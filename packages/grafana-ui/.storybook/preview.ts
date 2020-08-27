@@ -15,8 +15,9 @@ import lightTheme from '../../../public/sass/grafana.light.scss';
 // @ts-ignore
 import darkTheme from '../../../public/sass/grafana.dark.scss';
 import { GrafanaLight, GrafanaDark } from './storybookTheme';
-import { configure, addDecorator, addParameters } from '@storybook/react';
+import { addDecorator, addParameters } from '@storybook/react';
 import { withKnobs } from '@storybook/addon-knobs';
+import addons from '@storybook/addons';
 
 const handleThemeChange = (theme: any) => {
   if (theme !== 'light') {
@@ -31,6 +32,11 @@ addDecorator(withTheme(handleThemeChange));
 addDecorator(withKnobs);
 addDecorator(withPaddedStory);
 
+addons.setConfig({
+  showRoots: false,
+  theme: GrafanaDark,
+});
+
 addParameters({
   info: {},
   darkMode: {
@@ -38,9 +44,7 @@ addParameters({
     light: GrafanaLight,
   },
   options: {
-    theme: GrafanaDark,
     showPanel: true,
-    showRoots: true,
     panelPosition: 'right',
     showNav: true,
     isFullscreen: false,
@@ -58,6 +62,3 @@ addParameters({
     escapeHTML: false,
   },
 });
-
-// @ts-ignore
-configure(require.context('../src', true, /\.story\.(js|jsx|ts|tsx|mdx)$/), module);
