@@ -51,7 +51,7 @@ export class InspectDataTab extends PureComponent<Props, State> {
     this.state = {
       selectedDataFrame: DataTransformerID.seriesToColumns,
       dataFrameIndex: 0,
-      transformId: DataTransformerID.seriesToColumns,
+      transformId: DataTransformerID.noop,
       transformationOptions: buildTransformationOptions(),
     };
   }
