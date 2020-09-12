@@ -34,7 +34,7 @@ export interface ReduceDataOptions {
   limit?: number;
   /** When !values, pick one value for the whole field */
   calcs: string[];
-  /** Which fields to show.  By default this is only numeric fields */
+  /** Which fields to show. By default this is only numeric fields */
   fields?: string;
 }
 
@@ -138,17 +138,17 @@ export const getFieldDisplayValues = (options: GetFieldDisplayValuesOptions): Fi
           const usesCellValues = displayName.indexOf(VAR_CELL_PREFIX) >= 0;
 
           for (let j = 0; j < field.values.length; j++) {
-            // Add all the row variables
-            if (usesCellValues) {
-              for (let k = 0; k < series.fields.length; k++) {
-                const f = series.fields[k];
-                const v = f.values.get(j);
-                scopedVars[VAR_CELL_PREFIX + k] = {
-                  value: v,
-                  text: toString(v),
-                };
-              }
-            }
+            // // Add all the row variables
+            // if (usesCellValues) {
+            //   for (let k = 0; k < series.fields.length; k++) {
+            //     const f = series.fields[k];
+            //     const v = f.values.get(j);
+            //     scopedVars[VAR_CELL_PREFIX + k] = {
+            //       value: v,
+            //       text: toString(v),
+            //     };
+            //   }
+            // }
 
             const displayValue = display(field.values.get(j));
             displayValue.title = replaceVariables(displayName, {

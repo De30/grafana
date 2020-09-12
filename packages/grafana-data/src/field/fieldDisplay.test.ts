@@ -60,6 +60,18 @@ describe('FieldDisplay', () => {
     expect(display.map(v => v.display.numeric)).toEqual([1, 3, 5, 2, 4, 6]);
   });
 
+  it('when show all and there are other string fields should use them in title', () => {
+    const options = createDisplayOptions({
+      reduceOptions: {
+        values: true, //
+        limit: 1000,
+        calcs: [],
+      },
+    });
+    const display = getFieldDisplayValues(options);
+    expect(display.map(v => v.display.title)).toEqual(['a']);
+  });
+
   it('show 2 numeric values (limit)', () => {
     const options = createDisplayOptions({
       reduceOptions: {
@@ -225,7 +237,7 @@ function createDisplayOptions(extend: Partial<GetFieldDisplayValuesOptions> = {}
       toDataFrame({
         name: 'Series Name',
         fields: [
-          { name: 'Field 1', values: ['a', 'b', 'c'] },
+          { name: 'Field 1', values: ['Host-A', 'Host-B', 'Host-C'] },
           { name: 'Field 2', values: [1, 3, 5] },
           { name: 'Field 3', values: [2, 4, 6] },
         ],
