@@ -1,9 +1,10 @@
-import { TableSortByFieldState } from '@grafana/ui';
+import { TableSortByFieldState, ComponentSize } from '@grafana/ui';
 
 export interface Options {
   frameIndex: number;
   showHeader: boolean;
   sortBy?: TableSortByFieldState[];
+  cellSize?: ComponentSize;
 }
 
 export interface TableSortBy {

@@ -2,6 +2,7 @@ import { css } from 'emotion';
 import { GrafanaTheme } from '@grafana/data';
 import { styleMixins, stylesFactory } from '../../themes';
 import { getScrollbarWidth } from '../../utils';
+import { ComponentSize } from '../../types/size';
 
 export interface TableStyles {
   cellHeight: number;
@@ -23,15 +24,22 @@ export interface TableStyles {
 }
 
 export const getTableStyles = stylesFactory(
-  (theme: GrafanaTheme): TableStyles => {
+  (theme: GrafanaTheme, cellSize: ComponentSize): TableStyles => {
     const { palette, colors } = theme;
     const headerBg = theme.colors.bg2;
     const borderColor = theme.colors.border1;
     const resizerColor = theme.isLight ? palette.blue95 : palette.blue77;
-    const padding = 6;
-    const lineHeight = theme.typography.lineHeight.md;
-    const bodyFontSize = 14;
-    const cellHeight = padding * 2 + bodyFontSize * lineHeight;
+
+    let padding = 6;
+    let lineHeight = theme.typography.lineHeight.md;
+    let bodyFontSize = 14;
+    let cellHeight = 34;
+
+    if (cellSize === 'lg') {
+      bodyFontSize = 16;
+      cellHeight = 45;
+    }
+
     const rowHoverBg = styleMixins.hoverColor(theme.colors.bg1, theme);
     const scollbarWidth = getScrollbarWidth();
 

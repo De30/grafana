@@ -27,6 +27,7 @@ import { TableCell } from './TableCell';
 import { Icon } from '../Icon/Icon';
 import { CustomScrollbar } from '../CustomScrollbar/CustomScrollbar';
 import { Filter } from './Filter';
+import { ComponentSize } from '../../types/size';
 
 const COLUMN_MIN_WIDTH = 150;
 
@@ -38,6 +39,7 @@ export interface Props {
   /** Minimal column width specified in pixels */
   columnMinWidth?: number;
   noHeader?: boolean;
+  cellSize?: ComponentSize;
   resizable?: boolean;
   initialSortBy?: TableSortByFieldState[];
   onColumnResize?: TableColumnResizeActionCallback;
@@ -122,10 +124,11 @@ export const Table: FC<Props> = memo((props: Props) => {
     width,
     columnMinWidth = COLUMN_MIN_WIDTH,
     noHeader,
+    cellSize = 'md',
     resizable = true,
   } = props;
   const theme = useTheme();
-  const tableStyles = getTableStyles(theme);
+  const tableStyles = getTableStyles(theme, cellSize);
 
   // React table data array. This data acts just like a dummy array to let react-table know how many rows exist
   // The cells use the field to look up values
