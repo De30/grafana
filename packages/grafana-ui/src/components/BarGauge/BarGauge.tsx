@@ -440,8 +440,10 @@ export function getBasicAndGradientStyles(props: Props): BasicAndGradientStyles 
     zIndex: 1,
   };
 
+  const startColor = `rgba(${theme.isDark ? '255,255,255' : '0,0,0'}, 0.07)`;
+
   const emptyBar: CSSProperties = {
-    background: `rgba(${theme.isDark ? '255,255,255' : '0,0,0'}, 0.07)`,
+    background: startColor,
     flexGrow: 1,
     display: 'flex',
     borderRadius: '3px',
@@ -463,10 +465,11 @@ export function getBasicAndGradientStyles(props: Props): BasicAndGradientStyles 
     emptyBar.bottom = '-3px';
 
     if (isBasic) {
+      const mainColor = tinycolor(valueColor)
+        .setAlpha(0.45)
+        .toRgbString();
       // Basic styles
-      barStyles.background = `${tinycolor(valueColor)
-        .setAlpha(0.35)
-        .toRgbString()}`;
+      barStyles.background = `linear-gradient(0deg, ${startColor}, ${mainColor})`;
 
       barStyles.borderTop = `2px solid ${valueColor}`;
     } else {
@@ -489,10 +492,11 @@ export function getBasicAndGradientStyles(props: Props): BasicAndGradientStyles 
     emptyBar.left = '-3px';
 
     if (isBasic) {
+      const mainColor = tinycolor(valueColor)
+        .setAlpha(0.45)
+        .toRgbString();
       // Basic styles
-      barStyles.background = `${tinycolor(valueColor)
-        .setAlpha(0.35)
-        .toRgbString()}`;
+      barStyles.background = `linear-gradient(90deg, ${startColor}, ${mainColor})`;
       barStyles.borderRight = `2px solid ${valueColor}`;
     } else {
       // Gradient styles
