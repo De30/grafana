@@ -17,7 +17,7 @@ export function getDemoScene(name: string): Observable<Scene> {
 
     const onButtonHit = () => {
       scene.panels.push(getDemoPanel());
-      observer.next(scene);
+      observer.next({ ...scene });
     };
 
     // const onAddNested = () => {
@@ -35,14 +35,14 @@ export function getDemoScene(name: string): Observable<Scene> {
 
     scene.panels.push(getDemoPanel());
 
-    // panels.push(
-    //   of({
-    //     id: 'button3',
-    //     type: 'component',
-    //     gridPos: { x: 12, y: 1, w: 12, h: 1 },
-    //     component: () => <Button onClick={onAddNested}>Add nested scene</Button>,
-    //   })
-    // );
+    scene.panels.push(
+      of({
+        id: 'button3',
+        type: 'component',
+        gridPos: { x: 12, y: 1, w: 12, h: 1 },
+        component: () => <Button onClick={onButtonHit}>Hit button</Button>,
+      })
+    );
 
     observer.next(scene);
   });

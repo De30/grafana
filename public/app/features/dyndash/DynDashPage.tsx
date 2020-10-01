@@ -19,6 +19,8 @@ export const DynDashPageUnconnected: FC<Props> = ({ name }) => {
     return <h2>Loading...</h2>;
   }
 
+  console.log('DynDash render', scene);
+
   return (
     <div className="dashboard-container">
       <SceneView model={scene} />
