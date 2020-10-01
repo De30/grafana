@@ -4,26 +4,24 @@ import { PieChartOptions } from './types';
 import { addStandardDataReduceOptions } from '../stat/types';
 import { PieChartType } from '@grafana/ui';
 
-export const plugin = new PanelPlugin<PieChartOptions>(PieChartPanel).setPanelOptions(builder => {
+export const plugin = new PanelPlugin<PieChartOptions>(PieChartPanel).useFieldConfig().setPanelOptions(builder => {
   addStandardDataReduceOptions(builder, false);
 
   builder
     .addRadio({
-      name: 'Piechart type',
-      description: 'How the piechart should be rendered',
+      name: 'Type',
       path: 'pieType',
       settings: {
         options: [
-          { value: PieChartType.PIE, label: 'Pie' },
-          { value: PieChartType.DONUT, label: 'Donut' },
+          { value: PieChartType.Pie, label: 'Pie' },
+          { value: PieChartType.Donut, label: 'Donut' },
         ],
       },
-      defaultValue: PieChartType.PIE,
+      defaultValue: PieChartType.Pie,
     })
-    .addNumberInput({
-      name: 'Width',
-      description: 'Width of the piechart outline',
-      path: 'strokeWidth',
-      defaultValue: 1,
+    .addBooleanSwitch({
+      name: 'Show legend',
+      path: 'showLegend',
+      defaultValue: true,
     });
 });

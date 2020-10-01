@@ -39,6 +39,7 @@
     "@types/react-table": "7.0.12",
     "@types/slate": "0.47.1",
     "@types/slate-react": "0.22.5",
+    "apexcharts": "^3.21.0",
     "bizcharts": "^3.5.8",
     "classnames": "2.2.6",
     "d3": "5.15.0",

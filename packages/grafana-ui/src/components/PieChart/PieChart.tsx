@@ -1,145 +1,122 @@
-import React, { PureComponent } from 'react';
-import { select, pie, arc, event } from 'd3';
-import sum from 'lodash/sum';
-import { DisplayValue, GrafanaThemeType, formattedValueToString } from '@grafana/data';
-import { Themeable } from '../../index';
-import { colors as grafana_colors } from '../../utils/index';
+import React, { FC, useEffect, useRef } from 'react';
+import { DisplayValue, formattedValueToString, getColorFromHexRgbOrName } from '@grafana/data';
+import { useTheme } from '../../index';
+import ApexCharts from 'apexcharts';
+import tinycolor from 'tinycolor2';
 
 export enum PieChartType {
-  PIE = 'pie',
-  DONUT = 'donut',
+  Pie = 'pie',
+  Donut = 'donut',
 }
 
-export interface Props extends Themeable {
+export interface Props {
   height: number;
   width: number;
   values: DisplayValue[];
-
   pieType: PieChartType;
-  strokeWidth: number;
+  showLegend?: boolean;
 }
 
-export class PieChart extends PureComponent<Props> {
-  containerElement: any;
-  svgElement: any;
-  tooltipElement: any;
-  tooltipValueElement: any;
+export const PieChart: FC<Props> = ({ height, width, values, pieType, showLegend }) => {
+  const elementRef = useRef<HTMLDivElement | null>(null);
+  const chart = useRef<ApexCharts | null>(null);
+  const theme = useTheme();
+  const colors = ['blue', 'green', 'red', 'purple', 'orange'].map(c => getColorFromHexRgbOrName(c, theme.type));
+  const themeFactor = theme.isDark ? 1 : -0.7;
+  const gradientStart = pieType === PieChartType.Donut ? 60 : 0;
 
-  static defaultProps = {
-    pieType: 'pie',
-    format: 'short',
-    stat: 'current',
-    strokeWidth: 1,
-    theme: GrafanaThemeType.Dark,
+  const options = {
+    series: values.map(item => item.numeric),
+    labels: values.map(item => item.title),
+    colors: colors,
+    chart: {
+      type: pieType,
+      width,
+      height,
+      animations: {
+        enabled: false,
+        dynamicAnimation: {
+          enabled: false,
+          speed: 350,
+        },
+      },
+    },
+    stroke: {
+      show: true,
+      colors: [theme.colors.panelBg],
+      width: 2,
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        stops: [gradientStart, 100],
+        colorStops: colors.map(c => {
+          const bgColor2 = tinycolor(c)
+            .darken(15 * themeFactor)
+            .spin(8)
+            .toRgbString();
+          const bgColor3 = tinycolor(c)
+            .darken(5 * themeFactor)
+            .spin(-8)
+            .toRgbString();
+
+          return [
+            { offset: gradientStart, color: bgColor2, opacity: 100 },
+            { offset: 100, color: bgColor3, opacity: 100 },
+          ];
+        }),
+      },
+    },
+    dataLabels: {
+      enabled: true,
+      // formatter: function(val: number, opts: { seriesIndex: number; dataPointIndex: number }) {
+      //   return formattedValueToString(values[opts.seriesIndex]);
+      // },
+      style: {
+        fontSize: '14px',
+        fontFamily: theme.typography.fontFamily,
+        fontWeight: 'normal',
+        colors: [theme.palette.white],
+      },
+      dropShadow: {
+        enabled: false,
+      },
+    },
+    legend: {
+      show: showLegend,
+      fontSize: '14px',
+      labels: {
+        colors: [theme.colors.text],
+      },
+      fontFamily: theme.typography.fontFamily,
+    },
+    tooltip: {
+      enabled: true,
+      fillSeriesColor: false,
+      theme: theme.isDark ? 'dark' : 'light',
+      style: {
+        fontSize: '12px',
+        fontFamily: undefined,
+      },
+      onDatasetHover: {
+        highlightDataSeries: false,
+      },
+    },
   };
 
-  componentDidMount() {
-    this.draw();
-  }
-
-  componentDidUpdate() {
-    this.draw();
-  }
-
-  draw() {
-    const { values, pieType, strokeWidth } = this.props;
-
-    if (values.length === 0) {
-      return;
-    }
-
-    const data = values.map(datapoint => datapoint.numeric);
-    const names = values.map(datapoint => formattedValueToString(datapoint));
-    const colors = values.map((p, idx) => {
-      if (p.color) {
-        return p.color;
-      }
-      return grafana_colors[idx % grafana_colors.length];
-    });
-
-    const total = sum(data) || 1;
-    const percents = data.map((item: number) => (item / total) * 100);
-
-    const width = this.containerElement.offsetWidth;
-    const height = this.containerElement.offsetHeight;
-    const radius = Math.min(width, height) / 2;
-
-    const outerRadius = radius - radius / 10;
-    const innerRadius = pieType === PieChartType.PIE ? 0 : radius - radius / 3;
-
-    const svg = select(this.svgElement)
-      .html('')
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width / 2},${height / 2})`);
-
-    const pieChart = pie();
-
-    const customArc = arc()
-      .outerRadius(outerRadius)
-      .innerRadius(innerRadius)
-      .padAngle(0);
-
-    svg
-      .selectAll('path')
-      .data(pieChart(data))
-      .enter()
-      .append('path')
-      .attr('d', customArc as any)
-      .attr('fill', (d: any, idx: number) => colors[idx])
-      .style('fill-opacity', 0.15)
-      .style('stroke', (d: any, idx: number) => colors[idx])
-      .style('stroke-width', `${strokeWidth}px`)
-      .on('mouseover', (d: any, idx: any) => {
-        select(this.tooltipElement).style('opacity', 1);
-        select(this.tooltipValueElement).text(`${names[idx]} (${percents[idx].toFixed(2)}%)`);
-      })
-      .on('mousemove', () => {
-        select(this.tooltipElement)
-          .style('top', `${event.pageY - height / 2}px`)
-          .style('left', `${event.pageX}px`);
-      })
-      .on('mouseout', () => {
-        select(this.tooltipElement).style('opacity', 0);
-      });
-  }
-
-  render() {
-    const { height, width, values } = this.props;
-
-    if (values.length > 0) {
-      return (
-        <div className="piechart-panel">
-          <div
-            ref={element => (this.containerElement = element)}
-            className="piechart-container"
-            style={{
-              height: `${height * 0.9}px`,
-              width: `${Math.min(width, height * 1.3)}px`,
-            }}
-          >
-            <svg ref={element => (this.svgElement = element)} />
-          </div>
-          <div className="piechart-tooltip" ref={element => (this.tooltipElement = element)}>
-            <div className="piechart-tooltip-time">
-              <div
-                id="tooltip-value"
-                className="piechart-tooltip-value"
-                ref={element => (this.tooltipValueElement = element)}
-              />
-            </div>
-          </div>
-        </div>
-      );
+  useEffect(() => {
+    if (!chart.current) {
+      chart.current = new ApexCharts(elementRef.current, options);
+      chart.current.render();
     } else {
-      return (
-        <div className="piechart-panel">
-          <div className="datapoints-warning">
-            <span className="small">No data points</span>
-          </div>
-        </div>
-      );
+      chart.current.updateOptions(options);
     }
-  }
+  });
+
+  return <div style={{ width, height }} ref={elementRef} />;
+};
+
+interface ApexFormatterOpts {
+  seriesIndex: number;
+  dataPointIndex: number;
 }

@@ -33,8 +33,7 @@ export class PieChartPanel extends PureComponent<Props> {
         height={height}
         values={values}
         pieType={options.pieType}
-        strokeWidth={options.strokeWidth}
-        theme={config.theme}
+        showLegend={options.showLegend}
       />
     );
   }
