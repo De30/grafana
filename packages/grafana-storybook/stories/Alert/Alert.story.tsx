@@ -1,18 +1,16 @@
 import React from 'react';
 import { select } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
-import { Alert, AlertVariant } from './Alert';
-import { withCenteredStory, withHorizontallyCenteredStory } from '../../utils/storybook/withCenteredStory';
-import mdx from '../Alert/Alert.mdx';
+import { Alert, AlertVariant } from '@grafana/ui';
+import { withCenteredStory } from '../../utils/withCenteredStory';
+import mdx from './Alert.stories.mdx';
 
 export default {
   title: 'Overlays/Alert',
   component: Alert,
-  decorators: [withCenteredStory, withHorizontallyCenteredStory],
+  decorators: [withCenteredStory],
   parameters: {
-    docs: {
-      page: mdx,
-    },
+    docs: { page: mdx },
   },
 };
 

@@ -1,0 +1,41 @@
+{
+  "author": "Grafana Labs",
+  "license": "Apache-2.0",
+  "name": "@grafana/storybook",
+  "version": "1.0.0",
+  "description": "Grafana Storybook",
+  "keywords": [
+    "grafana",
+    "react",
+    "react-component",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/grafana/grafana.git",
+    "directory": "packages/grafana-storybook"
+  },
+  "scripts": {
+    "start": "start-storybook -p 9001 -c .storybook -s .storybook/static",
+    "build": "build-storybook -o ./dist/storybook -c .storybook -s .storybook/static"
+  },
+  "dependencies": {
+    "@emotion/core": "^10.0.27",
+    "@grafana/tsconfig": "^1.0.0-rc1",
+    "@grafana/ui": "^7.3.0-pre.0",
+    "@storybook/addons": "^6.0.22",
+    "@storybook/addon-actions": "6.0.22",
+    "@storybook/addon-docs": "6.0.22",
+    "@storybook/addon-knobs": "6.0.22",
+    "@storybook/addon-storysource": "6.0.22",
+    "@storybook/react": "6.0.22",
+    "@storybook/theming": "6.0.22",
+    "@types/node": "13.7.0",
+    "emotion": "10.0.27",
+    "react": "16.12.0",
+    "storybook-dark-mode": "1.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "16.8.16"
+  }
+}

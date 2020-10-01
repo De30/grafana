@@ -1,7 +1,7 @@
-import { Meta, Props } from '@storybook/addon-docs/blocks';
-import { Alert } from './Alert';
+import { Meta, ArgsTable } from '@storybook/addon-docs/blocks';
+import { Alert } from '@grafana/ui';
 
-<Meta title="MDX|Alert" component={Alert} />
+<Meta title="MDX/   Alert" component={Alert} />
 
 # Alert
 
@@ -14,4 +14,4 @@ An alert displays an important message in a way that attracts the user's attenti
   <Alert title="Some very important message" severity="info" />
 ```
 
-<Props of={Alert}/>
+<ArgsTable of={Alert} />
