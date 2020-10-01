@@ -9,99 +9,86 @@ import { map, mergeMap } from 'rxjs/operators';
 import { v4 as newUuid } from 'uuid';
 
 export function getDemoScene(name: string): Observable<Scene> {
-  return new Observable<Scene>(observer => {
-    const scene: Scene = {
-      title: `Demo ${name}`,
-      panels: [],
-    };
+  return of({
+    title: `Demo ${name}`,
+    panels: new Observable<SceneItemList>(observer => {
+      const panels: SceneItemList = [];
 
-    const onButtonHit = () => {
-      scene.panels.push(getDemoPanel());
-      observer.next({ ...scene });
-    };
+      const onButtonHit = () => {
+        panels.push(getDemoPanel());
+        observer.next(panels);
+      };
 
-    // const onAddNested = () => {
-    //   panels.push(
-    //     of({
-    //       id: newUuid(),
-    //       title: 'inner scene',
-    //       type: 'scene',
-    //       gridPos: { x: 12, y: 1, w: 12, h: 1 },
-    //       panels: getDemoPanels(),
-    //     })
-    //   );
-    //   observer.next(panels);
-    // };
+      panels.push(getDemoPanel());
+      panels.push(
+        of({
+          id: 'button3',
+          type: 'component',
+          gridPos: { x: 12, y: 1, w: 12, h: 1 },
+          component: () => <Button onClick={onButtonHit}>Hit button</Button>,
+        })
+      );
 
-    scene.panels.push(getDemoPanel());
-
-    scene.panels.push(
-      of({
-        id: 'button3',
-        type: 'component',
-        gridPos: { x: 12, y: 1, w: 12, h: 1 },
-        component: () => <Button onClick={onButtonHit}>Hit button</Button>,
-      })
-    );
-
-    observer.next(scene);
+      observer.next(panels);
+    }),
   });
-
-  // return new Observable<SceneItemList>(observer => {
-  //   const panels: SceneItem[] = [];
-
-  //   const onButtonHit = () => {
-  //     panels.push({
-  //       id: panels.length.toString(),
-  //       type: 'scene',
-  //       title: 'Nested scene',
-  //       gridPos: { x: 0, y: 3, w: 12, h: 10 },
-  //       panels: getDemoScene('nested').pipe(mergeMap(scene => scene.panels)),
-  //     });
-  //     observer.next([...panels]);
-  //   };
-
-  //   const onQuery = () => {
-  //     panels.push({
-  //       id: 'nestedScene',
-  //       type: 'scene',
-  //       title: 'Query scene',
-  //       gridPos: { x: 0, y: 3, w: 12, h: 10 },
-  //       panels: getQueryPanels(),
-  //     });
-  //     observer.next([...panels]);
-  //   };
-
-  //   panels.push({
-  //     id: 'A',
-  //     type: 'viz',
-  //     title: 'Demo panel',
-  //     vizId: 'bar-gauge',
-  //     gridPos: { x: 0, y: 0, w: 12, h: 3 },
-  //     data: of({
-  //       state: LoadingState.Done,
-  //       series: [],
-  //       timeRange: {} as TimeRange,
-  //     } as PanelData),
-  //   });
-
-  //   panels.push({
-  //     id: 'button',
-  //     type: 'component',
-  //     gridPos: { x: 12, y: 0, w: 12, h: 1 },
-  //     component: () => <Button onClick={onButtonHit}>Hit me</Button>,
-  //   });
-
-  //   panels.push({
-  //     id: 'button2',
-  //     type: 'component',
-  //     gridPos: { x: 12, y: 1, w: 12, h: 1 },
-  //     component: () => <Button onClick={onQuery}>Query stuff</Button>,
-  //   });
-
-  //   observer.next(panels);
-  // });
 }
+
+// return new Observable<SceneItemList>(observer => {
+//   const panels: SceneItem[] = [];
+
+//   const onButtonHit = () => {
+//     panels.push({
+//       id: panels.length.toString(),
+//       type: 'scene',
+//       title: 'Nested scene',
+//       gridPos: { x: 0, y: 3, w: 12, h: 10 },
+//       panels: getDemoScene('nested').pipe(mergeMap(scene => scene.panels)),
+//     });
+//     observer.next([...panels]);
+//   };
+
+//   const onQuery = () => {
+//     panels.push({
+//       id: 'nestedScene',
+//       type: 'scene',
+//       title: 'Query scene',
+//       gridPos: { x: 0, y: 3, w: 12, h: 10 },
+//       panels: getQueryPanels(),
+//     });
+//     observer.next([...panels]);
+//   };
+
+//   panels.push({
+//     id: 'A',
+//     type: 'viz',
+//     title: 'Demo panel',
+//     vizId: 'bar-gauge',
+//     gridPos: { x: 0, y: 0, w: 12, h: 3 },
+//     data: of({
+//       state: LoadingState.Done,
+//       series: [],
+//       timeRange: {} as TimeRange,
+//     } as PanelData),
+//   });
+
+//   panels.push({
+//     id: 'button',
+//     type: 'component',
+//     gridPos: { x: 12, y: 0, w: 12, h: 1 },
+//     component: () => <Button onClick={onButtonHit}>Hit me</Button>,
+//   });
+
+//   panels.push({
+//     id: 'button2',
+//     type: 'component',
+//     gridPos: { x: 12, y: 1, w: 12, h: 1 },
+//     component: () => <Button onClick={onQuery}>Query stuff</Button>,
+//   });
+
+//   observer.next(panels);
+// });
+//}
 
 function getDemoPanel(): Observable<SceneItem> {
   return new Observable<SceneItem>(observer => {

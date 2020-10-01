@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 export interface Scene {
   title: string;
-  panels: SceneItemList;
+  panels: Observable<SceneItemList>;
 }
 
 export type SceneItemList = Array<Observable<SceneItem>>;

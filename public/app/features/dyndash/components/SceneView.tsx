@@ -11,7 +11,8 @@ export interface Props {
 }
 
 export const SceneView: FC<Props> = React.memo(({ model }) => {
-  const panels = useObservable(zip(...model.panels), null);
+  //const panels = useObservable(zip(...model.panels), null);
+  const panels = useObservable(model.panels.pipe(mergeMap(item => zip(...item))), null);
 
   console.log('SceneView render');
 
