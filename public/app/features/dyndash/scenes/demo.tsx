@@ -9,13 +9,29 @@ import { map, mergeMap } from 'rxjs/operators';
 import { v4 as newUuid } from 'uuid';
 
 export function getDemoScene(name: string): Observable<Scene> {
-  return of({
+  return of(getSceneContent());
+}
+
+function getSceneContent(): Scene {
+  return {
     title: `Demo ${name}`,
     panels: new Observable<SceneItemList>(observer => {
       const panels: SceneItemList = [];
 
       const onButtonHit = () => {
         panels.push(getDemoPanel());
+        observer.next(panels);
+      };
+
+      const onAddNested = () => {
+        panels.push(
+          of({
+            ...getSceneContent(),
+            type: 'scene',
+            id: newUuid(),
+            gridPos: { x: 12, y: 1, w: 12, h: 1 },
+          })
+        );
         observer.next(panels);
       };
 
@@ -29,9 +45,18 @@ export function getDemoScene(name: string): Observable<Scene> {
         })
       );
 
+      panels.push(
+        of({
+          id: 'button4',
+          type: 'component',
+          gridPos: { x: 12, y: 1, w: 12, h: 1 },
+          component: () => <Button onClick={onAddNested}>Add nested scene</Button>,
+        })
+      );
+
       observer.next(panels);
     }),
-  });
+  };
 }
 
 // return new Observable<SceneItemList>(observer => {
