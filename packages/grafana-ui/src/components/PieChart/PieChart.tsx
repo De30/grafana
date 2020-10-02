@@ -36,7 +36,6 @@ export const PieChart: FC<Props> = ({ height, width, values, pieType, showLegend
       animations: {
         enabled: false,
         dynamicAnimation: {
-          enabled: false,
           speed: 350,
         },
       },
@@ -109,6 +108,7 @@ export const PieChart: FC<Props> = ({ height, width, values, pieType, showLegend
       chart.current = new ApexCharts(elementRef.current, options);
       chart.current.render();
     } else {
+      options.chart.animations.enabled = true;
       chart.current.updateOptions(options);
     }
   });
