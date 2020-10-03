@@ -45,11 +45,13 @@ export interface VariableQueryData {
 export enum QueryType {
   METRICS = 'metrics',
   SLO = 'slo',
+  MQL = 'mql',
 }
 
 export const queryTypes = [
   { label: 'Metrics', value: QueryType.METRICS },
   { label: 'Service Level Objectives (SLO)', value: QueryType.SLO },
+  { label: 'Monitoring Query Language (MQL)', value: QueryType.MQL },
 ];
 
 export interface MetricQuery {
@@ -78,11 +80,18 @@ export interface SLOQuery {
   goal?: number;
 }
 
+export interface MQLQuery {
+  projectName: string;
+  query: string;
+  aliasBy?: string;
+}
+
 export interface CloudMonitoringQuery extends DataQuery {
   datasourceId?: number; // Should not be necessary anymore
   queryType: QueryType;
   metricQuery: MetricQuery;
   sloQuery?: SLOQuery;
+  mqlQuery?: MQLQuery;
 }
 
 export interface CloudMonitoringOptions extends DataSourceJsonData {

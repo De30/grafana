@@ -328,13 +328,19 @@ export default class CloudMonitoringDatasource extends DataSourceApi<CloudMonito
       return !!selectorName && !!serviceId && !!sloId && !!projectName;
     }
 
+    if (query.queryType && query.queryType === QueryType.MQL && query.mqlQuery) {
+      const projectName = query.mqlQuery.projectName;
+      const mqlQuery = query.mqlQuery.query;
+      return !!mqlQuery && !!projectName;
+    }
+
     const { metricType } = query.metricQuery;
 
     return !!metricType;
   }
 
   prepareTimeSeriesQuery(
-    { metricQuery, refId, queryType, sloQuery }: CloudMonitoringQuery,
+    { metricQuery, refId, queryType, sloQuery, mqlQuery }: CloudMonitoringQuery,
     scopedVars: ScopedVars
   ): CloudMonitoringQuery {
     return {
@@ -351,6 +357,7 @@ export default class CloudMonitoringDatasource extends DataSourceApi<CloudMonito
         view: metricQuery.view || 'FULL',
       },
       sloQuery: sloQuery && this.interpolateProps(sloQuery, scopedVars),
+      mqlQuery: mqlQuery && this.interpolateProps(mqlQuery, scopedVars),
     };
   }
 
