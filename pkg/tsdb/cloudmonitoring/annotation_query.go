@@ -21,7 +21,7 @@ func (e *CloudMonitoringExecutor) executeAnnotationQuery(ctx context.Context, ts
 		return nil, err
 	}
 
-	queryRes, resp, err := e.executeQuery(ctx, queries[0], tsdbQuery)
+	queryRes, resp, err := queries[0].executeQuery(ctx, tsdbQuery, e)
 	if err != nil {
 		return nil, err
 	}
@@ -30,13 +30,13 @@ func (e *CloudMonitoringExecutor) executeAnnotationQuery(ctx context.Context, ts
 	title := metricQuery.Get("title").MustString()
 	text := metricQuery.Get("text").MustString()
 	tags := metricQuery.Get("tags").MustString()
-	err = e.parseToAnnotations(queryRes, resp, queries[0], title, text, tags)
+	err = queries[0].parseToAnnotations(queryRes, resp, title, text, tags)
 	result.Results[firstQuery.RefId] = queryRes
 
 	return result, err
 }
 
-func (e *CloudMonitoringExecutor) parseToAnnotations(queryRes *tsdb.QueryResult, data cloudMonitoringResponse, query *cloudMonitoringQuery, title string, text string, tags string) error {
+func (query *cloudMonitoringQuery) parseToAnnotations(queryRes *tsdb.QueryResult, data cloudMonitoringResponse, title string, text string, tags string) error {
 	annotations := make([]map[string]string, 0)
 
 	for _, series := range data.TimeSeries {

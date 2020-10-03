@@ -11,7 +11,6 @@ import (
 
 func TestCloudMonitoringAnnotationQuery(t *testing.T) {
 	Convey("CloudMonitoring Annotation Query Executor", t, func() {
-		executor := &CloudMonitoringExecutor{}
 		Convey("When parsing the cloud monitoring api response", func() {
 			data, err := loadTestFile("./test-data/2-series-response-no-agg.json")
 			So(err, ShouldBeNil)
@@ -19,7 +18,7 @@ func TestCloudMonitoringAnnotationQuery(t *testing.T) {
 
 			res := &tsdb.QueryResult{Meta: simplejson.New(), RefId: "annotationQuery"}
 			query := &cloudMonitoringQuery{}
-			err = executor.parseToAnnotations(res, data, query, "atitle {{metric.label.instance_name}} {{metric.value}}", "atext {{resource.label.zone}}", "atag")
+			err = query.parseToAnnotations(res, data, "atitle {{metric.label.instance_name}} {{metric.value}}", "atext {{resource.label.zone}}", "atag")
 			So(err, ShouldBeNil)
 
 			Convey("Should return annotations table", func() {

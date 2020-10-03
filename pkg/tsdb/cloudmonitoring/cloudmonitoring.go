@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -46,6 +47,7 @@ const (
 	jwtAuthentication string = "jwt"
 	metricQueryType   string = "metrics"
 	sloQueryType      string = "slo"
+	mqlQueryType      string = "mql"
 )
 
 // CloudMonitoringExecutor executes queries for the CloudMonitoring datasource
@@ -192,6 +194,10 @@ func (query *cloudMonitoringQuery) buildDeepLink() string {
 	return accountChooserURL.String()
 }
 
+func (query *cloudMonitoringQuery) getRefID() string {
+	return query.RefID
+}
+
 func (e *CloudMonitoringExecutor) executeTimeSeriesQuery(ctx context.Context, tsdbQuery *tsdb.TsdbQuery) (*tsdb.Response, error) {
 	result := &tsdb.Response{
 		Results: make(map[string]*tsdb.QueryResult),
@@ -203,24 +209,26 @@ func (e *CloudMonitoringExecutor) executeTimeSeriesQuery(ctx context.Context, ts
 	}
 
 	for _, query := range queries {
-		queryRes, resp, err := e.executeQuery(ctx, query, tsdbQuery)
+		queryRes, resp, err := query.executeQuery(ctx, tsdbQuery, e)
 		if err != nil {
 			return nil, err
 		}
-		err = e.parseResponse(queryRes, resp, query)
+		err = query.parseResponse(queryRes, resp)
 		if err != nil {
 			queryRes.Error = err
 		}
 
-		result.Results[query.RefID] = queryRes
+		result.Results[query.getRefID()] = queryRes
 
-		resourceType := ""
-		for _, s := range resp.TimeSeries {
-			resourceType = s.Resource.Type
-			// set the first resource type found
-			break
+		if cmq, ok := query.(*cloudMonitoringQuery); ok {
+			resourceType := ""
+			for _, s := range resp.TimeSeries {
+				resourceType = s.Resource.Type
+				// set the first resource type found
+				break
+			}
+			cmq.Params.Set("resourceType", resourceType)
 		}
-		query.Params.Set("resourceType", resourceType)
 		dl := ""
 		if len(resp.TimeSeries) > 0 {
 			dl = query.buildDeepLink()
@@ -231,8 +239,8 @@ func (e *CloudMonitoringExecutor) executeTimeSeriesQuery(ctx context.Context, ts
 	return result, nil
 }
 
-func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]*cloudMonitoringQuery, error) {
-	cloudMonitoringQueries := []*cloudMonitoringQuery{}
+func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]cloudMonitoringQueryInterface, error) {
+	cloudMonitoringQueries := []cloudMonitoringQueryInterface{}
 
 	startTime, err := tsdbQuery.TimeRange.ParseFrom()
 	if err != nil {
@@ -258,12 +266,14 @@ func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]*cl
 		params.Add("interval.startTime", startTime.UTC().Format(time.RFC3339))
 		params.Add("interval.endTime", endTime.UTC().Format(time.RFC3339))
 
+		var sqi cloudMonitoringQueryInterface
 		sq := &cloudMonitoringQuery{
 			RefID:    query.RefId,
 			GroupBys: []string{},
 		}
 
-		if q.QueryType == metricQueryType {
+		switch q.QueryType {
+		case metricQueryType:
 			sq.AliasBy = q.MetricQuery.AliasBy
 			sq.GroupBys = append(sq.GroupBys, q.MetricQuery.GroupBys...)
 			sq.ProjectName = q.MetricQuery.ProjectName
@@ -273,7 +283,8 @@ func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]*cl
 			params.Add("filter", buildFilterString(q.MetricQuery.MetricType, q.MetricQuery.Filters))
 			params.Add("view", q.MetricQuery.View)
 			setMetricAggParams(&params, &q.MetricQuery, durationSeconds, query.IntervalMs)
-		} else if q.QueryType == sloQueryType {
+			sqi = sq
+		case sloQueryType:
 			sq.AliasBy = q.SloQuery.AliasBy
 			sq.ProjectName = q.SloQuery.ProjectName
 			sq.Selector = q.SloQuery.SelectorName
@@ -281,6 +292,16 @@ func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]*cl
 			sq.Slo = q.SloQuery.SloId
 			params.Add("filter", buildSLOFilterExpression(q.SloQuery))
 			setSloAggParams(&params, &q.SloQuery, durationSeconds, query.IntervalMs)
+			sqi = sq
+		case mqlQueryType:
+			sqi = &cloudMonitoringMqlQuery{
+				RefID:       query.RefId,
+				ProjectName: q.MqlQuery.ProjectName,
+				Query:       q.MqlQuery.Query,
+				IntervalMs:  query.IntervalMs,
+				AliasBy:     q.MqlQuery.AliasBy,
+				timeRange:   tsdbQuery.TimeRange,
+			}
 		}
 
 		target = params.Encode()
@@ -291,7 +312,7 @@ func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]*cl
 			slog.Debug("CloudMonitoring request", "params", params)
 		}
 
-		cloudMonitoringQueries = append(cloudMonitoringQueries, sq)
+		cloudMonitoringQueries = append(cloudMonitoringQueries, sqi)
 	}
 
 	return cloudMonitoringQueries, nil
@@ -418,7 +439,7 @@ func calculateAlignmentPeriod(alignmentPeriod string, intervalMs int64, duration
 	return alignmentPeriod
 }
 
-func (e *CloudMonitoringExecutor) executeQuery(ctx context.Context, query *cloudMonitoringQuery, tsdbQuery *tsdb.TsdbQuery) (*tsdb.QueryResult, cloudMonitoringResponse, error) {
+func (query *cloudMonitoringQuery) executeQuery(ctx context.Context, tsdbQuery *tsdb.TsdbQuery, e *CloudMonitoringExecutor) (*tsdb.QueryResult, cloudMonitoringResponse, error) {
 	queryResult := &tsdb.QueryResult{Meta: simplejson.New(), RefId: query.RefID}
 	projectName := query.ProjectName
 	if projectName == "" {
@@ -431,7 +452,7 @@ func (e *CloudMonitoringExecutor) executeQuery(ctx context.Context, query *cloud
 		slog.Info("No project name set on query, using project name from datasource", "projectName", projectName)
 	}
 
-	req, err := e.createRequest(ctx, e.dsInfo, query, fmt.Sprintf("cloudmonitoring%s", "v3/projects/"+projectName+"/timeSeries"))
+	req, err := e.createRequest(ctx, e.dsInfo, fmt.Sprintf("cloudmonitoring%s", "v3/projects/"+projectName+"/timeSeries"), nil)
 	if err != nil {
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
@@ -471,7 +492,7 @@ func (e *CloudMonitoringExecutor) executeQuery(ctx context.Context, query *cloud
 		return queryResult, cloudMonitoringResponse{}, nil
 	}
 
-	data, err := e.unmarshalResponse(res)
+	data, err := query.unmarshalResponse(res)
 	if err != nil {
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
@@ -480,7 +501,7 @@ func (e *CloudMonitoringExecutor) executeQuery(ctx context.Context, query *cloud
 	return queryResult, data, nil
 }
 
-func (e *CloudMonitoringExecutor) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
+func (e *cloudMonitoringQuery) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	if err != nil {
@@ -535,7 +556,7 @@ func handleDistributionSeries(series timeSeries, defaultMetricName string, serie
 	})
 }
 
-func (e *CloudMonitoringExecutor) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse, query *cloudMonitoringQuery) error {
+func (query *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse) error {
 	labels := make(map[string]map[string]bool)
 
 	for _, series := range data.TimeSeries {
@@ -759,14 +780,18 @@ func calcBucketBound(bucketOptions cloudMonitoringBucketOptions, n int) string {
 	return bucketBound
 }
 
-func (e *CloudMonitoringExecutor) createRequest(ctx context.Context, dsInfo *models.DataSource, query *cloudMonitoringQuery, proxyPass string) (*http.Request, error) {
+func (e *CloudMonitoringExecutor) createRequest(ctx context.Context, dsInfo *models.DataSource, proxyPass string, body io.Reader) (*http.Request, error) {
 	u, err := url.Parse(dsInfo.Url)
 	if err != nil {
 		return nil, err
 	}
 	u.Path = path.Join(u.Path, "render")
 
-	req, err := http.NewRequest(http.MethodGet, "https://monitoring.googleapis.com/", nil)
+	method := http.MethodGet
+	if body != nil {
+		method = http.MethodPost
+	}
+	req, err := http.NewRequest(method, "https://monitoring.googleapis.com/", body)
 	if err != nil {
 		slog.Error("Failed to create request", "error", err)
 		return nil, fmt.Errorf("Failed to create request. error: %v", err)
