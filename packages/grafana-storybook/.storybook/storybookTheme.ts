@@ -1,9 +1,6 @@
-//@ts-ignore
-import { create } from '@storybook/theming/create';
-import lightTheme from '../src/themes/light';
-import darkTheme from '../src/themes/dark';
-import ThemeCommons from '../src/themes/default';
 import { GrafanaTheme } from '@grafana/data';
+import { darkTheme, lightTheme, ThemeCommon } from '@grafana/ui';
+import { create } from '@storybook/theming';
 
 const createTheme = (theme: GrafanaTheme) => {
   return create({
@@ -19,8 +16,8 @@ const createTheme = (theme: GrafanaTheme) => {
     appBorderRadius: 4,
 
     // Typography
-    fontBase: ThemeCommons.typography.fontFamily.sansSerif,
-    fontCode: ThemeCommons.typography.fontFamily.monospace,
+    fontBase: ThemeCommon.typography.fontFamily.sansSerif,
+    fontCode: ThemeCommon.typography.fontFamily.monospace,
 
     // Text colors
     textColor: theme.colors.text,

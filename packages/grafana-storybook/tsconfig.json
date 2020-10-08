@@ -5,5 +5,10 @@
     "typeRoots": ["node_modules/@types"]
   },
   "extends": "@grafana/tsconfig",
-  "include": ["../**/*.ts*", "../../public/app/types/sanitize-url.d.ts", "../../public/app/types/svg.d.ts"]
+  "include": [
+    "stories/**/*.tsx*",
+    "utils/*.ts",
+    "../../public/app/types/sanitize-url.d.ts",
+    "../../public/app/types/svg.d.ts"
+  ]
 }
