@@ -18,3 +18,4 @@ export { urlUtil, UrlQueryMap, UrlQueryValue } from './url';
 export { DataLinkBuiltInVars } from './dataLinks';
 export { DocsId } from './docs';
 export { useObservable } from './useObservable';
+export { observableTester } from './tests/observableTester';

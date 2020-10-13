@@ -1,4 +1,3 @@
-import 'uplot/dist/uPlot.min.css';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { css } from 'emotion';
 import uPlot from 'uplot';
@@ -23,6 +22,13 @@ export const UPlotChart: React.FC<PlotProps> = props => {
   );
 
   const prevConfig = usePrevious(currentConfig);
+
+  const getPlotInstance = useCallback(() => {
+    if (!plotInstance) {
+      throw new Error("Plot hasn't initialised yet");
+    }
+    return plotInstance;
+  }, [plotInstance]);
 
   // Main function initialising uPlot. If final config is not settled it will do nothing
   const initPlot = () => {
@@ -82,8 +88,17 @@ export const UPlotChart: React.FC<PlotProps> = props => {
 
   // Memoize plot context
   const plotCtx = useMemo(() => {
-    return buildPlotContext(registerPlugin, addSeries, addAxis, addScale, canvasRef, props.data, plotInstance);
-  }, [registerPlugin, canvasRef, props.data, plotInstance, addSeries, addAxis, addScale]);
+    return buildPlotContext(
+      Boolean(plotInstance),
+      canvasRef,
+      props.data,
+      registerPlugin,
+      addSeries,
+      addAxis,
+      addScale,
+      getPlotInstance
+    );
+  }, [plotInstance, canvasRef, props.data, registerPlugin, addSeries, addAxis, addScale, getPlotInstance]);
 
   return (
     <PlotContext.Provider value={plotCtx}>
