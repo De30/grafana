@@ -1072,8 +1072,9 @@ steps:
   - echo $DRONE_RUNNER_NAME
 
 - name: clone
-  image: grafana/build-container:1.2.27
+  image: alpine/git:v2.26.2
   commands:
+  - apk add --no-cache curl
   - mkdir -p bin
   - curl -fL -o bin/grabpl https://grafana-downloads.storage.googleapis.com/grafana-build-pipeline/v0.5.18/grabpl
   - chmod +x bin/grabpl
@@ -1836,8 +1837,9 @@ steps:
   - echo $DRONE_RUNNER_NAME
 
 - name: clone
-  image: grafana/build-container:1.2.27
+  image: alpine/git:v2.26.2
   commands:
+  - apk add --no-cache curl
   - mkdir -p bin
   - curl -fL -o bin/grabpl https://grafana-downloads.storage.googleapis.com/grafana-build-pipeline/v0.5.18/grabpl
   - chmod +x bin/grabpl

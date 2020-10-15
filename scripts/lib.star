@@ -4,6 +4,7 @@ publish_image = 'grafana/grafana-ci-deploy:1.2.6'
 grafana_docker_image = 'grafana/drone-grafana-docker:0.3.2'
 alpine_image = 'alpine:3.12'
 windows_image = 'mcr.microsoft.com/windows:1809'
+git_image = 'alpine/git:v2.26.2'
 dockerize_version = '0.6.1'
 wix_image = 'grafana/ci-wix:0.1.1'
 test_release_ver = 'v7.3.0-test'
@@ -133,11 +134,14 @@ def init_steps(edition, platform, ver_mode, is_downstream=False, install_deps=Tr
             else:
                 source_commit = ''
             committish = '${DRONE_COMMIT}'
+        # TODO: Put in image
+        download_grabpl_cmds.insert(0, 'apk add --no-cache curl')
         steps = [
             identify_runner_step,
             {
                 'name': 'clone',
-                'image': build_image,
+                # Use a minimal image in order to secure GitHub token
+                'image': git_image,
                 'environment': {
                     'GITHUB_TOKEN': {
                         'from_secret': 'github_token',
