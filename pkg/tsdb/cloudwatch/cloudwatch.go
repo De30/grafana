@@ -37,7 +37,6 @@ type datasourceInfo struct {
 	AuthType      authType
 	AssumeRoleARN string
 	ExternalID    string
-	Namespace     string
 
 	AccessKey string
 	SecretKey string
