@@ -6,8 +6,11 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
 	"github.com/grafana/grafana/pkg/tsdb"
 )
 
@@ -20,6 +23,11 @@ var (
 type AzureMonitorExecutor struct {
 	httpClient *http.Client
 	dsInfo     *models.DataSource
+}
+
+type AzureMonitorExecutorNext struct {
+	httpClient *http.Client
+	//dsInfo     *models.DataSource
 }
 
 // NewAzureMonitorExecutor initializes a http client
@@ -35,9 +43,32 @@ func NewAzureMonitorExecutor(dsInfo *models.DataSource) (tsdb.TsdbQueryEndpoint,
 	}, nil
 }
 
+func NewAzureMonitorExecutorNext(pc *backend.PluginContext) (*AzureMonitorExecutorNext, error) {
+	return &AzureMonitorExecutorNext{}, nil
+}
+
+func (az *AzureMonitorExecutorNext) QueryMetrics(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	return nil, nil
+}
+
 func init() {
 	azlog = log.New("tsdb.azuremonitor")
-	tsdb.RegisterTsdbQueryEndpoint("grafana-azure-monitor-datasource", NewAzureMonitorExecutor)
+	//tsdb.RegisterTsdbQueryEndpoint("grafana-azure-monitor-datasource", NewAzureMonitorExecutor)
+	//az, _ := NewAzureMonitorExecutorNext(nil)
+	mux := datasource.NewQueryTypeMux()
+
+	mux.Handle("Azure Monitor", &AzureMonitorDatasourceNext{})
+
+	register := coreplugin.New(backend.ServeOpts{
+		QueryDataHandler: mux,
+	})
+
+	p, err := register("grafana-azure-monitor-datasource", azlog, nil)
+	if err != nil {
+		azlog.Error(err.Error())
+	}
+	p.Start(context.Background())
+
 	legendKeyFormat = regexp.MustCompile(`\{\{\s*(.+?)\s*\}\}`)
 }
 

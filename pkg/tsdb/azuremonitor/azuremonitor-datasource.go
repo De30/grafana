@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/api/pluginproxy"
 	"github.com/grafana/grafana/pkg/models"
@@ -29,6 +30,21 @@ import (
 type AzureMonitorDatasource struct {
 	httpClient *http.Client
 	dsInfo     *models.DataSource
+}
+
+type AzureMonitorDatasourceNext struct {
+	httpClient *http.Client
+	pc         *backend.PluginContext
+}
+
+func (a *AzureMonitorDatasourceNext) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	return &backend.QueryDataResponse{
+		Responses: backend.Responses{
+			"A": backend.DataResponse{
+				Error: fmt.Errorf("oops"),
+			},
+		},
+	}, nil
 }
 
 var (
