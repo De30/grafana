@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +21,7 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
-func (query cloudMonitoringMqlQuery) executeQuery(ctx context.Context, tsdbQuery *tsdb.TsdbQuery, e *CloudMonitoringExecutor) (*tsdb.QueryResult, cloudMonitoringResponse, error) {
+func (query cloudMonitoringMQLQuery) executeQuery(ctx context.Context, tsdbQuery *tsdb.TsdbQuery, e *CloudMonitoringExecutor) (*tsdb.QueryResult, cloudMonitoringResponse, error) {
 	queryResult := &tsdb.QueryResult{Meta: simplejson.New(), RefId: query.RefID}
 	projectName := query.ProjectName
 	if projectName == "" {
@@ -44,7 +45,7 @@ func (query cloudMonitoringMqlQuery) executeQuery(ctx context.Context, tsdbQuery
 		return queryResult, cloudMonitoringResponse{}, nil
 	}
 	intervalCalculator := tsdb.NewIntervalCalculator(&tsdb.IntervalOptions{})
-	interval := intervalCalculator.Calculate(tsdbQuery.TimeRange, time.Duration(query.IntervalMs/1000)*time.Second)
+	interval := intervalCalculator.Calculate(tsdbQuery.TimeRange, time.Duration(query.IntervalMS/1000)*time.Second)
 	timeFormat := "2006/01/02-15:04:05"
 	query.Query += fmt.Sprintf(" | graph_period %s | within d'%s', d'%s'", interval.Text, from.UTC().Format(timeFormat), to.UTC().Format(timeFormat))
 
@@ -95,7 +96,7 @@ func (query cloudMonitoringMqlQuery) executeQuery(ctx context.Context, tsdbQuery
 	return queryResult, data, nil
 }
 
-func (query cloudMonitoringMqlQuery) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
+func (query cloudMonitoringMQLQuery) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	if err != nil {
@@ -117,7 +118,7 @@ func (query cloudMonitoringMqlQuery) unmarshalResponse(res *http.Response) (clou
 	return data, nil
 }
 
-func (query cloudMonitoringMqlQuery) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse) error {
+func (query cloudMonitoringMQLQuery) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse) error {
 	labels := make(map[string]map[string]bool)
 
 	for _, series := range data.TimeSeriesData {
@@ -237,7 +238,7 @@ func (query cloudMonitoringMqlQuery) parseResponse(queryRes *tsdb.QueryResult, d
 	return nil
 }
 
-func (query cloudMonitoringMqlQuery) parseToAnnotations(queryRes *tsdb.QueryResult, data cloudMonitoringResponse, title string, text string, tags string) error {
+func (query cloudMonitoringMQLQuery) parseToAnnotations(queryRes *tsdb.QueryResult, data cloudMonitoringResponse, title string, text string, tags string) error {
 	annotations := make([]map[string]string, 0)
 
 	for _, series := range data.TimeSeriesData {
@@ -289,7 +290,7 @@ func (query cloudMonitoringMqlQuery) parseToAnnotations(queryRes *tsdb.QueryResu
 	return nil
 }
 
-func (query cloudMonitoringMqlQuery) buildDeepLink() string {
+func (query cloudMonitoringMQLQuery) buildDeepLink() string {
 	u, err := url.Parse("https://console.cloud.google.com/monitoring/metrics-explorer")
 	if err != nil {
 		slog.Error("Failed to generate deep link: unable to parse metrics explorer URL", "ProjectName", query.ProjectName, "query", query.RefID)
@@ -344,6 +345,6 @@ func (query cloudMonitoringMqlQuery) buildDeepLink() string {
 	return accountChooserURL.String()
 }
 
-func (query cloudMonitoringMqlQuery) getRefID() string {
+func (query cloudMonitoringMQLQuery) getRefID() string {
 	return query.RefID
 }

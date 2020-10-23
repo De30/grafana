@@ -294,12 +294,12 @@ func (e *CloudMonitoringExecutor) buildQueries(tsdbQuery *tsdb.TsdbQuery) ([]clo
 			setSloAggParams(&params, &q.SloQuery, durationSeconds, query.IntervalMs)
 			sqi = sq
 		case mqlQueryType:
-			sqi = &cloudMonitoringMqlQuery{
+			sqi = &cloudMonitoringMQLQuery{
 				RefID:       query.RefId,
-				ProjectName: q.MqlQuery.ProjectName,
-				Query:       q.MqlQuery.Query,
-				IntervalMs:  query.IntervalMs,
-				AliasBy:     q.MqlQuery.AliasBy,
+				ProjectName: q.MQLQuery.ProjectName,
+				Query:       q.MQLQuery.Query,
+				IntervalMS:  query.IntervalMs,
+				AliasBy:     q.MQLQuery.AliasBy,
 				timeRange:   tsdbQuery.TimeRange,
 			}
 		}
@@ -452,7 +452,7 @@ func (query *cloudMonitoringQuery) executeQuery(ctx context.Context, tsdbQuery *
 		slog.Info("No project name set on query, using project name from datasource", "projectName", projectName)
 	}
 
-	req, err := e.createRequest(ctx, e.dsInfo, path.Joinf("cloudmonitoringv3/projects", projectName, "timeSeries"), nil)
+	req, err := e.createRequest(ctx, e.dsInfo, path.Join("cloudmonitoringv3/projects", projectName, "timeSeries"), nil)
 	if err != nil {
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
@@ -572,7 +572,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 			labels["metric.label."+key][value] = true
 			seriesLabels["metric.label."+key] = value
 
-			if len(query.GroupBys) == 0 || containsLabel(query.GroupBys, "metric.label."+key) {
+			if len(q.GroupBys) == 0 || containsLabel(q.GroupBys, "metric.label."+key) {
 				defaultMetricName += " " + value
 			}
 		}
@@ -584,7 +584,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 			labels["resource.label."+key][value] = true
 			seriesLabels["resource.label."+key] = value
 
-			if containsLabel(query.GroupBys, "resource.label."+key) {
+			if containsLabel(q.GroupBys, "resource.label."+key) {
 				defaultMetricName += " " + value
 			}
 		}
@@ -619,7 +619,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 
 		// reverse the order to be ascending
 		if series.ValueType != "DISTRIBUTION" {
-			handleDistributionSeries(series, defaultMetricName, seriesLabels, query, queryRes)
+			handleDistributionSeries(series, defaultMetricName, seriesLabels, q, queryRes)
 		} else {
 			buckets := make(map[int]*tsdb.TimeSeries)
 
@@ -640,7 +640,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 						bucketBound := calcBucketBound(point.Value.DistributionValue.BucketOptions, i)
 						additionalLabels := map[string]string{"bucket": bucketBound}
 						buckets[i] = &tsdb.TimeSeries{
-							Name:   formatLegendKeys(series.Metric.Type, defaultMetricName, nil, additionalLabels, query),
+							Name:   formatLegendKeys(series.Metric.Type, defaultMetricName, nil, additionalLabels, q),
 							Points: make([]tsdb.TimePoint, 0),
 						}
 						if maxKey < i {
@@ -656,7 +656,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 						bucketBound := calcBucketBound(point.Value.DistributionValue.BucketOptions, i)
 						additionalLabels := map[string]string{"bucket": bucketBound}
 						buckets[i] = &tsdb.TimeSeries{
-							Name:   formatLegendKeys(series.Metric.Type, defaultMetricName, seriesLabels, additionalLabels, query),
+							Name:   formatLegendKeys(series.Metric.Type, defaultMetricName, seriesLabels, additionalLabels, q),
 							Points: make([]tsdb.TimePoint, 0),
 						}
 					}
@@ -676,7 +676,7 @@ func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cl
 	}
 
 	queryRes.Meta.Set("labels", labelsByKey)
-	queryRes.Meta.Set("groupBys", query.GroupBys)
+	queryRes.Meta.Set("groupBys", q.GroupBys)
 
 	return nil
 }

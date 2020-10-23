@@ -68,7 +68,7 @@ type (
 		QueryType    string
 		MetricQuery  metricQuery
 		SloQuery     sloQuery
-		MQLQuery     cloudMonitoringMqlQuery
+		MQLQuery     cloudMonitoringMQLQuery
 	}
 
 	cloudMonitoringBucketOptions struct {
@@ -96,8 +96,8 @@ type (
 
 type timeSeriesDescriptor struct {
 	LabelDescriptors []struct {
-		Key        string `json:"key"`
-		ValueType  string `json:"valueType"`
+		Key         string `json:"key"`
+		ValueType   string `json:"valueType"`
 		Description string `json:"description"`
 	} `json:"labelDescriptors"`
 	PointDescriptors []struct {
