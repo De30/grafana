@@ -609,9 +609,9 @@ func TestCloudMonitoring(t *testing.T) {
 
 				qis, err := executor.buildQueries(tsdbQuery)
 				So(err, ShouldBeNil)
-				queries := make([]*cloudMonitoringMqlQuery, 0)
+				queries := make([]*cloudMonitoringMQLQuery, 0)
 				for _, qi := range qis {
-					q, ok := qi.(*cloudMonitoringMqlQuery)
+					q, ok := qi.(*cloudMonitoringMQLQuery)
 					So(ok, ShouldBeTrue)
 					queries = append(queries, q)
 				}
@@ -945,7 +945,7 @@ func TestCloudMonitoring(t *testing.T) {
 
 				Convey("and alias by is expanded", func() {
 					res := &tsdb.QueryResult{Meta: simplejson.New(), RefId: "A"}
-					query := &cloudMonitoringMqlQuery{
+					query := &cloudMonitoringMQLQuery{
 						ProjectName: "test-proj",
 						Query:       "test-query",
 						AliasBy:     "{{project}} - {{resource.zone}} - {{resource.instance_id}}",
