@@ -452,7 +452,7 @@ func (query *cloudMonitoringQuery) executeQuery(ctx context.Context, tsdbQuery *
 		slog.Info("No project name set on query, using project name from datasource", "projectName", projectName)
 	}
 
-	req, err := e.createRequest(ctx, e.dsInfo, fmt.Sprintf("cloudmonitoring%s", "v3/projects/"+projectName+"/timeSeries"), nil)
+	req, err := e.createRequest(ctx, e.dsInfo, path.Joinf("cloudmonitoringv3/projects", projectName, "timeSeries"), nil)
 	if err != nil {
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
@@ -501,7 +501,7 @@ func (query *cloudMonitoringQuery) executeQuery(ctx context.Context, tsdbQuery *
 	return queryResult, data, nil
 }
 
-func (e *cloudMonitoringQuery) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
+func (q *cloudMonitoringQuery) unmarshalResponse(res *http.Response) (cloudMonitoringResponse, error) {
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	if err != nil {
@@ -556,7 +556,7 @@ func handleDistributionSeries(series timeSeries, defaultMetricName string, serie
 	})
 }
 
-func (query *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse) error {
+func (q *cloudMonitoringQuery) parseResponse(queryRes *tsdb.QueryResult, data cloudMonitoringResponse) error {
 	labels := make(map[string]map[string]bool)
 
 	for _, series := range data.TimeSeries {

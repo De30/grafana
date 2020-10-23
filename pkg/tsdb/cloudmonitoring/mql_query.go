@@ -55,7 +55,7 @@ func (query cloudMonitoringMqlQuery) executeQuery(ctx context.Context, tsdbQuery
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
 	}
-	req, err := e.createRequest(ctx, e.dsInfo, fmt.Sprintf("cloudmonitoring%s", "v3/projects/"+projectName+"/timeSeries:query"), bytes.NewBuffer(buf))
+	req, err := e.createRequest(ctx, e.dsInfo, path.Join("cloudmonitoringv3/projects", projectName, "timeSeries:query"), bytes.NewBuffer(buf))
 	if err != nil {
 		queryResult.Error = err
 		return queryResult, cloudMonitoringResponse{}, nil
@@ -159,9 +159,7 @@ func (query cloudMonitoringMqlQuery) parseResponse(queryRes *tsdb.QueryResult, d
 						if err == nil {
 							value = parsedValue
 						}
-					}
-
-					if d.ValueType == "BOOL" {
+					} else if d.ValueType == "BOOL" {
 						if point.Values[n].BoolValue {
 							value = 1
 						} else {
@@ -169,7 +167,7 @@ func (query cloudMonitoringMqlQuery) parseResponse(queryRes *tsdb.QueryResult, d
 						}
 					}
 
-					points = append(points, tsdb.NewTimePoint(null.FloatFrom(value), float64((point.TimeInterval.EndTime).Unix())*1000))
+					points = append(points, tsdb.NewTimePoint(null.FloatFrom(value), float64(point.TimeInterval.EndTime.Unix())*1000))
 				}
 
 				metricName := formatLegendKeys(d.MetricKind, defaultMetricName, seriesLabels, nil, &cloudMonitoringQuery{ProjectName: query.ProjectName, AliasBy: query.AliasBy})
@@ -205,7 +203,7 @@ func (query cloudMonitoringMqlQuery) parseResponse(queryRes *tsdb.QueryResult, d
 								maxKey = i
 							}
 						}
-						buckets[i].Points = append(buckets[i].Points, tsdb.NewTimePoint(null.FloatFrom(value), float64((point.TimeInterval.EndTime).Unix())*1000))
+						buckets[i].Points = append(buckets[i].Points, tsdb.NewTimePoint(null.FloatFrom(value), float64(point.TimeInterval.EndTime.Unix())*1000))
 					}
 
 					// fill empty bucket

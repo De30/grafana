@@ -31,11 +31,11 @@ type (
 		Slo         string
 	}
 
-	cloudMonitoringMqlQuery struct {
+	cloudMonitoringMQLQuery struct {
 		RefID       string
 		ProjectName string
 		Query       string
-		IntervalMs  int64
+		IntervalMS  int64
 		AliasBy     string
 		timeRange   *tsdb.TimeRange
 	}
@@ -68,7 +68,7 @@ type (
 		QueryType    string
 		MetricQuery  metricQuery
 		SloQuery     sloQuery
-		MqlQuery     cloudMonitoringMqlQuery
+		MQLQuery     cloudMonitoringMqlQuery
 	}
 
 	cloudMonitoringBucketOptions struct {
@@ -98,7 +98,7 @@ type timeSeriesDescriptor struct {
 	LabelDescriptors []struct {
 		Key        string `json:"key"`
 		ValueType  string `json:"valueType"`
-		Descrition string `json:"description"`
+		Description string `json:"description"`
 	} `json:"labelDescriptors"`
 	PointDescriptors []struct {
 		Key        string `json:"key"`
@@ -106,6 +106,7 @@ type timeSeriesDescriptor struct {
 		MetricKind string `json:"metricKind"`
 	} `json:"pointDescriptors"`
 }
+
 type timeSeriesData []struct {
 	LabelValues []struct {
 		BoolValue   bool   `json:"boolValue"`
