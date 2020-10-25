@@ -1,6 +1,5 @@
-import React, { ChangeEvent } from 'react';
-import { LegacyForms } from '@grafana/ui';
-const { Input } = LegacyForms;
+import React from 'react';
+import { TextArea } from '@grafana/ui';
 import { SelectableValue } from '@grafana/data';
 import { Project, AliasBy, QueryInlineField } from '.';
 import { MQLQuery } from '../types';
@@ -37,11 +36,12 @@ export function MQLQueryEditor({
       />
 
       <QueryInlineField label="Query">
-        <Input
-          className="gf-form-input"
-          onBlur={onRunQuery}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => onChange({ ...query, query: event.target.value })}
+        <TextArea
           value={query.query}
+          rows={10}
+          placeholder=""
+          onBlur={onRunQuery}
+          onChange={e => onChange({ ...query, query: e.currentTarget.value })}
         />
       </QueryInlineField>
 
