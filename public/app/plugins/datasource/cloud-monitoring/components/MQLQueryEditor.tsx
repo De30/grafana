@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextArea } from '@grafana/ui';
 import { SelectableValue } from '@grafana/data';
-import { Project, AliasBy, QueryInlineField } from '.';
+import { Project, AliasBy } from '.';
 import { MQLQuery } from '../types';
 import CloudMonitoringDatasource from '../datasource';
 
@@ -35,15 +35,14 @@ export function MQLQueryEditor({
         onChange={projectName => onChange({ ...query, projectName })}
       />
 
-      <QueryInlineField label="Query">
-        <TextArea
-          value={query.query}
-          rows={10}
-          placeholder=""
-          onBlur={onRunQuery}
-          onChange={e => onChange({ ...query, query: e.currentTarget.value })}
-        />
-      </QueryInlineField>
+      <TextArea
+        name="Query"
+        value={query.query}
+        rows={10}
+        placeholder=""
+        onBlur={onRunQuery}
+        onChange={e => onChange({ ...query, query: e.currentTarget.value })}
+      />
 
       <AliasBy value={query.aliasBy} onChange={aliasBy => onChange({ ...query, aliasBy })} />
     </>
