@@ -127,6 +127,7 @@ func (query cloudMonitoringMQLQuery) parseResponse(queryRes *tsdb.QueryResult, d
 
 		for n, d := range data.TimeSeriesDescriptor.LabelDescriptors {
 			key := toSnakeCase(d.Key)
+			key = strings.Replace(key, ".", ".label.", 1)
 			if _, ok := labels[key]; !ok {
 				labels[key] = map[string]bool{}
 			}
