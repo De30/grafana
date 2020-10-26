@@ -226,6 +226,24 @@ The Alias By field allows you to control the format of the legend keys for SLO q
 
 SLO queries use the same [alignment period functionality as metric queries]({{< relref "#metric-queries" >}}).
 
+### MQL (Monitoring Query Language) queries
+
+> Only available in Grafana v7.x+
+
+The MQL query builder in the Google Cloud Monitoring data source allows you to display MQL result in time series format. To get an understanding of the basic concepts in MQL, please refer to Google Cloud Monitoring's [official docs](https://cloud.google.com/monitoring/mql).
+
+#### How to create an MQL query
+
+To create an MQL query, follow these steps:
+
+1. Choose the option **Monitoring Query Language (MQL)** in the **Query Type** dropdown.
+1. Choose a project from the **Project** dropdown.
+1. Specify [MQL](https://cloud.google.com/monitoring/mql/query-language) to query field.
+
+#### Alias Patterns for MQL queries
+
+MQL queries use the same [alias patterns as metric queries]({{< relref "#metric-queries" >}}).
+
 ## Templating
 
 Instead of hard-coding things like server, application and sensor name in your metric queries you can use variables in their place.
