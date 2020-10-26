@@ -88,7 +88,7 @@ $critical: #e02f44;
 // -------------------------
 $body-bg: #141619;
 $page-bg: #141619;
-$dashboard-bg: radial-gradient(blue, black);
+$dashboard-bg: radial-gradient(#001153, #04041b);
 
 $text-color-strong: #f7f8fa;
 $text-color: #c7d0d9;
@@ -122,8 +122,8 @@ $hr-border-color: $dark-9;
 
 // Panel
 // -------------------------
-$panel-bg: #141619;
-$panel-border: 1px solid #202226;
+$panel-bg: #00000066;
+$panel-border: 1px solid #041e3b;
 $panel-header-hover-bg: #202226;
 $panel-corner: $panel-bg;
 
@@ -224,7 +224,7 @@ $typeahead-selected-color: $yellow;
 // Dropdowns
 // -------------------------
 $dropdownBackground: $panel-bg;
-$dropdownBorder: #202226;
+$dropdownBorder: #041e3b;
 $dropdownDividerTop: transparent;
 $dropdownDividerBottom: #2c3235;
 

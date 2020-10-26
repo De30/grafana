@@ -4,9 +4,8 @@ $mobile-menu-breakpoint: md;
   display: flex;
   flex-flow: column;
   flex-direction: row;
-  width: $side-menu-width;
   z-index: $zindex-sidemenu;
-  height: 40px;
+  height: 35px;
 
   a:focus {
     text-decoration: none;
@@ -21,8 +20,7 @@ $mobile-menu-breakpoint: md;
   }
 
   @include media-breakpoint-up($mobile-menu-breakpoint) {
-    background: $side-menu-bg;
-    box-shadow: $side-menu-shadow;
+    background: 'black';
     position: relative;
     z-index: $zindex-sidemenu;
   }
@@ -41,7 +39,6 @@ $mobile-menu-breakpoint: md;
 }
 
 .sidemenu__bottom {
-  padding-bottom: $spacer;
 }
 
 .sidemenu__top,
@@ -85,7 +82,7 @@ $mobile-menu-breakpoint: md;
 
 .sidemenu-link {
   color: $side-menu-icon-color !important;
-  line-height: 42px;
+  line-height: 33px;
   padding: 0px 10px 0px 10px;
   display: block;
   position: relative;
@@ -95,8 +92,8 @@ $mobile-menu-breakpoint: md;
 
   img {
     border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.05);
   }
 }
@@ -113,8 +110,8 @@ $mobile-menu-breakpoint: md;
 }
 
 .icon-circle {
-  width: 35px;
-  height: 35px;
+  width: 20px;
+  height: 20px;
   display: inline-block;
   position: relative;
 
@@ -179,20 +176,17 @@ li.sidemenu-org-switcher {
 
 .sidemenu__logo {
   display: block;
-  padding: 6px 14px 6px 9px;
-  min-height: $navbarHeight;
   position: relative;
-  height: $navbarHeight - 1px;
 
   &:hover {
     background: lightOrDark($gray33, $gray25);
   }
 
   img {
-    width: 30px;
+    width: 20px;
     position: relative;
     top: 5px;
-    left: 4px;
+    left: 8px;
   }
 }
 

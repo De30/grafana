@@ -131,7 +131,7 @@ i.navbar-page-btn__search {
   // 2px less then border
   line-height: 30px;
   color: $text-muted;
-  border: 1px solid $navbar-button-border;
+  border: $panel-border;
   margin-left: $space-xs;
   white-space: nowrap;
 

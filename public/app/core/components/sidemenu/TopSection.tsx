@@ -18,10 +18,12 @@ const TopSection: FC<any> = () => {
 
   return (
     <div className="sidemenu__top">
+      {/*
       <TopSectionItem link={searchLink} onClick={onOpenSearch} />
       {mainLinks.map((link, index) => {
         return <TopSectionItem link={link} key={`${link.id}-${index}`} />;
       })}
+      */}
     </div>
   );
 };

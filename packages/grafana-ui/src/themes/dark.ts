@@ -38,7 +38,7 @@ const backgrounds = {
   bg1: basicColors.gray10,
   bg2: basicColors.gray15,
   bg3: basicColors.gray25,
-  dashboardBg: 'radial-gradient(blue, black)',
+  dashboardBg: 'radial-gradient(#001153, #04041b)',
   bgBlue1: basicColors.blue80,
   bgBlue2: basicColors.blue77,
 };
@@ -113,10 +113,10 @@ const darkTheme: GrafanaTheme = {
     ...textColors,
 
     bodyBg: backgrounds.bg1,
-    panelBg: backgrounds.bg1,
+    panelBg: '#00000066',
     pageHeaderBg: backgrounds.bg2,
     pageHeaderBorder: borders.border1,
-    panelBorder: borders.border1,
+    panelBorder: '#041e3b',
 
     dropdownBg: form.formInputBg,
     dropdownShadow: basicColors.black,
