@@ -38,7 +38,7 @@ const backgrounds = {
   bg1: basicColors.gray10,
   bg2: basicColors.gray15,
   bg3: basicColors.gray25,
-  dashboardBg: basicColors.gray05,
+  dashboardBg: 'radial-gradient(blue, black)',
   bgBlue1: basicColors.blue80,
   bgBlue2: basicColors.blue77,
 };

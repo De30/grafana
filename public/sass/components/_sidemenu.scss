@@ -1,12 +1,12 @@
 $mobile-menu-breakpoint: md;
 
 .sidemenu {
-  position: fixed;
   display: flex;
   flex-flow: column;
-  flex-direction: column;
+  flex-direction: row;
   width: $side-menu-width;
   z-index: $zindex-sidemenu;
+  height: 40px;
 
   a:focus {
     text-decoration: none;
@@ -22,7 +22,6 @@ $mobile-menu-breakpoint: md;
 
   @include media-breakpoint-up($mobile-menu-breakpoint) {
     background: $side-menu-bg;
-    height: auto;
     box-shadow: $side-menu-shadow;
     position: relative;
     z-index: $zindex-sidemenu;
@@ -37,8 +36,8 @@ $mobile-menu-breakpoint: md;
 }
 
 .sidemenu__top {
-  padding-top: 40px;
   flex-grow: 1;
+  display: none;
 }
 
 .sidemenu__bottom {
@@ -50,7 +49,7 @@ $mobile-menu-breakpoint: md;
   display: none;
 
   @include media-breakpoint-up($mobile-menu-breakpoint) {
-    display: block;
+    display: flex;
   }
 }
 
