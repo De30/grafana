@@ -33,7 +33,7 @@ const getRadioButtonStyles = stylesFactory((theme: GrafanaTheme, size: RadioButt
   const borderColor = theme.colors.border2;
   const borderColorHover = theme.colors.border3;
   const borderColorActive = theme.colors.border2;
-  const bg = theme.colors.bodyBg;
+  const bg = theme.colors.panelBg;
   const bgDisabled = theme.isLight ? c.gray95 : c.gray15;
   const bgActive = theme.colors.bg2;
 

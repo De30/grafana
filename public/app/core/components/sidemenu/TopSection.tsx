@@ -1,23 +1,30 @@
+import { Icon, Input } from '@grafana/ui';
 import React, { FC } from 'react';
-import _ from 'lodash';
-import TopSectionItem from './TopSectionItem';
-import config from '../../config';
-import { getLocationSrv } from '@grafana/runtime';
+/* import _ from 'lodash'; */
+/* import TopSectionItem from './TopSectionItem'; */
+/* import config from '../../config'; */
+/* import { getLocationSrv } from '@grafana/runtime'; */
 
 const TopSection: FC<any> = () => {
-  const navTree = _.cloneDeep(config.bootData.navTree);
-  const mainLinks = _.filter(navTree, item => !item.hideFromMenu);
-  const searchLink = {
-    text: 'Search',
-    icon: 'search',
-  };
+  /* const navTree = _.cloneDeep(config.bootData.navTree); */
+  /* const mainLinks = _.filter(navTree, item => !item.hideFromMenu); */
+  /* const searchLink = { */
+  /*   text: 'Search', */
+  /*   icon: 'search', */
+  /* }; */
 
-  const onOpenSearch = () => {
-    getLocationSrv().update({ query: { search: 'open' }, partial: true });
-  };
+  /* const onOpenSearch = () => { */
+  /*   getLocationSrv().update({ query: { search: 'open' }, partial: true }); */
+  /* }; */
 
   return (
-    <div className="sidemenu__top">
+    <div className="sidemenu__middle">
+      <Input
+        className="search-input"
+        prefix={<Icon name="search" />}
+        type="text"
+        placeholder={'Search dashboards, alerts, etc'}
+      />
       {/*
       <TopSectionItem link={searchLink} onClick={onOpenSearch} />
       {mainLinks.map((link, index) => {

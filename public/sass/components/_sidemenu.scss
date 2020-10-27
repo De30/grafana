@@ -4,7 +4,6 @@ $mobile-menu-breakpoint: md;
   display: flex;
   flex-flow: column;
   flex-direction: row;
-  z-index: $zindex-sidemenu;
   height: 35px;
 
   a:focus {
@@ -20,9 +19,8 @@ $mobile-menu-breakpoint: md;
   }
 
   @include media-breakpoint-up($mobile-menu-breakpoint) {
-    background: 'black';
+    background: black;
     position: relative;
-    z-index: $zindex-sidemenu;
   }
 }
 
@@ -33,21 +31,32 @@ $mobile-menu-breakpoint: md;
   }
 }
 
-.sidemenu__top {
+.sidemenu__left {
+  display: flex;
+}
+
+.sidemenu__middle {
   flex-grow: 1;
-  display: none;
+  display: flex;
+  justify-content: center;
 }
 
-.sidemenu__bottom {
+.search-input {
+  width: 30% !important;
+  height: 28px !important;
+  position: relative;
+  top: 3px;
 }
 
-.sidemenu__top,
-.sidemenu__bottom {
-  display: none;
+.sidemenu__right {
+  width: 40px;
+}
 
-  @include media-breakpoint-up($mobile-menu-breakpoint) {
-    display: flex;
-  }
+.sidemenu__menu {
+  display: flex;
+  height: 35px;
+  line-height: 35px;
+  align-items: center;
 }
 
 .sidemenu-item {
@@ -184,10 +193,11 @@ li.sidemenu-org-switcher {
 
   img {
     width: 20px;
-    position: relative;
-    top: 5px;
-    left: 8px;
+    margin: 8px 12px;
   }
+}
+
+.sidemenu-menu {
 }
 
 @include media-breakpoint-down(sm) {

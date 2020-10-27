@@ -255,8 +255,8 @@ $side-menu-header-color: ${theme.colors.text};
 
 // Menu dropdowns
 // -------------------------
-$menu-dropdown-bg: ${theme.colors.bg1};
-$menu-dropdown-hover-bg: ${theme.colors.bg2};
+$menu-dropdown-bg: ${theme.colors.bg2};
+$menu-dropdown-hover-bg: ${theme.colors.bg3};
 $menu-dropdown-shadow: 5px 5px 20px -5px $black;
 
 // Tabs

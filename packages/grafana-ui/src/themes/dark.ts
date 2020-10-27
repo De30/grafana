@@ -35,8 +35,8 @@ const basicColors = {
 };
 
 const backgrounds = {
-  bg1: basicColors.gray10,
-  bg2: basicColors.gray15,
+  bg1: '#00000066',
+  bg2: '#0f1828',
   bg3: basicColors.gray25,
   dashboardBg: 'radial-gradient(#001153, #04041b)',
   bgBlue1: basicColors.blue80,
@@ -44,7 +44,7 @@ const backgrounds = {
 };
 
 const borders = {
-  border1: basicColors.gray15,
+  border1: '#041e3b',
   border2: basicColors.gray25,
   border3: basicColors.gray33,
 };
@@ -112,11 +112,11 @@ const darkTheme: GrafanaTheme = {
     ...form,
     ...textColors,
 
-    bodyBg: backgrounds.bg1,
+    bodyBg: backgrounds.dashboardBg,
     panelBg: '#00000066',
     pageHeaderBg: backgrounds.bg2,
     pageHeaderBorder: borders.border1,
-    panelBorder: '#041e3b',
+    panelBorder: borders.border1,
 
     dropdownBg: form.formInputBg,
     dropdownShadow: basicColors.black,

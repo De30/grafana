@@ -275,7 +275,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
       flex-direction: column;
       flex-grow: 1;
       min-height: 0;
-      background: ${theme.colors.bodyBg};
+      background: ${theme.colors.panelBg};
       border-left: 1px solid ${theme.colors.pageHeaderBorder};
     `,
     tabsButton: css``,

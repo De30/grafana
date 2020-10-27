@@ -86,8 +86,8 @@ $critical: #e02f44;
 
 // Scaffolding
 // -------------------------
-$body-bg: #141619;
-$page-bg: #141619;
+$body-bg: radial-gradient(#001153, #04041b);
+$page-bg: radial-gradient(#001153, #04041b);
 $dashboard-bg: radial-gradient(#001153, #04041b);
 
 $text-color-strong: #f7f8fa;
@@ -124,27 +124,27 @@ $hr-border-color: $dark-9;
 // -------------------------
 $panel-bg: #00000066;
 $panel-border: 1px solid #041e3b;
-$panel-header-hover-bg: #202226;
+$panel-header-hover-bg: #0f1828;
 $panel-corner: $panel-bg;
 
 // page header
-$page-header-bg: #202226;
+$page-header-bg: #0f1828;
 $page-header-shadow: inset 0px -4px 14px $dark-3;
-$page-header-border-color: #202226;
+$page-header-border-color: #041e3b;
 
 $divider-border-color: $gray-1;
 
 // Graphite Target Editor
-$tight-form-func-bg: #202226;
-$tight-form-func-highlight-bg: #25272b;
+$tight-form-func-bg: #0f1828;
+$tight-form-func-highlight-bg: #141d2d;
 
 $modal-backdrop-bg: #2c3235;
 $code-tag-bg: $dark-1;
 $code-tag-border: $dark-9;
 
 // cards
-$card-background: #202226;
-$card-background-hover: #25272b;
+$card-background: #0f1828;
+$card-background-hover: #141d2d;
 $card-shadow: none;
 
 // Lists
@@ -152,7 +152,7 @@ $list-item-bg: $card-background;
 $list-item-hover-bg: $card-background-hover;
 $list-item-shadow: $card-shadow;
 
-$empty-list-cta-bg: #202226;
+$empty-list-cta-bg: #0f1828;
 
 // Scrollbars
 $scrollbarBackground: #404357;
@@ -161,7 +161,7 @@ $scrollbarBorder: black;
 
 // Tables
 // -------------------------
-$table-bg-accent: #191b1e; // for striping
+$table-bg-accent: rgba(5, 5, 5, 0.4); // for striping
 $table-border: $dark-6; // table and cell border
 
 $table-bg-odd: $dark-3;
@@ -210,7 +210,7 @@ $input-box-shadow: none;
 $input-border-focus: #5794f2;
 $input-box-shadow-focus: $blue-light !default;
 $input-color-placeholder: #464c54;
-$input-label-bg: #202226;
+$input-label-bg: #0f1828;
 $input-color-select-arrow: $white;
 
 // Search
@@ -250,15 +250,15 @@ $navbar-button-border: #2f2f32;
 $side-menu-bg: $panel-bg;
 $side-menu-bg-mobile: $panel-bg;
 $side-menu-border: none;
-$side-menu-item-hover-bg: #202226;
+$side-menu-item-hover-bg: #0f1828;
 $side-menu-shadow: 0 0 20px black;
 $side-menu-icon-color: #9fa7b3;
 $side-menu-header-color: #c7d0d9;
 
 // Menu dropdowns
 // -------------------------
-$menu-dropdown-bg: #141619;
-$menu-dropdown-hover-bg: #202226;
+$menu-dropdown-bg: #0f1828;
+$menu-dropdown-hover-bg: #2c3235;
 $menu-dropdown-shadow: 5px 5px 20px -5px $black;
 
 // Tabs
@@ -383,7 +383,7 @@ $panel-editor-tabs-line-color: #e3e3e3;
 $panel-editor-viz-item-bg-hover: darken($blue-base, 46%);
 
 $panel-options-group-border: none;
-$panel-options-group-header-bg: #202226;
+$panel-options-group-header-bg: #0f1828;
 
 $panel-grid-placeholder-bg: darken(#1f60c4, 30%);
 $panel-grid-placeholder-shadow: 0 0 4px #3274d9;

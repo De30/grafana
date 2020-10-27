@@ -111,7 +111,7 @@ const getSectionStyles = stylesFactory((theme: GrafanaTheme) => {
       display: flex;
       flex-direction: column;
       background: ${theme.colors.panelBg};
-      border-bottom: solid 1px ${theme.colors.border2};
+      border-bottom: solid 1px ${theme.colors.panelBorder};
     `,
     sectionItems: css`
       margin: 0 24px 0 32px;
@@ -126,8 +126,7 @@ const getSectionStyles = stylesFactory((theme: GrafanaTheme) => {
       position: relative;
       flex-grow: 10;
       margin-bottom: ${md};
-      background: ${theme.colors.bg1};
-      border: 1px solid ${theme.colors.border1};
+      border: 1px solid ${theme.colors.panelBorder};
       border-radius: 3px;
       height: 100%;
     `,

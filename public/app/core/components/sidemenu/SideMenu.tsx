@@ -16,15 +16,13 @@ export class SideMenu extends PureComponent {
 
   render() {
     return [
-      <a href={homeUrl} className="sidemenu__logo" key="logo">
-        <Branding.MenuLogo />
-      </a>,
-      <div className="sidemenu__logo_small_breakpoint" onClick={this.toggleSideMenuSmallBreakpoint} key="hamburger">
-        <Icon name="bars" size="xl" />
-        <span className="sidemenu__close">
-          <Icon name="times" />
-          &nbsp;Close
-        </span>
+      <div className="sidemenu__left">
+        <a href={homeUrl} className="sidemenu__logo" key="logo">
+          <Branding.MenuLogo />
+        </a>
+        <div className="sidemenu__menu">
+          <Icon name="bars" />
+        </div>
       </div>,
       <TopSection key="topsection" />,
       <BottomSection key="bottomsection" />,

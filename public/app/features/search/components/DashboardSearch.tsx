@@ -72,7 +72,6 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
       background: ${theme.colors.dashboardBg};
 
       @media only screen and (min-width: ${theme.breakpoints.md}) {
-        left: 60px;
         z-index: ${theme.zIndex.navbarFixed + 1};
       }
     `,
