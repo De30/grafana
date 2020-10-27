@@ -75,7 +75,7 @@ body {
   // Go easy on the eyes and use something other than `#000` for text
   color: $text-color;
   // By default, `<body>` has no `background-color` so we set one as a best practice.
-  background-color: $body-bg;
+  background: $body-bg;
   height: 100%;
   width: 100%;
   position: absolute;

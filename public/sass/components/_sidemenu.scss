@@ -19,7 +19,7 @@ $mobile-menu-breakpoint: md;
   }
 
   @include media-breakpoint-up($mobile-menu-breakpoint) {
-    background: black;
+    background: $panel-bg;
     position: relative;
   }
 }

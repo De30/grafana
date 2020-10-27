@@ -63,7 +63,7 @@ const form = {
   // Next-gen forms functional colors
   formLabel: textColors.textSemiWeak,
   formDescription: basicColors.gray60,
-  formInputBg: basicColors.gray05,
+  formInputBg: 'transparent',
   formInputBgDisabled: basicColors.gray10,
   formInputBorder: borders.border2,
   formInputBorderHover: basicColors.gray33,

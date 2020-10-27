@@ -1,62 +1,28 @@
-import React, { FormEvent } from 'react';
+import React, { FC } from 'react';
 import { css } from 'emotion';
-import { Tab, TabsBar, Icon, IconName } from '@grafana/ui';
+import { VerticalTab, Icon, IconName, stylesFactory } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { NavModel, NavModelItem, NavModelBreadcrumb } from '@grafana/data';
 import { CoreEvents } from 'app/types';
+import { config } from 'app/core/config';
 
 export interface Props {
   model: NavModel;
 }
 
-const SelectNav = ({ children, customCss }: { children: NavModelItem[]; customCss: string }) => {
+export const Navigation: FC<Props> = ({ model }) => {
+  if (!model) {
+    return null;
+  }
+
+  const main = model.main;
+  const children = main.children;
+
   if (!children || children.length === 0) {
     return null;
   }
 
-  const defaultSelectedItem = children.find(navItem => {
-    return navItem.active === true;
-  });
-
-  const gotoUrl = (evt: FormEvent) => {
-    const element = evt.target as HTMLSelectElement;
-    const url = element.options[element.selectedIndex].value;
-    appEvents.emit(CoreEvents.locationChange, { href: url });
-  };
-
-  return (
-    <div className={`gf-form-select-wrapper width-20 ${customCss}`}>
-      <label
-        className={`gf-form-select-icon ${defaultSelectedItem ? defaultSelectedItem?.icon : ''}`}
-        htmlFor="page-header-select-nav"
-      />
-      {/* Label to make it clickable */}
-      <select
-        className="gf-select-nav gf-form-input"
-        value={defaultSelectedItem?.url ?? ''}
-        onChange={gotoUrl}
-        id="page-header-select-nav"
-      >
-        {children.map((navItem: NavModelItem) => {
-          if (navItem.hideFromTabs) {
-            // TODO: Rename hideFromTabs => hideFromNav
-            return null;
-          }
-          return (
-            <option key={navItem.url} value={navItem.url}>
-              {navItem.text}
-            </option>
-          );
-        })}
-      </select>
-    </div>
-  );
-};
-
-const Navigation = ({ children }: { children: NavModelItem[] }) => {
-  if (!children || children.length === 0) {
-    return null;
-  }
+  const styles = getStyles();
 
   const goToUrl = (index: number) => {
     children.forEach((child, i) => {
@@ -67,13 +33,13 @@ const Navigation = ({ children }: { children: NavModelItem[] }) => {
   };
 
   return (
-    <nav>
-      <SelectNav customCss="page-header__select-nav" children={children} />
-      <TabsBar className="page-header__tabs" hideBorder={true}>
+    <nav className={styles.nav}>
+      <div className={styles.navHeading}>{main.text}</div>
+      <div className={styles.navItems}>
         {children.map((child, index) => {
           return (
             !child.hideFromTabs && (
-              <Tab
+              <VerticalTab
                 label={child.text}
                 active={child.active}
                 key={`${child.url}-${index}`}
@@ -84,7 +50,7 @@ const Navigation = ({ children }: { children: NavModelItem[] }) => {
             )
           );
         })}
-      </TabsBar>
+      </div>
     </nav>
   );
 };
@@ -157,18 +123,30 @@ export default class PageHeader extends React.Component<Props, any> {
       return null;
     }
 
-    const main = model.main;
-    const children = main.children;
+    let node = model.node;
 
     return (
       <div className="page-header-canvas">
-        <div className="page-container">
-          <div className="page-header">
-            {this.renderHeaderTitle(main)}
-            {children && children.length && <Navigation children={children} />}
-          </div>
-        </div>
+        <div className="page-header">{this.renderHeaderTitle(node)}</div>
       </div>
     );
   }
 }
+
+export const getStyles = stylesFactory(() => {
+  return {
+    nav: css`
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    `,
+    navHeading: css`
+      margin-bottom: 16px;
+      font-size: ${config.theme.typography.size.lg};
+    `,
+    navItems: css`
+      display: flex;
+      flex-direction: column;
+    `,
+  };
+});

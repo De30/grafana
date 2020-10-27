@@ -217,11 +217,11 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 
 	if c.OrgRole == models.ROLE_ADMIN {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Data Sources",
-			Icon:        "database",
-			Description: "Add and configure data sources",
-			Id:          "datasources",
-			Url:         setting.AppSubUrl + "/datasources",
+			Text:     "Data Sources",
+			Icon:     "database",
+			SubTitle: "Add and configure data sources",
+			Id:       "datasources",
+			Url:      setting.AppSubUrl + "/datasources",
 		})
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Users",
@@ -244,11 +244,11 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 
 	if c.OrgRole == models.ROLE_ADMIN {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Plugins",
-			Id:          "plugins",
-			Description: "View and configure plugins",
-			Icon:        "plug",
-			Url:         setting.AppSubUrl + "/plugins",
+			Text:     "Plugins",
+			Id:       "plugins",
+			SubTitle: "View and configure plugins",
+			Icon:     "plug",
+			Url:      setting.AppSubUrl + "/plugins",
 		})
 
 		configNodes = append(configNodes, &dtos.NavLink{
