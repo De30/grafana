@@ -60,6 +60,7 @@ import * as newsPanel from 'app/plugins/panel/news/module';
 import * as livePanel from 'app/plugins/panel/live/module';
 import * as homeLinksPanel from 'app/plugins/panel/homelinks/module';
 import * as welcomeBanner from 'app/plugins/panel/welcome/module';
+import * as repeatGraph from 'app/plugins/panel/repeat-graph/module';
 
 const builtInPlugins: any = {
   'app/plugins/datasource/graphite/module': graphitePlugin,
@@ -104,6 +105,7 @@ const builtInPlugins: any = {
   'app/plugins/panel/logs/module': logsPanel,
   'app/plugins/panel/homelinks/module': homeLinksPanel,
   'app/plugins/panel/welcome/module': welcomeBanner,
+  'app/plugins/panel/repeat-graph/module': repeatGraph,
 };
 
 export default builtInPlugins;

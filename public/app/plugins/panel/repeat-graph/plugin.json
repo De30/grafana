@@ -1,0 +1,17 @@
+{
+  "type": "panel",
+  "name": "Repeat Graph",
+  "id": "repeat-graph",
+  "state": "alpha",
+
+  "info": {
+    "author": {
+      "name": "Grafana Project",
+      "url": "https://grafana.com"
+    },
+    "logos": {
+      "small": "img/icn-graph-panel.svg",
+      "large": "img/icn-graph-panel.svg"
+    }
+  }
+}

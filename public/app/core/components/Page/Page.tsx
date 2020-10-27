@@ -11,7 +11,6 @@ import { NavModel } from '@grafana/data';
 import { isEqual } from 'lodash';
 import { Branding } from '../Branding/Branding';
 import { css } from 'emotion';
-import { config } from 'app/core/config';
 
 interface Props {
   children: React.ReactNode;
