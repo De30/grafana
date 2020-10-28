@@ -223,7 +223,7 @@ $typeahead-selected-color: $yellow;
 
 // Dropdowns
 // -------------------------
-$dropdownBackground: $panel-bg;
+$dropdownBackground: #0f1828;
 $dropdownBorder: #041e3b;
 $dropdownDividerTop: transparent;
 $dropdownDividerBottom: #2c3235;
@@ -231,7 +231,7 @@ $dropdownDividerBottom: #2c3235;
 $dropdownLinkColor: $link-color;
 $dropdownLinkColorHover: $white;
 $dropdownLinkColorActive: $white;
-$dropdownLinkBackgroundHover: $dark-9;
+$dropdownLinkBackgroundHover: #141d2d;
 
 // Horizontal forms & lists
 // -------------------------
@@ -258,7 +258,7 @@ $side-menu-header-color: #c7d0d9;
 // Menu dropdowns
 // -------------------------
 $menu-dropdown-bg: #0f1828;
-$menu-dropdown-hover-bg: #2c3235;
+$menu-dropdown-hover-bg: #141d2d;
 $menu-dropdown-shadow: 5px 5px 20px -5px $black;
 
 // Tabs

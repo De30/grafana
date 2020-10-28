@@ -221,7 +221,7 @@ $typeahead-selected-color: $yellow;
 
 // Dropdowns
 // -------------------------
-$dropdownBackground: $panel-bg;
+$dropdownBackground: ${theme.colors.bg2};
 $dropdownBorder: ${theme.colors.panelBorder};
 $dropdownDividerTop: transparent;
 $dropdownDividerBottom: ${theme.palette.gray25};
@@ -229,7 +229,7 @@ $dropdownDividerBottom: ${theme.palette.gray25};
 $dropdownLinkColor: $link-color;
 $dropdownLinkColorHover: $white;
 $dropdownLinkColorActive: $white;
-$dropdownLinkBackgroundHover: $dark-9;
+$dropdownLinkBackgroundHover: ${styleMixins.hoverColor(theme.colors.bg2, theme)};
 
 // Horizontal forms & lists
 // -------------------------
@@ -256,7 +256,7 @@ $side-menu-header-color: ${theme.colors.text};
 // Menu dropdowns
 // -------------------------
 $menu-dropdown-bg: ${theme.colors.bg2};
-$menu-dropdown-hover-bg: ${theme.colors.bg3};
+$menu-dropdown-hover-bg: ${styleMixins.hoverColor(theme.colors.bg2, theme)};
 $menu-dropdown-shadow: 5px 5px 20px -5px $black;
 
 // Tabs
