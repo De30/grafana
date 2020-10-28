@@ -16,14 +16,14 @@ const getStyles = stylesFactory((theme: GrafanaTheme, isReversed) => {
 
   return {
     container: css`
-      background: ${theme.colors.bodyBg};
+      background: #020722;
       box-shadow: 0px 0px 20px ${theme.colors.dropdownShadow};
       position: absolute;
       z-index: ${theme.zIndex.modal};
       width: 546px;
       top: 116%;
       border-radius: 2px;
-      border: 1px solid ${containerBorder};
+      border: 1px solid ${theme.colors.panelBorder};
       right: ${isReversed ? 'unset' : 0};
 
       @media only screen and (max-width: ${theme.breakpoints.lg}) {
