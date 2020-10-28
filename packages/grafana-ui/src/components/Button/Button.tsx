@@ -56,11 +56,14 @@ const getPropertiesForVariant = (theme: GrafanaTheme, variant: ButtonVariant) =>
         `,
       };
     case 'primary':
-    default:
+    default: {
+      const from = '#2f6bdf';
+      const to = '#0042a7';
       return {
-        borderColor: theme.colors.bgBlue1,
-        background: buttonVariantStyles(theme.colors.bgBlue1, theme.colors.bgBlue2, theme.palette.white),
+        borderColor: '#024ab9',
+        background: buttonVariantStyles(from, to, theme.isLight ? theme.palette.gray25 : theme.palette.gray4),
       };
+    }
   }
 };
 

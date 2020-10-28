@@ -78,7 +78,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       &:hover,
       &:focus {
         color: ${colors.linkHover};
-        background: linear-gradient(180deg, #ff790040, #020418);
+        background: linear-gradient(180deg, #ff790029, #020418);
       }
     `,
     padding: css`
@@ -88,7 +88,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       label: activeTabStyle;
       border: 1px solid ${theme.colors.panelBorder};
       border-bottom: 1px solid #020418;
-      background: linear-gradient(180deg, #ff790040, #020418);
+      background: linear-gradient(180deg, #ff790029, #020418);
       color: ${colors.link};
       overflow: hidden;
 

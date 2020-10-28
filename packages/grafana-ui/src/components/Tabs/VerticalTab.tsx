@@ -77,7 +77,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       &:hover,
       &:focus {
         color: ${colors.linkHover};
-        background: linear-gradient(90deg, #ff790040, #8eff0000);
+        background: linear-gradient(90deg, ff790029, #8eff0000);
       }
     `,
     padding: css`
