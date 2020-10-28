@@ -98,6 +98,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
         bottom: 0;
         top: 0;
         background-image: linear-gradient(0deg, #f05a28 30%, #fbca0a 99%);
+        box-shadow: 0 0 5px orange;
       }
     `,
   };
