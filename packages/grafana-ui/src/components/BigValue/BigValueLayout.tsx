@@ -200,15 +200,19 @@ export abstract class BigValueLayout {
       lineWidth: 2,
     };
 
-    let fillColor: string;
+    let fillColor: any;
     let lineColor: string;
 
     switch (colorMode) {
       case BigValueColorMode.Value:
-        lineColor = this.valueColor;
-        fillColor = tinycolor(this.valueColor)
-          .setAlpha(0.2)
+        const gradientColor = tinycolor(this.valueColor)
+          .setAlpha(0.4)
           .toRgbString();
+        const gradientColor2 = tinycolor(this.valueColor)
+          .setAlpha(0.05)
+          .toRgbString();
+        lineColor = this.valueColor;
+        fillColor = `l(90) 0:${gradientColor} 1:${gradientColor2}`;
         break;
       case BigValueColorMode.Background:
         fillColor = 'rgba(255,255,255,0.4)';
@@ -349,7 +353,7 @@ export class StackedWithChartLayout extends BigValueLayout {
 
     const { width, height } = props;
     const titleHeightPercent = 0.15;
-    const chartHeightPercent = 0.25;
+    const chartHeightPercent = 0.35;
     let titleHeight = 0;
 
     this.chartHeight = height * chartHeightPercent;

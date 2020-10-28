@@ -62,9 +62,8 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       margin-right: ${theme.spacing.md};
       position: relative;
       display: block;
-      border: solid transparent;
-      border-width: 0 1px 1px;
-      border-radius: ${theme.border.radius.md} ${theme.border.radius.md} 0 0;
+      border: 1px solid transparent;
+      border-width: 0 1px 0 1px;
       color: ${colors.text};
       cursor: pointer;
 
@@ -79,6 +78,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       &:hover,
       &:focus {
         color: ${colors.linkHover};
+        background: linear-gradient(180deg, #ff790040, #020418);
       }
     `,
     padding: css`
@@ -86,8 +86,9 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
     `,
     activeStyle: css`
       label: activeTabStyle;
-      border-color: ${theme.palette.orange} ${colors.pageHeaderBorder} transparent;
-      background: ${colors.panelBg};
+      border: 1px solid ${theme.colors.panelBorder};
+      border-bottom: 1px solid #020418;
+      background: linear-gradient(180deg, #ff790040, #020418);
       color: ${colors.link};
       overflow: hidden;
 
