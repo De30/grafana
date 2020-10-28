@@ -476,7 +476,6 @@ export const getStyles = stylesFactory((theme: GrafanaTheme, props: Props) => {
       padding: ${theme.spacing.sm};
       background: ${theme.colors.panelBg};
       justify-content: space-between;
-      border-bottom: 1px solid ${theme.colors.panelBorder};
     `,
     panelToolbar: css`
       display: flex;
