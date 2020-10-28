@@ -139,6 +139,7 @@ export const getStyles = stylesFactory(() => {
       display: flex;
       flex-direction: column;
       flex-grow: 1;
+      margin-top: 44px;
     `,
     navHeading: css`
       margin-bottom: 16px;
