@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { StoreState } from 'app/types';
 import { getDemoScene } from './scenes/demo';
 import { SceneView } from './components/SceneView';
-import { useObservable } from '@grafana/data';
+import { useObservable } from 'react-use';
 
 export interface Props {
   name: string;

@@ -1,10 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { SceneGrid } from './SceneGrid';
 import { Scene, SceneItem, SceneItemList } from '../models';
-import { combineAll, map, mergeAll, mergeMap } from 'rxjs/operators';
-import { combineLatest, concat, merge, Observable, Subscription, Unsubscribable, zip } from 'rxjs';
-import { useObservable } from '@grafana/data';
-import { ZipSubscriber } from 'rxjs/internal/observable/zip';
+import { Observable, Unsubscribable } from 'rxjs';
+import { useObservable } from 'react-use';
 
 export interface Props {
   model: Scene;
