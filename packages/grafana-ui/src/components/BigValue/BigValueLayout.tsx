@@ -206,10 +206,10 @@ export abstract class BigValueLayout {
     switch (colorMode) {
       case BigValueColorMode.Value:
         const gradientColor = tinycolor(this.valueColor)
-          .setAlpha(0.4)
+          .setAlpha(0.35)
           .toRgbString();
         const gradientColor2 = tinycolor(this.valueColor)
-          .setAlpha(0.05)
+          .setAlpha(0.02)
           .toRgbString();
         lineColor = this.valueColor;
         fillColor = `l(90) 0:${gradientColor} 1:${gradientColor2}`;
