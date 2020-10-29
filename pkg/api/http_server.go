@@ -75,21 +75,12 @@ type HTTPServer struct {
 	SearchService        *search.SearchService            `inject:""`
 	AlertNG              *eval.AlertNG                    `inject:""`
 	ShortURLService      *shorturls.ShortURLService       `inject:""`
-	Live                 *live.GrafanaLive
+	Live                 *live.GrafanaLive                `inject:""`
 	Listener             net.Listener
 }
 
 func (hs *HTTPServer) Init() error {
 	hs.log = log.New("http.server")
-
-	// Set up a websocket broker
-	if hs.Cfg.IsLiveEnabled() { // feature flag
-		node, err := live.InitializeBroker()
-		if err != nil {
-			return err
-		}
-		hs.Live = node
-	}
 
 	hs.macaron = hs.newMacaron()
 	hs.registerRoutes()
@@ -107,7 +98,7 @@ func (hs *HTTPServer) Run(ctx context.Context) error {
 	hs.applyRoutes()
 
 	hs.httpSrv = &http.Server{
-		Addr:    fmt.Sprintf("%s:%s", setting.HttpAddr, setting.HttpPort),
+		Addr:    net.JoinHostPort(setting.HttpAddr, setting.HttpPort),
 		Handler: hs.macaron,
 	}
 	switch setting.Protocol {
