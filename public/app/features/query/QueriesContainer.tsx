@@ -1,23 +1,33 @@
 import React, { PureComponent } from 'react';
-import { connect, MapStateToProps } from 'react-redux';
 import { css } from 'emotion';
-import { DataSourceApi, DataSourceSelectItem, DefaultTimeRange, LoadingState, PanelData } from '@grafana/data';
+import {
+  DataQuery,
+  DataSourceApi,
+  DataSourceSelectItem,
+  DefaultTimeRange,
+  LoadingState,
+  PanelData,
+} from '@grafana/data';
 import { getDataSourceSrv, getLocationSrv } from '@grafana/runtime';
-import { Modal, stylesFactory } from '@grafana/ui';
+import { Button, HorizontalGroup, Modal, stylesFactory } from '@grafana/ui';
 import { TopSection } from './TopSection';
-import { config } from 'app/core/config';
-import { ExpressionDatasourceID } from '../expressions/ExpressionDatasource';
-import { PanelModel } from '../dashboard/state';
-import { getDatasourceSrv } from '../plugins/datasource_srv';
-import { StoreState } from 'app/types';
-import { PluginHelp } from '../../core/components/PluginHelp/PluginHelp';
 import { Queries } from './Queries';
+import { config } from 'app/core/config';
+import { PluginHelp } from 'app/core/components/PluginHelp/PluginHelp';
+import { expressionDatasource, ExpressionDatasourceID } from '../expressions/ExpressionDatasource';
+import { getDatasourceSrv } from '../plugins/datasource_srv';
+import { DashboardModel, PanelModel } from '../dashboard/state';
+import { isSharedDashboardQuery } from '../../plugins/datasource/dashboard';
+import { selectors } from '@grafana/e2e-selectors';
+import { addQuery } from '../../core/utils/query';
+import { DataSourcePicker } from '../../core/components/Select/DataSourcePicker';
 
-interface ConnectedProps {
+interface OwnProps {
+  dashboard: DashboardModel;
   panel: PanelModel;
 }
 
-type Props = ConnectedProps;
+type Props = OwnProps;
 
 interface State {
   dataSource?: DataSourceApi;
@@ -25,6 +35,8 @@ interface State {
   dataSourceError?: string;
   data: PanelData;
   isHelpOpen: boolean;
+  scrollTop: number;
+  isAddingMixed: boolean;
 }
 
 export class QueriesContainer extends PureComponent<Props> {
@@ -38,6 +50,8 @@ export class QueriesContainer extends PureComponent<Props> {
       timeRange: DefaultTimeRange,
     },
     isHelpOpen: false,
+    scrollTop: 0,
+    isAddingMixed: false,
   };
 
   async componentDidMount() {
@@ -102,8 +116,32 @@ export class QueriesContainer extends PureComponent<Props> {
     );
   };
 
+  onUpdateQueries = (queries: DataQuery[]) => {
+    this.props.panel.updateQueries(queries);
+
+    // Need to force update to rerender query rows.
+    this.forceUpdate();
+  };
+
   toggleHelp = () => {
     this.setState((prevState: State) => ({ isHelpOpen: !prevState.isHelpOpen }));
+  };
+
+  renderMixedPicker = () => {
+    // We cannot filter on mixed flag as some mixed data sources like external plugin
+    // meta queries data source is mixed but also supports it's own queries
+    const filteredDsList = this.dataSources.filter(dataSource => dataSource.meta.id !== 'mixed');
+
+    return (
+      <DataSourcePicker
+        datasources={filteredDsList}
+        onChange={this.onAddMixedQuery}
+        current={null}
+        autoFocus={true}
+        onBlur={this.onMixedPickerBlur}
+        openMenuOnFocus={true}
+      />
+    );
   };
 
   openQueryInspector = () => {
@@ -115,8 +153,63 @@ export class QueriesContainer extends PureComponent<Props> {
     });
   };
 
+  onScrollBottom = () => {
+    this.setState({ scrollTop: 1000 });
+  };
+
+  onAddMixedQuery = (datasource: any) => {
+    this.props.panel.targets = addQuery(this.props.panel.targets, { datasource: datasource.name });
+    this.setState({ isAddingMixed: false, scrollTop: this.state.scrollTop + 10000 });
+    this.forceUpdate();
+  };
+
+  onMixedPickerBlur = () => {
+    this.setState({ isAddingMixed: false });
+  };
+
+  onAddQueryClick = () => {
+    if (this.state.dataSourceItem.meta.mixed) {
+      this.setState({ isAddingMixed: true });
+      return;
+    }
+
+    this.onUpdateQueries(addQuery(this.props.panel.targets));
+    this.onScrollBottom();
+  };
+
+  onAddExpressionClick = () => {
+    this.onUpdateQueries(addQuery(this.props.panel.targets, expressionDatasource.newQuery()));
+    this.onScrollBottom();
+  };
+
+  renderAddQueryRow() {
+    const { dataSourceItem, isAddingMixed } = this.state;
+    const showAddButton = !(isAddingMixed || isSharedDashboardQuery(dataSourceItem.name));
+
+    return (
+      <HorizontalGroup spacing="md" align="flex-start">
+        {showAddButton && (
+          <Button
+            icon="plus"
+            onClick={this.onAddQueryClick}
+            variant="secondary"
+            aria-label={selectors.components.QueryTab.addQuery}
+          >
+            Query
+          </Button>
+        )}
+        {isAddingMixed && this.renderMixedPicker()}
+        {config.featureToggles.expressions && (
+          <Button icon="plus" onClick={this.onAddExpressionClick} variant="secondary">
+            Expression
+          </Button>
+        )}
+      </HorizontalGroup>
+    );
+  }
+
   render() {
-    const { panel } = this.props;
+    const { dashboard, panel } = this.props;
     const { dataSourceItem, data, dataSource, dataSourceError, isHelpOpen } = this.state;
     const styles = getStyles();
 
@@ -134,13 +227,20 @@ export class QueriesContainer extends PureComponent<Props> {
           openQueryInspector={this.openQueryInspector}
         />
         <div className={styles.queriesWrapper}>
-          <Queries />
-          {isHelpOpen && (
-            <Modal title="Data source help" isOpen={true} onDismiss={this.toggleHelp}>
-              <PluginHelp plugin={this.state.dataSourceItem.meta} type="query_help" />
-            </Modal>
-          )}
+          <Queries
+            panel={panel}
+            dataSourceItem={dataSourceItem}
+            data={data}
+            dashboard={dashboard}
+            onScrollBottom={this.onScrollBottom}
+          />
         </div>
+        {this.renderAddQueryRow()}
+        {isHelpOpen && (
+          <Modal title="Data source help" isOpen={true} onDismiss={this.toggleHelp}>
+            <PluginHelp plugin={this.state.dataSourceItem.meta} type="query_help" />
+          </Modal>
+        )}
       </div>
     );
   }
@@ -161,10 +261,4 @@ const getStyles = stylesFactory(() => {
   };
 });
 
-const mapStateToProps: MapStateToProps<ConnectedProps, Props, StoreState> = state => {
-  return {
-    panel: state.panelEditor.getPanel(),
-  };
-};
-
-export default connect(mapStateToProps)(QueriesContainer);
+export default QueriesContainer;

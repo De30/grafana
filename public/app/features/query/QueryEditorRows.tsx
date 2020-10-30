@@ -2,10 +2,10 @@
 import React, { PureComponent } from 'react';
 
 // Types
-import { PanelModel } from '../state/PanelModel';
+import { PanelModel } from '../dashboard/state/PanelModel';
 import { DataQuery, PanelData, DataSourceSelectItem } from '@grafana/data';
-import { DashboardModel } from '../state/DashboardModel';
-import { QueryEditorRow } from './QueryEditorRow';
+import { DashboardModel } from '../dashboard/state/DashboardModel';
+import { QueryEditorRow } from '../dashboard/panel_editor/QueryEditorRow';
 import { addQuery } from 'app/core/utils/query';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { selectors } from '@grafana/e2e-selectors';
 import { DashboardQueryEditor, isSharedDashboardQuery } from 'app/plugins/datasource/dashboard';
-import { QueryEditorRows } from '../dashboard/panel_editor/QueryEditorRows';
+import { QueryEditorRows } from './QueryEditorRows';
 import { DashboardModel, PanelModel } from '../dashboard/state';
 import { DataQuery, DataSourceSelectItem, PanelData } from '@grafana/data';
 
@@ -10,6 +10,8 @@ interface Props {
   dashboard: DashboardModel;
   data: PanelData;
   dataSourceItem: DataSourceSelectItem;
+
+  onScrollBottom: () => void;
 }
 
 export class Queries extends PureComponent<Props> {
@@ -23,7 +25,7 @@ export class Queries extends PureComponent<Props> {
     this.forceUpdate();
   };
   render() {
-    const { dashboard, data, dataSourceItem, panel } = this.props;
+    const { dashboard, data, dataSourceItem, onScrollBottom, panel } = this.props;
 
     if (isSharedDashboardQuery(dataSourceItem.name)) {
       return <DashboardQueryEditor panel={panel} panelData={data} onChange={query => this.onUpdateQueries([query])} />;
@@ -35,7 +37,7 @@ export class Queries extends PureComponent<Props> {
           queries={panel.targets}
           datasource={dataSourceItem}
           onChangeQueries={this.onUpdateQueries}
-          onScrollBottom={this.onScrollBottom}
+          onScrollBottom={onScrollBottom}
           panel={panel}
           dashboard={dashboard}
           data={data}
