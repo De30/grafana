@@ -19,8 +19,8 @@ type templateData struct {
 	SecureJsonData map[string]string
 }
 
-// NewApiPluginProxy create a plugin proxy
-func NewApiPluginProxy(ctx *models.ReqContext, proxyPath string, route *plugins.AppPluginRoute, appID string, cfg *setting.Cfg) *httputil.ReverseProxy {
+// NewAPIPluginProxy creates a plugin proxy
+func NewAPIPluginProxy(ctx *models.ReqContext, proxyPath string, route *plugins.AppPluginRoute, appID string, cfg *setting.Cfg) *httputil.ReverseProxy {
 	director := func(req *http.Request) {
 		query := models.GetPluginSettingByIdQuery{OrgId: ctx.OrgId, PluginId: appID}
 		if err := bus.Dispatch(&query); err != nil {
@@ -35,12 +35,12 @@ func NewApiPluginProxy(ctx *models.ReqContext, proxyPath string, route *plugins.
 
 		interpolatedURL, err := interpolateString(route.URL, data)
 		if err != nil {
-			ctx.JsonApiErr(500, "Could not interpolate plugin route url", err)
+			ctx.JsonApiErr(500, "Could not interpolate plugin route URL", err)
 			return
 		}
 		targetURL, err := url.Parse(interpolatedURL)
 		if err != nil {
-			ctx.JsonApiErr(500, "Could not parse url", err)
+			ctx.JsonApiErr(500, "Could not parse URL", err)
 			return
 		}
 		req.URL.Scheme = targetURL.Scheme
