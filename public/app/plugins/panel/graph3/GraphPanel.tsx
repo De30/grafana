@@ -1,21 +1,20 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
-  ContextMenuPlugin,
-  TooltipPlugin,
-  UPlotChart,
-  ZoomPlugin,
-  LegendPlugin,
   Canvas,
+  ContextMenuPlugin,
   LegendDisplayMode,
+  LegendPlugin,
+  TooltipPlugin,
+  ZoomPlugin,
+  GraphNG,
 } from '@grafana/ui';
 import { PanelProps } from '@grafana/data';
 import { Options } from './types';
-import { alignAndSortDataFramesByFieldName } from './utils';
 import { VizLayout } from './VizLayout';
+import { AnnotationsPlugin } from './plugins/AnnotationsPlugin';
+import { ExemplarsPlugin } from './plugins/ExemplarsPlugin';
 
 interface GraphPanelProps extends PanelProps<Options> {}
-
-const TIME_FIELD_NAME = 'Time';
 
 export const GraphPanel: React.FC<GraphPanelProps> = ({
   data,
@@ -26,21 +25,6 @@ export const GraphPanel: React.FC<GraphPanelProps> = ({
   options,
   onChangeTimeRange,
 }) => {
-  const alignedData = useMemo(() => {
-    if (!data || !data.series?.length) {
-      return null;
-    }
-    return alignAndSortDataFramesByFieldName(data.series, TIME_FIELD_NAME);
-  }, [data]);
-
-  if (!alignedData) {
-    return (
-      <div className="panel-empty">
-        <p>No data found in response</p>
-      </div>
-    );
-  }
-
   return (
     <VizLayout width={width} height={height}>
       {({ builder, getLayout }) => {
@@ -66,15 +50,17 @@ export const GraphPanel: React.FC<GraphPanelProps> = ({
         }
 
         return (
-          <UPlotChart data={alignedData} timeRange={timeRange} timeZone={timeZone} {...canvasSize}>
+          <GraphNG data={data.series} timeRange={timeRange} timeZone={timeZone} {...canvasSize}>
             {builder.addSlot('canvas', <Canvas />).render()}
             <TooltipPlugin mode={options.tooltipOptions.mode as any} timeZone={timeZone} />
             <ZoomPlugin onZoom={onChangeTimeRange} />
             <ContextMenuPlugin />
 
+            {data.annotations && <ExemplarsPlugin exemplars={data.annotations} timeZone={timeZone} />}
+            {data.annotations && <AnnotationsPlugin annotations={data.annotations} timeZone={timeZone} />}
             {/* TODO: */}
             {/*<AnnotationsEditorPlugin />*/}
-          </UPlotChart>
+          </GraphNG>
         );
       }}
     </VizLayout>
