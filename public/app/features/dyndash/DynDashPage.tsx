@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 // Types
 import { StoreState } from 'app/types';
-import { getDemoScene } from './scenes/demo';
+import { getDemoScene } from './scenes/nestingScene';
 import { SceneView } from './components/SceneView';
 import { useObservable } from 'react-use';
 

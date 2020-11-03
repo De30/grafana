@@ -1,11 +1,8 @@
 import React from 'react';
-import { CoreApp, DataQueryRequest, dateMath, LoadingState, PanelData, TimeRange } from '@grafana/data';
+import { LoadingState, PanelData, TimeRange } from '@grafana/data';
 import { Button } from '@grafana/ui';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Scene, SceneItem, SceneItemList, VizPanel } from '../models';
-import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
-import { runRequest } from 'app/features/dashboard/state/runRequest';
-import { map } from 'rxjs/operators';
 import { v4 as newUuid } from 'uuid';
 
 export function getDemoScene(name: string): Observable<Scene> {
