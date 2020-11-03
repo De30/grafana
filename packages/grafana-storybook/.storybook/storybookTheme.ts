@@ -34,7 +34,7 @@ const createTheme = (theme: GrafanaTheme) => {
     inputTextColor: theme.colors.formInputText,
     inputBorderRadius: 4,
 
-    brandTitle: 'Grafana UI',
+    brandTitle: 'Grafana design system',
     brandUrl: './',
     brandImage: './grafana_icon.svg',
   });

@@ -4,5 +4,5 @@
   },
   "exclude": ["../node_modules"],
   "extends": "../tsconfig.json",
-  "include": ["../stories/**/*.(ts|tsx)", "../utils/**/*.(ts|tsx)"]
+  "include": ["../**/*.(ts|tsx)"]
 }

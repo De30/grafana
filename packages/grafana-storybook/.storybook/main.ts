@@ -9,6 +9,12 @@ module.exports = {
     'storybook-dark-mode/register',
     '@storybook/addon-storysource',
   ],
+  typescript: {
+    check: true,
+    checkOptions: {
+      configFile: 'tsconfig.json',
+    },
+  },
   webpackFinal: async (config: any) => {
     config.module.rules.push({
       test: /\.scss$/,
@@ -39,9 +45,9 @@ module.exports = {
       ],
     });
 
-    // Resolve grafana packages
-    config.resolve.modules.push(path.resolve(__dirname, '../../grafana-ui'));
-    config.resolve.modules.push(path.resolve(__dirname, '../../grafana-data'));
+    config.resolve.alias['@grafana/ui'] = path.resolve(__dirname, '../../grafana-ui');
+    config.resolve.alias['@grafana/data'] = path.resolve(__dirname, '../../grafana-data');
+    config.resolve.alias['@grafana/e2e-selectors'] = path.resolve(__dirname, '../../grafana-e2e-selectors');
 
     return config;
   },
