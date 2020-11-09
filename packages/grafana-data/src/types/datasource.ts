@@ -10,6 +10,7 @@ import { RawTimeRange, TimeRange } from './time';
 import { ScopedVars } from './ScopedVars';
 import { CoreApp } from './app';
 import { LiveChannelSupport } from './live';
+import { ActionSupport } from './action';
 
 export interface DataSourcePluginOptionsEditorProps<JSONData = DataSourceJsonData, SecureJSONData = {}> {
   options: DataSourceSettings<JSONData, SecureJSONData>;
@@ -277,6 +278,13 @@ export abstract class DataSourceApi<
    * It is only necessary to configure an annotation processor if the default behavior is not desirable
    */
   annotations?: AnnotationSupport<TQuery>;
+
+  /**
+   * The datasource can process actions
+   *
+   * @alpha -- experimental
+   */
+  actions?: ActionSupport;
 
   /**
    * Can be optionally implemented to allow datasource to be a source of annotations for dashboard.

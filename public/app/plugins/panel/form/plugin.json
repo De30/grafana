@@ -1,0 +1,18 @@
+{
+  "type": "panel",
+  "name": "Form",
+  "id": "form",
+  "state": "alpha",
+
+  "info": {
+    "description": "Form Panel for Grafana",
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com"
+    },
+    "logos": {
+      "small": "img/form.svg",
+      "large": "img/form.svg"
+    }
+  }
+}

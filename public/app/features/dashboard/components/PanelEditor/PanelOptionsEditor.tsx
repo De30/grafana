@@ -57,10 +57,12 @@ export const PanelOptionsEditor: React.FC<PanelOptionsEditorProps<any>> = ({
               return null;
             }
 
-            const label = (
+            const label = e.name ? (
               <Label description={e.description} category={e.category?.slice(1)}>
                 {e.name}
               </Label>
+            ) : (
+              undefined // hide the label when no name exists
             );
             return (
               <Field label={label} key={`${e.id}/${j}`}>
