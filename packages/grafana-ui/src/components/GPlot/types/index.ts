@@ -1,11 +1,12 @@
 // Attribution: Parts copied & inspired by https://github.com/influxdata/giraffe
 // MIT License Copyright (c) 2019 InfluxData
 
-import { Field } from '@grafana/data';
+import { DataFrame } from '@grafana/data';
 
 export interface PlotConfig {
   width: number;
   height: number;
+  data: DataFrame[];
 }
 
 export interface Margins {
@@ -23,14 +24,13 @@ export interface LineSeriesConfig {
   show?: boolean;
   /** scale key */
   scale?: string;
-  xField: Field;
-  yField: Field;
+
+  frameIdx: number;
+  xFieldIdx: number;
+  yFieldIdx: number;
 
   fill?: string[];
   position?: LinePosition;
-  hoverDimension?: LineHoverDimension | 'auto';
-  maxTooltipRows?: number;
-  interpolation?: LineInterpolation;
   lineWidth?: number;
   colors?: string[];
   shadeBelow?: boolean;
