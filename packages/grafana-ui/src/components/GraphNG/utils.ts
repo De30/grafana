@@ -51,7 +51,7 @@ export function mergeDataFrames(frames: DataFrame[]): AlignedFrameWithGapTest | 
   };
 
   // populate the alignedFrame with original Fields but with aligned values
-  for (let i = 0, ii = 0; i < frames.length; i++) {
+  for (let i = 0, seriesIdx = 0; i < frames.length; i++) {
     const frame = frames[i];
 
     let { timeField } = getTimeField(frame);
@@ -60,7 +60,7 @@ export function mergeDataFrames(frames: DataFrame[]): AlignedFrameWithGapTest | 
     if (timeField !== undefined && frame.fields.length > 1) {
       // push time field
       if (alignedFrame.fields.length === 0) {
-        alignedFrame.fields.push({ ...timeField, values: new ArrayVector(alignedData[ii++] as any) });
+        alignedFrame.fields.push({ ...timeField, values: new ArrayVector(alignedData[seriesIdx++] as any) });
       }
 
       // push numeric fields
@@ -68,7 +68,7 @@ export function mergeDataFrames(frames: DataFrame[]): AlignedFrameWithGapTest | 
         const field = frame.fields[j];
 
         if (field.type === FieldType.number) {
-          alignedFrame.fields.push({ ...field, values: new ArrayVector(alignedData[ii++] as any) });
+          alignedFrame.fields.push({ ...field, values: new ArrayVector(alignedData[seriesIdx++] as any) });
         }
       }
 
