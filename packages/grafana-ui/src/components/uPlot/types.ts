@@ -64,7 +64,27 @@ export interface PlotProps {
   config: PlotSeriesConfig;
   children?: React.ReactElement[];
   /** Callback performed when uPlot data is updated */
-  onDataUpdate?: (data: uPlot.AlignedData) => {};
+  onDataUpdate?: (data: AlignedData) => {};
   /** Callback performed when uPlot is (re)initialized */
   onPlotInit?: () => {};
+}
+
+export type AlignedData = [
+  // x values
+  number[],
+  // y values
+  ...Array<number | null>
+];
+
+// uPlot.Series.isGap ?
+export type isGap = (self: uPlot, seriesIdx: number, dataIdx: number) => boolean;
+
+export interface AlignedDataWithGapTest {
+  data: AlignedData;
+  isGap: isGap;
+}
+
+export interface AlignedFrameWithGapTest {
+  frame: DataFrame;
+  isGap: isGap;
 }

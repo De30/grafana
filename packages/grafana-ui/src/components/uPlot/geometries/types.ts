@@ -1,5 +1,5 @@
 import { GrafanaTheme, TimeZone } from '@grafana/data';
-import { AxisSide } from '../types';
+import { AxisSide, isGap } from '../types';
 
 export interface SeriesProps {
   scaleKey: string;
@@ -12,6 +12,7 @@ export interface SeriesProps {
   fill?: boolean;
   fillOpacity?: number;
   fillColor?: string;
+  isGap?: isGap;
 }
 
 export interface AxisProps {

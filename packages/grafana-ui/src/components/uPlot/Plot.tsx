@@ -4,7 +4,7 @@ import uPlot from 'uplot';
 import { buildPlotContext, PlotContext } from './context';
 import { pluginLog, preparePlotData, shouldInitialisePlot } from './utils';
 import { usePlotConfig } from './hooks';
-import { PlotProps } from './types';
+import { AlignedData, PlotProps } from './types';
 
 // uPlot abstraction responsible for plot initialisation, setup and refresh
 // Receives a data frame that is x-axis aligned, as of https://github.com/leeoniya/uPlot/tree/master/docs#data-format
@@ -12,7 +12,7 @@ import { PlotProps } from './types';
 export const UPlotChart: React.FC<PlotProps> = props => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [plotInstance, setPlotInstance] = useState<uPlot>();
-  const plotData = useRef<uPlot.AlignedData>();
+  const plotData = useRef<AlignedData>();
 
   // uPlot config API
   const { currentConfig, registerPlugin } = usePlotConfig(props.width, props.height, props.timeZone, props.config);
@@ -34,7 +34,7 @@ export const UPlotChart: React.FC<PlotProps> = props => {
     }
     pluginLog('uPlot core', false, 'updating plot data(throttled log!)', plotData.current);
     // If config hasn't changed just update uPlot's data
-    plotInstance.setData(plotData.current);
+    plotInstance.setData(plotData.current as uPlot.AlignedData);
 
     if (props.onDataUpdate) {
       props.onDataUpdate(plotData.current);
@@ -106,7 +106,7 @@ export const UPlotChart: React.FC<PlotProps> = props => {
 };
 
 // Main function initialising uPlot. If final config is not settled it will do nothing
-function initPlot(data: uPlot.AlignedData, config: uPlot.Options, ref: HTMLDivElement) {
+function initPlot(data: AlignedData, config: uPlot.Options, ref: HTMLDivElement) {
   pluginLog('uPlot core', false, 'initialized with', data, config);
-  return new uPlot(config, data, ref);
+  return new uPlot(config, data as uPlot.AlignedData, ref);
 }

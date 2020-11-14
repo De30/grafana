@@ -7,9 +7,8 @@ import {
   getFieldColorModeForField,
   getFieldDisplayName,
   getTimeField,
-  TIME_SERIES_TIME_FIELD_NAME,
 } from '@grafana/data';
-import { alignAndSortDataFramesByFieldName } from './utils';
+import { mergeDataFrames } from './utils';
 import { UPlotChart } from '../uPlot/Plot';
 import { AxisSide, GraphCustomFieldConfig, PlotProps } from '../uPlot/types';
 import { useTheme } from '../../themes';
@@ -36,10 +35,10 @@ export const GraphNG: React.FC<GraphNGProps> = ({
   ...plotProps
 }) => {
   const theme = useTheme();
-  const alignedData = useMemo(() => alignAndSortDataFramesByFieldName(data, TIME_SERIES_TIME_FIELD_NAME), [data]);
+  const alignedFrameWithGapTest = useMemo(() => mergeDataFrames(data), [data]);
   const legendItemsRef = useRef<LegendItem[]>([]);
 
-  if (!alignedData) {
+  if (alignedFrameWithGapTest == null) {
     return (
       <div className="panel-empty">
         <p>No data found in response</p>
@@ -47,10 +46,12 @@ export const GraphNG: React.FC<GraphNGProps> = ({
     );
   }
 
+  const { frame: alignedFrame, isGap } = alignedFrameWithGapTest;
+
   const currentConfig = useMemo(() => {
     const builder = new GraphConfigBuilder();
 
-    let { timeIndex } = getTimeField(alignedData);
+    let { timeIndex } = getTimeField(alignedFrame);
 
     if (timeIndex === undefined) {
       timeIndex = 0; // assuming first field represents x-domain
@@ -75,8 +76,8 @@ export const GraphNG: React.FC<GraphNGProps> = ({
     const legendItems: LegendItem[] = [];
     const uniqueScales: Record<string, boolean> = {};
 
-    for (let i = 0; i < alignedData.fields.length; i++) {
-      const field = alignedData.fields[i];
+    for (let i = 0; i < alignedFrame.fields.length; i++) {
+      const field = alignedFrame.fields[i];
       const config = field.config as FieldConfig<GraphCustomFieldConfig>;
       const customConfig = config.custom;
 
@@ -118,12 +119,13 @@ export const GraphNG: React.FC<GraphNGProps> = ({
         fill: customConfig?.fill?.alpha !== undefined,
         fillOpacity: customConfig?.fill?.alpha,
         fillColor: seriesColor,
+        isGap,
       });
 
       if (legend?.isVisible) {
         legendItems.push({
           color: seriesColor,
-          label: getFieldDisplayName(field, alignedData),
+          label: getFieldDisplayName(field, alignedFrame),
           isVisible: true,
           yAxis: customConfig?.axis?.side === 1 ? 3 : 1,
         });
@@ -134,7 +136,7 @@ export const GraphNG: React.FC<GraphNGProps> = ({
 
     legendItemsRef.current = legendItems;
     return builder.getConfig();
-  }, [alignedData]);
+  }, [alignedFrameWithGapTest]);
 
   let legendElement: React.ReactElement | undefined;
 
@@ -150,7 +152,7 @@ export const GraphNG: React.FC<GraphNGProps> = ({
     <VizLayout width={width} height={height} legend={legendElement}>
       {(vizWidth: number, vizHeight: number) => (
         <UPlotChart
-          data={alignedData}
+          data={alignedFrame}
           config={currentConfig}
           width={vizWidth}
           height={vizHeight}

@@ -1,17 +1,9 @@
 import throttle from 'lodash/throttle';
 import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
-import {
-  DataFrame,
-  dateTimeFormat,
-  FieldType,
-  getTimeField,
-  rangeUtil,
-  RawTimeRange,
-  systemDateFormats,
-} from '@grafana/data';
+import { DataFrame, dateTimeFormat, rangeUtil, RawTimeRange, systemDateFormats } from '@grafana/data';
 import uPlot from 'uplot';
-import { PlotPlugin, PlotProps } from './types';
+import { AlignedData, PlotPlugin, PlotProps } from './types';
 import { measureText } from '../../utils';
 
 const ALLOWED_FORMAT_STRINGS_REGEX = /\b(YYYY|YY|MMMM|MMM|MM|M|DD|D|WWWW|WWW|HH|H|h|AA|aa|a|mm|m|ss|s|fff)\b/g;
@@ -47,37 +39,8 @@ export const buildPlotConfig = (props: PlotProps, plugins: Record<string, PlotPl
   } as any;
 };
 
-export const preparePlotData = (data: DataFrame): uPlot.AlignedData => {
-  const plotData: any[] = [];
-
-  // Prepare x axis
-  let { timeIndex } = getTimeField(data);
-  let xvals = data.fields[timeIndex!].values.toArray();
-
-  if (!isNaN(timeIndex!)) {
-    xvals = xvals.map(v => v / 1000);
-  }
-
-  plotData.push(xvals);
-
-  for (let i = 0; i < data.fields.length; i++) {
-    const field = data.fields[i];
-
-    // already handled time and we ignore non-numeric fields
-    if (i === timeIndex || field.type !== FieldType.number) {
-      continue;
-    }
-
-    let values = field.values.toArray();
-
-    if (field.config.custom?.nullValues === 'asZero') {
-      values = values.map(v => (v === null ? 0 : v));
-    }
-
-    plotData.push(values);
-  }
-
-  return plotData;
+export const preparePlotData = (alignedFrame: DataFrame): AlignedData => {
+  return alignedFrame.fields.map(f => f.values.toArray()) as AlignedData;
 };
 
 const isPlottingTime = (config: uPlot.Options) => {
