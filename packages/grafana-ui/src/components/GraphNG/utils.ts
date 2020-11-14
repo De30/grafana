@@ -13,8 +13,6 @@ export function mergeDataFrames(frames: DataFrame[]): AlignedFrameWithGapTest | 
 
     // walk all temporal frames
     if (timeField !== undefined && frame.fields.length > 1) {
-      // console.log([timeField.values.toArray()]);
-
       // push time values
       let alignedData: AlignedData = [timeField.values.toArray()];
 
