@@ -37,7 +37,7 @@ export function mergeDataFrames(frames: DataFrame[]): AlignedFrameWithGapTest | 
     }
   }
 
-  if (valuesFromFrames.length < 2) {
+  if (valuesFromFrames.length === 0) {
     return null;
   }
 
