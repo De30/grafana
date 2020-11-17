@@ -1,87 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   DataFrame,
   FieldConfig,
   FieldType,
   formattedValueToString,
   getFieldColorModeForField,
+  getFieldDisplayName,
   getTimeField,
-  systemDateFormats,
+  TIME_SERIES_TIME_FIELD_NAME,
 } from '@grafana/data';
-import { timeFormatToTemplate } from '../uPlot/utils';
 import { alignAndSortDataFramesByFieldName } from './utils';
 import { Area, Axis, Line, Point, Scale, SeriesGeometry } from '../uPlot/geometries';
 import { UPlotChart } from '../uPlot/Plot';
 import { AxisSide, GraphCustomFieldConfig, PlotProps } from '../uPlot/types';
 import { useTheme } from '../../themes';
-
-const timeStampsConfig = [
-  [3600 * 24 * 365, '{YYYY}', 7, '{YYYY}'],
-  [3600 * 24 * 28, `{${timeFormatToTemplate(systemDateFormats.interval.month)}`, 7, '{MMM}\n{YYYY}'],
-  [
-    3600 * 24,
-    `{${timeFormatToTemplate(systemDateFormats.interval.day)}`,
-    7,
-    `${timeFormatToTemplate(systemDateFormats.interval.day)}\n${timeFormatToTemplate(systemDateFormats.interval.year)}`,
-  ],
-  [
-    3600,
-    `{${timeFormatToTemplate(systemDateFormats.interval.minute)}`,
-    4,
-    `${timeFormatToTemplate(systemDateFormats.interval.minute)}\n${timeFormatToTemplate(
-      systemDateFormats.interval.day
-    )}`,
-  ],
-  [
-    60,
-    `{${timeFormatToTemplate(systemDateFormats.interval.second)}`,
-    4,
-    `${timeFormatToTemplate(systemDateFormats.interval.second)}\n${timeFormatToTemplate(
-      systemDateFormats.interval.day
-    )}`,
-  ],
-  [
-    1,
-    `:{ss}`,
-    2,
-    `:{ss}\n${timeFormatToTemplate(systemDateFormats.interval.day)} ${timeFormatToTemplate(
-      systemDateFormats.interval.minute
-    )}`,
-  ],
-  [
-    1e-3,
-    ':{ss}.{fff}',
-    2,
-    `:{ss}.{fff}\n${timeFormatToTemplate(systemDateFormats.interval.day)} ${timeFormatToTemplate(
-      systemDateFormats.interval.minute
-    )}`,
-  ],
-];
+import { VizLayout } from '../VizLayout/VizLayout';
+import { LegendDisplayMode, LegendItem, LegendOptions } from '../Legend/Legend';
+import { GraphLegend } from '../Graph/GraphLegend';
 
 const defaultFormatter = (v: any) => (v == null ? '-' : v.toFixed(1));
 
-const TIME_FIELD_NAME = 'Time';
-
 interface GraphNGProps extends Omit<PlotProps, 'data'> {
   data: DataFrame[];
+  legend?: LegendOptions;
 }
 
-export const GraphNG: React.FC<GraphNGProps> = ({ data, children, ...plotProps }) => {
+export const GraphNG: React.FC<GraphNGProps> = ({
+  data,
+  children,
+  width,
+  height,
+  legend,
+  timeRange,
+  timeZone,
+  ...plotProps
+}) => {
   const theme = useTheme();
-  const [alignedData, setAlignedData] = useState<DataFrame | null>(null);
-
-  useEffect(() => {
-    if (data.length === 0) {
-      setAlignedData(null);
-      return;
-    }
-
-    const subscription = alignAndSortDataFramesByFieldName(data, TIME_FIELD_NAME).subscribe(setAlignedData);
-
-    return function unsubscribe() {
-      subscription.unsubscribe();
-    };
-  }, [data]);
+  const alignedData = useMemo(() => alignAndSortDataFramesByFieldName(data, TIME_SERIES_TIME_FIELD_NAME), [data]);
 
   if (!alignedData) {
     return (
@@ -100,13 +55,15 @@ export const GraphNG: React.FC<GraphNGProps> = ({ data, children, ...plotProps }
     timeIndex = 0; // assuming first field represents x-domain
     scales.push(<Scale key="scale-x" scaleKey="x" />);
   } else {
-    scales.push(<Scale key="scale-x" scaleKey="x" time />);
+    scales.push(<Scale key="scale-x" scaleKey="x" isTime />);
   }
 
-  axes.push(<Axis key="axis-scale--x" scaleKey="x" values={timeStampsConfig} side={AxisSide.Bottom} />);
+  axes.push(<Axis key="axis-scale-x" scaleKey="x" isTime side={AxisSide.Bottom} timeZone={timeZone} />);
 
   let seriesIdx = 0;
+  const legendItems: LegendItem[] = [];
   const uniqueScales: Record<string, boolean> = {};
+  const hasLegend = legend && legend.displayMode !== LegendDisplayMode.Hidden;
 
   for (let i = 0; i < alignedData.fields.length; i++) {
     const seriesGeometry = [];
@@ -165,6 +122,7 @@ export const GraphNG: React.FC<GraphNGProps> = ({ data, children, ...plotProps }
         <Area key={`area-${scale}-${i}`} scaleKey={scale} fill={customConfig?.fill.alpha} color={seriesColor} />
       );
     }
+
     if (seriesGeometry.length > 1) {
       geometries.push(
         <SeriesGeometry key={`seriesGeometry-${scale}-${i}`} scaleKey={scale}>
@@ -175,15 +133,44 @@ export const GraphNG: React.FC<GraphNGProps> = ({ data, children, ...plotProps }
       geometries.push(seriesGeometry);
     }
 
+    if (hasLegend) {
+      legendItems.push({
+        color: seriesColor,
+        label: getFieldDisplayName(field, alignedData),
+        yAxis: customConfig?.axis?.side === 1 ? 3 : 1,
+      });
+    }
+
     seriesIdx++;
   }
 
+  let legendElement: React.ReactElement | undefined;
+
+  if (hasLegend && legendItems.length > 0) {
+    legendElement = (
+      <VizLayout.Legend position={legend!.placement} maxHeight="35%" maxWidth="60%">
+        <GraphLegend placement={legend!.placement} items={legendItems} displayMode={legend!.displayMode} />
+      </VizLayout.Legend>
+    );
+  }
+
   return (
-    <UPlotChart data={alignedData} {...plotProps}>
-      {scales}
-      {axes}
-      {geometries}
-      {children}
-    </UPlotChart>
+    <VizLayout width={width} height={height} legend={legendElement}>
+      {(vizWidth: number, vizHeight: number) => (
+        <UPlotChart
+          data={alignedData}
+          width={vizWidth}
+          height={vizHeight}
+          timeRange={timeRange}
+          timeZone={timeZone}
+          {...plotProps}
+        >
+          {scales}
+          {axes}
+          {geometries}
+          {children}
+        </UPlotChart>
+      )}
+    </VizLayout>
   );
 };

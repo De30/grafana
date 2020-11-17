@@ -314,20 +314,21 @@ class PluginPage extends PureComponent<Props, State> {
         aria-label={selectors.pages.PluginPage.signatureInfo}
         severity={plugin.meta.signature !== PluginSignatureStatus.valid ? 'warning' : 'info'}
         urlTitle="Read more about plugins signing"
-        url="https://grafana.com/docs/grafana/latest/plugins/plugin-signature-verification/"
+        url="https://grafana.com/docs/grafana/latest/plugins/plugin-signatures/"
       >
-        <p>
-          <PluginSignatureBadge
-            status={plugin.meta.signature}
-            className={css`
-              margin-top: 0;
-            `}
-          />
-        </p>
+        <PluginSignatureBadge
+          status={plugin.meta.signature}
+          className={css`
+            margin-top: 0;
+          `}
+        />
+        <br />
+        <br />
         <p>
           Grafana Labs checks each plugin to verify that it has a valid digital signature. Plugin signature verification
-          is part of our security measure to ensure plugins are safe and trustworthy. Grafana Labs can’t guarantee the
-          integrity of this unsigned plugin. Ask the plugin author to request it to be signed.
+          is part of our security measures to ensure plugins are safe and trustworthy.
+          {plugin.meta.signature !== PluginSignatureStatus.valid &&
+            'Grafana Labs can’t guarantee the integrity of this unsigned plugin. Ask the plugin author to request it to be signed.'}
         </p>
       </InfoBox>
     );
