@@ -10,6 +10,7 @@ import { RawTimeRange, TimeRange } from './time';
 import { ScopedVars } from './ScopedVars';
 import { CoreApp } from './app';
 import { LiveChannelSupport } from './live';
+import { BrowseRequest } from './browse';
 
 export interface DataSourcePluginOptionsEditorProps<JSONData = DataSourceJsonData, SecureJSONData = {}> {
   options: DataSourceSettings<JSONData, SecureJSONData>;
@@ -117,6 +118,19 @@ export interface DataSourcePluginMeta<T extends KeyValue = {}> extends PluginMet
   unlicensed?: boolean;
 }
 
+export enum DataSourceCapabilityStatus {
+  Enabled = 'enabled',
+  Disabled = 'disabled',
+}
+
+/**
+ * This object defines runtime capabilities for the datasource.  Unlike flags set in `DataSourcePluginMeta`
+ * these flags are enabled on startup and require the configuraiton to agree
+ */
+export interface DataSourceCapabilities {
+  browse?: DataSourceCapabilityStatus;
+}
+
 interface PluginMetaQueryOptions {
   cacheTimeout?: boolean;
   maxDataPoints?: boolean;
@@ -171,6 +185,11 @@ export abstract class DataSourceApi<
   readonly id: number;
 
   /**
+   * Runtime capabilities depend on configuration and backend support
+   */
+  readonly capabilities: DataSourceCapabilities = {};
+
+  /**
    *  min interval range
    */
   interval?: string;
@@ -195,6 +214,13 @@ export abstract class DataSourceApi<
    * Query for data, and optionally stream results
    */
   abstract query(request: DataQueryRequest<TQuery>): Promise<DataQueryResponse> | Observable<DataQueryResponse>;
+
+  /**
+   * Optionally browse the datasource
+   *
+   * NOTE: rather than adding this to frontend DataSource... maybe we should just make it a backend construct?
+   */
+  browse?(request: BrowseRequest): Promise<DataFrame>;
 
   /**
    * Test & verify datasource settings & connection details

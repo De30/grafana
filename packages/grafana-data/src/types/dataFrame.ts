@@ -29,6 +29,14 @@ export interface FieldConfig<TOptions extends object = any> {
   displayName?: string;
 
   /**
+   * Explict path to the field in the datasource.  When the frame meta includes a path,
+   * This will default to `${frame.meta.path}/${field.name}
+   *
+   * This value can often be used as a stable id for the field
+   */
+  path?: string;
+
+  /**
    * This can be used by data sources that return and explicit naming structure for values and labels
    * When this property is configured, this value is used rather than the default naming strategy.
    */
