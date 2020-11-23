@@ -6,7 +6,13 @@ import Drop from 'tether-drop';
 
 // Utils and servies
 import { colors } from '@grafana/ui';
-import { getTemplateSrv, setBackendSrv, setDataSourceSrv, setLegacyAngularInjector } from '@grafana/runtime';
+import {
+  getTemplateSrv,
+  setBackendSrv,
+  setBrowseSrv,
+  setDataSourceSrv,
+  setLegacyAngularInjector,
+} from '@grafana/runtime';
 import config from 'app/core/config';
 import coreModule from 'app/core/core_module';
 import { profiler } from 'app/core/profiler';
@@ -33,6 +39,7 @@ import { AppEvent, AppEvents, locationUtil } from '@grafana/data';
 import { backendSrv } from 'app/core/services/backend_srv';
 import { auto } from 'angular';
 import { initGrafanaLive } from 'app/features/live/live';
+import { GrafanaBrowseSrv } from 'app/features/browse/browseSrv';
 
 export type GrafanaRootScope = IRootScopeService & AppEventEmitter & AppEventConsumer & { colors: string[] };
 
@@ -56,6 +63,7 @@ export class GrafanaCtrl {
     setAngularLoader(angularLoader);
     setBackendSrv(backendSrv);
     setDataSourceSrv(datasourceSrv);
+    setBrowseSrv(new GrafanaBrowseSrv());
     setTimeSrv(timeSrv);
     setLinkSrv(linkSrv);
     setKeybindingSrv(keybindingSrv);

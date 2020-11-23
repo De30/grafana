@@ -1,4 +1,4 @@
-import { BrowseRequest, BrowseResponseRow, DataFrame, SelectableValue } from '@grafana/data';
+import { BrowseRequest, BrowseResponseRow, DataFrameView, SelectableValue } from '@grafana/data';
 import { Observable } from 'rxjs';
 
 /**
@@ -8,17 +8,12 @@ export interface BrowseSrv {
   /**
    * Find the root scope names
    */
-  getRootScopes(pluginId: string): Observable<Array<SelectableValue<string>>>;
+  getRootScopes(pluginId: number): Observable<Array<SelectableValue<string>>>;
 
   /**
    * Browse by path
    */
-  browse(req: BrowseRequest): Observable<DataFrame>;
-
-  /**
-   * fetch by path
-   */
-  fetch<T>(req: BrowseRequest): Observable<BrowseResponseRow<T>>;
+  browse<T>(req: BrowseRequest): Observable<DataFrameView<BrowseResponseRow<T>>>;
 }
 
 let singletonInstance: BrowseSrv;

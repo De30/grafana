@@ -1,7 +1,7 @@
 import defaults from 'lodash/defaults';
 
 import React, { PureComponent } from 'react';
-import { InlineField, Select, FeatureInfoBox } from '@grafana/ui';
+import { InlineField, Select, FeatureInfoBox, Switch } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue, LiveChannelScope, FeatureState } from '@grafana/data';
 import { getLiveMeasurements, LiveMeasurements } from '@grafana/runtime';
 import { GrafanaDatasource } from '../datasource';
@@ -22,6 +22,11 @@ export class QueryEditor extends PureComponent<Props> {
       label: 'Live Measurements',
       value: GrafanaQueryType.LiveMeasurements,
       description: 'Stream real-time measurements from Grafana',
+    },
+    {
+      label: 'Browse data',
+      value: GrafanaQueryType.Browse,
+      description: 'browse datasurce data',
     },
   ];
 
@@ -147,6 +152,33 @@ export class QueryEditor extends PureComponent<Props> {
     );
   }
 
+  renderBrowse() {
+    return (
+      <>
+        <div className="gf-form">
+          <InlineField label="Datasource" labelWidth={labelWidth}>
+            <div>[DATASOURCE]</div>
+          </InlineField>
+          <InlineField label="Scope" grow={true}>
+            <div>[scopes]</div>
+          </InlineField>
+        </div>
+        <div className="gf-form">
+          <InlineField label="Path" labelWidth={labelWidth} grow={true}>
+            <div>path...</div>
+          </InlineField>
+          <Switch
+            label="Auto Option"
+            checked={false}
+            onChange={() => {
+              console.log('toggle');
+            }}
+          />
+        </div>
+      </>
+    );
+  }
+
   render() {
     const query = defaults(this.props.query, defaultQuery);
     return (
@@ -161,6 +193,7 @@ export class QueryEditor extends PureComponent<Props> {
           </InlineField>
         </div>
         {query.queryType === GrafanaQueryType.LiveMeasurements && this.renderMeasurementsQuery()}
+        {query.queryType === GrafanaQueryType.Browse && this.renderBrowse()}
       </>
     );
   }
