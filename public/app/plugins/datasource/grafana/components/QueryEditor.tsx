@@ -1,11 +1,12 @@
 import defaults from 'lodash/defaults';
 
 import React, { PureComponent } from 'react';
-import { InlineField, Select, FeatureInfoBox, Switch } from '@grafana/ui';
+import { InlineField, Select, FeatureInfoBox } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue, LiveChannelScope, FeatureState } from '@grafana/data';
 import { getLiveMeasurements, LiveMeasurements } from '@grafana/runtime';
 import { GrafanaDatasource } from '../datasource';
 import { defaultQuery, GrafanaQuery, GrafanaQueryType } from '../types';
+import { BrowseQueryEditor } from './BrowseQueryEditor';
 
 type Props = QueryEditorProps<GrafanaDatasource, GrafanaQuery>;
 
@@ -152,33 +153,6 @@ export class QueryEditor extends PureComponent<Props> {
     );
   }
 
-  renderBrowse() {
-    return (
-      <>
-        <div className="gf-form">
-          <InlineField label="Datasource" labelWidth={labelWidth}>
-            <div>[DATASOURCE]</div>
-          </InlineField>
-          <InlineField label="Scope" grow={true}>
-            <div>[scopes]</div>
-          </InlineField>
-        </div>
-        <div className="gf-form">
-          <InlineField label="Path" labelWidth={labelWidth} grow={true}>
-            <div>path...</div>
-          </InlineField>
-          <Switch
-            label="Auto Option"
-            checked={false}
-            onChange={() => {
-              console.log('toggle');
-            }}
-          />
-        </div>
-      </>
-    );
-  }
-
   render() {
     const query = defaults(this.props.query, defaultQuery);
     return (
@@ -193,7 +167,7 @@ export class QueryEditor extends PureComponent<Props> {
           </InlineField>
         </div>
         {query.queryType === GrafanaQueryType.LiveMeasurements && this.renderMeasurementsQuery()}
-        {query.queryType === GrafanaQueryType.Browse && this.renderBrowse()}
+        {query.queryType === GrafanaQueryType.Browse && <BrowseQueryEditor {...this.props} />}
       </>
     );
   }
