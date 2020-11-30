@@ -33,10 +33,10 @@ import {
   standardFieldConfigEditorRegistry,
   standardTransformersRegistry,
 } from '@grafana/data';
+import { angularModules, coreModule } from 'app/core/core_module';
 import appEvents from 'app/core/app_events';
 import { checkBrowserCompatibility } from 'app/core/utils/browser';
 import { importPluginModule } from 'app/features/plugins/plugin_loader';
-import { angularModules, coreModule } from 'app/core/core_module';
 import { registerAngularDirectives } from 'app/core/core';
 import { setupAngularRoutes } from 'app/routes/routes';
 import { registerEchoBackend, setEchoSrv } from '@grafana/runtime';

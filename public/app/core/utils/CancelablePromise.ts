@@ -5,7 +5,7 @@ export interface CancelablePromise<T> {
   cancel: () => void;
 }
 
-export const makePromiseCancelable = <T>(promise: Promise<T>): CancelablePromise<T> => {
+export function makePromiseCancelable<T>(promise: Promise<T>): CancelablePromise<T> {
   let hasCanceled_ = false;
 
   const wrappedPromise = new Promise<T>((resolve, reject) => {
@@ -19,4 +19,4 @@ export const makePromiseCancelable = <T>(promise: Promise<T>): CancelablePromise
       hasCanceled_ = true;
     },
   };
-};
+}

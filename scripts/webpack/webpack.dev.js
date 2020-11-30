@@ -8,6 +8,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { ESBuildPlugin } = require('esbuild-loader');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = (env = {}) =>
@@ -31,49 +32,11 @@ module.exports = (env = {}) =>
       rules: [
         {
           test: /\.tsx?$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                cacheDirectory: true,
-                babelrc: false,
-                // Note: order is top-to-bottom and/or left-to-right
-                plugins: [
-                  [
-                    require('@rtsao/plugin-proposal-class-properties'),
-                    {
-                      loose: true,
-                    },
-                  ],
-                  '@babel/plugin-proposal-nullish-coalescing-operator',
-                  '@babel/plugin-proposal-optional-chaining',
-                  'angularjs-annotate',
-                ],
-                // Note: order is bottom-to-top and/or right-to-left
-                presets: [
-                  [
-                    '@babel/preset-env',
-                    {
-                      targets: {
-                        browsers: 'last 3 versions',
-                      },
-                      useBuiltIns: 'entry',
-                      corejs: 3,
-                      modules: false,
-                    },
-                  ],
-                  [
-                    '@babel/preset-typescript',
-                    {
-                      allowNamespaces: true,
-                    },
-                  ],
-                  '@babel/preset-react',
-                ],
-              },
-            },
-          ],
+          loader: 'esbuild-loader',
+          options: {
+            loader: 'tsx',
+            target: 'es2015', // Syntax to compile to (see options below for possible values)
+          },
         },
         require('./sass.rule.js')({
           sourceMap: false,
@@ -83,6 +46,7 @@ module.exports = (env = {}) =>
     },
 
     plugins: [
+      new ESBuildPlugin(),
       new CleanWebpackPlugin(),
       env.noTsCheck
         ? new webpack.DefinePlugin({}) // bogus plugin to satisfy webpack API
