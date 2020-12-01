@@ -128,7 +128,7 @@ func TestInstallPluginCommand(t *testing.T) {
 		},
 	}
 
-	err = InstallPlugin("test-plugin-panel", "", c, client)
+	err = installPlugin("test-plugin-panel", "", c, client)
 	assert.NoError(t, err)
 }
 
@@ -150,7 +150,7 @@ func TestIsPathSafe(t *testing.T) {
 
 func TestSelectVersion(t *testing.T) {
 	t.Run("Should return error when requested version does not exist", func(t *testing.T) {
-		_, err := SelectVersion(
+		_, err := selectVersion(
 			makePluginWithVersions(versionArg{Version: "version"}),
 			"1.1.1",
 		)
@@ -158,7 +158,7 @@ func TestSelectVersion(t *testing.T) {
 	})
 
 	t.Run("Should return error when no version supports current arch", func(t *testing.T) {
-		_, err := SelectVersion(
+		_, err := selectVersion(
 			makePluginWithVersions(versionArg{Version: "version", Arch: []string{"non-existent"}}),
 			"",
 		)
@@ -166,7 +166,7 @@ func TestSelectVersion(t *testing.T) {
 	})
 
 	t.Run("Should return error when requested version does not support current arch", func(t *testing.T) {
-		_, err := SelectVersion(
+		_, err := selectVersion(
 			makePluginWithVersions(
 				versionArg{Version: "2.0.0"},
 				versionArg{Version: "1.1.1", Arch: []string{"non-existent"}},
@@ -177,7 +177,7 @@ func TestSelectVersion(t *testing.T) {
 	})
 
 	t.Run("Should return latest available for arch when no version specified", func(t *testing.T) {
-		ver, err := SelectVersion(
+		ver, err := selectVersion(
 			makePluginWithVersions(
 				versionArg{Version: "2.0.0", Arch: []string{"non-existent"}},
 				versionArg{Version: "1.0.0"},
@@ -189,7 +189,7 @@ func TestSelectVersion(t *testing.T) {
 	})
 
 	t.Run("Should return latest version when no version specified", func(t *testing.T) {
-		ver, err := SelectVersion(
+		ver, err := selectVersion(
 			makePluginWithVersions(versionArg{Version: "2.0.0"}, versionArg{Version: "1.0.0"}),
 			"",
 		)
@@ -198,7 +198,7 @@ func TestSelectVersion(t *testing.T) {
 	})
 
 	t.Run("Should return requested version", func(t *testing.T) {
-		ver, err := SelectVersion(
+		ver, err := selectVersion(
 			makePluginWithVersions(
 				versionArg{Version: "2.0.0"},
 				versionArg{Version: "1.0.0"},

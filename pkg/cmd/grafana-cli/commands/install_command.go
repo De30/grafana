@@ -57,12 +57,12 @@ func (cmd Command) installCommand(c utils.CommandLine) error {
 	pluginToInstall := c.Args().First()
 	version := c.Args().Get(1)
 
-	return InstallPlugin(pluginToInstall, version, c, cmd.Client)
+	return installPlugin(pluginToInstall, version, c, cmd.Client)
 }
 
-// InstallPlugin downloads the plugin code as a zip file from the Grafana.com API
+// installPlugin downloads the plugin code as a zip file from the Grafana.com API
 // and then extracts the zip into the plugins directory.
-func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils.ApiClient) error {
+func installPlugin(pluginName, version string, c utils.CommandLine, client utils.ApiClient) error {
 	pluginFolder := c.PluginDirectory()
 	downloadURL := c.PluginURL()
 	isInternal := false
@@ -72,8 +72,8 @@ func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils
 		if strings.HasPrefix(pluginName, "grafana-") {
 			// At this point the plugin download is going through grafana.com API and thus the name is validated.
 			// Checking for grafana prefix is how it is done there so no 3rd party plugin should have that prefix.
-			// You can supply custom plugin name and then set custom download url to 3rd party plugin but then that
-			// is up to the user to know what she is doing.
+			// You can supply a custom plugin name and then set custom download URL to 3rd party plugin, but then it's
+			// up to the user to know what she is doing.
 			isInternal = true
 		}
 		plugin, err := client.GetPlugin(pluginName, c.RepoDirectory())
@@ -81,7 +81,7 @@ func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils
 			return err
 		}
 
-		v, err := SelectVersion(&plugin, version)
+		v, err := selectVersion(&plugin, version)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils
 			version,
 		)
 
-		// Plugins which are downloaded just as sourcecode zipball from github do not have checksum
+		// Plugins which are downloaded just as sourcecode zipball from GitHub do not have a checksum
 		if v.Arch != nil {
 			checksum = v.Arch[osAndArchString()].Md5
 		}
@@ -113,18 +113,15 @@ func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils
 	}
 	defer os.Remove(tmpFile.Name())
 
-	err = client.DownloadFile(pluginName, tmpFile, downloadURL, checksum)
-	if err != nil {
+	if err := client.DownloadFile(pluginName, tmpFile, downloadURL, checksum); err != nil {
 		tmpFile.Close()
 		return errutil.Wrap("failed to download plugin archive", err)
 	}
-	err = tmpFile.Close()
-	if err != nil {
-		return errutil.Wrap("failed to close tmp file", err)
+	if err := tmpFile.Close(); err != nil {
+		return errutil.Wrap("failed to close temp file", err)
 	}
 
-	err = extractFiles(tmpFile.Name(), pluginName, pluginFolder, isInternal)
-	if err != nil {
+	if err := extractFiles(tmpFile.Name(), pluginName, pluginFolder, isInternal); err != nil {
 		return errutil.Wrap("failed to extract plugin archive", err)
 	}
 
@@ -132,7 +129,7 @@ func InstallPlugin(pluginName, version string, c utils.CommandLine, client utils
 
 	res, _ := services.ReadPlugin(pluginFolder, pluginName)
 	for _, v := range res.Dependencies.Plugins {
-		if err := InstallPlugin(v.ID, "", c, client); err != nil {
+		if err := installPlugin(v.ID, "", c, client); err != nil {
 			return errutil.Wrapf(err, "failed to install plugin '%s'", v.ID)
 		}
 
@@ -170,10 +167,10 @@ func latestSupportedVersion(plugin *models.Plugin) *models.Version {
 	return nil
 }
 
-// SelectVersion returns latest version if none is specified or the specified version. If the version string is not
+// selectVersion returns latest version if none is specified or the specified version. If the version string is not
 // matched to existing version it errors out. It also errors out if version that is matched is not available for current
 // os and platform. It expects plugin.Versions to be sorted so the newest version is first.
-func SelectVersion(plugin *models.Plugin, version string) (*models.Version, error) {
+func selectVersion(plugin *models.Plugin, version string) (*models.Version, error) {
 	var ver models.Version
 
 	latestForArch := latestSupportedVersion(plugin)
