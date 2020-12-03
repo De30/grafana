@@ -30,7 +30,7 @@ export enum ReducerID {
 }
 
 // Internal function
-type FieldReducer = (field: Field, ignoreNulls: boolean, nullAsZero: boolean) => FieldCalcs;
+type FieldReducer = (field: Field, ignoreNulls?: boolean, nullAsZero?: boolean) => FieldCalcs;
 
 export interface FieldReducerInfo extends RegistryItem {
   // Internal details
@@ -232,7 +232,7 @@ export const fieldReducers = new Registry<FieldReducerInfo>(() => [
   },
 ]);
 
-export function doStandardCalcs(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+export function doStandardCalcs(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const calcs = {
     sum: 0,
     max: -Number.MAX_VALUE,
@@ -367,11 +367,11 @@ export function doStandardCalcs(field: Field, ignoreNulls: boolean, nullAsZero: 
   return calcs;
 }
 
-function calculateFirst(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateFirst(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   return { first: field.values.get(0) };
 }
 
-function calculateFirstNotNull(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateFirstNotNull(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const data = field.values;
   for (let idx = 0; idx < data.length; idx++) {
     const v = data.get(idx);
@@ -382,12 +382,12 @@ function calculateFirstNotNull(field: Field, ignoreNulls: boolean, nullAsZero: b
   return { firstNotNull: null };
 }
 
-function calculateLast(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateLast(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const data = field.values;
   return { last: data.get(data.length - 1) };
 }
 
-function calculateLastNotNull(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateLastNotNull(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const data = field.values;
   let idx = data.length - 1;
   while (idx >= 0) {
@@ -399,7 +399,7 @@ function calculateLastNotNull(field: Field, ignoreNulls: boolean, nullAsZero: bo
   return { lastNotNull: null };
 }
 
-function calculateChangeCount(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateChangeCount(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const data = field.values;
   let count = 0;
   let first = true;
@@ -424,7 +424,7 @@ function calculateChangeCount(field: Field, ignoreNulls: boolean, nullAsZero: bo
   return { changeCount: count };
 }
 
-function calculateDistinctCount(field: Field, ignoreNulls: boolean, nullAsZero: boolean): FieldCalcs {
+function calculateDistinctCount(field: Field, ignoreNulls?: boolean, nullAsZero?: boolean): FieldCalcs {
   const data = field.values;
   const distinct = new Set<any>();
   for (let i = 0; i < data.length; i++) {

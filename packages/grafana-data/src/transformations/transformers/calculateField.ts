@@ -22,7 +22,6 @@ export enum CalculateFieldMode {
 export interface ReduceOptions {
   include?: string[]; // Assume all fields
   reducer: ReducerID;
-  nullValueMode?: NullValueMode;
 }
 
 export interface BinaryOptions {
@@ -146,9 +145,6 @@ function getReduceRowCreator(options: ReduceOptions, allFrames: DataFrame[]): Va
   }
 
   const reducer = info.reduce ?? doStandardCalcs;
-  const ignoreNulls = options.nullValueMode === NullValueMode.Ignore;
-  const nullAsZero = options.nullValueMode === NullValueMode.AsZero;
-
   return (frame: DataFrame) => {
     // Find the columns that should be examined
     const columns: Vector[] = [];

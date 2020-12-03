@@ -54,7 +54,9 @@ export interface FieldConfig<TOptions extends object = any> {
   // Map values to a display color
   color?: FieldColor;
 
-  // Used when reducing field values
+  /**
+   * @deprecated Used when reducing fields
+   */
   nullValueMode?: NullValueMode;
 
   // The behavior when clicking on a result
