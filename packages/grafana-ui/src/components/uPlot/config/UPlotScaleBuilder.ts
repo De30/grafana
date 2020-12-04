@@ -4,6 +4,7 @@ import { PlotConfigBuilder } from '../types';
 export interface ScaleProps {
   scaleKey: string;
   isTime?: boolean;
+  range?: Scale.Range;
   min?: number | null;
   max?: number | null;
 }
@@ -15,11 +16,13 @@ export class UPlotScaleBuilder extends PlotConfigBuilder<ScaleProps, Scale> {
   }
 
   getConfig() {
-    const { isTime, scaleKey } = this.props;
+    const { isTime, scaleKey, range } = this.props;
     if (isTime) {
       return {
         [scaleKey]: {
           time: true, // TODO?  this should be based on the query range, not the data
+          auto: false,
+          range,
         },
       };
     }

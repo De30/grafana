@@ -11,9 +11,6 @@ export class UPlotConfigBuilder {
 
   hasLeftAxis = false;
 
-  /** flag when the xscale should update with timeRange */
-  xScaleIsTimeRange = false;
-
   addAxis(props: AxisProps) {
     props.placement = props.placement ?? AxisPlacement.Auto;
 
@@ -60,6 +57,7 @@ export class UPlotConfigBuilder {
     config.scales = this.scales.reduce((acc, s) => {
       return { ...acc, ...s.getConfig() };
     }, {});
+    config.cursor = { drag: { setScale: false } };
 
     return config;
   }

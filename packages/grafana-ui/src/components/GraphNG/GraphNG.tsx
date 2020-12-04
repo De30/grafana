@@ -8,6 +8,7 @@ import {
   formattedValueToString,
   getFieldColorModeForField,
   getFieldDisplayName,
+  TimeRange,
 } from '@grafana/data';
 import { alignDataFrames } from './utils';
 import { UPlotChart } from '../uPlot/Plot';
@@ -29,6 +30,7 @@ export interface XYFieldMatchers {
 
 export interface GraphNGProps extends Omit<PlotProps, 'data' | 'config'> {
   data: DataFrame[];
+  timeRange: TimeRange;
   legend?: LegendOptions;
   fields?: XYFieldMatchers; // default will assume timeseries data
 }
@@ -63,6 +65,8 @@ export const GraphNG: React.FC<GraphNGProps> = ({
     return false;
   }, []);
 
+  // console.log(timeRange.from.valueOf(), timeRange.to.valueOf());
+
   const configRev = useRevision(alignedFrame, compareFrames);
 
   const configBuilder = useMemo(() => {
@@ -72,13 +76,13 @@ export const GraphNG: React.FC<GraphNGProps> = ({
       return builder;
     }
 
-    // X is the first field in the alligned frame
+    // X is the first field in the aligned frame
     const xField = alignedFrame.fields[0];
     if (xField.type === FieldType.time) {
-      builder.xScaleIsTimeRange = true;
       builder.addScale({
         scaleKey: 'x',
         isTime: true,
+        range: () => [timeRange.from.valueOf(), timeRange.to.valueOf()],
       });
       builder.addAxis({
         scaleKey: 'x',
@@ -193,7 +197,6 @@ export const GraphNG: React.FC<GraphNGProps> = ({
           config={configBuilder}
           width={vizWidth}
           height={vizHeight}
-          timeRange={timeRange}
           timeZone={timeZone}
           {...plotProps}
         >

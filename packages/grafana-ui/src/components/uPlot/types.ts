@@ -1,9 +1,9 @@
 import React from 'react';
 import uPlot, { Options, Series, Hooks } from 'uplot';
-import { DataFrame, TimeRange, TimeZone } from '@grafana/data';
+import { DataFrame, TimeZone } from '@grafana/data';
 import { UPlotConfigBuilder } from './config/UPlotConfigBuilder';
 
-export type PlotSeriesConfig = Pick<Options, 'series' | 'scales' | 'axes'>;
+export type PlotSeriesConfig = Pick<Options, 'series' | 'scales' | 'axes' | 'cursor'>;
 export type PlotPlugin = {
   id: string;
   /** can mutate provided opts as necessary */
@@ -17,7 +17,6 @@ export interface PlotPluginProps {
 
 export interface PlotProps {
   data: AlignedFrameWithGapTest;
-  timeRange: TimeRange;
   timeZone: TimeZone;
   width: number;
   height: number;
