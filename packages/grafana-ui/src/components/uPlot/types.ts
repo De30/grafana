@@ -1,9 +1,9 @@
 import React from 'react';
-import uPlot, { Options, AlignedData, Series, Hooks } from 'uplot';
+import uPlot, { Options, Series, Hooks } from 'uplot';
 import { DataFrame, TimeRange, TimeZone } from '@grafana/data';
 import { UPlotConfigBuilder } from './config/UPlotConfigBuilder';
 
-export type PlotSeriesConfig = Pick<Options, 'series' | 'scales' | 'axes'>;
+export type PlotSeriesConfig = Pick<Options, 'series' | 'scales' | 'axes' | 'cursor'>;
 export type PlotPlugin = {
   id: string;
   /** can mutate provided opts as necessary */
@@ -23,14 +23,10 @@ export interface PlotProps {
   height: number;
   config: UPlotConfigBuilder;
   children?: React.ReactElement[];
-  /** Callback performed when uPlot data is updated */
-  onDataUpdate?: (data: AlignedData) => {};
-  /** Callback performed when uPlot is (re)initialized */
-  onPlotInit?: () => {};
 }
 
 export abstract class PlotConfigBuilder<P, T> {
-  constructor(protected props: P) {}
+  constructor(public props: P) {}
   abstract getConfig(): T;
 }
 
