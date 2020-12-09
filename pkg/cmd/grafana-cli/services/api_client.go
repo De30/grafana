@@ -45,6 +45,9 @@ func (client *GrafanaComClient) GetPlugin(pluginID, repoURL string) (models.Plug
 func (client *GrafanaComClient) DownloadFile(pluginName string, tmpFile *os.File, url string, checksum string) (err error) {
 	// Try handling URL as a local file path first
 	if _, err := os.Stat(url); err == nil {
+		// We can ignore this gosec G304 warning since `url` stems from command line flag "pluginUrl". If the
+		// user shouldn't be able to read the file, it should be handled through filesystem permissions.
+		// nolint:gosec
 		f, err := os.Open(url)
 		if err != nil {
 			return errutil.Wrap("failed to read plugin archive", err)
