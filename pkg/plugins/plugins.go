@@ -372,7 +372,11 @@ func (s *PluginScanner) loadPlugin(pluginJSONFilePath string) error {
 	pluginCommon.PluginDir = filepath.Dir(pluginJSONFilePath)
 	pluginCommon.Signature = getPluginSignatureState(s.log, &pluginCommon)
 
-	s.plugins[currentDir] = &pluginCommon
+	if pluginCommon.Signature == PluginSignatureValid || pluginCommon.Signature == PluginSignatureInternal {
+		s.plugins[currentDir] = &pluginCommon
+	} else {
+		s.log.Warn("Ignore invalid signature", "path", pluginJSONFilePath)
+	}
 
 	return nil
 }
