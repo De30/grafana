@@ -414,7 +414,7 @@ func (s *PluginScanner) validateSignature(plugin *PluginBase) *PluginError {
 
 	// For the time being, we choose to only require back-end plugins to be signed
 	// NOTE: the state is calculated again when setting metadata on the object
-	if !s.requireSigned {
+	if !plugin.Backend || !s.requireSigned {
 		return nil
 	}
 
