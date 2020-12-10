@@ -372,10 +372,11 @@ func (s *PluginScanner) loadPlugin(pluginJSONFilePath string) error {
 	pluginCommon.PluginDir = filepath.Dir(pluginJSONFilePath)
 	pluginCommon.Signature = getPluginSignatureState(s.log, &pluginCommon)
 
-	if pluginCommon.Signature == PluginSignatureValid || pluginCommon.IsCorePlugin {
+	isCore := strings.HasPrefix(pluginJSONFilePath, setting.HomePath)
+	if pluginCommon.Signature == PluginSignatureValid || isCore {
 		s.plugins[currentDir] = &pluginCommon
 	} else {
-		s.log.Warn("Ignore invalid signature", "path", pluginJSONFilePath)
+		s.log.Warn("Ignore unsinged plugin", "path", pluginJSONFilePath)
 	}
 
 	return nil
@@ -413,7 +414,7 @@ func (s *PluginScanner) validateSignature(plugin *PluginBase) *PluginError {
 
 	// For the time being, we choose to only require back-end plugins to be signed
 	// NOTE: the state is calculated again when setting metadata on the object
-	if !plugin.Backend || !s.requireSigned {
+	if !s.requireSigned {
 		return nil
 	}
 
