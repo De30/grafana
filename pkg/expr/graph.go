@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/grafana/pkg/expr/mathexp"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
 )
@@ -57,6 +58,10 @@ func buildPipeline(req *backend.QueryDataRequest) (DataPipeline, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	dotDoc, _ := dot.Marshal(graph, "", "", " ")
+
+	fmt.Printf("%v", string(dotDoc))
 
 	nodes, err := buildExecutionOrder(graph)
 	if err != nil {

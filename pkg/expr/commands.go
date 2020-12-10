@@ -15,6 +15,7 @@ import (
 type Command interface {
 	NeedsVars() []string
 	Execute(c context.Context, vars mathexp.Vars) (mathexp.Results, error)
+	String() string
 }
 
 // MathCommand is a command for a math expression such as "1 + $GA / 2"
@@ -66,6 +67,10 @@ func (gm *MathCommand) Execute(ctx context.Context, vars mathexp.Vars) (mathexp.
 	return gm.Expression.Execute(vars)
 }
 
+func (gm *MathCommand) String() string {
+	return fmt.Sprintf("math: %v", gm.RawExpression)
+}
+
 // ReduceCommand is an expression command for reduction of a timeseries such as a min, mean, or max.
 type ReduceCommand struct {
 	Reducer     string
@@ -109,6 +114,10 @@ func UnmarshalReduceCommand(rn *rawNode) (*ReduceCommand, error) {
 // to execute the command and allows the command to fulfill the Command interface.
 func (gr *ReduceCommand) NeedsVars() []string {
 	return []string{gr.VarToReduce}
+}
+
+func (gr *ReduceCommand) String() string {
+	return fmt.Sprintf("reduction: %v of %v", gr.Reducer, gr.VarToReduce)
 }
 
 // Execute runs the command and returns the results or an error if the command
@@ -201,6 +210,10 @@ func UnmarshalResampleCommand(rn *rawNode) (*ResampleCommand, error) {
 // to execute the command and allows the command to fulfill the Command interface.
 func (gr *ResampleCommand) NeedsVars() []string {
 	return []string{gr.VarToResample}
+}
+
+func (gr *ResampleCommand) String() string {
+	return fmt.Sprintf("resample of %v", gr.VarToResample)
 }
 
 // Execute runs the command and returns the results or an error if the command

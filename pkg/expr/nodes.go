@@ -73,9 +73,18 @@ func (b *baseNode) RefID() string {
 	return b.refID
 }
 
+// DOTID returns the display for dot marshling of the node.
+func (b *baseNode) DOTID() string {
+	return b.refID
+}
+
 // NodeType returns the data pipeline node type.
 func (gn *CMDNode) NodeType() NodeType {
 	return TypeCMDNode
+}
+
+func (gn *CMDNode) DOTID() string {
+	return fmt.Sprintf("%v (%v)", gn.refID, gn.Command.String())
 }
 
 // Execute runs the node and adds the results to vars. If the node requires
@@ -135,6 +144,11 @@ type DSNode struct {
 // NodeType returns the data pipeline node type.
 func (dn *DSNode) NodeType() NodeType {
 	return TypeDatasourceNode
+}
+
+// DOTID returns the display for dot marshling of the node.
+func (dn *DSNode) DOTID() string {
+	return fmt.Sprintf("%v (datasource query)", dn.refID)
 }
 
 func buildDSNode(dp *simple.DirectedGraph, rn *rawNode, orgID int64) (*DSNode, error) {
