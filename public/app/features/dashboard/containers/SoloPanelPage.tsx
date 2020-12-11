@@ -8,6 +8,7 @@ import { DashboardPanel } from '../dashgrid/DashboardPanel';
 
 // Redux
 import { initDashboard } from '../state/initDashboard';
+import { cleanUpDashboardAndVariables } from '../state/actions';
 
 // Types
 import { StoreState, DashboardRouteInfo } from 'app/types';
@@ -22,6 +23,7 @@ export interface Props {
   $injector: any;
   routeInfo: DashboardRouteInfo;
   initDashboard: typeof initDashboard;
+  cleanUpDashboardAndVariables: typeof cleanUpDashboardAndVariables;
   dashboard: DashboardModel | null;
 }
 
@@ -50,6 +52,10 @@ export class SoloPanelPage extends Component<Props, State> {
     });
   }
 
+  componentWillUnmount() {
+    this.props.cleanUpDashboardAndVariables();
+  }
+
   componentDidUpdate(prevProps: Props) {
     const { urlPanelId, dashboard } = this.props;
 
@@ -58,7 +64,7 @@ export class SoloPanelPage extends Component<Props, State> {
     }
 
     // we just got a new dashboard
-    if (!prevProps.dashboard || prevProps.dashboard.uid !== dashboard.uid) {
+    if (!prevProps.dashboard || prevProps.dashboard.uid !== dashboard.uid || prevProps.urlPanelId !== urlPanelId) {
       const panelId = parseInt(urlPanelId, 10);
 
       // need to expand parent row if this panel is inside a row
@@ -105,6 +111,7 @@ const mapStateToProps = (state: StoreState) => ({
 
 const mapDispatchToProps = {
   initDashboard,
+  cleanUpDashboardAndVariables,
 };
 
 export default hot(module)(connect(mapStateToProps, mapDispatchToProps)(SoloPanelPage));
