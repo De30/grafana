@@ -44,11 +44,13 @@ export function runSignalStream(
   return new Observable<DataQueryResponse>(subscriber => {
     const streamId = `signal-${req.panelId}-${target.refId}`;
     const maxDataPoints = req.maxDataPoints || 1000;
+    let counter = 0;
 
     const data = new CircularDataFrame({
       append: 'tail',
       capacity: maxDataPoints,
     });
+
     data.refId = target.refId;
     data.name = target.alias || 'Signal ' + target.refId;
     data.addField({ name: 'time', type: FieldType.time });
@@ -67,6 +69,7 @@ export function runSignalStream(
 
     const addNextRow = (time: number) => {
       value += (Math.random() - 0.5) * spread;
+      value = Math.min(Math.max(value, 0), 100);
 
       let idx = 0;
       data.fields[idx++].values.add(time);
@@ -86,15 +89,20 @@ export function runSignalStream(
 
     // Fill the buffer on init
     if (true) {
-      let time = Date.now() - maxDataPoints * speed;
-      for (let i = 0; i < maxDataPoints; i++) {
-        addNextRow(time);
-        time += speed;
-      }
+      // let time = Date.now() - maxDataPoints * speed;
+      // for (let i = 0; i < maxDataPoints; i++) {
+      //   addNextRow(time);
+      //   time += speed;
+      // }
     }
 
     const pushNextEvent = () => {
-      addNextRow(Date.now());
+      counter++;
+
+      if (counter % 10 === 0) {
+        addNextRow(Date.now());
+      }
+
       subscriber.next({
         data: [data],
         key: streamId,

@@ -134,7 +134,7 @@ function formatTime(self: uPlot, splits: number[], axisIdx: number, foundSpace: 
   let format = systemDateFormats.interval.minute;
 
   if (foundIncr < 1) {
-    format = systemDateFormats.interval.second.replace('ss', 'ss.SS');
+    format = 'mm:ss.SSS';
   } else if (foundIncr <= 45) {
     format = systemDateFormats.interval.second;
   } else if (foundIncr <= 7200 || range <= oneDay) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TooltipPlugin, ZoomPlugin, GraphNG } from '@grafana/ui';
+import { TooltipPlugin, ZoomPlugin, GraphNG, ChristmasPlugin } from '@grafana/ui';
 import { PanelProps } from '@grafana/data';
 import { Options } from './types';
 import { AnnotationsPlugin } from './plugins/AnnotationsPlugin';
@@ -32,6 +32,7 @@ export const GraphPanel: React.FC<GraphPanelProps> = ({
       <ContextMenuPlugin timeZone={timeZone} replaceVariables={replaceVariables} />
       {data.annotations ? <ExemplarsPlugin exemplars={data.annotations} timeZone={timeZone} /> : <></>}
       {data.annotations ? <AnnotationsPlugin annotations={data.annotations} timeZone={timeZone} /> : <></>}
+      <ChristmasPlugin id="christ" />
     </GraphNG>
   );
 };
