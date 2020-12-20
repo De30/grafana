@@ -1,49 +1,36 @@
-import { storiesOf } from '@storybook/react';
-import { Button, LinkButton } from './Button';
-// @ts-ignore
-import withPropsCombinations from 'react-storybook-addon-props-combinations';
-import { action } from '@storybook/addon-actions';
-import { ThemeableCombinationsRowRenderer } from '../../utils/storybook/CombinationsRowRenderer';
-import { select, boolean } from '@storybook/addon-knobs';
+import React from 'react';
+import { Story } from '@storybook/react';
+import { Button, ButtonProps } from './Button';
+import { withCenteredStory, withHorizontallyCenteredStory } from '../../utils/storybook/withCenteredStory';
+import { iconOptions } from '../../utils/storybook/knobs';
+import mdx from './Button.mdx';
 
-const ButtonStories = storiesOf('UI/Button', module);
-
-const defaultProps = {
-  onClick: [action('Button clicked')],
-  children: ['Click, click!'],
-};
-
-const variants = {
-  size: ['xs', 'sm', 'md', 'lg'],
-  variant: ['primary', 'secondary', 'danger', 'inverse', 'transparent'],
-};
-const combinationOptions = {
-  CombinationRenderer: ThemeableCombinationsRowRenderer,
-};
-
-const renderButtonStory = (buttonComponent: typeof Button | typeof LinkButton) => {
-  const isDisabled = boolean('Disable button', false);
-  return withPropsCombinations(
-    buttonComponent,
-    { ...variants, ...defaultProps, disabled: [isDisabled] },
-    combinationOptions
-  )();
-};
-
-ButtonStories.add('as button element', () => renderButtonStory(Button));
-
-ButtonStories.add('as link element', () => renderButtonStory(LinkButton));
-
-ButtonStories.add('with icon', () => {
-  const iconKnob = select(
-    'Icon',
-    {
-      Plus: 'fa fa-plus',
-      User: 'fa fa-user',
-      Gear: 'fa fa-gear',
-      Annotation: 'gicon gicon-annotation',
+export default {
+  title: 'Buttons/Button',
+  component: Button,
+  decorators: [withCenteredStory, withHorizontallyCenteredStory],
+  argTypes: {
+    variant: { control: { type: 'select', options: ['primary', 'secondary', 'destructive', 'link'] } },
+    size: { control: { type: 'select', options: ['sm', 'md', 'lg'] } },
+    icon: { control: { type: 'select', options: iconOptions } },
+    css: { control: { disable: true } },
+    className: { control: { disable: true } },
+  },
+  parameters: {
+    docs: {
+      page: mdx,
     },
-    'fa fa-plus'
-  );
-  return withPropsCombinations(Button, { ...variants, ...defaultProps, icon: [iconKnob] }, combinationOptions)();
-});
+    knobs: {
+      disabled: true,
+    },
+  },
+};
+
+export const Simple: Story<ButtonProps> = ({ children, ...args }) => <Button {...args}>{children}</Button>;
+Simple.args = {
+  variant: 'primary',
+  size: 'md',
+  disabled: false,
+  children: 'Button',
+  icon: undefined,
+};

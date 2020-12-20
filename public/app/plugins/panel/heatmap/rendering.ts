@@ -1,20 +1,30 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import * as d3 from 'd3';
-import { appEvents, contextSrv } from 'app/core/core';
+import { contextSrv } from 'app/core/core';
 import * as ticksUtils from 'app/core/utils/ticks';
 import { HeatmapTooltip } from './heatmap_tooltip';
 import { mergeZeroBuckets } from './heatmap_data_converter';
 import { getColorScale, getOpacityScale } from './color_scale';
-import { toUtc, PanelEvents, GrafanaThemeType, getColorFromHexRgbOrName, getValueFormat } from '@grafana/data';
-import { CoreEvents } from 'app/types';
+import {
+  toUtc,
+  PanelEvents,
+  getValueFormat,
+  formattedValueToString,
+  dateTimeFormat,
+  LegacyGraphHoverEvent,
+  LegacyGraphHoverClearEvent,
+  getColorForTheme,
+} from '@grafana/data';
+import { graphTimeFormat } from '@grafana/ui';
+import { config } from 'app/core/config';
 
 const MIN_CARD_SIZE = 1,
   CARD_PADDING = 1,
   CARD_ROUND = 0,
   DATA_RANGE_WIDING_FACTOR = 1.2,
   DEFAULT_X_TICK_SIZE_PX = 100,
-  DEFAULT_Y_TICK_SIZE_PX = 50,
+  DEFAULT_Y_TICK_SIZE_PX = 22.5,
   X_AXIS_TICK_PADDING = 10,
   Y_AXIS_TICK_PADDING = 5,
   MIN_SELECTION_WIDTH = 2;
@@ -75,9 +85,8 @@ export class HeatmapRenderer {
     /////////////////////////////
 
     // Shared crosshair and tooltip
-    appEvents.on(CoreEvents.graphHover, this.onGraphHover.bind(this), this.scope);
-
-    appEvents.on(CoreEvents.graphHoverClear, this.onGraphHoverClear.bind(this), this.scope);
+    this.ctrl.dashboard.events.on(LegacyGraphHoverEvent.type, this.onGraphHover.bind(this), this.scope);
+    this.ctrl.dashboard.events.on(LegacyGraphHoverClearEvent.type, this.onGraphHoverClear.bind(this), this.scope);
 
     // Register selection listeners
     this.$heatmap.on('mousedown', this.onMouseDown.bind(this));
@@ -147,19 +156,18 @@ export class HeatmapRenderer {
       .range([0, this.chartWidth]);
 
     const ticks = this.chartWidth / DEFAULT_X_TICK_SIZE_PX;
-    const grafanaTimeFormatter = ticksUtils.grafanaTimeFormat(ticks, this.timeRange.from, this.timeRange.to);
-    let timeFormat;
-    const dashboardTimeZone = this.ctrl.dashboard.getTimezone();
-    if (dashboardTimeZone === 'utc') {
-      timeFormat = d3.utcFormat(grafanaTimeFormatter);
-    } else {
-      timeFormat = d3.timeFormat(grafanaTimeFormatter);
-    }
+    const format = graphTimeFormat(ticks, this.timeRange.from.valueOf(), this.timeRange.to.valueOf());
+    const timeZone = this.ctrl.dashboard.getTimezone();
+    const formatter = (date: Date) =>
+      dateTimeFormat(date.valueOf(), {
+        format: format,
+        timeZone: timeZone,
+      });
 
     const xAxis = d3
       .axisBottom(this.xScale)
       .ticks(ticks)
-      .tickFormat(timeFormat)
+      .tickFormat(formatter)
       .tickPadding(X_AXIS_TICK_PADDING)
       .tickSize(this.chartHeight);
 
@@ -337,6 +345,7 @@ export class HeatmapRenderer {
 
   addYAxisFromBuckets() {
     const tsBuckets = this.data.tsBuckets;
+    let ticks = Math.ceil(this.chartHeight / DEFAULT_Y_TICK_SIZE_PX);
 
     this.scope.yScale = this.yScale = d3
       .scaleLinear()
@@ -363,11 +372,15 @@ export class HeatmapRenderer {
 
     const yAxis = d3
       .axisLeft(this.yScale)
-      .tickValues(tickValues)
       .tickFormat(tickFormatter)
       .tickSizeInner(0 - this.width)
       .tickSizeOuter(0)
       .tickPadding(Y_AXIS_TICK_PADDING);
+    if (tickValues && tickValues.length <= ticks) {
+      yAxis.tickValues(tickValues);
+    } else {
+      yAxis.ticks(ticks);
+    }
 
     this.heatmap
       .append('g')
@@ -441,11 +454,14 @@ export class HeatmapRenderer {
     const format = this.panel.yAxis.format;
     return (value: any) => {
       try {
-        return format !== 'none' ? getValueFormat(format)(value, decimals, scaledDecimals) : value;
+        if (format !== 'none') {
+          const v = getValueFormat(format)(value, decimals, scaledDecimals);
+          return formattedValueToString(v);
+        }
       } catch (err) {
         console.error(err.message || err);
-        return value;
       }
+      return value;
     };
   }
 
@@ -567,8 +583,8 @@ export class HeatmapRenderer {
 
   highlightCard(event: any) {
     const color = d3.select(event.target).style('fill');
-    const highlightColor = d3.color(color).darker(2);
-    const strokeColor = d3.color(color).brighter(4);
+    const highlightColor = d3.color(color)!.darker(2);
+    const strokeColor = d3.color(color)!.brighter(4);
     const currentCard = d3.select(event.target);
     this.tooltip.originalFillColor = color;
     currentCard
@@ -666,10 +682,7 @@ export class HeatmapRenderer {
 
   getCardColor(d: { count: any }) {
     if (this.panel.color.mode === 'opacity') {
-      return getColorFromHexRgbOrName(
-        this.panel.color.cardColor,
-        contextSrv.user.lightTheme ? GrafanaThemeType.Light : GrafanaThemeType.Dark
-      );
+      return getColorForTheme(this.panel.color.cardColor, config.theme);
     } else {
       return this.colorScale(d.count);
     }
@@ -722,7 +735,7 @@ export class HeatmapRenderer {
   }
 
   onMouseLeave() {
-    appEvents.emit(CoreEvents.graphHoverClear);
+    this.ctrl.dashboard.events.publish(new LegacyGraphHoverClearEvent());
     this.clearCrosshair();
   }
 
@@ -768,7 +781,7 @@ export class HeatmapRenderer {
     // Set minimum offset to prevent showing legend from another panel
     pos.panelRelY = Math.max(pos.offset.y / this.height, 0.001);
     // broadcast to other graph panels that we are hovering
-    appEvents.emit(CoreEvents.graphHover, { pos: pos, panel: this.panel });
+    this.ctrl.dashboard.events.publish(new LegacyGraphHoverEvent({ pos: pos, panel: this.panel }));
   }
 
   limitSelection(x2: number) {

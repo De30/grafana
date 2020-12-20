@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { SelectableValue } from '@grafana/data';
-import { SegmentAsync } from './';
+import { SegmentAsync, Icon } from '@grafana/ui';
 
 const AddButton = (
   <a className="gf-form-label query-part">
-    <i className="fa fa-plus" />
+    <Icon name="plus" />
   </a>
 );
 
@@ -48,8 +48,8 @@ export const ArrayOptions = () => {
 };
 
 export default {
-  title: 'UI/Segment/SegmentAsync',
-  component: ArrayOptions,
+  title: 'Data Source/Segment/SegmentAsync',
+  component: SegmentAsync,
 };
 
 export const ArrayOptionsWithPrimitiveValue = () => {
@@ -118,6 +118,24 @@ export const CustomLabel = () => {
         onChange={({ value }) => {
           setValue(value);
           action('Segment value changed')(value);
+        }}
+      />
+    </SegmentFrame>
+  );
+};
+
+export const HtmlAttributes = () => {
+  const [value, setValue] = useState<any>(options[0]);
+  return (
+    <SegmentFrame loadOptions={() => loadOptions(options)}>
+      <SegmentAsync
+        data-testid="segment-async-test"
+        id="segment-async"
+        value={value}
+        loadOptions={() => loadOptions(options)}
+        onChange={item => {
+          setValue(item);
+          action('Segment value changed')(item.value);
         }}
       />
     </SegmentFrame>

@@ -22,7 +22,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
       label: logs-label;
       display: flex;
       padding: 0 2px;
-      background-color: ${selectThemeVariant({ light: theme.colors.gray5, dark: theme.colors.dark6 }, theme.type)};
+      background-color: ${selectThemeVariant({ light: theme.palette.gray5, dark: theme.palette.dark6 }, theme.type)};
       border-radius: ${theme.border.radius};
       margin: 1px 4px 0 0;
       text-overflow: ellipsis;
@@ -57,7 +57,7 @@ export const UnThemedLogLabels: FunctionComponent<Props> = ({ labels, theme }) =
 
   return (
     <span className={cx([styles.logsLabels])}>
-      {displayLabels.map(label => {
+      {displayLabels.sort().map(label => {
         const value = labels[label];
         const tooltip = `${label}: ${value}`;
         return (

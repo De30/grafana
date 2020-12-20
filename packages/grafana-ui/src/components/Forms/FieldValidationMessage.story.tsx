@@ -1,6 +1,7 @@
 import React from 'react';
-import { FieldValidationMessage } from './FieldValidationMessage';
 import { text } from '@storybook/addon-knobs';
+import { FieldValidationMessage } from './FieldValidationMessage';
+import mdx from './FieldValidationMessage.mdx';
 
 const getKnobs = () => {
   return {
@@ -9,8 +10,13 @@ const getKnobs = () => {
 };
 
 export default {
-  title: 'UI/Forms/FieldValidationMessage',
+  title: 'Forms/FieldValidationMessage',
   component: FieldValidationMessage,
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
 };
 
 export const simple = () => {

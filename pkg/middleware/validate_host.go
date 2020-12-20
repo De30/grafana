@@ -3,13 +3,13 @@ package middleware
 import (
 	"strings"
 
-	m "github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/setting"
 	"gopkg.in/macaron.v1"
 )
 
-func ValidateHostHeader(domain string) macaron.Handler {
-	return func(c *m.ReqContext) {
+func ValidateHostHeader(cfg *setting.Cfg) macaron.Handler {
+	return func(c *models.ReqContext) {
 		// ignore local render calls
 		if c.IsRenderCall {
 			return
@@ -20,8 +20,8 @@ func ValidateHostHeader(domain string) macaron.Handler {
 			h = h[:i]
 		}
 
-		if !strings.EqualFold(h, domain) {
-			c.Redirect(strings.TrimSuffix(setting.AppUrl, "/")+c.Req.RequestURI, 301)
+		if !strings.EqualFold(h, cfg.Domain) {
+			c.Redirect(strings.TrimSuffix(cfg.AppURL, "/")+c.Req.RequestURI, 301)
 			return
 		}
 	}

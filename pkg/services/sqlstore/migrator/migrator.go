@@ -1,14 +1,15 @@
 package migrator
 
 import (
+	"errors"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/util/errutil"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"xorm.io/xorm"
 )
 
 type Migrator struct {
@@ -20,8 +21,8 @@ type Migrator struct {
 
 type MigrationLog struct {
 	Id          int64
-	MigrationId string
-	Sql         string
+	MigrationID string `xorm:"migration_id"`
+	SQL         string `xorm:"sql"`
 	Success     bool
 	Error       string
 	Timestamp   time.Time
@@ -51,9 +52,8 @@ func (mg *Migrator) GetMigrationLog() (map[string]MigrationLog, error) {
 
 	exists, err := mg.x.IsTableExist(new(MigrationLog))
 	if err != nil {
-		return nil, err
+		return nil, errutil.Wrap("failed to check table existence", err)
 	}
-
 	if !exists {
 		return logMap, nil
 	}
@@ -66,14 +66,14 @@ func (mg *Migrator) GetMigrationLog() (map[string]MigrationLog, error) {
 		if !logItem.Success {
 			continue
 		}
-		logMap[logItem.MigrationId] = logItem
+		logMap[logItem.MigrationID] = logItem
 	}
 
 	return logMap, nil
 }
 
 func (mg *Migrator) Start() error {
-	mg.Logger.Info("Starting DB migration")
+	mg.Logger.Info("Starting DB migrations")
 
 	logMap, err := mg.GetMigrationLog()
 	if err != nil {
@@ -81,17 +81,18 @@ func (mg *Migrator) Start() error {
 	}
 
 	for _, m := range mg.migrations {
+		m := m
 		_, exists := logMap[m.Id()]
 		if exists {
 			mg.Logger.Debug("Skipping migration: Already executed", "id", m.Id())
 			continue
 		}
 
-		sql := m.Sql(mg.Dialect)
+		sql := m.SQL(mg.Dialect)
 
 		record := MigrationLog{
-			MigrationId: m.Id(),
-			Sql:         sql,
+			MigrationID: m.Id(),
+			SQL:         sql,
 			Timestamp:   time.Now(),
 		}
 
@@ -109,9 +110,8 @@ func (mg *Migrator) Start() error {
 			_, err = sess.Insert(&record)
 			return err
 		})
-
 		if err != nil {
-			return err
+			return errutil.Wrap("migration failed", err)
 		}
 	}
 
@@ -123,7 +123,7 @@ func (mg *Migrator) exec(m Migration, sess *xorm.Session) error {
 
 	condition := m.GetCondition()
 	if condition != nil {
-		sql, args := condition.Sql(mg.Dialect)
+		sql, args := condition.SQL(mg.Dialect)
 
 		if sql != "" {
 			mg.Logger.Debug("Executing migration condition sql", "id", m.Id(), "sql", sql, "args", args)
@@ -145,7 +145,7 @@ func (mg *Migrator) exec(m Migration, sess *xorm.Session) error {
 		mg.Logger.Debug("Executing code migration", "id", m.Id())
 		err = codeMigration.Exec(sess, mg)
 	} else {
-		sql := m.Sql(mg.Dialect)
+		sql := m.SQL(mg.Dialect)
 		mg.Logger.Debug("Executing sql migration", "id", m.Id(), "sql", sql)
 		_, err = sess.Exec(sql)
 	}
@@ -169,8 +169,8 @@ func (mg *Migrator) inTransaction(callback dbTransactionFunc) error {
 	}
 
 	if err := callback(sess); err != nil {
-		if rollErr := sess.Rollback(); err != rollErr {
-			return errutil.Wrapf(err, "Failed to roll back transaction due to error: %s", rollErr)
+		if rollErr := sess.Rollback(); !errors.Is(err, rollErr) {
+			return errutil.Wrapf(err, "failed to roll back transaction due to error: %s; initial err: %s", rollErr, err)
 		}
 
 		return err

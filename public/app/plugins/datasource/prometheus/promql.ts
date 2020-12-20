@@ -1,7 +1,9 @@
+import { Grammar } from 'prismjs';
 import { CompletionItem } from '@grafana/ui';
 
 export const RATE_RANGES: CompletionItem[] = [
   { label: '$__interval', sortText: '$__interval' },
+  { label: '$__rate_interval', sortText: '$__rate_interval' },
   { label: '1m', sortText: '00:01:00' },
   { label: '5m', sortText: '00:05:00' },
   { label: '10m', sortText: '00:10:00' },
@@ -375,10 +377,9 @@ export const FUNCTIONS = [
   },
 ];
 
-const tokenizer = {
+const tokenizer: Grammar = {
   comment: {
-    pattern: /(^|[^\n])#.*/,
-    lookbehind: true,
+    pattern: /#.*/,
   },
   'context-aggregation': {
     pattern: /((by|without)\s*)\([^)]*\)/, // by ()
@@ -393,10 +394,15 @@ const tokenizer = {
   },
   'context-labels': {
     pattern: /\{[^}]*(?=})/,
+    greedy: true,
     inside: {
+      comment: {
+        pattern: /#.*/,
+      },
       'label-key': {
         pattern: /[a-z_]\w*(?=\s*(=|!=|=~|!~))/,
         alias: 'attr-name',
+        greedy: true,
       },
       'label-value': {
         pattern: /"(?:\\.|[^\\"])*"/,

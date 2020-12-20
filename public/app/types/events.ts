@@ -1,5 +1,4 @@
-import { DataFrame, eventFactory, TimeRange } from '@grafana/data';
-import { IHttpResponse } from 'angular';
+import { BusEventBase, eventFactory, TimeRange } from '@grafana/data';
 import { DashboardModel } from 'app/features/dashboard/state';
 
 /**
@@ -23,6 +22,11 @@ export interface ShowModalPayload {
   scope?: any;
 }
 
+export interface ShowModalReactPayload {
+  component: React.ComponentType;
+  props?: any;
+}
+
 export interface ShowConfirmModalPayload {
   title?: string;
   text?: string;
@@ -38,20 +42,19 @@ export interface ShowConfirmModalPayload {
   onAltAction?: () => void;
 }
 
-type DataSourceResponsePayload = IHttpResponse<any>;
-
-export interface SaveDashboardPayload {
-  overwrite?: boolean;
-  folderId?: number;
-  makeEditable?: boolean;
+export interface DataSourceResponse<T> {
+  data: T;
+  readonly status: number;
+  readonly statusText: string;
+  readonly ok: boolean;
+  readonly headers: Headers;
+  readonly redirected: boolean;
+  readonly type: ResponseType;
+  readonly url: string;
+  readonly config: any;
 }
 
-export interface GraphHoverPayload {
-  pos: any;
-  panel: {
-    id: number;
-  };
-}
+type DataSourceResponsePayload = DataSourceResponse<any>;
 
 export interface ToggleKioskModePayload {
   exit?: boolean;
@@ -74,36 +77,24 @@ export interface DashScrollPayload {
   pos?: number;
 }
 
+export interface PanelChangeViewPayload {}
+
 /**
  * Events
  */
 
-export const showDashSearch = eventFactory<ShowDashSearchPayload>('show-dash-search');
-export const hideDashSearch = eventFactory('hide-dash-search');
-export const hideDashEditor = eventFactory('hide-dash-editor');
-export const dashScroll = eventFactory<DashScrollPayload>('dash-scroll');
 export const dashLinksUpdated = eventFactory('dash-links-updated');
-export const saveDashboard = eventFactory<SaveDashboardPayload>('save-dashboard');
-export const dashboardFetchStart = eventFactory('dashboard-fetch-start');
 export const dashboardSaved = eventFactory<DashboardModel>('dashboard-saved');
 export const removePanel = eventFactory<number>('remove-panel');
-
 export const searchQuery = eventFactory('search-query');
-
-export const locationChange = eventFactory<LocationChangePayload>('location-change');
-
-export const timepickerOpen = eventFactory('timepickerOpen');
-export const timepickerClosed = eventFactory('timepickerClosed');
 
 export const showModal = eventFactory<ShowModalPayload>('show-modal');
 export const showConfirmModal = eventFactory<ShowConfirmModalPayload>('confirm-modal');
 export const hideModal = eventFactory('hide-modal');
+export const showModalReact = eventFactory<ShowModalReactPayload>('show-modal-react');
 
 export const dsRequestResponse = eventFactory<DataSourceResponsePayload>('ds-request-response');
 export const dsRequestError = eventFactory<any>('ds-request-error');
-
-export const graphHover = eventFactory<GraphHoverPayload>('graph-hover');
-export const graphHoverClear = eventFactory('graph-hover-clear');
 
 export const toggleSidemenuMobile = eventFactory('toggle-sidemenu-mobile');
 export const toggleSidemenuHidden = eventFactory('toggle-sidemenu-hidden');
@@ -115,14 +106,8 @@ export const toggleKioskMode = eventFactory<ToggleKioskModePayload>('toggle-kios
 export const toggleViewMode = eventFactory('toggle-view-mode');
 
 export const timeRangeUpdated = eventFactory<TimeRange>('time-range-updated');
-
-export const repeatsProcessed = eventFactory('repeats-processed');
-export const rowExpanded = eventFactory('row-expanded');
-export const rowCollapsed = eventFactory('row-collapsed');
 export const templateVariableValueUpdated = eventFactory('template-variable-value-updated');
 export const submenuVisibilityChanged = eventFactory<boolean>('submenu-visibility-changed');
-
-export const dataFramesReceived = eventFactory<DataFrame[]>('data-frames-received');
 
 export const graphClicked = eventFactory<GraphClickedPayload>('graph-click');
 
@@ -132,12 +117,34 @@ export const zoomOut = eventFactory<number>('zoom-out');
 
 export const shiftTime = eventFactory<number>('shift-time');
 
-export const elasticQueryUpdated = eventFactory('elastic-query-updated');
-
-export const layoutModeChanged = eventFactory<string>('layout-mode-changed');
-
-export const jsonDiffReady = eventFactory('json-diff-ready');
-
-export const closeTimepicker = eventFactory('closeTimepicker');
-
 export const routeUpdated = eventFactory('$routeUpdate');
+
+/**
+ * Used for syncing queries badge count in panel edit queries tab
+ * Think we can get rid of this soon
+ */
+export class PanelQueriesChangedEvent extends BusEventBase {
+  static type = 'panel-queries-changed';
+}
+
+/**
+ * Used for syncing transformations badge count in panel edit transform tab
+ * Think we can get rid of this soon
+ */
+export class PanelTransformationsChangedEvent extends BusEventBase {
+  static type = 'panel-transformations-changed';
+}
+
+/**
+ * Used by panel editor to know when panel plugin it'self trigger option updates
+ */
+export class PanelOptionsChangedEvent extends BusEventBase {
+  static type = 'panels-options-changed';
+}
+
+/**
+ * Used internally by DashboardModel to commmunicate with DashboardGrid that it needs to re-render
+ */
+export class DashboardPanelsChangedEvent extends BusEventBase {
+  static type = 'dashboard-panels-changed';
+}

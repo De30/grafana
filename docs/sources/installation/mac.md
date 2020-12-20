@@ -1,81 +1,67 @@
 +++
-title = "Installing on macOS"
+title = "Install on macOS"
 description = "Installing Grafana on macOS"
 keywords = ["grafana", "configuration", "documentation", "mac", "homebrew", "osx"]
-type = "docs"
-[menu.docs]
-parent = "installation"
 weight = 500
 +++
 
+# Install on macOS
 
-# Installing on macOS
+This page explains how to install Grafana and get the service running on your macOS.
 
-This page provides instructions to help you install Grafana on macOS. You can either install using homebrew or a binary tar file.
+**Note on upgrading:** While the process for upgrading Grafana is very similar to installing Grafana, there are some key backup steps you should perform. Before you perform an upgrade, read [Upgrading Grafana]({{< relref "upgrading.md" >}}) for tips and guidance on updating an existing installation.
 
+## Install with Homebrew
 
-## Install using homebrew
+Use [Homebrew](http://brew.sh/) to install the most recent released version of Grafana using Homebrew package.
 
-Installation can be done using [homebrew](http://brew.sh/)
+1. On the Homberew homepage, search for Grafana. The last stable and released version is listed.
+1. Open a terminal and enter:
+    ```
+   brew update
+   brew install grafana
+   ```
 
-Install latest stable:
+   The brew page downloads and untars the files into `/usr/local/Cellar/grafana/version`.
 
-```bash
-brew update
-brew install grafana
-```
+1. Start Grafana using the command:
+   ```bash
+   brew services start grafana
+   ```
 
-To start grafana look at the command printed after the homebrew install completes.
+## Install standalone macOS binaries
 
-To upgrade use the reinstall command
+To install a nightly build, or to install the latest version of Grafana  without Homebrew, go to the [Grafana download page](https://grafana.com/grafana/download/7.3.0-381ff45epre?platform=mac).
+
+1. Select the Grafana version you want to install. By default, the most recent released version is selected.
+
+   > **Note:** The downloads page lists only finished releases. If you want to install a beta version, click [Nightly ] **Nightly Builds** and then select a version.
+
+1. Select an **Edition**.
+   * **Open Source** - Functionally identical to the enterprise version, but you will need to download the enterprise version if you want enterprise features.
+   * **Enterprise** - Recommended download. Functionally identical to the open source version, but includes features you can unlock with a license if you so choose.
+1. Click **Mac**.
+1. Open a terminal and download the binary using the cURL command. The following example shows Grafana 7.1.5 version:
+   ```bash
+   curl -O https://dl.grafana.com/oss/release/grafana-7.1.5.darwin-amd64.tar.gz
+      ```
+1.  Untar the gz file and copy the files to the location of your preference.
+1.  To start Grafana service, go to the directory and run the command:
+      ```bash
+      ./bin/grafana-server web
+      ```
+
+## Next steps
+
+Refer to the [Getting Started]({{< relref "../getting-started/getting-started/" >}}) guide for information about logging in, setting up data sources, and so on. Also, refer to the [Configuration]({{< relref "../administration/configuration.md" >}}) page for details on options for customizing your environment, logging, database, and so on.
+
+## Upgrade
+
+**Using Homebrew**
+
+To upgrade Grafana, use the reinstall command:
 
 ```bash
 brew update
 brew reinstall grafana
 ```
-
--------------
-
-You can also install the latest unstable grafana from git:
-
-
-```bash
-brew install --HEAD grafana/grafana/grafana
-```
-
-To upgrade grafana if you've installed from HEAD:
-
-```bash
-brew reinstall --HEAD grafana/grafana/grafana
-```
-
-### Start Grafana
-
-To start Grafana using homebrew services first make sure homebrew/services is installed.
-
-```bash
-brew tap homebrew/services
-```
-
-Then start Grafana using:
-
-```bash
-brew services start grafana
-```
-
-Default login and password `admin`/ `admin`
-
-## Install from binary tar file
-
-Download [the latest `.tar.gz` file](https://grafana.com/get) and
-extract it.  This will extract into a folder named after the version you
-downloaded. This folder contains all files required to run Grafana.  There are
-no init scripts or install scripts in this package.
-
-To configure Grafana add a configuration file named `custom.ini` to the
-`conf` folder and override any of the settings defined in
-`conf/defaults.ini`.
-
-### Start Grafana
-
-Start Grafana by executing `./bin/grafana-server`. The `grafana-server` binary needs the working directory to be the root install directory (where the binary and the `public` folder is located).

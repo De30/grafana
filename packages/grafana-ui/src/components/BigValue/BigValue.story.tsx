@@ -1,58 +1,68 @@
-import { storiesOf } from '@storybook/react';
-import { text } from '@storybook/addon-knobs';
-import { BigValue, BigValueColorMode, BigValueGraphMode } from './BigValue';
+import React from 'react';
+import { color, number, select, text } from '@storybook/addon-knobs';
+import { BigValue, BigValueColorMode, BigValueGraphMode, BigValueJustifyMode, BigValueTextMode } from './BigValue';
 import { withCenteredStory } from '../../utils/storybook/withCenteredStory';
-import { renderComponentWithTheme } from '../../utils/storybook/withTheme';
+import mdx from './BigValue.mdx';
+import { useTheme } from '../../themes';
+import { ArrayVector, FieldSparkline, FieldType } from '@grafana/data';
 
 const getKnobs = () => {
   return {
     value: text('value', '$5022'),
     title: text('title', 'Total Earnings'),
+    colorMode: select('Color mode', [BigValueColorMode.Value, BigValueColorMode.Background], BigValueColorMode.Value),
+    graphMode: select('Graph mode', [BigValueGraphMode.Area, BigValueGraphMode.None], BigValueGraphMode.Area),
+    justifyMode: select('Justify', [BigValueJustifyMode.Auto, BigValueJustifyMode.Center], BigValueJustifyMode.Auto),
+    width: number('Width', 400, { range: true, max: 800, min: 200 }),
+    height: number('Height', 300, { range: true, max: 800, min: 200 }),
+    color: color('Value color', 'red'),
+    textMode: select(
+      'Text mode',
+      [BigValueTextMode.Auto, BigValueTextMode.Name, BigValueTextMode.ValueAndName, BigValueTextMode.None],
+      BigValueTextMode.Auto
+    ),
   };
 };
 
-const BigValueStories = storiesOf('UI/BigValue', module);
+export default {
+  title: 'Visualizations/BigValue',
+  component: BigValue,
+  decorators: [withCenteredStory],
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+};
 
-BigValueStories.addDecorator(withCenteredStory);
+export const Basic = () => {
+  const { value, title, colorMode, graphMode, height, width, color, textMode, justifyMode } = getKnobs();
+  const theme = useTheme();
+  const sparkline: FieldSparkline = {
+    y: {
+      name: '',
+      values: new ArrayVector([1, 2, 3, 4, 3]),
+      type: FieldType.number,
+      config: {},
+    },
+  };
 
-interface StoryOptions {
-  colorMode: BigValueColorMode;
-  graphMode: BigValueGraphMode;
-  width?: number;
-  height?: number;
-  noSparkline?: boolean;
-}
-
-function addStoryForMode(options: StoryOptions) {
-  BigValueStories.add(`Color: ${options.colorMode}`, () => {
-    const { value, title } = getKnobs();
-
-    return renderComponentWithTheme(BigValue, {
-      width: options.width || 400,
-      height: options.height || 300,
-      colorMode: options.colorMode,
-      graphMode: options.graphMode,
-      value: {
+  return (
+    <BigValue
+      theme={theme}
+      width={width}
+      height={height}
+      colorMode={colorMode}
+      graphMode={graphMode}
+      textMode={textMode}
+      justifyMode={justifyMode}
+      value={{
         text: value,
         numeric: 5022,
-        color: 'red',
+        color: color,
         title,
-      },
-      sparkline: {
-        minX: 0,
-        maxX: 5,
-        data: [
-          [0, 10],
-          [1, 20],
-          [2, 15],
-          [3, 25],
-          [4, 5],
-          [5, 10],
-        ],
-      },
-    });
-  });
-}
-
-addStoryForMode({ colorMode: BigValueColorMode.Value, graphMode: BigValueGraphMode.Area });
-addStoryForMode({ colorMode: BigValueColorMode.Background, graphMode: BigValueGraphMode.Line });
+      }}
+      sparkline={graphMode === BigValueGraphMode.None ? undefined : sparkline}
+    />
+  );
+};

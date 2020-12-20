@@ -1,31 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { css } from 'emotion';
-
-import { Tooltip, useTheme, stylesFactory } from '@grafana/ui';
-import { GrafanaTheme } from '@grafana/data';
-
-const getStyles = stylesFactory((theme: GrafanaTheme) => {
-  return {
-    timePickerSynced: css`
-      label: timePickerSynced;
-      border-color: ${theme.colors.orangeDark};
-      background-image: none;
-      background-color: transparent;
-      color: ${theme.colors.orangeDark};
-      &:focus,
-      :hover {
-        color: ${theme.colors.orangeDark};
-        background-image: none;
-        background-color: transparent;
-      }
-    `,
-    noRightBorderStyle: css`
-      label: noRightBorderStyle;
-      border-right: 0;
-    `,
-  };
-});
+import { Tooltip, Icon } from '@grafana/ui';
 
 interface TimeSyncButtonProps {
   isSynced: boolean;
@@ -34,8 +9,6 @@ interface TimeSyncButtonProps {
 
 export function TimeSyncButton(props: TimeSyncButtonProps) {
   const { onClick, isSynced } = props;
-  const theme = useTheme();
-  const styles = getStyles(theme);
 
   const syncTimesTooltip = () => {
     const { isSynced } = props;
@@ -47,12 +20,12 @@ export function TimeSyncButton(props: TimeSyncButtonProps) {
     <Tooltip content={syncTimesTooltip} placement="bottom">
       <button
         className={classNames('btn navbar-button navbar-button--attached', {
-          [`explore-active-button-glow ${styles.timePickerSynced}`]: isSynced,
+          [`explore-active-button`]: isSynced,
         })}
         aria-label={isSynced ? 'Synced times' : 'Unsynced times'}
         onClick={() => onClick()}
       >
-        <i className={classNames('fa fa-link', isSynced && 'icon-brand-gradient')} />
+        <Icon name="link" className={isSynced ? 'icon-brand-gradient' : ''} size="lg" />
       </button>
     </Tooltip>
   );

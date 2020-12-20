@@ -1,7 +1,8 @@
 import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import 'jquery';
 import $ from 'jquery';
+import 'mutationobserver-shim';
 
 const global = window as any;
 global.$ = global.jQuery = $;
@@ -43,8 +44,6 @@ const localStorageMock = (() => {
 })();
 
 global.localStorage = localStorageMock;
-
-HTMLCanvasElement.prototype.getContext = jest.fn() as any;
 
 const throwUnhandledRejections = () => {
   process.on('unhandledRejection', err => {

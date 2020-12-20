@@ -91,15 +91,15 @@ export default class TimeSeries {
   label: string;
   alias: string;
   aliasEscaped: string;
-  color: string;
+  color?: string;
   valueFormater: any;
   stats: any;
   legend: boolean;
   hideTooltip: boolean;
   allIsNull: boolean;
   allIsZero: boolean;
-  decimals: number;
-  scaledDecimals: number;
+  decimals: DecimalCount;
+  scaledDecimals: DecimalCount;
   hasMsResolution: boolean;
   isOutsideRange: boolean;
 
@@ -232,6 +232,7 @@ export default class TimeSeries {
     this.stats.first = null;
     this.stats.delta = 0;
     this.stats.diff = null;
+    this.stats.diffperc = 0;
     this.stats.range = null;
     this.stats.timeStep = Number.MAX_VALUE;
     this.allIsNull = true;
@@ -336,6 +337,7 @@ export default class TimeSeries {
     }
     if (this.stats.current !== null && this.stats.first !== null) {
       this.stats.diff = this.stats.current - this.stats.first;
+      this.stats.diffperc = this.stats.diff / this.stats.first;
     }
 
     this.stats.count = result.length;
@@ -348,7 +350,7 @@ export default class TimeSeries {
     this.scaledDecimals = scaledDecimals;
   }
 
-  formatValue(value: number) {
+  formatValue(value: number | null) {
     if (!_.isFinite(value)) {
       value = null; // Prevent NaN formatting
     }

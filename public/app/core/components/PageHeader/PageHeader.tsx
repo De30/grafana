@@ -1,81 +1,72 @@
-import React, { FormEvent } from 'react';
-import classNames from 'classnames';
-import appEvents from 'app/core/app_events';
+import React from 'react';
+import { css } from 'emotion';
+import { Tab, TabsBar, Icon, IconName } from '@grafana/ui';
 import { NavModel, NavModelItem, NavModelBreadcrumb } from '@grafana/data';
-import { CoreEvents } from 'app/types';
+import { PanelHeaderMenuItem } from 'app/features/dashboard/dashgrid/PanelHeader/PanelHeaderMenuItem';
 
 export interface Props {
   model: NavModel;
 }
 
-const SelectNav = ({ main, customCss }: { main: NavModelItem; customCss: string }) => {
-  const defaultSelectedItem = main.children.find(navItem => {
+const SelectNav = ({ children, customCss }: { children: NavModelItem[]; customCss: string }) => {
+  if (!children || children.length === 0) {
+    return null;
+  }
+
+  const defaultSelectedItem = children.find(navItem => {
     return navItem.active === true;
   });
 
-  const gotoUrl = (evt: FormEvent) => {
-    const element = evt.target as HTMLSelectElement;
-    const url = element.options[element.selectedIndex].value;
-    appEvents.emit(CoreEvents.locationChange, { href: url });
-  };
-
   return (
     <div className={`gf-form-select-wrapper width-20 ${customCss}`}>
-      <label className={`gf-form-select-icon ${defaultSelectedItem.icon}`} htmlFor="page-header-select-nav" />
-      {/* Label to make it clickable */}
-      <select
-        className="gf-select-nav gf-form-input"
-        value={defaultSelectedItem.url}
-        onChange={gotoUrl}
-        id="page-header-select-nav"
-      >
-        {main.children.map((navItem: NavModelItem) => {
-          if (navItem.hideFromTabs) {
-            // TODO: Rename hideFromTabs => hideFromNav
-            return null;
-          }
-          return (
-            <option key={navItem.url} value={navItem.url}>
-              {navItem.text}
-            </option>
-          );
-        })}
-      </select>
+      <div className="dropdown">
+        <div className="gf-form-input dropdown-toggle" data-toggle="dropdown">
+          {defaultSelectedItem?.text}
+        </div>
+        <ul className="dropdown-menu dropdown-menu--menu">
+          {children.map((navItem: NavModelItem) => {
+            if (navItem.hideFromTabs) {
+              // TODO: Rename hideFromTabs => hideFromNav
+              return null;
+            }
+            return (
+              <PanelHeaderMenuItem
+                key={navItem.url}
+                iconClassName={navItem.icon}
+                text={navItem.text}
+                href={navItem.url}
+              />
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 };
 
-const Tabs = ({ main, customCss }: { main: NavModelItem; customCss: string }) => {
-  return (
-    <ul className={`gf-tabs ${customCss}`}>
-      {main.children.map((tab, idx) => {
-        if (tab.hideFromTabs) {
-          return null;
-        }
+const Navigation = ({ children }: { children: NavModelItem[] }) => {
+  if (!children || children.length === 0) {
+    return null;
+  }
 
-        const tabClasses = classNames({
-          'gf-tabs-link': true,
-          active: tab.active,
-        });
-
-        return (
-          <li className="gf-tabs-item" key={tab.url}>
-            <a className={tabClasses} target={tab.target} href={tab.url}>
-              <i className={tab.icon} />
-              {tab.text}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  );
-};
-
-const Navigation = ({ main }: { main: NavModelItem }) => {
   return (
     <nav>
-      <SelectNav customCss="page-header__select-nav" main={main} />
-      <Tabs customCss="page-header__tabs" main={main} />
+      <SelectNav customCss="page-header__select-nav">{children}</SelectNav>
+      <TabsBar className="page-header__tabs" hideBorder={true}>
+        {children.map((child, index) => {
+          return (
+            !child.hideFromTabs && (
+              <Tab
+                label={child.text}
+                active={child.active}
+                key={`${child.url}-${index}`}
+                icon={child.icon as IconName}
+                href={child.url}
+              />
+            )
+          );
+        })}
+      </TabsBar>
     </nav>
   );
 };
@@ -117,15 +108,24 @@ export default class PageHeader extends React.Component<Props, any> {
   }
 
   renderHeaderTitle(main: NavModelItem) {
+    const iconClassName =
+      main.icon === 'grafana'
+        ? css`
+            margin-top: 12px;
+          `
+        : css`
+            margin-top: 14px;
+          `;
+
     return (
       <div className="page-header__inner">
         <span className="page-header__logo">
-          {main.icon && <i className={`page-header__icon ${main.icon}`} />}
+          {main.icon && <Icon name={main.icon as IconName} size="xxxl" className={iconClassName} />}
           {main.img && <img className="page-header__img" src={main.img} />}
         </span>
 
         <div className="page-header__info-block">
-          {this.renderTitle(main.text, main.breadcrumbs)}
+          {this.renderTitle(main.text, main.breadcrumbs ?? [])}
           {main.subTitle && <div className="page-header__sub-title">{main.subTitle}</div>}
         </div>
       </div>
@@ -140,13 +140,14 @@ export default class PageHeader extends React.Component<Props, any> {
     }
 
     const main = model.main;
+    const children = main.children;
 
     return (
       <div className="page-header-canvas">
         <div className="page-container">
           <div className="page-header">
             {this.renderHeaderTitle(main)}
-            {main.children && <Navigation main={main} />}
+            {children && children.length && <Navigation>{children}</Navigation>}
           </div>
         </div>
       </div>

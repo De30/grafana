@@ -1,22 +1,31 @@
+import { of } from 'rxjs';
+import { dateTime } from '@grafana/data';
+
 import { MssqlDatasource } from '../datasource';
 import { TimeSrvStub } from 'test/specs/helpers';
-import { CustomVariable } from 'app/features/templating/custom_variable';
-
-import { dateTime } from '@grafana/data';
 import { TemplateSrv } from 'app/features/templating/template_srv';
+import { backendSrv } from 'app/core/services/backend_srv';
+import { initialCustomVariableModelState } from '../../../../features/variables/custom/reducer';
+import { createFetchResponse } from 'test/helpers/createFetchResponse';
+
+jest.mock('@grafana/runtime', () => ({
+  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  getBackendSrv: () => backendSrv,
+}));
 
 describe('MSSQLDatasource', () => {
   const templateSrv: TemplateSrv = new TemplateSrv();
+  const fetchMock = jest.spyOn(backendSrv, 'fetch');
 
   const ctx: any = {
-    backendSrv: {},
     timeSrv: new TimeSrvStub(),
   };
 
   beforeEach(() => {
-    ctx.instanceSettings = { name: 'mssql' };
+    jest.clearAllMocks();
 
-    ctx.ds = new MssqlDatasource(ctx.instanceSettings, ctx.backendSrv, templateSrv, ctx.timeSrv);
+    ctx.instanceSettings = { name: 'mssql' };
+    ctx.ds = new MssqlDatasource(ctx.instanceSettings, templateSrv, ctx.timeSrv);
   });
 
   describe('When performing annotationQuery', () => {
@@ -54,9 +63,7 @@ describe('MSSQLDatasource', () => {
     };
 
     beforeEach(() => {
-      ctx.backendSrv.datasourceRequest = (options: any) => {
-        return Promise.resolve({ data: response, status: 200 });
-      };
+      fetchMock.mockImplementation(() => of(createFetchResponse(response)));
 
       return ctx.ds.annotationQuery(options).then((data: any) => {
         results = data;
@@ -102,9 +109,7 @@ describe('MSSQLDatasource', () => {
     };
 
     beforeEach(() => {
-      ctx.backendSrv.datasourceRequest = (options: any) => {
-        return Promise.resolve({ data: response, status: 200 });
-      };
+      fetchMock.mockImplementation(() => of(createFetchResponse(response)));
 
       return ctx.ds.metricFindQuery(query).then((data: any) => {
         results = data;
@@ -143,9 +148,7 @@ describe('MSSQLDatasource', () => {
     };
 
     beforeEach(() => {
-      ctx.backendSrv.datasourceRequest = (options: any) => {
-        return Promise.resolve({ data: response, status: 200 });
-      };
+      fetchMock.mockImplementation(() => of(createFetchResponse(response)));
 
       return ctx.ds.metricFindQuery(query).then((data: any) => {
         results = data;
@@ -186,10 +189,7 @@ describe('MSSQLDatasource', () => {
     };
 
     beforeEach(() => {
-      ctx.backendSrv.datasourceRequest = (options: any) => {
-        return Promise.resolve({ data: response, status: 200 });
-      };
-
+      fetchMock.mockImplementation(() => of(createFetchResponse(response)));
       return ctx.ds.metricFindQuery(query).then((data: any) => {
         results = data;
       });
@@ -203,7 +203,6 @@ describe('MSSQLDatasource', () => {
   });
 
   describe('When performing metricFindQuery', () => {
-    let results: any;
     const query = 'select * from atable';
     const response = {
       results: {
@@ -229,25 +228,23 @@ describe('MSSQLDatasource', () => {
     beforeEach(() => {
       ctx.timeSrv.setTime(time);
 
-      ctx.backendSrv.datasourceRequest = (options: any) => {
-        results = options.data;
-        return Promise.resolve({ data: response, status: 200 });
-      };
+      fetchMock.mockImplementation(() => of(createFetchResponse(response)));
 
       return ctx.ds.metricFindQuery(query);
     });
 
     it('should pass timerange to datasourceRequest', () => {
-      expect(results.from).toBe(time.from.valueOf().toString());
-      expect(results.to).toBe(time.to.valueOf().toString());
-      expect(results.queries.length).toBe(1);
-      expect(results.queries[0].rawSql).toBe(query);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock.mock.calls[0][0].data.from).toBe(time.from.valueOf().toString());
+      expect(fetchMock.mock.calls[0][0].data.to).toBe(time.to.valueOf().toString());
+      expect(fetchMock.mock.calls[0][0].data.queries.length).toBe(1);
+      expect(fetchMock.mock.calls[0][0].data.queries[0].rawSql).toBe(query);
     });
   });
 
   describe('When interpolating variables', () => {
     beforeEach(() => {
-      ctx.variable = new CustomVariable({}, {} as any);
+      ctx.variable = { ...initialCustomVariableModelState };
     });
 
     describe('and value is a string', () => {

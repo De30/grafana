@@ -1,20 +1,28 @@
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withCenteredStory } from '../../utils/storybook/withCenteredStory';
 import { UseState } from '../../utils/storybook/UseState';
-import { TagsInput } from './TagsInput';
+import { TagsInput } from '@grafana/ui';
+import mdx from './TagsInput.mdx';
 
-const TagsInputStories = storiesOf('UI/TagsInput', module);
 const mockTags = ['Some', 'Tags', 'With', 'This', 'New', 'Component'];
 
-TagsInputStories.addDecorator(withCenteredStory);
+export default {
+  title: 'Forms/TagsInput',
+  component: TagsInput,
+  decorators: [withCenteredStory],
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
+};
 
-TagsInputStories.add('default', () => {
+export const basic = () => {
   return <TagsInput tags={[]} onChange={tags => action('tags updated')(tags)} />;
-});
+};
 
-TagsInputStories.add('with mock tags', () => {
+export const withMockTags = () => {
   return (
     <UseState initialState={mockTags}>
       {tags => {
@@ -22,4 +30,4 @@ TagsInputStories.add('with mock tags', () => {
       }}
     </UseState>
   );
-});
+};

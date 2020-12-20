@@ -8,9 +8,8 @@ import union from 'lodash/union';
 import sortBy from 'lodash/sortBy';
 import { ThemeContext } from '../../themes/ThemeContext';
 import { css } from 'emotion';
-import { selectThemeVariant } from '../../themes/index';
 
-interface GraphLegendProps extends LegendProps {
+export interface GraphLegendProps extends LegendProps {
   displayMode: LegendDisplayMode;
   sortBy?: string;
   sortDesc?: boolean;
@@ -61,13 +60,7 @@ export const GraphLegend: React.FunctionComponent<GraphLegendProps> = ({
         })
       : items;
 
-    const legendTableEvenRowBackground = selectThemeVariant(
-      {
-        dark: theme.colors.dark6,
-        light: theme.colors.gray5,
-      },
-      theme.type
-    );
+    const legendTableEvenRowBackground = theme.isDark ? theme.palette.dark6 : theme.palette.gray5;
 
     return (
       <LegendTable

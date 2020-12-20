@@ -1,15 +1,19 @@
 package guardian
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"testing"
 
-	m "github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/bus"
+	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/setting"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 )
 
-var (
+const (
 	orgID              = int64(1)
 	defaultDashboardID = int64(-1)
 	dashboardID        = int64(1)
@@ -19,160 +23,157 @@ var (
 	otherUserID        = int64(2)
 	teamID             = int64(1)
 	otherTeamID        = int64(2)
-	adminRole          = m.ROLE_ADMIN
-	editorRole         = m.ROLE_EDITOR
-	viewerRole         = m.ROLE_VIEWER
+)
+
+var (
+	adminRole  = models.ROLE_ADMIN
+	editorRole = models.ROLE_EDITOR
+	viewerRole = models.ROLE_VIEWER
 )
 
 func TestGuardianAdmin(t *testing.T) {
-	Convey("Guardian admin org role tests", t, func() {
-		orgRoleScenario("Given user has admin org role", t, m.ROLE_ADMIN, func(sc *scenarioContext) {
-			// dashboard has default permissions
-			sc.defaultPermissionScenario(USER, FULL_ACCESS)
+	orgRoleScenario("Given user has admin org role", t, models.ROLE_ADMIN, func(sc *scenarioContext) {
+		// dashboard has default permissions
+		sc.defaultPermissionScenario(USER, FULL_ACCESS)
 
-			// dashboard has user with permission
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_VIEW, FULL_ACCESS)
+		// dashboard has user with permission
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// dashboard has team with permission
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_VIEW, FULL_ACCESS)
+		// dashboard has team with permission
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// dashboard has editor role with permission
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_VIEW, FULL_ACCESS)
+		// dashboard has editor role with permission
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// dashboard has viewer role with permission
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_VIEW, FULL_ACCESS)
+		// dashboard has viewer role with permission
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// parent folder has user with permission
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_VIEW, FULL_ACCESS)
+		// parent folder has user with permission
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// parent folder has team with permission
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_VIEW, FULL_ACCESS)
+		// parent folder has team with permission
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// parent folder has editor role with permission
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_VIEW, FULL_ACCESS)
+		// parent folder has editor role with permission
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_VIEW, FULL_ACCESS)
 
-			// parent folder has viweer role with permission
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_EDIT, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_VIEW, FULL_ACCESS)
-		})
+		// parent folder has viewer role with permission
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_EDIT, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_VIEW, FULL_ACCESS)
 	})
 }
 
 func TestGuardianEditor(t *testing.T) {
-	Convey("Guardian editor org role tests", t, func() {
-		orgRoleScenario("Given user has editor org role", t, m.ROLE_EDITOR, func(sc *scenarioContext) {
-			// dashboard has default permissions
-			sc.defaultPermissionScenario(USER, EDITOR_ACCESS)
+	orgRoleScenario("Given user has editor org role", t, models.ROLE_EDITOR, func(sc *scenarioContext) {
+		// dashboard has default permissions
+		sc.defaultPermissionScenario(USER, EDITOR_ACCESS)
 
-			// dashboard has user with permission
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_VIEW, CAN_VIEW)
+		// dashboard has user with permission
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_VIEW, CAN_VIEW)
 
-			// dashboard has team with permission
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_VIEW, CAN_VIEW)
+		// dashboard has team with permission
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_VIEW, CAN_VIEW)
 
-			// dashboard has editor role with permission
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// dashboard has editor role with permission
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// dashboard has viewer role with permission
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_ADMIN, NO_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_EDIT, NO_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_VIEW, NO_ACCESS)
+		// dashboard has viewer role with permission
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_ADMIN, NO_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_EDIT, NO_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_VIEW, NO_ACCESS)
 
-			// parent folder has user with permission
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// parent folder has user with permission
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has team with permission
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// parent folder has team with permission
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has editor role with permission
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// parent folder has editor role with permission
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has viweer role with permission
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_ADMIN, NO_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_EDIT, NO_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_VIEW, NO_ACCESS)
-		})
+		// parent folder has viewer role with permission
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_ADMIN, NO_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_EDIT, NO_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_VIEW, NO_ACCESS)
 	})
 }
 
 func TestGuardianViewer(t *testing.T) {
-	Convey("Guardian viewer org role tests", t, func() {
-		orgRoleScenario("Given user has viewer org role", t, m.ROLE_VIEWER, func(sc *scenarioContext) {
-			// dashboard has default permissions
-			sc.defaultPermissionScenario(USER, VIEWER_ACCESS)
+	orgRoleScenario("Given user has viewer org role", t, models.ROLE_VIEWER, func(sc *scenarioContext) {
+		// dashboard has default permissions
+		sc.defaultPermissionScenario(USER, VIEWER_ACCESS)
 
-			// dashboard has user with permission
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(USER, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// dashboard has user with permission
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(USER, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// dashboard has team with permission
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(TEAM, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// dashboard has team with permission
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(TEAM, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// dashboard has editor role with permission
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_ADMIN, NO_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_EDIT, NO_ACCESS)
-			sc.dashboardPermissionScenario(EDITOR, m.PERMISSION_VIEW, NO_ACCESS)
+		// dashboard has editor role with permission
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_ADMIN, NO_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_EDIT, NO_ACCESS)
+		sc.dashboardPermissionScenario(EDITOR, models.PERMISSION_VIEW, NO_ACCESS)
 
-			// dashboard has viewer role with permission
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.dashboardPermissionScenario(VIEWER, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// dashboard has viewer role with permission
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.dashboardPermissionScenario(VIEWER, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has user with permission
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(USER, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// parent folder has user with permission
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(USER, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has team with permission
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(TEAM, m.PERMISSION_VIEW, VIEWER_ACCESS)
+		// parent folder has team with permission
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(TEAM, models.PERMISSION_VIEW, VIEWER_ACCESS)
 
-			// parent folder has editor role with permission
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_ADMIN, NO_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_EDIT, NO_ACCESS)
-			sc.parentFolderPermissionScenario(EDITOR, m.PERMISSION_VIEW, NO_ACCESS)
+		// parent folder has editor role with permission
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_ADMIN, NO_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_EDIT, NO_ACCESS)
+		sc.parentFolderPermissionScenario(EDITOR, models.PERMISSION_VIEW, NO_ACCESS)
 
-			// parent folder has viweer role with permission
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_ADMIN, FULL_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_EDIT, EDITOR_ACCESS)
-			sc.parentFolderPermissionScenario(VIEWER, m.PERMISSION_VIEW, VIEWER_ACCESS)
-		})
+		// parent folder has viewer role with permission
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_ADMIN, FULL_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_EDIT, EDITOR_ACCESS)
+		sc.parentFolderPermissionScenario(VIEWER, models.PERMISSION_VIEW, VIEWER_ACCESS)
+	})
 
-		apiKeyScenario("Given api key with viewer role", t, m.ROLE_VIEWER, func(sc *scenarioContext) {
-			// dashboard has default permissions
-			sc.defaultPermissionScenario(VIEWER, VIEWER_ACCESS)
-		})
+	apiKeyScenario("Given api key with viewer role", t, models.ROLE_VIEWER, func(sc *scenarioContext) {
+		// dashboard has default permissions
+		sc.defaultPermissionScenario(VIEWER, VIEWER_ACCESS)
 	})
 }
 
@@ -180,82 +181,93 @@ func (sc *scenarioContext) defaultPermissionScenario(pt permissionType, flag per
 	_, callerFile, callerLine, _ := runtime.Caller(1)
 	sc.callerFile = callerFile
 	sc.callerLine = callerLine
-	existingPermissions := []*m.DashboardAclInfoDTO{
-		toDto(newEditorRolePermission(defaultDashboardID, m.PERMISSION_EDIT)),
-		toDto(newViewerRolePermission(defaultDashboardID, m.PERMISSION_VIEW)),
+	existingPermissions := []*models.DashboardAclInfoDTO{
+		toDto(newEditorRolePermission(defaultDashboardID, models.PERMISSION_EDIT)),
+		toDto(newViewerRolePermission(defaultDashboardID, models.PERMISSION_VIEW)),
 	}
 
-	permissionScenario("and existing permissions is the default permissions (everyone with editor role can edit, everyone with viewer role can view)", dashboardID, sc, existingPermissions, func(sc *scenarioContext) {
-		sc.expectedFlags = flag
-		sc.verifyExpectedPermissionsFlags()
-		sc.verifyDuplicatePermissionsShouldNotBeAllowed()
-		sc.verifyUpdateDashboardPermissionsShouldBeAllowed(pt)
-		sc.verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt)
-	})
+	permissionScenario("and existing permissions are the default permissions (everyone with editor role can edit, everyone with viewer role can view)",
+		dashboardID, sc, existingPermissions, func(sc *scenarioContext) {
+			sc.expectedFlags = flag
+			sc.verifyExpectedPermissionsFlags()
+			sc.verifyDuplicatePermissionsShouldNotBeAllowed()
+			sc.verifyUpdateDashboardPermissionsShouldBeAllowed(pt)
+			sc.verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt)
+		})
 }
 
-func (sc *scenarioContext) dashboardPermissionScenario(pt permissionType, permission m.PermissionType, flag permissionFlags) {
+func (sc *scenarioContext) dashboardPermissionScenario(pt permissionType, permission models.PermissionType, flag permissionFlags) {
 	_, callerFile, callerLine, _ := runtime.Caller(1)
 	sc.callerFile = callerFile
 	sc.callerLine = callerLine
-	var existingPermissions []*m.DashboardAclInfoDTO
+	var existingPermissions []*models.DashboardAclInfoDTO
 
 	switch pt {
 	case USER:
-		existingPermissions = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, UserId: userID, Permission: permission}}
+		existingPermissions = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, UserId: userID, Permission: permission}}
 	case TEAM:
-		existingPermissions = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, TeamId: teamID, Permission: permission}}
+		existingPermissions = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, TeamId: teamID, Permission: permission}}
 	case EDITOR:
-		existingPermissions = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, Role: &editorRole, Permission: permission}}
+		existingPermissions = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, Role: &editorRole, Permission: permission}}
 	case VIEWER:
-		existingPermissions = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, Role: &viewerRole, Permission: permission}}
+		existingPermissions = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: dashboardID, Role: &viewerRole, Permission: permission}}
 	}
 
-	permissionScenario(fmt.Sprintf("and %s has permission to %s dashboard", pt.String(), permission.String()), dashboardID, sc, existingPermissions, func(sc *scenarioContext) {
-		sc.expectedFlags = flag
-		sc.verifyExpectedPermissionsFlags()
-		sc.verifyDuplicatePermissionsShouldNotBeAllowed()
-		sc.verifyUpdateDashboardPermissionsShouldBeAllowed(pt)
-		sc.verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt)
-	})
+	permissionScenario(fmt.Sprintf("and %s has permission to %s dashboard", pt.String(), permission.String()),
+		dashboardID, sc, existingPermissions, func(sc *scenarioContext) {
+			sc.expectedFlags = flag
+			sc.verifyExpectedPermissionsFlags()
+			sc.verifyDuplicatePermissionsShouldNotBeAllowed()
+			sc.verifyUpdateDashboardPermissionsShouldBeAllowed(pt)
+			sc.verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt)
+		})
 }
 
-func (sc *scenarioContext) parentFolderPermissionScenario(pt permissionType, permission m.PermissionType, flag permissionFlags) {
+func (sc *scenarioContext) parentFolderPermissionScenario(pt permissionType, permission models.PermissionType, flag permissionFlags) {
 	_, callerFile, callerLine, _ := runtime.Caller(1)
 	sc.callerFile = callerFile
 	sc.callerLine = callerLine
-	var folderPermissionList []*m.DashboardAclInfoDTO
+	var folderPermissionList []*models.DashboardAclInfoDTO
 
 	switch pt {
 	case USER:
-		folderPermissionList = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID, UserId: userID, Permission: permission, Inherited: true}}
+		folderPermissionList = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID,
+			UserId: userID, Permission: permission, Inherited: true}}
 	case TEAM:
-		folderPermissionList = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID, TeamId: teamID, Permission: permission, Inherited: true}}
+		folderPermissionList = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID, TeamId: teamID,
+			Permission: permission, Inherited: true}}
 	case EDITOR:
-		folderPermissionList = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID, Role: &editorRole, Permission: permission, Inherited: true}}
+		folderPermissionList = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID,
+			Role: &editorRole, Permission: permission, Inherited: true}}
 	case VIEWER:
-		folderPermissionList = []*m.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID, Role: &viewerRole, Permission: permission, Inherited: true}}
+		folderPermissionList = []*models.DashboardAclInfoDTO{{OrgId: orgID, DashboardId: parentFolderID,
+			Role: &viewerRole, Permission: permission, Inherited: true}}
 	}
 
-	permissionScenario(fmt.Sprintf("and parent folder has %s with permission to %s", pt.String(), permission.String()), childDashboardID, sc, folderPermissionList, func(sc *scenarioContext) {
-		sc.expectedFlags = flag
-		sc.verifyExpectedPermissionsFlags()
-		sc.verifyDuplicatePermissionsShouldNotBeAllowed()
-		sc.verifyUpdateChildDashboardPermissionsShouldBeAllowed(pt, permission)
-		sc.verifyUpdateChildDashboardPermissionsShouldNotBeAllowed(pt, permission)
-		sc.verifyUpdateChildDashboardPermissionsWithOverrideShouldBeAllowed(pt, permission)
-		sc.verifyUpdateChildDashboardPermissionsWithOverrideShouldNotBeAllowed(pt, permission)
-	})
+	permissionScenario(fmt.Sprintf("and parent folder has %s with permission to %s", pt.String(), permission.String()),
+		childDashboardID, sc, folderPermissionList, func(sc *scenarioContext) {
+			sc.expectedFlags = flag
+			sc.verifyExpectedPermissionsFlags()
+			sc.verifyDuplicatePermissionsShouldNotBeAllowed()
+			sc.verifyUpdateChildDashboardPermissionsShouldBeAllowed(pt, permission)
+			sc.verifyUpdateChildDashboardPermissionsShouldNotBeAllowed(pt, permission)
+			sc.verifyUpdateChildDashboardPermissionsWithOverrideShouldBeAllowed(pt, permission)
+			sc.verifyUpdateChildDashboardPermissionsWithOverrideShouldNotBeAllowed(pt, permission)
+		})
 }
 
 func (sc *scenarioContext) verifyExpectedPermissionsFlags() {
-	canAdmin, _ := sc.g.CanAdmin()
-	canEdit, _ := sc.g.CanEdit()
-	canSave, _ := sc.g.CanSave()
-	canView, _ := sc.g.CanView()
-
 	tc := fmt.Sprintf("should have permissions to %s", sc.expectedFlags.String())
-	Convey(tc, func() {
+	sc.t.Run(tc, func(t *testing.T) {
+		canAdmin, err := sc.g.CanAdmin()
+		require.NoError(t, err)
+		canEdit, err := sc.g.CanEdit()
+		require.NoError(t, err)
+		canSave, err := sc.g.CanSave()
+		require.NoError(t, err)
+		canView, err := sc.g.CanView()
+		require.NoError(t, err)
+
 		var actualFlag permissionFlags
 
 		if canAdmin {
@@ -292,74 +304,71 @@ func (sc *scenarioContext) verifyDuplicatePermissionsShouldNotBeAllowed() {
 	}
 
 	tc := "When updating dashboard permissions with duplicate permission for user should not be allowed"
-	Convey(tc, func() {
-		p := []*m.DashboardAcl{
-			newDefaultUserPermission(dashboardID, m.PERMISSION_VIEW),
-			newDefaultUserPermission(dashboardID, m.PERMISSION_ADMIN),
+	sc.t.Run(tc, func(t *testing.T) {
+		p := []*models.DashboardAcl{
+			newDefaultUserPermission(dashboardID, models.PERMISSION_VIEW),
+			newDefaultUserPermission(dashboardID, models.PERMISSION_ADMIN),
 		}
 		sc.updatePermissions = p
-		_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, p)
+		_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, p)
 
-		if err != ErrGuardianPermissionExists {
+		if !errors.Is(err, ErrGuardianPermissionExists) {
 			sc.reportFailure(tc, ErrGuardianPermissionExists, err)
 		}
 		sc.reportSuccess()
 	})
 
 	tc = "When updating dashboard permissions with duplicate permission for team should not be allowed"
-	Convey(tc, func() {
-		p := []*m.DashboardAcl{
-			newDefaultTeamPermission(dashboardID, m.PERMISSION_VIEW),
-			newDefaultTeamPermission(dashboardID, m.PERMISSION_ADMIN),
+	sc.t.Run(tc, func(t *testing.T) {
+		p := []*models.DashboardAcl{
+			newDefaultTeamPermission(dashboardID, models.PERMISSION_VIEW),
+			newDefaultTeamPermission(dashboardID, models.PERMISSION_ADMIN),
 		}
 		sc.updatePermissions = p
-		_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, p)
-
-		if err != ErrGuardianPermissionExists {
+		_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, p)
+		if !errors.Is(err, ErrGuardianPermissionExists) {
 			sc.reportFailure(tc, ErrGuardianPermissionExists, err)
 		}
 		sc.reportSuccess()
 	})
 
 	tc = "When updating dashboard permissions with duplicate permission for editor role should not be allowed"
-	Convey(tc, func() {
-		p := []*m.DashboardAcl{
-			newEditorRolePermission(dashboardID, m.PERMISSION_VIEW),
-			newEditorRolePermission(dashboardID, m.PERMISSION_ADMIN),
+	sc.t.Run(tc, func(t *testing.T) {
+		p := []*models.DashboardAcl{
+			newEditorRolePermission(dashboardID, models.PERMISSION_VIEW),
+			newEditorRolePermission(dashboardID, models.PERMISSION_ADMIN),
 		}
 		sc.updatePermissions = p
-		_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, p)
+		_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, p)
 
-		if err != ErrGuardianPermissionExists {
+		if !errors.Is(err, ErrGuardianPermissionExists) {
 			sc.reportFailure(tc, ErrGuardianPermissionExists, err)
 		}
 		sc.reportSuccess()
 	})
 
 	tc = "When updating dashboard permissions with duplicate permission for viewer role should not be allowed"
-	Convey(tc, func() {
-		p := []*m.DashboardAcl{
-			newViewerRolePermission(dashboardID, m.PERMISSION_VIEW),
-			newViewerRolePermission(dashboardID, m.PERMISSION_ADMIN),
+	sc.t.Run(tc, func(t *testing.T) {
+		p := []*models.DashboardAcl{
+			newViewerRolePermission(dashboardID, models.PERMISSION_VIEW),
+			newViewerRolePermission(dashboardID, models.PERMISSION_ADMIN),
 		}
 		sc.updatePermissions = p
-		_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, p)
-
-		if err != ErrGuardianPermissionExists {
+		_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, p)
+		if !errors.Is(err, ErrGuardianPermissionExists) {
 			sc.reportFailure(tc, ErrGuardianPermissionExists, err)
 		}
 		sc.reportSuccess()
 	})
 
 	tc = "When updating dashboard permissions with duplicate permission for admin role should not be allowed"
-	Convey(tc, func() {
-		p := []*m.DashboardAcl{
-			newAdminRolePermission(dashboardID, m.PERMISSION_ADMIN),
+	sc.t.Run(tc, func(t *testing.T) {
+		p := []*models.DashboardAcl{
+			newAdminRolePermission(dashboardID, models.PERMISSION_ADMIN),
 		}
 		sc.updatePermissions = p
-		_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, p)
-
-		if err != ErrGuardianPermissionExists {
+		_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, p)
+		if !errors.Is(err, ErrGuardianPermissionExists) {
 			sc.reportFailure(tc, ErrGuardianPermissionExists, err)
 		}
 		sc.reportSuccess()
@@ -371,28 +380,27 @@ func (sc *scenarioContext) verifyUpdateDashboardPermissionsShouldBeAllowed(pt pe
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
 		tc := fmt.Sprintf("When updating dashboard permissions with %s permissions should be allowed", p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{}
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{}
 			switch pt {
 			case USER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(dashboardID, p),
 					newViewerRolePermission(dashboardID, p),
 					newCustomUserPermission(dashboardID, otherUserID, p),
 					newDefaultTeamPermission(dashboardID, p),
 				}
 			case TEAM:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(dashboardID, p),
 					newViewerRolePermission(dashboardID, p),
 					newDefaultUserPermission(dashboardID, p),
 					newCustomTeamPermission(dashboardID, otherTeamID, p),
 				}
 			case EDITOR, VIEWER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(dashboardID, p),
 					newViewerRolePermission(dashboardID, p),
 					newDefaultUserPermission(dashboardID, p),
@@ -401,8 +409,7 @@ func (sc *scenarioContext) verifyUpdateDashboardPermissionsShouldBeAllowed(pt pe
 			}
 
 			sc.updatePermissions = permissionList
-			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
+			ok, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
@@ -419,30 +426,30 @@ func (sc *scenarioContext) verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
 		tc := fmt.Sprintf("When updating dashboard permissions with %s permissions should NOT be allowed", p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{
 				newEditorRolePermission(dashboardID, p),
 				newViewerRolePermission(dashboardID, p),
 			}
 			switch pt {
 			case USER:
-				permissionList = append(permissionList, []*m.DashboardAcl{
+				permissionList = append(permissionList, []*models.DashboardAcl{
 					newCustomUserPermission(dashboardID, otherUserID, p),
 					newDefaultTeamPermission(dashboardID, p),
 				}...)
 			case TEAM:
-				permissionList = append(permissionList, []*m.DashboardAcl{
+				permissionList = append(permissionList, []*models.DashboardAcl{
 					newDefaultUserPermission(dashboardID, p),
 					newCustomTeamPermission(dashboardID, otherTeamID, p),
 				}...)
+			default:
+				// TODO: Handle other cases?
 			}
 
 			sc.updatePermissions = permissionList
-			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
+			ok, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
@@ -454,33 +461,32 @@ func (sc *scenarioContext) verifyUpdateDashboardPermissionsShouldNotBeAllowed(pt
 	}
 }
 
-func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldBeAllowed(pt permissionType, parentFolderPermission m.PermissionType) {
+func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldBeAllowed(pt permissionType, parentFolderPermission models.PermissionType) {
 	if !sc.expectedFlags.canAdmin() {
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
 		tc := fmt.Sprintf("When updating child dashboard permissions with %s permissions should be allowed", p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{}
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{}
 			switch pt {
 			case USER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newViewerRolePermission(childDashboardID, p),
 					newCustomUserPermission(childDashboardID, otherUserID, p),
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 			case TEAM:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newViewerRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newCustomTeamPermission(childDashboardID, otherTeamID, p),
 				}
 			case EDITOR:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newViewerRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newDefaultTeamPermission(childDashboardID, p),
@@ -491,7 +497,7 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldBeAllowed(
 					permissionList = append(permissionList, newEditorRolePermission(childDashboardID, p))
 				}
 			case VIEWER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newDefaultTeamPermission(childDashboardID, p),
@@ -504,8 +510,7 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldBeAllowed(
 			}
 
 			sc.updatePermissions = permissionList
-			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
+			ok, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
@@ -517,58 +522,56 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldBeAllowed(
 	}
 }
 
-func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldNotBeAllowed(pt permissionType, parentFolderPermission m.PermissionType) {
+func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldNotBeAllowed(pt permissionType, parentFolderPermission models.PermissionType) {
 	if sc.expectedFlags.canAdmin() {
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
 		tc := fmt.Sprintf("When updating child dashboard permissions with %s permissions should NOT be allowed", p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{}
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{}
 			switch pt {
 			case USER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newViewerRolePermission(childDashboardID, p),
 					newCustomUserPermission(childDashboardID, otherUserID, p),
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 			case TEAM:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newViewerRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newCustomTeamPermission(childDashboardID, otherTeamID, p),
 				}
 			case EDITOR:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newViewerRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 
-				// perminssion to update is higher than parent folder permission
+				// permission to update is higher than parent folder permission
 				if p > parentFolderPermission {
 					permissionList = append(permissionList, newEditorRolePermission(childDashboardID, p))
 				}
 			case VIEWER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 					newDefaultUserPermission(childDashboardID, p),
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 
-				// perminssion to update is higher than parent folder permission
+				// permission to update is higher than parent folder permission
 				if p > parentFolderPermission {
 					permissionList = append(permissionList, newViewerRolePermission(childDashboardID, p))
 				}
 			}
 
 			sc.updatePermissions = permissionList
-			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
+			ok, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
@@ -580,44 +583,42 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsShouldNotBeAllow
 	}
 }
 
-func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShouldBeAllowed(pt permissionType, parentFolderPermission m.PermissionType) {
+func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShouldBeAllowed(pt permissionType, parentFolderPermission models.PermissionType) {
 	if !sc.expectedFlags.canAdmin() {
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
-		// perminssion to update is higher tban parent folder permission
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
+		// permission to update is higher than parent folder permission
 		if p > parentFolderPermission {
 			continue
 		}
 
 		tc := fmt.Sprintf("When updating child dashboard permissions overriding parent %s permission with %s permission should NOT be allowed", pt.String(), p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{}
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{}
 			switch pt {
 			case USER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newDefaultUserPermission(childDashboardID, p),
 				}
 			case TEAM:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 			case EDITOR:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 				}
 			case VIEWER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newViewerRolePermission(childDashboardID, p),
 				}
 			}
 
 			sc.updatePermissions = permissionList
-			_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
-			if err != ErrGuardianOverride {
+			_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
+			if !errors.Is(err, ErrGuardianOverride) {
 				sc.reportFailure(tc, ErrGuardianOverride, err)
 			}
 			sc.reportSuccess()
@@ -625,47 +626,48 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShou
 	}
 }
 
-func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShouldNotBeAllowed(pt permissionType, parentFolderPermission m.PermissionType) {
+func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShouldNotBeAllowed(pt permissionType, parentFolderPermission models.PermissionType) {
 	if !sc.expectedFlags.canAdmin() {
 		return
 	}
 
-	for _, p := range []m.PermissionType{m.PERMISSION_ADMIN, m.PERMISSION_EDIT, m.PERMISSION_VIEW} {
-		// perminssion to update is lower than/equal parent folder permission
+	for _, p := range []models.PermissionType{models.PERMISSION_ADMIN, models.PERMISSION_EDIT, models.PERMISSION_VIEW} {
+		// permission to update is lower than or equal to parent folder permission
 		if p <= parentFolderPermission {
 			continue
 		}
 
-		tc := fmt.Sprintf("When updating child dashboard permissions overriding parent %s permission with %s permission should be allowed", pt.String(), p.String())
-
-		Convey(tc, func() {
-			permissionList := []*m.DashboardAcl{}
+		tc := fmt.Sprintf(
+			"When updating child dashboard permissions overriding parent %s permission with %s permission should be allowed",
+			pt.String(), p.String(),
+		)
+		sc.t.Run(tc, func(t *testing.T) {
+			permissionList := []*models.DashboardAcl{}
 			switch pt {
 			case USER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newDefaultUserPermission(childDashboardID, p),
 				}
 			case TEAM:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newDefaultTeamPermission(childDashboardID, p),
 				}
 			case EDITOR:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newEditorRolePermission(childDashboardID, p),
 				}
 			case VIEWER:
-				permissionList = []*m.DashboardAcl{
+				permissionList = []*models.DashboardAcl{
 					newViewerRolePermission(childDashboardID, p),
 				}
 			}
 
-			_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
+			_, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
 			sc.updatePermissions = permissionList
-			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
-
+			ok, err := sc.g.CheckPermissionBeforeUpdate(models.PERMISSION_ADMIN, permissionList)
 			if err != nil {
 				sc.reportFailure(tc, nil, err)
 			}
@@ -675,4 +677,52 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShou
 			sc.reportSuccess()
 		})
 	}
+}
+
+func TestGuardianGetHiddenACL(t *testing.T) {
+	Convey("Get hidden ACL tests", t, func() {
+		bus.ClearBusHandlers()
+
+		bus.AddHandler("test", func(query *models.GetDashboardAclInfoListQuery) error {
+			query.Result = []*models.DashboardAclInfoDTO{
+				{Inherited: false, UserId: 1, UserLogin: "user1", Permission: models.PERMISSION_EDIT},
+				{Inherited: false, UserId: 2, UserLogin: "user2", Permission: models.PERMISSION_ADMIN},
+				{Inherited: true, UserId: 3, UserLogin: "user3", Permission: models.PERMISSION_VIEW},
+			}
+			return nil
+		})
+
+		cfg := setting.NewCfg()
+		cfg.HiddenUsers = map[string]struct{}{"user2": {}}
+
+		Convey("Should get hidden acl", func() {
+			user := &models.SignedInUser{
+				OrgId:  orgID,
+				UserId: 1,
+				Login:  "user1",
+			}
+			g := New(dashboardID, orgID, user)
+
+			hiddenACL, err := g.GetHiddenACL(cfg)
+			So(err, ShouldBeNil)
+
+			So(hiddenACL, ShouldHaveLength, 1)
+			So(hiddenACL[0].UserID, ShouldEqual, 2)
+		})
+
+		Convey("Grafana admin should not get hidden acl", func() {
+			user := &models.SignedInUser{
+				OrgId:          orgID,
+				UserId:         1,
+				Login:          "user1",
+				IsGrafanaAdmin: true,
+			}
+			g := New(dashboardID, orgID, user)
+
+			hiddenACL, err := g.GetHiddenACL(cfg)
+			So(err, ShouldBeNil)
+
+			So(hiddenACL, ShouldHaveLength, 0)
+		})
+	})
 }

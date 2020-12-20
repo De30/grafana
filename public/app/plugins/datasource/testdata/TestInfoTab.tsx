@@ -2,10 +2,9 @@
 import React, { PureComponent } from 'react';
 
 // Types
-import { PluginConfigPageProps, DataSourcePlugin } from '@grafana/data';
-import { TestDataDataSource } from './datasource';
+import { PluginConfigPageProps, DataSourcePluginMeta, DataSourceJsonData } from '@grafana/data';
 
-interface Props extends PluginConfigPageProps<DataSourcePlugin<TestDataDataSource>> {}
+interface Props extends PluginConfigPageProps<DataSourcePluginMeta<DataSourceJsonData>> {}
 
 export class TestInfoTab extends PureComponent<Props> {
   constructor(props: Props) {
@@ -15,16 +14,16 @@ export class TestInfoTab extends PureComponent<Props> {
   render() {
     return (
       <div>
-        See github for more information about setting up a reproducable test environment.
+        See github for more information about setting up a reproducible test environment.
         <br />
         <br />
         <a
           className="btn btn-inverse"
           href="https://github.com/grafana/grafana/tree/master/devenv"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
         >
-          Github
+          GitHub
         </a>
         <br />
       </div>

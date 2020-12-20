@@ -3,15 +3,8 @@ package cloudwatch
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/grafana/grafana/pkg/tsdb"
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 )
-
-type cloudWatchClient interface {
-	GetMetricDataWithContext(ctx aws.Context, input *cloudwatch.GetMetricDataInput, opts ...request.Option) (*cloudwatch.GetMetricDataOutput, error)
-}
 
 type requestQuery struct {
 	RefId              string
@@ -31,11 +24,13 @@ type requestQuery struct {
 }
 
 type cloudwatchResponse struct {
-	series                  *tsdb.TimeSeriesSlice
+	DataFrames              data.Frames
 	Id                      string
 	RefId                   string
 	Expression              string
 	RequestExceededMaxLimit bool
+	PartialData             bool
+	Period                  int
 }
 
 type queryError struct {
@@ -44,5 +39,5 @@ type queryError struct {
 }
 
 func (e *queryError) Error() string {
-	return fmt.Sprintf("Error parsing query %s, %s", e.RefID, e.err)
+	return fmt.Sprintf("error parsing query %q, %s", e.RefID, e.err)
 }

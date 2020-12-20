@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react';
 import extend from 'lodash/extend';
 
 import { PluginDashboard } from 'app/types';
-import { getBackendSrv } from 'app/core/services/backend_srv';
+import { getBackendSrv } from '@grafana/runtime';
 import { appEvents } from 'app/core/core';
 import DashboardsTable from 'app/features/datasources/DashboardsTable';
 import { AppEvents, PluginMeta, DataSourceApi } from '@grafana/data';
@@ -44,7 +44,7 @@ export class PluginDashboards extends PureComponent<Props, State> {
     const { dashboards } = this.state;
     return this.import(dashboards[index], true).then(() => {
       if (index + 1 < dashboards.length) {
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
           setTimeout(() => {
             this.importNext(index + 1).then(() => {
               resolve();

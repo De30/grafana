@@ -5,20 +5,19 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/bus"
-	m "github.com/grafana/grafana/pkg/models"
-
-	"github.com/grafana/grafana/pkg/setting"
+	"github.com/grafana/grafana/pkg/models"
 )
 
-func init() {
+func (ss *SQLStore) addPreferencesQueryAndCommandHandlers() {
 	bus.AddHandler("sql", GetPreferences)
-	bus.AddHandler("sql", GetPreferencesWithDefaults)
+	bus.AddHandler("sql", ss.GetPreferencesWithDefaults)
 	bus.AddHandler("sql", SavePreferences)
 }
 
-func GetPreferencesWithDefaults(query *m.GetPreferencesWithDefaultsQuery) error {
+func (ss *SQLStore) GetPreferencesWithDefaults(query *models.GetPreferencesWithDefaultsQuery) error {
 	params := make([]interface{}, 0)
 	filter := ""
+
 	if len(query.User.Teams) > 0 {
 		filter = "(org_id=? AND team_id IN (?" + strings.Repeat(",?", len(query.User.Teams)-1) + ")) OR "
 		params = append(params, query.User.OrgId)
@@ -26,11 +25,12 @@ func GetPreferencesWithDefaults(query *m.GetPreferencesWithDefaultsQuery) error 
 			params = append(params, v)
 		}
 	}
+
 	filter += "(org_id=? AND user_id=? AND team_id=0) OR (org_id=? AND team_id=0 AND user_id=0)"
 	params = append(params, query.User.OrgId)
 	params = append(params, query.User.UserId)
 	params = append(params, query.User.OrgId)
-	prefs := make([]*m.Preferences, 0)
+	prefs := make([]*models.Preferences, 0)
 	err := x.Where(filter, params...).
 		OrderBy("user_id ASC, team_id ASC").
 		Find(&prefs)
@@ -39,9 +39,9 @@ func GetPreferencesWithDefaults(query *m.GetPreferencesWithDefaultsQuery) error 
 		return err
 	}
 
-	res := &m.Preferences{
-		Theme:           setting.DefaultTheme,
-		Timezone:        "browser",
+	res := &models.Preferences{
+		Theme:           ss.Cfg.DefaultTheme,
+		Timezone:        ss.Cfg.DateFormats.DefaultTimezone,
 		HomeDashboardId: 0,
 	}
 
@@ -61,8 +61,8 @@ func GetPreferencesWithDefaults(query *m.GetPreferencesWithDefaultsQuery) error 
 	return nil
 }
 
-func GetPreferences(query *m.GetPreferencesQuery) error {
-	var prefs m.Preferences
+func GetPreferences(query *models.GetPreferencesQuery) error {
+	var prefs models.Preferences
 	exists, err := x.Where("org_id=? AND user_id=? AND team_id=?", query.OrgId, query.UserId, query.TeamId).Get(&prefs)
 
 	if err != nil {
@@ -72,23 +72,22 @@ func GetPreferences(query *m.GetPreferencesQuery) error {
 	if exists {
 		query.Result = &prefs
 	} else {
-		query.Result = new(m.Preferences)
+		query.Result = new(models.Preferences)
 	}
 
 	return nil
 }
 
-func SavePreferences(cmd *m.SavePreferencesCommand) error {
+func SavePreferences(cmd *models.SavePreferencesCommand) error {
 	return inTransaction(func(sess *DBSession) error {
-
-		var prefs m.Preferences
+		var prefs models.Preferences
 		exists, err := sess.Where("org_id=? AND user_id=? AND team_id=?", cmd.OrgId, cmd.UserId, cmd.TeamId).Get(&prefs)
 		if err != nil {
 			return err
 		}
 
 		if !exists {
-			prefs = m.Preferences{
+			prefs = models.Preferences{
 				UserId:          cmd.UserId,
 				OrgId:           cmd.OrgId,
 				TeamId:          cmd.TeamId,

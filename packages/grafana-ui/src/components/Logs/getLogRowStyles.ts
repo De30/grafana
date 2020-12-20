@@ -6,9 +6,10 @@ import { selectThemeVariant } from '../../themes/selectThemeVariant';
 import { stylesFactory } from '../../themes';
 
 export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: LogLevel) => {
-  let logColor = selectThemeVariant({ light: theme.colors.gray5, dark: theme.colors.gray2 }, theme.type);
-  const borderColor = selectThemeVariant({ light: theme.colors.gray5, dark: theme.colors.gray2 }, theme.type);
-  const bgColor = selectThemeVariant({ light: theme.colors.gray5, dark: theme.colors.dark4 }, theme.type);
+  let logColor = selectThemeVariant({ light: theme.palette.gray5, dark: theme.palette.gray2 }, theme.type);
+  const borderColor = selectThemeVariant({ light: theme.palette.gray5, dark: theme.palette.gray2 }, theme.type);
+  const bgColor = selectThemeVariant({ light: theme.palette.gray5, dark: theme.palette.dark4 }, theme.type);
+  const hoverBgColor = selectThemeVariant({ light: theme.palette.gray7, dark: theme.palette.dark2 }, theme.type);
   const context = css`
     label: context;
     visibility: hidden;
@@ -27,7 +28,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
       break;
     case LogLevel.warning:
     case LogLevel.warn:
-      logColor = theme.colors.yellow;
+      logColor = theme.palette.yellow;
       break;
     case LogLevel.info:
       logColor = '#7eb26d';
@@ -45,12 +46,12 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
       label: logs-row__match-highlight;
       background: inherit;
       padding: inherit;
-      color: ${theme.colors.yellow};
-      background-color: rgba(${theme.colors.yellow}, 0.1);
+      color: ${theme.palette.yellow};
+      background-color: rgba(${theme.palette.yellow}, 0.1);
     `,
     logsRowMatchHighLightPreview: css`
       label: logs-row__match-highlight--preview;
-      background-color: rgba(${theme.colors.yellow}, 0.2);
+      background-color: rgba(${theme.palette.yellow}, 0.2);
       border-bottom-style: dotted;
     `,
     logsRowsTable: css`
@@ -61,7 +62,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     `,
     logsRowsHorizontalScroll: css`
       label: logs-rows__horizontal-scroll;
-      overflow: scroll;
+      overflow: auto;
     `,
     context: context,
     logsRow: css`
@@ -76,7 +77,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
           margin-left: 10px;
           text-decoration: underline;
           &:hover {
-            color: ${theme.colors.yellow};
+            color: ${theme.palette.yellow};
           }
         }
       }
@@ -92,7 +93,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
       }
 
       &:hover {
-        background: ${theme.colors.pageBg};
+        background: ${hoverBgColor};
       }
     `,
     logsRowDuplicates: css`
@@ -113,8 +114,12 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
         top: 1px;
         bottom: 1px;
         width: 3px;
+        left: 4px;
         background-color: ${logColor};
       }
+    `,
+    logIconError: css`
+      color: ${theme.palette.red};
     `,
     logsRowToggleDetails: css`
       label: logs-row-toggle-details__level;
@@ -126,7 +131,6 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     logsRowLocalTime: css`
       label: logs-row__localtime;
       white-space: nowrap;
-      max-width: 12.5em;
     `,
     logsRowLabels: css`
       label: logs-row__labels;
@@ -135,9 +139,10 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     `,
     logsRowMessage: css`
       label: logs-row__message;
+      white-space: pre-wrap;
       word-break: break-all;
     `,
-    //Log details sepcific CSS
+    //Log details specific CSS
     logDetailsContainer: css`
       label: logs-row-details-table;
       border: 1px solid ${borderColor};
@@ -148,7 +153,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     `,
     logDetailsTable: css`
       label: logs-row-details-table;
-      line-height: 2;
+      line-height: 18px;
       width: 100%;
       td:last-child {
         width: 100%;
@@ -157,8 +162,9 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     logsDetailsIcon: css`
       label: logs-row-details__icon;
       position: relative;
-      padding-right: ${theme.spacing.md};
-      color: ${theme.colors.gray3};
+      color: ${theme.palette.gray3};
+      padding-top: 6px;
+      padding-left: 6px;
     `,
     logDetailsLabel: css`
       label: logs-row-details__label;
@@ -175,7 +181,7 @@ export const getLogRowStyles = stylesFactory((theme: GrafanaTheme, logLevel?: Lo
     logDetailsValue: css`
       label: logs-row-details__row;
       position: relative;
-      vertical-align: top;
+      vertical-align: middle;
       cursor: default;
       &:hover {
         background-color: ${bgColor};

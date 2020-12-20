@@ -1,25 +1,9 @@
 import React from 'react';
-import { storiesOf } from '@storybook/react';
-import { LegendList, LegendPlacement, LegendItem, LegendTable } from './Legend';
-import tinycolor from 'tinycolor2';
-import { DisplayValue } from '@grafana/data';
+import { generateLegendItems } from './Legend';
+import { LegendList, LegendPlacement, LegendItem, LegendTable } from '@grafana/ui';
 import { number, select, text } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
 import { GraphLegendListItem, GraphLegendTableRow, GraphLegendItemProps } from '../Graph/GraphLegendItem';
-
-export const generateLegendItems = (numberOfSeries: number, statsToDisplay?: DisplayValue[]): LegendItem[] => {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-
-  return [...new Array(numberOfSeries)].map((item, i) => {
-    return {
-      label: `${alphabet[i].toUpperCase()}-series`,
-      color: tinycolor.fromRatio({ h: i / alphabet.length, s: 1, v: 1 }).toHexString(),
-      isVisible: true,
-      yAxis: 1,
-      displayValues: statsToDisplay || [],
-    };
-  });
-};
 
 const getStoriesKnobs = (table = false) => {
   const numberOfSeries = number('Number of series', 3);
@@ -35,11 +19,12 @@ const getStoriesKnobs = (table = false) => {
 
   const rawRenderer = (item: LegendItem) => (
     <>
-      Label: <strong>{item.label}</strong>, Color: <strong>{item.color}</strong>, isVisible:{' '}
-      <strong>{item.isVisible ? 'yes' : 'no'}</strong>
+      Label: <strong>{item.label}</strong>, Color: <strong>{item.color}</strong>, disabled:{' '}
+      <strong>{item.disabled ? 'yes' : 'no'}</strong>
     </>
   );
 
+  // eslint-disable-next-line react/display-name
   const customRenderer = (component: React.ComponentType<GraphLegendItemProps>) => (item: LegendItem) =>
     React.createElement(component, {
       item,
@@ -50,7 +35,7 @@ const getStoriesKnobs = (table = false) => {
 
   const typeSpecificRenderer = table
     ? {
-        'Custom renderer(GraphLegendTablerow)': 'custom-tabe',
+        'Custom renderer(GraphLegendTablerow)': 'custom-table',
       }
     : {
         'Custom renderer(GraphLegendListItem)': 'custom-list',
@@ -69,10 +54,10 @@ const getStoriesKnobs = (table = false) => {
   const legendPlacement = select<LegendPlacement>(
     'Legend placement',
     {
-      under: 'under',
+      bottom: 'bottom',
       right: 'right',
     },
-    'under'
+    'bottom'
   );
 
   return {
@@ -87,9 +72,13 @@ const getStoriesKnobs = (table = false) => {
   };
 };
 
-const LegendStories = storiesOf('UI/Legend/Legend', module);
+export default {
+  title: 'Visualizations/Legend',
+  component: LegendList,
+  subcomponents: { LegendTable },
+};
 
-LegendStories.add('list', () => {
+export const list = () => {
   const { numberOfSeries, itemRenderer, containerWidth, rightAxisSeries, legendPlacement } = getStoriesKnobs();
   let items = generateLegendItems(numberOfSeries);
 
@@ -110,9 +99,9 @@ LegendStories.add('list', () => {
       <LegendList itemRenderer={itemRenderer} items={items} placement={legendPlacement} />
     </div>
   );
-});
+};
 
-LegendStories.add('table', () => {
+export const table = () => {
   const { numberOfSeries, itemRenderer, containerWidth, rightAxisSeries, legendPlacement } = getStoriesKnobs(true);
   let items = generateLegendItems(numberOfSeries);
 
@@ -139,4 +128,4 @@ LegendStories.add('table', () => {
       <LegendTable itemRenderer={itemRenderer} items={items} columns={['', 'min', 'max']} placement={legendPlacement} />
     </div>
   );
-});
+};

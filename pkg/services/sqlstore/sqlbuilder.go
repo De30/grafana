@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"strings"
 
-	m "github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/models"
 )
 
-type SqlBuilder struct {
+type SQLBuilder struct {
 	sql    bytes.Buffer
 	params []interface{}
 }
 
-func (sb *SqlBuilder) Write(sql string, params ...interface{}) {
+func (sb *SQLBuilder) Write(sql string, params ...interface{}) {
 	sb.sql.WriteString(sql)
 
 	if len(params) > 0 {
@@ -20,24 +20,23 @@ func (sb *SqlBuilder) Write(sql string, params ...interface{}) {
 	}
 }
 
-func (sb *SqlBuilder) GetSqlString() string {
+func (sb *SQLBuilder) GetSQLString() string {
 	return sb.sql.String()
 }
 
-func (sb *SqlBuilder) AddParams(params ...interface{}) {
+func (sb *SQLBuilder) AddParams(params ...interface{}) {
 	sb.params = append(sb.params, params...)
 }
 
-func (sb *SqlBuilder) writeDashboardPermissionFilter(user *m.SignedInUser, permission m.PermissionType) {
-
-	if user.OrgRole == m.ROLE_ADMIN {
+func (sb *SQLBuilder) writeDashboardPermissionFilter(user *models.SignedInUser, permission models.PermissionType) {
+	if user.OrgRole == models.ROLE_ADMIN {
 		return
 	}
 
 	okRoles := []interface{}{user.OrgRole}
 
-	if user.OrgRole == m.ROLE_EDITOR {
-		okRoles = append(okRoles, m.ROLE_VIEWER)
+	if user.OrgRole == models.ROLE_EDITOR {
+		okRoles = append(okRoles, models.ROLE_VIEWER)
 	}
 
 	falseStr := dialect.BooleanStr(false)

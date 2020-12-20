@@ -3,13 +3,11 @@ title = "Alerting Notification Channels HTTP API "
 description = "Grafana Alerting Notification Channel HTTP API"
 keywords = ["grafana", "http", "documentation", "api", "alerting", "alerts", "notifications"]
 aliases = []
-type = "docs"
-[menu.docs]
-name = "Alerting Notification Channels"
-parent = "http_api"
 +++
 
 # Alerting Notification Channels API
+
+This page documents the Alerting Notification Channels API.
 
 ## Identifier (id) vs unique identifier (uid)
 
@@ -17,9 +15,8 @@ The identifier (id) of a notification channel is an auto-incrementing numeric va
 
 The unique identifier (uid) of a notification channel can be used for uniquely identify a notification channel between
 multiple Grafana installs. It's automatically generated if not provided when creating a notification channel. The uid
-allows having consistent URL's for accessing notification channels and when syncing notification channels between multiple
-Grafana installs, see [alert notification channel provisioning](/administration/provisioning/#alert-notification-channels)
-for more information.
+allows having consistent URLs for accessing notification channels and when syncing notification channels between multiple
+Grafana installations, refer to [alert notification channel provisioning]({{< relref "../administration/provisioning.md#alert-notification-channels" >}}).
 
 The uid can have a maximum length of 40 characters.
 
@@ -29,7 +26,7 @@ Returns all notification channels that the authenticated user has permission to 
 
 `GET /api/alert-notifications`
 
-**Example Request**:
+**Example request**:
 
 ```http
 GET /api/alert-notifications HTTP/1.1
@@ -38,7 +35,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -65,13 +62,11 @@ Content-Type: application/json
 
 ## Get all notification channels (lookup)
 
-Returns all notification channels, but with less detailed information.
-Accessible by any authenticated user and is mainly used by providing
-alert notification channels in Grafana UI when configuring alert rule.
+Returns all notification channels, but with less detailed information. Accessible by any authenticated user and is mainly used by providing alert notification channels in Grafana UI when configuring alert rule.
 
 `GET /api/alert-notifications/lookup`
 
-**Example Request**:
+**Example request**:
 
 ```http
 GET /api/alert-notifications/lookup HTTP/1.1
@@ -80,7 +75,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -109,9 +104,9 @@ Content-Type: application/json
 
 `GET /api/alert-notifications/uid/:uid`
 
-Will return the notification channel given the notification channel uid.
+Returns the notification channel given the notification channel uid.
 
-**Example Request**:
+**Example request**:
 
 ```http
 GET /api/alert-notifications/uid/team-a-email-notifier HTTP/1.1
@@ -120,7 +115,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -146,9 +141,9 @@ Content-Type: application/json
 
 `GET /api/alert-notifications/:id`
 
-Will return the notification channel given the notification channel id.
+Returns the notification channel given the notification channel id.
 
-**Example Request**:
+**Example request**:
 
 ```http
 GET /api/alert-notifications/1 HTTP/1.1
@@ -157,7 +152,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -181,11 +176,11 @@ Content-Type: application/json
 
 ## Create notification channel
 
-You can find the full list of [supported notifiers](/alerting/notifications/#all-supported-notifier) at the alert notifiers page.
+You can find the full list of [supported notifiers](/alerting/notifications/#all-supported-notifier) on the alert notifiers page.
 
 `POST /api/alert-notifications`
 
-**Example Request**:
+**Example request**:
 
 ```http
 POST /api/alert-notifications HTTP/1.1
@@ -205,7 +200,7 @@ Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 }
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -232,7 +227,7 @@ Content-Type: application/json
 
 Updates an existing notification channel identified by uid.
 
-**Example Request**:
+**Example request**:
 
 ```http
 PUT /api/alert-notifications/uid/cIBgcSjkk HTTP/1.1
@@ -253,7 +248,7 @@ Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 }
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -281,7 +276,7 @@ Content-Type: application/json
 
 Updates an existing notification channel identified by id.
 
-**Example Request**:
+**Example request**:
 
 ```http
 PUT /api/alert-notifications/1 HTTP/1.1
@@ -303,7 +298,7 @@ Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 }
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -331,7 +326,7 @@ Content-Type: application/json
 
 Deletes an existing notification channel identified by uid.
 
-**Example Request**:
+**Example request**:
 
 ```http
 DELETE /api/alert-notifications/uid/team-a-email-notifier HTTP/1.1
@@ -340,7 +335,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -357,7 +352,7 @@ Content-Type: application/json
 
 Deletes an existing notification channel identified by id.
 
-**Example Request**:
+**Example request**:
 
 ```http
 DELETE /api/alert-notifications/1 HTTP/1.1
@@ -366,7 +361,7 @@ Content-Type: application/json
 Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -384,7 +379,7 @@ You can find the full list of [supported notifiers](/alerting/notifications/#all
 
 `POST /api/alert-notifications/test`
 
-**Example Request**:
+**Example request**:
 
 ```http
 POST /api/alert-notifications/test HTTP/1.1
@@ -400,7 +395,7 @@ Authorization: Bearer eyJrIjoiT0tTcG1pUlY2RnVKZTFVaDFsNFZXdE9ZWmNrMkZYbk
 }
 ```
 
-**Example Response**:
+**Example response**:
 
 ```http
 HTTP/1.1 200
@@ -410,4 +405,3 @@ Content-Type: application/json
   "message": "Test notification sent"
 }
 ```
-

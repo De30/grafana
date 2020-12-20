@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import { Label } from './Label';
 import { stylesFactory, useTheme } from '../../themes';
 import { css, cx } from 'emotion';
 import { GrafanaTheme } from '@grafana/data';
 import { FieldValidationMessage } from './FieldValidationMessage';
 
-export interface FieldProps {
+export interface FieldProps extends HTMLAttributes<HTMLDivElement> {
   /** Form input element, i.e Input or Switch */
   children: React.ReactElement;
   /** Label for the field */
-  label?: string;
+  label?: React.ReactNode;
   /** Description of the field */
   description?: string;
   /** Indicates if field is in invalid state */
@@ -18,6 +18,8 @@ export interface FieldProps {
   loading?: boolean;
   /** Indicates if field is disabled */
   disabled?: boolean;
+  /** Indicates if field is required */
+  required?: boolean;
   /** Error message to display */
   error?: string;
   /** Indicates horizontal layout of the field */
@@ -30,7 +32,7 @@ export const getFieldStyles = stylesFactory((theme: GrafanaTheme) => {
     field: css`
       display: flex;
       flex-direction: column;
-      margin-bottom: ${theme.spacing.formSpacingBase * 2}px;
+      margin-bottom: ${theme.spacing.formInputMargin};
     `,
     fieldHorizontal: css`
       flex-direction: row;
@@ -53,9 +55,11 @@ export const Field: React.FC<FieldProps> = ({
   invalid,
   loading,
   disabled,
+  required,
   error,
   children,
   className,
+  ...otherProps
 }) => {
   const theme = useTheme();
   let inputId;
@@ -68,14 +72,18 @@ export const Field: React.FC<FieldProps> = ({
     // Retrieve input's id to apply on the label for correct click interaction
     inputId = (child as React.ReactElement<{ id?: string }>).props.id;
   }
+  const labelElement =
+    typeof label === 'string' ? (
+      <Label htmlFor={inputId} description={description}>
+        {`${label}${required ? ' *' : ''}`}
+      </Label>
+    ) : (
+      label
+    );
 
   return (
-    <div className={cx(styles.field, horizontal && styles.fieldHorizontal, className)}>
-      {label && (
-        <Label htmlFor={inputId} description={description}>
-          {label}
-        </Label>
-      )}
+    <div className={cx(styles.field, horizontal && styles.fieldHorizontal, className)} {...otherProps}>
+      {labelElement}
       <div>
         {React.cloneElement(children, { invalid, disabled, loading })}
         {invalid && error && !horizontal && (

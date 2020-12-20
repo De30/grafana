@@ -7,6 +7,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const readdirPromise = util.promisify(fs.readdir);
 const accessPromise = util.promisify(fs.access);
@@ -17,8 +18,11 @@ import { getStyleLoaders, getStylesheetEntries, getFileLoaders } from './webpack
 export interface WebpackConfigurationOptions {
   watch?: boolean;
   production?: boolean;
+  preserveConsole?: boolean;
 }
+
 type WebpackConfigurationGetter = (options: WebpackConfigurationOptions) => Promise<webpack.Configuration>;
+
 export type CustomWebpackConfigurationGetter = (
   originalConfig: webpack.Configuration,
   options: WebpackConfigurationOptions
@@ -82,6 +86,7 @@ const getEntries = async () => {
 };
 
 const getCommonPlugins = (options: WebpackConfigurationOptions) => {
+  const hasREADME = fs.existsSync(path.resolve(process.cwd(), 'src', 'README.md'));
   const packageJson = require(path.resolve(process.cwd(), 'package.json'));
   return [
     new MiniCssExtractPlugin({
@@ -91,9 +96,11 @@ const getCommonPlugins = (options: WebpackConfigurationOptions) => {
     new webpack.optimize.OccurrenceOrderPlugin(true),
     new CopyWebpackPlugin(
       [
+        // If src/README.md exists use it; otherwise the root README
+        { from: hasREADME ? 'README.md' : '../README.md', to: '.', force: true },
         { from: 'plugin.json', to: '.' },
-        { from: '../README.md', to: '.' },
         { from: '../LICENSE', to: '.' },
+        { from: '../CHANGELOG.md', to: '.', force: true },
         { from: '**/*.json', to: '.' },
         { from: '**/*.svg', to: '.' },
         { from: '**/*.png', to: '.' },
@@ -121,6 +128,11 @@ const getCommonPlugins = (options: WebpackConfigurationOptions) => {
         ],
       },
     ]),
+    new ForkTsCheckerWebpackPlugin({
+      tsconfig: path.join(process.cwd(), 'tsconfig.json'),
+      // Only report problems in detected in plugin's code
+      reportFiles: ['**/*.{ts,tsx}'],
+    }),
   ];
 };
 
@@ -129,7 +141,11 @@ const getBaseWebpackConfig: WebpackConfigurationGetter = async options => {
   const optimization: { [key: string]: any } = {};
 
   if (options.production) {
-    optimization.minimizer = [new TerserPlugin(), new OptimizeCssAssetsPlugin()];
+    const compressOptions = { drop_console: !options.preserveConsole, drop_debugger: true };
+    optimization.minimizer = [
+      new TerserPlugin({ sourceMap: true, terserOptions: { compress: compressOptions } }),
+      new OptimizeCssAssetsPlugin(),
+    ];
   } else if (options.watch) {
     plugins.push(new HtmlWebpackPlugin());
   }
@@ -172,6 +188,8 @@ const getBaseWebpackConfig: WebpackConfigurationGetter = async options => {
       '@grafana/ui',
       '@grafana/runtime',
       '@grafana/data',
+      'monaco-editor',
+      'react-monaco-editor',
       // @ts-ignore
       (context, request, callback) => {
         const prefix = 'grafana/';
@@ -198,11 +216,15 @@ const getBaseWebpackConfig: WebpackConfigurationGetter = async options => {
               options: {
                 presets: [['@babel/preset-env', { modules: false }]],
                 plugins: ['angularjs-annotate'],
+                sourceMaps: true,
               },
             },
             {
               loader: 'ts-loader',
-              options: { onlyCompileBundledFiles: true },
+              options: {
+                onlyCompileBundledFiles: true,
+                transpileOnly: true,
+              },
             },
           ],
           exclude: /(node_modules)/,
@@ -215,6 +237,7 @@ const getBaseWebpackConfig: WebpackConfigurationGetter = async options => {
               options: {
                 presets: [['@babel/preset-env', { modules: false }]],
                 plugins: ['angularjs-annotate'],
+                sourceMaps: true,
               },
             },
           ],

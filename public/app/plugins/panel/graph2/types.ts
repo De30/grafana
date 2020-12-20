@@ -1,9 +1,5 @@
-import { LegendOptions, GraphTooltipOptions } from '@grafana/ui';
-import { YAxis, FieldDisplayOptions } from '@grafana/data';
-
-import { GraphLegendEditorLegendOptions } from './GraphLegendEditor';
-// TODO move out from single stat
-import { standardFieldDisplayOptions } from '../stat/types';
+import { LegendOptions, GraphTooltipOptions, LegendDisplayMode } from '@grafana/ui';
+import { YAxis } from '@grafana/data';
 
 export interface SeriesOptions {
   color?: string;
@@ -22,7 +18,6 @@ export interface Options {
   series: {
     [alias: string]: SeriesOptions;
   };
-  fieldOptions: FieldDisplayOptions;
   tooltipOptions: GraphTooltipOptions;
 }
 
@@ -33,11 +28,16 @@ export const defaults: Options = {
     showPoints: false,
   },
   legend: {
-    asTable: false,
-    isVisible: true,
-    placement: 'under',
+    displayMode: LegendDisplayMode.List,
+    placement: 'bottom',
   },
   series: {},
-  fieldOptions: { ...standardFieldDisplayOptions },
   tooltipOptions: { mode: 'single' },
 };
+
+export interface GraphLegendEditorLegendOptions extends LegendOptions {
+  stats?: string[];
+  decimals?: number;
+  sortBy?: string;
+  sortDesc?: boolean;
+}

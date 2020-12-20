@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { HTMLProps, useRef } from 'react';
 import { css, cx } from 'emotion';
 import useClickAway from 'react-use/lib/useClickAway';
 import { SelectableValue } from '@grafana/data';
-import { Select } from '../Select/Select';
+import { Select } from '../Forms/Legacy/Select/Select';
 
-export interface Props<T> {
+export interface Props<T> extends Omit<HTMLProps<HTMLDivElement>, 'value' | 'onChange'> {
   value?: SelectableValue<T>;
   options: Array<SelectableValue<T>>;
   onChange: (item: SelectableValue<T>) => void;
@@ -22,15 +22,25 @@ export function SegmentSelect<T>({
   width,
   noOptionsMessage = '',
   allowCustomValue = false,
+  ...rest
 }: React.PropsWithChildren<Props<T>>) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useClickAway(ref, () => {
-    onClickOutside();
+    if (ref && ref.current) {
+      // https://github.com/JedWatson/react-select/issues/188#issuecomment-279240292
+      // Unfortunately there's no other way of retrieving the (not yet) created new option
+      const input = ref.current.querySelector('input[id^="react-select-"]') as HTMLInputElement;
+      if (input && input.value) {
+        onChange({ value: input.value as any, label: input.value });
+      } else {
+        onClickOutside();
+      }
+    }
   });
 
   return (
-    <div ref={ref}>
+    <div {...rest} ref={ref}>
       <Select
         className={cx(
           css`

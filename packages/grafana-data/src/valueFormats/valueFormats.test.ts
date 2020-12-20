@@ -13,9 +13,10 @@ interface ValueFormatTest {
 }
 
 const formatTests: ValueFormatTest[] = [
-  // Currancy
+  // Currency
   { id: 'currencyUSD', decimals: 2, value: 1532.82, result: '$1.53K' },
   { id: 'currencyKRW', decimals: 2, value: 1532.82, result: '₩1.53K' },
+  { id: 'currencyIDR', decimals: 2, value: 1532.82, result: 'Rp1.53K' },
 
   // Standard
   { id: 'ms', decimals: 4, value: 0.0024, result: '0.0024 ms' },
@@ -25,6 +26,7 @@ const formatTests: ValueFormatTest[] = [
   { id: 'ms', decimals: 0, value: 1200, result: '1 s' },
   { id: 'short', decimals: 0, scaledDecimals: -1, value: 98765, result: '98.77 K' },
   { id: 'short', decimals: 0, scaledDecimals: 0, value: 9876543, result: '9.876543 Mil' },
+  { id: 'short', decimals: 2, scaledDecimals: null, value: 9876543, result: '9.88 Mil' },
   { id: 'kbytes', decimals: 3, value: 10000000, result: '9.537 GiB' },
   { id: 'deckbytes', decimals: 3, value: 10000000, result: '10.000 GB' },
   { id: 'megwatt', decimals: 3, value: 1000, result: '1.000 GW' },
@@ -47,15 +49,37 @@ const formatTests: ValueFormatTest[] = [
 
   // Prefix (unknown units append to the end)
   { id: 'prefix:b', value: 1532.82, result: 'b1533' },
+  { id: 'suffix:d', value: 1532.82, result: '1533 d' },
 
   // SI Units
   { id: 'si:µF', value: 1234, decimals: 2, result: '1.23 mF' },
   { id: 'si:µF', value: 1234000000, decimals: 2, result: '1.23 kF' },
   { id: 'si:µF', value: 1234000000000000, decimals: 2, result: '1.23 GF' },
 
+  // Counts (suffix)
+  { id: 'count:xpm', value: 1234567, decimals: 2, result: '1.23M xpm' },
+  { id: 'count:x/min', value: 1234, decimals: 2, result: '1.23K x/min' },
+
+  // Currency (prefix)
+  { id: 'currency:@', value: 1234567, decimals: 2, result: '@1.23M' },
+  { id: 'currency:@', value: 1234, decimals: 2, result: '@1.23K' },
+
   // Time format
   { id: 'time:YYYY', decimals: 0, value: dateTime(new Date(1999, 6, 2)).valueOf(), result: '1999' },
   { id: 'time:YYYY.MM', decimals: 0, value: dateTime(new Date(2010, 6, 2)).valueOf(), result: '2010.07' },
+  { id: 'dateTimeAsIso', decimals: 0, value: dateTime(new Date(2010, 6, 2)).valueOf(), result: '2010-07-02 00:00:00' },
+  {
+    id: 'dateTimeAsUS',
+    decimals: 0,
+    value: dateTime(new Date(2010, 6, 2)).valueOf(),
+    result: '07/02/2010 12:00:00 am',
+  },
+  {
+    id: 'dateTimeAsSystem',
+    decimals: 0,
+    value: dateTime(new Date(2010, 6, 2)).valueOf(),
+    result: '2010-07-02 00:00:00',
+  },
 ];
 
 describe('valueFormats', () => {

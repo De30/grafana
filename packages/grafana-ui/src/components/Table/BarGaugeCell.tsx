@@ -1,43 +1,58 @@
 import React, { FC } from 'react';
-import { ReactTableCellProps, TableCellDisplayMode } from './types';
+import { ThresholdsConfig, ThresholdsMode, VizOrientation } from '@grafana/data';
 import { BarGauge, BarGaugeDisplayMode } from '../BarGauge/BarGauge';
-import { VizOrientation } from '@grafana/data';
+import { TableCellProps, TableCellDisplayMode } from './types';
+import { getFieldConfigWithMinMax } from '@grafana/data/src/field/scale';
 
-const defaultThresholds = [
-  {
-    color: 'blue',
-    value: -Infinity,
-  },
-  {
-    color: 'green',
-    value: 20,
-  },
-];
+const defaultScale: ThresholdsConfig = {
+  mode: ThresholdsMode.Absolute,
+  steps: [
+    {
+      color: 'blue',
+      value: -Infinity,
+    },
+    {
+      color: 'green',
+      value: 20,
+    },
+  ],
+};
 
-export const BarGaugeCell: FC<ReactTableCellProps> = props => {
-  const { column, tableStyles, cell } = props;
-  const { field } = column;
+export const BarGaugeCell: FC<TableCellProps> = props => {
+  const { field, column, tableStyles, cell, cellProps } = props;
 
-  if (!field.display) {
-    return null;
+  let config = getFieldConfigWithMinMax(field, false);
+  if (!config.thresholds) {
+    config = {
+      ...config,
+      thresholds: defaultScale,
+    };
   }
 
-  const displayValue = field.display(cell.value);
+  const displayValue = field.display!(cell.value);
   let barGaugeMode = BarGaugeDisplayMode.Gradient;
 
   if (field.config.custom && field.config.custom.displayMode === TableCellDisplayMode.LcdGauge) {
     barGaugeMode = BarGaugeDisplayMode.Lcd;
+  } else if (field.config.custom && field.config.custom.displayMode === TableCellDisplayMode.BasicGauge) {
+    barGaugeMode = BarGaugeDisplayMode.Basic;
+  }
+
+  let width;
+  if (column.width) {
+    width = (column.width as number) - tableStyles.cellPadding * 2;
+  } else {
+    width = tableStyles.cellPadding * 2;
   }
 
   return (
-    <div className={tableStyles.tableCell}>
+    <div {...cellProps} className={tableStyles.cellContainer}>
       <BarGauge
-        width={column.width - tableStyles.cellPadding * 2}
+        width={width}
         height={tableStyles.cellHeightInner}
-        thresholds={field.config.thresholds || defaultThresholds}
+        field={config}
+        display={field.display}
         value={displayValue}
-        maxValue={field.config.max || 100}
-        minValue={field.config.min || 0}
         orientation={VizOrientation.Horizontal}
         theme={tableStyles.theme}
         itemSpacing={1}

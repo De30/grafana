@@ -54,7 +54,7 @@ export function runSignalStream(
     data.addField({ name: 'time', type: FieldType.time });
     data.addField({ name: 'value', type: FieldType.number });
 
-    const { spread, speed, bands, noise } = query;
+    const { spread, speed, bands = 0, noise } = query;
 
     for (let i = 0; i < bands; i++) {
       const suffix = bands > 1 ? ` ${i + 1}` : '';
@@ -98,6 +98,7 @@ export function runSignalStream(
       subscriber.next({
         data: [data],
         key: streamId,
+        state: LoadingState.Streaming,
       });
 
       timeoutId = setTimeout(pushNextEvent, speed);
@@ -128,16 +129,17 @@ export function runLogsStream(
     });
     data.refId = target.refId;
     data.name = target.alias || 'Logs ' + target.refId;
-    data.addField({ name: 'time', type: FieldType.time });
     data.addField({ name: 'line', type: FieldType.string });
+    data.addField({ name: 'time', type: FieldType.time });
+    data.meta = { preferredVisualisationType: 'logs' };
 
     const { speed } = query;
 
     let timeoutId: any = null;
 
     const pushNextEvent = () => {
-      data.values.time.add(Date.now());
-      data.values.line.add(getRandomLine());
+      data.fields[0].values.add(Date.now());
+      data.fields[1].values.add(getRandomLine());
 
       subscriber.next({
         data: [data],
@@ -217,9 +219,15 @@ export function runFetchStream(
       return reader.read().then(processChunk);
     };
 
+    if (!query.url) {
+      throw new Error('query.url is not defined');
+    }
+
     fetch(new Request(query.url)).then(response => {
-      reader = response.body.getReader();
-      reader.read().then(processChunk);
+      if (response.body) {
+        reader = response.body.getReader();
+        reader.read().then(processChunk);
+      }
     });
 
     return () => {

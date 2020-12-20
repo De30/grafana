@@ -1,13 +1,12 @@
 package sqlstore
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/events"
-	m "github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -23,8 +22,8 @@ func init() {
 	bus.AddHandler("sql", DeleteOrg)
 }
 
-func SearchOrgs(query *m.SearchOrgsQuery) error {
-	query.Result = make([]*m.OrgDTO, 0)
+func SearchOrgs(query *models.SearchOrgsQuery) error {
+	query.Result = make([]*models.OrgDTO, 0)
 	sess := x.Table("org")
 	if query.Query != "" {
 		sess.Where("name LIKE ?", query.Query+"%")
@@ -43,30 +42,30 @@ func SearchOrgs(query *m.SearchOrgsQuery) error {
 	return err
 }
 
-func GetOrgById(query *m.GetOrgByIdQuery) error {
-	var org m.Org
+func GetOrgById(query *models.GetOrgByIdQuery) error {
+	var org models.Org
 	exists, err := x.Id(query.Id).Get(&org)
 	if err != nil {
 		return err
 	}
 
 	if !exists {
-		return m.ErrOrgNotFound
+		return models.ErrOrgNotFound
 	}
 
 	query.Result = &org
 	return nil
 }
 
-func GetOrgByName(query *m.GetOrgByNameQuery) error {
-	var org m.Org
+func GetOrgByName(query *models.GetOrgByNameQuery) error {
+	var org models.Org
 	exists, err := x.Where("name=?", query.Name).Get(&org)
 	if err != nil {
 		return err
 	}
 
 	if !exists {
-		return m.ErrOrgNotFound
+		return models.ErrOrgNotFound
 	}
 
 	query.Result = &org
@@ -75,7 +74,7 @@ func GetOrgByName(query *m.GetOrgByNameQuery) error {
 
 func isOrgNameTaken(name string, existingId int64, sess *DBSession) (bool, error) {
 	// check if org name is taken
-	var org m.Org
+	var org models.Org
 	exists, err := sess.Where("name=?", name).Get(&org)
 
 	if err != nil {
@@ -89,16 +88,15 @@ func isOrgNameTaken(name string, existingId int64, sess *DBSession) (bool, error
 	return false, nil
 }
 
-func CreateOrg(cmd *m.CreateOrgCommand) error {
+func CreateOrg(cmd *models.CreateOrgCommand) error {
 	return inTransaction(func(sess *DBSession) error {
-
 		if isNameTaken, err := isOrgNameTaken(cmd.Name, 0, sess); err != nil {
 			return err
 		} else if isNameTaken {
-			return m.ErrOrgNameTaken
+			return models.ErrOrgNameTaken
 		}
 
-		org := m.Org{
+		org := models.Org{
 			Name:    cmd.Name,
 			Created: time.Now(),
 			Updated: time.Now(),
@@ -108,10 +106,10 @@ func CreateOrg(cmd *m.CreateOrgCommand) error {
 			return err
 		}
 
-		user := m.OrgUser{
+		user := models.OrgUser{
 			OrgId:   org.Id,
 			UserId:  cmd.UserId,
-			Role:    m.ROLE_ADMIN,
+			Role:    models.ROLE_ADMIN,
 			Created: time.Now(),
 			Updated: time.Now(),
 		}
@@ -129,16 +127,15 @@ func CreateOrg(cmd *m.CreateOrgCommand) error {
 	})
 }
 
-func UpdateOrg(cmd *m.UpdateOrgCommand) error {
+func UpdateOrg(cmd *models.UpdateOrgCommand) error {
 	return inTransaction(func(sess *DBSession) error {
-
 		if isNameTaken, err := isOrgNameTaken(cmd.Name, cmd.OrgId, sess); err != nil {
 			return err
 		} else if isNameTaken {
-			return m.ErrOrgNameTaken
+			return models.ErrOrgNameTaken
 		}
 
-		org := m.Org{
+		org := models.Org{
 			Name:    cmd.Name,
 			Updated: time.Now(),
 		}
@@ -150,7 +147,7 @@ func UpdateOrg(cmd *m.UpdateOrgCommand) error {
 		}
 
 		if affectedRows == 0 {
-			return m.ErrOrgNotFound
+			return models.ErrOrgNotFound
 		}
 
 		sess.publishAfterCommit(&events.OrgUpdated{
@@ -163,9 +160,9 @@ func UpdateOrg(cmd *m.UpdateOrgCommand) error {
 	})
 }
 
-func UpdateOrgAddress(cmd *m.UpdateOrgAddressCommand) error {
+func UpdateOrgAddress(cmd *models.UpdateOrgAddressCommand) error {
 	return inTransaction(func(sess *DBSession) error {
-		org := m.Org{
+		org := models.Org{
 			Address1: cmd.Address1,
 			Address2: cmd.Address2,
 			City:     cmd.City,
@@ -190,12 +187,12 @@ func UpdateOrgAddress(cmd *m.UpdateOrgAddressCommand) error {
 	})
 }
 
-func DeleteOrg(cmd *m.DeleteOrgCommand) error {
+func DeleteOrg(cmd *models.DeleteOrgCommand) error {
 	return inTransaction(func(sess *DBSession) error {
 		if res, err := sess.Query("SELECT 1 from org WHERE id=?", cmd.Id); err != nil {
 			return err
 		} else if len(res) != 1 {
-			return m.ErrOrgNotFound
+			return models.ErrOrgNotFound
 		}
 
 		deletes := []string{
@@ -220,9 +217,20 @@ func DeleteOrg(cmd *m.DeleteOrgCommand) error {
 	})
 }
 
-func getOrCreateOrg(sess *DBSession, orgName string) (int64, error) {
-	var org m.Org
+func verifyExistingOrg(sess *DBSession, orgId int64) error {
+	var org models.Org
+	has, err := sess.Where("id=?", orgId).Get(&org)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return models.ErrOrgNotFound
+	}
+	return nil
+}
 
+func getOrCreateOrg(sess *DBSession, orgName string) (int64, error) {
+	var org models.Org
 	if setting.AutoAssignOrg {
 		has, err := sess.Where("id=?", setting.AutoAssignOrgId).Get(&org)
 		if err != nil {
@@ -231,15 +239,16 @@ func getOrCreateOrg(sess *DBSession, orgName string) (int64, error) {
 		if has {
 			return org.Id, nil
 		}
-		if setting.AutoAssignOrgId == 1 {
-			org.Name = mainOrgName
-			org.Id = int64(setting.AutoAssignOrgId)
-		} else {
-			sqlog.Info("Could not create user: organization id %v does not exist",
+
+		if setting.AutoAssignOrgId != 1 {
+			sqlog.Error("Could not create user: organization ID does not exist", "orgID",
 				setting.AutoAssignOrgId)
-			return 0, fmt.Errorf("Could not create user: organization id %v does not exist",
+			return 0, fmt.Errorf("could not create user: organization ID %d does not exist",
 				setting.AutoAssignOrgId)
 		}
+
+		org.Name = mainOrgName
+		org.Id = int64(setting.AutoAssignOrgId)
 	} else {
 		org.Name = orgName
 	}
@@ -264,15 +273,4 @@ func getOrCreateOrg(sess *DBSession, orgName string) (int64, error) {
 	})
 
 	return org.Id, nil
-}
-
-func createDefaultOrg(ctx context.Context) error {
-	return inTransactionCtx(ctx, func(sess *DBSession) error {
-		_, err := getOrCreateOrg(sess, mainOrgName)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
 }
