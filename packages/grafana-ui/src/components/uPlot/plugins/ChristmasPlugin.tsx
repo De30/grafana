@@ -24,6 +24,7 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
     yPos: 1,
     rotation: 0,
   });
+  const timeOffset = 6000;
 
   useEffect(() => {
     let yPos = 0;
@@ -33,11 +34,17 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
       hooks: {
         draw: (plot: uPlot) => {
           yPos += 1;
-          console.log('draw hook');
-          console.log(plot.data[1][0]);
+          const timePos = new Date().valueOf() - timeOffset;
+
+          const valIndex = plot.valToIdx(timePos);
+          //console.log('valIndex', valIndex);
+          //console.log('value', plot.data[1][valIndex]);
+          const valPos = plot.valToPos(plot.data[1][valIndex] ?? 0, 'short');
+          console.log(valPos, valPos);
+
           setState({
             xPos: state.xPos,
-            yPos: yPos,
+            yPos: valPos - 30,
             rotation: 0,
           });
         },
@@ -51,6 +58,7 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
     left: state.xPos,
     fontSize: '40px',
     transform: 'rotate(-35deg) matrix(-1, 0, 0, 1, 0, 0)',
+    transition: 'all 100ms linear',
   };
 
   return (
