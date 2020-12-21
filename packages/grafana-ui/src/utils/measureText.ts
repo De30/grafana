@@ -21,7 +21,7 @@ export function getCanvasContext() {
  * @beta
  */
 export function measureText(text: string, fontSize: number): TextMetrics {
-  const fontStyle = `${fontSize}px 'Roboto'`;
+  const fontStyle = `${fontSize}px 'Press Start 2P'`;
   const cacheKey = text + fontStyle;
   const fromCache = cache[cacheKey];
 

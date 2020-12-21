@@ -31,14 +31,14 @@ const theme: GrafanaThemeCommons = {
   name: 'Grafana Default',
   typography: {
     fontFamily: {
-      sansSerif: "'Roboto', 'Helvetica Neue', Arial, sans-serif",
+      sansSerif: "'Press Start 2P', cursive;",
       monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
     },
     size: {
-      base: '14px',
+      base: '12px',
       xs: '10px',
       sm: '12px',
-      md: '14px',
+      md: '12px',
       lg: '18px',
     },
     heading: {

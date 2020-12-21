@@ -99,17 +99,18 @@ export function runSignalStream(
     const pushNextEvent = () => {
       counter++;
 
-      if (counter % 10 === 0) {
+      if (counter % 2 === 0) {
         addNextRow(Date.now());
       }
 
-      subscriber.next({
-        data: [data],
-        key: streamId,
-        state: LoadingState.Streaming,
+      requestAnimationFrame(() => {
+        subscriber.next({
+          data: [data],
+          key: streamId,
+          state: LoadingState.Streaming,
+        });
+        timeoutId = setTimeout(pushNextEvent, speed);
       });
-
-      timeoutId = setTimeout(pushNextEvent, speed);
     };
 
     // Send first event in 5ms

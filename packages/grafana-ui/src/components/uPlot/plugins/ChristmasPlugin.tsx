@@ -3,7 +3,6 @@ import { PlotPluginProps } from '../types';
 import { usePlotContext } from '../context';
 import { XYCanvas } from '../geometries';
 import uPlot from 'uplot';
-import { DH_CHECK_P_NOT_SAFE_PRIME } from 'constants';
 
 interface Props extends PlotPluginProps {}
 
@@ -22,30 +21,29 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
   const [state, setState] = useState<State>({
     xPos: 200,
     yPos: 1,
-    rotation: 0,
+    rotation: -35,
   });
   const timeOffset = 6000;
 
   useEffect(() => {
-    let yPos = 0;
-
     plotCtx.registerPlugin({
       id: pluginId,
       hooks: {
         draw: (plot: uPlot) => {
-          yPos += 1;
           const timePos = new Date().valueOf() - timeOffset;
 
           const valIndex = plot.valToIdx(timePos);
-          //console.log('valIndex', valIndex);
           //console.log('value', plot.data[1][valIndex]);
+          const xPos = plot.valToPos(timePos, 'x');
           const valPos = plot.valToPos(plot.data[1][valIndex] ?? 0, 'short');
-          console.log(valPos, valPos);
+          const valPosNext = plot.valToPos(plot.data[1][valIndex + 1] ?? 0, 'short');
+          const valPostNextNext = plot.valToPos(plot.data[1][valIndex + 2] ?? 0, 'short');
+          const diff = valPostNextNext - valPosNext;
 
           setState({
-            xPos: state.xPos,
-            yPos: valPos - 30,
-            rotation: 0,
+            xPos: xPos,
+            yPos: valPos - 40,
+            rotation: -40 + diff,
           });
         },
       },
@@ -57,8 +55,8 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
     top: state.yPos,
     left: state.xPos,
     fontSize: '40px',
-    transform: 'rotate(-35deg) matrix(-1, 0, 0, 1, 0, 0)',
-    transition: 'all 100ms linear',
+    transform: `rotate(${state.rotation}deg) matrix(-1, 0, 0, 1, 0, 0)`,
+    transition: 'all 30ms linear 30ms',
   };
 
   return (
