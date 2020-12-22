@@ -56,7 +56,7 @@ export const ChristmasPlugin: React.FC<Props> = ({ id }) => {
     left: state.xPos,
     fontSize: '40px',
     transform: `rotate(${state.rotation}deg) matrix(-1, 0, 0, 1, 0, 0)`,
-    transition: 'all 30ms linear 30ms',
+    transition: 'all 20ms linear 20ms',
   };
 
   return (

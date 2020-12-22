@@ -107,7 +107,7 @@ export const fieldColorModeRegistry = new Registry<FieldColorMode>(() => {
       name: 'Blues',
       isContinuous: true,
       isByValue: true,
-      colors: ['panel-bg', 'dark-blue'],
+      colors: ['panel-bg', 'dark-blue', 'blue', 'light-blue', 'white'],
     }),
     new FieldColorSchemeMode({
       id: 'continuous-reds',
