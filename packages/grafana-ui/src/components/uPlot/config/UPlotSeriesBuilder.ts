@@ -156,41 +156,32 @@ interface AreaGradientOptions {
 
 function getCanvasGradient(opts: AreaGradientOptions): (self: uPlot, seriesIdx: number) => CanvasGradient {
   return (plot: uPlot, seriesIdx: number) => {
-    const { color, mode, opacity } = opts;
+    const { color, opacity } = opts;
 
     const ctx = getCanvasContext();
-    const gradient = ctx.createLinearGradient(0, plot.bbox.top, 0, plot.bbox.top + plot.bbox.height);
+    const gradient = ctx.createLinearGradient(0, 0, 0, plot.bbox.height);
 
-    switch (mode) {
-      case AreaGradientMode.Hue:
-        const color1 = tinycolor(color)
-          .spin(-25)
-          .darken(30)
-          .setAlpha(opacity)
-          .toRgbString();
-        const color2 = tinycolor(color)
-          .spin(25)
-          .lighten(35)
-          .setAlpha(opacity)
-          .toRgbString();
-        gradient.addColorStop(0, color2);
-        gradient.addColorStop(1, color1);
+    gradient.addColorStop(0.55, '#FFFFFF');
+    gradient.addColorStop(0.55, '#d4d4e7');
+    gradient.addColorStop(0.56, '#d4d4e7');
+    gradient.addColorStop(0.56, '#6469a7');
+    gradient.addColorStop(0.58, '#6469a7');
+    gradient.addColorStop(0.58, '#494f90');
+    gradient.addColorStop(0.6, '#494f90');
 
-      case AreaGradientMode.Opacity:
-      default:
-        gradient.addColorStop(
-          0,
-          tinycolor(color)
-            .setAlpha(opacity)
-            .toRgbString()
-        );
-        gradient.addColorStop(
-          1,
-          tinycolor(color)
-            .setAlpha(0)
-            .toRgbString()
-        );
-        return gradient;
-    }
+    gradient.addColorStop(0.6, '#323694');
+    gradient.addColorStop(0.75, '#323694');
+    gradient.addColorStop(0.75, '#292d84');
+    gradient.addColorStop(0.8, '#292d84');
+    gradient.addColorStop(0.8, '#1d205b');
+    gradient.addColorStop(0.85, '#1d205b');
+    gradient.addColorStop(0.85, '#191850');
+    gradient.addColorStop(0.9, '#191850');
+    gradient.addColorStop(0.9, '#14153f');
+    gradient.addColorStop(0.95, '#14153f');
+    gradient.addColorStop(0.95, '#0b0d22');
+    gradient.addColorStop(1, '#0b0d22');
+
+    return gradient;
   };
 }

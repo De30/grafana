@@ -64,12 +64,12 @@ export function runSignalStream(
       data.addField({ name: 'Max' + suffix, type: FieldType.number });
     }
 
-    let value = Math.random() * 100;
+    let value = 70;
     let timeoutId: any = null;
 
     const addNextRow = (time: number) => {
       value += (Math.random() - 0.5) * spread;
-      value = Math.min(Math.max(value, 0), 100);
+      value = Math.min(Math.max(value, 40), 90);
 
       let idx = 0;
       data.fields[idx++].values.add(time);
@@ -99,7 +99,7 @@ export function runSignalStream(
     const pushNextEvent = () => {
       counter++;
 
-      if (counter % 2 === 0) {
+      if (counter % 1 === 0) {
         addNextRow(Date.now());
       }
 
