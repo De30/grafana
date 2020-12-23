@@ -9,7 +9,7 @@ import { ArrayVector } from '../../vector/ArrayVector';
 import { KeyValue } from '../../types/data';
 import { guessFieldTypeForField } from '../../dataframe/processDataFrame';
 import { getFieldMatcher } from '../matchers';
-import { getFieldDisplayName } from '../../field';
+import { getFieldDisplayName, getFrameDisplayName } from '../../field';
 import { FieldMatcher } from '../../types/transformations';
 
 export enum ReduceTransformerMode {
@@ -71,6 +71,7 @@ export function reduceSeriesToRows(
   const calculators = fieldReducers.list(reducerId);
   const reducers = calculators.map(c => c.id);
   const processed: DataFrame[] = [];
+  const addFrameField = true;
 
   for (const series of data) {
     const values: ArrayVector[] = [];
@@ -84,6 +85,15 @@ export function reduceSeriesToRows(
       values: values[0],
       config: {},
     });
+
+    if (addFrameField) {
+      fields.push({
+        name: getFrameDisplayName(series),
+        type: FieldType.frame,
+        values: new ArrayVector(),
+        config: {},
+      });
+    }
 
     for (const info of calculators) {
       const vals = new ArrayVector();

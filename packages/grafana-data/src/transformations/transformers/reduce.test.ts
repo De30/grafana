@@ -2,12 +2,14 @@ import { ReducerID } from '../fieldReducer';
 import { DataTransformerID } from './ids';
 import { toDataFrame } from '../../dataframe/processDataFrame';
 import { mockTransformationsRegistry } from '../../utils/tests/mockTransformationsRegistry';
-import { reduceFields, reduceTransformer } from './reduce';
+import { reduceFields, reduceSeriesToRows, reduceTransformer } from './reduce';
 import { transformDataFrame } from '../transformDataFrame';
 import { Field, FieldType } from '../../types';
 import { ArrayVector } from '../../vector';
 import { notTimeFieldMatcher } from '../matchers/predicates';
 import { DataFrameView } from '../../dataframe';
+import { fieldMatchers, getFieldMatcher } from '../matchers';
+import { FieldMatcherID } from '../matchers/ids';
 
 const seriesAWithSingleField = toDataFrame({
   name: 'A',
@@ -273,5 +275,27 @@ describe('Reducer Transformer', () => {
         "temperature": 6,
       }
     `);
+  });
+
+  it('Reduce time series with sparkline field', () => {
+    const s1 = toDataFrame({
+      target: 'SeriesA',
+      datapoints: [
+        [100, 1],
+        [200, 2],
+      ],
+    });
+
+    const s2 = toDataFrame({
+      target: 'SeriesB',
+      datapoints: [
+        [100, 3],
+        [200, 4],
+      ],
+    });
+
+    const matcher = getFieldMatcher({ id: FieldMatcherID.numeric });
+    const result = reduceSeriesToRows([s1, s2], matcher, [ReducerID.max]);
+    expect(result?.fields.length).toBe(3);
   });
 });
