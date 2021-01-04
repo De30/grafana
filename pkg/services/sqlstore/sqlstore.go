@@ -67,6 +67,7 @@ type SQLStore struct {
 	log                         log.Logger
 	Dialect                     migrator.Dialect
 	skipEnsureDefaultOrgAndUser bool
+	concurrentUserStatsCache    memoConcurrentUserStats
 }
 
 func (ss *SQLStore) Init() error {

@@ -60,7 +60,7 @@ func (uss *UsageStatsService) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-onceEveryDayTick.C:
-			if err := uss.sendUsageStats(); err != nil {
+			if err := uss.sendUsageStats(ctx); err != nil {
 				metricsLogger.Warn("Failed to send usage stats", "err", err)
 			}
 		case <-everyMinuteTicker.C:

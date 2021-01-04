@@ -113,8 +113,3 @@ type ConcurrentUsersStats struct {
 	BucketLe15  int32
 	BucketLeInf int32
 }
-
-type GetConcurrentUsersStatsQuery struct {
-	MustRefresh bool
-	Result      *ConcurrentUsersStats
-}

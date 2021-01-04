@@ -17,7 +17,6 @@ func init() {
 	bus.AddHandlerCtx("sql", GetUserStats)
 	bus.AddHandlerCtx("sql", GetAlertNotifiersUsageStats)
 	bus.AddHandlerCtx("sql", GetSystemUserCountStats)
-	bus.AddHandlerCtx("sql", GetConcurrentUsersStats)
 }
 
 const activeUserTimeLimit = time.Hour * 24 * 30
@@ -192,33 +191,16 @@ type memoConcurrentUserStats struct {
 	memoized time.Time
 }
 
-var (
-	concurrentUserStatsCache         = memoConcurrentUserStats{}
+const (
 	concurrentUserStatsCacheLifetime = time.Hour
 )
 
-func GetConcurrentUsersStats(ctx context.Context, query *models.GetConcurrentUsersStatsQuery) error {
-	err := updateConcurrentUsersStatsIfNecessary(ctx, query.MustRefresh)
-	if err != nil {
-		return err
-	}
-	query.Result = concurrentUserStatsCache.stats
-	return nil
-}
-
-func updateConcurrentUsersStatsIfNecessary(ctx context.Context, refresh bool) error {
+func (ss *SQLStore) GetConcurrentUsersStats(ctx context.Context) (*models.ConcurrentUsersStats, error) {
 	memoizationPeriod := time.Now().Add(-concurrentUserStatsCacheLifetime)
-	if refresh || concurrentUserStatsCache.memoized.Before(memoizationPeriod) {
-		err := updateConcurrentUsersStats(ctx)
-		if err != nil {
-			return err
-		}
+	if ss.concurrentUserStatsCache.memoized.Before(memoizationPeriod) {
+		return ss.concurrentUserStatsCache.stats, nil
 	}
 
-	return nil
-}
-
-func updateConcurrentUsersStats(ctx context.Context) error {
 	// Retrieves concurrent users stats as a histogram. Buckets are accumulative and upper bound is inclusive.
 	var rawSql = `
 SELECT
@@ -229,13 +211,14 @@ SELECT
     COUNT(CASE WHEN tokens <= 15 THEN 1 END) AS bucket_le15,
     COUNT(1) AS bucket_le_inf
 FROM (select count(1) as tokens from user_auth_token group by user_id) uat;`
-	concurrentUserStatsCache.stats = &models.ConcurrentUsersStats{}
-	_, err := x.Context(ctx).SQL(rawSql).Get(concurrentUserStatsCache.stats)
+	ss.concurrentUserStatsCache.stats = &models.ConcurrentUsersStats{}
+	_, err := x.Context(ctx).SQL(rawSql).Get(ss.concurrentUserStatsCache.stats)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	concurrentUserStatsCache.memoized = time.Now()
-	return err
+	ss.concurrentUserStatsCache.memoized = time.Now()
+
+	return ss.concurrentUserStatsCache.stats, nil
 }
 
 func GetUserStats(ctx context.Context, query *models.GetUserStatsQuery) error {
