@@ -30,14 +30,15 @@ type Plugin struct {
 }
 
 type Version struct {
-	Commit  string              `json:"commit"`
-	URL     string              `json:"url"`
-	Version string              `json:"version"`
-	Arch    map[string]ArchMeta `json:"arch"`
+	Commit  string `json:"commit"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
+	// Arch contains architecture metadata.
+	Arch map[string]ArchMeta `json:"arch"`
 }
 
 type ArchMeta struct {
-	Md5 string `json:"md5"`
+	SHA256 string `json:"sha256"`
 }
 
 type PluginRepo struct {
