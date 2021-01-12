@@ -1,9 +1,8 @@
 import React from 'react';
-import { select } from '@storybook/addon-knobs';
-import { action } from '@storybook/addon-actions';
-import { Alert, AlertVariant } from './Alert';
+import { Story } from '@storybook/react';
+import { Alert, Props } from './Alert';
 import { withCenteredStory, withHorizontallyCenteredStory } from '../../utils/storybook/withCenteredStory';
-import mdx from '../Alert/Alert.mdx';
+import mdx from './Alert.mdx';
 
 export default {
   title: 'Overlays/Alert',
@@ -13,29 +12,35 @@ export default {
     docs: {
       page: mdx,
     },
+    knobs: {
+      disabled: true,
+    },
+  },
+  argTypes: {
+    severity: { control: 'select' },
   },
 };
 
-const severities: AlertVariant[] = ['error', 'warning', 'info', 'success'];
+const Template: Story<Props> = args => <Alert {...args} />;
 
-export const basic = () => {
-  const severity = select('Severity', severities, 'info');
-  return <Alert title="Some very important message" severity={severity} />;
+export const basic = Template.bind({});
+basic.args = { title: 'Some very important message', severity: 'info' };
+
+export const withRemove = Template.bind({});
+withRemove.args = {
+  title: 'Some very important message',
+  severity: 'info',
+};
+withRemove.argTypes = {
+  onRemove: { action: 'Remove button clicked' },
 };
 
-export const withRemove = () => {
-  const severity = select('Severity', severities, 'info');
-  return <Alert title="Some very important message" severity={severity} onRemove={action('Remove button clicked')} />;
+export const customButtonContent = Template.bind({});
+customButtonContent.args = {
+  title: 'Some very important message',
+  severity: 'info',
+  buttonContent: <span>Close</span>,
 };
-
-export const customButtonContent = () => {
-  const severity = select('Severity', severities, 'info');
-  return (
-    <Alert
-      title="Some very important message"
-      severity={severity}
-      buttonContent={<span>Close</span>}
-      onRemove={action('Remove button clicked')}
-    />
-  );
+customButtonContent.argTypes = {
+  onRemove: { action: 'Remove button clicked' },
 };
