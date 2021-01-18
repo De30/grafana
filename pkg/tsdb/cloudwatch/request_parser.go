@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/tsdb"
 )
@@ -17,6 +16,7 @@ import (
 // Parses the json queries and returns a requestQuery. The requestQuery has a 1 to 1 mapping to a query editor row
 func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTime time.Time, endTime time.Time) (map[string][]*requestQuery, error) {
 	requestQueries := make(map[string][]*requestQuery)
+	migrateLegacyQuery(queryContext)
 	for i, query := range queryContext.Queries {
 		queryType := query.Model.Get("type").MustString()
 		if queryType != "timeSeriesQuery" && queryType != "" {
@@ -38,6 +38,57 @@ func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTim
 	return requestQueries, nil
 }
 
+func migrateLegacyQuery(queryContext *tsdb.TsdbQuery) (*tsdb.TsdbQuery, error) {
+	for _, query := range queryContext.Queries {
+		// var statistics string
+		_, err := query.Model.Get("statistics").String()
+		if err == nil {
+			continue
+		}
+
+		stats := query.Model.Get("statistics").MustStringArray()
+
+		if len(stats) == 1 {
+			continue
+		}
+		for i := 1; i < len(stats); i++ {
+			newQuery := &tsdb.Query{
+				Model:         query.Model,
+				DataSource:    query.DataSource,
+				MaxDataPoints: query.MaxDataPoints,
+				QueryType:     query.QueryType,
+				IntervalMs:    query.IntervalMs,
+			}
+
+			newQuery.Model.Set("statistics", stats[i])
+			newQuery.RefId = getNextRefIDChar(queryContext.Queries)
+			queryContext.Queries = append(queryContext.Queries, newQuery)
+		}
+	}
+
+	return queryContext, nil
+}
+
+func getNextRefIDChar(queries []*tsdb.Query) string {
+	letters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	for _, rune := range letters {
+		char := string(rune)
+		characterTaken := false
+		for _, query := range queries {
+			if query.RefId == char {
+				characterTaken = true
+				break
+			}
+		}
+
+		if !characterTaken {
+			return char
+		}
+	}
+
+	return "NA"
+}
+
 func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time, endTime time.Time) (*requestQuery, error) {
 	plog.Debug("Parsing request query", "query", model)
 	reNumber := regexp.MustCompile(`^\d+$`)
@@ -57,7 +108,7 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 	if err != nil {
 		return nil, err
 	}
-	statistics, err := parseStatistics(model)
+	statistics, err := model.Get("statistics").String() // parseStatistics(model)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +161,7 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 		Namespace:  namespace,
 		MetricName: metricName,
 		Dimensions: dimensions,
-		Statistics: aws.StringSlice(statistics),
+		Statistics: []*string{&statistics},
 		Period:     period,
 		Alias:      alias,
 		Id:         id,
