@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { FieldConfigSource, GrafanaTheme, PanelPlugin } from '@grafana/data';
 import { DashboardModel, PanelModel } from '../../state';
-import { CustomScrollbar, Icon, stylesFactory, TabContent, useStyles, useTheme } from '@grafana/ui';
+import { CustomScrollbar, Icon, IconButton, stylesFactory, TabContent, useStyles, useTheme } from '@grafana/ui';
 import { OverrideFieldConfigEditor } from './OverrideFieldConfigEditor';
 import { DefaultFieldConfigEditor } from './DefaultFieldConfigEditor';
 import { css } from 'emotion';
@@ -93,6 +93,7 @@ export const OptionsPaneContent: React.FC<Props> = ({
         <div className={styles.wrapper}>
           {vizPickerIsOpen && <VisualizationTab panel={panel} onClose={onToggleVizPicker} />}
           <TabContent className={styles.tabContent}>
+            <PaneBar plugin={plugin} styles={styles} />
             <PanelOptionsTab
               panel={panel}
               plugin={plugin}
@@ -110,6 +111,25 @@ export const OptionsPaneContent: React.FC<Props> = ({
   );
 };
 
+export const PaneBar: React.FC<{
+  plugin: PanelPlugin;
+  styles: OptionsPaneStyles;
+}> = ({ plugin, styles }) => {
+  return (
+    <div className={styles.paneBar}>
+      <IconButton size="lg" surface="header" name="search" tooltip="Search options" />
+      <IconButton size="lg" surface="header" name="minus-square" tooltip="Collapse all sections" />
+      <IconButton size="lg" surface="header" name="plus-square" tooltip="Expand all sections" />
+      <IconButton
+        size="lg"
+        surface="header"
+        name="question-circle"
+        tooltip={`Open ${plugin.meta.name} documentation`}
+      />
+    </div>
+  );
+};
+
 export const VisualizationButtons: React.FC<{
   plugin: PanelPlugin;
   onToggleVizPicker: () => void;
@@ -119,10 +139,7 @@ export const VisualizationButtons: React.FC<{
   return (
     <div className={styles.vizButtonBar}>
       <VizButton plugin={plugin} onClick={onToggleVizPicker} />
-      <DashNavButton icon="search" tooltip="Search options" />
-      <DashNavButton icon="minus-square" tooltip="Collapse all sections" />
-      <DashNavButton icon="plus-square" tooltip="Expand all sections" />
-      <DashNavButton icon="cog" onClick={onClose} tooltip="Close options pane" />
+      <DashNavButton icon="sliders-v-alt" onClick={onClose} tooltip="Close options pane" />
     </div>
   );
 };
@@ -218,6 +235,16 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
       flex-direction: row;
       flex-grow: 1;
       margin-right: ${theme.spacing.xs};
+    `,
+    paneBar: css`
+      display: flex;
+      flex-direction: row;
+      padding: 6px 4px;
+      background: ${theme.colors.bg2};
+      justify-content: flex-end;
+      svg {
+        color: ${theme.colors.textWeak};
+      }
     `,
     tabsButton: css``,
     legacyOptions: css`
