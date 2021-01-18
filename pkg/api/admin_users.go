@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/util"
+	"github.com/open-policy-agent/opa/rego"
 )
 
 func AdminCreateUser(c *models.ReqContext, form dtos.AdminCreateUserForm) response.Response {
@@ -149,6 +150,64 @@ func (hs *HTTPServer) AdminDisableUser(c *models.ReqContext) response.Response {
 
 // POST /api/admin/users/:id/enable
 func AdminEnableUser(c *models.ReqContext) response.Response {
+	module := `
+package grafana.rbac
+
+default allow = false
+
+allow {
+	user_is_superadmin
+}
+
+allow {
+	some grant
+	user_is_granted[grant]
+
+	input.action == grant.action
+	input.resource == grant.resource
+}
+
+user_is_superadmin {
+
+	some i
+
+	data.user_roles[input.user][i] == "superadmin"
+}
+
+user_is_granted[grant] {
+	some i, j
+
+	role := data.user_roles[input.user][i]
+
+
+	grant := data.role_grants[role][j]
+}
+`
+	query, err := rego.New(
+		rego.Query("x = data.grafana.rbac.allow"),
+		rego.Module("grafana.rbac", module),
+	).PrepareForEval(c.Req.Context())
+
+	if err != nil {
+		return response.Error(401, "Could not authorize user", err)
+	}
+	input := map[string]interface{}{
+		"user":     "vardan",
+		"resource": "/api/admin/users/:id/enable",
+		"action":   "post",
+	}
+
+	results, err := query.Eval(c.Req.Context(), rego.EvalInput(input))
+	if err != nil {
+		return response.Error(401, "Could not authorize user", err)
+	} else if len(results) == 0 {
+		return response.Error(401, "Could not authorize user", err)
+	} else if _, ok := results[0].Bindings["x"].(bool); !ok {
+		return response.Error(401, "Could not authorize user", err)
+	} else {
+		fmt.Printf("%+v", results)
+	}
+
 	userID := c.ParamsInt64(":id")
 
 	// External users shouldn't be disabled from API
