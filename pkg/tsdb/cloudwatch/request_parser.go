@@ -121,7 +121,7 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 	if err != nil {
 		return nil, err
 	}
-	statistics, err := model.Get("statistics").String()
+	statistic, err := model.Get("statistic").String()
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,8 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 		Namespace:  namespace,
 		MetricName: metricName,
 		Dimensions: dimensions,
-		Statistics: []*string{&statistics},
+		Statistics: []*string{&statistic},
+		Statistic:  statistic,
 		Period:     period,
 		Alias:      alias,
 		Id:         id,

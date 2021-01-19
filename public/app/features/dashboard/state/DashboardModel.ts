@@ -27,6 +27,8 @@ import { onTimeRangeUpdated } from 'app/features/variables/state/actions';
 import { dispatch } from '../../../store/store';
 import { isAllVariable } from '../../variables/utils';
 import { DashboardPanelsChangedEvent, RefreshEvent, RenderEvent } from 'app/types/events';
+import { CloudWatchMetricsQuery } from 'app/plugins/datasource/cloudwatch/types';
+import { getNextRefIdChar } from 'app/core/utils/query';
 
 export interface CloneOptions {
   saveVariables?: boolean;
@@ -134,6 +136,23 @@ export class DashboardModel {
 
     this.addBuiltInAnnotationQuery();
     this.sortPanelsByGridPos();
+
+    for (const panel of this.panels) {
+      for (const target of panel.targets) {
+        const newTargets = [];
+        const cloudWatchQuery = target as CloudWatchMetricsQuery;
+        if (cloudWatchQuery.statistics.length > 1) {
+          for (const stat of cloudWatchQuery.statistics.splice(1)) {
+            newTargets.push({ ...cloudWatchQuery, statistics: [stat] });
+          }
+          cloudWatchQuery.statistics = [cloudWatchQuery.statistics[0]];
+        }
+        for (const newTarget of newTargets) {
+          newTarget.refId = getNextRefIdChar(panel.targets);
+          panel.targets.push(newTarget);
+        }
+      }
+    }
   }
 
   addBuiltInAnnotationQuery() {

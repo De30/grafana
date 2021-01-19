@@ -13,6 +13,7 @@ type requestQuery struct {
 	Namespace          string
 	MetricName         string
 	Statistics         []*string
+	Statistic          string
 	QueryType          string
 	Expression         string
 	ReturnData         bool
