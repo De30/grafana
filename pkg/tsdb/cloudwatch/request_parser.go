@@ -41,7 +41,7 @@ func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTim
 func migrateLegacyQuery(queryContext *tsdb.TsdbQuery) (*tsdb.TsdbQuery, error) {
 	for _, query := range queryContext.Queries {
 		// var statistics string
-		_, err := query.Model.Get("statistics").String()
+		_, err := query.Model.Get("statistic").String()
 		if err == nil {
 			continue
 		}
@@ -49,21 +49,34 @@ func migrateLegacyQuery(queryContext *tsdb.TsdbQuery) (*tsdb.TsdbQuery, error) {
 		stats := query.Model.Get("statistics").MustStringArray()
 
 		if len(stats) == 1 {
+			query.Model.Del("statistics")
+			query.Model.Set("statistic", stats[0])
 			continue
 		}
+
+		bytes, err := queryContext.Queries[0].Model.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		for i := 1; i < len(stats); i++ {
-			newQuery := &tsdb.Query{
-				Model:         query.Model,
+			model, err := simplejson.NewJson(bytes)
+			if err != nil {
+				return nil, err
+			}
+			q := &tsdb.Query{
+				Model:         model,
 				DataSource:    query.DataSource,
 				MaxDataPoints: query.MaxDataPoints,
 				QueryType:     query.QueryType,
 				IntervalMs:    query.IntervalMs,
 			}
 
-			newQuery.Model.Set("statistics", stats[i])
-			newQuery.RefId = getNextRefIDChar(queryContext.Queries)
-			queryContext.Queries = append(queryContext.Queries, newQuery)
+			q.Model.Set("statistic", stats[i])
+			q.RefId = getNextRefIDChar(queryContext.Queries)
+			queryContext.Queries = append(queryContext.Queries, q)
 		}
+		query.Model.Del("statistics")
+		query.Model.Set("statistic", stats[0])
 	}
 
 	return queryContext, nil
@@ -108,7 +121,7 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 	if err != nil {
 		return nil, err
 	}
-	statistics, err := model.Get("statistics").String() // parseStatistics(model)
+	statistics, err := model.Get("statistics").String()
 	if err != nil {
 		return nil, err
 	}
