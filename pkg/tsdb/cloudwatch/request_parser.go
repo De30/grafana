@@ -14,8 +14,8 @@ import (
 )
 
 // Parses the json queries and returns a requestQuery. The requestQuery has a 1 to 1 mapping to a query editor row
-func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTime time.Time, endTime time.Time) (map[string][]*requestQuery, error) {
-	requestQueries := make(map[string][]*requestQuery)
+func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTime time.Time, endTime time.Time) (map[string]map[string]*cloudWatchQuery, error) {
+	requestQueries := make(map[string]map[string]*cloudWatchQuery)
 	migrateLegacyQuery(queryContext)
 	for i, query := range queryContext.Queries {
 		queryType := query.Model.Get("type").MustString()
@@ -30,9 +30,9 @@ func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTim
 		}
 
 		if _, exist := requestQueries[query.Region]; !exist {
-			requestQueries[query.Region] = make([]*requestQuery, 0)
+			requestQueries[query.Region] = make(map[string]*cloudWatchQuery, 0)
 		}
-		requestQueries[query.Region] = append(requestQueries[query.Region], query)
+		requestQueries[query.Region][query.Id] = query // append(requestQueries[query.Region], query)
 	}
 
 	return requestQueries, nil
@@ -102,7 +102,7 @@ func getNextRefIDChar(queries []*tsdb.Query) string {
 	return "NA"
 }
 
-func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time, endTime time.Time) (*requestQuery, error) {
+func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time, endTime time.Time) (*cloudWatchQuery, error) {
 	plog.Debug("Parsing request query", "query", model)
 	reNumber := regexp.MustCompile(`^\d+$`)
 	region, err := model.Get("region").String()
@@ -155,6 +155,9 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 	}
 
 	id := model.Get("id").MustString("")
+	if id == "" {
+		id = strings.ToLower(refId)
+	}
 	expression := model.Get("expression").MustString("")
 	alias := model.Get("alias").MustString()
 	returnData := !model.Get("hide").MustBool(false)
@@ -168,20 +171,23 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 
 	matchExact := model.Get("matchExact").MustBool(true)
 
-	return &requestQuery{
-		RefId:      refId,
-		Region:     region,
-		Namespace:  namespace,
-		MetricName: metricName,
-		Dimensions: dimensions,
-		Statistics: []*string{&statistic},
-		Statistic:  statistic,
-		Period:     period,
-		Alias:      alias,
-		Id:         id,
-		Expression: expression,
-		ReturnData: returnData,
-		MatchExact: matchExact,
+	return &cloudWatchQuery{
+		RefId:                   refId,
+		Region:                  region,
+		Id:                      id,
+		Namespace:               namespace,
+		MetricName:              metricName,
+		Stats:                   statistic,
+		Expression:              expression,
+		ReturnData:              returnData,
+		Dimensions:              dimensions,
+		Period:                  period,
+		Alias:                   alias,
+		MatchExact:              matchExact,
+		UsedExpression:          "",
+		RequestExceededMaxLimit: false,
+		DeepLink:                "",
+		PartialData:             false,
 	}, nil
 }
 

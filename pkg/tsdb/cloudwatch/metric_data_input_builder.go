@@ -19,6 +19,10 @@ func (e *cloudWatchExecutor) buildMetricDataInput(startTime time.Time, endTime t
 		if err != nil {
 			return nil, &queryError{err, query.RefId}
 		}
+		err = query.generateDeepLink(startTime, endTime)
+		if err != nil {
+			return nil, &queryError{err: err, RefID: query.RefId}
+		}
 		metricDataInput.MetricDataQueries = append(metricDataInput.MetricDataQueries, metricDataQuery)
 	}
 

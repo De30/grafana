@@ -57,23 +57,23 @@ func (e *cloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				return err
 			}
 
-			queries, err := e.transformRequestQueriesToCloudWatchQueries(requestQueries)
-			if err != nil {
-				for _, query := range requestQueries {
-					resultChan <- &tsdb.QueryResult{
-						RefId: query.RefId,
-						Error: err,
-					}
-				}
-				return nil
-			}
+			// queries, err := e.transformRequestQueriesToCloudWatchQueries(requestQueries)
+			// if err != nil {
+			// 	for _, query := range requestQueries {
+			// 		resultChan <- &tsdb.QueryResult{
+			// 			RefId: query.RefId,
+			// 			Error: err,
+			// 		}
+			// 	}
+			// 	return nil
+			// }
 
-			metricDataInput, err := e.buildMetricDataInput(startTime, endTime, queries)
+			metricDataInput, err := e.buildMetricDataInput(startTime, endTime, requestQueries)
 			if err != nil {
 				return err
 			}
 
-			cloudwatchResponses := make([]*cloudwatchResponse, 0)
+			// cloudwatchResponses := make([]*cloudwatchResponse, 0)
 			mdo, err := e.executeRequest(ectx, client, metricDataInput)
 			if err != nil {
 				for _, query := range requestQueries {
@@ -85,7 +85,7 @@ func (e *cloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				return nil
 			}
 
-			responses, err := e.parseResponse(mdo, queries)
+			res, err := e.parseResponse(mdo, requestQueries)
 			if err != nil {
 				for _, query := range requestQueries {
 					resultChan <- &tsdb.QueryResult{
@@ -96,17 +96,17 @@ func (e *cloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				return nil
 			}
 
-			cloudwatchResponses = append(cloudwatchResponses, responses...)
-			res, err := e.transformQueryResponsesToQueryResult(cloudwatchResponses, requestQueries, startTime, endTime)
-			if err != nil {
-				for _, query := range requestQueries {
-					resultChan <- &tsdb.QueryResult{
-						RefId: query.RefId,
-						Error: err,
-					}
-				}
-				return nil
-			}
+			// cloudwatchResponses = append(cloudwatchResponses, responses...)
+			// res, err := e.transformQueryResponsesToQueryResult(cloudwatchResponses, requestQueries, startTime, endTime)
+			// if err != nil {
+			// 	for _, query := range requestQueries {
+			// 		resultChan <- &tsdb.QueryResult{
+			// 			RefId: query.RefId,
+			// 			Error: err,
+			// 		}
+			// 	}
+			// 	return nil
+			// }
 
 			for _, queryRes := range res {
 				resultChan <- queryRes

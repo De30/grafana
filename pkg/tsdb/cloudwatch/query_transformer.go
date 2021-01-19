@@ -55,7 +55,7 @@ func (e *cloudWatchExecutor) transformRequestQueriesToCloudWatchQueries(requestQ
 	return cloudwatchQueries, nil
 }
 
-func (e *cloudWatchExecutor) transformQueryResponsesToQueryResult(cloudwatchResponses []*cloudwatchResponse, requestQueries []*requestQuery, startTime time.Time, endTime time.Time) (map[string]*tsdb.QueryResult, error) {
+func (e *cloudWatchExecutor) transformQueryResponsesToQueryResult(cloudwatchResponses []*cloudwatchResponse, requestQueries map[string]*cloudWatchQuery, startTime time.Time, endTime time.Time) (map[string]*tsdb.QueryResult, error) {
 	responsesByRefID := make(map[string][]*cloudwatchResponse)
 	refIDs := sort.StringSlice{}
 	for _, res := range cloudwatchResponses {
@@ -141,12 +141,12 @@ func (e *cloudWatchExecutor) transformQueryResponsesToQueryResult(cloudwatchResp
 }
 
 // buildDeepLink generates a deep link from Grafana to the CloudWatch console. The link params are based on metric(s) for a given query row in the Query Editor.
-func buildDeepLink(refID string, requestQueries []*requestQuery, executedQueries []executedQuery, startTime time.Time, endTime time.Time) (string, error) {
+func buildDeepLink(refID string, requestQueries map[string]*cloudWatchQuery, executedQueries []executedQuery, startTime time.Time, endTime time.Time) (string, error) {
 	if isMathExpression(executedQueries) {
 		return "", nil
 	}
 
-	requestQuery := &requestQuery{}
+	requestQuery := &cloudWatchQuery{}
 	for _, rq := range requestQueries {
 		if rq.RefId == refID {
 			requestQuery = rq
@@ -174,17 +174,17 @@ func buildDeepLink(refID string, requestQueries []*requestQuery, executedQueries
 	if len(expressions) != 0 {
 		cloudWatchLinkProps.Metrics = expressions
 	} else {
-		for _, stat := range requestQuery.Statistics {
-			metricStat := []interface{}{requestQuery.Namespace, requestQuery.MetricName}
-			for dimensionKey, dimensionValues := range requestQuery.Dimensions {
-				metricStat = append(metricStat, dimensionKey, dimensionValues[0])
-			}
-			metricStat = append(metricStat, &metricStatMeta{
-				Stat:   *stat,
-				Period: requestQuery.Period,
-			})
-			metricItems = append(metricItems, metricStat)
+		// for _, stat := range requestQuery.Statistics {
+		metricStat := []interface{}{requestQuery.Namespace, requestQuery.MetricName}
+		for dimensionKey, dimensionValues := range requestQuery.Dimensions {
+			metricStat = append(metricStat, dimensionKey, dimensionValues[0])
 		}
+		metricStat = append(metricStat, &metricStatMeta{
+			Stat:   *&requestQuery.Stats,
+			Period: requestQuery.Period,
+		})
+		metricItems = append(metricItems, metricStat)
+		// }
 		cloudWatchLinkProps.Metrics = metricItems
 	}
 

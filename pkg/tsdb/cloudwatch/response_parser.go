@@ -9,10 +9,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
+	"github.com/grafana/grafana/pkg/components/simplejson"
+	"github.com/grafana/grafana/pkg/tsdb"
 )
 
 func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput,
-	queries map[string]*cloudWatchQuery) ([]*cloudwatchResponse, error) {
+	queries map[string]*cloudWatchQuery) (map[string]*tsdb.QueryResult, error) {
 	// Map from result ID -> label -> result
 	mdrs := make(map[string]map[string]*cloudwatch.MetricDataResult)
 	labels := map[string][]string{}
@@ -27,6 +29,12 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 		for _, r := range mdo.MetricDataResults {
 			id := *r.Id
 			label := *r.Label
+			for _, message := range r.Messages {
+				if *message.Code == "ArithmeticError" {
+					return nil, fmt.Errorf("ArithmeticError in query %q: %s", queries[id].RefId, *message.Value)
+				}
+			}
+
 			if _, exists := mdrs[id]; !exists {
 				mdrs[id] = make(map[string]*cloudwatch.MetricDataResult)
 				mdrs[id][label] = r
@@ -40,50 +48,44 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 				mdr.Values = append(mdr.Values, r.Values...)
 				if *r.StatusCode == "Complete" {
 					mdr.StatusCode = r.StatusCode
+					queries[id].PartialData = true
 				}
 			}
 			queries[id].RequestExceededMaxLimit = requestExceededMaxLimit
 		}
 	}
 
-	cloudWatchResponses := make([]*cloudwatchResponse, 0, len(mdrs))
+	results := make(map[string]*tsdb.QueryResult)
 	for id, lr := range mdrs {
-		query := queries[id]
-		frames, partialData, err := parseMetricResults(lr, labels[id], query)
+		queryRow := queries[id]
+		queryResult := tsdb.NewQueryResult()
+		queryResult.RefId = queryRow.RefId
+
+		frames, err := parseMetricResults(lr, labels[id], queryRow)
 		if err != nil {
 			return nil, err
 		}
 
-		response := &cloudwatchResponse{
-			DataFrames:              frames,
-			Period:                  query.Period,
-			Expression:              query.UsedExpression,
-			RefId:                   query.RefId,
-			Id:                      query.Id,
-			RequestExceededMaxLimit: query.RequestExceededMaxLimit,
-			PartialData:             partialData,
+		queryResult.Dataframes = tsdb.NewDecodedDataFrames(frames)
+
+		if queryRow.RequestExceededMaxLimit {
+			queryResult.ErrorString = "Cloudwatch GetMetricData error: Maximum number of allowed metrics exceeded. Your search may have been limited."
 		}
-		cloudWatchResponses = append(cloudWatchResponses, response)
+		if queryRow.PartialData {
+			queryResult.ErrorString = "Cloudwatch GetMetricData error: Too many datapoints requested - your search has been limited. Please try to reduce the time range"
+		}
+
+		results[queryRow.RefId] = queryResult
 	}
 
-	return cloudWatchResponses, nil
+	return results, nil
 }
 
 func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels []string,
-	query *cloudWatchQuery) (data.Frames, bool, error) {
-	partialData := false
+	query *cloudWatchQuery) (data.Frames, error) {
 	frames := data.Frames{}
 	for _, label := range labels {
 		result := results[label]
-		if *result.StatusCode != "Complete" {
-			partialData = true
-		}
-
-		for _, message := range result.Messages {
-			if *message.Code == "ArithmeticError" {
-				return nil, false, fmt.Errorf("ArithmeticError in query %q: %s", query.RefId, *message.Value)
-			}
-		}
 
 		// In case a multi-valued dimension is used and the cloudwatch query yields no values, create one empty time
 		// series for each dimension value. Use that dimension value to expand the alias field
@@ -109,7 +111,7 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 				valueField := data.NewField(data.TimeSeriesValueFieldName, tags, []*float64{})
 
 				frameName := formatAlias(query, query.Stats, tags, label)
-				valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName})
+				valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName, Links: createDataLinks(query.DeepLink)})
 
 				emptyFrame := data.Frame{
 					Name: frameName,
@@ -118,6 +120,7 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 						valueField,
 					},
 					RefID: query.RefId,
+					Meta:  createMeta(query),
 				}
 				frames = append(frames, &emptyFrame)
 			}
@@ -163,7 +166,7 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 			valueField := data.NewField(data.TimeSeriesValueFieldName, tags, points)
 
 			frameName := formatAlias(query, query.Stats, tags, label)
-			valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName})
+			valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName, Links: createDataLinks(query.DeepLink)})
 
 			frame := data.Frame{
 				Name: frameName,
@@ -172,12 +175,13 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 					valueField,
 				},
 				RefID: query.RefId,
+				Meta:  createMeta(query),
 			}
 			frames = append(frames, &frame)
 		}
 	}
 
-	return frames, partialData, nil
+	return frames, nil
 }
 
 func formatAlias(query *cloudWatchQuery, stat string, dimensions map[string]string, label string) string {
@@ -230,4 +234,26 @@ func formatAlias(query *cloudWatchQuery, stat string, dimensions map[string]stri
 	}
 
 	return string(result)
+}
+
+func createDataLinks(link string) []data.DataLink {
+	dataLinks := []data.DataLink{}
+	if link != "" {
+		dataLinks = append(dataLinks, data.DataLink{
+			Title:       "View in CloudWatch console",
+			TargetBlank: true,
+			URL:         link,
+		})
+	}
+	return dataLinks
+}
+
+func createMeta(query *cloudWatchQuery) *data.FrameMeta {
+	return &data.FrameMeta{
+		ExecutedQueryString: query.UsedExpression,
+		Custom: simplejson.NewFromAny(map[string]interface{}{
+			"period": query.Period,
+			"id":     query.Id,
+		}),
+	}
 }
