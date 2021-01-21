@@ -15,9 +15,39 @@ import (
 
 func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput,
 	queries map[string]*cloudWatchQuery) (map[string]*tsdb.QueryResult, error) {
-	// Map from result ID -> label -> result
-	mdrs := make(map[string]map[string]*cloudwatch.MetricDataResult)
-	labels := map[string][]string{}
+	responses := buildAggregatedResponses(metricDataOutputs)
+	results := make(map[string]*tsdb.QueryResult)
+	for id, aggregatedResponse := range responses {
+		queryRow := queries[id]
+		queryResult := &tsdb.QueryResult{RefId: queryRow.RefId}
+		results[queryRow.RefId] = queryResult
+
+		if aggregatedResponse.ArithmeticError {
+			queryResult.Error = fmt.Errorf("ArithmeticError in query %q", queryRow.RefId)
+			continue
+		}
+
+		frames, err := buildDataFrames(aggregatedResponse, queryRow)
+		if err != nil {
+			return nil, err
+		}
+
+		queryResult.Dataframes = tsdb.NewDecodedDataFrames(frames)
+
+		if aggregatedResponse.RequestExceededMaxLimit {
+			queryResult.ErrorString = "Cloudwatch GetMetricData error: Maximum number of allowed metrics exceeded. Your search may have been limited."
+		}
+		if aggregatedResponse.PartialData {
+			queryResult.ErrorString = "Cloudwatch GetMetricData error: Too many datapoints requested - your search has been limited. Please try to reduce the time range"
+		}
+	}
+
+	return results, nil
+}
+
+func buildAggregatedResponses(metricDataOutputs []*cloudwatch.GetMetricDataOutput) map[string]responseAggregator {
+	resByID := make(map[string]responseAggregator)
+
 	for _, mdo := range metricDataOutputs {
 		requestExceededMaxLimit := false
 		for _, message := range mdo.Messages {
@@ -29,67 +59,69 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 		for _, r := range mdo.MetricDataResults {
 			id := *r.Id
 			label := *r.Label
+
+			var aggregator responseAggregator
+			if _, exists := resByID[id]; !exists {
+				aggregator = newAggregatedResponse(id)
+			} else {
+				aggregator = resByID[id]
+			}
+
 			for _, message := range r.Messages {
 				if *message.Code == "ArithmeticError" {
-					return nil, fmt.Errorf("ArithmeticError in query %q: %s", queries[id].RefId, *message.Value)
+					aggregator.ArithmeticError = true // fix this
 				}
 			}
 
-			if _, exists := mdrs[id]; !exists {
-				mdrs[id] = make(map[string]*cloudwatch.MetricDataResult)
-				mdrs[id][label] = r
-				labels[id] = append(labels[id], label)
-			} else if _, exists := mdrs[id][label]; !exists {
-				mdrs[id][label] = r
-				labels[id] = append(labels[id], label)
+			if _, exists := aggregator.Metrics[label]; !exists {
+				aggregator.addMetricDataResult(r)
 			} else {
-				mdr := mdrs[id][label]
-				mdr.Timestamps = append(mdr.Timestamps, r.Timestamps...)
-				mdr.Values = append(mdr.Values, r.Values...)
-				if *r.StatusCode == "Complete" {
-					mdr.StatusCode = r.StatusCode
-					queries[id].PartialData = true
-				}
+				aggregator.appendTimeSeries(r)
+				aggregator.checkDataStatus(r)
 			}
-			queries[id].RequestExceededMaxLimit = requestExceededMaxLimit
+
+			aggregator.RequestExceededMaxLimit = aggregator.RequestExceededMaxLimit || requestExceededMaxLimit
+			resByID[id] = aggregator
 		}
 	}
 
-	results := make(map[string]*tsdb.QueryResult)
-	for id, lr := range mdrs {
-		queryRow := queries[id]
-		queryResult := tsdb.NewQueryResult()
-		queryResult.RefId = queryRow.RefId
-
-		frames, err := parseMetricResults(lr, labels[id], queryRow)
-		if err != nil {
-			return nil, err
-		}
-
-		queryResult.Dataframes = tsdb.NewDecodedDataFrames(frames)
-
-		if queryRow.RequestExceededMaxLimit {
-			queryResult.ErrorString = "Cloudwatch GetMetricData error: Maximum number of allowed metrics exceeded. Your search may have been limited."
-		}
-		if queryRow.PartialData {
-			queryResult.ErrorString = "Cloudwatch GetMetricData error: Too many datapoints requested - your search has been limited. Please try to reduce the time range"
-		}
-
-		results[queryRow.RefId] = queryResult
-	}
-
-	return results, nil
+	return resByID
 }
 
-func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels []string,
+func getLabels(cloudwatchLabel string, query *cloudWatchQuery) data.Labels {
+	dims := make([]string, 0, len(query.Dimensions))
+	for k := range query.Dimensions {
+		dims = append(dims, k)
+	}
+	sort.Strings(dims)
+
+	labels := data.Labels{}
+	for _, dim := range dims {
+		values := query.Dimensions[dim]
+		if len(values) == 1 && values[0] != "*" {
+			labels[dim] = values[0]
+		} else {
+			for _, value := range values {
+				if value == cloudwatchLabel || value == "*" {
+					labels[dim] = cloudwatchLabel
+				} else if strings.Contains(cloudwatchLabel, value) {
+					labels[dim] = value
+				}
+			}
+		}
+	}
+	return labels
+}
+
+func buildDataFrames(aggregatedResponse responseAggregator,
 	query *cloudWatchQuery) (data.Frames, error) {
 	frames := data.Frames{}
-	for _, label := range labels {
-		result := results[label]
+	for _, label := range aggregatedResponse.Labels {
+		metric := aggregatedResponse.Metrics[label]
 
 		// In case a multi-valued dimension is used and the cloudwatch query yields no values, create one empty time
 		// series for each dimension value. Use that dimension value to expand the alias field
-		if len(result.Values) == 0 && query.isMultiValuedDimensionExpression() {
+		if len(metric.Values) == 0 && query.isMultiValuedDimensionExpression() {
 			series := 0
 			multiValuedDimension := ""
 			for key, values := range query.Dimensions {
@@ -100,17 +132,17 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 			}
 
 			for _, value := range query.Dimensions[multiValuedDimension] {
-				tags := map[string]string{multiValuedDimension: value}
+				labels := map[string]string{multiValuedDimension: value}
 				for key, values := range query.Dimensions {
 					if key != multiValuedDimension && len(values) > 0 {
-						tags[key] = values[0]
+						labels[key] = values[0]
 					}
 				}
 
 				timeField := data.NewField(data.TimeSeriesTimeFieldName, nil, []*time.Time{})
-				valueField := data.NewField(data.TimeSeriesValueFieldName, tags, []*float64{})
+				valueField := data.NewField(data.TimeSeriesValueFieldName, labels, []*float64{})
 
-				frameName := formatAlias(query, query.Stats, tags, label)
+				frameName := formatAlias(query, query.Stats, labels, label)
 				valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName, Links: createDataLinks(query.DeepLink)})
 
 				emptyFrame := data.Frame{
@@ -124,61 +156,41 @@ func parseMetricResults(results map[string]*cloudwatch.MetricDataResult, labels 
 				}
 				frames = append(frames, &emptyFrame)
 			}
-		} else {
-			dims := make([]string, 0, len(query.Dimensions))
-			for k := range query.Dimensions {
-				dims = append(dims, k)
-			}
-			sort.Strings(dims)
-
-			tags := data.Labels{}
-			for _, dim := range dims {
-				values := query.Dimensions[dim]
-				if len(values) == 1 && values[0] != "*" {
-					tags[dim] = values[0]
-				} else {
-					for _, value := range values {
-						if value == label || value == "*" {
-							tags[dim] = label
-						} else if strings.Contains(label, value) {
-							tags[dim] = value
-						}
-					}
-				}
-			}
-
-			timestamps := []*time.Time{}
-			points := []*float64{}
-			for j, t := range result.Timestamps {
-				if j > 0 {
-					expectedTimestamp := result.Timestamps[j-1].Add(time.Duration(query.Period) * time.Second)
-					if expectedTimestamp.Before(*t) {
-						timestamps = append(timestamps, &expectedTimestamp)
-						points = append(points, nil)
-					}
-				}
-				val := result.Values[j]
-				timestamps = append(timestamps, t)
-				points = append(points, val)
-			}
-
-			timeField := data.NewField(data.TimeSeriesTimeFieldName, nil, timestamps)
-			valueField := data.NewField(data.TimeSeriesValueFieldName, tags, points)
-
-			frameName := formatAlias(query, query.Stats, tags, label)
-			valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName, Links: createDataLinks(query.DeepLink)})
-
-			frame := data.Frame{
-				Name: frameName,
-				Fields: []*data.Field{
-					timeField,
-					valueField,
-				},
-				RefID: query.RefId,
-				Meta:  createMeta(query),
-			}
-			frames = append(frames, &frame)
+			continue
 		}
+
+		labels := getLabels(label, query)
+		timestamps := []*time.Time{}
+		points := []*float64{}
+		for j, t := range metric.Timestamps {
+			if j > 0 {
+				expectedTimestamp := metric.Timestamps[j-1].Add(time.Duration(query.Period) * time.Second)
+				if expectedTimestamp.Before(*t) {
+					timestamps = append(timestamps, &expectedTimestamp)
+					points = append(points, nil)
+				}
+			}
+			val := metric.Values[j]
+			timestamps = append(timestamps, t)
+			points = append(points, val)
+		}
+
+		timeField := data.NewField(data.TimeSeriesTimeFieldName, nil, timestamps)
+		valueField := data.NewField(data.TimeSeriesValueFieldName, labels, points)
+
+		frameName := formatAlias(query, query.Stats, labels, label)
+		valueField.SetConfig(&data.FieldConfig{DisplayNameFromDS: frameName, Links: createDataLinks(query.DeepLink)})
+
+		frame := data.Frame{
+			Name: frameName,
+			Fields: []*data.Field{
+				timeField,
+				valueField,
+			},
+			RefID: query.RefId,
+			Meta:  createMeta(query),
+		}
+		frames = append(frames, &frame)
 	}
 
 	return frames, nil

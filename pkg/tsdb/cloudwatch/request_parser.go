@@ -172,22 +172,20 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 	matchExact := model.Get("matchExact").MustBool(true)
 
 	return &cloudWatchQuery{
-		RefId:                   refId,
-		Region:                  region,
-		Id:                      id,
-		Namespace:               namespace,
-		MetricName:              metricName,
-		Stats:                   statistic,
-		Expression:              expression,
-		ReturnData:              returnData,
-		Dimensions:              dimensions,
-		Period:                  period,
-		Alias:                   alias,
-		MatchExact:              matchExact,
-		UsedExpression:          "",
-		RequestExceededMaxLimit: false,
-		DeepLink:                "",
-		PartialData:             false,
+		RefId:          refId,
+		Region:         region,
+		Id:             id,
+		Namespace:      namespace,
+		MetricName:     metricName,
+		Stats:          statistic,
+		Expression:     expression,
+		ReturnData:     returnData,
+		Dimensions:     dimensions,
+		Period:         period,
+		Alias:          alias,
+		MatchExact:     matchExact,
+		UsedExpression: "",
+		DeepLink:       "",
 	}, nil
 }
 

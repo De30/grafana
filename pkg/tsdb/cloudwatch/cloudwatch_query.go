@@ -9,22 +9,20 @@ import (
 )
 
 type cloudWatchQuery struct {
-	RefId                   string
-	Region                  string
-	Id                      string
-	Namespace               string
-	MetricName              string
-	Stats                   string
-	Expression              string
-	ReturnData              bool
-	Dimensions              map[string][]string
-	Period                  int
-	Alias                   string
-	MatchExact              bool
-	UsedExpression          string
-	DeepLink                string
-	RequestExceededMaxLimit bool
-	PartialData             bool
+	RefId          string
+	Region         string
+	Id             string
+	Namespace      string
+	MetricName     string
+	Stats          string
+	Expression     string
+	ReturnData     bool
+	Dimensions     map[string][]string
+	Period         int
+	Alias          string
+	MatchExact     bool
+	UsedExpression string
+	DeepLink       string
 }
 
 func (q *cloudWatchQuery) isMathExpression() bool {
