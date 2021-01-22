@@ -22,8 +22,8 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 		queryResult := &tsdb.QueryResult{RefId: queryRow.RefId}
 		results[queryRow.RefId] = queryResult
 
-		if response.ArithmeticError {
-			queryResult.Error = fmt.Errorf("ArithmeticError in query %q", queryRow.RefId)
+		if response.HasArithmeticError {
+			queryResult.Error = fmt.Errorf("ArithmeticError in query %q: %s", queryRow.RefId, response.ArithmeticErrorMessage)
 			continue
 		}
 
@@ -37,7 +37,7 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 		if response.RequestExceededMaxLimit {
 			queryResult.ErrorString = "Cloudwatch GetMetricData error: Maximum number of allowed metrics exceeded. Your search may have been limited."
 		}
-		if response.PartialData {
+		if response.StatusCode != "Complete" {
 			queryResult.ErrorString = "Cloudwatch GetMetricData error: Too many datapoints requested - your search has been limited. Please try to reduce the time range"
 		}
 	}
@@ -65,7 +65,7 @@ func aggregateResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput) map[
 
 			for _, message := range r.Messages {
 				if *message.Code == "ArithmeticError" {
-					response.ArithmeticError = true // fix this
+					response.addArithmeticError(message.Value)
 				}
 			}
 

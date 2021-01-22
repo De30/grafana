@@ -7,8 +7,10 @@ type queryRowResponse struct {
 	RequestExceededMaxLimit bool
 	PartialData             bool
 	Labels                  []string
-	ArithmeticError         bool
+	HasArithmeticError      bool
+	ArithmeticErrorMessage  string
 	Metrics                 map[string]*cloudwatch.MetricDataResult
+	StatusCode              string
 }
 
 func newQueryRowResponse(id string) queryRowResponse {
@@ -16,7 +18,8 @@ func newQueryRowResponse(id string) queryRowResponse {
 		ID:                      id,
 		RequestExceededMaxLimit: false,
 		PartialData:             false,
-		ArithmeticError:         false,
+		HasArithmeticError:      false,
+		ArithmeticErrorMessage:  "",
 		Labels:                  []string{},
 		Metrics:                 map[string]*cloudwatch.MetricDataResult{},
 	}
@@ -26,19 +29,17 @@ func (q *queryRowResponse) addMetricDataResult(mdr *cloudwatch.MetricDataResult)
 	label := *mdr.Label
 	q.Labels = append(q.Labels, label)
 	q.Metrics[label] = mdr
+	q.StatusCode = *mdr.StatusCode
 }
 
 func (q *queryRowResponse) appendTimeSeries(mdr *cloudwatch.MetricDataResult) {
 	metric := q.Metrics[*mdr.Label]
 	metric.Timestamps = append(metric.Timestamps, mdr.Timestamps...)
 	metric.Values = append(metric.Values, mdr.Values...)
+	q.StatusCode = *mdr.StatusCode
 }
 
-func (q *queryRowResponse) checkDataStatus(mdr *cloudwatch.MetricDataResult) {
-	metric := q.Metrics[*mdr.Label]
-	if *mdr.StatusCode == "Complete" {
-		metric.StatusCode = mdr.StatusCode
-	} else {
-		q.PartialData = true
-	}
+func (q *queryRowResponse) addArithmeticError(message *string) {
+	q.HasArithmeticError = true
+	q.ArithmeticErrorMessage = *message
 }
