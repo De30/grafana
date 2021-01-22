@@ -2,8 +2,8 @@ package cloudwatch
 
 import "github.com/aws/aws-sdk-go/service/cloudwatch"
 
-type responseAggregator struct {
-	Id                      string
+type queryRowResponse struct {
+	ID                      string
 	RequestExceededMaxLimit bool
 	PartialData             bool
 	Labels                  []string
@@ -11,9 +11,9 @@ type responseAggregator struct {
 	Metrics                 map[string]*cloudwatch.MetricDataResult
 }
 
-func newAggregatedResponse(id string) responseAggregator {
-	return responseAggregator{
-		Id:                      id,
+func newQueryRowResponse(id string) queryRowResponse {
+	return queryRowResponse{
+		ID:                      id,
 		RequestExceededMaxLimit: false,
 		PartialData:             false,
 		ArithmeticError:         false,
@@ -22,23 +22,23 @@ func newAggregatedResponse(id string) responseAggregator {
 	}
 }
 
-func (r *responseAggregator) addMetricDataResult(mdr *cloudwatch.MetricDataResult) {
+func (q *queryRowResponse) addMetricDataResult(mdr *cloudwatch.MetricDataResult) {
 	label := *mdr.Label
-	r.Labels = append(r.Labels, label)
-	r.Metrics[label] = mdr
+	q.Labels = append(q.Labels, label)
+	q.Metrics[label] = mdr
 }
 
-func (r *responseAggregator) appendTimeSeries(mdr *cloudwatch.MetricDataResult) {
-	metric := r.Metrics[*mdr.Label]
+func (q *queryRowResponse) appendTimeSeries(mdr *cloudwatch.MetricDataResult) {
+	metric := q.Metrics[*mdr.Label]
 	metric.Timestamps = append(metric.Timestamps, mdr.Timestamps...)
 	metric.Values = append(metric.Values, mdr.Values...)
 }
 
-func (r *responseAggregator) checkDataStatus(mdr *cloudwatch.MetricDataResult) {
-	metric := r.Metrics[*mdr.Label]
+func (q *queryRowResponse) checkDataStatus(mdr *cloudwatch.MetricDataResult) {
+	metric := q.Metrics[*mdr.Label]
 	if *mdr.StatusCode == "Complete" {
 		metric.StatusCode = mdr.StatusCode
 	} else {
-		r.PartialData = true
+		q.PartialData = true
 	}
 }

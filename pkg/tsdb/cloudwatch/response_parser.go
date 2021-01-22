@@ -15,29 +15,29 @@ import (
 
 func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput,
 	queries map[string]*cloudWatchQuery) (map[string]*tsdb.QueryResult, error) {
-	responses := buildAggregatedResponses(metricDataOutputs)
+	aggregatedResponse := aggregateResponse(metricDataOutputs)
 	results := make(map[string]*tsdb.QueryResult)
-	for id, aggregatedResponse := range responses {
+	for id, response := range aggregatedResponse {
 		queryRow := queries[id]
 		queryResult := &tsdb.QueryResult{RefId: queryRow.RefId}
 		results[queryRow.RefId] = queryResult
 
-		if aggregatedResponse.ArithmeticError {
+		if response.ArithmeticError {
 			queryResult.Error = fmt.Errorf("ArithmeticError in query %q", queryRow.RefId)
 			continue
 		}
 
-		frames, err := buildDataFrames(aggregatedResponse, queryRow)
+		frames, err := buildDataFrames(response, queryRow)
 		if err != nil {
 			return nil, err
 		}
 
 		queryResult.Dataframes = tsdb.NewDecodedDataFrames(frames)
 
-		if aggregatedResponse.RequestExceededMaxLimit {
+		if response.RequestExceededMaxLimit {
 			queryResult.ErrorString = "Cloudwatch GetMetricData error: Maximum number of allowed metrics exceeded. Your search may have been limited."
 		}
-		if aggregatedResponse.PartialData {
+		if response.PartialData {
 			queryResult.ErrorString = "Cloudwatch GetMetricData error: Too many datapoints requested - your search has been limited. Please try to reduce the time range"
 		}
 	}
@@ -45,9 +45,8 @@ func (e *cloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 	return results, nil
 }
 
-func buildAggregatedResponses(metricDataOutputs []*cloudwatch.GetMetricDataOutput) map[string]responseAggregator {
-	resByID := make(map[string]responseAggregator)
-
+func aggregateResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput) map[string]queryRowResponse {
+	responseByID := make(map[string]queryRowResponse)
 	for _, mdo := range metricDataOutputs {
 		requestExceededMaxLimit := false
 		for _, message := range mdo.Messages {
@@ -55,37 +54,34 @@ func buildAggregatedResponses(metricDataOutputs []*cloudwatch.GetMetricDataOutpu
 				requestExceededMaxLimit = true
 			}
 		}
-
 		for _, r := range mdo.MetricDataResults {
 			id := *r.Id
 			label := *r.Label
 
-			var aggregator responseAggregator
-			if _, exists := resByID[id]; !exists {
-				aggregator = newAggregatedResponse(id)
-			} else {
-				aggregator = resByID[id]
+			response := newQueryRowResponse(id)
+			if _, exists := responseByID[id]; exists {
+				response = responseByID[id]
 			}
 
 			for _, message := range r.Messages {
 				if *message.Code == "ArithmeticError" {
-					aggregator.ArithmeticError = true // fix this
+					response.ArithmeticError = true // fix this
 				}
 			}
 
-			if _, exists := aggregator.Metrics[label]; !exists {
-				aggregator.addMetricDataResult(r)
+			if _, exists := response.Metrics[label]; !exists {
+				response.addMetricDataResult(r)
 			} else {
-				aggregator.appendTimeSeries(r)
-				aggregator.checkDataStatus(r)
+				response.appendTimeSeries(r)
+				response.checkDataStatus(r)
 			}
 
-			aggregator.RequestExceededMaxLimit = aggregator.RequestExceededMaxLimit || requestExceededMaxLimit
-			resByID[id] = aggregator
+			response.RequestExceededMaxLimit = response.RequestExceededMaxLimit || requestExceededMaxLimit
+			responseByID[id] = response
 		}
 	}
 
-	return resByID
+	return responseByID
 }
 
 func getLabels(cloudwatchLabel string, query *cloudWatchQuery) data.Labels {
@@ -94,7 +90,6 @@ func getLabels(cloudwatchLabel string, query *cloudWatchQuery) data.Labels {
 		dims = append(dims, k)
 	}
 	sort.Strings(dims)
-
 	labels := data.Labels{}
 	for _, dim := range dims {
 		values := query.Dimensions[dim]
@@ -113,7 +108,7 @@ func getLabels(cloudwatchLabel string, query *cloudWatchQuery) data.Labels {
 	return labels
 }
 
-func buildDataFrames(aggregatedResponse responseAggregator,
+func buildDataFrames(aggregatedResponse queryRowResponse,
 	query *cloudWatchQuery) (data.Frames, error) {
 	frames := data.Frames{}
 	for _, label := range aggregatedResponse.Labels {
