@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/util"
+	"github.com/open-policy-agent/opa/rego"
+	"github.com/open-policy-agent/opa/storage/inmem"
 )
 
 func AdminCreateUser(c *models.ReqContext, form dtos.AdminCreateUserForm) response.Response {
@@ -150,6 +153,99 @@ func (hs *HTTPServer) AdminDisableUser(c *models.ReqContext) response.Response {
 // POST /api/admin/users/:id/enable
 func AdminEnableUser(c *models.ReqContext) response.Response {
 	userID := c.ParamsInt64(":id")
+
+	module := `
+	package grafana.rbac
+	default allow = false
+	allow {
+    user_is_superadmin
+	}
+
+	allow {
+		user_has_role[role_name]
+		role_has_permission[role_name]
+	}
+
+	user_is_superadmin {
+		g := data.grants[_]
+		g.role == "SuperAdmin"
+		g.user == input.user
+	}
+
+	user_has_role[role_name] {
+		g = data.grants[_]
+		g.role = role_name
+		g.user = input.user
+	}
+
+	role_has_permission[role_name] {
+		r = data.roles[_]
+		r.name = role_name
+		r.resource == input.resource
+		match_with_wildcard(r.actions, input.action)
+	}
+
+	match_with_wildcard(allowed, value) {
+		allowed[_] = "*"
+	}
+
+	match_with_wildcard(allowed, value) {
+		allowed[_] = value
+	}
+	`
+
+	store := inmem.NewFromReader(bytes.NewBufferString(`{
+		"roles": [
+        {
+			"name": "CanEnableUser",
+            "resource": "/api/admin/users/:id/enable",
+            "actions": ["post"]
+        },
+        {
+			"name": "SuperAdmin",
+            "resource": "*",
+            "actions": ["*"]
+        }
+    ],
+    "grants": [
+        {
+            "user": "editor",
+            "role": "CanEnableUser"
+        },
+        {
+            "user": "admin",
+            "role": "SuperAdmin"
+        }
+    ]
+	}`))
+
+	query, err := rego.New(
+		rego.Query("authorized = data.grafana.rbac.allow"),
+		rego.Module("grafana.rbac", module),
+		rego.Store(store),
+	).PrepareForEval(c.Req.Context())
+
+	if err != nil {
+		return response.Error(401, "Could not authorize user", err)
+	}
+
+	input := map[string]interface{}{
+		"user":     c.Login,
+		"resource": "/api/admin/users/:id/enable",
+		"action":   "post",
+	}
+
+	results, err := query.Eval(c.Req.Context(), rego.EvalInput(input))
+	authorized, ok := results[0].Bindings["authorized"].(bool)
+	if err != nil {
+		return response.Error(401, "Could not authorize user", err)
+	} else if len(results) == 0 {
+		return response.Error(401, "Could not authorize user", err)
+	} else if !ok || !authorized {
+		return response.Error(401, "Could not authorize user", err)
+	} else {
+		c.Logger.Debug("User authorized", "user", c.Login)
+	}
 
 	// External users shouldn't be disabled from API
 	authInfoQuery := &models.GetAuthInfoQuery{UserId: userID}
