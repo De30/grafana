@@ -10,8 +10,8 @@ export interface CloudWatchMetricsQuery extends DataQuery {
 
   metricName: string;
   dimensions: { [key: string]: string | string[] };
-  statistics: string[];
   statistic: string;
+  statistics?: string[];
   period: string;
   alias: string;
   matchExact: boolean;

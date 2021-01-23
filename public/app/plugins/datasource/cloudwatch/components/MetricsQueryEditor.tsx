@@ -78,42 +78,40 @@ export class MetricsQueryEditor extends PureComponent<Props, State> {
     return (
       <>
         <MetricsQueryFieldsEditor {...{ ...this.props, query }}></MetricsQueryFieldsEditor>
-        {query.statistics.length <= 1 && (
-          <div className="gf-form-inline">
-            <div className="gf-form">
-              <QueryField
-                label="Id"
-                tooltip="Id can include numbers, letters, and underscore, and must start with a lowercase letter."
-              >
-                <Input
-                  className="gf-form-input width-8"
-                  onBlur={onRunQuery}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    this.onChange({ ...metricsQuery, id: event.target.value })
-                  }
-                  validationEvents={idValidationEvents}
-                  value={query.id}
-                />
-              </QueryField>
-            </div>
-            <div className="gf-form gf-form--grow">
-              <QueryField
-                className="gf-form--grow"
-                label="Expression"
-                tooltip="Optionally you can add an expression here. Please note that if a math expression that is referencing other queries is being used, it will not be possible to create an alert rule based on this query"
-              >
-                <Input
-                  className="gf-form-input"
-                  onBlur={onRunQuery}
-                  value={query.expression || ''}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    this.onChange({ ...metricsQuery, expression: event.target.value })
-                  }
-                />
-              </QueryField>
-            </div>
+        <div className="gf-form-inline">
+          <div className="gf-form">
+            <QueryField
+              label="Id"
+              tooltip="Id can include numbers, letters, and underscore, and must start with a lowercase letter."
+            >
+              <Input
+                className="gf-form-input width-8"
+                onBlur={onRunQuery}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  this.onChange({ ...metricsQuery, id: event.target.value })
+                }
+                validationEvents={idValidationEvents}
+                value={query.id}
+              />
+            </QueryField>
           </div>
-        )}
+          <div className="gf-form gf-form--grow">
+            <QueryField
+              className="gf-form--grow"
+              label="Expression"
+              tooltip="Optionally you can add an expression here. Please note that if a math expression that is referencing other queries is being used, it will not be possible to create an alert rule based on this query"
+            >
+              <Input
+                className="gf-form-input"
+                onBlur={onRunQuery}
+                value={query.expression || ''}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  this.onChange({ ...metricsQuery, expression: event.target.value })
+                }
+              />
+            </QueryField>
+          </div>
+        </div>
         <div className="gf-form-inline">
           <div className="gf-form">
             <QueryField label="Period" tooltip="Minimum interval between points in seconds">
