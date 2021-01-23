@@ -1,10 +1,10 @@
 import React, { PureComponent, ChangeEvent } from 'react';
 import isEmpty from 'lodash/isEmpty';
 
-import { ExploreQueryFieldProps } from '@grafana/data';
+import { ExploreQueryFieldProps, PanelData } from '@grafana/data';
 import { LegacyForms, ValidationEvents, EventsWithValidation, Icon } from '@grafana/ui';
 const { Input, Switch } = LegacyForms;
-import { CloudWatchQuery, CloudWatchMetricsQuery } from '../types';
+import { CloudWatchQuery, CloudWatchMetricsQuery, ExecutedQueryPreview } from '../types';
 import { CloudWatchDatasource } from '../datasource';
 import { QueryField, Alias, MetricsQueryFieldsEditor } from './';
 
@@ -65,16 +65,28 @@ export class MetricsQueryEditor extends PureComponent<Props, State> {
     onRunQuery();
   }
 
+  getExecutedQueryPreview(data?: PanelData): ExecutedQueryPreview {
+    if (!(data && data?.series.length && data?.series[0].meta && data?.series[0].meta && data?.series[0].meta.custom)) {
+      return {
+        executedQuery: '',
+        period: '',
+        id: '',
+      };
+    }
+
+    return {
+      executedQuery: data?.series[0].meta.executedQueryString || '',
+      period: data.series[0].meta.custom['period'],
+      id: data.series[0].meta.custom['id'],
+    };
+  }
+
   render() {
     const { data, onRunQuery } = this.props;
     const metricsQuery = this.props.query as CloudWatchMetricsQuery;
     const { showMeta } = this.state;
     const query = normalizeQuery(metricsQuery);
-    const executedQueries =
-      data && data.series.length && data.series[0].meta && data.state === 'Done'
-        ? data.series[0].meta.executedQueryString
-        : null;
-
+    let executedQueryPreview = this.getExecutedQueryPreview(data);
     return (
       <>
         <MetricsQueryFieldsEditor {...{ ...this.props, query }}></MetricsQueryFieldsEditor>
@@ -151,21 +163,20 @@ export class MetricsQueryEditor extends PureComponent<Props, State> {
             <label className="gf-form-label">
               <a
                 onClick={() =>
-                  executedQueries &&
+                  executedQueryPreview &&
                   this.setState({
                     showMeta: !showMeta,
                   })
                 }
               >
-                <Icon name={showMeta && executedQueries ? 'angle-down' : 'angle-right'} />{' '}
-                {showMeta && executedQueries ? 'Hide' : 'Show'} Query Preview
+                <Icon name={showMeta ? 'angle-down' : 'angle-right'} /> {showMeta ? 'Hide' : 'Show'} Query Preview
               </a>
             </label>
           </div>
           <div className="gf-form gf-form--grow">
             <div className="gf-form-label gf-form-label--grow" />
           </div>
-          {showMeta && executedQueries && (
+          {showMeta && (
             <table className="filter-table form-inline">
               <thead>
                 <tr>
@@ -176,13 +187,11 @@ export class MetricsQueryEditor extends PureComponent<Props, State> {
                 </tr>
               </thead>
               <tbody>
-                {JSON.parse(executedQueries).map(({ ID, Expression, Period }: any) => (
-                  <tr key={ID}>
-                    <td>{ID}</td>
-                    <td>{Expression}</td>
-                    <td>{Period}</td>
-                  </tr>
-                ))}
+                <tr>
+                  <td>{executedQueryPreview.id}</td>
+                  <td>{executedQueryPreview.executedQuery}</td>
+                  <td>{executedQueryPreview.period}</td>
+                </tr>
               </tbody>
             </table>
           )}

@@ -336,3 +336,9 @@ export interface CloudWatchMetricsAnnotation {
   actionPrefix: string;
   alarmNamePrefix: string;
 }
+
+export interface ExecutedQueryPreview {
+  id: string;
+  executedQuery: string;
+  period: string;
+}
