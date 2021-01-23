@@ -40,20 +40,17 @@ func (e *cloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTim
 
 func migrateLegacyQuery(queryContext *tsdb.TsdbQuery) (*tsdb.TsdbQuery, error) {
 	for _, query := range queryContext.Queries {
-		// var statistics string
 		_, err := query.Model.Get("statistic").String()
 		if err == nil {
 			continue
 		}
 
 		stats := query.Model.Get("statistics").MustStringArray()
-
 		if len(stats) == 1 {
 			query.Model.Del("statistics")
 			query.Model.Set("statistic", stats[0])
 			continue
 		}
-
 		bytes, err := queryContext.Queries[0].Model.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -70,7 +67,6 @@ func migrateLegacyQuery(queryContext *tsdb.TsdbQuery) (*tsdb.TsdbQuery, error) {
 				QueryType:     query.QueryType,
 				IntervalMs:    query.IntervalMs,
 			}
-
 			q.Model.Set("statistic", stats[i])
 			q.RefId = getNextRefIDChar(queryContext.Queries)
 			queryContext.Queries = append(queryContext.Queries, q)
