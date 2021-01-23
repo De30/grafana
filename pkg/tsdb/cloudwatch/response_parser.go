@@ -73,7 +73,6 @@ func aggregateResponse(metricDataOutputs []*cloudwatch.GetMetricDataOutput) map[
 				response.addMetricDataResult(r)
 			} else {
 				response.appendTimeSeries(r)
-				response.checkDataStatus(r)
 			}
 
 			response.RequestExceededMaxLimit = response.RequestExceededMaxLimit || requestExceededMaxLimit
