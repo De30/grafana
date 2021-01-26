@@ -197,12 +197,12 @@ func AdminEnableUser(c *models.ReqContext) response.Response {
 	store := inmem.NewFromReader(bytes.NewBufferString(`{
 		"roles": [
         {
-			"name": "CanEnableUser",
+						"name": "CanEnableUser",
             "resource": "/api/admin/users/:id/enable",
             "actions": ["post"]
         },
         {
-			"name": "SuperAdmin",
+						"name": "SuperAdmin",
             "resource": "*",
             "actions": ["*"]
         }
