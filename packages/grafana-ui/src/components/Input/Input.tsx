@@ -1,4 +1,4 @@
-import React, { HTMLProps, ReactNode } from 'react';
+import React, { useState, useEffect, HTMLProps, ReactNode } from 'react';
 import { GrafanaTheme } from '@grafana/data';
 import { css, cx } from 'emotion';
 import { getFocusStyle, sharedInputStyle } from '../Forms/commonStyles';
@@ -214,7 +214,18 @@ export const getInputStyles = stylesFactory(({ theme, invalid = false, width }: 
 });
 
 export const Input = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const { className, addonAfter, addonBefore, prefix, suffix, invalid, loading, width = 0, ...restProps } = props;
+  const {
+    className,
+    addonAfter,
+    addonBefore,
+    prefix,
+    suffix,
+    invalid,
+    loading,
+    onBlur,
+    width = 0,
+    ...restProps
+  } = props;
   /**
    * Prefix & suffix are positioned absolutely within inputWrapper. We use client rects below to apply correct padding to the input
    * when prefix/suffix is larger than default (28px = 16px(icon) + 12px(left/right paddings)).
@@ -222,9 +233,22 @@ export const Input = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
    */
   const [prefixRect, prefixRef] = useClientRect<HTMLDivElement>();
   const [suffixRect, suffixRef] = useClientRect<HTMLDivElement>();
+  const [isInvalid, setIsInvalid] = useState(invalid);
 
   const theme = useTheme();
-  const styles = getInputStyles({ theme, invalid: !!invalid, width });
+  const styles = getInputStyles({ theme, invalid: !!isInvalid, width });
+
+  useEffect(() => {
+    setIsInvalid(invalid);
+  }, [invalid]);
+
+  const checkInputValidityOnBlur = (ev: React.FocusEvent<HTMLInputElement>) => {
+    setIsInvalid(!ev.target.validity.valid);
+
+    if (onBlur) {
+      onBlur(ev);
+    }
+  };
 
   return (
     <div className={cx(styles.wrapper, className)}>
@@ -241,6 +265,7 @@ export const Input = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
           ref={ref}
           className={styles.input}
           {...restProps}
+          onBlur={checkInputValidityOnBlur}
           style={{
             paddingLeft: prefixRect ? prefixRect.width : undefined,
             paddingRight: suffixRect ? suffixRect.width : undefined,
