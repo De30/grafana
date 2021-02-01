@@ -25,6 +25,8 @@ import { HelpModal } from './components/help/HelpModal';
 import { Footer } from './components/Footer/Footer';
 import { FolderPicker } from 'app/core/components/Select/FolderPicker';
 import { SearchField, SearchResults, SearchResultsFilter, SearchWrapper } from '../features/search';
+import { TimePickerSettings } from 'app/features/dashboard/components/DashboardSettings/TimePickerSettings';
+import QueryEditor from 'app/plugins/datasource/grafana-azure-monitor-datasource/components/QueryEditor';
 
 const { SecretFormField } = LegacyForms;
 
@@ -185,5 +187,24 @@ export function registerAngularDirectives() {
     ['exitFolderCreation', { watchDepth: 'reference', wrapApply: true }],
     ['onLoad', { watchDepth: 'reference', wrapApply: true }],
     ['onChange', { watchDepth: 'reference', wrapApply: true }],
+  ]);
+
+  react2AngularDirective('timePickerSettings', TimePickerSettings, [
+    'renderCount',
+    'refreshIntervals',
+    'timePickerHidden',
+    'nowDelay',
+    'timezone',
+    ['onTimeZoneChange', { watchDepth: 'reference', wrapApply: true }],
+    ['onRefreshIntervalChange', { watchDepth: 'reference', wrapApply: true }],
+    ['onNowDelayChange', { watchDepth: 'reference', wrapApply: true }],
+    ['onHideTimePickerChange', { watchDepth: 'reference', wrapApply: true }],
+  ]);
+
+  react2AngularDirective('azureMonitorQueryEditor', QueryEditor, [
+    'query',
+    ['datasource', { watchDepth: 'reference' }],
+    'replaceTemplateVariable',
+    'onQueryChange',
   ]);
 }
