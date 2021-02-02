@@ -57,9 +57,10 @@ const HttpAccessHelp = () => (
 
 export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
   const { defaultUrl, dataSourceConfig, onChange, showAccessOptions, sigV4AuthToggleEnabled } = props;
-  let urlTooltip;
   const [isAccessHelpVisible, setIsAccessHelpVisible] = useState(false);
   const theme = useTheme();
+
+  let urlTooltip;
 
   const onSettingsChange = useCallback(
     (change: Partial<DataSourceSettings<any, any>>) => {
@@ -126,6 +127,11 @@ export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
         <div className="gf-form-group">
           <div className="gf-form">
             <FormField label="URL" labelWidth={11} tooltip={urlTooltip} inputEl={urlInput} />
+            <div className="gf-form-label">
+              <a href="sasd" className="external-link">
+                Try Grafana Cloud <Icon name="angle-right" />
+              </a>
+            </div>
           </div>
 
           {showAccessOptions && (
