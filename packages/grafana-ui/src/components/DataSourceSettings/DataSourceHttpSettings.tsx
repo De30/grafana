@@ -111,6 +111,16 @@ export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
 
   const inputStyle = cx({ [`width-20`]: true, [notValidStyle]: !isValidUrl });
 
+  const subHeading = css`
+    font-size: 12px;
+    color: ${theme.colors.textWeak};
+    margin: -10px 0 16px 0;
+    > a {
+      color: ${theme.colors.textWeak};
+      text-decoration: underline;
+    }
+  `;
+
   const urlInput = (
     <Input
       className={inputStyle}
@@ -124,14 +134,13 @@ export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
     <div className="gf-form-group">
       <>
         <h3 className="page-heading">HTTP</h3>
+        <div className={subHeading}>
+          Configure your Prometheus server address. If you don't want to run prometheus yourself{' '}
+          <a href="https://grafana.com">Grafana Cloud</a> can run it for you.
+        </div>
         <div className="gf-form-group">
           <div className="gf-form">
             <FormField label="URL" labelWidth={11} tooltip={urlTooltip} inputEl={urlInput} />
-            <div className="gf-form-label">
-              <a href="sasd" className="external-link">
-                Try Grafana Cloud <Icon name="angle-right" />
-              </a>
-            </div>
           </div>
 
           {showAccessOptions && (
