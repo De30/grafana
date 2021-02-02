@@ -222,25 +222,19 @@ export class PanelEditorUnconnected extends PureComponent<Props> {
   renderPanelToolbar(styles: EditorStyles) {
     const { dashboard, location, uiState, variables, updateTimeZoneForSession } = this.props;
     return (
-      <div className={styles.panelToolbar}>
-        <HorizontalGroup justify={variables.length > 0 ? 'space-between' : 'flex-end'} align="flex-start">
-          {this.renderTemplateVariables(styles)}
-
-          <HorizontalGroup>
-            <RadioButtonGroup value={uiState.mode} options={displayModes} onChange={this.onDisplayModeChange} />
-            <DashNavTimeControls
-              dashboard={dashboard}
-              location={location}
-              onChangeTimeZone={updateTimeZoneForSession}
-            />
-            {!uiState.isPanelOptionsVisible && (
-              <ToolbarButton onClick={this.onTogglePanelOptions} tooltip="Open options pane" icon="angle-left">
-                Show options
-              </ToolbarButton>
-            )}
-          </HorizontalGroup>
-        </HorizontalGroup>
-      </div>
+      <PageToolbar
+        title={`${dashboard.title} / Edit Panel`}
+        onGoBack={this.onPanelExit}
+        leftItems={this.renderEditorActions()}
+      >
+        <RadioButtonGroup value={uiState.mode} options={displayModes} onChange={this.onDisplayModeChange} />
+        <DashNavTimeControls dashboard={dashboard} location={location} onChangeTimeZone={updateTimeZoneForSession} />
+        {!uiState.isPanelOptionsVisible && (
+          <ToolbarButton onClick={this.onTogglePanelOptions} tooltip="Open options pane" icon="angle-left">
+            Show options
+          </ToolbarButton>
+        )}
+      </PageToolbar>
     );
   }
 
@@ -305,9 +299,6 @@ export class PanelEditorUnconnected extends PureComponent<Props> {
 
     return (
       <div className={styles.wrapper} aria-label={selectors.components.PanelEditor.General.content}>
-        <PageToolbar title={`${dashboard.title} / Edit Panel`} onGoBack={this.onPanelExit}>
-          {this.renderEditorActions()}
-        </PageToolbar>
         <div className={styles.verticalSplitPanesWrapper}>
           <SplitPaneWrapper
             leftPaneComponents={this.renderPanelAndEditor(styles)}
