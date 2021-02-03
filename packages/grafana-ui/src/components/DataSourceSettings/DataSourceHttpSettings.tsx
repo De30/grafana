@@ -135,7 +135,7 @@ export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
       <>
         <h3 className="page-heading">HTTP</h3>
         <div className={subHeading}>
-          Configure your Prometheus server address. If you don't want to run prometheus yourself{' '}
+          Configure your Prometheus server address. If you {"don't"} want to run prometheus yourself{' '}
           <a href="https://grafana.com">Grafana Cloud</a> can run it for you.
         </div>
         <div className="gf-form-group">

@@ -9,6 +9,7 @@ const helpOptions = [
   { value: 1, label: 'Tutorials', href: 'https://grafana.com/tutorials' },
   { value: 2, label: 'Community', href: 'https://community.grafana.com' },
   { value: 3, label: 'Public Slack', href: 'http://slack.grafana.com' },
+  { value: 3, label: 'Grafana Cloud', href: 'https://grafana.com/products/cloud/' },
 ];
 
 export const WelcomeBanner: FC = () => {
