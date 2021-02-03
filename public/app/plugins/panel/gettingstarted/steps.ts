@@ -96,6 +96,18 @@ export const getSteps = (): SetupStep[] => [
         },
         done: false,
       },
+      {
+        type: 'cloud',
+        heading: 'Grafana Cloud',
+        title: 'Your observability, managed as a service',
+        learnHref: 'https://grafana.com/docs/grafana/latest/plugins/installation',
+        href: 'plugins',
+        icon: 'cloud',
+        check: async () => {
+          return Promise.resolve(false);
+        },
+        done: false,
+      },
     ],
   },
 ];

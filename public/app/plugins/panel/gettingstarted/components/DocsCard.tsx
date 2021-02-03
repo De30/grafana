@@ -24,14 +24,26 @@ export const DocsCard: FC<Props> = ({ card }) => {
           </div>
         </a>
       </div>
-      <a
-        href={`${card.learnHref}?utm_source=grafana_gettingstarted`}
-        className={styles.url}
-        target="_blank"
-        rel="noreferrer"
-      >
-        Learn how in the docs <Icon name="external-link-alt" />
-      </a>
+      {card.type === 'docs' && (
+        <a
+          href={`${card.learnHref}?utm_source=grafana_gettingstarted`}
+          className={styles.url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn how in the docs <Icon name="external-link-alt" />
+        </a>
+      )}
+      {card.type === 'cloud' && (
+        <a
+          href={`${card.learnHref}?utm_source=grafana_gettingstarted`}
+          className={styles.url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Start for free <Icon name="external-link-alt" />
+        </a>
+      )}
     </div>
   );
 };
