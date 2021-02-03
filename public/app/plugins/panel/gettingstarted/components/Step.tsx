@@ -19,6 +19,10 @@ export const Step: FC<Props> = ({ step }) => {
       <div className={styles.info}>
         <h2 className={styles.title}>{step.title}</h2>
         <p>{step.info}</p>
+        <div className={styles.info}>
+          <hr style={{ borderColor: '#EEE', margin: '24px 0' }} />
+          <p>Want to try Grafana Cloud? Get up and running quickly with the free tier.</p>
+        </div>
       </div>
       <div className={styles.cards}>
         {step.cards.map((card: Card | TutorialCardType, index: number) => {
