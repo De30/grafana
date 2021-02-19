@@ -3,6 +3,7 @@
     "baseUrl": "node_modules/@types",
     "declarationDir": "dist",
     "outDir": "compiled",
+    "composite": true,
     "paths": {
       "@grafana/slate-react": ["slate-react"],
       "@grafana/ui": ["."]
@@ -10,6 +11,7 @@
     "rootDirs": [".", "stories"],
     "typeRoots": ["node_modules/@types"]
   },
+  "references": [{ "path": "../grafana-data" }, { "path": "../grafana-e2e-selectors" }],
   "exclude": ["dist", "node_modules"],
   "extends": "@grafana/tsconfig",
   "include": ["src/**/*.ts*", "../../public/app/types/sanitize-url.d.ts", "../../public/app/types/svg.d.ts"]

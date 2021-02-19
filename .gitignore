@@ -6,7 +6,8 @@ coverage/
 awsconfig
 /.awcache
 /dist
-/public/build
+/public/build/
+/public/dist
 /public/views/index.html
 /public/views/error.html
 /emails/dist

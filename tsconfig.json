@@ -11,14 +11,21 @@
     "rootDirs": ["public/"],
     "typeRoots": ["node_modules/@types", "public/app/types"],
     "allowJs": true,
+    "composite": true,
     "strictNullChecks": true
   },
+  "references": [
+    { "path": "packages/grafana-ui" },
+    { "path": "packages/grafana-data" },
+    { "path": "packages/grafana-e2e-selectors" }
+  ],
   "extends": "@grafana/tsconfig/base.json",
   "include": [
     "public/app/**/*.ts*",
     "public/e2e-test/**/*.ts",
     "public/test/**/*.ts",
     "public/vendor/**/*.ts",
+    "public/vendor/**/*.js",
     "packages/jaeger-ui-components/typings",
     "packages/grafana-data/typings"
   ]

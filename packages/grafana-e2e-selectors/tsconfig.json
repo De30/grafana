@@ -3,6 +3,7 @@
     "declarationDir": "dist",
     "outDir": "compiled",
     "rootDirs": ["."],
+    "composite": true,
     "typeRoots": ["node_modules/@types"]
   },
   "exclude": ["dist", "node_modules"],
