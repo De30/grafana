@@ -6,7 +6,7 @@ import { getTitleFromNavModel } from 'app/core/selectors/navModel';
 import PageHeader from '../PageHeader/PageHeader';
 import { Footer } from '../Footer/Footer';
 import { PageContents } from './PageContents';
-import { CustomScrollbar, useStyles } from '@grafana/ui';
+import { CustomScrollbar, IconName, PageToolbar, useStyles } from '@grafana/ui';
 import { GrafanaTheme, NavModel } from '@grafana/data';
 import { Branding } from '../Branding/Branding';
 import { css } from 'emotion';
@@ -29,15 +29,25 @@ export const Page: PageType = ({ navModel, children, ...otherProps }) => {
     document.title = title ? `${title} - ${Branding.AppTitle}` : Branding.AppTitle;
   }, [navModel]);
 
+  console.log(navModel);
+
   return (
     <div {...otherProps} className={styles.wrapper}>
-      <CustomScrollbar autoHeightMin={'100%'}>
-        <div className="page-scrollbar-content">
-          <PageHeader model={navModel} />
-          {children}
-          <Footer />
+      <PageToolbar
+        pageIcon={navModel.main.icon as IconName}
+        title={navModel.node.text}
+        parent={navModel.main.text}
+        onClickParent={() => {}}
+      ></PageToolbar>
+      <div className={styles.subNavWrapper}>
+        <div className={styles.subNav}></div>
+        <div className={styles.page}>
+          <CustomScrollbar autoHeightMin={'100%'}>
+            {children}
+            <Footer />
+          </CustomScrollbar>
         </div>
-      </CustomScrollbar>
+      </div>
     </div>
   );
 };
@@ -53,6 +63,20 @@ const getStyles = (theme: GrafanaTheme) => ({
     top: 0;
     bottom: 0;
     width: 100%;
-    background: ${theme.colors.bg1};
+    background: ${theme.colors.dashboardBg};
+    display: flex;
+    flex-direction: column;
+  `,
+  subNavWrapper: css`
+    display: flex;
+    flex-direction: row;
+    padding: ${theme.spacing.md};
+  `,
+  subNav: css`
+    width: 200px;
+    margin-right: ${theme.spacing.md};
+  `,
+  page: css`
+    flex-grow: 1;
   `,
 });
