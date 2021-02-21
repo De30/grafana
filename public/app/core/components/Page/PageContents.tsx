@@ -18,15 +18,5 @@ export const PageContents: FC<Props> = ({ isLoading, children }) => {
 };
 
 const getStyles = (theme: GrafanaTheme) => ({
-  pageContainer: css`
-    flex-grow: 1;
-    flex-basis: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding: ${theme.spacing.md};
-    max-width: 980px;
-    background: ${theme.colors.bg1};
-    border: 1px solid ${theme.colors.border1};
-    border-radius: ${theme.border.radius.sm};
-  `,
+  pageContainer: css``,
 });
