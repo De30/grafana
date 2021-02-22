@@ -54,8 +54,10 @@ export const Page: PageType = ({ navModel, children, ...otherProps }) => {
             ))}
           </div>
           <div className={styles.pageColumn}>
-            {renderHeaderTitle(navModel.node, styles)}
-            <div className={styles.page}>{children}</div>
+            <div className={styles.page}>
+              {renderHeaderTitle(navModel.node, styles)}
+              {children}
+            </div>
           </div>
         </div>
       </CustomScrollbar>
@@ -115,17 +117,19 @@ const getStyles = (theme: GrafanaTheme) => ({
     font-weight: ${theme.typography.weight.semibold};
   `,
   pageHeading: css`
-    font-size: ${theme.typography.heading.h2};
+    font-size: ${theme.typography.heading.h1};
     display: flex;
     align-items: center;
-    padding-left: ${theme.spacing.md};
   `,
   pageHeadingWrapper: css`
     flex-grow: 1;
     display: flex;
     margin-bottom: ${theme.spacing.md};
   `,
-  pageHeadingLogo: css``,
+  pageHeadingLogo: css`
+    display: none;
+    padding-right: ${theme.spacing.md};
+  `,
   pageColumn: css`
     display: flex;
     flex-direction: column;
@@ -136,7 +140,7 @@ const getStyles = (theme: GrafanaTheme) => ({
   page: css`
     display: flex;
     flex-direction: column;
-    padding: ${theme.spacing.md};
+    padding: ${theme.spacing.lg};
     background: ${theme.colors.bg1};
     border: 1px solid ${theme.colors.border1};
     border-radius: ${theme.border.radius.sm};
