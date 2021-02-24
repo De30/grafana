@@ -12,6 +12,7 @@ const MetricName: React.FC<AzureQueryEditorFieldProps> = ({
   subscriptionId,
   variableOptionGroup,
   onQueryChange,
+  width = 38,
 }) => {
   const [metricNames, setMetricNames] = useState<Option[]>([]);
 
@@ -72,11 +73,12 @@ const MetricName: React.FC<AzureQueryEditorFieldProps> = ({
   return (
     <Field label="Metric">
       <Select
+        openMenuOnFocus={true}
         inputId="azure-monitor-metrics-metric-field"
         value={findOption(metricNames, query.azureMonitor.metricName)}
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );

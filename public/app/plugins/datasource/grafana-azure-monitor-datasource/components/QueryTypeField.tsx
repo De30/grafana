@@ -15,9 +15,10 @@ const QUERY_TYPES = [
 interface QueryTypeFieldProps {
   query: AzureMonitorQuery;
   onQueryChange: (newQuery: AzureMonitorQuery) => void;
+  width?: number;
 }
 
-const QueryTypeField: React.FC<QueryTypeFieldProps> = ({ query, onQueryChange }) => {
+const QueryTypeField: React.FC<QueryTypeFieldProps> = ({ query, onQueryChange, width = 38 }) => {
   const handleChange = useCallback(
     (change: SelectableValue<AzureQueryType>) => {
       change.value &&
@@ -36,7 +37,7 @@ const QueryTypeField: React.FC<QueryTypeFieldProps> = ({ query, onQueryChange })
         value={findOption(QUERY_TYPES, query.queryType)}
         options={QUERY_TYPES}
         onChange={handleChange}
-        width={38}
+        width={width}
       />
     </Field>
   );

@@ -16,6 +16,7 @@ const TimeGrainField: React.FC<TimeGrainFieldProps> = ({
   timeGrainOptions,
   variableOptionGroup,
   onQueryChange,
+  width = 38,
 }) => {
   const handleChange = useCallback(
     (change: SelectableValue<string>) => {
@@ -58,10 +59,11 @@ const TimeGrainField: React.FC<TimeGrainFieldProps> = ({
     <Field label="Time Grain">
       <Select
         inputId="azure-monitor-metrics-time-grain-field"
+        openMenuOnFocus={true}
         value={findOption(timeGrainOptions, query.azureMonitor.timeGrain)}
         onChange={handleChange}
         options={timeGrains}
-        width={38}
+        width={width}
       />
     </Field>
   );

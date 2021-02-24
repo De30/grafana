@@ -12,6 +12,8 @@ const ResourceGroupsField: React.FC<AzureQueryEditorFieldProps> = ({
   subscriptionId,
   variableOptionGroup,
   onQueryChange,
+  menuOpen,
+  width = 38,
 }) => {
   const [resourceGroups, setResourceGroups] = useState<Option[]>([]);
 
@@ -59,11 +61,12 @@ const ResourceGroupsField: React.FC<AzureQueryEditorFieldProps> = ({
   return (
     <Field label="Resource Group">
       <Select
+        openMenuOnFocus={true}
         inputId="azure-monitor-metrics-resource-group-field"
         value={findOption(resourceGroups, query.azureMonitor.resourceGroup)}
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );

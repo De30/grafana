@@ -28,12 +28,14 @@ const MetricsQueryEditor: React.FC<MetricsQueryEditorProps> = ({
   datasource,
   subscriptionId,
   variableOptionGroup,
+  children,
   onChange,
 }) => {
   const metricsMetadata = useMetricsMetadata(datasource, query, subscriptionId, onChange);
 
   return (
     <div data-testid="azure-monitor-metrics-query-editor">
+      {children}
       <SubscriptionField
         query={query}
         datasource={datasource}

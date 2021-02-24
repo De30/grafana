@@ -162,6 +162,8 @@ export interface AzureQueryEditorFieldProps {
   datasource: Datasource;
   subscriptionId: string;
   variableOptionGroup: { label: string; options: Option[] };
+  width?: number;
+  menuOpen?: boolean;
 
   onQueryChange: (newQuery: AzureMonitorQuery) => void;
 }

@@ -12,6 +12,7 @@ const ResourceNameField: React.FC<AzureQueryEditorFieldProps> = ({
   subscriptionId,
   variableOptionGroup,
   onQueryChange,
+  width = 38,
 }) => {
   const [resourceNames, setResourceNames] = useState<Option[]>([]);
 
@@ -58,11 +59,12 @@ const ResourceNameField: React.FC<AzureQueryEditorFieldProps> = ({
   return (
     <Field label="Resource Name">
       <Select
+        openMenuOnFocus={true}
         inputId="azure-monitor-metrics-resource-name-field"
         value={findOption(resourceNames, query.azureMonitor.resourceName)}
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );

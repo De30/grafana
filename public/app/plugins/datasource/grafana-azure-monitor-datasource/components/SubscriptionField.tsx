@@ -15,6 +15,7 @@ const SubscriptionField: React.FC<SubscriptionFieldProps> = ({
   query,
   variableOptionGroup,
   onQueryChange,
+  width = 38,
 }) => {
   const [subscriptions, setSubscriptions] = useState<Option[]>([]);
 
@@ -84,11 +85,12 @@ const SubscriptionField: React.FC<SubscriptionFieldProps> = ({
   return (
     <Field label="Subscription">
       <Select
+        openMenuOnFocus={true}
         value={findOption(subscriptions, query.subscription)}
         inputId="azure-monitor-subscriptions-field"
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );

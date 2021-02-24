@@ -9,7 +9,7 @@ interface DimensionFieldsProps extends AzureQueryEditorFieldProps {
   dimensionOptions: Option[];
 }
 
-const DimensionFields: React.FC<DimensionFieldsProps> = ({ query, dimensionOptions, onQueryChange }) => {
+const DimensionFields: React.FC<DimensionFieldsProps> = ({ query, dimensionOptions, width = 38, onQueryChange }) => {
   const setDimensionFilters = (newFilters: AzureMetricDimension[]) => {
     onQueryChange({
       ...query,
@@ -64,7 +64,7 @@ const DimensionFields: React.FC<DimensionFieldsProps> = ({ query, dimensionOptio
               value={findOption(dimensionOptions, filter.dimension)}
               options={dimensionOptions}
               onChange={(v) => onFieldChange(index, 'dimension', v.value ?? '')}
-              width={38}
+              width={width}
             />
             <InlineLabel aria-label="equals">==</InlineLabel>
             <Input placeholder="" value={filter.filter} onChange={(ev) => onFilterInputChange(index, ev)} />

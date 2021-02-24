@@ -15,6 +15,7 @@ const AggregationField: React.FC<AggregationFieldProps> = ({
   variableOptionGroup,
   onQueryChange,
   aggregationOptions,
+  width = 38,
 }) => {
   const handleChange = useCallback(
     (change: SelectableValue<string>) => {
@@ -42,10 +43,11 @@ const AggregationField: React.FC<AggregationFieldProps> = ({
     <Field label="Aggregation">
       <Select
         inputId="azure-monitor-metrics-aggregation-field"
+        openMenuOnFocus={true}
         value={findOption(aggregationOptions, query.azureMonitor.aggregation)}
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );

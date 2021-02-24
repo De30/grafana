@@ -12,6 +12,8 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
   subscriptionId,
   variableOptionGroup,
   onQueryChange,
+  menuOpen,
+  width = 38,
 }) => {
   const [namespaces, setNamespaces] = useState<Option[]>([]);
 
@@ -59,11 +61,12 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
     <Field label="Namespace">
       {/* It's expected that the label reads Namespace but the property is metricDefinition */}
       <Select
+        openMenuOnFocus={true}
         inputId="azure-monitor-metrics-namespace-field"
         value={findOption(namespaces, query.azureMonitor.metricDefinition)}
         onChange={handleChange}
         options={options}
-        width={38}
+        width={width}
       />
     </Field>
   );
