@@ -2,6 +2,7 @@ version: '3'
 services:
   citest:
     image: "amd64/alpine"
+    stdin_open: true
     user: root
     volumes:
       - ../scripts:/home/circleci/scripts
@@ -9,7 +10,8 @@ services:
       - ${HOME}/.ssh:/root/.ssh
       - ../../..:/home/circleci/grafana-toolkit
   cibuilt:
-    image: "grafana/grafana-plugin-ci:latest-alpine"
+    image: "grafana/grafana-plugin-ci:1.1.4-alpine"
+    stdin_open: true
     user: root
     volumes:
       - ../scripts:/home/circleci/scripts
