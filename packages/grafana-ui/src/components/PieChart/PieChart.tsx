@@ -42,12 +42,12 @@ export enum PieChartType {
 }
 
 export interface PieChartLegendOptions extends VizLegendOptions {
-  values: PieChartLegendValues[];
+  values?: PieChartLegendValues[];
 }
 
-const defaultLegendOptions: PieChartLegendOptions = {
+const defaultLegendOptions = {
   displayMode: LegendDisplayMode.List,
-  placement: 'right',
+  placement: 'right' as const,
   calcs: [],
   values: [PieChartLegendValues.Percent],
 };
@@ -65,7 +65,7 @@ export const PieChart: FC<Props> = ({ values, legendOptions = defaultLegendOptio
         color: value.color ?? FALLBACK_COLOR,
         yAxis: 1,
         getDisplayValues: () => {
-          const valuesToShow = legendOptions.values;
+          const valuesToShow = legendOptions.values ?? defaultLegendOptions.values;
           let displayValues = [];
 
           if (valuesToShow.includes(PieChartLegendValues.Value)) {
