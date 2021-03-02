@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# run a plugin continuous integration step
+source plugin-ci-steps && "$1"

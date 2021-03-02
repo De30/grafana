@@ -3,6 +3,8 @@ set -eo pipefail
 
 source ./common.sh
 
+cp -r ../bin bin
+
 #
 # No longer required, but useful to keep just in case we want to deploy
 # changes in toolkit directly to the docker image
@@ -17,6 +19,8 @@ if [ -n "$INCLUDE_TOOLKIT" ]; then
 fi
 
 docker build -t ${DOCKER_IMAGE_NAME} .
-docker push $DOCKER_IMAGE_NAME
+# docker push $DOCKER_IMAGE_NAME
 
 [ -n "$INCLUDE_TOOLKIT" ] && /bin/rm -rfv install/grafana-toolkit
+
+rm -rf bin
