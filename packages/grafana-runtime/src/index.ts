@@ -13,4 +13,4 @@ export { logInfo, logDebug, logWarning, logError } from './utils/logging';
 export { DataSourceWithBackend, HealthCheckResult, HealthStatus } from './utils/DataSourceWithBackend';
 export { toDataQueryError, toDataQueryResponse, frameToMetricFindValue } from './utils/queryResponse';
 export { setQueryRunnerFactory, createQueryRunner } from './queryRunners';
-export { DataSourcePicker } from './datasources/DataSourcePicker';
+export { DataSourcePicker, DataSourcePickerProps, DataSourcePickerState } from './datasources/DataSourcePicker';
