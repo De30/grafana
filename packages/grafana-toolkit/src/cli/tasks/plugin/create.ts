@@ -35,7 +35,7 @@ const RepositoriesPaths: Record<PluginType, string> = {
 const TutorialPaths: Record<PluginType, string> = {
   'panel-plugin': 'https://grafana.com/tutorials/build-a-panel-plugin',
   'datasource-plugin': 'https://grafana.com/tutorials/build-a-data-source-plugin',
-  'backend-datasource-plugin': 'TODO',
+  'backend-datasource-plugin': 'https://grafana.com/tutorials/build-a-data-source-backend-plugin/',
 };
 
 export const getGitUsername = async () => {
@@ -178,9 +178,7 @@ export const printGrafanaTutorialsDetails = (type: PluginType) => {
   console.log();
   console.log(chalk.bold.yellow(`Congrats! You have just created ${PluginNames[type]}.`));
   console.log();
-  if (type !== 'backend-datasource-plugin') {
-    console.log(`${PluginNames[type]} tutorial: ${TutorialPaths[type]}`);
-  }
+  console.log(`${PluginNames[type]} tutorial: ${TutorialPaths[type]}`);
   console.log(
     'Learn more about Grafana Plugins at https://grafana.com/docs/grafana/latest/plugins/developing/development/'
   );
