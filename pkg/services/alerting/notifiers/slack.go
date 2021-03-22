@@ -244,11 +244,6 @@ func (sn *SlackNotifier) Notify(evalContext *alerting.EvalContext) error {
 	if evalContext.Rule.State != models.AlertStateOK { // don't add message when going back to alert state ok.
 		msg = evalContext.Rule.Message
 	}
-	imageURL := ""
-	// default to file.upload API method if a token is provided
-	if sn.Token == "" {
-		imageURL = evalContext.ImagePublicURL
-	}
 
 	var blocks []map[string]interface{}
 	if mentionsBuilder.Len() > 0 {
@@ -273,8 +268,8 @@ func (sn *SlackNotifier) Notify(evalContext *alerting.EvalContext) error {
 		"footer_icon": "https://grafana.com/assets/img/fav32.png",
 		"ts":          time.Now().Unix(),
 	}
-	if sn.NeedsImage() && imageURL != "" {
-		attachment["image_url"] = imageURL
+	if sn.NeedsImage() {
+		attachment["image_url"] = evalContext.ImagePublicURL
 	}
 	body := map[string]interface{}{
 		"text": evalContext.GetNotificationTitle(),
@@ -314,13 +309,14 @@ func (sn *SlackNotifier) Notify(evalContext *alerting.EvalContext) error {
 		sn.log.Debug("Adding authorization header to HTTP request")
 		cmd.HttpHeader = map[string]string{
 			"Authorization": fmt.Sprintf("Bearer %s", sn.Token),
+			"Content-Type":  "application/json",
 		}
 	}
 	if err := bus.DispatchCtx(evalContext.Ctx, cmd); err != nil {
 		sn.log.Error("Failed to send slack notification", "error", err, "webhook", sn.Name)
 		return err
 	}
-	if sn.Token != "" && sn.UploadImage {
+	if sn.Token != "" && sn.UploadImage && evalContext.ImageOnDiskPath != "" {
 		err = sn.slackFileUpload(evalContext, sn.log, "https://slack.com/api/files.upload", sn.Recipient, sn.Token)
 		if err != nil {
 			return err
