@@ -40,7 +40,7 @@ export const PanelHeaderMenuTrigger: FC<Props> = ({ children, ...divProps }) => 
 };
 
 function isClick(current: CartesianCoords2D, clicked: CartesianCoords2D): boolean {
-  return clicked.x === current.x && clicked.y === current.y;
+  return Math.floor(clicked.x) === Math.floor(current.x) && Math.floor(clicked.y) === Math.floor(current.y);
 }
 
 function eventToClickCoordinates(event: MouseEvent<HTMLDivElement>): CartesianCoords2D {
