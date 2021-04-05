@@ -1,6 +1,5 @@
 import { Field, DataFrame, FieldType } from '../types/dataFrame';
 import { QueryResultMeta } from '../types';
-import { ArrayVector } from '../vector';
 import { DataFrameJSON, decodeFieldValueEntities } from './DataFrameJSON';
 import { guessFieldTypeFromValue } from './processDataFrame';
 
@@ -81,7 +80,7 @@ export class StreamingDataFrame implements DataFrame {
   meta?: QueryResultMeta;
 
   // raw field buffers
-  fields: Array<Field<any, ArrayVector<any>>> = [];
+  fields: Array<Field<any>> = [];
 
   options: StreamingFrameOptions;
 
@@ -106,7 +105,7 @@ export class StreamingDataFrame implements DataFrame {
     const { schema, data } = msg;
     if (schema) {
       // Keep old values if they are the same shape
-      let oldValues: ArrayVector[] | undefined;
+      let oldValues: any[] | undefined;
       if (schema.fields.length === this.fields.length) {
         let same = true;
         oldValues = this.fields.map((f, idx) => {
@@ -132,7 +131,7 @@ export class StreamingDataFrame implements DataFrame {
           name: f.name,
           labels: f.labels,
           type: f.type ?? FieldType.other,
-          values: oldValues ? oldValues[idx] : new ArrayVector(),
+          values: oldValues ? oldValues[idx] : [],
         };
       });
 
@@ -159,7 +158,7 @@ export class StreamingDataFrame implements DataFrame {
             name,
             type,
             config: {},
-            values: new ArrayVector([]),
+            values: [],
           };
         });
       }
@@ -173,12 +172,12 @@ export class StreamingDataFrame implements DataFrame {
         });
       }
 
-      let curValues = this.fields.map((f) => f.values.buffer);
+      let curValues = this.fields.map((f) => f.values);
 
       let appended = circPush(curValues, values, this.options.maxLength, this.timeFieldIndex, this.options.maxDelta);
 
       appended.forEach((v, i) => {
-        this.fields[i].values.buffer = v;
+        this.fields[i].values = v;
       });
 
       // Update the frame length

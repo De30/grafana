@@ -27,7 +27,7 @@ describe('Streaming JSON', () => {
     });
 
     it('should create frame with schema & data', () => {
-      expect(stream.fields.map((f) => ({ name: f.name, value: f.values.buffer }))).toMatchInlineSnapshot(`
+      expect(stream.fields.map((f) => ({ name: f.name, value: f.values }))).toMatchInlineSnapshot(`
         Array [
           Object {
             "name": "time",
@@ -64,7 +64,7 @@ describe('Streaming JSON', () => {
         },
       });
 
-      expect(stream.fields.map((f) => ({ name: f.name, value: f.values.buffer }))).toMatchInlineSnapshot(`
+      expect(stream.fields.map((f) => ({ name: f.name, value: f.values }))).toMatchInlineSnapshot(`
         Array [
           Object {
             "name": "time",
@@ -104,7 +104,7 @@ describe('Streaming JSON', () => {
         },
       });
 
-      expect(stream.fields.map((f) => ({ name: f.name, value: f.values.buffer }))).toMatchInlineSnapshot(`
+      expect(stream.fields.map((f) => ({ name: f.name, value: f.values }))).toMatchInlineSnapshot(`
         Array [
           Object {
             "name": "time",
@@ -148,7 +148,7 @@ describe('Streaming JSON', () => {
         },
       });
 
-      expect(stream.fields.map((f) => ({ name: f.name, value: f.values.buffer }))).toMatchInlineSnapshot(`
+      expect(stream.fields.map((f) => ({ name: f.name, value: f.values }))).toMatchInlineSnapshot(`
         Array [
           Object {
             "name": "time",

@@ -97,7 +97,7 @@ export interface ValueLinkConfig {
   valueRowIndex?: number;
 }
 
-export interface Field<T = any, V = Vector<T>> {
+export interface Field<T = any> {
   /**
    * Name of the field (column)
    */
@@ -110,7 +110,7 @@ export interface Field<T = any, V = Vector<T>> {
    *  Meta info about how field and how to display it
    */
   config: FieldConfig;
-  values: V; // The raw field values
+  values: T[]; // The raw field values
   labels?: Labels;
 
   /**

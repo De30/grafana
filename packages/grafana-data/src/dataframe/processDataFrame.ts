@@ -24,7 +24,6 @@ import { SortedVector } from '../vector/SortedVector';
 import { ArrayDataFrame } from './ArrayDataFrame';
 import { getFieldDisplayName } from '../field/fieldState';
 import { fieldIndexComparer } from '../field/fieldComparers';
-import { vectorToArray } from '../vector/vectorToArray';
 
 function convertTableToDataFrame(table: TableData): DataFrame {
   const fields = table.columns.map((c) => {
@@ -33,7 +32,7 @@ function convertTableToDataFrame(table: TableData): DataFrame {
     return {
       name: text, // rename 'text' to the 'name' field
       config: (disp || {}) as FieldConfig,
-      values: new ArrayVector(),
+      values: [] as any[],
       type: type && Object.values(FieldType).includes(type as FieldType) ? (type as FieldType) : FieldType.other,
     };
   });
@@ -44,7 +43,7 @@ function convertTableToDataFrame(table: TableData): DataFrame {
 
   for (const row of table.rows) {
     for (let i = 0; i < fields.length; i++) {
-      fields[i].values.buffer.push(row[i]);
+      fields[i].values.push(row[i]);
     }
   }
 
@@ -82,7 +81,7 @@ function convertTimeSeriesToDataFrame(timeSeries: TimeSeries): DataFrame {
       name: TIME_SERIES_TIME_FIELD_NAME,
       type: FieldType.time,
       config: {},
-      values: new ArrayVector<number>(times),
+      values: times,
     },
     {
       name: TIME_SERIES_VALUE_FIELD_NAME,
@@ -90,7 +89,7 @@ function convertTimeSeriesToDataFrame(timeSeries: TimeSeries): DataFrame {
       config: {
         unit: timeSeries.unit,
       },
-      values: new ArrayVector<TimeSeriesValue>(values),
+      values: values,
       labels: timeSeries.tags,
     },
   ];
@@ -113,13 +112,13 @@ function convertTimeSeriesToDataFrame(timeSeries: TimeSeries): DataFrame {
  * to DataFrame.  See: https://github.com/grafana/grafana/issues/18528
  */
 function convertGraphSeriesToDataFrame(graphSeries: GraphSeriesXY): DataFrame {
-  const x = new ArrayVector();
-  const y = new ArrayVector();
+  const x: any[] = [];
+  const y: any[] = [];
 
   for (let i = 0; i < graphSeries.data.length; i++) {
     const row = graphSeries.data[i];
-    x.buffer.push(row[1]);
-    y.buffer.push(row[0]);
+    x.push(row[1]);
+    y.push(row[0]);
   }
 
   return {
@@ -140,7 +139,7 @@ function convertGraphSeriesToDataFrame(graphSeries: GraphSeriesXY): DataFrame {
         values: y,
       },
     ],
-    length: x.buffer.length,
+    length: x.length,
   };
 }
 
@@ -154,12 +153,12 @@ function convertJSONDocumentDataToDataFrame(timeSeries: TimeSeries): DataFrame {
         unit: timeSeries.unit,
         filterable: (timeSeries as any).filterable,
       },
-      values: new ArrayVector(),
+      values: [] as any[],
     },
   ];
 
   for (const point of timeSeries.datapoints) {
-    fields[0].values.buffer.push(point);
+    fields[0].values.push(point);
   }
 
   return {
@@ -235,7 +234,7 @@ export function guessFieldTypeForField(field: Field): FieldType | undefined {
 
   // 2. Check the first non-null value
   for (let i = 0; i < field.values.length; i++) {
-    const v = field.values.get(i);
+    const v = field.values[i];
     if (v !== null) {
       return guessFieldTypeFromValue(v);
     }
@@ -333,8 +332,8 @@ export const toLegacyResponseData = (frame: DataFrame): TimeSeries | TableData =
       // Make sure it is [value,time]
       for (let i = 0; i < rowCount; i++) {
         rows.push([
-          valueField.values.get(i), // value
-          timeField.values.get(i), // time
+          valueField.values[i], // value
+          timeField.values[i], // time
         ]);
       }
 
@@ -352,7 +351,7 @@ export const toLegacyResponseData = (frame: DataFrame): TimeSeries | TableData =
   for (let i = 0; i < rowCount; i++) {
     const row: any[] = [];
     for (let j = 0; j < fields.length; j++) {
-      row.push(fields[j].values.get(i));
+      row.push(fields[j].values[i]);
     }
     rows.push(row);
   }
@@ -361,7 +360,7 @@ export const toLegacyResponseData = (frame: DataFrame): TimeSeries | TableData =
     return {
       alias: fields[0].name || frame.name,
       target: fields[0].name || frame.name,
-      datapoints: fields[0].values.toArray(),
+      datapoints: fields[0].values,
       filterable: fields[0].config ? fields[0].config.filterable : undefined,
       type: 'docs',
     } as TimeSeries;
@@ -405,7 +404,7 @@ export function sortDataFrame(data: DataFrame, sortIndex?: number, reverse = fal
     fields: data.fields.map((f) => {
       return {
         ...f,
-        values: new SortedVector(f.values, index),
+        values: new SortedVector(new ArrayVector(f.values), index).toArray(),
       };
     }),
   };
@@ -418,11 +417,11 @@ export function reverseDataFrame(data: DataFrame): DataFrame {
   return {
     ...data,
     fields: data.fields.map((f) => {
-      const copy = [...f.values.toArray()];
+      const copy = [...f.values];
       copy.reverse();
       return {
         ...f,
-        values: new ArrayVector(copy),
+        values: copy,
       };
     }),
   };
@@ -434,7 +433,7 @@ export function reverseDataFrame(data: DataFrame): DataFrame {
 export function getDataFrameRow(data: DataFrame, row: number): any[] {
   const values: any[] = [];
   for (const field of data.fields) {
-    values.push(field.values.get(row));
+    values.push(field.values[row]);
   }
   return values;
 }
@@ -444,16 +443,11 @@ export function getDataFrameRow(data: DataFrame, row: number): any[] {
  */
 export function toDataFrameDTO(data: DataFrame): DataFrameDTO {
   const fields: FieldDTO[] = data.fields.map((f) => {
-    let values = f.values.toArray();
-    // The byte buffers serialize like objects
-    if (values instanceof Float64Array) {
-      values = vectorToArray(f.values);
-    }
     return {
       name: f.name,
       type: f.type,
       config: f.config,
-      values,
+      values: f.values,
       labels: f.labels,
     };
   });

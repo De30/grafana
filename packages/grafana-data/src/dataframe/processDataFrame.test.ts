@@ -28,12 +28,12 @@ describe('toDataFrame', () => {
     const v0 = series.fields[0].values;
     const v1 = series.fields[1].values;
     expect(v0.length).toEqual(2);
-    expect(v0.get(0)).toEqual(1);
-    expect(v0.get(1)).toEqual(2);
+    expect(v0[0]).toEqual(1);
+    expect(v0[1]).toEqual(2);
 
     expect(v1.length).toEqual(2);
-    expect(v1.get(0)).toEqual(100);
-    expect(v1.get(1)).toEqual(200);
+    expect(v1[0]).toEqual(100);
+    expect(v1[1]).toEqual(200);
 
     // Should fill a default name if target is empty
     const input2 = {
@@ -172,7 +172,7 @@ describe('toDataFrame', () => {
 
     const v0 = dataFrame.fields[0].values;
     expect(v0.length).toEqual(1);
-    expect(v0.get(0)).toEqual(input1.datapoints[0]);
+    expect(v0[0]).toEqual(input1.datapoints[0]);
   });
 });
 
@@ -323,14 +323,14 @@ describe('sorted DataFrame', () => {
   it('Should sort numbers', () => {
     const sorted = sortDataFrame(frame, 0, true);
     expect(sorted.length).toEqual(3);
-    expect(sorted.fields[0].values.toArray()).toEqual([3, 2, 1]);
-    expect(sorted.fields[1].values.toArray()).toEqual(['c', 'b', 'a']);
+    expect(sorted.fields[0].values).toEqual([3, 2, 1]);
+    expect(sorted.fields[1].values).toEqual(['c', 'b', 'a']);
   });
 
   it('Should sort strings', () => {
     const sorted = sortDataFrame(frame, 1, true);
     expect(sorted.length).toEqual(3);
-    expect(sorted.fields[0].values.toArray()).toEqual([3, 2, 1]);
-    expect(sorted.fields[1].values.toArray()).toEqual(['c', 'b', 'a']);
+    expect(sorted.fields[0].values).toEqual([3, 2, 1]);
+    expect(sorted.fields[1].values).toEqual(['c', 'b', 'a']);
   });
 });
