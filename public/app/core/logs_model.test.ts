@@ -575,100 +575,6 @@ describe('dataFrameToLogsModel', () => {
     const logsModel = dataFrameToLogsModel(series, 1, 'utc');
     expect(logsModel.rows[0].uid).toBe('0');
   });
-
-  it('given multiple series with equal ids should return expected logs model', () => {
-    const series: DataFrame[] = [
-      toDataFrame({
-        fields: [
-          {
-            name: 'ts',
-            type: FieldType.time,
-            values: ['1970-01-01T00:00:00Z'],
-          },
-          {
-            name: 'line',
-            type: FieldType.string,
-            values: ['WARN boooo 1'],
-            labels: {
-              foo: 'bar',
-              baz: '1',
-              level: 'dbug',
-            },
-          },
-          {
-            name: 'id',
-            type: FieldType.string,
-            values: ['0'],
-          },
-        ],
-      }),
-      toDataFrame({
-        fields: [
-          {
-            name: 'ts',
-            type: FieldType.time,
-            values: ['1970-01-01T00:00:01Z'],
-          },
-          {
-            name: 'line',
-            type: FieldType.string,
-            values: ['WARN boooo 2'],
-            labels: {
-              foo: 'bar',
-              baz: '2',
-              level: 'dbug',
-            },
-          },
-          {
-            name: 'id',
-            type: FieldType.string,
-            values: ['1'],
-          },
-        ],
-      }),
-      toDataFrame({
-        fields: [
-          {
-            name: 'ts',
-            type: FieldType.time,
-            values: ['1970-01-01T00:00:01Z'],
-          },
-          {
-            name: 'line',
-            type: FieldType.string,
-            values: ['WARN boooo 2'],
-            labels: {
-              foo: 'bar',
-              baz: '2',
-              level: 'dbug',
-            },
-          },
-          {
-            name: 'id',
-            type: FieldType.string,
-            values: ['1'],
-          },
-        ],
-      }),
-    ];
-    const logsModel = dataFrameToLogsModel(series, 0, 'utc');
-    expect(logsModel.hasUniqueLabels).toBeTruthy();
-    expect(logsModel.rows).toHaveLength(2);
-    expect(logsModel.rows).toMatchObject([
-      {
-        entry: 'WARN boooo 1',
-        labels: { foo: 'bar' },
-        logLevel: LogLevel.debug,
-        uniqueLabels: { baz: '1' },
-      },
-      {
-        entry: 'WARN boooo 2',
-        labels: { foo: 'bar' },
-        logLevel: LogLevel.debug,
-        uniqueLabels: { baz: '2' },
-      },
-    ]);
-  });
 });
 
 describe('logSeriesToLogsModel', () => {
@@ -693,7 +599,7 @@ describe('logSeriesToLogsModel', () => {
       hasUniqueLabels: false,
       meta: [
         { label: 'Limit', value: '1000 (0 returned)', kind: 1 },
-        { label: 'Total bytes processed', value: '97  kB', kind: 1 },
+        { label: 'Total bytes processed', value: '97.0  kB', kind: 1 },
       ],
       rows: [],
     };
@@ -762,6 +668,56 @@ describe('logSeriesToLogsModel', () => {
       },
       {
         entry: 'WARN boooo 1',
+        labels: { foo: 'bar' },
+        logLevel: LogLevel.debug,
+      },
+      {
+        entry: 'WARN boooo 2',
+        labels: { foo: 'bar' },
+        logLevel: LogLevel.debug,
+      },
+    ]);
+  });
+
+  it('should return empty string if message field is undefined', () => {
+    const logSeries: DataFrame[] = [
+      toDataFrame({
+        fields: [
+          {
+            name: 'ts',
+            type: FieldType.time,
+            values: ['1970-01-01T00:00:01Z', '1970-02-01T00:00:01Z', '1970-03-01T00:00:01Z'],
+          },
+          {
+            name: 'line',
+            type: FieldType.string,
+            values: ['WARN boooo 0', undefined, 'WARN boooo 2'],
+            labels: {
+              foo: 'bar',
+              level: 'dbug',
+            },
+          },
+          {
+            name: 'id',
+            type: FieldType.string,
+            values: ['0', '1', '2'],
+          },
+        ],
+        refId: 'A',
+        meta: {},
+      }),
+    ];
+
+    const logsModel = dataFrameToLogsModel(logSeries, 0, 'utc');
+    expect(logsModel.rows).toHaveLength(3);
+    expect(logsModel.rows).toMatchObject([
+      {
+        entry: 'WARN boooo 0',
+        labels: { foo: 'bar' },
+        logLevel: LogLevel.debug,
+      },
+      {
+        entry: '',
         labels: { foo: 'bar' },
         logLevel: LogLevel.debug,
       },

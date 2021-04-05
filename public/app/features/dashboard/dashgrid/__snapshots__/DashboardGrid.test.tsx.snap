@@ -41,12 +41,11 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
   onLayoutChange={[Function]}
   onResize={[Function]}
   onResizeStop={[Function]}
-  onWidthChange={[Function]}
   viewPanel={null}
 >
   <div
     className=""
-    id="panel-1"
+    data-panelid="1"
     key="1"
   >
     <Connect(DashboardPanelUnconnected)
@@ -80,6 +79,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
               "_eventsCount": 1,
             },
           },
+          "formatDate": [Function],
           "getVariables": [Function],
           "getVariablesFromState": [Function],
           "gnetId": null,
@@ -92,6 +92,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
             "canSave": true,
             "canShare": true,
             "canStar": true,
+            "hasUnsavedFolderChange": false,
             "showSettings": true,
           },
           "originalTemplating": Array [],
@@ -268,7 +269,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
   </div>
   <div
     className=""
-    id="panel-2"
+    data-panelid="2"
     key="2"
   >
     <Connect(DashboardPanelUnconnected)
@@ -302,6 +303,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
               "_eventsCount": 1,
             },
           },
+          "formatDate": [Function],
           "getVariables": [Function],
           "getVariablesFromState": [Function],
           "gnetId": null,
@@ -314,6 +316,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
             "canSave": true,
             "canShare": true,
             "canStar": true,
+            "hasUnsavedFolderChange": false,
             "showSettings": true,
           },
           "originalTemplating": Array [],
@@ -490,7 +493,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
   </div>
   <div
     className=""
-    id="panel-3"
+    data-panelid="3"
     key="3"
   >
     <Connect(DashboardPanelUnconnected)
@@ -524,6 +527,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
               "_eventsCount": 1,
             },
           },
+          "formatDate": [Function],
           "getVariables": [Function],
           "getVariablesFromState": [Function],
           "gnetId": null,
@@ -536,6 +540,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
             "canSave": true,
             "canShare": true,
             "canStar": true,
+            "hasUnsavedFolderChange": false,
             "showSettings": true,
           },
           "originalTemplating": Array [],
@@ -712,7 +717,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
   </div>
   <div
     className=""
-    id="panel-4"
+    data-panelid="4"
     key="4"
   >
     <Connect(DashboardPanelUnconnected)
@@ -746,6 +751,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
               "_eventsCount": 1,
             },
           },
+          "formatDate": [Function],
           "getVariables": [Function],
           "getVariablesFromState": [Function],
           "gnetId": null,
@@ -758,6 +764,7 @@ exports[`DashboardGrid Can render dashboard grid Should render 1`] = `
             "canSave": true,
             "canShare": true,
             "canStar": true,
+            "hasUnsavedFolderChange": false,
             "showSettings": true,
           },
           "originalTemplating": Array [],

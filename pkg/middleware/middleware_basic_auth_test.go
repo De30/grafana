@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/bus"
-	authLogin "github.com/grafana/grafana/pkg/login"
+	"github.com/grafana/grafana/pkg/login"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/contexthandler"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/stretchr/testify/assert"
@@ -14,20 +15,14 @@ import (
 )
 
 func TestMiddlewareBasicAuth(t *testing.T) {
-	var origBasicAuthEnabled = setting.BasicAuthEnabled
-	var origDisableBruteForceLoginProtection = setting.DisableBruteForceLoginProtection
-	t.Cleanup(func() {
-		setting.BasicAuthEnabled = origBasicAuthEnabled
-		setting.DisableBruteForceLoginProtection = origDisableBruteForceLoginProtection
-	})
-	setting.BasicAuthEnabled = true
-	setting.DisableBruteForceLoginProtection = true
-
-	bus.ClearBusHandlers()
-
 	const id int64 = 12
 
-	middlewareScenario(t, "Valid API key", func(sc *scenarioContext) {
+	configure := func(cfg *setting.Cfg) {
+		cfg.BasicAuthEnabled = true
+		cfg.DisableBruteForceLoginProtection = true
+	}
+
+	middlewareScenario(t, "Valid API key", func(t *testing.T, sc *scenarioContext) {
 		const orgID int64 = 2
 		keyhash, err := util.EncodePassword("v5nAwpMafFP6znaS4urhdWDLS5511M42", "asd")
 		require.NoError(t, err)
@@ -44,16 +39,15 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 		assert.True(t, sc.context.IsSignedIn)
 		assert.Equal(t, orgID, sc.context.OrgId)
 		assert.Equal(t, models.ROLE_EDITOR, sc.context.OrgRole)
-	})
+	}, configure)
 
-	middlewareScenario(t, "Handle auth", func(sc *scenarioContext) {
+	middlewareScenario(t, "Handle auth", func(t *testing.T, sc *scenarioContext) {
 		const password = "MyPass"
 		const salt = "Salt"
 		const orgID int64 = 2
 
-		t.Cleanup(bus.ClearBusHandlers)
-
 		bus.AddHandler("grafana-auth", func(query *models.LoginUserQuery) error {
+			t.Log("Handling LoginUserQuery")
 			encoded, err := util.EncodePassword(password, salt)
 			if err != nil {
 				return err
@@ -66,6 +60,7 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 		})
 
 		bus.AddHandler("get-sign-user", func(query *models.GetSignedInUserQuery) error {
+			t.Log("Handling GetSignedInUserQuery")
 			query.Result = &models.SignedInUser{OrgId: orgID, UserId: id}
 			return nil
 		})
@@ -76,13 +71,13 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 		assert.True(t, sc.context.IsSignedIn)
 		assert.Equal(t, orgID, sc.context.OrgId)
 		assert.Equal(t, id, sc.context.UserId)
-	})
+	}, configure)
 
-	middlewareScenario(t, "Auth sequence", func(sc *scenarioContext) {
+	middlewareScenario(t, "Auth sequence", func(t *testing.T, sc *scenarioContext) {
 		const password = "MyPass"
 		const salt = "Salt"
 
-		authLogin.Init()
+		login.Init()
 
 		bus.AddHandler("user-query", func(query *models.GetUserByLoginQuery) error {
 			encoded, err := util.EncodePassword(password, salt)
@@ -104,12 +99,13 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 
 		authHeader := util.GetBasicAuthHeader("myUser", password)
 		sc.fakeReq("GET", "/").withAuthorizationHeader(authHeader).exec()
+		require.NotNil(t, sc.context)
 
 		assert.True(t, sc.context.IsSignedIn)
 		assert.Equal(t, id, sc.context.UserId)
-	})
+	}, configure)
 
-	middlewareScenario(t, "Should return error if user is not found", func(sc *scenarioContext) {
+	middlewareScenario(t, "Should return error if user is not found", func(t *testing.T, sc *scenarioContext) {
 		sc.fakeReq("GET", "/")
 		sc.req.SetBasicAuth("user", "password")
 		sc.exec()
@@ -118,10 +114,10 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 		require.Error(t, err)
 
 		assert.Equal(t, 401, sc.resp.Code)
-		assert.Equal(t, errStringInvalidUsernamePassword, sc.respJson["message"])
-	})
+		assert.Equal(t, contexthandler.InvalidUsernamePassword, sc.respJson["message"])
+	}, configure)
 
-	middlewareScenario(t, "Should return error if user & password do not match", func(sc *scenarioContext) {
+	middlewareScenario(t, "Should return error if user & password do not match", func(t *testing.T, sc *scenarioContext) {
 		bus.AddHandler("user-query", func(loginUserQuery *models.GetUserByLoginQuery) error {
 			return nil
 		})
@@ -134,6 +130,6 @@ func TestMiddlewareBasicAuth(t *testing.T) {
 		require.Error(t, err)
 
 		assert.Equal(t, 401, sc.resp.Code)
-		assert.Equal(t, errStringInvalidUsernamePassword, sc.respJson["message"])
-	})
+		assert.Equal(t, contexthandler.InvalidUsernamePassword, sc.respJson["message"])
+	}, configure)
 }

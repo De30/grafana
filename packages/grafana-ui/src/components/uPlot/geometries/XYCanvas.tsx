@@ -1,6 +1,6 @@
 import { usePlotContext } from '../context';
 import React from 'react';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 interface XYCanvasProps {}
 
@@ -10,8 +10,9 @@ interface XYCanvasProps {}
  */
 export const XYCanvas: React.FC<XYCanvasProps> = ({ children }) => {
   const plotContext = usePlotContext();
+  const plotInstance = plotContext.getPlotInstance();
 
-  if (!plotContext.isPlotReady) {
+  if (!plotInstance) {
     return null;
   }
 
@@ -20,8 +21,8 @@ export const XYCanvas: React.FC<XYCanvasProps> = ({ children }) => {
       className={css`
         position: absolute;
         overflow: visible;
-        left: ${plotContext.getPlotInstance().bbox.left / window.devicePixelRatio}px;
-        top: ${plotContext.getPlotInstance().bbox.top / window.devicePixelRatio}px;
+        left: ${plotInstance.bbox.left / window.devicePixelRatio}px;
+        top: ${plotInstance.bbox.top / window.devicePixelRatio}px;
       `}
     >
       {children}

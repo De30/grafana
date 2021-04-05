@@ -307,17 +307,17 @@ func GetDashboardFolderUrl(isFolder bool, uid string, slug string) string {
 	return GetDashboardUrl(uid, slug)
 }
 
-// GetDashboardUrl return the html url for a dashboard
+// GetDashboardUrl returns the HTML url for a dashboard.
 func GetDashboardUrl(uid string, slug string) string {
 	return fmt.Sprintf("%s/d/%s/%s", setting.AppSubUrl, uid, slug)
 }
 
-// GetFullDashboardUrl return the full url for a dashboard
+// GetFullDashboardUrl returns the full URL for a dashboard.
 func GetFullDashboardUrl(uid string, slug string) string {
 	return fmt.Sprintf("%sd/%s/%s", setting.AppUrl, uid, slug)
 }
 
-// GetFolderUrl return the html url for a folder
+// GetFolderUrl returns the HTML url for a folder.
 func GetFolderUrl(folderUid string, slug string) string {
 	return fmt.Sprintf("%s/dashboards/f/%s/%s", setting.AppSubUrl, folderUid, slug)
 }
@@ -355,23 +355,9 @@ type DashboardProvisioning struct {
 	Updated     int64
 }
 
-type SaveProvisionedDashboardCommand struct {
-	DashboardCmd          *SaveDashboardCommand
-	DashboardProvisioning *DashboardProvisioning
-
-	Result *Dashboard
-}
-
 type DeleteDashboardCommand struct {
 	Id    int64
 	OrgId int64
-}
-
-type ValidateDashboardBeforeSaveCommand struct {
-	OrgId     int64
-	Dashboard *Dashboard
-	Overwrite bool
-	Result    *ValidateDashboardBeforeSaveResult
 }
 
 type DeleteOrphanedProvisionedDashboardsCommand struct {
@@ -423,16 +409,6 @@ type GetDashboardsByPluginIdQuery struct {
 type GetDashboardSlugByIdQuery struct {
 	Id     int64
 	Result string
-}
-
-type GetProvisionedDashboardDataByIdQuery struct {
-	DashboardId int64
-	Result      *DashboardProvisioning
-}
-
-type GetProvisionedDashboardDataQuery struct {
-	Name   string
-	Result []*DashboardProvisioning
 }
 
 type GetDashboardsBySlugQuery struct {

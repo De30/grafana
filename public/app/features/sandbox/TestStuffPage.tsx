@@ -1,65 +1,43 @@
-import {
-  ApplyFieldOverrideOptions,
-  DataQuery,
-  DataSourceSelectItem,
-  DataTransformerConfig,
-  dateMath,
-  FieldColorModeId,
-  PanelData,
-} from '@grafana/data';
-import { GraphNG, Table } from '@grafana/ui';
+import { ApplyFieldOverrideOptions, DataTransformerConfig, dateMath, FieldColorModeId, PanelData } from '@grafana/data';
+import { GraphNG, LegendDisplayMode, Table } from '@grafana/ui';
 import { config } from 'app/core/config';
 import React, { FC, useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import { QueryGroup } from '../query/components/QueryGroup';
-import { QueryGroupOptions } from '../query/components/QueryGroupOptions';
 import { PanelQueryRunner } from '../query/state/PanelQueryRunner';
+import { QueryGroupOptions } from 'app/types';
 
 interface State {
-  queries: DataQuery[];
   queryRunner: PanelQueryRunner;
-  dataSourceName: string | null;
   queryOptions: QueryGroupOptions;
   data?: PanelData;
 }
 
 export const TestStuffPage: FC = () => {
   const [state, setState] = useState<State>(getDefaultState());
-  const { queryOptions, queryRunner, queries, dataSourceName } = state;
-
-  const onDataSourceChange = (ds: DataSourceSelectItem, queries: DataQuery[]) => {
-    setState({
-      ...state,
-      dataSourceName: ds.value,
-      queries: queries,
-    });
-  };
+  const { queryOptions, queryRunner } = state;
 
   const onRunQueries = () => {
     const timeRange = { from: 'now-1h', to: 'now' };
 
     queryRunner.run({
-      queries,
+      queries: queryOptions.queries,
+      datasource: queryOptions.dataSource.name!,
       timezone: 'browser',
-      datasource: dataSourceName,
       timeRange: { from: dateMath.parse(timeRange.from)!, to: dateMath.parse(timeRange.to)!, raw: timeRange },
       maxDataPoints: queryOptions.maxDataPoints ?? 100,
       minInterval: queryOptions.minInterval,
     });
   };
 
-  const onQueriesChange = (queries: DataQuery[]) => {
-    setState({ ...state, queries: queries });
-  };
-
-  const onQueryOptionsChange = (queryOptions: QueryGroupOptions) => {
+  const onOptionsChange = (queryOptions: QueryGroupOptions) => {
     setState({ ...state, queryOptions });
   };
 
   /**
    * Subscribe to data
    */
-  const observable = useMemo(() => queryRunner.getData({ withFieldConfig: true, withTransforms: true }), []);
+  const observable = useMemo(() => queryRunner.getData({ withFieldConfig: true, withTransforms: true }), [queryRunner]);
   const data = useObservable(observable);
 
   return (
@@ -68,19 +46,22 @@ export const TestStuffPage: FC = () => {
       <div>
         <QueryGroup
           options={queryOptions}
-          dataSourceName={dataSourceName}
           queryRunner={queryRunner}
-          queries={queries}
-          onDataSourceChange={onDataSourceChange}
           onRunQueries={onRunQueries}
-          onQueriesChange={onQueriesChange}
-          onOptionsChange={onQueryOptionsChange}
+          onOptionsChange={onOptionsChange}
         />
       </div>
 
       {data && (
         <div style={{ padding: '16px' }}>
-          <GraphNG width={1200} height={300} data={data.series} timeRange={data.timeRange} timeZone="browser" />
+          <GraphNG
+            width={1200}
+            height={300}
+            data={data.series}
+            legend={{ displayMode: LegendDisplayMode.List, placement: 'bottom', calcs: [] }}
+            timeRange={data.timeRange}
+            timeZone="browser"
+          />
           <hr></hr>
           <Table data={data.series[0]} width={1200} height={300} />
         </div>
@@ -109,10 +90,12 @@ export function getDefaultState(): State {
   };
 
   return {
-    queries: [],
-    dataSourceName: 'gdev-testdata',
     queryRunner: new PanelQueryRunner(dataConfig),
     queryOptions: {
+      queries: [],
+      dataSource: {
+        name: 'gdev-testdata',
+      },
       maxDataPoints: 100,
     },
   };

@@ -82,7 +82,6 @@ exports[`Render PromQueryEditor with basic options should render 1`] = `
       </div>
       <Select
         isSearchable={false}
-        menuPlacement="bottom"
         onChange={[Function]}
         options={
           Array [
@@ -164,7 +163,7 @@ exports[`Render PromQueryEditor with basic options should render 1`] = `
         tooltip="Link to Graph in Prometheus"
         width={10}
       >
-        <PromLink
+        <Memo(PromLink)
           datasource={
             Object {
               "createQuery": [MockFunction],
@@ -173,6 +172,7 @@ exports[`Render PromQueryEditor with basic options should render 1`] = `
           }
           query={
             Object {
+              "exemplar": true,
               "expr": "",
               "interval": "",
               "legendFormat": "",
@@ -182,6 +182,24 @@ exports[`Render PromQueryEditor with basic options should render 1`] = `
         />
       </FormLabel>
     </div>
+    <PromExemplarField
+      datasource={
+        Object {
+          "createQuery": [MockFunction],
+          "getPrometheusTime": [MockFunction],
+        }
+      }
+      onChange={[MockFunction]}
+      query={
+        Object {
+          "exemplar": true,
+          "expr": "",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A",
+        }
+      }
+    />
   </div>
 </div>
 `;

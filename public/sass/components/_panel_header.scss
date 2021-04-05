@@ -179,6 +179,15 @@ $panel-header-no-title-zindex: 1;
     }
   }
 
+  code {
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  pre > code {
+    display: block;
+  }
+
   .panel-info-corner-links {
     list-style: none;
     padding-left: 0;

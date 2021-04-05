@@ -1,4 +1,4 @@
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 import { GrafanaTheme } from '@grafana/data';
 import { styleMixins, stylesFactory } from '@grafana/ui';
@@ -32,7 +32,8 @@ export const getStyles = stylesFactory((theme: GrafanaTheme) => ({
 
   dashlistFolder: css`
     color: ${theme.colors.textWeak};
-    font-size: ${theme.typography.size.xs};
+    font-size: ${theme.typography.size.sm};
+    line-height: ${theme.typography.lineHeight.sm};
   `,
 
   dashlistTitle: css`

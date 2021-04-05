@@ -10,12 +10,12 @@ import {
   InputControl,
   Legend,
 } from '@grafana/ui';
+import { DataSourcePicker } from '@grafana/runtime';
 import { FolderPicker } from 'app/core/components/Select/FolderPicker';
-import DataSourcePicker from 'app/core/components/Select/DataSourcePicker';
 import { DashboardInput, DashboardInputs, DataSourceInput, ImportDashboardDTO } from '../state/reducers';
 import { validateTitle, validateUid } from '../utils/validation';
 
-interface Props extends Omit<FormAPI<ImportDashboardDTO>, 'formState' | 'watch'> {
+interface Props extends Omit<FormAPI<ImportDashboardDTO>, 'formState'> {
   uidReset: boolean;
   inputs: DashboardInputs;
   initialFolderId: number;
@@ -36,8 +36,10 @@ export const ImportDashboardForm: FC<Props> = ({
   onUidReset,
   onCancel,
   onSubmit,
+  watch,
 }) => {
   const [isSubmitted, setSubmitted] = useState(false);
+  const watchDataSources = watch('dataSources');
 
   /*
     This useEffect is needed for overwriting a dashboard. It
@@ -47,7 +49,7 @@ export const ImportDashboardForm: FC<Props> = ({
     if (isSubmitted && (errors.title || errors.uid)) {
       onSubmit(getValues({ nest: true }), {} as any);
     }
-  }, [errors]);
+  }, [errors, getValues, isSubmitted, onSubmit]);
 
   return (
     <>
@@ -66,16 +68,15 @@ export const ImportDashboardForm: FC<Props> = ({
         <InputControl
           as={FolderPicker}
           name="folder"
-          useNewForms
           enableCreateNew
           initialFolderId={initialFolderId}
           control={control}
         />
       </Field>
       <Field
-        label="Unique identifier (uid)"
-        description="The unique identifier (uid) of a dashboard can be used for uniquely identify a dashboard between multiple Grafana installs.
-                The uid allows having consistent URL’s for accessing dashboards so changing the title of a dashboard will not break any
+        label="Unique identifier (UID)"
+        description="The unique identifier (UID) of a dashboard can be used for uniquely identify a dashboard between multiple Grafana installs.
+                The UID allows having consistent URLs for accessing dashboards so changing the title of a dashboard will not break any
                 bookmarked links to that dashboard."
         invalid={!!errors.uid}
         error={errors.uid && errors.uid.message}
@@ -96,6 +97,7 @@ export const ImportDashboardForm: FC<Props> = ({
       {inputs.dataSources &&
         inputs.dataSources.map((input: DataSourceInput, index: number) => {
           const dataSourceOption = `dataSources[${index}]`;
+          const current = watchDataSources ?? [];
           return (
             <Field
               label={input.label}
@@ -105,8 +107,10 @@ export const ImportDashboardForm: FC<Props> = ({
             >
               <InputControl
                 as={DataSourcePicker}
+                noDefault={true}
+                pluginId={input.pluginId}
                 name={`${dataSourceOption}`}
-                datasources={input.options}
+                current={current[index]?.name}
                 control={control}
                 placeholder={input.info}
                 rules={{ required: true }}

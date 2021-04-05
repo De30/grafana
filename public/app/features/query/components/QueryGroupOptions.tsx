@@ -10,18 +10,8 @@ import { Switch, Input, InlineField, InlineFormLabel, stylesFactory } from '@gra
 // Types
 import { QueryOperationRow } from 'app/core/components/QueryOperationRow/QueryOperationRow';
 import { config } from 'app/core/config';
-import { css } from 'emotion';
-
-export interface QueryGroupOptions {
-  maxDataPoints?: number | null;
-  minInterval?: string | null;
-  cacheTimeout?: string | null;
-  timeRange?: {
-    from?: string | null;
-    shift?: string | null;
-    hide?: boolean;
-  };
-}
+import { css } from '@emotion/css';
+import { QueryGroupOptions } from 'app/types';
 
 interface Props {
   options: QueryGroupOptions;
@@ -136,19 +126,23 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       maxDataPoints = null;
     }
 
-    onChange({
-      ...options,
-      maxDataPoints: maxDataPoints,
-    });
+    if (maxDataPoints !== options.maxDataPoints) {
+      onChange({
+        ...options,
+        maxDataPoints,
+      });
+    }
   };
 
   onMinIntervalBlur = (event: ChangeEvent<HTMLInputElement>) => {
     const { options, onChange } = this.props;
-
-    onChange({
-      ...options,
-      minInterval: emptyToNull(event.target.value),
-    });
+    const minInterval = emptyToNull(event.target.value);
+    if (minInterval !== options.minInterval) {
+      onChange({
+        ...options,
+        minInterval,
+      });
+    }
   };
 
   renderCacheTimeoutOption() {
@@ -256,7 +250,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
               width={9}
               tooltip={
                 <>
-                  The evaluated Interval that is sent to data source and is used in <code>$__interval</code> and{' '}
+                  The evaluated interval that is sent to data source and is used in <code>$__interval</code> and{' '}
                   <code>$__interval_ms</code>
                 </>
               }
