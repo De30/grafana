@@ -159,6 +159,9 @@ export class DatasourceSrv implements DataSourceService {
       if (filters.metrics && !x.meta.metrics) {
         return false;
       }
+      if (filters.alerting && !x.meta.alerting) {
+        return false;
+      }
       if (filters.tracing && !x.meta.tracing) {
         return false;
       }
