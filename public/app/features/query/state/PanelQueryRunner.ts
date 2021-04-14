@@ -106,7 +106,7 @@ export class PanelQueryRunner {
         }
 
         if (withAlignment) {
-          console.log('ALIGN ALL THE THINGS!');
+          //console.log('ALIGN ALL THE THINGS!');
 
           const defaultAlignmentMatchers = {
             x: fieldMatchers.get(FieldMatcherID.firstTimeField).get({}),

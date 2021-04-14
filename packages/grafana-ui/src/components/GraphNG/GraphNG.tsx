@@ -61,7 +61,7 @@ class UnthemedGraphNG extends React.Component<GraphNGProps, GraphNGState> {
     if (!data) {
       return;
     }
-    const plotData = preparePlotData(data, [FieldType.string]);
+    const plotData = preparePlotData(data, [FieldType.string, FieldType.boolean, 'bool'] as FieldType[]);
     const config = preparePlotConfigBuilder(data, theme, this.getTimeRange, this.getTimeZone);
 
     this.setState({
@@ -98,7 +98,7 @@ class UnthemedGraphNG extends React.Component<GraphNGProps, GraphNGState> {
       }
       this.setState({
         config: builder,
-        data: preparePlotData(data, [FieldType.string]),
+        data: preparePlotData(data, [FieldType.string, FieldType.boolean, 'bool'] as FieldType[]),
       });
     }
   }

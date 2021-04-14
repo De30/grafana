@@ -539,7 +539,20 @@ class GraphElement {
 
   callPlot(options: any, incrementRenderCounter: boolean) {
     try {
-      this.plot = $.plot(this.elem, this.sortedSeries, options);
+      if (this.plot) {
+        this.plot.setData(
+          this.sortedSeries?.map((s) => ({
+            label: s.label,
+            data: s.data,
+          }))
+        );
+        let { xaxis } = this.plot.getAxes();
+        xaxis.options.max = Math.ceil(Date.now());
+        this.plot.setupGrid();
+        this.plot.draw();
+      } else {
+        this.plot = $.plot(this.elem, this.sortedSeries, options);
+      }
       if (this.ctrl.renderError) {
         delete this.ctrl.error;
       }

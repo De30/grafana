@@ -50,20 +50,20 @@ module.exports = merge(common, {
     ],
   },
   plugins: [
-    new ForkTsCheckerWebpackPlugin({
-      eslint: {
-        enabled: true,
-        files: ['public/app/**/*.{ts,tsx}', 'packages/*/src/**/*.{ts,tsx}'],
-      },
-      typescript: {
-        mode: 'write-references',
-        memoryLimit: 4096,
-        diagnosticOptions: {
-          semantic: true,
-          syntactic: true,
-        },
-      },
-    }),
+    // new ForkTsCheckerWebpackPlugin({
+    //   eslint: {
+    //     enabled: true,
+    //     files: ['public/app/**/*.{ts,tsx}', 'packages/*/src/**/*.{ts,tsx}'],
+    //   },
+    //   typescript: {
+    //     mode: 'write-references',
+    //     memoryLimit: 4096,
+    //     diagnosticOptions: {
+    //       semantic: true,
+    //       syntactic: true,
+    //     },
+    //   },
+    // }),
     new MiniCssExtractPlugin({
       filename: 'grafana.[name].[hash].css',
     }),

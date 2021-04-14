@@ -2,7 +2,7 @@ import { DataFrame, dateTime, FieldType } from '@grafana/data';
 import { AlignedData, Options } from 'uplot';
 import { PlotPlugin, PlotProps } from './types';
 import { createLogger } from '../../utils/logger';
-import { attachDebbuger } from '../../utils/debug';
+//import { attachDebbuger } from '../../utils/debug';
 
 const ALLOWED_FORMAT_STRINGS_REGEX = /\b(YYYY|YY|MMMM|MMM|MM|M|DD|D|WWWW|WWW|HH|H|h|AA|aa|a|mm|m|ss|s|fff)\b/g;
 
@@ -66,4 +66,4 @@ export function preparePlotData(frame: DataFrame, ignoreFieldTypes?: FieldType[]
 export const pluginLogger = createLogger('uPlot Plugin');
 export const pluginLog = pluginLogger.logger;
 
-attachDebbuger('graphng', undefined, pluginLogger);
+//attachDebbuger('graphng', undefined, pluginLogger);
