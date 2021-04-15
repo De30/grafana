@@ -690,9 +690,18 @@ func randomWalk(query backend.DataQuery, model *simplejson.Json, index int) *dat
 		timeWalkerMs += query.Interval.Milliseconds()
 	}
 
+	fieldConfig := data.FieldConfig{}
+	fieldConfig.Links = []data.DataLink{{
+		Title:       "Data link from DS",
+		TargetBlank: true,
+		URL:         "${__value.time}",
+	}}
+	field := data.NewField(frameNameForQuery(query, model, index), parseLabels(model), floatVec)
+	field.Config = &fieldConfig
+
 	return data.NewFrame("",
 		data.NewField("time", nil, timeVec),
-		data.NewField(frameNameForQuery(query, model, index), parseLabels(model), floatVec),
+		field,
 	)
 }
 
