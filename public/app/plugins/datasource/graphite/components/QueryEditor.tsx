@@ -4,6 +4,8 @@ import { GraphiteDatasource } from '../datasource';
 import { GraphiteOptions, GraphiteQuery } from '../types';
 import { TextEditor } from './TextEditor';
 import { VisualEditor } from './VisualEditor';
+import { default as GraphiteModel } from '../graphite_query';
+import { getTemplateSrv } from '@grafana/runtime';
 
 type Props = QueryEditorProps<GraphiteDatasource, GraphiteQuery, GraphiteOptions>;
 
@@ -23,6 +25,11 @@ export const QueryEditor: FC<Props> = ({
   // required by the parser
   query.target = query.target || '';
 
+  const model = new GraphiteModel(datasource, query, getTemplateSrv());
+  model.target.textEditor = textEditModeEnabled;
+  model.parseTarget();
+  console.log(model);
+
   const onTextEditorChange = (value: string): void => {
     query.target = value;
     onChange(query);
@@ -34,7 +41,7 @@ export const QueryEditor: FC<Props> = ({
       {textEditModeEnabled ? (
         <TextEditor query={query} onChange={onTextEditorChange}></TextEditor>
       ) : (
-        <VisualEditor query={query} datasource={datasource}></VisualEditor>
+        <VisualEditor model={model} datasource={datasource}></VisualEditor>
       )}
     </>
   );
