@@ -50,10 +50,7 @@ export class UPlotAxisBuilder extends PlotConfigBuilder<AxisProps, Axis> {
       theme,
     } = this.props;
 
-    let { typography } = theme;
-
-    let font = `${typography.size.sm} ${typography.fontFamily.sansSerif}`;
-
+    const font = `${theme.v2.typography.bodySmall.fontSize} ${theme.v2.typography.fontFamily}`;
     const gridColor = theme.isDark ? theme.palette.gray25 : theme.palette.gray90;
 
     let config: Axis = {
