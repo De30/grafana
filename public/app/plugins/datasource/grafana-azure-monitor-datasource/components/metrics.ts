@@ -50,8 +50,9 @@ export function useMetricsMetadata(
           ...query,
           azureMonitor: {
             ...query.azureMonitor,
-            aggregation: metadata.primaryAggType,
-            timeGrain: 'auto',
+            aggregation:
+              query.azureMonitor.aggregation === 'None' ? metadata.primaryAggType : query.azureMonitor.aggregation,
+            timeGrain: query.azureMonitor.timeGrain || 'auto',
             allowedTimeGrainsMs: convertTimeGrainsToMs(metadata.supportedTimeGrains),
           },
         });
