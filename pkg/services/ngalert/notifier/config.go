@@ -1,16 +1,19 @@
 package notifier
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 
 	"github.com/grafana/alerting-api/pkg/api"
-	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/prometheus/alertmanager/config"
+	"github.com/prometheus/alertmanager/pkg/labels"
+	"github.com/prometheus/common/model"
 
-	"github.com/pkg/errors"
+	"github.com/grafana/grafana/pkg/components/simplejson"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 func PersistTemplates(cfg *api.PostableUserConfig, path string) ([]string, bool, error) {
@@ -76,11 +79,134 @@ func PersistTemplates(cfg *api.PostableUserConfig, path string) ([]string, bool,
 }
 
 func Load(rawConfig []byte) (*api.PostableUserConfig, error) {
-	cfg := &api.PostableUserConfig{}
+	//cfg := &api.PostableUserConfig{}
+	//
+	//if err := json.Unmarshal(rawConfig, cfg); err != nil {
+	//	return nil, errors.Wrap(err, "unable to parse Alertmanager configuration")
+	//}
 
-	if err := json.Unmarshal(rawConfig, cfg); err != nil {
-		return nil, errors.Wrap(err, "unable to parse Alertmanager configuration")
+	cfg := &api.PostableUserConfig{
+		TemplateFiles: nil,
+		AlertmanagerConfig: api.PostableApiAlertingConfig{
+			Config: api.Config{
+				Route: &config.Route{
+					GroupBy:  []model.LabelName{"alertname"},
+					Receiver: "slack_demo",
+					Matchers: nil,
+					Routes: []*config.Route{
+						{
+							GroupBy:  []model.LabelName{"alertname"},
+							Receiver: "slack_demo",
+							Matchers: config.Matchers{
+								&labels.Matcher{
+									Type:  labels.MatchEqual,
+									Name:  "alertname",
+									Value: "DemoAlert",
+								},
+							},
+						},
+						{
+							GroupBy:  []model.LabelName{"alertname"},
+							Receiver: "slack_demo",
+							Matchers: config.Matchers{
+								&labels.Matcher{
+									Type:  labels.MatchEqual,
+									Name:  "alertname",
+									Value: "DemoAlert2",
+								},
+							},
+						},
+					},
+				},
+			},
+			Receivers: nil,
+		},
 	}
+
+	settings, err := simplejson.NewJson([]byte(`{"addresses": "ganesh@grafana.com"}`))
+	if err != nil {
+		return nil, err
+	}
+
+	settings2, err := simplejson.NewJson([]byte(`{"addresses": "ganesh+new@grafana.com"}`))
+	if err != nil {
+		return nil, err
+	}
+
+	settings3, err := simplejson.NewJson([]byte(`{"addresses": "ganesh+newest@grafana.com"}`))
+	if err != nil {
+		return nil, err
+	}
+
+	slackSettings, err := simplejson.NewJson([]byte(`{
+		"url": "<url",
+		"recipient": "#<channel>"
+	}`))
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.AlertmanagerConfig.Receivers = append(cfg.AlertmanagerConfig.Receivers,
+		&api.PostableApiReceiver{
+			Receiver: config.Receiver{
+				Name: "demo_receiver",
+			},
+			PostableGrafanaReceivers: api.PostableGrafanaReceivers{
+				GrafanaManagedReceivers: []*api.PostableGrafanaReceiver{
+					{
+						Uid:      "",
+						Name:     fmt.Sprintf("demo_email_%d", rand.Int()),
+						Type:     "email",
+						Settings: settings,
+					},
+				},
+			},
+		},
+		&api.PostableApiReceiver{
+			Receiver: config.Receiver{
+				Name: "demo_receiver2",
+			},
+			PostableGrafanaReceivers: api.PostableGrafanaReceivers{
+				GrafanaManagedReceivers: []*api.PostableGrafanaReceiver{
+					{
+						Uid:      "",
+						Name:     fmt.Sprintf("demo_email_%d", rand.Int()),
+						Type:     "email",
+						Settings: settings2,
+					},
+				},
+			},
+		},
+		&api.PostableApiReceiver{
+			Receiver: config.Receiver{
+				Name: "demo_receiver3",
+			},
+			PostableGrafanaReceivers: api.PostableGrafanaReceivers{
+				GrafanaManagedReceivers: []*api.PostableGrafanaReceiver{
+					{
+						Uid:      "",
+						Name:     fmt.Sprintf("demo_email_%d", rand.Int()),
+						Type:     "email",
+						Settings: settings3,
+					},
+				},
+			},
+		},
+		&api.PostableApiReceiver{
+			Receiver: config.Receiver{
+				Name: "slack_demo",
+			},
+			PostableGrafanaReceivers: api.PostableGrafanaReceivers{
+				GrafanaManagedReceivers: []*api.PostableGrafanaReceiver{
+					{
+						Name:     fmt.Sprintf("slack_demo_%d", rand.Int()),
+						Type:     "slack",
+						Settings: slackSettings,
+					},
+				},
+			},
+		},
+	)
 
 	return cfg, nil
 }

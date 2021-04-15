@@ -50,7 +50,7 @@ type SlackNotifier struct {
 var reRecipient *regexp.Regexp = regexp.MustCompile("^((@[a-z0-9][a-zA-Z0-9._-]*)|(#[^ .A-Z]{1,79})|([a-zA-Z0-9]+))$")
 
 // NewSlackNotifier is the constructor for the Slack notifier
-func NewSlackNotifier(model *models.AlertNotification, t *template.Template, externalUrl *url.URL) (*SlackNotifier, error) {
+func NewSlackNotifier(model *models.AlertNotification, t *template.Template, externalUrl *url.URL) (_ *SlackNotifier, reterr error) {
 	if model.Settings == nil {
 		return nil, alerting.ValidationError{Reason: "No Settings Supplied"}
 	}
@@ -170,7 +170,6 @@ func (sn *SlackNotifier) buildSlackMessage(ctx context.Context, as []*types.Aler
 	data := notify.GetTemplateData(ctx, &template.Template{ExternalURL: sn.externalUrl}, as, gokit_log.NewNopLogger())
 	alerts := types.Alerts(as...)
 	tmpl := notify.TmplText(sn.tmpl, data, &tmplErr)
-
 	req := &slackMessage{
 		Channel:   tmpl(sn.Recipient),
 		Username:  tmpl(sn.Username),

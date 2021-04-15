@@ -33,6 +33,9 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
 	"github.com/grafana/grafana/pkg/setting"
+
+	"github.com/go-openapi/strfmt"
+	amv2 "github.com/prometheus/alertmanager/api/v2/models"
 )
 
 const (
@@ -137,6 +140,82 @@ func (am *Alertmanager) Run(ctx context.Context) error {
 		am.logger.Error(errors.Wrap(err, "unable to sync configuration").Error())
 	}
 
+	go func() {
+		// TODO: ONLY FOR DEMO.
+		// TODO: move this goroutine to the config API POST and initiate it there.
+		<-time.After(4 * time.Second)
+		fmt.Println("Sending alert")
+		err := am.PutAlerts(
+			&PostableAlert{
+				PostableAlert: amv2.PostableAlert{
+					Annotations: amv2.LabelSet{
+						"foo_annotation": "asdf",
+					},
+					EndsAt:   strfmt.DateTime(time.Now().Add(15 * time.Minute)),
+					StartsAt: strfmt.DateTime(time.Now()),
+					Alert: amv2.Alert{
+						GeneratorURL: "https://example.com",
+						Labels: amv2.LabelSet{
+							"alertname": "DemoAlert",
+							"alertlbl":  "lbl1",
+						},
+					},
+				},
+			}, &PostableAlert{
+				PostableAlert: amv2.PostableAlert{
+					Annotations: amv2.LabelSet{
+						"foo_annotation": "asdf",
+					},
+					EndsAt:   strfmt.DateTime(time.Now().Add(15 * time.Minute)),
+					StartsAt: strfmt.DateTime(time.Now()),
+					Alert: amv2.Alert{
+						GeneratorURL: "https://example.com",
+						Labels: amv2.LabelSet{
+							"alertname": "DemoAlert",
+							"alertlbl":  "lbl2",
+						},
+					},
+				},
+			}, &PostableAlert{
+				PostableAlert: amv2.PostableAlert{
+					Annotations: amv2.LabelSet{
+						"foo_annotation": "asdf",
+					},
+					EndsAt:   strfmt.DateTime(time.Now().Add(15 * time.Minute)),
+					StartsAt: strfmt.DateTime(time.Now()),
+					Alert: amv2.Alert{
+						GeneratorURL: "https://example.com",
+						Labels: amv2.LabelSet{
+							"alertname": "DemoAlert2",
+							"alertlbl":  "lbl3",
+						},
+					},
+				},
+			},
+			&PostableAlert{
+				PostableAlert: amv2.PostableAlert{
+					Annotations: amv2.LabelSet{
+						"foo_annotation": "asdf",
+						"msg":            "this is my message",
+					},
+					EndsAt:   strfmt.DateTime(time.Now().Add(15 * time.Minute)),
+					StartsAt: strfmt.DateTime(time.Now()),
+					Alert: amv2.Alert{
+						GeneratorURL: "https://example.com",
+						Labels: amv2.LabelSet{
+							"alertname": "DemoAlert2",
+							"alertlbl":  "lbl4",
+						},
+					},
+				},
+			})
+		if err == nil {
+			fmt.Println("ALERT SENT! WOHOOO!")
+		} else {
+			fmt.Println("SENDING ALERT FAILED", err)
+		}
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -190,18 +269,19 @@ func (am *Alertmanager) SyncAndApplyConfigFromDatabase() error {
 	defer am.reloadConfigMtx.Unlock()
 
 	// First, let's get the configuration we need from the database.
-	q := &ngmodels.GetLatestAlertmanagerConfigurationQuery{}
-	if err := am.Store.GetLatestAlertmanagerConfiguration(q); err != nil {
-		// If there's no configuration in the database, let's use the default configuration.
-		if errors.Is(err, store.ErrNoAlertmanagerConfiguration) {
-			q.Result = &ngmodels.AlertConfiguration{AlertmanagerConfiguration: alertmanagerDefaultConfiguration}
-		} else {
-			return errors.Wrap(err, "unable to get Alertmanager configuration from the database")
-		}
-	}
+	//q := &ngmodels.GetLatestAlertmanagerConfigurationQuery{}
+	//if err := am.Store.GetLatestAlertmanagerConfiguration(q); err != nil {
+	//	// If there's no configuration in the database, let's use the default configuration.
+	//	if errors.Is(err, store.ErrNoAlertmanagerConfiguration) {
+	//		q.Result = &ngmodels.AlertConfiguration{AlertmanagerConfiguration: alertmanagerDefaultConfiguration}
+	//	} else {
+	//		return errors.Wrap(err, "unable to get Alertmanager configuration from the database")
+	//	}
+	//}
 
-	cfg, err := Load([]byte(q.Result.AlertmanagerConfiguration))
+	cfg, err := Load(nil)
 	if err != nil {
+		fmt.Println("ERROR", err)
 		return err
 	}
 
