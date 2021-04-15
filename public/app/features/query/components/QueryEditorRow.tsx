@@ -46,6 +46,7 @@ interface State {
   loadedDataSourceIdentifier?: string | null;
   datasource: DataSourceApi | null;
   hasTextEditMode: boolean;
+  textEditModeEnabled: boolean;
   data?: PanelData;
   isOpen?: boolean;
   showingHelp: boolean;
@@ -62,6 +63,7 @@ export class QueryEditorRow extends PureComponent<Props, State> {
     data: undefined,
     isOpen: true,
     showingHelp: false,
+    textEditModeEnabled: false,
   };
 
   componentDidMount() {
@@ -127,7 +129,7 @@ export class QueryEditorRow extends PureComponent<Props, State> {
     this.setState({
       datasource,
       loadedDataSourceIdentifier: dataSourceIdentifier,
-      hasTextEditMode: _.has(datasource, 'components.QueryCtrl.prototype.toggleEditorMode'),
+      hasTextEditMode: datasource.canToggleEditorMode(),
     });
   }
 
@@ -190,7 +192,7 @@ export class QueryEditorRow extends PureComponent<Props, State> {
 
   renderPluginEditor = () => {
     const { query, onChange, queries, onRunQuery } = this.props;
-    const { datasource, data } = this.state;
+    const { datasource, data, textEditModeEnabled } = this.state;
 
     if (datasource?.components?.QueryCtrl) {
       return <div ref={(element) => (this.element = element)} />;
@@ -209,6 +211,7 @@ export class QueryEditorRow extends PureComponent<Props, State> {
           data={data}
           range={getTimeSrv().timeRange()}
           queries={queries}
+          textEditModeEnabled={textEditModeEnabled}
         />
       );
     }
@@ -218,12 +221,17 @@ export class QueryEditorRow extends PureComponent<Props, State> {
 
   onToggleEditMode = (e: React.MouseEvent, props: QueryOperationRowRenderProps) => {
     e.stopPropagation();
+    const { textEditModeEnabled } = this.state;
     if (this.angularScope && this.angularScope.toggleEditorMode) {
       this.angularScope.toggleEditorMode();
       this.angularQueryEditor?.digest();
-      if (!props.isOpen) {
-        props.onOpen();
-      }
+    } else {
+      this.setState({
+        textEditModeEnabled: !textEditModeEnabled,
+      });
+    }
+    if (!props.isOpen) {
+      props.onOpen();
     }
   };
 
