@@ -12,6 +12,7 @@ import { CoreApp } from './app';
 import { LiveChannelSupport } from './live';
 import { CustomVariableSupport, DataSourceVariableSupport, StandardVariableSupport } from './variables';
 import { makeClassES5Compatible } from '../utils/makeClassES5Compatible';
+import has from 'lodash/has';
 
 export interface DataSourcePluginOptionsEditorProps<JSONData = DataSourceJsonData, SecureJSONData = {}> {
   options: DataSourceSettings<JSONData, SecureJSONData>;
@@ -264,6 +265,10 @@ abstract class DataSourceApi<
    */
   components?: DataSourcePluginComponents<DataSourceApi<TQuery, TOptions>, TQuery, TOptions>;
 
+  canToggleEditorMode(): boolean {
+    return has(this, 'components.QueryCtrl.prototype.toggleEditorMode');
+  }
+
   /**
    * static information about the datasource
    */
@@ -360,6 +365,7 @@ export interface QueryEditorProps<
   exploreId?: any;
   history?: HistoryItem[];
   queries?: DataQuery[];
+  textEditModeEnabled?: boolean;
 }
 
 // TODO: not really needed but used as type in some data sources and in DataQueryRequest

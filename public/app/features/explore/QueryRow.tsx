@@ -1,7 +1,6 @@
 // Libraries
 import React, { PureComponent } from 'react';
 import debounce from 'lodash/debounce';
-import has from 'lodash/has';
 import { hot } from 'react-hot-loader';
 // @ts-ignore
 import { connect } from 'react-redux';
@@ -133,6 +132,7 @@ export class QueryRow extends PureComponent<QueryRowProps, QueryRowState> {
           data={queryResponse}
           range={range}
           exploreId={exploreId}
+          textEditModeEnabled={this.state.textEditModeEnabled}
         />
       );
     } else {
@@ -175,7 +175,7 @@ export class QueryRow extends PureComponent<QueryRowProps, QueryRowState> {
   render() {
     const { datasourceInstance, query, queryResponse, latency } = this.props;
 
-    const canToggleEditorModes = has(datasourceInstance, 'components.QueryCtrl.prototype.toggleEditorMode');
+    const canToggleEditorModes = datasourceInstance.canToggleEditorMode();
     const isNotStarted = queryResponse.state === LoadingState.NotStarted;
 
     // We show error without refId in ResponseErrorContainer so this condition needs to match se we don't loose errors.

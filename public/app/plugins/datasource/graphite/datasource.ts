@@ -720,6 +720,10 @@ export class GraphiteDatasource extends DataSourceApi<GraphiteQuery, GraphiteOpt
 
     return cleanOptions;
   }
+
+  canToggleEditorMode(): boolean {
+    return true;
+  }
 }
 
 function supportsTags(version: string): boolean {
