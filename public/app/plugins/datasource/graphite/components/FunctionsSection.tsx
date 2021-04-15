@@ -1,6 +1,6 @@
 import React from 'react';
 import { default as GraphiteModel } from '../graphite_query';
-import { Button, IconButton, Segment } from '@grafana/ui';
+import { Button, Segment } from '@grafana/ui';
 import { noop } from 'rxjs';
 
 type Props = {
