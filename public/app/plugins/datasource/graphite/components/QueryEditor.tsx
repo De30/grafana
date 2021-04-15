@@ -19,7 +19,23 @@ export const QueryEditor: FC<Props> = ({
   console.log('Query', query);
   console.log('Datasource', datasource);
   console.log('Data', data);
+
+  // required by the parser
+  query.target = query.target || '';
+
+  const onTextEditorChange = (value: string): void => {
+    query.target = value;
+    onChange(query);
+    onRunQuery();
+  };
+
   return (
-    <>{textEditModeEnabled ? <TextEditor query={query}></TextEditor> : <VisualEditor query={query}></VisualEditor>}</>
+    <>
+      {textEditModeEnabled ? (
+        <TextEditor query={query} onChange={onTextEditorChange}></TextEditor>
+      ) : (
+        <VisualEditor query={query} datasource={datasource}></VisualEditor>
+      )}
+    </>
   );
 };
