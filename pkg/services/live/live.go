@@ -431,6 +431,9 @@ func (g *GrafanaLive) handleDatasourceScope(user *models.SignedInUser, namespace
 // Publish sends the data to the channel without checking permissions etc
 func (g *GrafanaLive) Publish(channel string, data []byte) error {
 	_, err := g.node.Publish(channel, data)
+	if err != nil {
+		logger.Error("Error publishing to channel", "channel", channel, "data", string(data))
+	}
 	return err
 }
 

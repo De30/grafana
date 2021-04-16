@@ -3,7 +3,11 @@ package push
 import (
 	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
+	"time"
+
+	"github.com/grafana/grafana-live-sdk/telemetry/prometheus"
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
@@ -27,7 +31,8 @@ type Gateway struct {
 	Cfg         *setting.Cfg      `inject:""`
 	GrafanaLive *live.GrafanaLive `inject:""`
 
-	converter *convert.Converter
+	converter           *convert.Converter
+	prometheusConverter *prometheus.Converter
 }
 
 // Init Gateway.
@@ -40,6 +45,34 @@ func (g *Gateway) Init() error {
 	}
 
 	g.converter = convert.NewConverter()
+
+	g.prometheusConverter = prometheus.NewConverter()
+	go func() {
+		time.Sleep(time.Second)
+		stream, err := g.GrafanaLive.ManagedStreamRunner.GetOrCreateStream("prometheus")
+		if err != nil {
+			logger.Error("Error getting stream", "error", err)
+			return
+		}
+		for {
+			time.Sleep(time.Second)
+			resp, _ := http.Get(g.Cfg.AppURL + "metrics")
+			body, _ := ioutil.ReadAll(resp.Body)
+			_ = resp.Body.Close()
+			metricFrames, err := g.prometheusConverter.Convert(body)
+			if err != nil {
+				logger.Error("Error converting metrics to stream", "error", err, "body", string(body))
+				continue
+			}
+			for _, mf := range metricFrames {
+				err := stream.Push(mf.Key(), mf.Frame(), true)
+				if err != nil {
+					logger.Error("Error pushing to stream", "error", err, body, string(body))
+					return
+				}
+			}
+		}
+	}()
 	return nil
 }
 
