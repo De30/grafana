@@ -96,11 +96,24 @@ var PredefinedRoles = map[string]RoleDTO{
 			},
 		},
 	},
+
+	//orgsSelfRead: {
+	//	Name: orgsSelfRead,
+	//	Version: 1,
+	//	Permissions: []Permission{
+	//		{
+	//			Action:
+	//		},
+	//	},
+	//},
 }
 
 const (
 	usersAdminEdit = "grafana:roles:users:admin:edit"
 	usersAdminRead = "grafana:roles:users:admin:read"
+
+	//orgsSelfRead = "grafana:roles:orgs:self:read"
+	//orgsSelfEdit = "grafana:roles:orgs:self:edit"
 )
 
 // PredefinedRoleGrants specifies which organization roles are assigned
@@ -110,4 +123,8 @@ var PredefinedRoleGrants = map[string][]string{
 		usersAdminEdit,
 		usersAdminRead,
 	},
+	//"Admin": {
+	//	orgsSelfEdit,
+	//	orgsSelfRead,
+	//},
 }

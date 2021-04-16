@@ -198,22 +198,22 @@ func (hs *HTTPServer) registerRoutes() {
 
 		// current org
 		apiRoute.Group("/org", func(orgRoute routing.RouteRegister) {
-			orgRoute.Put("/", bind(dtos.UpdateOrgForm{}), routing.Wrap(UpdateOrgCurrent))
-			orgRoute.Put("/address", bind(dtos.UpdateOrgAddressForm{}), routing.Wrap(UpdateOrgAddressCurrent))
-			orgRoute.Get("/users", routing.Wrap(hs.GetOrgUsersForCurrentOrg))
-			orgRoute.Post("/users", quota("user"), bind(models.AddOrgUserCommand{}), routing.Wrap(AddOrgUserToCurrentOrg))
-			orgRoute.Patch("/users/:userId", bind(models.UpdateOrgUserCommand{}), routing.Wrap(UpdateOrgUserForCurrentOrg))
-			orgRoute.Delete("/users/:userId", routing.Wrap(RemoveOrgUserForCurrentOrg))
+			orgRoute.Put("/", authorize(reqOrgAdmin, accesscontrol.ActionOrgUpdate), bind(dtos.UpdateOrgForm{}), routing.Wrap(UpdateOrgCurrent))
+			orgRoute.Put("/address", authorize(reqOrgAdmin, accesscontrol.ActionOrgAddressUpdate), bind(dtos.UpdateOrgAddressForm{}), routing.Wrap(UpdateOrgAddressCurrent))
+			orgRoute.Get("/users", authorize(reqOrgAdmin, accesscontrol.ActionOrgUsersRead), routing.Wrap(hs.GetOrgUsersForCurrentOrg))
+			orgRoute.Post("/users", quota("user"), authorize(reqOrgAdmin, accesscontrol.ActionOrgUsersCreate), bind(models.AddOrgUserCommand{}), routing.Wrap(AddOrgUserToCurrentOrg))
+			orgRoute.Patch("/users/:userId", authorize(reqOrgAdmin, accesscontrol.ActionOrgUsersUpdate), bind(models.UpdateOrgUserCommand{}), routing.Wrap(UpdateOrgUserForCurrentOrg))
+			orgRoute.Delete("/users/:userId", authorize(reqOrgAdmin, accesscontrol.ActionOrgUsersDelete), routing.Wrap(RemoveOrgUserForCurrentOrg))
 
 			// invites
-			orgRoute.Get("/invites", routing.Wrap(GetPendingOrgInvites))
-			orgRoute.Post("/invites", quota("user"), bind(dtos.AddInviteForm{}), routing.Wrap(AddOrgInvite))
-			orgRoute.Patch("/invites/:code/revoke", routing.Wrap(RevokeInvite))
+			orgRoute.Get("/invites", authorize(reqOrgAdmin, accesscontrol.ActionOrgInvitesRead), routing.Wrap(GetPendingOrgInvites))
+			orgRoute.Post("/invites", quota("user"), authorize(reqOrgAdmin, accesscontrol.ActionOrgInvitesCreate), bind(dtos.AddInviteForm{}), routing.Wrap(AddOrgInvite))
+			orgRoute.Patch("/invites/:code/revoke", authorize(reqOrgAdmin, accesscontrol.ActionOrgInvitesRevoke), routing.Wrap(RevokeInvite))
 
 			// prefs
-			orgRoute.Get("/preferences", routing.Wrap(GetOrgPreferences))
-			orgRoute.Put("/preferences", bind(dtos.UpdatePrefsCmd{}), routing.Wrap(UpdateOrgPreferences))
-		}, reqOrgAdmin)
+			orgRoute.Get("/preferences", authorize(reqOrgAdmin, accesscontrol.ActionOrgPreferencesRead), routing.Wrap(GetOrgPreferences))
+			orgRoute.Put("/preferences", authorize(reqOrgAdmin, accesscontrol.ActionOrgPreferencesWrite), bind(dtos.UpdatePrefsCmd{}), routing.Wrap(UpdateOrgPreferences))
+		})
 
 		// current org without requirement of user to be org admin
 		apiRoute.Group("/org", func(orgRoute routing.RouteRegister) {

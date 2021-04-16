@@ -63,9 +63,21 @@ const (
 	ActionUsersQuotasList        = "users.quotas:list"
 	ActionUsersQuotasUpdate      = "users.quotas:update"
 
+	ActionOrgUpdate           = "orgs:update"
+	ActionOrgAddressUpdate    = "orgs.address:write"
+	ActionOrgUsersRead        = "orgs.users:read"
+	ActionOrgUsersCreate      = "orgs.users:create"
+	ActionOrgUsersUpdate      = "orgs.users:write"
+	ActionOrgUsersDelete      = "orgs.users:delete"
+	ActionOrgInvitesRead      = "orgs.invites:read"
+	ActionOrgInvitesCreate    = "orgs.invites:create"
+	ActionOrgInvitesRevoke    = "orgs.invites:revoke"
+	ActionOrgPreferencesRead  = "orgs.preferences:read"
+	ActionOrgPreferencesWrite = "orgs.preferences:write"
+
 	// Global Scopes
-	ScopeUsersAll  = "users:*"
-	ScopeUsersSelf = "users:self"
+	ScopeUsersAll = "users:*"
+	ScopeOrgsSelf = "orgs:self"
 )
 
 const RoleGrafanaAdmin = "Grafana Admin"
