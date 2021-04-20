@@ -10,7 +10,7 @@ import (
 func (ss *SQLStore) SaveLiveChannelData(query *models.SaveLiveChannelDataQuery) error {
 	return inTransaction(func(sess *DBSession) error {
 		var msg models.LiveChannel
-		exists, err := x.SQL("SELECT * FROM live_channel WHERE org_id=? AND channel=?", query.OrgId, query.Channel).Get(&msg)
+		exists, err := x.NoAutoCondition(true).Where("org_id=? AND channel=?", query.OrgId, query.Channel).Get(&msg)
 		if err != nil {
 			return fmt.Errorf("error getting existing: %w", err)
 		}
@@ -42,10 +42,9 @@ func (ss *SQLStore) SaveLiveChannelData(query *models.SaveLiveChannelDataQuery) 
 
 func (ss *SQLStore) GetLiveChannel(query *models.GetLiveChannelQuery) (models.LiveChannel, bool, error) {
 	var msg models.LiveChannel
-	// Using Where we get the following SQL:
-	// SELECT `id`, `org_id`, `channel`, `data`, `config`, `created` FROM `live_channel` WHERE (org_id=? AND channel=?) AND `config`=? LIMIT 1 []interface {}{1, "grafana/broadcast/ryantxu/board/trello/board", "{}"}
-	// exists, err := x.Where("org_id=? AND channel=?", query.OrgId, query.Channel).Get(&msg)
-	exists, err := x.SQL("SELECT * FROM live_channel WHERE org_id=? AND channel=?", query.OrgId, query.Channel).Get(&msg)
+	// Using Where without NoAutoCondition(true) we get the following SQL:
+	// SELECT `id`, `org_id`, `channel`, `data`, `config`, `created` FROM `live_channel` WHERE (org_id=? AND channel=?) AND `config`=? LIMIT 1 []interface {}{1, "grafana/broadcast/xxx", "{}"}
+	exists, err := x.NoAutoCondition(true).Where("org_id=? AND channel=?", query.OrgId, query.Channel).Get(&msg)
 	if err != nil {
 		return models.LiveChannel{}, false, err
 	}
