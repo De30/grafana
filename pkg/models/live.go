@@ -2,7 +2,10 @@ package models
 
 import (
 	"context"
+	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -72,7 +75,33 @@ type LiveChannel struct {
 	OrgId   int64
 	Channel string
 	Data    json.RawMessage
+	Config  LiveChannelConfig
 	Created time.Time
+}
+
+type LiveChannelConfig struct {
+	Type string `json:"type,omitempty"`
+}
+
+var (
+	_ driver.Valuer = LiveChannelConfig{}
+	_ sql.Scanner   = &LiveChannelConfig{}
+)
+
+func (a LiveChannelConfig) Value() (driver.Value, error) {
+	d, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return string(d), nil
+}
+
+func (a *LiveChannelConfig) Scan(value interface{}) error {
+	b, ok := value.(string)
+	if !ok {
+		return errors.New("type assertion to string failed")
+	}
+	return json.Unmarshal([]byte(b), &a)
 }
 
 type SaveLiveChannelDataQuery struct {

@@ -12,6 +12,7 @@ func addLiveMigrations(mg *Migrator) {
 			{Name: "org_id", Type: DB_BigInt, Nullable: false},
 			{Name: "channel", Type: DB_NVarchar, Length: 189, Nullable: false},
 			{Name: "data", Type: DB_Text, Nullable: false},
+			{Name: "config", Type: DB_Text, Nullable: false},
 			{Name: "created", Type: DB_DateTime, Nullable: false},
 		},
 		Indices: []*Index{
