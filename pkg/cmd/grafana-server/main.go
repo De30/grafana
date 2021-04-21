@@ -1,5 +1,7 @@
 package main
 
+//go:generate swagger generate spec
+
 import (
 	"errors"
 	"flag"

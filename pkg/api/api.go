@@ -127,10 +127,58 @@ func (hs *HTTPServer) registerRoutes() {
 	r.Group("/api", func(apiRoute routing.RouteRegister) {
 		// user (signed in)
 		apiRoute.Group("/user", func(userRoute routing.RouteRegister) {
+
+			// swagger:route GET /api/user getUserSelf
+			//
+			// Returns the profile of the user making the request
+			//
+			//     Produces:
+			//     - application/json
+			//     Responses:
+			//       200: body:userProfile
 			userRoute.Get("/", routing.Wrap(GetSignedInUser))
+
+			// swagger:operation PUT /api/user updateUserSelf
+			//
+			// Update the current users details
+			//
+			// ---
+			// produces:
+			// - application/json
+			// consumes:
+			// - application/json
 			userRoute.Put("/", bind(models.UpdateUserCommand{}), routing.Wrap(UpdateSignedInUser))
+
+			// swagger:operation POST /api/user/using/{:id} userSetUsingOrg
+			//
+			// Set current org for this user
+			//
+			// ---
+			// produces:
+			// - application/json
+			// parameters:
+			// - name: id
+			//   in: path
+			//   required: true
+			//   type: integer
 			userRoute.Post("/using/:id", routing.Wrap(UserSetUsingOrg))
+
+			// swagger:operation GET /api/user/orgs getOrgListSelf
+			//
+			// List the orgs the user is a member of.
+			//
+			// ---
+			// produces:
+			// - application/json
+			// responses:
+			//   200:
+			//     description: list of orgs the user is a member of
+			//     schema:
+			//       type: array
+			//       items:
+			//         "$ref": "#/definitions/UserOrg"
 			userRoute.Get("/orgs", routing.Wrap(GetSignedInUserOrgList))
+
 			userRoute.Get("/teams", routing.Wrap(GetSignedInUserTeamList))
 
 			userRoute.Post("/stars/dashboard/:id", routing.Wrap(StarDashboard))

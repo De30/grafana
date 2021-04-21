@@ -71,10 +71,23 @@ type CreateUserCommand struct {
 	Result User
 }
 
+// swagger:parameters updateUserSelf
 type UpdateUserCommand struct {
-	Name  string `json:"name"`
+	// Name of user
+	//
+	// in: body
+	Name string `json:"name"`
+	// Email address of user
+	//
+	// in: body
 	Email string `json:"email"`
+	// Login name of user
+	//
+	// in: body
 	Login string `json:"login"`
+	// Theme user is using
+	//
+	// in: body
 	Theme string `json:"theme"`
 
 	UserId int64 `json:"-"`
@@ -216,20 +229,49 @@ func (u *SignedInUser) IsRealUser() bool {
 	return u.UserId != 0
 }
 
+// UserProfile represents the user for this application
+//
+// swagger:model userProfile
+// The user profile
 type UserProfileDTO struct {
-	Id             int64     `json:"id"`
-	Email          string    `json:"email"`
-	Name           string    `json:"name"`
-	Login          string    `json:"login"`
-	Theme          string    `json:"theme"`
-	OrgId          int64     `json:"orgId"`
-	IsGrafanaAdmin bool      `json:"isGrafanaAdmin"`
-	IsDisabled     bool      `json:"isDisabled"`
-	IsExternal     bool      `json:"isExternal"`
-	AuthLabels     []string  `json:"authLabels"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	CreatedAt      time.Time `json:"createdAt"`
-	AvatarUrl      string    `json:"avatarUrl"`
+	// the id for this user
+	Id int64 `json:"id"`
+
+	// the email address of this user
+	Email string `json:"email"`
+
+	// the name of this user
+	Name string `json:"name"`
+
+	// the login name of this user
+	Login string `json:"login"`
+
+	// the theme this user is currently using
+	Theme string `json:"theme"`
+
+	// the orgId of this user
+	OrgId int64 `json:"orgId"`
+
+	// the flag for whether this user is a GrafanaAdmin
+	IsGrafanaAdmin bool `json:"isGrafanaAdmin"`
+
+	// the flag for whether this user is currently disabled
+	IsDisabled bool `json:"isDisabled"`
+
+	// the flag for whether this user uses an external auth module
+	IsExternal bool `json:"isExternal"`
+
+	// the authLabels for this user
+	AuthLabels []string `json:"authLabels"`
+
+	// the timestamp this user profile was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// the timestmap this user profile was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// the url for this users avatar
+	AvatarUrl string `json:"avatarUrl"`
 }
 
 type UserSearchHitDTO struct {

@@ -83,6 +83,7 @@ type OrgDetailsDTO struct {
 	Address Address `json:"address"`
 }
 
+// swagger:model UserOrg
 type UserOrgDTO struct {
 	OrgId int64    `json:"orgId"`
 	Name  string   `json:"name"`
