@@ -48,12 +48,12 @@ func (e *GraphiteExecutor) DataQuery(ctx context.Context, dsInfo *models.DataSou
 	}
 
 	var target string
+	maxDataPoints := int64(500)
 
 	formData := url.Values{
-		"from":          []string{from},
-		"until":         []string{until},
-		"format":        []string{"json"},
-		"maxDataPoints": []string{"500"},
+		"from":   []string{from},
+		"until":  []string{until},
+		"format": []string{"json"},
 	}
 
 	emptyQueries := make([]string, 0)
@@ -71,6 +71,10 @@ func (e *GraphiteExecutor) DataQuery(ctx context.Context, dsInfo *models.DataSou
 			continue
 		}
 		target = fixIntervalFormat(currTarget)
+
+		if query.MaxDataPoints > maxDataPoints {
+			maxDataPoints = query.MaxDataPoints
+		}
 	}
 
 	if target == "" {
@@ -79,6 +83,7 @@ func (e *GraphiteExecutor) DataQuery(ctx context.Context, dsInfo *models.DataSou
 	}
 
 	formData["target"] = []string{target}
+	formData["maxDataPoints"] = []string{fmt.Sprintf("%d", maxDataPoints)}
 
 	if setting.Env == setting.Dev {
 		glog.Debug("Graphite request", "params", formData)
