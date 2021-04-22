@@ -14,7 +14,7 @@ import {
   TimeRange,
   toUtc,
 } from '@grafana/data';
-import { BackendSrvRequest, FetchResponse } from '@grafana/runtime';
+import { BackendSrvRequest, FetchResponse, getTemplateSrv } from '@grafana/runtime';
 
 import { ElasticDatasource, enhanceDataFrame } from './datasource';
 import { backendSrv } from 'app/core/services/backend_srv'; // will use the version in __mocks__
@@ -67,16 +67,7 @@ function getTestContext({
   const fetchMock = jest.spyOn(backendSrv, 'fetch');
   fetchMock.mockImplementation(mockImplementation ?? defaultMock);
 
-  const templateSrv: any = {
-    replace: jest.fn((text) => {
-      if (text.startsWith('$')) {
-        return `resolvedVariable`;
-      } else {
-        return text;
-      }
-    }),
-    getAdhocFilters: jest.fn(() => []),
-  };
+  const templateSrv = getTemplateSrv();
 
   const timeSrv: any = {
     time: { from, to: 'now' },
@@ -133,7 +124,13 @@ describe('ElasticDatasource', function (this: any) {
           query: 'escape\\:test',
         },
       ];
-      const query: any = { range, targets };
+      const scopedVars = {
+        varAlias: {
+          text: 'resolvedVariable',
+          value: 'resolvedVariable',
+        },
+      };
+      const query: any = { range, targets, scopedVars };
       const data = {
         responses: [
           {
@@ -871,7 +868,12 @@ describe('ElasticDatasource', function (this: any) {
       query: '$var',
     };
 
-    const interpolatedQuery = ds.interpolateVariablesInQueries([query], {})[0];
+    const interpolatedQuery = ds.interpolateVariablesInQueries([query], {
+      var: {
+        text: 'resolvedVariable',
+        value: 'resolvedVariable',
+      },
+    })[0];
 
     expect(interpolatedQuery.query).toBe('resolvedVariable');
     expect((interpolatedQuery.bucketAggs![0] as Filters).settings!.filters![0].query).toBe('resolvedVariable');
@@ -886,7 +888,32 @@ describe('ElasticDatasource', function (this: any) {
       query: '',
     };
 
-    const interpolatedQuery = ds.interpolateVariablesInQueries([query], {})[0];
+    const interpolatedQuery = ds.interpolateVariablesInQueries([query], {
+      var: {
+        text: 'resolvedVariable',
+        value: 'resolvedVariable',
+      },
+    })[0];
+
+    expect(interpolatedQuery.query).toBe('*');
+    expect((interpolatedQuery.bucketAggs![0] as Filters).settings!.filters![0].query).toBe('*');
+  });
+
+  it('should correctly handle empty query strings interpolated from vars', () => {
+    const { ds } = getTestContext();
+    const query: ElasticsearchQuery = {
+      refId: 'A',
+      bucketAggs: [{ type: 'filters', settings: { filters: [{ query: '$var', label: '' }] }, id: '1' }],
+      metrics: [{ type: 'count', id: '1' }],
+      query: '$var',
+    };
+
+    const interpolatedQuery = ds.interpolateVariablesInQueries([query], {
+      var: {
+        text: '',
+        value: '',
+      },
+    })[0];
 
     expect(interpolatedQuery.query).toBe('*');
     expect((interpolatedQuery.bucketAggs![0] as Filters).settings!.filters![0].query).toBe('*');
