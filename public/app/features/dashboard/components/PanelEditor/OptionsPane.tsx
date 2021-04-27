@@ -1,7 +1,7 @@
 import React from 'react';
-import { FieldConfigSource, GrafanaTheme, PanelPlugin } from '@grafana/data';
+import { FieldConfigSource, GrafanaThemeV2, PanelPlugin } from '@grafana/data';
 import { DashboardModel, PanelModel } from '../../state';
-import { useStyles } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { selectors } from '@grafana/e2e-selectors';
 import { VisualizationButton } from './VisualizationButton';
@@ -30,7 +30,7 @@ export const OptionsPane: React.FC<Props> = ({
   onPanelConfigChange,
   dashboard,
 }: Props) => {
-  const styles = useStyles(getStyles);
+  const styles = useStyles2(getStyles);
   const isVizPickerOpen = useSelector((state: StoreState) => state.panelEditor.isVizPickerOpen);
   const { data } = usePanelLatestData(panel, { withTransforms: true, withFieldConfig: false }, true);
 
@@ -59,7 +59,7 @@ export const OptionsPane: React.FC<Props> = ({
   );
 };
 
-const getStyles = (theme: GrafanaTheme) => {
+const getStyles = (theme: GrafanaThemeV2) => {
   return {
     wrapper: css`
       height: 100%;
@@ -67,14 +67,14 @@ const getStyles = (theme: GrafanaTheme) => {
       display: flex;
       flex: 1 1 0;
       flex-direction: column;
-      padding: ${theme.spacing.md} 0 0 0;
+      padding: ${theme.spacing(2, 1, 0, 0)};
     `,
     optionsWrapper: css`
       flex-grow: 1;
       min-height: 0;
     `,
     vizButtonWrapper: css`
-      padding: 0 ${theme.spacing.sm} ${theme.spacing.md} 0;
+      padding: ${theme.spacing(0, 1, 2, 0)};
     `,
     legacyOptions: css`
       label: legacy-options;
@@ -86,12 +86,12 @@ const getStyles = (theme: GrafanaTheme) => {
         margin-bottom: 0;
       }
       .panel-options-group__body {
-        padding: ${theme.spacing.md} 0;
+        padding: ${theme.spacing(2, 0)};
       }
 
       .section {
         display: block;
-        margin: ${theme.spacing.md} 0;
+        margin: ${theme.spacing(2, 0)};
 
         &:first-child {
           margin-top: 0;
