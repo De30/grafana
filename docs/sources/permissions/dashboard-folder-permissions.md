@@ -1,6 +1,6 @@
 +++
 title = "Dashboard and folder permissions"
-description = "Grafana Dashboard and Folder Permissions Guide "
+description = "Grafana dashboard and folder permissions"
 keywords = ["grafana", "configuration", "documentation", "dashboard", "folder", "permissions", "teams"]
 aliases = ["/docs/grafana/latest/permissions/dashboard_folder_permissions/"]
 weight = 200
@@ -8,9 +8,7 @@ weight = 200
 
 # Grant dashboard and folder permissions
 
-You can assign and remove permissions for organization roles, users, and teams for specific dashboards and dashboard folders.
-
-This topic explains how to grant permissions to specific folders and dashboards.
+You can assign and remove permissions for organization roles, users, and teams for specific dashboards and dashboard folders. This topic explains how to grant permissions to specific folders and dashboards.
 
 To learn more about denying access to certain Grafana users, refer to [Restricting access]({{< relref "restricting-access.md">}}).
 
