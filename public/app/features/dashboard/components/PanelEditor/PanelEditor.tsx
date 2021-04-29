@@ -418,7 +418,12 @@ export class PanelEditorUnconnected extends PureComponent<Props> {
             return false;
           }}
         />
-        <PageToolbar title={`${dashboard.title} / Edit Panel`} onGoBack={exitPanelEditor}>
+        <PageToolbar
+          title={`${dashboard.title} / Edit Panel`}
+          libraryPanelMeta={isPanelModelLibraryPanel(this.props.panel) ? this.props.panel.libraryPanel.meta : undefined}
+          formatDate={this.props.dashboard.formatDate}
+          onGoBack={exitPanelEditor}
+        >
           {this.renderEditorActions()}
         </PageToolbar>
         <div className={styles.verticalSplitPanesWrapper}>

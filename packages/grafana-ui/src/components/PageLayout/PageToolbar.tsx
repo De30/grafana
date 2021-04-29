@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import { css, cx } from '@emotion/css';
-import { GrafanaThemeV2 } from '@grafana/data';
+import { DateTimeInput, GrafanaThemeV2 } from '@grafana/data';
 import { useStyles2 } from '../../themes/ThemeContext';
 import { IconName } from '../../types';
 import { Icon } from '../Icon/Icon';
@@ -11,6 +11,7 @@ import { selectors } from '@grafana/e2e-selectors';
 export interface Props {
   pageIcon?: IconName;
   title: string;
+  libraryPanelMeta?: any;
   parent?: string;
   onGoBack?: () => void;
   onClickTitle?: () => void;
@@ -19,12 +20,15 @@ export interface Props {
   children?: ReactNode;
   className?: string;
   isFullscreen?: boolean;
+  formatDate?: (dateString: DateTimeInput, format?: string) => string;
 }
 
 /** @alpha */
 export const PageToolbar: FC<Props> = React.memo(
   ({
     title,
+    formatDate,
+    libraryPanelMeta,
     parent,
     pageIcon,
     onGoBack,
@@ -79,12 +83,32 @@ export const PageToolbar: FC<Props> = React.memo(
                 {parent} <span className={styles.parentIcon}>/</span>
               </button>
             )}
-            {onClickTitle && (
-              <button onClick={onClickTitle} className={styles.titleLink}>
-                {title}
-              </button>
-            )}
-            {!onClickTitle && <div className={styles.titleText}>{title}</div>}
+            <div className={styles.titleContainer}>
+              {onClickTitle ? (
+                <button onClick={onClickTitle} className={styles.titleLink}>
+                  {title}
+                </button>
+              ) : (
+                <div className={styles.titleText}>{title}</div>
+              )}
+              {libraryPanelMeta !== undefined && (
+                <div className={styles.subtitleText}>
+                  Used on {libraryPanelMeta.connectedDashboards}{' '}
+                  {libraryPanelMeta.connectedDashboards === 1 ? 'dashboard' : 'dashboards'} | Last edited on{' '}
+                  {formatDate?.(libraryPanelMeta.updated, 'L') ?? libraryPanelMeta.updated} by
+                  {libraryPanelMeta.updatedBy.avatarUrl && (
+                    <img
+                      width="22"
+                      height="22"
+                      className={styles.userAvatar}
+                      src={libraryPanelMeta.updatedBy.avatarUrl}
+                      alt={`Avatar for ${libraryPanelMeta.updatedBy.name}`}
+                    />
+                  )}
+                  {libraryPanelMeta.updatedBy.name}
+                </div>
+              )}
+            </div>
           </div>
           {leftItems?.map((child, index) => (
             <div className={styles.leftActionItem} key={index}>
@@ -171,6 +195,23 @@ const getStyles = (theme: GrafanaThemeV2) => {
     `,
     titleText: css`
       ${titleStyles};
+    `,
+    subtitleText: css`
+      color: ${theme.colors.text.secondary};
+      font-size: ${theme.typography.bodySmall.fontSize};
+      padding-left: ${spacing(1)};
+    `,
+    titleContainer: css`
+      display: flex;
+      flex-direction: column;
+    `,
+    userAvatar: css`
+      border-radius: 50%;
+      box-sizing: content-box;
+      width: 22px;
+      height: 22px;
+      padding-left: ${theme.spacing(1)};
+      padding-right: ${theme.spacing(1)};
     `,
     titleLink: css`
       ${titleStyles};
