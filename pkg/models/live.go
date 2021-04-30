@@ -79,3 +79,35 @@ type DashboardActivityChannel interface {
 	// someone is subscribed to the `grafana/dashboards/gitops` channel
 	HasGitOpsObserver() bool
 }
+
+// LiveChannelType is a type of channel.
+type LiveChannelType string
+
+// LiveChannelPlain contains various channel configuration options.
+type LiveChannelPlain struct {
+	// KeepLastMessage allows to turn on saving last publication to database.
+	KeepLastMessage bool `json:"keepLastMessage,omitempty"`
+
+	// RemoteWriteEndpoint to send streaming frames to.
+	RemoteWriteEndpoint string `json:"remoteWriteEndpoint,omitempty"`
+}
+
+// LiveChannelSecure contains various channel configuration options which are
+// encrypted in database.
+type LiveChannelSecure struct {
+	// RemoteWriteUser is a user for remote write request.
+	RemoteWriteUser string `json:"remoteWriteUser,omitempty"`
+	// RemoteWritePassword is a password/token for remote write request.
+	RemoteWritePassword string `json:"remoteWritePassword,omitempty"`
+}
+
+// LiveChannel represents channel metadata saved in database.
+type LiveChannelConfig struct {
+	Id      int64
+	OrgId   int64
+	Channel string
+	Created time.Time
+	Type    LiveChannelType
+	Config  LiveChannelPlain
+	Secure  LiveChannelSecure
+}

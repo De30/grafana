@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/infra/localcache"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
@@ -18,6 +19,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/live/channelconfig"
 	"github.com/grafana/grafana/pkg/services/live/demultiplexer"
 	"github.com/grafana/grafana/pkg/services/live/features"
 	"github.com/grafana/grafana/pkg/services/live/livecontext"
@@ -68,6 +70,7 @@ type GrafanaLive struct {
 	RouteRegister         routing.RouteRegister    `inject:""`
 	LogsService           *cloudwatch.LogsService  `inject:""`
 	PluginManager         *manager.PluginManager   `inject:""`
+	CacheService          *localcache.CacheService `inject:""`
 	DatasourceCache       datasources.CacheService `inject:""`
 
 	node *centrifuge.Node
@@ -85,8 +88,9 @@ type GrafanaLive struct {
 
 	ManagedStreamRunner *managedstream.Runner
 
-	contextGetter    *pluginContextGetter
-	runStreamManager *runstream.Manager
+	contextGetter        *pluginContextGetter
+	runStreamManager     *runstream.Manager
+	channelConfigStorage *channelconfig.Storage
 }
 
 func (g *GrafanaLive) getStreamPlugin(pluginID string) (backend.StreamHandler, error) {
@@ -140,6 +144,7 @@ func (g *GrafanaLive) Init() error {
 	packetSender := newPluginPacketSender(node)
 	presenceGetter := newPluginPresenceGetter(node)
 	g.runStreamManager = runstream.NewManager(packetSender, presenceGetter)
+	g.channelConfigStorage = channelconfig.NewStorage(g.CacheService)
 
 	// Initialize the main features
 	dash := &features.DashboardHandler{
