@@ -145,7 +145,7 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<{
   builder.addAxis({
     scaleKey: 'x',
     isTime: true,
-    splits: coreConfig.xSplits!,
+    //splits: coreConfig.xSplits!,
     placement: AxisPlacement.Bottom,
     timeZone,
     theme,

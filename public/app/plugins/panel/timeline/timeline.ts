@@ -1,4 +1,4 @@
-import uPlot, { Series, Cursor } from 'uplot';
+import uPlot, { Series, Cursor, AlignedData } from 'uplot';
 import { FIXED_UNIT } from '@grafana/ui/src/components/GraphNG/GraphNG';
 import { Quadtree, Rect, pointWithin } from 'app/plugins/panel/barchart/quadtree';
 import { distribute, SPACE_BETWEEN } from 'app/plugins/panel/barchart/distribute';
@@ -306,12 +306,60 @@ export function getConfig(opts: TimelineCoreOptions) {
           return false;
         };
 
+  function areValuesAligned(data: AlignedData) {
+    // 1. scan all data
+    if (data.length > 2) {
+      let xValsWithYVals: Set<number> | number[] = new Set();
+
+      for (let seriesIdx = 1; seriesIdx < data.length; seriesIdx++) {
+        let yVals = data[seriesIdx];
+
+        for (let dataIdx = 0; dataIdx < yVals.length; dataIdx++) {
+          // 2. collect any x value with non-null y value
+          if (yVals[dataIdx] != null) {
+            xValsWithYVals.add(data[0][dataIdx]);
+          }
+        }
+      }
+
+      // 3. to array and sort
+      xValsWithYVals = [...xValsWithYVals].sort((a, b) => a - b);
+
+      let delta = xValsWithYVals[1] - xValsWithYVals[0];
+
+      // 4. if any delta is different, then not aligned
+      for (let i = 2; i < xValsWithYVals.length; i++) {
+        if (xValsWithYVals[i] - xValsWithYVals[i - 1] !== delta) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   const init = (u: uPlot) => {
     let over = u.root.querySelector('.u-over')! as HTMLElement;
     over.style.overflow = 'hidden';
     hoverMarks.forEach((m) => {
       over.appendChild(m);
     });
+
+    if (mode === TimelineMode.Samples) {
+      const origSplits = u.axes[0].splits as Function;
+
+      u.axes[0].splits = function () {
+        // regular continuous splits
+        let calcSplits = origSplits;
+
+        // splits at exact data values
+        if (areValuesAligned(u.data)) {
+          calcSplits = samplesXSplits;
+        }
+
+        return calcSplits.apply(null, arguments);
+      };
+    }
   };
 
   const drawClear = (u: uPlot) => {
@@ -370,28 +418,33 @@ export function getConfig(opts: TimelineCoreOptions) {
   const yMids: number[] = Array(numSeries).fill(0);
   const ySplits: number[] = Array(numSeries).fill(0);
 
+  // puts ticks & grid at exact data values
+  const samplesXSplits = (
+    u: uPlot,
+    axisIdx: number,
+    scaleMin: number,
+    scaleMax: number,
+    foundIncr: number,
+    foundSpace: number
+  ) => {
+    let splits = [];
+
+    let dataIncr = u.data[0][1] - u.data[0][0];
+    let skipFactor = ceil(foundIncr / dataIncr);
+
+    for (let i = 0; i < u.data[0].length; i += skipFactor) {
+      let v = u.data[0][i];
+
+      if (v >= scaleMin && v <= scaleMax) {
+        splits.push(v);
+      }
+    }
+
+    return splits;
+  };
+
   return {
     cursor,
-
-    xSplits:
-      mode === TimelineMode.Samples
-        ? (u: uPlot, axisIdx: number, scaleMin: number, scaleMax: number, foundIncr: number, foundSpace: number) => {
-            let splits = [];
-
-            let dataIncr = u.data[0][1] - u.data[0][0];
-            let skipFactor = ceil(foundIncr / dataIncr);
-
-            for (let i = 0; i < u.data[0].length; i += skipFactor) {
-              let v = u.data[0][i];
-
-              if (v >= scaleMin && v <= scaleMax) {
-                splits.push(v);
-              }
-            }
-
-            return splits;
-          }
-        : null,
 
     xRange: (u: uPlot) => {
       const r = getTimeRange();
