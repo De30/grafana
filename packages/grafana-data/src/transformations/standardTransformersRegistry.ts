@@ -8,13 +8,13 @@ export interface TransformerUIProps<T> {
    */
   options: T;
   /**
-   * Pre-transform data rames
+   * Pre-transform data frames
    */
   input: DataFrame[];
   onChange: (options: T) => void;
 }
 
-export interface TransformerRegistyItem<TOptions> extends RegistryItem {
+export interface TransformerRegistryItem<TOptions> extends RegistryItem {
   /**
    * Object describing transformer configuration
    */
@@ -29,4 +29,4 @@ export interface TransformerRegistyItem<TOptions> extends RegistryItem {
  * Registry of transformation options that can be driven by
  * stored configuration files.
  */
-export const standardTransformersRegistry = new Registry<TransformerRegistyItem<any>>();
+export const standardTransformersRegistry = new Registry<TransformerRegistryItem<any>>();

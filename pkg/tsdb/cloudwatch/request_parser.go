@@ -10,25 +10,30 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/components/simplejson"
-	"github.com/grafana/grafana/pkg/tsdb"
 )
 
 // Parses the json queries and returns a requestQuery. The requestQuery has a 1 to 1 mapping to a query editor row
-func (e *CloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTime time.Time, endTime time.Time) (map[string][]*requestQuery, error) {
+func (e *cloudWatchExecutor) parseQueries(req *backend.QueryDataRequest, startTime time.Time, endTime time.Time) (map[string][]*requestQuery, error) {
 	requestQueries := make(map[string][]*requestQuery)
+	for _, query := range req.Queries {
+		model, err := simplejson.NewJson(query.JSON)
+		if err != nil {
+			return nil, &queryError{err: err, RefID: query.RefID}
+		}
 
-	for i, model := range queryContext.Queries {
-		queryType := model.Model.Get("type").MustString()
+		queryType := model.Get("type").MustString()
 		if queryType != "timeSeriesQuery" && queryType != "" {
 			continue
 		}
 
-		RefID := queryContext.Queries[i].RefId
-		query, err := parseRequestQuery(queryContext.Queries[i].Model, RefID, startTime, endTime)
+		refID := query.RefID
+		query, err := parseRequestQuery(model, refID, startTime, endTime)
 		if err != nil {
-			return nil, &queryError{err, RefID}
+			return nil, &queryError{err: err, RefID: refID}
 		}
+
 		if _, exist := requestQueries[query.Region]; !exist {
 			requestQueries[query.Region] = make([]*requestQuery, 0)
 		}
@@ -39,26 +44,24 @@ func (e *CloudWatchExecutor) parseQueries(queryContext *tsdb.TsdbQuery, startTim
 }
 
 func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time, endTime time.Time) (*requestQuery, error) {
+	plog.Debug("Parsing request query", "query", model)
+	reNumber := regexp.MustCompile(`^\d+$`)
 	region, err := model.Get("region").String()
 	if err != nil {
 		return nil, err
 	}
-
 	namespace, err := model.Get("namespace").String()
 	if err != nil {
 		return nil, err
 	}
-
 	metricName, err := model.Get("metricName").String()
 	if err != nil {
 		return nil, err
 	}
-
 	dimensions, err := parseDimensions(model)
 	if err != nil {
 		return nil, err
 	}
-
 	statistics, err := parseStatistics(model)
 	if err != nil {
 		return nil, err
@@ -78,7 +81,7 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 			}
 		}
 	} else {
-		if regexp.MustCompile(`^\d+$`).Match([]byte(p)) {
+		if reNumber.Match([]byte(p)) {
 			period, err = strconv.Atoi(p)
 			if err != nil {
 				return nil, err
@@ -124,7 +127,6 @@ func parseRequestQuery(model *simplejson.Json, refId string, startTime time.Time
 
 func parseStatistics(model *simplejson.Json) ([]string, error) {
 	var statistics []string
-
 	for _, s := range model.Get("statistics").MustArray() {
 		statistics = append(statistics, s.(string))
 	}
@@ -148,7 +150,6 @@ func parseDimensions(model *simplejson.Json) (map[string][]string, error) {
 	}
 
 	sortedDimensions := sortDimensions(parsedDimensions)
-
 	return sortedDimensions, nil
 }
 

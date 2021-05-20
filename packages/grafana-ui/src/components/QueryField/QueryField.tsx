@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import React, { Context } from 'react';
 
 import { Value, Editor as CoreEditor } from 'slate';
@@ -17,6 +17,7 @@ import {
 } from '../../slate-plugins';
 
 import { makeValue, SCHEMA, CompletionItemGroup, TypeaheadOutput, TypeaheadInput, SuggestionsState } from '../..';
+import { selectors } from '@grafana/e2e-selectors';
 
 export interface QueryFieldProps {
   additionalPlugins?: Plugin[];
@@ -25,7 +26,7 @@ export interface QueryFieldProps {
   // We have both value and local state. This is usually an antipattern but we need to keep local state
   // for perf reasons and also have outside value in for example in Explore redux that is mutable from logs
   // creating a two way binding.
-  query: string | null;
+  query?: string | null;
   onRunQuery?: () => void;
   onBlur?: () => void;
   onChange?: (value: string) => void;
@@ -63,7 +64,7 @@ export class QueryField extends React.PureComponent<QueryFieldProps, QueryFieldS
   constructor(props: QueryFieldProps, context: Context<any>) {
     super(props, context);
 
-    this.runOnChangeDebounced = _.debounce(this.runOnChange, 500);
+    this.runOnChangeDebounced = debounce(this.runOnChange, 500);
 
     const { onTypeahead, cleanText, portalOrigin, onWillApplySuggestion } = props;
 
@@ -79,7 +80,7 @@ export class QueryField extends React.PureComponent<QueryFieldProps, QueryFieldS
       IndentationPlugin(),
       ClipboardPlugin(),
       ...(props.additionalPlugins || []),
-    ].filter(p => p);
+    ].filter((p) => p);
 
     this.state = {
       suggestions: [],
@@ -147,9 +148,9 @@ export class QueryField extends React.PureComponent<QueryFieldProps, QueryFieldS
 
   runOnChange = () => {
     const { onChange } = this.props;
-
+    const value = Plain.serialize(this.state.value);
     if (onChange) {
-      onChange(Plain.serialize(this.state.value));
+      onChange(this.cleanText(value));
     }
   };
 
@@ -189,6 +190,12 @@ export class QueryField extends React.PureComponent<QueryFieldProps, QueryFieldS
     return next();
   };
 
+  cleanText(text: string) {
+    // RegExp with invisible characters we want to remove - currently only carriage return (newlines are visible)
+    const newText = text.replace(/[\r]/g, '');
+    return newText;
+  }
+
   render() {
     const { disabled } = this.props;
     const wrapperClassName = classnames('slate-query-field__wrapper', {
@@ -197,9 +204,9 @@ export class QueryField extends React.PureComponent<QueryFieldProps, QueryFieldS
 
     return (
       <div className={wrapperClassName}>
-        <div className="slate-query-field">
+        <div className="slate-query-field" aria-label={selectors.components.QueryField.container}>
           <Editor
-            ref={editor => (this.editor = editor!)}
+            ref={(editor) => (this.editor = editor!)}
             schema={SCHEMA}
             autoCorrect={false}
             readOnly={this.props.disabled}

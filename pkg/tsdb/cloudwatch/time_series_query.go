@@ -4,38 +4,35 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/tsdb"
 	"golang.org/x/sync/errgroup"
 )
 
-func (e *CloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryContext *tsdb.TsdbQuery) (*tsdb.Response, error) {
-	results := &tsdb.Response{
-		Results: make(map[string]*tsdb.QueryResult),
-	}
+func (e *cloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	plog.Debug("Executing time series query")
 
-	startTime, err := queryContext.TimeRange.ParseFrom()
-	if err != nil {
-		return nil, err
-	}
+	resp := backend.NewQueryDataResponse()
 
-	endTime, err := queryContext.TimeRange.ParseTo()
-	if err != nil {
-		return nil, err
-	}
+	for _, q := range req.Queries {
+		startTime := q.TimeRange.From
+		endTime := q.TimeRange.To
+		if !startTime.Before(endTime) {
+			return nil, fmt.Errorf("invalid time range: start time must be before end time")
+		}
 
-	if !startTime.Before(endTime) {
-		return nil, fmt.Errorf("Invalid time range: Start time must be before end time")
-	}
+		requestQueriesByRegion, err := e.parseQueries(req, startTime, endTime)
+		if err != nil {
+			return nil, err
+		}
 
-	requestQueriesByRegion, err := e.parseQueries(queryContext, startTime, endTime)
-	if err != nil {
-		return results, err
-	}
-	resultChan := make(chan *tsdb.QueryResult, len(queryContext.Queries))
-	eg, ectx := errgroup.WithContext(ctx)
+		if len(requestQueriesByRegion) == 0 {
+			return backend.NewQueryDataResponse(), nil
+		}
 
-	if len(requestQueriesByRegion) > 0 {
+		resultChan := make(chan *backend.DataResponse, len(req.Queries))
+		eg, ectx := errgroup.WithContext(ctx)
 		for r, q := range requestQueriesByRegion {
 			requestQueries := q
 			region := r
@@ -44,14 +41,14 @@ func (e *CloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 					if err := recover(); err != nil {
 						plog.Error("Execute Get Metric Data Query Panic", "error", err, "stack", log.Stack(1))
 						if theErr, ok := err.(error); ok {
-							resultChan <- &tsdb.QueryResult{
+							resultChan <- &backend.DataResponse{
 								Error: theErr,
 							}
 						}
 					}
 				}()
 
-				client, err := e.getClient(region)
+				client, err := e.getCWClient(region, req.PluginContext)
 				if err != nil {
 					return err
 				}
@@ -59,9 +56,9 @@ func (e *CloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				queries, err := e.transformRequestQueriesToCloudWatchQueries(requestQueries)
 				if err != nil {
 					for _, query := range requestQueries {
-						resultChan <- &tsdb.QueryResult{
-							RefId: query.RefId,
-							Error: err,
+						resultChan <- &backend.DataResponse{
+							Frames: data.Frames{data.NewFrame(query.RefId)},
+							Error:  err,
 						}
 					}
 					return nil
@@ -76,9 +73,9 @@ func (e *CloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				mdo, err := e.executeRequest(ectx, client, metricDataInput)
 				if err != nil {
 					for _, query := range requestQueries {
-						resultChan <- &tsdb.QueryResult{
-							RefId: query.RefId,
-							Error: err,
+						resultChan <- &backend.DataResponse{
+							Frames: data.Frames{data.NewFrame(query.RefId)},
+							Error:  err,
 						}
 					}
 					return nil
@@ -87,30 +84,42 @@ func (e *CloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, queryCo
 				responses, err := e.parseResponse(mdo, queries)
 				if err != nil {
 					for _, query := range requestQueries {
-						resultChan <- &tsdb.QueryResult{
-							RefId: query.RefId,
-							Error: err,
+						resultChan <- &backend.DataResponse{
+							Frames: data.Frames{data.NewFrame(query.RefId)},
+							Error:  err,
 						}
 					}
 					return nil
 				}
+
 				cloudwatchResponses = append(cloudwatchResponses, responses...)
-				res := e.transformQueryResponseToQueryResult(cloudwatchResponses)
+				res, err := e.transformQueryResponsesToQueryResult(cloudwatchResponses, requestQueries, startTime, endTime)
+				if err != nil {
+					for _, query := range requestQueries {
+						resultChan <- &backend.DataResponse{
+							Frames: data.Frames{data.NewFrame(query.RefId)},
+							Error:  err,
+						}
+					}
+					return nil
+				}
+
 				for _, queryRes := range res {
 					resultChan <- queryRes
 				}
 				return nil
 			})
 		}
+
+		if err := eg.Wait(); err != nil {
+			return nil, err
+		}
+		close(resultChan)
+
+		for result := range resultChan {
+			resp.Responses[q.RefID] = *result
+		}
 	}
 
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	close(resultChan)
-	for result := range resultChan {
-		results.Results[result.RefId] = result
-	}
-
-	return results, nil
+	return resp, nil
 }

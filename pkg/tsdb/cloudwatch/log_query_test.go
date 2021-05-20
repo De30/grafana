@@ -9,11 +9,12 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-//***
+// ***
 // LogQuery tests
-//***
+// ***
 
 func TestLogsResultsToDataframes(t *testing.T) {
 	fakeCloudwatchResponse := &cloudwatchlogs.GetQueryResultsOutput{
@@ -40,11 +41,11 @@ func TestLogsResultsToDataframes(t *testing.T) {
 					Value: aws.String("fakelog"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOGSTREAM_IDENTIFIER_INTERNAL),
+					Field: aws.String(logStreamIdentifierInternal),
 					Value: aws.String("fakelogstream"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOG_IDENTIFIER_INTERNAL),
+					Field: aws.String(logIdentifierInternal),
 					Value: aws.String("fakelog"),
 				},
 			},
@@ -70,11 +71,11 @@ func TestLogsResultsToDataframes(t *testing.T) {
 					Value: aws.String("fakelog"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOGSTREAM_IDENTIFIER_INTERNAL),
+					Field: aws.String(logStreamIdentifierInternal),
 					Value: aws.String("fakelogstream"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOG_IDENTIFIER_INTERNAL),
+					Field: aws.String(logIdentifierInternal),
 					Value: aws.String("fakelog"),
 				},
 			},
@@ -109,11 +110,11 @@ func TestLogsResultsToDataframes(t *testing.T) {
 					Value: aws.String("fakelog"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOGSTREAM_IDENTIFIER_INTERNAL),
+					Field: aws.String(logStreamIdentifierInternal),
 					Value: aws.String("fakelogstream"),
 				},
 				&cloudwatchlogs.ResultField{
-					Field: aws.String(LOG_IDENTIFIER_INTERNAL),
+					Field: aws.String(logIdentifierInternal),
 					Value: aws.String("fakelog"),
 				},
 			},
@@ -126,15 +127,19 @@ func TestLogsResultsToDataframes(t *testing.T) {
 		},
 	}
 
-	dataframes, _ := logsResultsToDataframes(fakeCloudwatchResponse)
-	timeA, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 15:04:05.000")
-	timeB, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 16:04:05.000")
-	timeC, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 17:04:05.000")
+	dataframes, err := logsResultsToDataframes(fakeCloudwatchResponse)
+	require.NoError(t, err)
+	timeA, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 15:04:05.000")
+	require.NoError(t, err)
+	timeB, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 16:04:05.000")
+	require.NoError(t, err)
+	timeC, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 17:04:05.000")
+	require.NoError(t, err)
 	timeVals := []*time.Time{
 		&timeA, &timeB, &timeC,
 	}
 	timeField := data.NewField("@timestamp", nil, timeVals)
-	timeField.SetConfig(&data.FieldConfig{Title: "Time"})
+	timeField.SetConfig(&data.FieldConfig{DisplayName: "Time"})
 
 	lineField := data.NewField("line", nil, []*string{
 		aws.String("test message 1"),
@@ -154,7 +159,7 @@ func TestLogsResultsToDataframes(t *testing.T) {
 		aws.String("fakelog"),
 	})
 
-	hiddenLogStreamField := data.NewField(LOGSTREAM_IDENTIFIER_INTERNAL, nil, []*string{
+	hiddenLogStreamField := data.NewField(logStreamIdentifierInternal, nil, []*string{
 		aws.String("fakelogstream"),
 		aws.String("fakelogstream"),
 		aws.String("fakelogstream"),
@@ -165,7 +170,7 @@ func TestLogsResultsToDataframes(t *testing.T) {
 		},
 	})
 
-	hiddenLogField := data.NewField(LOG_IDENTIFIER_INTERNAL, nil, []*string{
+	hiddenLogField := data.NewField(logIdentifierInternal, nil, []*string{
 		aws.String("fakelog"),
 		aws.String("fakelog"),
 		aws.String("fakelog"),
@@ -190,10 +195,19 @@ func TestLogsResultsToDataframes(t *testing.T) {
 		Meta: &data.FrameMeta{
 			Custom: map[string]interface{}{
 				"Status": "ok",
-				"Statistics": cloudwatchlogs.QueryStatistics{
-					BytesScanned:   aws.Float64(2000),
-					RecordsMatched: aws.Float64(3),
-					RecordsScanned: aws.Float64(5000),
+			},
+			Stats: []data.QueryStat{
+				{
+					FieldConfig: data.FieldConfig{DisplayName: "Bytes scanned"},
+					Value:       2000,
+				},
+				{
+					FieldConfig: data.FieldConfig{DisplayName: "Records scanned"},
+					Value:       5000,
+				},
+				{
+					FieldConfig: data.FieldConfig{DisplayName: "Records matched"},
+					Value:       3,
 				},
 			},
 		},
@@ -232,9 +246,12 @@ func TestGroupKeyGeneration(t *testing.T) {
 }
 
 func TestGroupingResults(t *testing.T) {
-	timeA, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 15:04:05.000")
-	timeB, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 16:04:05.000")
-	timeC, _ := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 17:04:05.000")
+	timeA, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 15:04:05.000")
+	require.NoError(t, err)
+	timeB, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 16:04:05.000")
+	require.NoError(t, err)
+	timeC, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 17:04:05.000")
+	require.NoError(t, err)
 	timeVals := []*time.Time{
 		&timeA, &timeA, &timeA, &timeB, &timeB, &timeB, &timeC, &timeC, &timeC,
 	}
@@ -344,6 +361,128 @@ func TestGroupingResults(t *testing.T) {
 		},
 	}
 
-	groupedResults, _ := groupResults(fakeDataFrame, []string{"@log"})
+	groupedResults, err := groupResults(fakeDataFrame, []string{"@log"})
+	require.NoError(t, err)
+	assert.ElementsMatch(t, expectedGroupedFrames, groupedResults)
+}
+
+func TestGroupingResultsWithNumericField(t *testing.T) {
+	timeA, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 15:04:05.000")
+	require.NoError(t, err)
+	timeB, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 16:04:05.000")
+	require.NoError(t, err)
+	timeC, err := time.Parse("2006-01-02 15:04:05.000", "2020-03-02 17:04:05.000")
+	require.NoError(t, err)
+	timeVals := []*time.Time{
+		&timeA, &timeA, &timeA, &timeB, &timeB, &timeB, &timeC, &timeC, &timeC,
+	}
+	timeField := data.NewField("@timestamp", data.Labels{}, timeVals)
+
+	httpResponseField := data.NewField("httpresponse", data.Labels{}, []*float64{
+		aws.Float64(400),
+		aws.Float64(404),
+		aws.Float64(500),
+		aws.Float64(400),
+		aws.Float64(404),
+		aws.Float64(500),
+		aws.Float64(400),
+		aws.Float64(404),
+		aws.Float64(500),
+	})
+
+	countField := data.NewField("count", data.Labels{}, []*string{
+		aws.String("100"),
+		aws.String("150"),
+		aws.String("20"),
+		aws.String("34"),
+		aws.String("57"),
+		aws.String("62"),
+		aws.String("105"),
+		aws.String("200"),
+		aws.String("99"),
+	})
+
+	fakeDataFrame := &data.Frame{
+		Name: "CloudWatchLogsResponse",
+		Fields: []*data.Field{
+			timeField,
+			httpResponseField,
+			countField,
+		},
+		RefID: "",
+	}
+
+	groupedTimeVals := []*time.Time{
+		&timeA, &timeB, &timeC,
+	}
+	groupedTimeField := data.NewField("@timestamp", data.Labels{}, groupedTimeVals)
+	groupedHttpResponseFieldA := data.NewField("httpresponse", data.Labels{}, []*string{
+		aws.String("400"),
+		aws.String("400"),
+		aws.String("400"),
+	})
+
+	groupedCountFieldA := data.NewField("count", data.Labels{}, []*string{
+		aws.String("100"),
+		aws.String("34"),
+		aws.String("105"),
+	})
+
+	groupedHttpResponseFieldB := data.NewField("httpresponse", data.Labels{}, []*string{
+		aws.String("404"),
+		aws.String("404"),
+		aws.String("404"),
+	})
+
+	groupedCountFieldB := data.NewField("count", data.Labels{}, []*string{
+		aws.String("150"),
+		aws.String("57"),
+		aws.String("200"),
+	})
+
+	groupedHttpResponseFieldC := data.NewField("httpresponse", data.Labels{}, []*string{
+		aws.String("500"),
+		aws.String("500"),
+		aws.String("500"),
+	})
+
+	groupedCountFieldC := data.NewField("count", data.Labels{}, []*string{
+		aws.String("20"),
+		aws.String("62"),
+		aws.String("99"),
+	})
+
+	expectedGroupedFrames := []*data.Frame{
+		{
+			Name: "400",
+			Fields: []*data.Field{
+				groupedTimeField,
+				groupedHttpResponseFieldA,
+				groupedCountFieldA,
+			},
+			RefID: "",
+		},
+		{
+			Name: "404",
+			Fields: []*data.Field{
+				groupedTimeField,
+				groupedHttpResponseFieldB,
+				groupedCountFieldB,
+			},
+			RefID: "",
+		},
+		{
+			Name: "500",
+			Fields: []*data.Field{
+				groupedTimeField,
+				groupedHttpResponseFieldC,
+				groupedCountFieldC,
+			},
+			RefID: "",
+		},
+	}
+
+	groupedResults, err := groupResults(fakeDataFrame, []string{"httpresponse"})
+	require.NoError(t, err)
 	assert.ElementsMatch(t, expectedGroupedFrames, groupedResults)
 }

@@ -1,13 +1,12 @@
 import React, { PureComponent } from 'react';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import tinycolor from 'tinycolor2';
-import { css, cx } from 'emotion';
+import { css, cx } from '@emotion/css';
 import { LogRowModel, findHighlightChunksInText, GrafanaTheme } from '@grafana/data';
 
 // @ts-ignore
 import Highlighter from 'react-highlight-words';
 import { LogRowContextQueryErrors, HasMoreContextRows, LogRowContextRows } from './LogRowContextProvider';
-import { selectThemeVariant } from '../../index';
 import { Themeable } from '../../types/theme';
 import { withTheme } from '../../themes/index';
 import { getLogRowStyles } from './getLogRowStyles';
@@ -16,6 +15,8 @@ import { stylesFactory } from '../../themes/stylesFactory';
 //Components
 import { LogRowContext } from './LogRowContext';
 import { LogMessageAnsi } from './LogMessageAnsi';
+
+export const MAX_CHARACTERS = 100000;
 
 interface Props extends Themeable {
   row: LogRowModel;
@@ -32,13 +33,7 @@ interface Props extends Themeable {
 }
 
 const getStyles = stylesFactory((theme: GrafanaTheme) => {
-  const outlineColor = selectThemeVariant(
-    {
-      light: theme.palette.white,
-      dark: theme.palette.black,
-    },
-    theme.type
-  );
+  const outlineColor = tinycolor(theme.colors.dashboardBg).setAlpha(0.7).toRgbString();
 
   return {
     positionRelative: css`
@@ -48,10 +43,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
     rowWithContext: css`
       label: rowWithContext;
       z-index: 1;
-      outline: 9999px solid
-        ${tinycolor(outlineColor as tinycolor.ColorInput)
-          .setAlpha(0.7)
-          .toRgbString()};
+      outline: 9999px solid ${outlineColor};
     `,
     horizontalScroll: css`
       label: verticalScroll;
@@ -84,17 +76,14 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
     const style = getLogRowStyles(theme, row.logLevel);
     const { entry, hasAnsi, raw } = row;
 
-    const previewHighlights = highlighterExpressions && !_.isEqual(highlighterExpressions, row.searchWords);
+    const previewHighlights = highlighterExpressions?.length && !isEqual(highlighterExpressions, row.searchWords);
     const highlights = previewHighlights ? highlighterExpressions : row.searchWords;
-    const needsHighlighter = highlights && highlights.length > 0 && highlights[0] && highlights[0].length > 0;
+    const needsHighlighter =
+      highlights && highlights.length > 0 && highlights[0] && highlights[0].length > 0 && entry.length < MAX_CHARACTERS;
     const highlightClassName = previewHighlights
       ? cx([style.logsRowMatchHighLight, style.logsRowMatchHighLightPreview])
       : cx([style.logsRowMatchHighLight]);
     const styles = getStyles(theme);
-    const whiteSpacePreWrap = {
-      label: 'white-space-pre-wrap',
-      whiteSpace: 'pre-wrap',
-    };
 
     return (
       <td className={style.logsRowMessage}>
@@ -116,9 +105,8 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
           <span className={cx(styles.positionRelative, { [styles.rowWithContext]: contextIsOpen })}>
             {needsHighlighter ? (
               <Highlighter
-                style={whiteSpacePreWrap}
                 textToHighlight={entry}
-                searchWords={highlights}
+                searchWords={highlights ?? []}
                 findChunks={findHighlightChunksInText}
                 highlightClassName={highlightClassName}
               />
@@ -129,7 +117,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
             )}
           </span>
           {showContextToggle?.(row) && (
-            <span onClick={this.onContextToggle} className={cx(style.context)}>
+            <span onClick={this.onContextToggle} className={cx('log-row-context', style.context)}>
               {contextIsOpen ? 'Hide' : 'Show'} context
             </span>
           )}

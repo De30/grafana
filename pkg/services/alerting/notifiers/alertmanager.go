@@ -2,7 +2,9 @@ package notifiers
 
 import (
 	"context"
+	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/grafana/grafana/pkg/bus"
@@ -17,34 +19,51 @@ func init() {
 		Type:        "prometheus-alertmanager",
 		Name:        "Prometheus Alertmanager",
 		Description: "Sends alert to Prometheus Alertmanager",
+		Heading:     "Alertmanager settings",
 		Factory:     NewAlertmanagerNotifier,
-		OptionsTemplate: `
-      <h3 class="page-heading">Alertmanager settings</h3>
-		<div class="gf-form">
-        	<span class="gf-form-label width-10">Url</span>
-        	<input type="text" required class="gf-form-input max-width-26" ng-model="ctrl.model.settings.url" placeholder="http://localhost:9093"></input>
-		</div>
-		<div class="gf-form">
-        	<span class="gf-form-label width-10">Basic Auth User</span>
-        	<input type="text" class="gf-form-input max-width-26" ng-model="ctrl.model.settings.basicAuthUser" placeholder=""></input>
-		</div>
-		<div class="gf-form">
-        	<span class="gf-form-label width-10">Basic Auth Password</span>
-        	<input type="text" class="gf-form-input max-width-26" ng-model="ctrl.model.settings.basicAuthPassword" placeholder=""></input>
-		</div>
-      </div>
-    `,
+		Options: []alerting.NotifierOption{
+			{
+				Label:        "Url",
+				Element:      alerting.ElementTypeInput,
+				InputType:    alerting.InputTypeText,
+				Description:  "As specified in Alertmanager documentation, do not specify a load balancer here. Enter all your Alertmanager URLs comma-separated.",
+				Placeholder:  "http://localhost:9093",
+				PropertyName: "url",
+				Required:     true,
+			},
+			{
+				Label:        "Basic Auth User",
+				Element:      alerting.ElementTypeInput,
+				InputType:    alerting.InputTypeText,
+				PropertyName: "basicAuthUser",
+			},
+			{
+				Label:        "Basic Auth Password",
+				Element:      alerting.ElementTypeInput,
+				InputType:    alerting.InputTypePassword,
+				PropertyName: "basicAuthPassword",
+				Secure:       true,
+			},
+		},
 	})
 }
 
 // NewAlertmanagerNotifier returns a new Alertmanager notifier
 func NewAlertmanagerNotifier(model *models.AlertNotification) (alerting.Notifier, error) {
-	url := model.Settings.Get("url").MustString()
-	if url == "" {
+	urlString := model.Settings.Get("url").MustString()
+	if urlString == "" {
 		return nil, alerting.ValidationError{Reason: "Could not find url property in settings"}
 	}
+
+	var url []string
+	for _, u := range strings.Split(urlString, ",") {
+		u = strings.TrimSpace(u)
+		if u != "" {
+			url = append(url, u)
+		}
+	}
 	basicAuthUser := model.Settings.Get("basicAuthUser").MustString()
-	basicAuthPassword := model.Settings.Get("basicAuthPassword").MustString()
+	basicAuthPassword := model.DecryptedValue("basicAuthPassword", model.Settings.Get("basicAuthPassword").MustString())
 
 	return &AlertmanagerNotifier{
 		NotifierBase:      NewNotifierBase(model),
@@ -58,7 +77,7 @@ func NewAlertmanagerNotifier(model *models.AlertNotification) (alerting.Notifier
 // AlertmanagerNotifier sends alert notifications to the alert manager
 type AlertmanagerNotifier struct {
 	NotifierBase
-	URL               string
+	URL               []string
 	BasicAuthUser     string
 	BasicAuthPassword string
 	log               log.Logger
@@ -152,18 +171,26 @@ func (am *AlertmanagerNotifier) Notify(evalContext *alerting.EvalContext) error 
 
 	bodyJSON := simplejson.NewFromAny(alerts)
 	body, _ := bodyJSON.MarshalJSON()
+	errCnt := 0
 
-	cmd := &models.SendWebhookSync{
-		Url:        am.URL + "/api/v1/alerts",
-		User:       am.BasicAuthUser,
-		Password:   am.BasicAuthPassword,
-		HttpMethod: "POST",
-		Body:       string(body),
+	for _, url := range am.URL {
+		cmd := &models.SendWebhookSync{
+			Url:        strings.TrimSuffix(url, "/") + "/api/v1/alerts",
+			User:       am.BasicAuthUser,
+			Password:   am.BasicAuthPassword,
+			HttpMethod: "POST",
+			Body:       string(body),
+		}
+
+		if err := bus.DispatchCtx(evalContext.Ctx, cmd); err != nil {
+			am.log.Error("Failed to send alertmanager", "error", err, "alertmanager", am.Name, "url", url)
+			errCnt++
+		}
 	}
 
-	if err := bus.DispatchCtx(evalContext.Ctx, cmd); err != nil {
-		am.log.Error("Failed to send alertmanager", "error", err, "alertmanager", am.Name)
-		return err
+	// This happens when every dispatch return error
+	if errCnt == len(am.URL) {
+		return fmt.Errorf("failed to send alert to alertmanager")
 	}
 
 	return nil
