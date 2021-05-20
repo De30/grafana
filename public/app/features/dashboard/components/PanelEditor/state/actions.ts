@@ -1,40 +1,129 @@
 import { DashboardModel, PanelModel } from '../../../state';
-import { PanelData } from '@grafana/data';
 import { ThunkResult } from 'app/types';
+import { appEvents } from 'app/core/core';
+import { SaveLibraryPanelModal } from 'app/features/library-panels/components/SaveLibraryPanelModal/SaveLibraryPanelModal';
 import {
   closeCompleted,
   PANEL_EDITOR_UI_STATE_STORAGE_KEY,
   PanelEditorUIState,
-  setEditorPanelData,
   setPanelEditorUIState,
   updateEditorInitState,
+  setDiscardChanges,
 } from './reducers';
 import { cleanUpEditPanel, panelModelAndPluginReady } from '../../../state/reducers';
-import store from '../../../../../core/store';
+import store from 'app/core/store';
+import { pick } from 'lodash';
+import { locationService } from '@grafana/runtime';
+import { ShowModalReactEvent } from '../../../../../types/events';
 
 export function initPanelEditor(sourcePanel: PanelModel, dashboard: DashboardModel): ThunkResult<void> {
-  return dispatch => {
+  return (dispatch) => {
     const panel = dashboard.initEditPanel(sourcePanel);
-
-    const queryRunner = panel.getQueryRunner();
-    const querySubscription = queryRunner.getData({ withTransforms: false }).subscribe({
-      next: (data: PanelData) => dispatch(setEditorPanelData(data)),
-    });
 
     dispatch(
       updateEditorInitState({
         panel,
         sourcePanel,
-        querySubscription,
       })
     );
   };
 }
 
+export function updateSourcePanel(sourcePanel: PanelModel): ThunkResult<void> {
+  return (dispatch, getStore) => {
+    const { getPanel } = getStore().panelEditor;
+
+    dispatch(
+      updateEditorInitState({
+        panel: getPanel(),
+        sourcePanel,
+      })
+    );
+  };
+}
+
+export function discardPanelChanges(): ThunkResult<void> {
+  return async (dispatch, getStore) => {
+    const { getPanel } = getStore().panelEditor;
+    getPanel().configRev = 0;
+    dispatch(setDiscardChanges(true));
+  };
+}
+export function exitPanelEditor(): ThunkResult<void> {
+  return async (dispatch, getStore) => {
+    const dashboard = getStore().dashboard.getModel();
+    const { getPanel, shouldDiscardChanges } = getStore().panelEditor;
+    const onConfirm = () => locationService.partial({ editPanel: null, tab: null });
+
+    const panel = getPanel();
+    const onDiscard = () => {
+      dispatch(discardPanelChanges());
+      onConfirm();
+    };
+
+    if (shouldDiscardChanges || !panel.libraryPanel) {
+      onConfirm();
+      return;
+    }
+
+    if (!panel.hasChanged) {
+      onConfirm();
+      return;
+    }
+
+    appEvents.publish(
+      new ShowModalReactEvent({
+        component: SaveLibraryPanelModal,
+        props: {
+          panel,
+          folderId: dashboard!.meta.folderId,
+          isOpen: true,
+          onConfirm,
+          onDiscard,
+        },
+      })
+    );
+  };
+}
+
+function updateDuplicateLibraryPanels(modifiedPanel: PanelModel, dashboard: DashboardModel, dispatch: any) {
+  if (modifiedPanel.libraryPanel?.uid === undefined) {
+    return;
+  }
+
+  const modifiedSaveModel = modifiedPanel.getSaveModel();
+  for (const panel of dashboard.panels) {
+    if (panel.libraryPanel?.uid !== modifiedPanel.libraryPanel!.uid) {
+      continue;
+    }
+
+    panel.restoreModel({
+      ...modifiedSaveModel,
+      ...pick(panel, 'gridPos', 'id'),
+    });
+
+    // Loaded plugin is not included in the persisted properties
+    // So is not handled by restoreModel
+    const pluginChanged = panel.plugin?.meta.id !== modifiedPanel.plugin?.meta.id;
+    panel.plugin = modifiedPanel.plugin;
+    panel.configRev++;
+
+    if (pluginChanged) {
+      dispatch(panelModelAndPluginReady({ panelId: panel.id, plugin: panel.plugin! }));
+    }
+
+    // Resend last query result on source panel query runner
+    // But do this after the panel edit editor exit process has completed
+    setTimeout(() => {
+      panel.getQueryRunner().useLastResultFrom(modifiedPanel.getQueryRunner());
+    }, 20);
+  }
+}
+
 export function panelEditorCleanUp(): ThunkResult<void> {
   return (dispatch, getStore) => {
     const dashboard = getStore().dashboard.getModel();
-    const { getPanel, getSourcePanel, querySubscription, shouldDiscardChanges } = getStore().panelEditor;
+    const { getPanel, getSourcePanel, shouldDiscardChanges } = getStore().panelEditor;
 
     if (!shouldDiscardChanges) {
       const panel = getPanel();
@@ -42,10 +131,13 @@ export function panelEditorCleanUp(): ThunkResult<void> {
       const sourcePanel = getSourcePanel();
       const panelTypeChanged = sourcePanel.type !== panel.type;
 
-      // restore the source panel id before we update source panel
+      updateDuplicateLibraryPanels(panel, dashboard!, dispatch);
+
+      // restore the source panel ID before we update source panel
       modifiedSaveModel.id = sourcePanel.id;
 
       sourcePanel.restoreModel(modifiedSaveModel);
+      sourcePanel.configRev++; // force check the configs
 
       // Loaded plugin is not included in the persisted properties
       // So is not handled by restoreModel
@@ -64,10 +156,6 @@ export function panelEditorCleanUp(): ThunkResult<void> {
 
     if (dashboard) {
       dashboard.exitPanelEditor();
-    }
-
-    if (querySubscription) {
-      querySubscription.unsubscribe();
     }
 
     dispatch(cleanUpEditPanel());

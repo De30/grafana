@@ -9,8 +9,9 @@ describe('parseSelector()', () => {
     expect(parsed.labelKeys).toEqual([]);
   });
 
-  it('throws if selector is broken', () => {
-    expect(() => parseSelector('{foo')).toThrow();
+  it('returns a clean selector from an unclosed selector', () => {
+    const parsed = parseSelector('{foo');
+    expect(parsed.selector).toBe('{}');
   });
 
   it('returns the selector sorted by label key', () => {
@@ -116,5 +117,28 @@ describe('expandRecordingRules()', () => {
     expect(expandRecordingRules('metric{}', { metric: 'foo' })).toBe('foo{}');
     expect(expandRecordingRules('metric[]', { metric: 'foo' })).toBe('foo[]');
     expect(expandRecordingRules('metric + foo', { metric: 'foo', foo: 'bar' })).toBe('foo + bar');
+  });
+
+  it('returns query with labels with expanded recording rules', () => {
+    expect(
+      expandRecordingRules('metricA{label1="value1"} / metricB{label2="value2"}', { metricA: 'fooA', metricB: 'fooB' })
+    ).toBe('fooA{label1="value1"} / fooB{label2="value2"}');
+    expect(
+      expandRecordingRules('metricA{label1="value1",label2="value,2"}', {
+        metricA: 'rate(fooA[])',
+      })
+    ).toBe('rate(fooA{label1="value1",label2="value,2"}[])');
+    expect(
+      expandRecordingRules('metricA{label1="value1"} / metricB{label2="value2"}', {
+        metricA: 'rate(fooA[])',
+        metricB: 'rate(fooB[])',
+      })
+    ).toBe('rate(fooA{label1="value1"}[])/ rate(fooB{label2="value2"}[])');
+    expect(
+      expandRecordingRules('metricA{label1="value1",label2="value2"} / metricB{label3="value3"}', {
+        metricA: 'rate(fooA[])',
+        metricB: 'rate(fooB[])',
+      })
+    ).toBe('rate(fooA{label1="value1",label2="value2"}[])/ rate(fooB{label3="value3"}[])');
   });
 });

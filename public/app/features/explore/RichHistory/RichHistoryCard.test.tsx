@@ -52,24 +52,9 @@ describe('RichHistoryCard', () => {
   it('should render all queries', () => {
     const wrapper = setup();
     expect(wrapper.find({ 'aria-label': 'Query text' })).toHaveLength(3);
-    expect(
-      wrapper
-        .find({ 'aria-label': 'Query text' })
-        .at(0)
-        .text()
-    ).toEqual('{"expr":"query1"}');
-    expect(
-      wrapper
-        .find({ 'aria-label': 'Query text' })
-        .at(1)
-        .text()
-    ).toEqual('{"expr":"query2"}');
-    expect(
-      wrapper
-        .find({ 'aria-label': 'Query text' })
-        .at(2)
-        .text()
-    ).toEqual('{"expr":"query3"}');
+    expect(wrapper.find({ 'aria-label': 'Query text' }).at(0).text()).toEqual('{"expr":"query1"}');
+    expect(wrapper.find({ 'aria-label': 'Query text' }).at(1).text()).toEqual('{"expr":"query2"}');
+    expect(wrapper.find({ 'aria-label': 'Query text' }).at(2).text()).toEqual('{"expr":"query3"}');
   });
   it('should render data source icon', () => {
     const wrapper = setup();
@@ -99,6 +84,40 @@ describe('RichHistoryCard', () => {
       const wrapper = setup();
       expect(wrapper.find({ title: 'Add comment' })).toHaveLength(1);
       expect(wrapper.find({ title: 'Edit comment' })).toHaveLength(0);
+    });
+    it('should open update comment form when edit comment button clicked', () => {
+      const wrapper = setup({ query: starredQueryWithComment });
+      const editCommentButton = wrapper.find({ title: 'Edit comment' });
+      editCommentButton.simulate('click');
+      expect(wrapper.find({ 'aria-label': 'Update comment form' })).toHaveLength(1);
+    });
+    it('should close update comment form when escape key pressed', () => {
+      const wrapper = setup({ query: starredQueryWithComment });
+      const editCommentButton = wrapper.find({ title: 'Edit comment' });
+      editCommentButton.simulate('click');
+      wrapper.simulate('keydown', { key: 'Escape' });
+      expect(wrapper.find({ 'aria-label': 'Update comment form' })).toHaveLength(0);
+    });
+    it('should close update comment form when enter and shift keys pressed', () => {
+      const wrapper = setup({ query: starredQueryWithComment });
+      const editCommentButton = wrapper.find({ title: 'Edit comment' });
+      editCommentButton.simulate('click');
+      wrapper.simulate('keydown', { key: 'Enter', shiftKey: true });
+      expect(wrapper.find({ 'aria-label': 'Update comment form' })).toHaveLength(0);
+    });
+    it('should close update comment form when enter and ctrl keys pressed', () => {
+      const wrapper = setup({ query: starredQueryWithComment });
+      const editCommentButton = wrapper.find({ title: 'Edit comment' });
+      editCommentButton.simulate('click');
+      wrapper.simulate('keydown', { key: 'Enter', ctrlKey: true });
+      expect(wrapper.find({ 'aria-label': 'Update comment form' })).toHaveLength(0);
+    });
+    it('should not close update comment form when enter key pressed', () => {
+      const wrapper = setup({ query: starredQueryWithComment });
+      const editCommentButton = wrapper.find({ title: 'Edit comment' });
+      editCommentButton.simulate('click');
+      wrapper.simulate('keydown', { key: 'Enter', shiftKey: false });
+      expect(wrapper.find({ 'aria-label': 'Update comment form' })).toHaveLength(1);
     });
   });
 
