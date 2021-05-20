@@ -1,12 +1,11 @@
 +++
 title = "Legacy plugins"
-type = "docs"
-aliases = ["/docs/grafana/latest/plugins/development/", "/docs/grafana/latest/plugins/datasources/", "/docs/grafana/latest/plugins/apps/", "/docs/grafana/latest/plugins/panels/", "/docs/grafana/latest/plugins/developing/development/"]
+aliases = ["/docs/grafana/latest/plugins/development/", "/docs/grafana/next/plugins/datasources/", "/docs/grafana/next/plugins/apps/", "/docs/grafana/next/plugins/panels/", "/docs/grafana/next/plugins/developing/development/"]
 +++
 
 # Legacy plugins
 
-> **Note**: Since Grafana 7.0, writing plugins using Angular is no longer recommended. If you're looking to build a new plugin, refer to [Plugins]({{< relref "../_index.md" >}}).
+> **Note:** Since Grafana 7.0, writing plugins using Angular is no longer recommended. If you're looking to build a new plugin, refer to [Plugins]({{< relref "../_index.md" >}}).
 
 You can extend Grafana by writing your own plugins and then share them with other users in [our plugin repository](https://grafana.com/plugins).
 
@@ -14,9 +13,9 @@ Grafana already has a strong community of contributors and plugin developers. By
 
 ## Short version
 
-1. [Set up Grafana](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md)
-2. Clone an example plugin into ```/var/lib/grafana/plugins```  or `data/plugins` (relative to grafana git repo if you're running development version from source dir)
-3. Use one of our example plugins as a starting point
+1. [Set up Grafana](https://github.com/grafana/grafana/blob/main/contribute/developer-guide.md)
+1. Clone an example plugin into `/var/lib/grafana/plugins` or `data/plugins` (relative to grafana git repo if you're running development version from source dir)
+1. Use one of our example plugins as a starting point
 
 Example plugins
 
@@ -36,11 +35,11 @@ Since everything turns into JavaScript, it's up to you to choose which language 
 
 ## Buildscript
 
-You can use any build system that supports systemjs. All the built content should end up in a folder named ```dist``` and be committed to the repository. By committing the dist folder, the person who installs your plugin does not have to run any build script. All of our example plugins have a build script configured.
+You can use any build system that supports systemjs. All the built content should end up in a folder named `dist` and be committed to the repository. By committing the dist folder, the person who installs your plugin does not have to run any build script. All of our example plugins have a build script configured.
 
 ## Keep your plugin up to date
 
-New versions of Grafana can sometimes cause plugins to break. Check out our [PLUGIN_DEV.md](https://github.com/grafana/grafana/blob/master/PLUGIN_DEV.md) doc for changes in
+New versions of Grafana can sometimes cause plugins to break. Check out our [PLUGIN_DEV.md](https://github.com/grafana/grafana/blob/main/PLUGIN_DEV.md) doc for changes in
 Grafana that can impact your plugin.
 
 ## Metadata
@@ -56,43 +55,39 @@ and [apps]({{< relref "apps.md" >}}) plugins in the documentation.
 
 The Grafana SDK is quite small so far and can be found here:
 
-- [SDK file in Grafana](https://github.com/grafana/grafana/blob/master/public/app/plugins/sdk.ts)
+- [SDK file in Grafana](https://github.com/grafana/grafana/blob/main/public/app/plugins/sdk.ts)
 
 The SDK contains three different plugin classes: PanelCtrl, MetricsPanelCtrl and QueryCtrl. For plugins of the panel type, the module.js file should export one of these. There are some extra classes for [data sources]({{< relref "data-sources.md" >}}).
 
 Example:
 
 ```javascript
-import {ClockCtrl} from './clock_ctrl';
+import { ClockCtrl } from './clock_ctrl';
 
-export {
-  ClockCtrl as PanelCtrl
-};
+export { ClockCtrl as PanelCtrl };
 ```
 
 The module class is also where css for the dark and light themes is imported:
 
 ```javascript
-import {loadPluginCss} from 'app/plugins/sdk';
+import { loadPluginCss } from 'app/plugins/sdk';
 import WorldmapCtrl from './worldmap_ctrl';
 
 loadPluginCss({
   dark: 'plugins/grafana-worldmap-panel/css/worldmap.dark.css',
-  light: 'plugins/grafana-worldmap-panel/css/worldmap.light.css'
+  light: 'plugins/grafana-worldmap-panel/css/worldmap.light.css',
 });
 
-export {
-  WorldmapCtrl as PanelCtrl
-};
+export { WorldmapCtrl as PanelCtrl };
 ```
 
 ## Start developing your plugin
 
 There are three ways that you can start developing a Grafana plugin.
 
-1. Set up a Grafana development environment. [(described here)](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md) and place your plugin in the ```data/plugins``` folder.
-2. Install Grafana and place your plugin in the plugins directory which is set in your [config file](/installation/configuration). By default this is `/var/lib/grafana/plugins` on Linux systems.
-3. Place your plugin directory anywhere you like and specify it grafana.ini.
+1. Set up a Grafana development environment. [(described here)](https://github.com/grafana/grafana/blob/main/contribute/developer-guide.md) and place your plugin in the `data/plugins` folder.
+1. Install Grafana and place your plugin in the plugins directory which is set in your [config file](/administration/configuration). By default this is `/var/lib/grafana/plugins` on Linux systems.
+1. Place your plugin directory anywhere you like and specify it grafana.ini.
 
 We encourage people to set up the full Grafana environment so that you can get inspiration from the rest of the Grafana code base.
 
@@ -116,11 +111,11 @@ If a panel receives data and hooks into the `data-received` event then it should
 
 We have three different examples that you can fork/download to get started developing your Grafana plugin.
 
- - [simple-json-datasource](https://github.com/grafana/simple-json-datasource) (small data source plugin for querying json data from backends)
- - [simple-app-plugin](https://github.com/grafana/simple-app-plugin)
- - [clock-panel](https://github.com/grafana/clock-panel)
- - [singlestat-panel](https://github.com/grafana/grafana/tree/master/public/app/plugins/panel/singlestat)
- - [piechart-panel](https://github.com/grafana/piechart-panel)
+- [simple-json-datasource](https://github.com/grafana/simple-json-datasource) (small data source plugin for querying json data from backends)
+- [simple-app-plugin](https://github.com/grafana/simple-app-plugin)
+- [clock-panel](https://github.com/grafana/clock-panel)
+- [singlestat-panel](https://github.com/grafana/grafana/tree/main/public/app/plugins/panel/singlestat)
+- [piechart-panel](https://github.com/grafana/piechart-panel)
 
 ## Other Articles
 
@@ -129,4 +124,4 @@ We have three different examples that you can fork/download to get started devel
 - [Grafana Plugin Code Styleguide]({{< relref "style-guide.md" >}})
 - [Grafana Apps]({{< relref "apps.md" >}})
 - [Grafana Data Sources]({{< relref "data-sources.md" >}})
-- [plugin.json Schema]({{< relref "metadata.md" >}})
+- [plugin.json Schema]({{< relref "../metadata.md" >}})

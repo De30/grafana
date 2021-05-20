@@ -2,12 +2,7 @@
 title = "Okta OAuth2 authentication"
 description = "Grafana Okta OAuth Guide "
 keywords = ["grafana", "configuration", "documentation", "oauth"]
-type = "docs"
-[menu.docs]
-name = "Okta"
-identifier = "okta_oauth2"
-parent = "authentication"
-weight = 3
+weight = 1000
 +++
 
 # Okta OAuth2 authentication
@@ -36,9 +31,9 @@ Before you can sign a user in, you need to create an Okta application from the O
 
 1. Click **Done** to finish creating the Okta application.
 
-## Enable Okta Oauth in Grafana
+## Enable Okta OAuth in Grafana
 
-1. Add the following to the [Grafana configuration file]({{< relref "../installation/configuration.md#config-file-locations" >}}):
+1. Add the following to the [Grafana configuration file]({{< relref "../administration/configuration.md#config-file-locations" >}}):
 
 ```ini
 [auth.okta]

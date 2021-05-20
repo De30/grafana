@@ -1,6 +1,5 @@
 +++
 title = "Legacy code style guide"
-type = "docs"
 aliases = ["/docs/grafana/latest/plugins/developing/code-styleguide/"]
 +++
 
@@ -27,7 +26,7 @@ grafana-piechart-panel
 mtanda-histogram-panel
 ```
 
-The full file format for plugin.json is described [here]({{< relref "metadata.md" >}}).
+For more information about the file format for `plugin.json` file, refer to [metadata]({{< relref "../metadata.md" >}}).
 
 Minimal plugin.json:
 
@@ -110,11 +109,23 @@ Below is a minimal example of an editor row with one form group and two fields, 
     <div class="gf-form">
       <label class="gf-form-label width-10">Label1</label>
       <div class="gf-form-select-wrapper max-width-10">
-        <select class="input-small gf-form-input" ng-model="ctrl.panel.mySelectProperty" ng-options="t for t in ['option1', 'option2', 'option3']" ng-change="ctrl.onSelectChange()"></select>
+        <select
+          class="input-small gf-form-input"
+          ng-model="ctrl.panel.mySelectProperty"
+          ng-options="t for t in ['option1', 'option2', 'option3']"
+          ng-change="ctrl.onSelectChange()"
+        ></select>
       </div>
       <div class="gf-form">
         <label class="gf-form-label width-10">Label2</label>
-        <input type="text" class="input-small gf-form-input width-10" ng-model="ctrl.panel.myProperty" ng-change="ctrl.onFieldChange()" placeholder="suggestion for user" ng-model-onblur />
+        <input
+          type="text"
+          class="input-small gf-form-input width-10"
+          ng-model="ctrl.panel.myProperty"
+          ng-change="ctrl.onFieldChange()"
+          placeholder="suggestion for user"
+          ng-model-onblur
+        />
       </div>
     </div>
   </div>
@@ -129,51 +140,53 @@ Our recommendation is to use whatever you usually use - Grunt, Gulp or npm scrip
 
 ## Linting
 
-We recommend that you use a linter for your JavaScript. For ES6, the standard linter is [eslint](http://eslint.org/). Rules for linting are described in an .eslintrc that is placed in the root directory. [Here is an example](https://github.com/grafana/worldmap-panel/blob/master/.eslintrc) of linting rules in a plugin.
+We recommend that you use a linter for your JavaScript. For ES6, the standard linter is [eslint](http://eslint.org/). Rules for linting are described in an .eslintrc that is placed in the root directory. For an example of linting rules in a plugin, refer to [.eslintrc](https://github.com/grafana/worldmap-panel/blob/master/.eslintrc).
 
 ### ES6 features
 
 1. Use `const` if a variable is not going to be reassigned.
-2. Prefer to use `let` instead `var` ([Exploring ES6](http://exploringjs.com/es6/ch_core-features.html#_from-var-to-letconst))
-3. Use arrow functions, which don’t shadow `this` ([Exploring ES6](http://exploringjs.com/es6/ch_core-features.html#_from-function-expressions-to-arrow-functions)):
+1. Prefer to use `let` instead `var` ([Exploring ES6](http://exploringjs.com/es6/ch_core-features.html#_from-var-to-letconst))
+1. Use arrow functions, which don’t shadow `this` ([Exploring ES6](http://exploringjs.com/es6/ch_core-features.html#_from-function-expressions-to-arrow-functions)):
 
-    ```js
-    testDatasource() {
-      return this.getServerStatus()
-      .then(status => {
-        return this.doSomething(status);
-      })
-    }
-    ```
+   ```js
+   testDatasource() {
+     return this.getServerStatus()
+     .then(status => {
+       return this.doSomething(status);
+     })
+   }
+   ```
 
-    better than
+   better than
 
-    ```js
-    testDatasource() {
-      var self = this;
-      return this.getServerStatus()
-      .then(function(status) {
-        return self.doSomething(status);
-      })
-    }
-    ```
-4. Use native _Promise_ object:
+   ```js
+   testDatasource() {
+     var self = this;
+     return this.getServerStatus()
+     .then(function(status) {
+       return self.doSomething(status);
+     })
+   }
+   ```
 
-    ```js
-    metricFindQuery(query) {
-      if (!query) {
-        return Promise.resolve([]);
-      }
-    }
-    ```
+1. Use native _Promise_ object:
 
-    better than
+   ```js
+   metricFindQuery(query) {
+     if (!query) {
+       return Promise.resolve([]);
+     }
+   }
+   ```
 
-    ```js
-    metricFindQuery(query) {
-      if (!query) {
-        return this.$q.when([]);
-      }
-    }
-    ```
-5. If using Lodash, then be consistent and prefer that to the native ES6 array functions.
+   better than
+
+   ```js
+   metricFindQuery(query) {
+     if (!query) {
+       return this.$q.when([]);
+     }
+   }
+   ```
+
+1. If using Lodash, then be consistent and prefer that to the native ES6 array functions.
