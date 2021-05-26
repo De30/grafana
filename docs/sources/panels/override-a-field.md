@@ -1,6 +1,7 @@
 +++
 title = "Configure specific fields"
 keywords = ["grafana", "field options", "documentation", "format fields", "overrides", "override fields"]
+aliases = ["/docs/grafana/latest/panels/field-options/configure-specific-fields/"]
 weight = 300
 +++
 
