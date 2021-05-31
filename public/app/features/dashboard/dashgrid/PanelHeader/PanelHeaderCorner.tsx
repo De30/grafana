@@ -81,9 +81,10 @@ export class PanelHeaderCorner extends Component<Props> {
     const theme = infoMode === InfoMode.Error ? 'error' : 'info';
     const className = `panel-info-corner panel-info-corner--${infoMode.toLowerCase()}`;
     const ariaLabel = selectors.components.Panels.Panel.headerCornerInfo(infoMode.toLowerCase());
+    const placement = infoMode === InfoMode.Info ? 'bottom-start' : 'top-start';
 
     return (
-      <Tooltip content={content} placement="top-start" theme={theme}>
+      <Tooltip content={content} placement={placement} theme={theme}>
         <div className={className} onClick={onClick} aria-label={ariaLabel}>
           <i className="fa" />
           <span className="panel-info-corner-inner" />
