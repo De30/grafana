@@ -192,7 +192,7 @@ func (rp *responseParser) processMetrics(esAgg *simplejson.Json, target *Query, 
 			tags["metric"] = countType
 			frames = append(frames, data.NewFrame(metric.Field,
 				data.NewField("time", nil, timeVector),
-				data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: metric.Field})))
+				data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metric.Field})))
 		case percentilesType:
 			buckets := esAggBuckets
 			if len(buckets) == 0 {
@@ -224,7 +224,7 @@ func (rp *responseParser) processMetrics(esAgg *simplejson.Json, target *Query, 
 				}
 				frames = append(frames, data.NewFrame(metric.Field,
 					data.NewField("time", nil, timeVector),
-					data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: tags["metric"] + " " + metric.Field})))
+					data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metric.Field})))
 			}
 		case topMetricsType:
 			topMetricSeries := processTopMetrics(metric, esAgg, props)
@@ -271,7 +271,7 @@ func (rp *responseParser) processMetrics(esAgg *simplejson.Json, target *Query, 
 				labels := tags
 				frames = append(frames, data.NewFrame(metric.Field,
 					data.NewField("time", nil, timeVector),
-					data.NewField("value", labels, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: metric.Field})))
+					data.NewField("value", labels, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metric.Field})))
 			}
 		default:
 			for k, v := range props {
@@ -299,7 +299,7 @@ func (rp *responseParser) processMetrics(esAgg *simplejson.Json, target *Query, 
 			}
 			frames = append(frames, data.NewFrame(metric.Field,
 				data.NewField("time", nil, timeVector),
-				data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: metric.Field})))
+				data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metric.Field})))
 		}
 	}
 	if query.Dataframes != nil {
@@ -540,7 +540,7 @@ func (rp *responseParser) getFieldName(dataField data.Field, target *Query, metr
 	}
 
 	if target.Alias != "" {
-		seriesName := target.Alias
+		frameName := target.Alias
 
 		subMatches := aliasPatternRegex.FindAllStringSubmatch(target.Alias, -1)
 		for _, subMatch := range subMatches {
@@ -551,20 +551,20 @@ func (rp *responseParser) getFieldName(dataField data.Field, target *Query, metr
 			}
 
 			if strings.Index(group, "term ") == 0 {
-				seriesName = strings.Replace(seriesName, subMatch[0], dataField.Labels[group[5:]], 1)
+				frameName = strings.Replace(frameName, subMatch[0], dataField.Labels[group[5:]], 1)
 			}
 			if v, ok := dataField.Labels[group]; ok {
-				seriesName = strings.Replace(seriesName, subMatch[0], v, 1)
+				frameName = strings.Replace(frameName, subMatch[0], v, 1)
 			}
 			if group == "metric" {
-				seriesName = strings.Replace(seriesName, subMatch[0], metricName, 1)
+				frameName = strings.Replace(frameName, subMatch[0], metricName, 1)
 			}
 			if group == "field" {
-				seriesName = strings.Replace(seriesName, subMatch[0], field, 1)
+				frameName = strings.Replace(frameName, subMatch[0], field, 1)
 			}
 		}
 
-		return seriesName
+		return frameName
 	}
 	// todo, if field and pipelineAgg
 	if field != "" && isPipelineAgg(metricType) {
