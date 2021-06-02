@@ -1,4 +1,4 @@
-import { reduceError } from './utils';
+import { improveError } from './utils';
 
 const SAMPLE_500_PAGE = `<body style="background-color: #666666; color: black;">
 <center>
@@ -41,7 +41,7 @@ describe('Graphite utils', () => {
       },
     };
 
-    expect(reduceError(error)).toMatchObject({
+    expect(improveError(error)).toMatchObject({
       data: {
         message: 'Graphite encountered an unexpected error while handling your request. KeyError: aliasByNodde',
       },
@@ -56,7 +56,7 @@ describe('Graphite utils', () => {
       },
     };
 
-    expect(reduceError(error)).toMatchObject({
+    expect(improveError(error)).toMatchObject({
       data: {
         message: 'ERROR MESSAGE',
       },
@@ -71,7 +71,7 @@ describe('Graphite utils', () => {
       },
     };
 
-    expect(reduceError(error)).toMatchObject({
+    expect(improveError(error)).toMatchObject({
       data: {
         message: 'ERROR MESSAGE',
       },
@@ -83,8 +83,21 @@ describe('Graphite utils', () => {
       message: 'ERROR MESSAGE',
     };
 
-    expect(reduceError(error)).toMatchObject({
+    expect(improveError(error)).toMatchObject({
       message: 'ERROR MESSAGE',
+    });
+  });
+
+  it('should reuse message from unathorized errors', () => {
+    const error = {
+      status: 400,
+      data: {
+        message: 'Authentication to data source failed',
+      },
+    };
+
+    expect(improveError(error)).toMatchObject({
+      message: 'Authentication to data source failed',
     });
   });
 });

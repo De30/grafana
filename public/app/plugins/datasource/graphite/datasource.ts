@@ -29,7 +29,7 @@ import { getSearchFilterScopedVar } from '../../../features/variables/utils';
 import { Observable, of, OperatorFunction, pipe, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { DEFAULT_GRAPHITE_VERSION } from './versions';
-import { reduceError } from './utils';
+import { improveError } from './utils';
 
 export class GraphiteDatasource extends DataSourceApi<
   GraphiteQuery,
@@ -732,7 +732,7 @@ export class GraphiteDatasource extends DataSourceApi<
       .fetch(options)
       .pipe(
         catchError((err: any) => {
-          return throwError(reduceError(err));
+          return throwError(improveError(err));
         })
       );
   }
