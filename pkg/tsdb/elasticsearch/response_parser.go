@@ -227,8 +227,46 @@ func (rp *responseParser) processMetrics(esAgg *simplejson.Json, target *Query, 
 					data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metric.Field})))
 			}
 		case topMetricsType:
-			topMetricSeries := processTopMetrics(metric, esAgg, props)
-			*series = append(*series, topMetricSeries...)
+			buckets := esAggBuckets
+			metrics := metric.Settings.Get("metrics").MustArray()
+
+			for _, metricField := range metrics {
+				for _, v := range buckets {
+					bucket := simplejson.NewFromAny(v)
+					stats := bucket.GetPath(metric.ID, "top")
+					key := castToFloat(bucket.Get("key"))
+
+					tags := make(map[string]string, len(props))
+
+					for k, v := range props {
+						tags[k] = v
+					}
+					tags["metric"] = "top_metrics"
+					tags["field"] = metricField.(string)
+
+					timeVector = append(timeVector, time.Unix(int64(*key)/1000, 0).UTC())
+
+					for _, stat := range stats.MustArray() {
+						stat := stat.(map[string]interface{})
+
+						metrics, hasMetrics := stat["metrics"]
+						if hasMetrics {
+							metrics := metrics.(map[string]interface{})
+							metricValue, hasMetricValue := metrics[metricField.(string)]
+
+							if hasMetricValue && metricValue != nil {
+								v := metricValue.(float64)
+								values = append(values, &v)
+							}
+						}
+					}
+				}
+
+				frames = append(frames, data.NewFrame(metricField.(string),
+					data.NewField("time", nil, timeVector),
+					data.NewField("value", tags, values).SetConfig(&data.FieldConfig{DisplayNameFromDS: rp.getMetricName(tags["metric"]) + " " + metricField.(string)}),
+				))
+			}
 
 		case extendedStatsType:
 			buckets := esAggBuckets
@@ -677,48 +715,4 @@ func getErrorFromElasticResponse(response *es.SearchResponse) plugins.DataQueryR
 	}
 
 	return result
-}
-
-func processTopMetricValues(stats *simplejson.Json, field string) null.Float {
-	for _, stat := range stats.MustArray() {
-		stat := stat.(map[string]interface{})
-		metrics, hasMetrics := stat["metrics"]
-		if hasMetrics {
-			metrics := metrics.(map[string]interface{})
-			metricValue, hasMetricValue := metrics[field]
-			if hasMetricValue && metricValue != nil {
-				return null.FloatFrom(metricValue.(float64))
-			}
-		}
-	}
-	return null.NewFloat(0, false)
-}
-
-func processTopMetrics(metric *MetricAgg, esAgg *simplejson.Json, props map[string]string) plugins.DataTimeSeriesSlice {
-	var series plugins.DataTimeSeriesSlice
-	metrics, hasMetrics := metric.Settings.MustMap()["metrics"].([]interface{})
-
-	if hasMetrics {
-		for _, metricField := range metrics {
-			newSeries := plugins.DataTimeSeries{
-				Tags: make(map[string]string),
-			}
-
-			for _, v := range esAgg.Get("buckets").MustArray() {
-				bucket := simplejson.NewFromAny(v)
-				stats := bucket.GetPath(metric.ID, "top")
-				value := processTopMetricValues(stats, metricField.(string))
-				key := castToNullFloat(bucket.Get("key"))
-				newSeries.Points = append(newSeries.Points, plugins.DataTimePoint{value, key})
-			}
-
-			for k, v := range props {
-				newSeries.Tags[k] = v
-			}
-			newSeries.Tags["metric"] = "top_metrics"
-			newSeries.Tags["field"] = metricField.(string)
-			series = append(series, newSeries)
-		}
-	}
-	return series
 }
