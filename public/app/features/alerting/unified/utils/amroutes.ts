@@ -110,11 +110,12 @@ export const amRouteToFormAmRoute = (route: Route | undefined): [FormAmRoute, Re
 
 export const formAmRouteToAmRoute = (formAmRoute: FormAmRoute, id2ExistingRoute: Record<string, Route>): Route => {
   const existing: Route | undefined = id2ExistingRoute[formAmRoute.id];
+  const formMatchers = formAmRoute.matchers?.filter((m) => !!m.name.trim() && !!m.value.trim());
   const amRoute: Route = {
     ...(existing ?? {}),
     continue: formAmRoute.continue,
     group_by: formAmRoute.groupBy,
-    matchers: formAmRoute.matchers.length ? formAmRoute.matchers.map(stringifyMatcher) : undefined,
+    matchers: formMatchers.length ? formMatchers.map(stringifyMatcher) : undefined,
     match: undefined,
     match_re: undefined,
     group_wait: formAmRoute.groupWaitValue
