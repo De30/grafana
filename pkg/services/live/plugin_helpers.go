@@ -2,6 +2,9 @@ package live
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/grafana/grafana/pkg/services/live/orgchannel"
 
 	"github.com/grafana/grafana/pkg/models"
 
@@ -19,7 +22,7 @@ func newPluginChannelSender(node *centrifuge.Node) *pluginChannelSender {
 }
 
 func (p *pluginChannelSender) Send(channel string, data []byte) error {
-	_, err := p.node.Publish(channel, data)
+	_, err := p.node.Publish(channel, data, centrifuge.WithHistory(1000, time.Minute))
 	if err != nil {
 		return fmt.Errorf("error publishing %s: %w", string(data), err)
 	}
@@ -54,4 +57,16 @@ func newPluginContextGetter(pluginContextProvider *plugincontext.Provider) *plug
 
 func (g *pluginContextGetter) GetPluginContext(user *models.SignedInUser, pluginID string, datasourceUID string, skipCache bool) (backend.PluginContext, bool, error) {
 	return g.PluginContextProvider.Get(pluginID, datasourceUID, user, skipCache)
+}
+
+type pluginHistoryGetter struct {
+	node *centrifuge.Node
+}
+
+func (g *pluginHistoryGetter) GetHistory(orgID int64, channel string) ([]*centrifuge.Publication, error) {
+	res, err := g.node.History(orgchannel.PrependOrgID(orgID, channel), centrifuge.WithLimit(centrifuge.NoLimit))
+	if err != nil {
+		return nil, err
+	}
+	return res.Publications, nil
 }

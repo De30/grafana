@@ -2,6 +2,9 @@ package features
 
 import (
 	"context"
+	"encoding/json"
+
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/live/orgchannel"
@@ -17,6 +20,10 @@ type PluginContextGetter interface {
 	GetPluginContext(user *models.SignedInUser, pluginID string, datasourceUID string, skipCache bool) (backend.PluginContext, bool, error)
 }
 
+type PluginHistoryGetter interface {
+	GetHistory(orgID int64, channel string) ([]*centrifuge.Publication, error)
+}
+
 // PluginRunner can handle streaming operations for channels belonging to plugins.
 type PluginRunner struct {
 	pluginID            string
@@ -24,16 +31,18 @@ type PluginRunner struct {
 	pluginContextGetter PluginContextGetter
 	handler             backend.StreamHandler
 	runStreamManager    *runstream.Manager
+	historyGetter       PluginHistoryGetter
 }
 
 // NewPluginRunner creates new PluginRunner.
-func NewPluginRunner(pluginID string, datasourceUID string, runStreamManager *runstream.Manager, pluginContextGetter PluginContextGetter, handler backend.StreamHandler) *PluginRunner {
+func NewPluginRunner(pluginID string, datasourceUID string, runStreamManager *runstream.Manager, pluginContextGetter PluginContextGetter, handler backend.StreamHandler, historyGetter PluginHistoryGetter) *PluginRunner {
 	return &PluginRunner{
 		pluginID:            pluginID,
 		datasourceUID:       datasourceUID,
 		pluginContextGetter: pluginContextGetter,
 		handler:             handler,
 		runStreamManager:    runStreamManager,
+		historyGetter:       historyGetter,
 	}
 }
 
@@ -46,6 +55,7 @@ func (m *PluginRunner) GetHandlerForPath(path string) (models.ChannelHandler, er
 		runStreamManager:    m.runStreamManager,
 		handler:             m.handler,
 		pluginContextGetter: m.pluginContextGetter,
+		historyGetter:       m.historyGetter,
 	}, nil
 }
 
@@ -57,6 +67,7 @@ type PluginPathRunner struct {
 	runStreamManager    *runstream.Manager
 	handler             backend.StreamHandler
 	pluginContextGetter PluginContextGetter
+	historyGetter       PluginHistoryGetter
 }
 
 // OnSubscribe passes control to a plugin.
@@ -99,6 +110,40 @@ func (r *PluginPathRunner) OnSubscribe(ctx context.Context, user *models.SignedI
 	if resp.InitialData != nil {
 		reply.Data = resp.InitialData.Data()
 	}
+
+	pubs, err := r.historyGetter.GetHistory(user.OrgId, e.Channel)
+	if err != nil {
+		return reply, 0, err
+	}
+	var frame data.Frame
+	err = json.Unmarshal(reply.Data, &frame)
+	if err != nil {
+		return reply, 0, err
+	}
+	s, _ := frame.StringTable(10, 10)
+	println(s)
+	if len(pubs) > 0 {
+		for i := 0; i < len(pubs); i++ {
+			newFrame := frame.EmptyCopy()
+			err = json.Unmarshal(pubs[i].Data, &newFrame)
+			if err != nil {
+				return reply, 0, err
+			}
+			var values []interface{}
+			for _, field := range newFrame.Fields {
+				values = append(values, field.At(0))
+			}
+			frame.AppendRow(values...)
+		}
+		frameData, err := data.FrameToJSON(&frame, data.IncludeAll)
+		if err != nil {
+			return reply, 0, err
+		}
+		s, _ := frame.StringTable(10, 10)
+		println(s)
+		reply.Data = frameData
+	}
+
 	return reply, backend.SubscribeStreamStatusOK, nil
 }
 

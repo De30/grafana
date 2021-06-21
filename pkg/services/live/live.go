@@ -541,6 +541,7 @@ func (g *GrafanaLive) handlePluginScope(_ *models.SignedInUser, namespace string
 		g.runStreamManager,
 		g.contextGetter,
 		streamHandler,
+		&pluginHistoryGetter{node: g.node},
 	), nil
 }
 
@@ -570,6 +571,7 @@ func (g *GrafanaLive) handleDatasourceScope(user *models.SignedInUser, namespace
 		g.runStreamManager,
 		g.contextGetter,
 		streamHandler,
+		&pluginHistoryGetter{node: g.node},
 	), nil
 }
 
