@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 import { DashboardPanelsChangedEvent } from 'app/types/events';
 import { GridPos } from '../state/PanelModel';
 import { config } from '@grafana/runtime';
+import Stories from 'app/features/social/Stories';
 
 export interface Props {
   dashboard: DashboardModel;
@@ -215,42 +216,45 @@ export class DashboardGrid extends PureComponent<Props, State> {
     };
 
     return (
-      <AutoSizer style={autoSizerStyle} disableHeight>
-        {({ width }) => {
-          if (width === 0) {
-            return null;
-          }
+      <>
+        <Stories />
+        <AutoSizer style={autoSizerStyle} disableHeight>
+          {({ width }) => {
+            if (width === 0) {
+              return null;
+            }
 
-          const draggable = width <= 769 ? false : dashboard.meta.canEdit;
+            const draggable = width <= 769 ? false : dashboard.meta.canEdit;
 
-          /*
+            /*
             Disable draggable if mobile device, solving an issue with unintentionally
             moving panels. https://github.com/grafana/grafana/issues/18497
             theme.breakpoints.md = 769      
           */
 
-          return (
-            <ReactGridLayout
-              width={width}
-              isDraggable={draggable}
-              isResizable={dashboard.meta.canEdit}
-              containerPadding={[0, 0]}
-              useCSSTransforms={false}
-              margin={[GRID_CELL_VMARGIN, GRID_CELL_VMARGIN]}
-              cols={GRID_COLUMN_COUNT}
-              rowHeight={GRID_CELL_HEIGHT}
-              draggableHandle=".grid-drag-handle"
-              layout={this.buildLayout()}
-              onDragStop={this.onDragStop}
-              onResize={this.onResize}
-              onResizeStop={this.onResizeStop}
-              onLayoutChange={this.onLayoutChange}
-            >
-              {this.renderPanels(width)}
-            </ReactGridLayout>
-          );
-        }}
-      </AutoSizer>
+            return (
+              <ReactGridLayout
+                width={width}
+                isDraggable={draggable}
+                isResizable={dashboard.meta.canEdit}
+                containerPadding={[0, 0]}
+                useCSSTransforms={false}
+                margin={[GRID_CELL_VMARGIN, GRID_CELL_VMARGIN]}
+                cols={GRID_COLUMN_COUNT}
+                rowHeight={GRID_CELL_HEIGHT}
+                draggableHandle=".grid-drag-handle"
+                layout={this.buildLayout()}
+                onDragStop={this.onDragStop}
+                onResize={this.onResize}
+                onResizeStop={this.onResizeStop}
+                onLayoutChange={this.onLayoutChange}
+              >
+                {this.renderPanels(width)}
+              </ReactGridLayout>
+            );
+          }}
+        </AutoSizer>
+      </>
     );
   }
 }
