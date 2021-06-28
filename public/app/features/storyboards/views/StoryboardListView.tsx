@@ -138,7 +138,7 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
       const msg = ev.data as OutboundNotebookMessage;
       const iFrame = iframeRef.current;
 
-      console.debug('Got Message: %s %o', msg.type, msg);
+      console.debug('Got Message %s: %o', msg.type, msg);
 
       switch (msg.type) {
         case 'NOTEBOOK_RESIZE_REQUEST': {
