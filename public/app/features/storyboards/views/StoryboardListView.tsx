@@ -110,7 +110,7 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
       if (iframeRef.current == null) {
         throw new Error('Not set up yet');
       }
-      console.debug(' * send message %o', message);
+      console.info(' * send message %o', message);
       iframeRef.current.contentWindow?.postMessage(message, '*');
     },
     [iframeRef]
@@ -138,7 +138,7 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
       const msg = ev.data as OutboundNotebookMessage;
       const iFrame = iframeRef.current;
 
-      console.debug('Got Message %s: %o', msg.type, msg);
+      console.info('Got Message %s: %o', msg.type, msg);
 
       switch (msg.type) {
         case 'NOTEBOOK_RESIZE_REQUEST': {
@@ -195,10 +195,10 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
   );
 
   useEffect(() => {
-    console.debug(' * set up iframe message handler');
+    console.info(' * set up iframe message handler');
     window.addEventListener('message', iframeMessageHandler);
     return () => {
-      console.debug(' * remove iframe message handler');
+      console.info(' * remove iframe message handler');
       window.removeEventListener('message', iframeMessageHandler);
     };
   }, [iframeMessageHandler]);
@@ -215,7 +215,7 @@ export const StoryboardListView = () => {
     if (!loaded) {
       return;
     }
-    console.debug('* Sending init data');
+    console.info('* Sending init data');
     sendMessage({
       type: 'NOTEBOOK_SET_INIT_DATA',
       payload: {
@@ -248,7 +248,7 @@ Math should be no issue:
       <Page.Contents>
         <iframe
           onLoad={(e) => {
-            console.debug('* did load', e);
+            console.info('* did load', e);
             setLoaded(true);
           }}
           ref={iframeRef}
