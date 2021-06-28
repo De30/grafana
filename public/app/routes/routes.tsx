@@ -147,14 +147,14 @@ export function getAppRoutes(): RouteDescriptor[] {
         () => import(/* webpackChunkName: "StoryboardListView" */ 'app/features/storyboards/views/StoryboardListView')
       ),
     },
-    // {
-    //   path: '/storyboards/:storyboardId',
-    //   pageClass: 'page-storyboard',
-    //   roles: () => ['Editor', 'Admin'],
-    //   component: SafeDynamicImport(
-    //     () => import(/* webpackChunkName: "StoryboardListView" */ 'app/features/storyboards/views/StoryboardView')
-    //   ),
-    // },
+    {
+      path: '/storyboards/:storyboardId',
+      pageClass: 'page-storyboard',
+      roles: () => ['Editor', 'Admin'],
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "StoryboardView" */ 'app/features/storyboards/views/StoryboardView')
+      ),
+    },
     {
       path: '/a/:pluginId/',
       exact: false,
