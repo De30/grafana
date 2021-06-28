@@ -38,6 +38,7 @@ const (
 
 	WeightCreate = (iota - 20) * 100
 	WeightDashboard
+	WeightStoryboard
 	WeightExplore
 	WeightProfile
 	WeightAlerting
