@@ -11,35 +11,15 @@ import type {
 } from 'starboard-notebook';
 
 export type StarboardNotebookIFrameOptions<ReceivedMessageType = OutboundNotebookMessage> = {
-  /**
-   * Optionally you can pass the iframe to attach to. If you don't pass one here
-   * an iframe will be created as a child unless the starboard-embed element already has an iframe as a child.
-   */
-  iFrame: HTMLIFrameElement | null;
   src: string;
-
   autoResize: boolean;
-
   baseUrl?: string;
-
-  /**
-   * Notebook content to initialize the iframe with
-   */
   notebookContent?: Promise<string> | string;
-
   onNotebookReadySignalMessage(payload: ReadySignalMessage['payload']): void;
-
-  /**
-   * Should return whether the saving was succesful or not.
-   */
   onSaveMessage(payload: SaveMessage['payload']): void | boolean | Promise<boolean>;
   onContentUpdateMessage(payload: ContentUpdateMessage['payload']): void;
   onMessage(message: ReceivedMessageType): void;
   onUnsavedChangesStatusChange(hasUnsavedChanges: boolean): void;
-
-  /**
-   * Custom iframe sandboxing attributes
-   */
   sandbox: string;
   preventNavigationWithUnsavedChanges: boolean;
 };
@@ -75,7 +55,6 @@ function loadDefaultSettings(
     return null;
   }
   return {
-    iFrame: opts.iFrame || null,
     src:
       opts.src ??
       el.getAttribute('src') ??
@@ -138,7 +117,7 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
   );
 
   const iframeMessageHandler = useCallback(
-    async (ev: MessageEvent<unknown>) => {
+    async (ev: MessageEvent<InboundNotebookMessage | OutboundNotebookMessage>) => {
       if (ev.source === null || ev.source !== iframeRef.current?.contentWindow) {
         return;
       }
@@ -152,7 +131,7 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
         return;
       }
 
-      if (!ev.data) {
+      if (ev.data == null) {
         return;
       }
 
@@ -184,7 +163,6 @@ function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOptions>) {
           } else {
             lastSavedNotebookContent.current = notebookContent.current = msg.payload.content;
           }
-          // this.hasReceivedReadyMessage.resolve(msg.payload);
           options.current.onNotebookReadySignalMessage(msg.payload);
           break;
         }
