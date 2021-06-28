@@ -140,11 +140,21 @@ export function getAppRoutes(): RouteDescriptor[] {
       component: SafeDynamicImport(() => import(/* webpackChunkName: "explore" */ 'app/features/explore/Wrapper')),
     },
     {
-      path: '/explore',
+      path: '/storyboards',
       pageClass: 'page-storyboard',
       roles: () => ['Editor', 'Admin'],
-      component: SafeDynamicImport(() => import(/* webpackChunkName: "explore" */ 'app/features/storyboard')),
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "StoryboardListView" */ 'app/features/storyboards/views/StoryboardListView')
+      ),
     },
+    // {
+    //   path: '/storyboards/:storyboardId',
+    //   pageClass: 'page-storyboard',
+    //   roles: () => ['Editor', 'Admin'],
+    //   component: SafeDynamicImport(
+    //     () => import(/* webpackChunkName: "StoryboardListView" */ 'app/features/storyboards/views/StoryboardView')
+    //   ),
+    // },
     {
       path: '/a/:pluginId/',
       exact: false,
