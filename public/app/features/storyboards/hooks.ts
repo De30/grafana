@@ -1,7 +1,6 @@
 import { MutableRefObject, useRef, useCallback, useEffect, useState } from 'react';
-import type { InboundNotebookMessage, OutboundNotebookMessage } from 'starboard-notebook';
 import { createStoryboard, getStoryboards, removeStoryboard, updateStoryboard } from './storage';
-import { StarboardNotebookIFrameOptions, Storyboard } from './types';
+import { InboundNotebookMessage, OutboundNotebookMessage, StarboardNotebookIFrameOptions, Storyboard } from './types';
 
 function loadDefaultSettings(
   opts: Partial<StarboardNotebookIFrameOptions>,
@@ -95,7 +94,7 @@ export function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOpti
       const msg = ev.data as OutboundNotebookMessage;
       const iFrame = iframeRef.current;
 
-      console.info('Got Message %s: %o', msg.type, msg);
+      console.info('Got Message %s: %o', msg.type, msg.payload);
 
       switch (msg.type) {
         case 'NOTEBOOK_RESIZE_REQUEST': {

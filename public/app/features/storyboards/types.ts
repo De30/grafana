@@ -1,9 +1,12 @@
-import type {
-  ContentUpdateMessage,
-  ReadySignalMessage,
-  SaveMessage,
-  OutboundNotebookMessage,
-} from 'starboard-notebook';
+// import type {
+//   ContentUpdateMessage,
+//   ReadySignalMessage,
+//   SaveMessage,
+//   OutboundNotebookMessage,
+// } from 'starboard-notebook';
+
+export type OutboundNotebookMessage = { type: unknown; payload: any };
+export type InboundNotebookMessage = { type: unknown; payload: any };
 
 export enum CellTypes {
   Markdown = 'markdown',
@@ -31,9 +34,9 @@ export type StarboardNotebookIFrameOptions<ReceivedMessageType = OutboundNoteboo
   autoResize: boolean;
   baseUrl?: string;
   notebookContent?: Promise<string> | string;
-  onNotebookReadySignalMessage(payload: ReadySignalMessage['payload']): void;
-  onSaveMessage(payload: SaveMessage['payload']): void | boolean | Promise<boolean>;
-  onContentUpdateMessage(payload: ContentUpdateMessage['payload']): void;
+  onNotebookReadySignalMessage(payload: unknown /*ReadySignalMessage['payload']*/): void;
+  onSaveMessage(payload: unknown /* SaveMessage['payload']*/): void | boolean | Promise<boolean>;
+  onContentUpdateMessage(payload: unknown /* ContentUpdateMessage['payload']*/): void;
   onMessage(message: ReceivedMessageType): void;
   onUnsavedChangesStatusChange(hasUnsavedChanges: boolean): void;
   sandbox: string;
