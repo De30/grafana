@@ -1,5 +1,8 @@
 import React from 'react';
 import VideoRecorder from './VideoRecorder';
+const axios = require('axios');
+import { useIndexedDB } from 'react-indexed-db';
+import { uniq, uniqBy } from 'lodash';
 
 const styles = {
   background: {
@@ -15,36 +18,71 @@ const styles = {
 };
 
 const Stories = () => {
+  const [users, setUsers] = React.useState<any>([]);
+  const [allStories, setAllStories] = React.useState<any>([]);
+  const { getAll } = useIndexedDB('social');
+
+  console.log('user', (window as any).grafanaBootData.user);
+
+  const currentUser = (window as any).grafanaBootData.user;
+
+  React.useEffect(() => {
+    async function getUsers() {
+      const response = await axios({
+        method: 'get',
+        url: '/api/users?perpage=10&page=1',
+        responseType: 'stream',
+        // example of admin:admin creds, need better way of having access to api
+        headers: {
+          Authorization: `Basic YWRtaW46YWRtaW4=`,
+        },
+      });
+
+      setUsers(response.data);
+
+      const allStories: any = await getAll();
+
+      setAllStories(allStories);
+    }
+
+    getUsers();
+  }, []);
+
   const stories = [
     {
-      avatar: 'public/app/features/social/avatar.jpeg',
+      avatar: currentUser.gravatarUrl,
+      username: currentUser.login,
     },
-    {
-      avatar: 'public/app/features/social/avatar.jpeg',
-      username: 'whatever',
-    },
-    {
-      avatar: 'public/app/features/social/avatar.jpeg',
-      username: 'another user',
-    },
+    ...users
+      .filter(
+        (user: any) => user.login !== currentUser.login && uniq(allStories.map((s: any) => s.name)).includes(user.login)
+      )
+      .map((user: any) => ({
+        avatar: user.avatarUrl,
+        username: user.login,
+      })),
   ];
 
   return (
     <div style={styles.background}>
       <h3 style={{ padding: '10px 2px' }}>Stories</h3>
       <div className="stories-container" style={{ display: 'flex', maxWidth: 'min-content' }}>
-        {stories.map((story, index) => (
-          <div key={index}>
-            <Story avatar={story.avatar} username={story.username} />
+        {stories.map((story: any, index: number) => (
+          <div key={story.username}>
+            <Story avatar={story.avatar} username={index === 0 ? 'Your story' : story.username} />
           </div>
         ))}
       </div>
-      <VideoRecorder />
+      <VideoRecorder users={users} />
     </div>
   );
 };
 
-const Story = (props: { avatar: string; username?: string }) => {
+const openStory = (username: string) => {
+  console.log('clicked avatar', username);
+};
+
+const Story = (props: { avatar: string; username: string }) => {
   const { avatar, username } = props;
 
   return (
@@ -60,6 +98,7 @@ const Story = (props: { avatar: string; username?: string }) => {
       <div
         className="story-image-container"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', position: 'relative' }}
+        onClick={() => openStory(username)}
       >
         <div
           style={{

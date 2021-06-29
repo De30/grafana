@@ -8,6 +8,7 @@ export const DBConfig = {
       storeSchema: [
         { name: 'name', keypath: 'name', options: { unique: false } },
         { name: 'blob', keypath: 'blob', options: { unique: false } },
+        { name: 'created_at', keypath: 'created_at', options: { unique: false } },
       ],
     },
   ],

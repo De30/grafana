@@ -190,7 +190,9 @@ function useMediaRecorder({
   }
 
   const saveFile = async (blob) => {
-    add({ name: '1', blob }).then(
+    const user = (window as any).grafanaBootData.user;
+
+    add({ name: user.login, blob, created_at: new Date().getTime() }).then(
       (event) => {
         console.log('saved', event);
       },
@@ -272,7 +274,7 @@ function Player({ srcBlob }) {
   return <video src={URL.createObjectURL(srcBlob)} width={520} height={480} controls />;
 }
 
-const VideoRecorder = () => {
+const VideoRecorder = (props: any) => {
   let [recordScreen, setRecordScreen] = React.useState(true);
   let [audio, setAudio] = React.useState(false);
   let {
@@ -301,7 +303,10 @@ const VideoRecorder = () => {
 
     async function getBlobs() {
       const items = await getAll();
-      setBlob(items[0].blob);
+      setBlob(items[0]?.blob);
+
+      // get hours
+      console.log('hours', (new Date().getTime() - items?.[0]?.created_at) / 1000 / 60 / 60);
 
       console.log(items);
     }
