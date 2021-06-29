@@ -46,6 +46,8 @@ import { getTimeSrv } from './features/dashboard/services/TimeSrv';
 import { getVariablesUrlParams } from './features/variables/getAllVariableValuesForUrl';
 import getDefaultMonacoLanguages from '../lib/monaco-languages';
 import { contextSrv } from './core/services/context_srv';
+import { initDB } from 'react-indexed-db';
+import { DBConfig } from './features/social/DBConfig';
 
 // add move to lodash for backward compatabilty with plugins
 // @ts-ignore
@@ -60,6 +62,8 @@ const extensionsExports = extensionsIndex.keys().map((key: any) => {
 if (process.env.NODE_ENV === 'development') {
   initDevFeatures();
 }
+
+initDB(DBConfig);
 
 export class GrafanaApp {
   angularApp: AngularApp;

@@ -1,4 +1,5 @@
 import React from 'react';
+import VideoRecorder from './VideoRecorder';
 
 const styles = {
   background: {
@@ -32,12 +33,13 @@ const Stories = () => {
     <div style={styles.background}>
       <h3 style={{ padding: '10px 2px' }}>Stories</h3>
       <div className="stories-container" style={{ display: 'flex', maxWidth: 'min-content' }}>
-        {stories.map((story) => (
-          <div key={story.username}>
+        {stories.map((story, index) => (
+          <div key={index}>
             <Story avatar={story.avatar} username={story.username} />
           </div>
         ))}
       </div>
+      <VideoRecorder />
     </div>
   );
 };

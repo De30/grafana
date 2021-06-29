@@ -5681,6 +5681,11 @@
   dependencies:
     lodash "^4"
 
+"@wmik/use-media-recorder@^1.2.1-beta.0":
+  version "1.2.1-beta.0"
+  resolved "https://registry.yarnpkg.com/@wmik/use-media-recorder/-/use-media-recorder-1.2.1-beta.0.tgz#970cd5af731ecf2b7d6a7f65ae3fa0b182155373"
+  integrity sha512-RXOIZw8pDry5Bt9AYSDm2BBYrm5YoUm95fuOpWxUMaeqQ1qYbYk6Q3bNghsDZFTNUIU/Rbl0mQBiPMsp7Ev0gg==
+
 "@wojtekmaj/enzyme-adapter-react-17@0.3.1":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-react-17/-/enzyme-adapter-react-17-0.3.1.tgz#b69d2bfe0817e6526a86b1c120daa82d49a7b697"
@@ -18770,6 +18775,11 @@ react-immutable-proptypes@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/react-immutable-proptypes/-/react-immutable-proptypes-2.1.0.tgz#023d6f39bb15c97c071e9e60d00d136eac5fa0b4"
   integrity sha1-Aj1vObsVyXwHHp5g0A0TbqxfoLQ=
+
+react-indexed-db@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/react-indexed-db/-/react-indexed-db-1.0.12.tgz#b8c6c4752a28eb2c6335b6b3289efc8262d119ae"
+  integrity sha512-39UY97QvH0BXke1dOa1jUIihjMSs5v4jMcUDZ3HBRKGr2kn6gnH5+7I0Px5Np9W8bomD7XTIXpCKVNrtKFQTIQ==
 
 react-inlinesvg@2.3.0:
   version "2.3.0"
