@@ -2,7 +2,9 @@ import React from 'react';
 import VideoRecorder from './VideoRecorder';
 const axios = require('axios');
 import { useIndexedDB } from 'react-indexed-db';
-import { uniq, uniqBy } from 'lodash';
+import { uniq } from 'lodash';
+import ReactModal from 'react-modal';
+import { ClickOutsideWrapper } from '../../../../packages/grafana-ui/src';
 
 const styles = {
   background: {
@@ -69,7 +71,7 @@ const Stories = () => {
       <div className="stories-container" style={{ display: 'flex', maxWidth: 'min-content' }}>
         {stories.map((story: any, index: number) => (
           <div key={story.username}>
-            <Story avatar={story.avatar} username={index === 0 ? 'Your story' : story.username} />
+            <Story avatar={story.avatar} username={index === 0 ? 'Your story' : story.username} stories={allStories} />
           </div>
         ))}
       </div>
@@ -78,59 +80,104 @@ const Stories = () => {
   );
 };
 
-const openStory = (username: string) => {
-  console.log('clicked avatar', username);
-};
+const StoryPlayer = (props: any) => {
+  const { srcBlob, showStory, closeStory } = props;
 
-const Story = (props: { avatar: string; username: string }) => {
-  const { avatar, username } = props;
+  if (!srcBlob) {
+    return null;
+  }
 
   return (
-    <div
-      className="story-container"
-      style={{
-        padding: '0 20px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}
+    <ReactModal
+      isOpen={showStory}
+      contentLabel="Minimal Modal Example"
+      ariaHideApp={false}
+      style={{ overlay: { zIndex: 1000 }, content: { background: 'transparent' } }}
     >
+      <ClickOutsideWrapper onClick={() => closeStory()} useCapture={true}>
+        <video
+          id="story-video"
+          style={{
+            maxWidth: '80%',
+            display: 'block',
+            margin: '0 auto',
+          }}
+          src={URL.createObjectURL(srcBlob)}
+          autoPlay
+          onEnded={() => closeStory()}
+        />
+      </ClickOutsideWrapper>
+    </ReactModal>
+  );
+};
+
+const Story = (props: { avatar: string; username: string; stories: any }) => {
+  const { avatar, username, stories } = props;
+  const [showStory, setShowStory] = React.useState(false);
+  const [blob, setBlob] = React.useState<any>();
+
+  const openStory = () => {
+    console.log('clicked avatar', username);
+    setShowStory(true);
+    console.log('stories', stories);
+    const currentUser = (window as any).grafanaBootData.user;
+    setBlob(stories.find((s: any) => s.name === (username === 'Your story' ? currentUser.login : username)).blob);
+  };
+
+  const closeStory = () => {
+    setBlob(undefined);
+    setShowStory(!showStory);
+  };
+
+  return (
+    <>
       <div
-        className="story-image-container"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', position: 'relative' }}
-        onClick={() => openStory(username)}
+        className="story-container"
+        style={{
+          padding: '0 20px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
         <div
-          style={{
-            gridColumn: 1,
-            gridRow: 1,
-            zIndex: 1,
-          }}
+          className="story-image-container"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', position: 'relative' }}
+          onClick={() => openStory()}
         >
-          <img
-            src="public/app/features/social/grafana-story-outline.png"
+          <div
             style={{
-              width: '100px',
-              height: '100px',
+              gridColumn: 1,
+              gridRow: 1,
+              zIndex: 1,
             }}
-          />
+          >
+            <img
+              src="public/app/features/social/grafana-story-outline.png"
+              style={{
+                width: '100px',
+                height: '100px',
+              }}
+            />
+          </div>
+          <div style={{ gridColumn: 1, gridRow: 1 }}>
+            <img
+              src={avatar}
+              style={{
+                width: '80px',
+                height: '80px',
+                left: '18px',
+                top: '10px',
+                position: 'relative',
+                borderRadius: '50%',
+              }}
+            />
+          </div>
         </div>
-        <div style={{ gridColumn: 1, gridRow: 1 }}>
-          <img
-            src={avatar}
-            style={{
-              width: '80px',
-              height: '80px',
-              left: '19px',
-              top: '10px',
-              position: 'relative',
-              borderRadius: '50%',
-            }}
-          />
-        </div>
+        <span>{username || 'Your story'}</span>
       </div>
-      <span>{username || 'Your story'}</span>
-    </div>
+      <StoryPlayer srcBlob={blob} showStory={showStory} closeStory={closeStory} />
+    </>
   );
 };
 

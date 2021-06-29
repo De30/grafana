@@ -315,7 +315,8 @@ const VideoRecorder = (props: any) => {
   }, []);
 
   return (
-    <article>
+    <>
+      {/* <article> */}
       <h1>Video recorder</h1>
       {status}
       <dialog open={status === 'acquiring_media'}>Waiting for permissions</dialog>
@@ -347,9 +348,10 @@ const VideoRecorder = (props: any) => {
           </button>
         )}
       </section>
-      <LiveStreamPreview stream={liveStream} />
-      <Player srcBlob={blob ?? mediaBlob} />
-    </article>
+      {/* <LiveStreamPreview stream={liveStream} /> */}
+      {/* <Player srcBlob={blob ?? mediaBlob} /> */}
+      {/* </article> */}
+    </>
   );
 };
 
