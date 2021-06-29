@@ -7,7 +7,22 @@ interface StarboardNotebookProps {
 
 export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook }) => {
   const [loaded, setLoaded] = useState(false);
-  const { iframeRef, contentRef, sendMessage } = useStarboard({});
+  const { iframeRef, contentRef, sendMessage } = useStarboard({
+    onMessage: (msg) => {
+      if (msg.type === 'QUERY_PLEASE') {
+        console.info('Running query for ', msg.payload);
+        setTimeout(() => {
+          sendMessage({
+            type: 'HERE_IS_YOUR_DATA',
+            payload: {
+              queryId: msg.payload.queryId,
+              data: [1, 2, 3],
+            },
+          });
+        }, 1000);
+      }
+    },
+  });
 
   useEffect(() => {
     if (!loaded) {
@@ -30,7 +45,7 @@ export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook 
           setLoaded(true);
         }}
         ref={iframeRef}
-        src="https://unpkg.com/starboard-notebook@0.12.0/dist/index.html"
+        src="http://localhost:3000/public/build/starboard-notebook/index.html"
         style={{ width: '100%', minHeight: '88vh', border: 'none' }}
       ></iframe>
       <div ref={contentRef}></div>
@@ -38,7 +53,16 @@ export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook 
   );
 };
 
-export const DEFAULT_NOTEBOOK = `# %%--- [javascript]
+export const DEFAULT_NOTEBOOK = `# %%--- [esm]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+#   locked: true
+# ---%%
+import { plugin as grafanaPlugin } from 'http://localhost:3000/public/build/starboard-grafana.js';
+grafanaPlugin.register(runtime);
+# %%--- [javascript]
 # properties:
 #   run_on_load: true
 #   bottom_hidden: true
@@ -78,4 +102,8 @@ Math should be no issue:
 \\nabla\\cdot\\mathcal{B}                 \\quad & = \\quad 0,                         & \\quad \\text{(Loi de Gauss)}  \\\\[5pt]
 \\nabla\\cdot\\mathcal{D}                 \\quad & = \\quad 0.                         & \\quad \\text{(Loi de Colomb)}
 \\end{aligned}
-\\end{equation}`;
+\\end{equation}
+# %% [markdown]
+Eventually we want to be able to run queries using Grafana!
+# %% [grafana]
+node_load1`;
