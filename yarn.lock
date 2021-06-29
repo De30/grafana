@@ -21514,7 +21514,7 @@ stacktrace-js@^2.0.0:
 
 "starboard-grafana@git+ssh://git@github.com:grafana/starboard-grafana":
   version "0.1.0"
-  resolved "git+ssh://git@github.com:grafana/starboard-grafana#faeca71ffe454adabb963db6a50f9baa632be506"
+  resolved "git+ssh://git@github.com:grafana/starboard-grafana#85f6e55e0207c048ca6fb21ae7739ad5f3d4d2cb"
   dependencies:
     "@types/katex" "^0.11.0"
     lit "*"
