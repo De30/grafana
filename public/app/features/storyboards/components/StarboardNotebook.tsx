@@ -38,15 +38,36 @@ export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook 
   );
 };
 
-export const DEFAULT_NOTEBOOK = `# %% [markdown]
+export const DEFAULT_NOTEBOOK = `# %%--- [javascript]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+#   locked: true
+# ---%%
+var getTheData = function(query) {
+  console.log("here is some data for your query", query);
+}
+# %%--- [python]
+# properties:
+#   run_on_load: true
+#   bottom_hidden: true
+#   top_hidden: true
+#   locked: true
+# ---%%
+def get_the_data(query):
+    print(f"here is some data for your query {query}")
+# %% [markdown]
 ### More info
 We can do javascript:
 # %% [javascript]
 console.log('Hello world!')
+getTheData({expr: "node_load1"})
 # %% [markdown]
 We can do python:
 # %% [python]
 print("hi, from python")
+get_the_data({"expr": "node_load1"})
 # %% [markdown]
 Math should be no issue:
 # %% [latex]
