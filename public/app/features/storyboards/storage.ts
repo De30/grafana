@@ -4,13 +4,13 @@ import { Storyboard } from './types';
 const STORAGE_KEY = 'grafana.storyboards';
 
 export const getStoryboards = (): Storyboard[] => {
-  return store.getObject(STORAGE_KEY);
+  return store.getObject(STORAGE_KEY) || [];
 };
 
 export const updateStoryboard = (newBoard: Storyboard) => {
   let boards = getStoryboards();
   for (let board of boards) {
-    if (board.id === newBoard.id) {
+    if (board.uid === newBoard.uid) {
       board = newBoard;
     }
   }
@@ -23,8 +23,8 @@ export const createStoryboard = (newBoard: Storyboard) => {
   store.setObject(STORAGE_KEY, boards);
 };
 
-export const removeBoard = (boardId: string) => {
+export const removeStoryboard = (boardId: string) => {
   let boards = getStoryboards();
-  const newBoards = boards.filter((board) => board.id !== boardId);
+  const newBoards = boards.filter((board) => board.uid !== boardId);
   store.setObject(STORAGE_KEY, newBoards);
 };

@@ -19,8 +19,11 @@ export interface Cell<T> {
 
 export interface Storyboard {
   title: string;
-  id: string;
-  cells: any[]; //Fix later
+  uid: string;
+  /**
+   *  String with the entire Starboard notebook
+   */
+  notebook: string;
 }
 
 export type StarboardNotebookIFrameOptions<ReceivedMessageType = OutboundNotebookMessage> = {

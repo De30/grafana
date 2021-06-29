@@ -1,6 +1,7 @@
-import { MutableRefObject, useRef, useCallback, useEffect } from 'react';
+import { MutableRefObject, useRef, useCallback, useEffect, useState } from 'react';
 import type { InboundNotebookMessage, OutboundNotebookMessage } from 'starboard-notebook';
-import { StarboardNotebookIFrameOptions } from './types';
+import { createStoryboard, getStoryboards, removeStoryboard, updateStoryboard } from './storage';
+import { StarboardNotebookIFrameOptions, Storyboard } from './types';
 
 function loadDefaultSettings(
   opts: Partial<StarboardNotebookIFrameOptions>,
@@ -160,4 +161,30 @@ export function useStarboard(initialOptions: Partial<StarboardNotebookIFrameOpti
   }, [iframeMessageHandler]);
 
   return { iframeRef, options, contentRef, sendMessage, setSaved };
+}
+
+export function useSavedStoryboards() {
+  let [boards, setBoards] = useState<Storyboard[]>(getStoryboards());
+
+  const updateBoardState = () => {
+    const newBoards = getStoryboards();
+    setBoards(newBoards);
+  };
+
+  const updateBoard = (board: Storyboard) => {
+    updateStoryboard(board);
+    updateBoardState();
+  };
+
+  const removeBoard = (boardId: string) => {
+    removeStoryboard(boardId);
+    updateBoardState();
+  };
+
+  const createBoard = (board: Storyboard) => {
+    createStoryboard(board);
+    updateBoardState();
+  };
+
+  return { boards, updateBoard, createBoard, removeBoard };
 }
