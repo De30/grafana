@@ -38,7 +38,7 @@ export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook 
   );
 };
 
-const DEFAULT_NOTEBOOK = `# %% [markdown]
+export const DEFAULT_NOTEBOOK = `# %% [markdown]
 ### More info
 We can do javascript:
 # %% [javascript]
