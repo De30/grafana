@@ -148,7 +148,7 @@ export function getAppRoutes(): RouteDescriptor[] {
       ),
     },
     {
-      path: '/storyboards/:storyboardId',
+      path: '/storyboards/:uid',
       pageClass: 'page-storyboard',
       roles: () => ['Editor', 'Admin'],
       component: SafeDynamicImport(

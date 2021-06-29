@@ -31,7 +31,7 @@ export const StarboardNotebook: FC<StarboardNotebookProps> = ({ initialNotebook 
         }}
         ref={iframeRef}
         src="https://unpkg.com/starboard-notebook@0.12.0/dist/index.html"
-        style={{ width: '100%', minHeight: '100vh' }}
+        style={{ width: '100%', minHeight: '88vh', border: 'none' }}
       ></iframe>
       <div ref={contentRef}></div>
     </>
