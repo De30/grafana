@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { createContext, useEffect, FC, useMemo, ReactNode } from 'react';
 import { css } from '@emotion/css';
 
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
@@ -6,8 +6,10 @@ import { StoreState } from 'app/types';
 import { connect } from 'react-redux';
 import { useSavedStoryboards } from '../hooks';
 import { Storyboard } from '../types';
-import { getLocationSrv } from '@grafana/runtime';
+import { getLocationSrv, createQueryRunner } from '@grafana/runtime';
 import { Page } from 'app/core/components/Page/Page';
+
+import { DataQuery, dateTime, DateTime, QueryRunner, TimeRange } from '@grafana/data';
 
 import PyWorker from '../web-workers/pyodide.worker';
 import { useObservable } from 'react-use';
@@ -45,8 +47,8 @@ interface StorybookDatasourceQuery {
   id: StorybookId;
   type: 'query';
   datasource: string;
-  query: string;
-  timeRange: [string, string];
+  query: DataQuery;
+  timeRange: TimeRange;
 }
 
 interface StorybookMarkdown {
@@ -88,7 +90,7 @@ type StorybookDocument = EvaluatedStorybookDocument | UnevaluatedStorybookDocume
 
 /// documents are a simple list of nodes. they can each be documentation, or code. cells can refer to
 /// each-other's output, including data and text. some nodes produce realtime data.
-const document: StorybookDocument = {
+const document: UnevaluatedStorybookDocument = {
   status: 'unevaluated',
   elements: [
     // presentational markdown
@@ -106,7 +108,13 @@ const document: StorybookDocument = {
     // { id: 'fetched', type: 'fetch', url: './works.csv' },
 
     // Perform a query and put data into local context
-    { id: 'query', type: 'query', datasource: 'prometheus', query: 'abc', timeRange: ['121', '123'] },
+    {
+      id: 'query',
+      type: 'query',
+      datasource: 'prometheus',
+      query: { refId: 'query' },
+      timeRange: { from: dateTime(), to: dateTime(), raw: { to: '', from: '' } },
+    },
 
     // Show a timeseries
     // { id: 'presentation', type: 'timeseries-view', from: 'query' },
@@ -136,14 +144,27 @@ compute1 + 42`,
   ],
 };
 
-async function evaluateElement(context: StorybookContext, n: StorybookDocumentElement): Promise<StorybookVariable> {
+async function evaluateElement(
+  runner: QueryRunner,
+  context: StorybookContext,
+  n: StorybookDocumentElement
+): Promise<StorybookVariable> {
   switch (n.type) {
     case 'markdown': {
+      // value should be JSX:  https://github.com/rexxars/commonmark-react-renderer
       return { value: n.content };
     }
     case 'query': {
-      // TODO: Do a query against grafnaa api and put the result into context
-      return { value: '' };
+      runner.run({
+        timeRange: n.timeRange,
+        queries: [n.query],
+        datasource: n.datasource,
+        timezone: '',
+        maxDataPoints: 100,
+        minInterval: null,
+      });
+      const value = await runner.get().toPromise();
+      return { value };
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
@@ -186,7 +207,9 @@ function ShowStorybookDocumentElementResult({
   }
   switch (element.type) {
     case 'markdown': {
-      return <div dangerouslySetInnerHTML={{ __html: result.value as string }} />;
+      // we should parse markdown with a strict subset of options directly to JSX with a library like this:
+      // https://github.com/rexxars/commonmark-react-renderer
+      return <div> {result.value as JSX.Element} </div>;
     }
     case 'csv': {
       return (
@@ -235,7 +258,7 @@ function ShowStorybookDocumentElementResult({
         <>
           <div>datasource: {element.datasource}</div>
           <div>
-            query: <pre>{element.query}</pre>
+            query: <pre>{JSON.stringify(element.query)}</pre>
           </div>
         </>
       );
@@ -246,23 +269,23 @@ function ShowStorybookDocumentElementResult({
 function ShowStorybookDocumentElementEditor({ element }: { element: StorybookDocumentElement }): JSX.Element {
   switch (element.type) {
     case 'markdown': {
-      return <div contentEditable>{element.content}</div>;
+      return <div>{element.content}</div>;
     }
     case 'csv': {
-      return <pre contentEditable>{element.content}</pre>;
+      return <pre>{element.content}</pre>;
     }
     case 'plaintext': {
-      return <pre contentEditable>{element.content}</pre>;
+      return <pre>{element.content}</pre>;
     }
     case 'python': {
-      return <pre contentEditable>{element.script}</pre>;
+      return <pre>{element.script}</pre>;
     }
     case 'query': {
       return (
         <>
           <div>datasource: {element.datasource}</div>
           <div>
-            query: <pre contentEditable>{element.query}</pre>
+            query: <pre>{JSON.stringify(element.query)}</pre>
           </div>
         </>
       );
@@ -272,7 +295,10 @@ function ShowStorybookDocumentElementEditor({ element }: { element: StorybookDoc
 }
 
 /// Transforms a document into an evaledDocument (has results)
-function evaluateDocument(doc: UnevaluatedStorybookDocument): Observable<EvaluatedStorybookDocument> {
+function evaluateDocument(
+  runner: QueryRunner,
+  doc: UnevaluatedStorybookDocument
+): Observable<EvaluatedStorybookDocument> {
   const result: EvaluatedStorybookDocument = {
     status: 'evaluating',
     context: {},
@@ -282,7 +308,7 @@ function evaluateDocument(doc: UnevaluatedStorybookDocument): Observable<Evaluat
   const obs: Observable<EvaluatedStorybookDocument> = from<StorybookDocumentElement[]>(doc.elements).pipe(
     concatMap(async (v: StorybookDocumentElement) => {
       console.log('Evaluating %s with context %o', v.id, result.context);
-      const res = await evaluateElement(result.context, v);
+      const res = await evaluateElement(runner, result.context, v);
       result.context[v.id] = res;
       return { ...result };
     })
@@ -292,6 +318,19 @@ function evaluateDocument(doc: UnevaluatedStorybookDocument): Observable<Evaluat
 }
 
 const locationSrv = getLocationSrv();
+
+function useRunner() {
+  const runner = useMemo(() => createQueryRunner(), []);
+
+  useEffect(() => {
+    const toDestroy = runner;
+    return () => {
+      return toDestroy.destroy();
+    };
+  }, [runner]);
+
+  return runner;
+}
 
 let pyodideWorker: Worker | undefined = undefined;
 pyodideWorker = (() => {
@@ -319,7 +358,8 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
     },
   };
 
-  const evaled = useMemo(() => evaluateDocument(document), []);
+  const runner = useRunner();
+  const evaled = useMemo(() => evaluateDocument(runner, document), [runner]);
   const evaluation = useObservable(evaled);
 
   return (
