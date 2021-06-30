@@ -174,26 +174,95 @@ function ElementType({ element }: { element: StorybookDocumentElement }): JSX.El
   );
 }
 
-function ShowStorybookDocumentElement({ element }: { element: StorybookDocumentElement }): JSX.Element {
+function ShowStorybookDocumentElementResult({
+  element,
+  result,
+}: {
+  element: StorybookDocumentElement;
+  result?: StorybookVariable;
+}): JSX.Element | null {
+  if (result == null) {
+    return null;
+  }
   switch (element.type) {
     case 'markdown': {
-      return <div>TODO: TRANSFORM: {element.content}</div>;
+      return <div dangerouslySetInnerHTML={{ __html: result.value as string }} />;
     }
     case 'csv': {
-      return <pre>{element.content}</pre>;
+      return (
+        <table>
+          <tbody>
+            {(result.value as string[][]).map((r, ri) => (
+              <tr key={ri}>
+                {r.map((c, ci) => (
+                  <td
+                    className={css`
+                      padding: 5px;
+                    `}
+                    key={ci}
+                  >
+                    {c as string}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
     }
     case 'plaintext': {
-      return <pre>{element.content}</pre>;
+      return null;
     }
     case 'python': {
-      return <pre>{element.script}</pre>;
+      return (
+        <div>
+          <div
+            className={css`
+              font-size: 10px;
+              margin-top: 20px;
+              opacity: 0.5;
+            `}
+          >
+            RESULT:
+          </div>
+          <pre>{JSON.stringify(result)}</pre>
+        </div>
+      );
+    }
+    case 'query': {
+      // TODO: Result of query as table
+      return (
+        <>
+          <div>datasource: {element.datasource}</div>
+          <div>
+            query: <pre>{element.query}</pre>
+          </div>
+        </>
+      );
+    }
+  }
+}
+
+function ShowStorybookDocumentElementEditor({ element }: { element: StorybookDocumentElement }): JSX.Element {
+  switch (element.type) {
+    case 'markdown': {
+      return <div contentEditable>{element.content}</div>;
+    }
+    case 'csv': {
+      return <pre contentEditable>{element.content}</pre>;
+    }
+    case 'plaintext': {
+      return <pre contentEditable>{element.content}</pre>;
+    }
+    case 'python': {
+      return <pre contentEditable>{element.script}</pre>;
     }
     case 'query': {
       return (
         <>
           <div>datasource: {element.datasource}</div>
           <div>
-            query: <pre>{element.query}</pre>
+            query: <pre contentEditable>{element.query}</pre>
           </div>
         </>
       );
@@ -268,8 +337,8 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             {evaluation?.elements.map((m) => (
               <div key={m.id}>
                 <ElementType element={m} />
-                <ShowStorybookDocumentElement element={m} />
-                <div>RESULT: {JSON.stringify(evaluation?.context[m.id])}</div>
+                <ShowStorybookDocumentElementEditor element={m} />
+                <ShowStorybookDocumentElementResult element={m} result={evaluation?.context[m.id]} />
               </div>
             ))}
           </div>
