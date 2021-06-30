@@ -155,16 +155,21 @@ async function evaluateElement(
       return { value: n.content };
     }
     case 'query': {
-      runner.run({
-        timeRange: n.timeRange,
-        queries: [n.query],
-        datasource: n.datasource,
-        timezone: '',
-        maxDataPoints: 100,
-        minInterval: null,
-      });
-      const value = await runner.get().toPromise();
-      return { value };
+      // try {
+      //   runner.run({
+      //     timeRange: n.timeRange,
+      //     queries: [n.query],
+      //     datasource: n.datasource,
+      //     timezone: '',
+      //     maxDataPoints: 100,
+      //     minInterval: null,
+      //   });
+      //   const value = await runner.get().toPromise();
+      //   return { value };
+      // } catch (e) {
+      //   console.error('TEMP ERROR HANDLER: ', e);
+      return { value: undefined };
+      //}
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
