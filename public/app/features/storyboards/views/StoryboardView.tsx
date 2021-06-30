@@ -29,6 +29,12 @@ interface StorybookContext {
   [property: string]: StorybookVariable;
 }
 
+interface StorybookCsv {
+  id: StorybookId;
+  type: 'csv';
+  content: string;
+}
+
 interface StorybookPlainText {
   id: StorybookId;
   type: 'plaintext';
@@ -55,7 +61,12 @@ interface StorybookPython {
   script: string;
 }
 
-type StorybookDocumentElement = StorybookPlainText | StorybookMarkdown | StorybookPython | StorybookDatasourceQuery;
+type StorybookDocumentElement =
+  | StorybookPlainText
+  | StorybookCsv
+  | StorybookMarkdown
+  | StorybookPython
+  | StorybookDatasourceQuery;
 
 // Describes an unevaluated storybook (no context)
 interface CoreStorybookDocument {
@@ -84,7 +95,12 @@ const document: StorybookDocument = {
     { id: 'markdown', type: 'markdown', content: '# This is markdown' },
 
     // Directly embed csv
-    { id: 'csv', type: 'plaintext', content: '1,23,4' },
+    {
+      id: 'some_data',
+      type: 'csv',
+      content: `1,23,4
+3,4,1`,
+    },
 
     // Fetch data from remote url and expose result
     // { id: 'fetched', type: 'fetch', url: './works.csv' },
@@ -108,16 +124,13 @@ const document: StorybookDocument = {
     {
       id: 'compute1',
       type: 'python',
-      script: `
-from js import csv;
-print(csv)
-42`,
+      script: `from js import some_data;
+42 + int(some_data[0][1])`,
     },
     {
       id: 'compute2',
       type: 'python',
-      script: `
-from js import compute1;
+      script: `from js import compute1;
 compute1 + 42`,
     },
   ],
@@ -131,6 +144,10 @@ async function evaluateElement(context: StorybookContext, n: StorybookDocumentEl
     case 'query': {
       // TODO: Do a query against grafnaa api and put the result into context
       return { value: '' };
+    }
+    case 'csv': {
+      // TODO: Use real CSV algorithm to split!
+      return { value: n.content.split('\n').map((l) => l.split(',')) };
     }
     case 'plaintext': {
       return { value: n.content };
@@ -161,6 +178,9 @@ function ShowStorybookDocumentElement({ element }: { element: StorybookDocumentE
   switch (element.type) {
     case 'markdown': {
       return <div>TODO: TRANSFORM: {element.content}</div>;
+    }
+    case 'csv': {
+      return <pre>{element.content}</pre>;
     }
     case 'plaintext': {
       return <pre>{element.content}</pre>;
