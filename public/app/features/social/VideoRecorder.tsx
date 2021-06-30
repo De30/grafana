@@ -4,6 +4,7 @@ import { useIndexedDB } from 'react-indexed-db';
 
 import { MenuGroup, MenuItem, WithContextMenu } from '../../../../packages/grafana-ui/src';
 import { SiAddthis } from 'react-icons/si';
+import { FaRegStopCircle } from 'react-icons/fa';
 
 function isObject(o: any) {
   return o && !Array.isArray(o) && Object(o) === o;
@@ -338,6 +339,7 @@ const VideoRecorder = (props: any) => {
 
       if (label === 'Yes') {
         console.log('start recording');
+        getMediaStream().then(() => startRecording());
       }
     };
 
@@ -395,13 +397,27 @@ const VideoRecorder = (props: any) => {
       {/* <LiveStreamPreview stream={liveStream} /> */}
       {/* <Player srcBlob={blob ?? mediaBlob} /> */}
       {/* </article> */}
-      <WithContextMenu renderMenuItems={renderMenuItems}>
-        {({ openMenu }) => (
-          <div onClick={(ev) => addStory(ev, openMenu)}>
-            <SiAddthis />
-          </div>
-        )}
-      </WithContextMenu>
+
+      {status !== 'recording' && (
+        <WithContextMenu renderMenuItems={renderMenuItems}>
+          {({ openMenu }) => (
+            <div onClick={(ev) => addStory(ev, openMenu)}>
+              <SiAddthis />
+            </div>
+          )}
+        </WithContextMenu>
+      )}
+
+      {status === 'recording' && (
+        <div
+          onClick={(ev: any) => {
+            ev.stopPropagation();
+            stopRecording();
+          }}
+        >
+          <FaRegStopCircle />
+        </div>
+      )}
     </>
   );
 };

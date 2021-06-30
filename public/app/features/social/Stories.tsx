@@ -75,7 +75,6 @@ const Stories = () => {
           </div>
         ))}
       </div>
-      <VideoRecorder users={users} />
     </div>
   );
 };
