@@ -195,7 +195,8 @@ function ElementType({ element }: { element: StorybookDocumentElement }): JSX.El
         opacity: 0.5;
       `}
     >
-      {element.type} — <strong>#{element.id}</strong>
+      {element.type} — <strong>#{element.id}</strong>{' '}
+      <i className="fa fa-pencil-square" style={{ color: 'skyblue', cursor: 'pointer' }}></i>
     </div>
   );
 }
