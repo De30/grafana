@@ -317,8 +317,8 @@ const VideoRecorder = (props: any) => {
   return (
     <>
       {/* <article> */}
-      <h1>Video recorder</h1>
-      {status}
+      {/* <h1>Video recorder</h1>
+      {status} */}
       <dialog open={status === 'acquiring_media'}>Waiting for permissions</dialog>
       <section>
         {status !== 'recording' && (

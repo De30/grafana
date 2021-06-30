@@ -4,7 +4,15 @@ const axios = require('axios');
 import { useIndexedDB } from 'react-indexed-db';
 import { uniq } from 'lodash';
 import ReactModal from 'react-modal';
-import { ClickOutsideWrapper } from '../../../../packages/grafana-ui/src';
+import {
+  ClickOutsideWrapper,
+  ContextMenu,
+  IconButton,
+  MenuGroup,
+  MenuItem,
+  WithContextMenu,
+} from '../../../../packages/grafana-ui/src';
+import { SiAddthis } from 'react-icons/si';
 
 const styles = {
   background: {
@@ -115,18 +123,59 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
   const { avatar, username, stories } = props;
   const [showStory, setShowStory] = React.useState(false);
   const [blob, setBlob] = React.useState<any>();
+  const [showMenu, setShowMenu] = React.useState(false);
 
-  const openStory = () => {
+  const currentUser = (window as any).grafanaBootData.user;
+  const isCurrentUser = username === 'Your story';
+
+  const openStory = (ev: any) => {
     console.log('clicked avatar', username);
     setShowStory(true);
     console.log('stories', stories);
-    const currentUser = (window as any).grafanaBootData.user;
-    setBlob(stories.find((s: any) => s.name === (username === 'Your story' ? currentUser.login : username)).blob);
+    setBlob(stories.find((s: any) => s.name === (isCurrentUser ? currentUser.login : username)).blob);
   };
 
   const closeStory = () => {
     setBlob(undefined);
     setShowStory(!showStory);
+  };
+
+  const addStory = (ev: any, openMenu: any) => {
+    setShowMenu(true);
+    console.log('clicked on add to your story');
+    ev.stopPropagation();
+
+    openMenu(ev);
+  };
+
+  const renderMenuItems = () => {
+    const menuItems = [
+      {
+        label: 'Record story?',
+        items: [{ label: 'Yes' }, { label: 'No' }],
+      },
+    ];
+
+    const onClick = (ev: any, label: string) => {
+      ev.stopPropagation();
+      setShowMenu(false);
+    };
+
+    return menuItems?.map((group, index) => {
+      if (!showMenu) {
+        return;
+      }
+
+      return (
+        <MenuGroup key={`${group.label}${index}`} label={group.label}>
+          {(group.items || []).map((item) => (
+            <div key={item.label} onClick={(ev) => onClick(ev, item.label)}>
+              <MenuItem label={item.label} ariaLabel={item.label} />
+            </div>
+          ))}
+        </MenuGroup>
+      );
+    });
   };
 
   return (
@@ -143,7 +192,7 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
         <div
           className="story-image-container"
           style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', position: 'relative' }}
-          onClick={() => openStory()}
+          onClick={(ev) => openStory(ev)}
         >
           <div
             style={{
@@ -173,6 +222,30 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
               }}
             />
           </div>
+          {isCurrentUser && (
+            <>
+              <div
+                style={{
+                  gridColumn: 1,
+                  gridRow: 1,
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  color: '#db2a2a',
+                  transform: 'scale(1.25)',
+                  zIndex: 1,
+                }}
+              >
+                <WithContextMenu renderMenuItems={renderMenuItems}>
+                  {({ openMenu }) => (
+                    <div onClick={(ev) => addStory(ev, openMenu)}>
+                      <SiAddthis />
+                    </div>
+                  )}
+                </WithContextMenu>
+              </div>
+            </>
+          )}
         </div>
         <span>{username || 'Your story'}</span>
       </div>
