@@ -9,6 +9,7 @@ import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import {
   addLibraryPanel,
   copyPanel,
+  sonifyPanel,
   duplicatePanel,
   removePanel,
   sharePanel,
@@ -81,6 +82,11 @@ export function getPanelMenu(
   const onCopyPanel = (event: React.MouseEvent<any>) => {
     event.preventDefault();
     copyPanel(panel);
+  };
+
+  const onSonifyPanel = (event: React.MouseEvent<any>) => {
+    event.preventDefault();
+    sonifyPanel(dashboard, panel);
   };
 
   const onRemovePanel = (event: React.MouseEvent<any>) => {
@@ -204,6 +210,12 @@ export function getPanelMenu(
     subMenu.push({
       text: 'Copy',
       onClick: onCopyPanel,
+    });
+
+    subMenu.push({
+      text: 'Sonify',
+      onClick: onSonifyPanel,
+      shortcut: 'p a',
     });
 
     if (isPanelModelLibraryPanel(panel)) {

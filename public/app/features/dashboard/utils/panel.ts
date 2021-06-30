@@ -1,6 +1,6 @@
 import { isString as _isString } from 'lodash';
 
-import { TimeRange, AppEvents, rangeUtil, dateMath, PanelModel as IPanelModel } from '@grafana/data';
+import { TimeRange, AppEvents, rangeUtil, dateMath, LoadingState, FieldType, PanelModel as IPanelModel } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import appEvents from 'app/core/app_events';
 import config from 'app/core/config';
@@ -55,6 +55,18 @@ export const copyPanel = (panel: IPanelModel) => {
 
   store.set(LS_PANEL_COPY_KEY, JSON.stringify(saveModel));
   appEvents.emit(AppEvents.alertSuccess, ['Panel copied. Click **Add panel** icon to paste.']);
+};
+
+export const sonifyPanel = (dashboard: DashboardModel, panel: PanelModel) => {
+  const panelData = panel.getQueryRunner().getLastResult();
+  if (panelData && panelData.state === LoadingState.Done) {
+    const timestamps = (panelData.series[0].fields.find((f) => f.type === FieldType.time)?.values || []) as number[];
+    const values = (panelData.series[0].fields.find((f) => f.type === FieldType.number)?.values.toArray() ||
+      []) as number[];
+    const series = timestamps.map((ts, i) => [ts, values[i]]);
+    console.log(series);
+    // Call sonifier
+  }
 };
 
 export const sharePanel = (dashboard: DashboardModel, panel: PanelModel) => {

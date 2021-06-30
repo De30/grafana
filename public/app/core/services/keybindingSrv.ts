@@ -21,6 +21,7 @@ import {
   AbsoluteTimeEvent,
 } from '../../types/events';
 import { HelpModal } from '../components/help/HelpModal';
+import { sonifyPanel } from 'app/features/dashboard/utils/panel';
 import { contextSrv } from '../core';
 import { exitKioskMode, toggleKioskMode } from '../navigation/kiosk';
 
@@ -300,6 +301,12 @@ export class KeybindingSrv {
           },
         })
       );
+    });
+
+    // sonify panel
+    this.bindWithPanelId('p a', (panelId) => {
+      const panelInfo = dashboard.getPanelInfoById(panelId)!;
+      sonifyPanel(dashboard, panelInfo.panel);
     });
 
     // toggle panel legend
