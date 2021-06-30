@@ -4,15 +4,7 @@ const axios = require('axios');
 import { useIndexedDB } from 'react-indexed-db';
 import { uniq } from 'lodash';
 import ReactModal from 'react-modal';
-import {
-  ClickOutsideWrapper,
-  ContextMenu,
-  IconButton,
-  MenuGroup,
-  MenuItem,
-  WithContextMenu,
-} from '../../../../packages/grafana-ui/src';
-import { SiAddthis } from 'react-icons/si';
+import { ClickOutsideWrapper } from '../../../../packages/grafana-ui/src';
 
 const styles = {
   background: {
@@ -123,7 +115,6 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
   const { avatar, username, stories } = props;
   const [showStory, setShowStory] = React.useState(false);
   const [blob, setBlob] = React.useState<any>();
-  const [showMenu, setShowMenu] = React.useState(false);
 
   const currentUser = (window as any).grafanaBootData.user;
   const isCurrentUser = username === 'Your story';
@@ -138,44 +129,6 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
   const closeStory = () => {
     setBlob(undefined);
     setShowStory(!showStory);
-  };
-
-  const addStory = (ev: any, openMenu: any) => {
-    setShowMenu(true);
-    console.log('clicked on add to your story');
-    ev.stopPropagation();
-
-    openMenu(ev);
-  };
-
-  const renderMenuItems = () => {
-    const menuItems = [
-      {
-        label: 'Record story?',
-        items: [{ label: 'Yes' }, { label: 'No' }],
-      },
-    ];
-
-    const onClick = (ev: any, label: string) => {
-      ev.stopPropagation();
-      setShowMenu(false);
-    };
-
-    return menuItems?.map((group, index) => {
-      if (!showMenu) {
-        return;
-      }
-
-      return (
-        <MenuGroup key={`${group.label}${index}`} label={group.label}>
-          {(group.items || []).map((item) => (
-            <div key={item.label} onClick={(ev) => onClick(ev, item.label)}>
-              <MenuItem label={item.label} ariaLabel={item.label} />
-            </div>
-          ))}
-        </MenuGroup>
-      );
-    });
   };
 
   return (
@@ -223,28 +176,20 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
             />
           </div>
           {isCurrentUser && (
-            <>
-              <div
-                style={{
-                  gridColumn: 1,
-                  gridRow: 1,
-                  position: 'absolute',
-                  bottom: 0,
-                  right: 0,
-                  color: '#db2a2a',
-                  transform: 'scale(1.25)',
-                  zIndex: 1,
-                }}
-              >
-                <WithContextMenu renderMenuItems={renderMenuItems}>
-                  {({ openMenu }) => (
-                    <div onClick={(ev) => addStory(ev, openMenu)}>
-                      <SiAddthis />
-                    </div>
-                  )}
-                </WithContextMenu>
-              </div>
-            </>
+            <div
+              style={{
+                gridColumn: 1,
+                gridRow: 1,
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                color: '#db2a2a',
+                transform: 'scale(1.25)',
+                zIndex: 1,
+              }}
+            >
+              <VideoRecorder />
+            </div>
           )}
         </div>
         <span>{username || 'Your story'}</span>
