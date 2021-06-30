@@ -11,6 +11,8 @@ replace github.com/denisenkom/go-mssqldb => github.com/grafana/go-mssqldb v0.0.0
 // It's also present on grafana/loki's go.mod so we'll need till it gets updated.
 replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
+replace github.com/hashicorp/go-plugin v1.4.0 => /home/carl/go/src/github.com/hashicorp/go-plugin
+
 require (
 	cloud.google.com/go/storage v1.14.0
 	cuelang.org/go v0.3.2
@@ -33,7 +35,7 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/structtag v0.0.0-20150214074306-217e25fb9691 // indirect
 	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
-	github.com/fatih/color v1.10.0
+	github.com/fatih/color v1.12.0
 	github.com/gchaincl/sqlhooks v1.3.0
 	github.com/getsentry/sentry-go v0.10.0
 	github.com/go-kit/kit v0.10.0
@@ -67,7 +69,7 @@ require (
 	github.com/lib/pq v1.10.0
 	github.com/linkedin/goavro/v2 v2.10.0
 	github.com/magefile/mage v1.11.0
-	github.com/mattn/go-isatty v0.0.12
+	github.com/mattn/go-isatty v0.0.13
 	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/matttproud/golang_protobuf_extensions v1.0.1
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
@@ -100,9 +102,8 @@ require (
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210521203332-0cec03c779c1 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
-	golang.org/x/tools v0.1.0
+	golang.org/x/tools v0.1.4
 	gonum.org/v1/gonum v0.9.1
 	google.golang.org/api v0.45.0
 	google.golang.org/grpc v1.37.1

@@ -35,6 +35,8 @@ func newClientConfig(executablePath string, env []string, logger log.Logger,
 		VersionedPlugins: versionedPlugins,
 		Logger:           logWrapper{Logger: logger},
 		AllowedProtocols: []goplugin.Protocol{goplugin.ProtocolGRPC},
+		User:             1001,
+		Group:            1002,
 	}
 }
 
