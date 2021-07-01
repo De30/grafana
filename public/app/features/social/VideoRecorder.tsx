@@ -132,7 +132,6 @@ function useMediaRecorder({
       mediaChunks.current.push(e.data);
     }
     onDataAvailable(e.data);
-    console.log('data is avaialble', e);
 
     saveFile(e.data);
   }
@@ -319,7 +318,6 @@ const VideoRecorder = (props: any) => {
 
   const addStory = (ev: any, openMenu: any) => {
     setShowMenu(true);
-    console.log('clicked on add to your story');
     ev.stopPropagation();
 
     openMenu(ev);
@@ -338,7 +336,6 @@ const VideoRecorder = (props: any) => {
       setShowMenu(false);
 
       if (label === 'Yes') {
-        console.log('start recording');
         getMediaStream().then(() => startRecording());
       }
     };
@@ -401,7 +398,7 @@ const VideoRecorder = (props: any) => {
       {status !== 'recording' && (
         <WithContextMenu renderMenuItems={renderMenuItems}>
           {({ openMenu }) => (
-            <div onClick={(ev) => addStory(ev, openMenu)}>
+            <div onClick={(ev) => addStory(ev, openMenu)} style={{ color: '#00ff44', transform: 'scale(1.25)' }}>
               <SiAddthis />
             </div>
           )}
@@ -414,6 +411,7 @@ const VideoRecorder = (props: any) => {
             ev.stopPropagation();
             stopRecording();
           }}
+          style={{ color: '#db2a2a', transform: 'scale(1.75)' }}
         >
           <FaRegStopCircle />
         </div>

@@ -5,6 +5,7 @@ import { useIndexedDB } from 'react-indexed-db';
 import { uniq } from 'lodash';
 import ReactModal from 'react-modal';
 import { ClickOutsideWrapper } from '../../../../packages/grafana-ui/src';
+import { setPausedStateAction } from '../explore/state/query';
 
 const styles = {
   background: {
@@ -23,8 +24,6 @@ const Stories = () => {
   const [users, setUsers] = React.useState<any>([]);
   const [allStories, setAllStories] = React.useState<any>([]);
   const { getAll } = useIndexedDB('social');
-
-  console.log('user', (window as any).grafanaBootData.user);
 
   const currentUser = (window as any).grafanaBootData.user;
 
@@ -80,11 +79,28 @@ const Stories = () => {
 };
 
 const StoryPlayer = (props: any) => {
-  const { srcBlob, showStory, closeStory } = props;
+  const { stories, showStory, closeStory } = props;
 
-  if (!srcBlob) {
+  if (!stories || stories.length === 0) {
     return null;
   }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [index, setIndex] = React.useState(0);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [currentStory, setCurrentStory] = React.useState<any>(stories[index]);
+
+  const queueStories = () => {
+    setIndex(index + 1);
+
+    if (index + 1 >= stories.length) {
+      closeStory();
+      return;
+    }
+
+    setCurrentStory(stories[index + 1]);
+  };
 
   return (
     <ReactModal
@@ -101,9 +117,9 @@ const StoryPlayer = (props: any) => {
             display: 'block',
             margin: '0 auto',
           }}
-          src={URL.createObjectURL(srcBlob)}
+          src={URL.createObjectURL(currentStory)}
           autoPlay
-          onEnded={() => closeStory()}
+          onEnded={() => queueStories()}
         />
       </ClickOutsideWrapper>
     </ReactModal>
@@ -113,21 +129,21 @@ const StoryPlayer = (props: any) => {
 const Story = (props: { avatar: string; username: string; stories: any }) => {
   const { avatar, username, stories } = props;
   const [showStory, setShowStory] = React.useState(false);
-  const [blob, setBlob] = React.useState<any>();
+  const [userStories, setUserStories] = React.useState<any>([]);
 
   const currentUser = (window as any).grafanaBootData.user;
   const isCurrentUser = username === 'Your story';
 
   const openStory = (ev: any) => {
-    console.log('clicked avatar', username);
     setShowStory(true);
-    console.log('stories', stories);
-    setBlob(stories.find((s: any) => s.name === (isCurrentUser ? currentUser.login : username)).blob);
+    setUserStories(
+      stories.filter((s: any) => s.name === (isCurrentUser ? currentUser.login : username)).map((s: any) => s.blob)
+    );
   };
 
   const closeStory = () => {
-    setBlob(undefined);
-    setShowStory(!showStory);
+    setUserStories(undefined);
+    setShowStory(false);
   };
 
   return (
@@ -182,8 +198,6 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
                 position: 'absolute',
                 bottom: 0,
                 right: 0,
-                color: '#db2a2a',
-                transform: 'scale(1.25)',
                 zIndex: 1,
               }}
             >
@@ -193,7 +207,7 @@ const Story = (props: { avatar: string; username: string; stories: any }) => {
         </div>
         <span>{username || 'Your story'}</span>
       </div>
-      <StoryPlayer srcBlob={blob} showStory={showStory} closeStory={closeStory} />
+      <StoryPlayer stories={userStories} showStory={showStory} closeStory={closeStory} />
     </>
   );
 };
