@@ -118,6 +118,7 @@ export type StoryboardDocumentElement =
 
 // Describes an unevaluated Storyboard (no context)
 export interface CoreStoryboardDocument {
+  title: string;
   elements: StoryboardDocumentElement[];
 }
 

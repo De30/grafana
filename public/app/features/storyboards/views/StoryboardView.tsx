@@ -16,6 +16,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
+import { Button, HorizontalGroup } from '@grafana/ui';
 
 interface StoryboardRouteParams {
   uid: string;
@@ -24,6 +25,7 @@ interface StoryboardRouteParams {
 /// documents are a simple list of nodes. they can each be documentation, or code. cells can refer to
 /// each-other's output, including data and text. some nodes produce realtime data.
 const document: UnevaluatedStoryboardDocument = {
+  title: 'This is the document title',
   status: 'unevaluated',
   elements: [
     // presentational markdown
@@ -121,6 +123,20 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
               </div>
             ))}
           </div>
+          <HorizontalGroup wrap>
+            <Button icon="plus" variant="secondary">
+              Add text cell
+            </Button>
+            <Button icon="plus" variant="secondary">
+              Add query cell
+            </Button>
+            <Button icon="plus" variant="secondary">
+              Add Python cell
+            </Button>
+            <Button icon="plus" variant="secondary">
+              Add CSV cell
+            </Button>
+          </HorizontalGroup>
         </div>
       </Page.Contents>
     </Page>
