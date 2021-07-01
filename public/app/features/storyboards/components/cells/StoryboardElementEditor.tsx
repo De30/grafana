@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextArea, Field, TableInputCSV } from '@grafana/ui';
+import { TextArea, Field, TableInputCSV, CodeEditor } from '@grafana/ui';
 import { StoryboardDocumentElement } from '../../types';
 
 interface Props {
@@ -48,14 +48,14 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
       return <pre>{element.content}</pre>;
     }
     case 'python': {
-      return <pre>{element.script}</pre>;
+      return <CodeEditor value={element.script} language="python" height={200} showLineNumbers />;
     }
     case 'query': {
       return (
         <>
           <div>datasource: {element.datasource}</div>
           <div>
-            query: <pre>{JSON.stringify(element.query)}</pre>
+            <CodeEditor value={JSON.stringify(element.query)} height={100} language="promql" showLineNumbers />
           </div>
         </>
       );
