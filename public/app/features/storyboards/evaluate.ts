@@ -34,7 +34,7 @@ export async function evaluateElement(
         const value = await runner
           .get()
           .pipe(
-            filter((ev) => ev.state === 'Done'),
+            filter((ev) => ev.state === 'Done' && ev.series[0].refId === n.id),
             first()
           )
           .toPromise();

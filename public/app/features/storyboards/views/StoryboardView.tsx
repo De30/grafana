@@ -50,6 +50,13 @@ const document: UnevaluatedStoryboardDocument = {
       query: { refId: 'query', expr: 'go_goroutines' },
       timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
     },
+    {
+      id: 'query2',
+      type: 'query',
+      datasource: 'prometheus',
+      query: { refId: 'query2', expr: 'prometheus_engine_queries' },
+      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
+    },
 
     // Show a timeseries
     // { id: 'presentation', type: 'timeseries-view', from: 'query' },
