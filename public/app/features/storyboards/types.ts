@@ -5,7 +5,7 @@
 //   OutboundNotebookMessage,
 // } from 'starboard-notebook';
 
-import { DataQuery, RawTimeRange } from '@grafana/data';
+import { DataFrame, DataQuery, RawTimeRange } from '@grafana/data';
 
 export type OutboundNotebookMessage = { type: unknown; payload: any };
 export type InboundNotebookMessage = { type: unknown; payload: any };
@@ -80,7 +80,13 @@ export interface StoryboardContext {
 export interface StoryboardCsv {
   id: StoryboardId;
   type: 'csv';
-  content: string;
+  content: {
+    text: string;
+    /**
+     * Optional in the case no input has been given
+     */
+    data?: DataFrame;
+  };
 }
 
 export interface StoryboardPlainText {

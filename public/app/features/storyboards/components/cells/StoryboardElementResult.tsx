@@ -1,7 +1,8 @@
 import React from 'react';
 import { StoryboardDocumentElement, StoryboardVariable } from '../../types';
 import { css } from '@emotion/css';
-import { renderMarkdown } from '../../../../../../packages/grafana-data/src';
+import { renderMarkdown } from '@grafana/data';
+import { Table } from '@grafana/ui';
 
 export function ShowStoryboardDocumentElementResult({
   element,
@@ -23,26 +24,7 @@ export function ShowStoryboardDocumentElementResult({
     }
     // Maybe use the Table component here?
     case 'csv': {
-      return (
-        <table>
-          <tbody>
-            {(result.value as string[][]).map((r, ri) => (
-              <tr key={ri}>
-                {r.map((c, ci) => (
-                  <td
-                    className={css`
-                      padding: 5px;
-                    `}
-                    key={ci}
-                  >
-                    {c as string}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
+      return element.content.data ? <Table data={element.content.data} width={100} height={300} /> : <></>;
     }
     case 'plaintext': {
       return null;

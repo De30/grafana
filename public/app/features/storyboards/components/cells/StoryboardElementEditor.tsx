@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextArea, Field } from '@grafana/ui';
+import { TextArea, Field, TableInputCSV } from '@grafana/ui';
 import { StoryboardDocumentElement } from '../../types';
 
 interface Props {
@@ -25,17 +25,14 @@ export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Ele
     }
     case 'csv': {
       return (
-        <Field label="CSV">
-          <TextArea
-            defaultValue={element.content}
-            onChange={(event) => {
-              element.content = event.currentTarget.value;
-            }}
-            onBlur={() => {
-              // Make the markdown render here if it can't be rendered onChange
-            }}
-          />
-        </Field>
+        <TableInputCSV
+          width="100%"
+          height="100px"
+          text={element.content.text}
+          onSeriesParsed={(data, text) => {
+            console.log(data);
+          }}
+        />
       );
     }
     case 'plaintext': {

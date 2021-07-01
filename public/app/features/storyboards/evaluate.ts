@@ -47,7 +47,7 @@ export async function evaluateElement(
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
-      return { value: n.content.split('\n').map((l) => l.split(',')) };
+      return { value: n.content.data };
     }
     case 'plaintext': {
       return { value: n.content };

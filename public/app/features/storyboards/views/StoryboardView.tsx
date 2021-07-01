@@ -15,6 +15,7 @@ import { ShowStoryboardDocumentElementResult } from '../components/cells/Storybo
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
 import { Button, HorizontalGroup } from '@grafana/ui';
+import { DataFrame } from '@grafana/data';
 
 interface StoryboardRouteParams {
   uid: string;
@@ -33,8 +34,9 @@ const document: UnevaluatedStoryboardDocument = {
     {
       id: 'some_data',
       type: 'csv',
-      content: `1,23,4
-3,4,1`,
+      content: {
+        text: '',
+      },
     },
 
     // Fetch data from remote url and expose result
