@@ -1,6 +1,6 @@
 import { isString as _isString } from 'lodash';
 
-import { TimeRange, AppEvents, rangeUtil, dateMath, LoadingState, FieldType, PanelModel as IPanelModel } from '@grafana/data';
+import { TimeRange, AppEvents, rangeUtil, dateMath, LoadingState, FieldType, DataFrame, PanelModel as IPanelModel } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import appEvents from 'app/core/app_events';
 import config from 'app/core/config';
@@ -61,14 +61,20 @@ export const copyPanel = (panel: IPanelModel) => {
 export const sonifyPanel = (dashboard: DashboardModel, panel: PanelModel) => {
   const panelData = panel.getQueryRunner().getLastResult();
   if (panelData && panelData.state === LoadingState.Done) {
-    const name = panelData.series[0].name || 'First series';
-    const timestamps = (panelData.series[0].fields.find((f) => f.type === FieldType.time)?.values || []) as number[];
-    const values = (panelData.series[0].fields.find((f) => f.type === FieldType.number)?.values.toArray() ||
-      []) as number[];
-    const series: any[] = timestamps.map((ts, i) => [ts, values[i]]);
-    const sonifier = new Sonifier();
-    sonifier.speak(name);
-    sonifier.playSeries(series);
+    let count = 1;
+    for (const frame of panelData.series) {
+      const name = frame.name || `Series ${count}`;
+      const timestamps = (frame.fields.find((f) => f.type === FieldType.time)?.values || []) as number[];
+      const values = (frame.fields.find((f) => f.type === FieldType.number)?.values.toArray() || []) as number[];
+      const series: any[] = timestamps.map((ts, i) => [ts, values[i]]);
+      const sonifier = new Sonifier();
+      sonifier.speak(name);
+      sonifier.playSeries(series);
+      count++;
+      if (count > 5) {
+        break;
+      }
+    }
   }
 };
 

@@ -288,7 +288,7 @@ class LiveLogs extends PureComponent<Props, State> {
           {sonifyValue && (
             <>
               <Input
-                width={48}
+                width={36}
                 placeholder="Example: duration=(\d+)ms"
                 onChange={this.onChangeValueExpression}
                 value={sonifyValueExpression}
