@@ -21,76 +21,76 @@ interface StoryboardRouteParams {
   uid: string;
 }
 
-type StorybookId = string;
+type StoryboardId = string;
 
-interface StorybookVariable {
+interface StoryboardVariable {
   value: unknown;
 }
 
-interface StorybookContext {
-  [property: string]: StorybookVariable;
+interface StoryboardContext {
+  [property: string]: StoryboardVariable;
 }
 
-interface StorybookCsv {
-  id: StorybookId;
+interface StoryboardCsv {
+  id: StoryboardId;
   type: 'csv';
   content: string;
 }
 
-interface StorybookPlainText {
-  id: StorybookId;
+interface StoryboardPlainText {
+  id: StoryboardId;
   type: 'plaintext';
   content: string;
 }
 
-interface StorybookDatasourceQuery {
-  id: StorybookId;
+interface StoryboardDatasourceQuery {
+  id: StoryboardId;
   type: 'query';
   datasource: string;
   query: DataQuery;
   timeRange: TimeRange;
 }
 
-interface StorybookMarkdown {
-  id: StorybookId;
+interface StoryboardMarkdown {
+  id: StoryboardId;
   type: 'markdown';
   content: string;
 }
 
-interface StorybookPython {
-  id: StorybookId;
+interface StoryboardPython {
+  id: StoryboardId;
   type: 'python';
   script: string;
 }
 
-type StorybookDocumentElement =
-  | StorybookPlainText
-  | StorybookCsv
-  | StorybookMarkdown
-  | StorybookPython
-  | StorybookDatasourceQuery;
+type StoryboardDocumentElement =
+  | StoryboardPlainText
+  | StoryboardCsv
+  | StoryboardMarkdown
+  | StoryboardPython
+  | StoryboardDatasourceQuery;
 
-// Describes an unevaluated storybook (no context)
-interface CoreStorybookDocument {
-  elements: StorybookDocumentElement[];
+// Describes an unevaluated Storyboard (no context)
+interface CoreStoryboardDocument {
+  elements: StoryboardDocumentElement[];
 }
 
-interface UnevaluatedStorybookDocument extends CoreStorybookDocument {
+interface UnevaluatedStoryboardDocument extends CoreStoryboardDocument {
   status: 'unevaluated';
 }
 
-// Evaluated storybooks have context, which is just results from evaluation bound to names. context is
+// Evaluated Storyboards have context, which is just results from evaluation bound to names. context is
 // constructed as we evaluate, and then documents can observe the results appear
-interface EvaluatedStorybookDocument extends CoreStorybookDocument {
+interface EvaluatedStoryboardDocument extends CoreStoryboardDocument {
   status: 'evaluating' | 'evaluated';
-  context: StorybookContext;
+  context: StoryboardContext;
 }
 
-type StorybookDocument = EvaluatedStorybookDocument | UnevaluatedStorybookDocument;
+type StoryboardDocument = EvaluatedStoryboardDocument | UnevaluatedStoryboardDocument;
 
 /// documents are a simple list of nodes. they can each be documentation, or code. cells can refer to
 /// each-other's output, including data and text. some nodes produce realtime data.
-const document: UnevaluatedStorybookDocument = {
+const document: UnevaluatedStoryboardDocument = {
   status: 'unevaluated',
   elements: [
     // presentational markdown
@@ -146,9 +146,9 @@ compute1 + 42`,
 
 async function evaluateElement(
   runner: QueryRunner,
-  context: StorybookContext,
-  n: StorybookDocumentElement
-): Promise<StorybookVariable> {
+  context: StoryboardContext,
+  n: StoryboardDocumentElement
+): Promise<StoryboardVariable> {
   switch (n.type) {
     case 'markdown': {
       // value should be JSX:  https://github.com/rexxars/commonmark-react-renderer
@@ -186,7 +186,7 @@ async function evaluateElement(
   return { value: undefined };
 }
 
-function ElementType({ element }: { element: StorybookDocumentElement }): JSX.Element {
+function ElementType({ element }: { element: StoryboardDocumentElement }): JSX.Element {
   return (
     <div
       className={css`
@@ -201,12 +201,12 @@ function ElementType({ element }: { element: StorybookDocumentElement }): JSX.El
   );
 }
 
-function ShowStorybookDocumentElementResult({
+function ShowStoryboardDocumentElementResult({
   element,
   result,
 }: {
-  element: StorybookDocumentElement;
-  result?: StorybookVariable;
+  element: StoryboardDocumentElement;
+  result?: StoryboardVariable;
 }): JSX.Element | null {
   if (result == null) {
     return null;
@@ -272,7 +272,7 @@ function ShowStorybookDocumentElementResult({
   }
 }
 
-function ShowStorybookDocumentElementEditor({ element }: { element: StorybookDocumentElement }): JSX.Element {
+function ShowStoryboardDocumentElementEditor({ element }: { element: StoryboardDocumentElement }): JSX.Element {
   switch (element.type) {
     case 'markdown': {
       return <div>{element.content}</div>;
@@ -303,16 +303,16 @@ function ShowStorybookDocumentElementEditor({ element }: { element: StorybookDoc
 /// Transforms a document into an evaledDocument (has results)
 function evaluateDocument(
   runner: QueryRunner,
-  doc: UnevaluatedStorybookDocument
-): Observable<EvaluatedStorybookDocument> {
-  const result: EvaluatedStorybookDocument = {
+  doc: UnevaluatedStoryboardDocument
+): Observable<EvaluatedStoryboardDocument> {
+  const result: EvaluatedStoryboardDocument = {
     status: 'evaluating',
     context: {},
     elements: doc.elements,
   };
 
-  const obs: Observable<EvaluatedStorybookDocument> = from<StorybookDocumentElement[]>(doc.elements).pipe(
-    concatMap(async (v: StorybookDocumentElement) => {
+  const obs: Observable<EvaluatedStoryboardDocument> = from<StoryboardDocumentElement[]>(doc.elements).pipe(
+    concatMap(async (v: StoryboardDocumentElement) => {
       console.log('Evaluating %s with context %o', v.id, result.context);
       const res = await evaluateElement(runner, result.context, v);
       result.context[v.id] = res;
@@ -383,8 +383,8 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             {evaluation?.elements.map((m) => (
               <div key={m.id}>
                 <ElementType element={m} />
-                <ShowStorybookDocumentElementEditor element={m} />
-                <ShowStorybookDocumentElementResult element={m} result={evaluation?.context[m.id]} />
+                <ShowStoryboardDocumentElementEditor element={m} />
+                <ShowStoryboardDocumentElementResult element={m} result={evaluation?.context[m.id]} />
               </div>
             ))}
           </div>
@@ -396,7 +396,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
 
 function runCallback(
   script: string,
-  context: StorybookContext,
+  context: StoryboardContext,
   onSuccess: (data: string) => void,
   onError: (ev: ErrorEvent) => any
 ) {
@@ -411,7 +411,7 @@ function runCallback(
   });
 }
 
-export function run(script: string, context: StorybookContext): Promise<any> {
+export function run(script: string, context: StoryboardContext): Promise<any> {
   return new Promise(function (onSuccess, onError) {
     runCallback(script, context, onSuccess, onError);
   });
