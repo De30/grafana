@@ -1,14 +1,19 @@
 import React from 'react';
-import { StoryboardDocumentElement, StoryboardVariable } from '../../types';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { StoryboardContext, StoryboardDocumentElement, StoryboardVariable } from '../../types';
 import { css } from '@emotion/css';
 import { renderMarkdown } from '@grafana/data';
-import { Table } from '@grafana/ui';
+import { PanelData } from '@grafana/data';
+import { PanelRenderer } from '@grafana/runtime';
+import { PanelChrome, Table } from '@grafana/ui';
 
 export function ShowStoryboardDocumentElementResult({
   element,
+  context,
   result,
 }: {
   element: StoryboardDocumentElement;
+  context: StoryboardContext;
   result?: StoryboardVariable;
 }): JSX.Element | null {
   if (result == null) {
@@ -49,8 +54,35 @@ export function ShowStoryboardDocumentElementResult({
       // TODO: Result of query as table
       return (
         <>
-          <pre>{JSON.stringify(result.value.series)}</pre>
+          <pre>{JSON.stringify((result.value as PanelData).series)}</pre>
         </>
+      );
+    }
+    case 'timeseries-plot': {
+      return (
+        <AutoSizer>
+          {({ width, height }) => {
+            if (width < 3 || height < 3) {
+              return null;
+            }
+
+            return (
+              <PanelChrome width={width} height={height}>
+                {(innerWidth, innerHeight) => {
+                  return (
+                    <PanelRenderer
+                      title=""
+                      pluginId="timeseries"
+                      width={innerWidth}
+                      height={innerHeight}
+                      data={context[element.from].value as PanelData}
+                    />
+                  );
+                }}
+              </PanelChrome>
+            );
+          }}
+        </AutoSizer>
       );
     }
   }

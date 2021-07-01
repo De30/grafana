@@ -39,7 +39,7 @@ export async function evaluateElement(
           )
           .toPromise();
         // Need to deep copy to avoid DOMException: object could not be cloned.
-        return { value: JSON.parse(JSON.stringify(value)) };
+        return { value };
       } catch (e) {
         console.error('TEMP ERROR HANDLER: ', e);
         return { value: undefined };
@@ -104,7 +104,8 @@ export function runCallback(
   pyodideWorker.onerror = (e) => onError(e);
   pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
   pyodideWorker.postMessage({
-    ...context,
+    // Need to deep copy the object to avoid DOMExceptions when objects can't be cloned.
+    ...JSON.parse(JSON.stringify(context)),
     python: script,
   });
 }

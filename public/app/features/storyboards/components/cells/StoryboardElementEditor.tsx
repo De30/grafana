@@ -51,6 +51,13 @@ export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Ele
         </>
       );
     }
+    case 'timeseries-plot': {
+      return (
+        <>
+          <div>Plotting {element.from}</div>
+        </>
+      );
+    }
   }
   return <>{JSON.stringify(element)}</>;
 }
