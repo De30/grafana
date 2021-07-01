@@ -254,13 +254,13 @@ export class PanelQueryRunner {
 
     let panelData = observable;
     const dataSupport = this.dataConfigSource.getDataSupport();
-
+    /*
     if (dataSupport.alertStates || dataSupport.annotations) {
       const panel = (this.dataConfigSource as unknown) as PanelModel;
       const id = panel.editSourceId ?? panel.id;
       panelData = mergePanelAndDashData(observable, getDashboardQueryRunner().getResult(id));
     }
-
+    */
     this.subscription = panelData.subscribe({
       next: (data) => {
         this.lastResult = preProcessPanelData(data, this.lastResult);

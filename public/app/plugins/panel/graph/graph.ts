@@ -106,6 +106,7 @@ class GraphElement {
   }
 
   onRender(renderData: any[]) {
+    return;
     this.data = renderData || this.data;
     if (!this.data) {
       return;

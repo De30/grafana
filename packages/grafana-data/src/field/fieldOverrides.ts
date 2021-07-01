@@ -2,8 +2,8 @@ import {
   ApplyFieldOverrideOptions,
   DataFrame,
   DataLink,
-  DisplayProcessor,
-  DisplayValue,
+  //DisplayProcessor,
+  //DisplayValue,
   DynamicConfigValue,
   Field,
   FieldColorModeId,
@@ -184,12 +184,12 @@ export function applyFieldOverrides(options: ApplyFieldOverrideOptions): DataFra
         theme: options.theme,
         timeZone: options.timeZone,
       });
-
+      /*
       // Wrap the display with a cache to avoid double calls
       if (field.config.unit !== 'dateTimeFromNow') {
         field.display = cachingDisplayProcessor(field.display, 2500);
       }
-
+      */
       // Attach data links supplier
       field.getLinks = getLinksSupplier(
         newFrame,
@@ -204,6 +204,7 @@ export function applyFieldOverrides(options: ApplyFieldOverrideOptions): DataFra
   });
 }
 
+/*
 function cachingDisplayProcessor(disp: DisplayProcessor, maxCacheSize = 2500): DisplayProcessor {
   const cache = new Map<any, DisplayValue>();
 
@@ -221,6 +222,7 @@ function cachingDisplayProcessor(disp: DisplayProcessor, maxCacheSize = 2500): D
     return v;
   };
 }
+*/
 
 export interface FieldOverrideEnv extends FieldOverrideContext {
   fieldConfigRegistry: FieldConfigOptionsRegistry;

@@ -21,6 +21,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
   onChangeTimeRange,
   replaceVariables,
 }) => {
+  /*
   const { sync } = usePanelContext();
 
   const getFieldLinks = (field: Field, rowIndex: number) => {
@@ -36,48 +37,51 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
       </div>
     );
   }
+  */
 
-  return (
-    <TimeSeries
-      frames={frames}
-      structureRev={data.structureRev}
-      timeRange={timeRange}
-      timeZone={timeZone}
-      width={width}
-      height={height}
-      legend={options.legend}
-    >
-      {(config, alignedDataFrame) => {
-        return (
-          <>
-            <ZoomPlugin config={config} onZoom={onChangeTimeRange} />
-            <TooltipPlugin
-              data={alignedDataFrame}
-              config={config}
-              mode={sync === DashboardCursorSync.Tooltip ? TooltipDisplayMode.Multi : options.tooltip.mode}
-              timeZone={timeZone}
-            />
-            <ContextMenuPlugin
-              data={alignedDataFrame}
-              config={config}
-              timeZone={timeZone}
-              replaceVariables={replaceVariables}
-            />
-            {data.annotations && (
-              <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
-            )}
+  return <div></div>;
 
-            {data.annotations && (
-              <ExemplarsPlugin
-                config={config}
-                exemplars={data.annotations}
-                timeZone={timeZone}
-                getFieldLinks={getFieldLinks}
-              />
-            )}
-          </>
-        );
-      }}
-    </TimeSeries>
-  );
+  // return (
+  //   <TimeSeries
+  //     frames={frames}
+  //     structureRev={data.structureRev}
+  //     timeRange={timeRange}
+  //     timeZone={timeZone}
+  //     width={width}
+  //     height={height}
+  //     legend={options.legend}
+  //   >
+  //     {(config, alignedDataFrame) => {
+  //       return (
+  //         <>
+  //           <ZoomPlugin config={config} onZoom={onChangeTimeRange} />
+  //           <TooltipPlugin
+  //             data={alignedDataFrame}
+  //             config={config}
+  //             mode={sync === DashboardCursorSync.Tooltip ? TooltipDisplayMode.Multi : options.tooltip.mode}
+  //             timeZone={timeZone}
+  //           />
+  //           <ContextMenuPlugin
+  //             data={alignedDataFrame}
+  //             config={config}
+  //             timeZone={timeZone}
+  //             replaceVariables={replaceVariables}
+  //           />
+  //           {data.annotations && (
+  //             <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
+  //           )}
+
+  //           {data.annotations && (
+  //             <ExemplarsPlugin
+  //               config={config}
+  //               exemplars={data.annotations}
+  //               timeZone={timeZone}
+  //               getFieldLinks={getFieldLinks}
+  //             />
+  //           )}
+  //         </>
+  //       );
+  //     }}
+  //   </TimeSeries>
+  // );
 };
