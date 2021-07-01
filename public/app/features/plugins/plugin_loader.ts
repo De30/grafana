@@ -146,27 +146,27 @@ exposeToPlugin('app/core/core', {
   __esModule: true,
 });
 
-import 'vendor/flot/jquery.flot';
-import 'vendor/flot/jquery.flot.selection';
-import 'vendor/flot/jquery.flot.time';
-import 'vendor/flot/jquery.flot.stack';
-import 'vendor/flot/jquery.flot.stackpercent';
-import 'vendor/flot/jquery.flot.fillbelow';
-import 'vendor/flot/jquery.flot.crosshair';
-import 'vendor/flot/jquery.flot.dashes';
-import 'vendor/flot/jquery.flot.gauge';
+// import 'vendor/flot/jquery.flot';
+// import 'vendor/flot/jquery.flot.selection';
+// import 'vendor/flot/jquery.flot.time';
+// import 'vendor/flot/jquery.flot.stack';
+// import 'vendor/flot/jquery.flot.stackpercent';
+// import 'vendor/flot/jquery.flot.fillbelow';
+// import 'vendor/flot/jquery.flot.crosshair';
+// import 'vendor/flot/jquery.flot.dashes';
+// import 'vendor/flot/jquery.flot.gauge';
 
-const flotDeps = [
-  'jquery.flot',
-  'jquery.flot.pie',
-  'jquery.flot.time',
-  'jquery.flot.fillbelow',
-  'jquery.flot.crosshair',
-  'jquery.flot.stack',
-  'jquery.flot.selection',
-  'jquery.flot.stackpercent',
-  'jquery.flot.events',
-  'jquery.flot.gauge',
+const flotDeps: string[] = [
+  // 'jquery.flot',
+  // 'jquery.flot.pie',
+  // 'jquery.flot.time',
+  // 'jquery.flot.fillbelow',
+  // 'jquery.flot.crosshair',
+  // 'jquery.flot.stack',
+  // 'jquery.flot.selection',
+  // 'jquery.flot.stackpercent',
+  // 'jquery.flot.events',
+  // 'jquery.flot.gauge',
 ];
 
 for (const flotDep of flotDeps) {

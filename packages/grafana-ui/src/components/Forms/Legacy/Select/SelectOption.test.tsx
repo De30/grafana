@@ -1,10 +1,10 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 import SelectOption from './SelectOption';
-import { OptionProps } from 'react-select/src/components/Option';
+// import { OptionProps } from 'react-select/src/components/Option';
 
 // @ts-ignore
-const model: OptionProps<any> = {
+const model: any = {
   data: jest.fn(),
   cx: jest.fn(),
   clearValue: jest.fn(),

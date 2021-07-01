@@ -44,7 +44,7 @@ import { PanelRenderer } from './features/panel/PanelRenderer';
 import { QueryRunner } from './features/query/state/QueryRunner';
 import { getTimeSrv } from './features/dashboard/services/TimeSrv';
 import { getVariablesUrlParams } from './features/variables/getAllVariableValuesForUrl';
-import getDefaultMonacoLanguages from '../lib/monaco-languages';
+import getDefaultMonacoLanguages from './monaco-languages';
 import { contextSrv } from './core/services/context_srv';
 
 // add move to lodash for backward compatabilty with plugins

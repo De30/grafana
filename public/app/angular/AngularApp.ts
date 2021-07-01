@@ -8,7 +8,7 @@ import { config } from 'app/core/config';
 import coreModule, { angularModules } from 'app/core/core_module';
 import { DashboardLoaderSrv } from 'app/features/dashboard/services/DashboardLoaderSrv';
 import { registerAngularDirectives } from 'app/core/core';
-import { initAngularRoutingBridge } from 'app/angular/bridgeReactAngularRouting';
+import { initAngularRoutingBridge } from './bridgeReactAngularRouting';
 import { monkeyPatchInjectorWithPreAssignedBindings } from 'app/core/injectorMonkeyPatch';
 import { extend } from 'lodash';
 import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';

@@ -15,12 +15,12 @@ export * from './field';
 export * from './events';
 export * from './themes';
 export * from './monaco';
-export {
+export type {
   ValueMatcherOptions,
   BasicValueMatcherOptions,
   RangeValueMatcherOptions,
 } from './transformations/matchers/valueMatchers/types';
-export { LayoutModes, LayoutMode } from './types/layout';
-export { PanelPlugin, SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
+export type { LayoutModes, LayoutMode } from './types/layout';
+export type { PanelPlugin, SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
 export { createFieldConfigRegistry } from './panel/registryFactories';
-export { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
+export type { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
