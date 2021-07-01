@@ -1,4 +1,5 @@
-import { MutableRefObject, useRef, useCallback, useEffect, useState } from 'react';
+import { MutableRefObject, useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import { createQueryRunner } from '@grafana/runtime';
 import { createStoryboard, getStoryboards, removeStoryboard, updateStoryboard } from './storage';
 import { InboundNotebookMessage, OutboundNotebookMessage, StarboardNotebookIFrameOptions, Storyboard } from './types';
 
@@ -186,4 +187,17 @@ export function useSavedStoryboards() {
   };
 
   return { boards, updateBoard, createBoard, removeBoard };
+}
+
+export function useRunner() {
+  const runner = useMemo(() => createQueryRunner(), []);
+
+  useEffect(() => {
+    const toDestroy = runner;
+    return () => {
+      return toDestroy.destroy();
+    };
+  }, [runner]);
+
+  return runner;
 }

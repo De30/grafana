@@ -5,6 +5,8 @@
 //   OutboundNotebookMessage,
 // } from 'starboard-notebook';
 
+import { DataQuery, TimeRange } from '@grafana/data';
+
 export type OutboundNotebookMessage = { type: unknown; payload: any };
 export type InboundNotebookMessage = { type: unknown; payload: any };
 
@@ -64,3 +66,70 @@ export type StarboardNotebookMessage =
   | StarboardNotebookMessageSetNotebookContent
   | StarboardNotebookMessageNotebookContentUpdate
   | StarboardNotebookMessageSave;
+
+type StoryboardId = string;
+
+export interface StoryboardVariable {
+  value: unknown;
+}
+
+export interface StoryboardContext {
+  [property: string]: StoryboardVariable;
+}
+
+export interface StoryboardCsv {
+  id: StoryboardId;
+  type: 'csv';
+  content: string;
+}
+
+export interface StoryboardPlainText {
+  id: StoryboardId;
+  type: 'plaintext';
+  content: string;
+}
+
+export interface StoryboardDatasourceQuery {
+  id: StoryboardId;
+  type: 'query';
+  datasource: string;
+  query: DataQuery;
+  timeRange: TimeRange;
+}
+
+export interface StoryboardMarkdown {
+  id: StoryboardId;
+  type: 'markdown';
+  content: string;
+}
+
+export interface StoryboardPython {
+  id: StoryboardId;
+  type: 'python';
+  script: string;
+}
+
+export type StoryboardDocumentElement =
+  | StoryboardPlainText
+  | StoryboardCsv
+  | StoryboardMarkdown
+  | StoryboardPython
+  | StoryboardDatasourceQuery;
+
+// Describes an unevaluated Storyboard (no context)
+export interface CoreStoryboardDocument {
+  elements: StoryboardDocumentElement[];
+}
+
+export interface UnevaluatedStoryboardDocument extends CoreStoryboardDocument {
+  status: 'unevaluated';
+}
+
+// Evaluated Storyboards have context, which is just results from evaluation bound to names. context is
+// constructed as we evaluate, and then documents can observe the results appear
+export interface EvaluatedStoryboardDocument extends CoreStoryboardDocument {
+  status: 'evaluating' | 'evaluated';
+  context: StoryboardContext;
+}
+
+export type StoryboardDocument = EvaluatedStoryboardDocument | UnevaluatedStoryboardDocument;

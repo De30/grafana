@@ -1,92 +1,25 @@
-import React, { createContext, useEffect, FC, useMemo, ReactNode } from 'react';
+import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/css';
 
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { StoreState } from 'app/types';
 import { connect } from 'react-redux';
-import { useSavedStoryboards } from '../hooks';
-import { Storyboard } from '../types';
-import { getLocationSrv, createQueryRunner } from '@grafana/runtime';
+import { useRunner, useSavedStoryboards } from '../hooks';
+import { Storyboard, UnevaluatedStoryboardDocument } from '../types';
+import { getLocationSrv } from '@grafana/runtime';
 import { Page } from 'app/core/components/Page/Page';
 
-import { DataQuery, dateTime, DateTime, QueryRunner, TimeRange } from '@grafana/data';
+import { dateTime } from '@grafana/data';
 
-import PyWorker from '../web-workers/pyodide.worker';
 import { useObservable } from 'react-use';
-import { Observable, from } from 'rxjs';
-
-import { concatMap } from 'rxjs/operators';
+import { ShowStoryboardDocumentElementEditor } from '../components/cells/StoryboardElementEditor';
+import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
+import { evaluateDocument } from '../evaluate';
+import { CellType } from '../components/cells/CellType';
 
 interface StoryboardRouteParams {
   uid: string;
 }
-
-type StoryboardId = string;
-
-interface StoryboardVariable {
-  value: unknown;
-}
-
-interface StoryboardContext {
-  [property: string]: StoryboardVariable;
-}
-
-interface StoryboardCsv {
-  id: StoryboardId;
-  type: 'csv';
-  content: string;
-}
-
-interface StoryboardPlainText {
-  id: StoryboardId;
-  type: 'plaintext';
-  content: string;
-}
-
-interface StoryboardDatasourceQuery {
-  id: StoryboardId;
-  type: 'query';
-  datasource: string;
-  query: DataQuery;
-  timeRange: TimeRange;
-}
-
-interface StoryboardMarkdown {
-  id: StoryboardId;
-  type: 'markdown';
-  content: string;
-}
-
-interface StoryboardPython {
-  id: StoryboardId;
-  type: 'python';
-  script: string;
-}
-
-type StoryboardDocumentElement =
-  | StoryboardPlainText
-  | StoryboardCsv
-  | StoryboardMarkdown
-  | StoryboardPython
-  | StoryboardDatasourceQuery;
-
-// Describes an unevaluated Storyboard (no context)
-interface CoreStoryboardDocument {
-  elements: StoryboardDocumentElement[];
-}
-
-interface UnevaluatedStoryboardDocument extends CoreStoryboardDocument {
-  status: 'unevaluated';
-}
-
-// Evaluated Storyboards have context, which is just results from evaluation bound to names. context is
-// constructed as we evaluate, and then documents can observe the results appear
-interface EvaluatedStoryboardDocument extends CoreStoryboardDocument {
-  status: 'evaluating' | 'evaluated';
-  context: StoryboardContext;
-}
-
-type StoryboardDocument = EvaluatedStoryboardDocument | UnevaluatedStoryboardDocument;
 
 /// documents are a simple list of nodes. they can each be documentation, or code. cells can refer to
 /// each-other's output, including data and text. some nodes produce realtime data.
@@ -144,207 +77,7 @@ compute1 + 42`,
   ],
 };
 
-async function evaluateElement(
-  runner: QueryRunner,
-  context: StoryboardContext,
-  n: StoryboardDocumentElement
-): Promise<StoryboardVariable> {
-  switch (n.type) {
-    case 'markdown': {
-      // value should be JSX:  https://github.com/rexxars/commonmark-react-renderer
-      return { value: n.content };
-    }
-    case 'query': {
-      // try {
-      //   runner.run({
-      //     timeRange: n.timeRange,
-      //     queries: [n.query],
-      //     datasource: n.datasource,
-      //     timezone: '',
-      //     maxDataPoints: 100,
-      //     minInterval: null,
-      //   });
-      //   const value = await runner.get().toPromise();
-      //   return { value };
-      // } catch (e) {
-      //   console.error('TEMP ERROR HANDLER: ', e);
-      return { value: undefined };
-      //}
-    }
-    case 'csv': {
-      // TODO: Use real CSV algorithm to split!
-      return { value: n.content.split('\n').map((l) => l.split(',')) };
-    }
-    case 'plaintext': {
-      return { value: n.content };
-    }
-    case 'python': {
-      const value = await run(n.script, context);
-      return { value };
-    }
-  }
-  return { value: undefined };
-}
-
-function ElementType({ element }: { element: StoryboardDocumentElement }): JSX.Element {
-  return (
-    <div
-      className={css`
-        font-size: 10px;
-        margin-top: 20px;
-        opacity: 0.5;
-      `}
-    >
-      {element.type} — <strong>#{element.id}</strong>{' '}
-      <i className="fa fa-pencil-square" style={{ color: 'skyblue', cursor: 'pointer' }}></i>
-    </div>
-  );
-}
-
-function ShowStoryboardDocumentElementResult({
-  element,
-  result,
-}: {
-  element: StoryboardDocumentElement;
-  result?: StoryboardVariable;
-}): JSX.Element | null {
-  if (result == null) {
-    return null;
-  }
-  switch (element.type) {
-    case 'markdown': {
-      // we should parse markdown with a strict subset of options directly to JSX with a library like this:
-      // https://github.com/rexxars/commonmark-react-renderer
-      return <div> {result.value as JSX.Element} </div>;
-    }
-    case 'csv': {
-      return (
-        <table>
-          <tbody>
-            {(result.value as string[][]).map((r, ri) => (
-              <tr key={ri}>
-                {r.map((c, ci) => (
-                  <td
-                    className={css`
-                      padding: 5px;
-                    `}
-                    key={ci}
-                  >
-                    {c as string}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    }
-    case 'plaintext': {
-      return null;
-    }
-    case 'python': {
-      return (
-        <div>
-          <div
-            className={css`
-              font-size: 10px;
-              margin-top: 20px;
-              opacity: 0.5;
-            `}
-          >
-            RESULT:
-          </div>
-          <pre>{JSON.stringify(result)}</pre>
-        </div>
-      );
-    }
-    case 'query': {
-      // TODO: Result of query as table
-      return (
-        <>
-          <div>datasource: {element.datasource}</div>
-          <div>
-            query: <pre>{JSON.stringify(element.query)}</pre>
-          </div>
-        </>
-      );
-    }
-  }
-}
-
-function ShowStoryboardDocumentElementEditor({ element }: { element: StoryboardDocumentElement }): JSX.Element {
-  switch (element.type) {
-    case 'markdown': {
-      return <div>{element.content}</div>;
-    }
-    case 'csv': {
-      return <pre>{element.content}</pre>;
-    }
-    case 'plaintext': {
-      return <pre>{element.content}</pre>;
-    }
-    case 'python': {
-      return <pre>{element.script}</pre>;
-    }
-    case 'query': {
-      return (
-        <>
-          <div>datasource: {element.datasource}</div>
-          <div>
-            query: <pre>{JSON.stringify(element.query)}</pre>
-          </div>
-        </>
-      );
-    }
-  }
-  return <>{JSON.stringify(element)}</>;
-}
-
-/// Transforms a document into an evaledDocument (has results)
-function evaluateDocument(
-  runner: QueryRunner,
-  doc: UnevaluatedStoryboardDocument
-): Observable<EvaluatedStoryboardDocument> {
-  const result: EvaluatedStoryboardDocument = {
-    status: 'evaluating',
-    context: {},
-    elements: doc.elements,
-  };
-
-  const obs: Observable<EvaluatedStoryboardDocument> = from<StoryboardDocumentElement[]>(doc.elements).pipe(
-    concatMap(async (v: StoryboardDocumentElement) => {
-      console.log('Evaluating %s with context %o', v.id, result.context);
-      const res = await evaluateElement(runner, result.context, v);
-      result.context[v.id] = res;
-      return { ...result };
-    })
-  );
-
-  return obs;
-}
-
 const locationSrv = getLocationSrv();
-
-function useRunner() {
-  const runner = useMemo(() => createQueryRunner(), []);
-
-  useEffect(() => {
-    const toDestroy = runner;
-    return () => {
-      return toDestroy.destroy();
-    };
-  }, [runner]);
-
-  return runner;
-}
-
-let pyodideWorker: Worker | undefined = undefined;
-pyodideWorker = (() => {
-  if (pyodideWorker == null) {
-    return new PyWorker();
-  }
-  return pyodideWorker;
-})();
 
 export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
   const { boards } = useSavedStoryboards();
@@ -382,7 +115,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
           >
             {evaluation?.elements.map((m) => (
               <div key={m.id}>
-                <ElementType element={m} />
+                <CellType element={m} />
                 <ShowStoryboardDocumentElementEditor element={m} />
                 <ShowStoryboardDocumentElementResult element={m} result={evaluation?.context[m.id]} />
               </div>
@@ -393,29 +126,6 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
     </Page>
   );
 };
-
-function runCallback(
-  script: string,
-  context: StoryboardContext,
-  onSuccess: (data: string) => void,
-  onError: (ev: ErrorEvent) => any
-) {
-  if (pyodideWorker == null) {
-    return;
-  }
-  pyodideWorker.onerror = (e) => onError(e);
-  pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
-  pyodideWorker.postMessage({
-    ...context,
-    python: script,
-  });
-}
-
-export function run(script: string, context: StoryboardContext): Promise<any> {
-  return new Promise(function (onSuccess, onError) {
-    runCallback(script, context, onSuccess, onError);
-  });
-}
 
 const mapStateToProps = (state: StoreState, props: GrafanaRouteComponentProps<StoryboardRouteParams>) => {
   return {
