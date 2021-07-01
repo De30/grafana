@@ -1,10 +1,24 @@
 import React from 'react';
+import { TextArea, Field } from '@grafana/ui';
 import { StoryboardDocumentElement } from '../../types';
 
-export function ShowStoryboardDocumentElementEditor({ element }: { element: StoryboardDocumentElement }): JSX.Element {
+interface Props {
+  element: StoryboardDocumentElement;
+}
+
+export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Element {
   switch (element.type) {
     case 'markdown': {
-      return <div>{element.content}</div>;
+      return (
+        <Field label="Markdown text  ">
+          <TextArea
+            defaultValue={element.content}
+            onChange={(event) => {
+              element.content = event.currentTarget.value;
+            }}
+          />
+        </Field>
+      );
     }
     case 'csv': {
       return <pre>{element.content}</pre>;
