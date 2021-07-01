@@ -28,7 +28,7 @@ export function ShowStoryboardDocumentElementResult({
     }
     // Maybe use the Table component here?
     case 'csv': {
-      return element.content.data ? <Table data={element.content.data} width={100} height={300} /> : <></>;
+      return element.content.data ? <Table data={element.content.data} width={100} height={400} /> : <></>;
     }
     case 'plaintext': {
       return null;
@@ -51,6 +51,9 @@ export function ShowStoryboardDocumentElementResult({
     }
     case 'query': {
       // TODO: Result of query as table
+      if (!result.value) {
+        return <p>Nothing here</p>;
+      }
       return (
         <>
           <pre>{JSON.stringify((result.value as PanelData).series)}</pre>

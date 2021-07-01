@@ -85,7 +85,7 @@ export interface StoryboardCsv {
     /**
      * Optional in the case no input has been given
      */
-    data?: DataFrame[];
+    data?: DataFrame;
   };
 }
 

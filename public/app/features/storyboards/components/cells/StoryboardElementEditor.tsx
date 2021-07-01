@@ -19,8 +19,11 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
               newElement.content = event.currentTarget.value;
               onUpdate(newElement);
             }}
-            onBlur={() => {
+            onBlur={(event) => {
               // Make the markdown render here if it can't be rendered onChange
+              // let newElement = element;
+              // newElement.content = event.currentTarget.value;
+              // onUpdate(newElement);
             }}
           />
         </Field>
@@ -34,7 +37,7 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
           text={element.content.text}
           onSeriesParsed={(data, text) => {
             let newElement = element;
-            newElement.content.data = data;
+            newElement.content.data = data[0];
             newElement.content.text = text;
             onUpdate(newElement);
           }}
