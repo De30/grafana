@@ -67,10 +67,7 @@ export function ShowStoryboardDocumentElementResult({
       // TODO: Result of query as table
       return (
         <>
-          <div>datasource: {element.datasource}</div>
-          <div>
-            query: <pre>{JSON.stringify(element.query)}</pre>
-          </div>
+          <pre>{JSON.stringify(result.value.series)}</pre>
         </>
       );
     }
