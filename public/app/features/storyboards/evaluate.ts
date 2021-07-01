@@ -16,10 +16,12 @@ export async function evaluateElement(
   context: StoryboardContext,
   n: StoryboardDocumentElement
 ): Promise<StoryboardVariable> {
+  let result: StoryboardVariable = { element: n, value: undefined };
   switch (n.type) {
     case 'markdown': {
       // value should be JSX:  https://github.com/rexxars/commonmark-react-renderer
-      return { value: n.content };
+      result.value = n.content;
+      break;
     }
     case 'query': {
       try {
@@ -39,25 +41,27 @@ export async function evaluateElement(
           )
           .toPromise();
         // Need to deep copy to avoid DOMException: object could not be cloned.
-        return { value };
+        result.value = value;
       } catch (e) {
         console.error('TEMP ERROR HANDLER: ', e);
-        return { value: undefined };
       }
+      break;
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
-      return { value: n.content.data };
+      result.value = n.content.text.split('\n').map((line) => line.split(','));
+      break;
     }
     case 'plaintext': {
-      return { value: n.content };
+      result.value = n.content;
+      break;
     }
     case 'python': {
-      const value = await run(n.script, context);
-      return { value };
+      result.value = await run(n.script, context);
+      break;
     }
   }
-  return { value: undefined };
+  return result;
 }
 
 /// Transforms a document into an evaledDocument (has results)

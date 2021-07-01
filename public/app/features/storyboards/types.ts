@@ -71,6 +71,7 @@ type StoryboardId = string;
 
 export interface StoryboardVariable {
   value: unknown;
+  element?: StoryboardDocumentElement;
 }
 
 export interface StoryboardContext {
