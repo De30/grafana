@@ -115,12 +115,19 @@ export interface StoryboardPython {
   script: string;
 }
 
+export interface StoryboardTimeseriesPlot {
+  id: StoryboardId;
+  type: 'timeseries-plot';
+  from: StoryboardId;
+}
+
 export type StoryboardDocumentElement =
   | StoryboardPlainText
   | StoryboardCsv
   | StoryboardMarkdown
   | StoryboardPython
-  | StoryboardDatasourceQuery;
+  | StoryboardDatasourceQuery
+  | StoryboardTimeseriesPlot;
 
 // Describes an unevaluated Storyboard (no context)
 export interface CoreStoryboardDocument {

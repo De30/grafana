@@ -58,7 +58,7 @@ const document: UnevaluatedStoryboardDocument = {
     },
 
     // Show a timeseries
-    // { id: 'presentation', type: 'timeseries-view', from: 'query' },
+    { id: 'presentation', type: 'timeseries-plot', from: 'query' },
 
     // raw json data
     // {
@@ -130,7 +130,11 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
               >
                 <span>{m.type}</span>
                 <ShowStoryboardDocumentElementEditor element={m} />
-                <ShowStoryboardDocumentElementResult element={m} result={evaluation?.context[m.id]} />
+                <ShowStoryboardDocumentElementResult
+                  element={m}
+                  context={evaluation?.context}
+                  result={evaluation?.context[m.id]}
+                />
                 <p>
                   Result saved in variable: <CellType element={m} />
                 </p>
