@@ -10,7 +10,7 @@ import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import { AddLibraryPanelModal } from 'app/features/library-panels/components/AddLibraryPanelModal/AddLibraryPanelModal';
-import Sonifier, { Tuple, sleep } from 'app/core/services/Sonifier';
+import Sonifier, { Tuple } from 'app/core/services/Sonifier';
 import { UnlinkModal } from 'app/features/library-panels/components/UnlinkModal/UnlinkModal';
 import { cleanUpPanelState } from 'app/features/panel/state/actions';
 import { dispatch } from 'app/store/store';
@@ -67,7 +67,7 @@ export const sonifyPanel = (dashboard: DashboardModel, panel: PanelModel) => {
       []) as number[];
     const series: Tuple[] = timestamps.map((ts, i) => [ts, values[i]]);
     const sonifier = new Sonifier();
-    sonifier.speak('Series 1');
+    sonifier.speak(name);
     sonifier.playSeries(series);
   }
 };
