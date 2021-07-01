@@ -1,6 +1,6 @@
 import { Observable, from } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
-import { QueryRunner } from '../variables/query/queryRunners';
+import { concatMap, filter, first } from 'rxjs/operators';
+import { rangeUtil, QueryRunner } from '@grafana/data';
 import {
   StoryboardContext,
   StoryboardDocumentElement,
@@ -22,21 +22,28 @@ export async function evaluateElement(
       return { value: n.content };
     }
     case 'query': {
-      // try {
-      //   runner.run({
-      //     timeRange: n.timeRange,
-      //     queries: [n.query],
-      //     datasource: n.datasource,
-      //     timezone: '',
-      //     maxDataPoints: 100,
-      //     minInterval: null,
-      //   });
-      //   const value = await runner.get().toPromise();
-      //   return { value };
-      // } catch (e) {
-      //   console.error('TEMP ERROR HANDLER: ', e);
-      return { value: undefined };
-      //}
+      try {
+        runner.run({
+          timeRange: rangeUtil.convertRawToRange(n.timeRange),
+          queries: [n.query],
+          datasource: n.datasource,
+          timezone: '',
+          maxDataPoints: 100,
+          minInterval: null,
+        });
+        const value = await runner
+          .get()
+          .pipe(
+            filter((ev) => ev.state === 'Done'),
+            first()
+          )
+          .toPromise();
+        // Need to deep copy to avoid DOMException: object could not be cloned.
+        return { value: JSON.parse(JSON.stringify(value)) };
+      } catch (e) {
+        console.error('TEMP ERROR HANDLER: ', e);
+        return { value: undefined };
+      }
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
