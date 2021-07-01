@@ -15,6 +15,7 @@ import { ShowStoryboardDocumentElementResult } from '../components/cells/Storybo
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
 import { Button, HorizontalGroup, PageToolbar } from '@grafana/ui';
+import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
   uid: string;
@@ -64,7 +65,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   padding-bottom: 50px;
                 `}
               >
-                <span>{m.type}</span>
+                <CellTypeIcon type={m.type} />
                 <ShowStoryboardDocumentElementEditor
                   element={m}
                   onUpdate={(newElement) => {
