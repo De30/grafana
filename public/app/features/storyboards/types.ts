@@ -28,7 +28,7 @@ export interface Storyboard {
   /**
    *  String with the entire Starboard notebook
    */
-  notebook: string;
+  notebook: UnevaluatedStoryboardDocument;
 }
 
 export type StarboardNotebookIFrameOptions<ReceivedMessageType = OutboundNotebookMessage> = {
@@ -85,7 +85,7 @@ export interface StoryboardCsv {
     /**
      * Optional in the case no input has been given
      */
-    data?: DataFrame;
+    data?: DataFrame[];
   };
 }
 

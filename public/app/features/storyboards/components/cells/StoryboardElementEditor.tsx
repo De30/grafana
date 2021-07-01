@@ -4,9 +4,10 @@ import { StoryboardDocumentElement } from '../../types';
 
 interface Props {
   element: StoryboardDocumentElement;
+  onUpdate: (element: StoryboardDocumentElement) => void;
 }
 
-export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Element {
+export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props): JSX.Element {
   switch (element.type) {
     case 'markdown': {
       return (
@@ -14,7 +15,9 @@ export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Ele
           <TextArea
             defaultValue={element.content}
             onChange={(event) => {
-              element.content = event.currentTarget.value;
+              let newElement = element;
+              newElement.content = event.currentTarget.value;
+              onUpdate(newElement);
             }}
             onBlur={() => {
               // Make the markdown render here if it can't be rendered onChange
@@ -30,7 +33,10 @@ export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Ele
           height="100px"
           text={element.content.text}
           onSeriesParsed={(data, text) => {
-            console.log(data);
+            let newElement = element;
+            newElement.content.data = data;
+            newElement.content.text = text;
+            onUpdate(newElement);
           }}
         />
       );

@@ -22,76 +22,15 @@ interface StoryboardRouteParams {
 
 /// documents are a simple list of nodes. they can each be documentation, or code. cells can refer to
 /// each-other's output, including data and text. some nodes produce realtime data.
-const document: UnevaluatedStoryboardDocument = {
-  title: 'This is the document title',
-  status: 'unevaluated',
-  elements: [
-    // presentational markdown
-    { id: 'markdown', type: 'markdown', content: '# This is markdown' },
-
-    // Directly embed csv
-    {
-      id: 'some_data',
-      type: 'csv',
-      content: {
-        text: '',
-      },
-    },
-
-    // Fetch data from remote url and expose result
-    // { id: 'fetched', type: 'fetch', url: './works.csv' },
-
-    // Perform a query and put data into local context
-    {
-      id: 'query',
-      type: 'query',
-      datasource: 'prometheus',
-      query: { refId: 'query', expr: 'go_goroutines' },
-      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
-    },
-    {
-      id: 'query2',
-      type: 'query',
-      datasource: 'prometheus',
-      query: { refId: 'query2', expr: 'prometheus_engine_queries' },
-      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
-    },
-
-    // Show a timeseries
-    { id: 'presentation', type: 'timeseries-plot', from: 'query' },
-
-    // raw json data
-    // {
-    //   id: 'rawtime',
-    //   type: 'json',
-    //   content: [
-    //     { time: 1, value: 123 },
-    //     { time: 2, value: 124 },
-    //   ],
-    // },
-    //
-    {
-      id: 'compute1',
-      type: 'python',
-      script: `from js import some_data;
-42 + int(some_data[0][1])`,
-    },
-    {
-      id: 'compute2',
-      type: 'python',
-      script: `from js import compute1;
-compute1 + 42`,
-    },
-  ],
-};
 
 const locationSrv = getLocationSrv();
 
 export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
-  const { boards } = useSavedStoryboards();
-  const board = boards.find((b) => b.uid === uid);
-  if (!board) {
+  const { boards, updateBoard } = useSavedStoryboards();
+  const board = boards.find((b) => b.uid === uid) as Storyboard;
+  if (board === undefined) {
     locationSrv.update({ path: '/storyboards', partial: true });
+    throw new TypeError('board is undefined');
   }
 
   const { title } = board as Storyboard;
@@ -106,14 +45,14 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
   };
 
   const runner = useRunner();
-  const evaled = useMemo(() => evaluateDocument(runner, document), [runner]);
+  const evaled = useMemo(() => evaluateDocument(runner, board.notebook as UnevaluatedStoryboardDocument), [runner]);
   const evaluation = useObservable(evaled);
 
   return (
     <Page navModel={navModel}>
       <Page.Contents>
         <div>
-          <h2>{document.title}</h2>
+          <h2>{title}</h2>
           <hr />
           <div
             className={css`
@@ -121,7 +60,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
               flex-direction: column;
             `}
           >
-            {evaluation?.elements.map((m) => (
+            {evaluation?.elements.map((m, index) => (
               <div
                 key={m.id}
                 className={css`
@@ -129,7 +68,15 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                 `}
               >
                 <span>{m.type}</span>
-                <ShowStoryboardDocumentElementEditor element={m} />
+                <ShowStoryboardDocumentElementEditor
+                  element={m}
+                  onUpdate={(newElement) => {
+                    let updatedDoc = board;
+                    updatedDoc.notebook.elements[index] = newElement;
+
+                    updateBoard(updatedDoc);
+                  }}
+                />
                 <ShowStoryboardDocumentElementResult
                   element={m}
                   context={evaluation?.context}
