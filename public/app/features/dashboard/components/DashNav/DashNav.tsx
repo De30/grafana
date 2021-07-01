@@ -24,6 +24,7 @@ import { DashboardModel } from '../../state';
 
 import { DashNavButton } from './DashNavButton';
 import { DashNavTimeControls } from './DashNavTimeControls';
+import SonifierControls from 'app/core/components/SonifierControls/SonifierControls';
 
 const mapDispatchToProps = {
   setStarred,
@@ -297,6 +298,8 @@ export const DashNav = React.memo<Props>((props) => {
     }
 
     addCustomContent(customRightActions, buttons);
+
+    buttons.push(<SonifierControls />);
 
     buttons.push(renderTimeControls());
     buttons.push(tvButton);

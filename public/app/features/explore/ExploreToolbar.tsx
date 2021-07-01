@@ -30,6 +30,7 @@ import { cancelQueries, runQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { syncTimes, changeRefreshInterval } from './state/time';
 import { LiveTailControls } from './useLiveTailControls';
+import SonifierControls from 'app/core/components/SonifierControls/SonifierControls';
 
 const AddToDashboard = lazy(() =>
   import('./AddToDashboard').then(({ AddToDashboard }) => ({ default: AddToDashboard }))
@@ -154,6 +155,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
           ].filter(Boolean)}
         >
           <ToolbarButtonRow>
+            <SonifierControls />
+            
             {!splitted ? (
               <ToolbarButton title="Split" onClick={() => split()} icon="columns" disabled={isLive}>
                 Split
@@ -163,7 +166,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
                 Close
               </ToolbarButton>
             )}
-
             {config.featureToggles.explore2Dashboard && showExploreToDashboard && (
               <Suspense fallback={null}>
                 <AddToDashboard exploreId={exploreId} />
@@ -185,7 +187,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
                 onChangeFiscalYearStartMonth={onChangeFiscalYearStartMonth}
               />
             )}
-
             {this.renderRefreshPicker(showSmallTimePicker)}
 
             {refreshInterval && <SetInterval func={this.onRunQuery} interval={refreshInterval} loading={loading} />}
