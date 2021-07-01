@@ -9,8 +9,6 @@ import { Storyboard, UnevaluatedStoryboardDocument } from '../types';
 import { getLocationSrv } from '@grafana/runtime';
 import { Page } from 'app/core/components/Page/Page';
 
-import { dateTime } from '@grafana/data';
-
 import { useObservable } from 'react-use';
 import { ShowStoryboardDocumentElementEditor } from '../components/cells/StoryboardElementEditor';
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
@@ -47,8 +45,8 @@ const document: UnevaluatedStoryboardDocument = {
       id: 'query',
       type: 'query',
       datasource: 'prometheus',
-      query: { refId: 'query' },
-      timeRange: { from: dateTime(), to: dateTime(), raw: { to: '', from: '' } },
+      query: { refId: 'query', expr: 'go_goroutines' },
+      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
     },
 
     // Show a timeseries

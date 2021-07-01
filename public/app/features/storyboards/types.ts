@@ -5,7 +5,7 @@
 //   OutboundNotebookMessage,
 // } from 'starboard-notebook';
 
-import { DataQuery, TimeRange } from '@grafana/data';
+import { DataQuery, RawTimeRange } from '@grafana/data';
 
 export type OutboundNotebookMessage = { type: unknown; payload: any };
 export type InboundNotebookMessage = { type: unknown; payload: any };
@@ -94,7 +94,7 @@ export interface StoryboardDatasourceQuery {
   type: 'query';
   datasource: string;
   query: DataQuery;
-  timeRange: TimeRange;
+  timeRange: RawTimeRange;
 }
 
 export interface StoryboardMarkdown {
