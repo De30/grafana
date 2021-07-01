@@ -22,6 +22,7 @@ import {
 } from '../../types/events';
 import { HelpModal } from '../components/help/HelpModal';
 import { sonifyPanel } from 'app/features/dashboard/utils/panel';
+import getSonifier from './Sonifier';
 import { contextSrv } from '../core';
 import { exitKioskMode, toggleKioskMode } from '../navigation/kiosk';
 
@@ -57,6 +58,13 @@ export class KeybindingSrv {
   globalEsc() {
     const anyDoc = document as any;
     const activeElement = anyDoc.activeElement;
+
+    // Cancel sound
+    const sonifier = getSonifier();
+    if (sonifier.isPlaying) {
+      sonifier.stop();
+      return;
+    }
 
     // typehead needs to handle it
     const typeaheads = document.querySelectorAll('.slate-typeahead--open');
