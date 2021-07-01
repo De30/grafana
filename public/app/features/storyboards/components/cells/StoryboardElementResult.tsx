@@ -1,6 +1,11 @@
 import React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { StoryboardContext, StoryboardDocumentElement, StoryboardVariable } from '../../types';
+import {
+  StoryboardContext,
+  StoryboardDatasourceQuery,
+  StoryboardDocumentElement,
+  StoryboardVariable,
+} from '../../types';
 import { css } from '@emotion/css';
 import { renderMarkdown, PanelData } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
@@ -28,7 +33,7 @@ export function ShowStoryboardDocumentElementResult({
     }
     // Maybe use the Table component here?
     case 'csv': {
-      return element.content.data ? <Table data={element.content.data} width={100} height={400} /> : <></>;
+      return element.content.data ? <Table data={element.content.data} width={100} height={300} /> : <></>;
     }
     case 'plaintext': {
       return null;
@@ -45,46 +50,42 @@ export function ShowStoryboardDocumentElementResult({
           >
             RESULT:
           </div>
-          <pre>{JSON.stringify(result)}</pre>
+          <pre>{JSON.stringify(result.value)}</pre>
         </div>
       );
     }
     case 'query': {
       // TODO: Result of query as table
-      if (!result.value) {
-        return <p>Nothing here</p>;
-      }
-      return (
-        <>
-          <pre>{JSON.stringify((result.value as PanelData).series)}</pre>
-        </>
-      );
+      return <Table data={(result.value as PanelData).series[0]} height={300} width={400} />;
     }
     case 'timeseries-plot': {
+      const target = context[element.from];
       return (
-        <AutoSizer>
-          {({ width, height }) => {
-            if (width < 3 || height < 3) {
-              return null;
-            }
+        <div style={{ width: '100%', height: '400px' }}>
+          <AutoSizer>
+            {({ width, height }) => {
+              if (width < 3 || height < 3) {
+                return null;
+              }
 
-            return (
-              <PanelChrome width={width} height={height}>
-                {(innerWidth, innerHeight) => {
-                  return (
-                    <PanelRenderer
-                      title=""
-                      pluginId="timeseries"
-                      width={innerWidth}
-                      height={innerHeight}
-                      data={context[element.from].value as PanelData}
-                    />
-                  );
-                }}
-              </PanelChrome>
-            );
-          }}
-        </AutoSizer>
+              return (
+                <PanelChrome width={width} height={height}>
+                  {(innerWidth, innerHeight) => {
+                    return (
+                      <PanelRenderer
+                        title={(target.element as StoryboardDatasourceQuery)?.query.expr}
+                        pluginId="timeseries"
+                        width={innerWidth}
+                        height={innerHeight}
+                        data={target.value as PanelData}
+                      />
+                    );
+                  }}
+                </PanelChrome>
+              );
+            }}
+          </AutoSizer>
+        </div>
       );
     }
   }

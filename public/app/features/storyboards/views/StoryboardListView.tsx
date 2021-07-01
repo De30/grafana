@@ -8,6 +8,7 @@ import { StoryboardForm } from '../components/StoryboardForm';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_NOTEBOOK } from '../components/StarboardNotebook';
 import { getLocationSrv } from '@grafana/runtime';
+import { UnevaluatedStoryboardDocument } from '../types';
 
 const locationSrv = getLocationSrv();
 
@@ -56,7 +57,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       id: 'some_data',
       type: 'csv',
       content: {
-        text: '',
+        text: '1,2,3\n4,5,6\n',
       },
     },
 
@@ -69,14 +70,14 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       type: 'query',
       datasource: 'prometheus',
       query: { refId: 'query', expr: 'go_goroutines' },
-      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
+      timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
     },
     {
       id: 'query2',
       type: 'query',
       datasource: 'prometheus',
       query: { refId: 'query2', expr: 'prometheus_engine_queries' },
-      timeRange: { from: '2021-07-01T00:00:00', to: '2021-07-01T09:00:00' },
+      timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
     },
 
     // Show a timeseries
