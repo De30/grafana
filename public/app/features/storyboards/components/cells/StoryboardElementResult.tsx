@@ -1,6 +1,7 @@
 import React from 'react';
 import { StoryboardDocumentElement, StoryboardVariable } from '../../types';
 import { css } from '@emotion/css';
+import { renderMarkdown } from '../../../../../../packages/grafana-data/src';
 
 export function ShowStoryboardDocumentElementResult({
   element,
@@ -16,7 +17,9 @@ export function ShowStoryboardDocumentElementResult({
     case 'markdown': {
       // we should parse markdown with a strict subset of options directly to JSX with a library like this:
       // https://github.com/rexxars/commonmark-react-renderer
-      return <div> {result.value as JSX.Element} </div>;
+      const md = renderMarkdown(result.value as string);
+
+      return <div dangerouslySetInnerHTML={{ __html: md }} />;
     }
     // Maybe use the Table component here?
     case 'csv': {

@@ -107,7 +107,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
     <Page navModel={navModel}>
       <Page.Contents>
         <div>
-          <h2>Title of doc</h2>
+          <h2>{document.title}</h2>
           <hr />
           <div
             className={css`
