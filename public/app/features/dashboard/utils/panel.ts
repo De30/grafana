@@ -1,6 +1,6 @@
 import { isString as _isString } from 'lodash';
 
-import { TimeRange, AppEvents, rangeUtil, dateMath, LoadingState, FieldType, DataFrame, PanelModel as IPanelModel } from '@grafana/data';
+import { TimeRange, AppEvents, rangeUtil, dateMath, LoadingState, FieldType, PanelModel as IPanelModel } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import appEvents from 'app/core/app_events';
 import config from 'app/core/config';
@@ -11,7 +11,7 @@ import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import { AddLibraryPanelModal } from 'app/features/library-panels/components/AddLibraryPanelModal/AddLibraryPanelModal';
 import { UnlinkModal } from 'app/features/library-panels/components/UnlinkModal/UnlinkModal';
-import Sonifier from 'app/core/services/Sonifier';
+import getSonifier from 'app/core/services/Sonifier';
 import { cleanUpPanelState } from 'app/features/panel/state/actions';
 import { dispatch } from 'app/store/store';
 
@@ -67,7 +67,7 @@ export const sonifyPanel = (dashboard: DashboardModel, panel: PanelModel) => {
       const timestamps = (frame.fields.find((f) => f.type === FieldType.time)?.values || []) as number[];
       const values = (frame.fields.find((f) => f.type === FieldType.number)?.values.toArray() || []) as number[];
       const series: any[] = timestamps.map((ts, i) => [ts, values[i]]);
-      const sonifier = new Sonifier();
+      const sonifier = getSonifier();
       sonifier.speak(name);
       sonifier.playSeries(series);
       count++;
