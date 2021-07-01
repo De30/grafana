@@ -10,8 +10,8 @@ import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import { AddLibraryPanelModal } from 'app/features/library-panels/components/AddLibraryPanelModal/AddLibraryPanelModal';
-import Sonifier, { Tuple } from 'app/core/services/Sonifier';
 import { UnlinkModal } from 'app/features/library-panels/components/UnlinkModal/UnlinkModal';
+import Sonifier from 'app/core/services/Sonifier';
 import { cleanUpPanelState } from 'app/features/panel/state/actions';
 import { dispatch } from 'app/store/store';
 
@@ -65,7 +65,7 @@ export const sonifyPanel = (dashboard: DashboardModel, panel: PanelModel) => {
     const timestamps = (panelData.series[0].fields.find((f) => f.type === FieldType.time)?.values || []) as number[];
     const values = (panelData.series[0].fields.find((f) => f.type === FieldType.number)?.values.toArray() ||
       []) as number[];
-    const series: Tuple[] = timestamps.map((ts, i) => [ts, values[i]]);
+    const series: any[] = timestamps.map((ts, i) => [ts, values[i]]);
     const sonifier = new Sonifier();
     sonifier.speak(name);
     sonifier.playSeries(series);
