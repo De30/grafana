@@ -14,7 +14,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, HorizontalGroup } from '@grafana/ui';
+import { Button, HorizontalGroup, PageToolbar } from '@grafana/ui';
 
 interface StoryboardRouteParams {
   uid: string;
@@ -34,22 +34,19 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
   }
 
   const { title } = board as Storyboard;
-  const navModel = {
-    main: {
-      text: title,
-      icon: 'book-open',
-    },
-    node: {
-      text: 'Storyboards',
-    },
-  };
 
   const runner = useRunner();
   const evaled = useMemo(() => evaluateDocument(runner, board.notebook as UnevaluatedStoryboardDocument), [runner]);
   const evaluation = useObservable(evaled);
 
   return (
-    <Page navModel={navModel}>
+    <Page>
+      <PageToolbar
+        title={`Storyboards / ${title}`}
+        onGoBack={() => locationSrv.update({ path: '/storyboards', partial: true })}
+      >
+        <Button icon="save">Save</Button>
+      </PageToolbar>
       <Page.Contents>
         <div>
           <h2>{title}</h2>
