@@ -59,6 +59,7 @@ export function evaluateDocument(
   doc: UnevaluatedStoryboardDocument
 ): Observable<EvaluatedStoryboardDocument> {
   const result: EvaluatedStoryboardDocument = {
+    title: doc.title,
     status: 'evaluating',
     context: {},
     elements: doc.elements,

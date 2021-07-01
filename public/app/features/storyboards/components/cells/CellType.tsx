@@ -6,7 +6,6 @@ export function CellType({ element }: { element: StoryboardDocumentElement }): J
   return (
     <div
       className={css`
-        font-size: 10px;
         margin-top: 20px;
         opacity: 0.5;
       `}

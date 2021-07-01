@@ -16,12 +16,27 @@ export function ShowStoryboardDocumentElementEditor({ element }: Props): JSX.Ele
             onChange={(event) => {
               element.content = event.currentTarget.value;
             }}
+            onBlur={() => {
+              // Make the markdown render here if it can't be rendered onChange
+            }}
           />
         </Field>
       );
     }
     case 'csv': {
-      return <pre>{element.content}</pre>;
+      return (
+        <Field label="CSV">
+          <TextArea
+            defaultValue={element.content}
+            onChange={(event) => {
+              element.content = event.currentTarget.value;
+            }}
+            onBlur={() => {
+              // Make the markdown render here if it can't be rendered onChange
+            }}
+          />
+        </Field>
+      );
     }
     case 'plaintext': {
       return <pre>{element.content}</pre>;
