@@ -15,7 +15,6 @@ import { ShowStoryboardDocumentElementResult } from '../components/cells/Storybo
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
 import { Button, HorizontalGroup } from '@grafana/ui';
-import { DataFrame } from '@grafana/data';
 
 interface StoryboardRouteParams {
   uid: string;
@@ -123,10 +122,18 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             `}
           >
             {evaluation?.elements.map((m) => (
-              <div key={m.id}>
-                <CellType element={m} />
+              <div
+                key={m.id}
+                className={css`
+                  padding-bottom: 50px;
+                `}
+              >
+                <span>{m.type}</span>
                 <ShowStoryboardDocumentElementEditor element={m} />
                 <ShowStoryboardDocumentElementResult element={m} result={evaluation?.context[m.id]} />
+                <p>
+                  Result saved in variable: <CellType element={m} />
+                </p>
               </div>
             ))}
           </div>
