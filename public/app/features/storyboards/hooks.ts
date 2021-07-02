@@ -1,15 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { createQueryRunner } from '@grafana/runtime';
 import { createStoryboard, getStoryboards, removeStoryboard, updateStoryboard } from './storage';
-import {
-  Storyboard,
-  StoryboardMarkdown,
-  StoryboardCsv,
-  StoryboardDatasourceQuery,
-  StoryboardPlainText,
-  StoryboardPython,
-  StoryboardTimeseriesPlot,
-} from './types';
+import { Storyboard, StoryboardDocumentElement } from './types';
 
 export function useSavedStoryboards() {
   let [boards, setBoards] = useState<Storyboard[]>(getStoryboards());
@@ -34,31 +26,29 @@ export function useSavedStoryboards() {
     updateBoardState();
   };
 
-  const addCellToBoard = (type: string, board: Storyboard) => {
+  const addCellToBoard = (type: string, board: Storyboard, index: number | null = null) => {
     const nextId = findNextIdForCellType(type, board);
-
+    let cell: StoryboardDocumentElement | null = null;
     switch (type) {
       case 'markdown':
-        const markdownCell: StoryboardMarkdown = {
+        cell = {
           id: 'markdown' + nextId,
           type: 'markdown',
           content: '',
           editing: true,
         };
-        board.notebook.elements.push(markdownCell);
         break;
       case 'csv':
-        const csvCell: StoryboardCsv = {
+        cell = {
           id: 'csv' + nextId,
           type: 'csv',
           content: {
             text: '',
           },
         };
-        board.notebook.elements.push(csvCell);
         break;
       case 'query':
-        const queryCell: StoryboardDatasourceQuery = {
+        cell = {
           id: 'query' + nextId,
           type: 'query',
           datasource: '',
@@ -67,39 +57,45 @@ export function useSavedStoryboards() {
           },
           timeRange: { from: 'now', to: 'now-1d' },
         };
-        board.notebook.elements.push(queryCell);
         break;
       case 'plaintext':
-        const textCell: StoryboardPlainText = {
+        cell = {
           id: 'plaintext' + nextId,
           type: 'plaintext',
           content: '',
         };
-        board.notebook.elements.push(textCell);
         break;
       case 'python':
-        const pythonCell: StoryboardPython = {
+        cell = {
           id: 'python' + nextId,
           type: 'python',
           script: '',
         };
-        board.notebook.elements.push(pythonCell);
         break;
       case 'timeseries-plot':
-        const plotCell: StoryboardTimeseriesPlot = {
+        cell = {
           id: 'timeseries-plot' + nextId,
           type: 'timeseries-plot',
           from: '',
         };
-        board.notebook.elements.push(plotCell);
         break;
       default:
         throw new Error('bad element type:' + type);
     }
+    if (index == null) {
+      board.notebook.elements.push(cell as StoryboardDocumentElement);
+    } else {
+      board.notebook.elements.splice(index, 0, cell as StoryboardDocumentElement);
+    }
     updateBoard(board);
   };
 
-  return { boards, updateBoard, createBoard, removeBoard, addCellToBoard };
+  const removeCellFromBoard = (board: Storyboard, index: number) => {
+    board.notebook.elements.splice(index, 1);
+    updateBoard(board);
+  };
+
+  return { boards, updateBoard, createBoard, removeBoard, addCellToBoard, removeCellFromBoard };
 }
 
 export function useRunner() {

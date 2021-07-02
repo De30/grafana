@@ -1,16 +1,17 @@
 import React from 'react';
-import { TextArea, Field, TableInputCSV, CodeEditor } from '@grafana/ui';
+import { TextArea, Field, TableInputCSV, CodeEditor, Select } from '@grafana/ui';
 import { renderMarkdown } from '@grafana/data';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
-import { StoryboardDocumentElement } from '../../types';
+import { StoryboardContext, StoryboardDocumentElement } from '../../types';
 
 interface Props {
   element: StoryboardDocumentElement;
+  context: StoryboardContext;
   onUpdate: (element: StoryboardDocumentElement) => void;
 }
 
-export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props): JSX.Element {
+export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate }: Props): JSX.Element {
   switch (element.type) {
     case 'markdown': {
       return (
@@ -104,20 +105,24 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
           }}
         />
       );
-      // return (
-      //   <>
-      //     <div>datasource: {element.datasource}</div>
-      //     <div>
-      //       query: <pre>{JSON.stringify(element.query)}</pre>
-      //     </div>
-      //   </>
-      // );
     }
     case 'timeseries-plot': {
+      const options = Object.entries(context)
+        .filter(([k, v]) => v.element?.type === 'query')
+        .map(([k, v]) => ({ label: k, value: k }));
       return (
-        <>
-          <div>Plotting {element.from}</div>
-        </>
+        <Select
+          value={element.from}
+          options={options}
+          placeholder="Select a query"
+          onChange={(value) => {
+            if (value.value != null) {
+              let newElement = element;
+              newElement.from = value.value;
+              onUpdate(newElement);
+            }
+          }}
+        />
       );
     }
   }

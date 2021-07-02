@@ -66,6 +66,9 @@ export function ShowStoryboardDocumentElementResult({
     }
     case 'timeseries-plot': {
       const target = context[element.from];
+      if (target == null) {
+        return null;
+      }
       return (
         <div style={{ width: '100%', height: '400px' }}>
           <AutoSizer>
