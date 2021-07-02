@@ -19,7 +19,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, ButtonGroup, Card, HorizontalGroup, IconButton, PageToolbar, ValuePicker } from '@grafana/ui';
+import { Button, Card, IconButton, PageToolbar, ValuePicker } from '@grafana/ui';
 import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
@@ -41,6 +41,15 @@ interface StoryboardCellElementProps {
   evaluation: EvaluatedStoryboardDocument;
 }
 
+const newCellOptions = [
+  { label: 'Markdown cell', value: 'markdown' },
+  { label: 'Query cell', value: 'query' },
+  { label: 'Plot cell', value: 'timeseries-plot' },
+  { label: 'Plain text cell', value: 'plaintext' },
+  { label: 'Python cell', value: 'python' },
+  { label: 'CSV cell', value: 'csv' },
+];
+
 const StoryboardCellElement = ({
   element,
   index,
@@ -50,7 +59,7 @@ const StoryboardCellElement = ({
   updateBoard,
   evaluation,
 }: StoryboardCellElementProps) => {
-  const addCell = (type: string) => () => addCellToBoard(type, board, index + 1);
+  const addCell = (type: string) => addCellToBoard(type, board, index + 1);
   return (
     <Card heading={element.id}>
       <Card.Figure>
@@ -80,28 +89,14 @@ const StoryboardCellElement = ({
           ) : null}
         </div>
       </Card.Meta>
-      <Card.Actions>
-        <>
-          <div>Add cell below: </div>
-          <ButtonGroup key="addCellBelow">
-            <HorizontalGroup align="normal" spacing="xs">
-              <Button size="sm" variant="secondary" onClick={addCell('markdown')}>
-                Markdown
-              </Button>
-              <Button size="sm" variant="secondary" onClick={addCell('python')}>
-                Python
-              </Button>
-              <Button size="sm" variant="secondary" onClick={addCell('query')}>
-                Query
-              </Button>
-              <Button size="sm" variant="secondary" onClick={addCell('timeseries-plot')}>
-                Plot
-              </Button>
-            </HorizontalGroup>
-          </ButtonGroup>
-        </>
-      </Card.Actions>
       <Card.SecondaryActions>
+        <ValuePicker
+          options={newCellOptions}
+          label="Add cell below"
+          onChange={(value) => addCell(value.value!)}
+          variant="secondary"
+          isFullWidth={false}
+        />
         <IconButton
           key="delete"
           name="trash-alt"
@@ -129,15 +124,6 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
     board.notebook,
   ]);
   const evaluation = useObservable(evaled);
-
-  const newCellOptions = [
-    { label: 'Markdown cell', value: 'markdown' },
-    { label: 'Query cell', value: 'query' },
-    { label: 'Plot cell', value: 'timeseries-plot' },
-    { label: 'Plain text cell', value: 'plaintext' },
-    { label: 'Python cell', value: 'python' },
-    { label: 'CSV cell', value: 'csv' },
-  ];
 
   return (
     <Page>
