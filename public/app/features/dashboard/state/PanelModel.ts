@@ -244,7 +244,7 @@ export class PanelModel implements DataConfigSource {
   }
 
   updateOptions(options: object) {
-    this.options = options;
+    this.options = cloneDeep(options);
     this.configRev++;
     this.events.publish(new PanelOptionsChangedEvent());
     this.render();

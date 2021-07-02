@@ -74,8 +74,8 @@ export interface FieldOverrideEditorProps<TValue, TSettings> extends Omit<Standa
   context: FieldOverrideContext;
 }
 
-export interface FieldConfigEditorConfig<TOptions, TSettings = any, TValue = any>
-  extends OptionEditorConfig<TOptions, TSettings, TValue> {
+export interface FieldConfigEditorConfig<TOptions, TSettings = any, TValue = any, TPanelOptions = any>
+  extends OptionEditorConfig<TOptions, TSettings, TValue, TPanelOptions> {
   /**
    * Function that allows specifying whether or not this field config should apply to a given field.
    * @param field

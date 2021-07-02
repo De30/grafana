@@ -20,12 +20,14 @@ import {
 /**
  * Fluent API for declarative creation of field config option editors
  */
-export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder<
+export class FieldConfigEditorBuilder<TOptions, TPanelOptions = any> extends OptionsUIRegistryBuilder<
   TOptions,
   FieldConfigEditorProps<any, any>,
   FieldConfigPropertyItem<TOptions>
 > {
-  addNumberInput<TSettings>(config: FieldConfigEditorConfig<TOptions, TSettings & NumberFieldConfigSettings, number>) {
+  addNumberInput<TSettings>(
+    config: FieldConfigEditorConfig<TOptions, TSettings & NumberFieldConfigSettings, number, TPanelOptions>
+  ) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -37,7 +39,9 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
     });
   }
 
-  addSliderInput<TSettings>(config: FieldConfigEditorConfig<TOptions, TSettings & SliderFieldConfigSettings, number>) {
+  addSliderInput<TSettings>(
+    config: FieldConfigEditorConfig<TOptions, TSettings & SliderFieldConfigSettings, number, TPanelOptions>
+  ) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -49,7 +53,9 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
     });
   }
 
-  addTextInput<TSettings>(config: FieldConfigEditorConfig<TOptions, TSettings & StringFieldConfigSettings, string>) {
+  addTextInput<TSettings>(
+    config: FieldConfigEditorConfig<TOptions, TSettings & StringFieldConfigSettings, string, TPanelOptions>
+  ) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -62,7 +68,7 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
   }
 
   addSelect<TOption, TSettings extends SelectFieldConfigSettings<TOption>>(
-    config: FieldConfigEditorConfig<TOptions, TSettings, TOption>
+    config: FieldConfigEditorConfig<TOptions, TSettings, TOption, TPanelOptions>
   ) {
     return this.addCustomEditor({
       ...config,
@@ -76,7 +82,7 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
     });
   }
 
-  addRadio<TOption, TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, TOption>) {
+  addRadio<TOption, TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, TOption, TPanelOptions>) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -89,7 +95,7 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
     });
   }
 
-  addBooleanSwitch<TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, boolean>) {
+  addBooleanSwitch<TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, boolean, TPanelOptions>) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -101,7 +107,7 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
     });
   }
 
-  addColorPicker<TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, string>) {
+  addColorPicker<TSettings = any>(config: FieldConfigEditorConfig<TOptions, TSettings, string, TPanelOptions>) {
     return this.addCustomEditor({
       ...config,
       id: config.path,
@@ -114,7 +120,7 @@ export class FieldConfigEditorBuilder<TOptions> extends OptionsUIRegistryBuilder
   }
 
   addUnitPicker<TSettings = any>(
-    config: FieldConfigEditorConfig<TOptions, TSettings & UnitFieldConfigSettings, string>
+    config: FieldConfigEditorConfig<TOptions, TSettings & UnitFieldConfigSettings, string, TPanelOptions>
   ) {
     return this.addCustomEditor({
       ...config,

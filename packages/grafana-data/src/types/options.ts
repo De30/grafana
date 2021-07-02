@@ -5,7 +5,7 @@ import { DataFrame } from './dataFrame';
  *
  * @beta
  */
-export interface OptionEditorConfig<TOptions, TSettings = any, TValue = any> {
+export interface OptionEditorConfig<TOptions, TSettings = any, TValue = any, TExtraOptions = any> {
   /**
    * Path of the option property to control.
    *
@@ -51,5 +51,5 @@ export interface OptionEditorConfig<TOptions, TSettings = any, TValue = any> {
   /**
    * Function that enables configuration of when option editor should be shown based on current panel option properties.
    */
-  showIf?: (currentOptions: TOptions, data?: DataFrame[]) => boolean | undefined;
+  showIf?: (currentOptions: TOptions, data?: DataFrame[], extraOptions?: TExtraOptions) => boolean | undefined;
 }

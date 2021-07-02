@@ -12,9 +12,29 @@ export enum DebugMode {
   Render = 'render',
   Events = 'events',
   Cursor = 'cursor',
+  Options = 'options',
 }
 
 export interface DebugPanelOptions {
   mode: DebugMode;
   counters?: UpdateConfig;
+  debugOptions?: {
+    debugText?: string;
+    l1?: {
+      text: string;
+      l2: {
+        text: string;
+      };
+    };
+  };
+}
+
+export interface DebugPanelFieldConfig {
+  debugText?: string;
+  l1?: {
+    text: string;
+    l2: {
+      text: string;
+    };
+  };
 }

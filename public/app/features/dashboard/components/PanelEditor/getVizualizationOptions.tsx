@@ -78,7 +78,7 @@ export function getVizualizationOptions(props: OptionPaneRenderProps): OptionsPa
     if (
       fieldOption.isCustom &&
       fieldOption.showIf &&
-      !fieldOption.showIf(currentFieldConfig.defaults.custom, data?.series)
+      !fieldOption.showIf(currentFieldConfig.defaults.custom, data?.series, panel.options)
     ) {
       continue;
     }
