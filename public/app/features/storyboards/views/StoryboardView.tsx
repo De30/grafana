@@ -71,6 +71,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                 <div
                   className={css`
                     margin: 0;
+                    float: right;
                   `}
                 >
                   <CellTypeIcon type={m.type} aria-hidden />

@@ -62,6 +62,7 @@ export interface StoryboardMarkdown {
   id: StoryboardId;
   type: 'markdown';
   content: string;
+  editing: boolean;
 }
 
 export interface StoryboardPython {

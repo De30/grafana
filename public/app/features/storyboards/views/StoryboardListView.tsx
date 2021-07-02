@@ -49,7 +49,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
   status: 'unevaluated',
   elements: [
     // presentational markdown
-    { id: 'markdown', type: 'markdown', content: '# This is markdown' },
+    { id: 'markdown', type: 'markdown', content: '# This is markdown\n\n*Double-click* me to edit', editing: false },
 
     // Directly embed csv
     {

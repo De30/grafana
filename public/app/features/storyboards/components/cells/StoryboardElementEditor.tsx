@@ -1,5 +1,6 @@
 import React from 'react';
 import { TextArea, Field, TableInputCSV, CodeEditor } from '@grafana/ui';
+import { renderMarkdown } from '@grafana/data';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
 import { StoryboardDocumentElement } from '../../types';
@@ -13,21 +14,41 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
   switch (element.type) {
     case 'markdown': {
       return (
-        <Field label="Markdown text  ">
-          <TextArea
-            defaultValue={element.content}
-            onChange={(event) => {
-              let newElement = element;
-              newElement.content = event.currentTarget.value;
-              onUpdate(newElement);
-            }}
-            onBlur={(event) => {
-              // Make the markdown render here if it can't be rendered onChange
-              // let newElement = element;
-              // newElement.content = event.currentTarget.value;
-              // onUpdate(newElement);
-            }}
-          />
+        <Field>
+          {element.editing ? (
+            <div className="gf-form--grow">
+              <TextArea
+                defaultValue={element.content}
+                className="gf-form-input"
+                onBlur={(event) => {
+                  element.editing = false;
+                  let newElement = element;
+                  newElement.content = event.currentTarget.value;
+                  onUpdate(newElement);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && event.shiftKey) {
+                    element.editing = false;
+                    let newElement = element;
+                    newElement.content = event.currentTarget.value;
+                    onUpdate(newElement);
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              dangerouslySetInnerHTML={
+                // we should parse markdown with a strict subset of options directly to JSX with a library like this:
+                // https://github.com/rexxars/commonmark-react-renderer
+                { __html: renderMarkdown(element.content as string) }
+              }
+              onDoubleClick={() => {
+                element.editing = true;
+                onUpdate(element);
+              }}
+            />
+          )}
         </Field>
       );
     }

@@ -25,11 +25,8 @@ export function ShowStoryboardDocumentElementResult({
   }
   switch (element.type) {
     case 'markdown': {
-      // we should parse markdown with a strict subset of options directly to JSX with a library like this:
-      // https://github.com/rexxars/commonmark-react-renderer
-      const md = renderMarkdown(result.value as string);
-
-      return <div dangerouslySetInnerHTML={{ __html: md }} />;
+      // Let the Editor manage its result, as stateful.
+      return null;
     }
     // Maybe use the Table component here?
     case 'csv': {
