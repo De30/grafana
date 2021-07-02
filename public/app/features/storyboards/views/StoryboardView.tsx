@@ -102,9 +102,11 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   context={evaluation?.context}
                   result={evaluation?.context[m.id]}
                 />
-                <div>
-                  Result saved in variable: <CellType element={m} />
-                </div>
+                {m.type !== 'markdown' && m.type !== 'plaintext' ? (
+                  <div>
+                    Result saved in variable: <CellType element={m} />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
