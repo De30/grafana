@@ -68,14 +68,14 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   padding-bottom: 50px;
                 `}
               >
-                <span
+                <div
                   className={css`
                     margin: 0;
                   `}
                 >
                   <CellTypeIcon type={m.type} aria-hidden />
                   {m.type}
-                </span>
+                </div>
                 <ShowStoryboardDocumentElementEditor
                   element={m}
                   onUpdate={(newElement) => {
@@ -92,9 +92,9 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   context={evaluation?.context}
                   result={evaluation?.context[m.id]}
                 />
-                <p>
+                <div>
                   Result saved in variable: <CellType element={m} />
-                </p>
+                </div>
               </div>
             ))}
           </div>
