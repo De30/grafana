@@ -1,6 +1,6 @@
 import React from 'react';
 import { StandardEditorContext, VariableSuggestionsScope } from '@grafana/data';
-import { get as lodashGet, set as lodashSet } from 'lodash';
+import { get as lodashGet, set as lodashSet, setWith, clone, cloneDeep } from 'lodash';
 import { getDataLinksVariableSuggestions } from 'app/features/panel/panellinks/link_srv';
 import { OptionPaneRenderProps } from './types';
 import { updateDefaultFieldConfigValue } from './utils';
@@ -9,7 +9,7 @@ import { OptionsPaneCategoryDescriptor } from './OptionsPaneCategoryDescriptor';
 
 export function getVizualizationOptions(props: OptionPaneRenderProps): OptionsPaneCategoryDescriptor[] {
   const { plugin, panel, onPanelOptionsChanged, onFieldConfigsChange, data, dashboard } = props;
-  const currentOptions = panel.getOptions();
+  const currentOptions = cloneDeep(panel.getOptions());
   const currentFieldConfig = panel.fieldConfig;
   const categoryIndex: Record<string, OptionsPaneCategoryDescriptor> = {};
 
@@ -55,6 +55,11 @@ export function getVizualizationOptions(props: OptionPaneRenderProps): OptionsPa
         render: function renderEditor() {
           const onChange = (value: any) => {
             const newOptions = lodashSet({ ...currentOptions }, pluginOption.path, value);
+            const newOptionsImmutable = setWith(clone(currentOptions), pluginOption.path, value, clone);
+            console.log('Mutable l1:', newOptions.debugOptions.l1 === currentOptions.debugOptions.l1);
+            console.log('Mutable l2:', newOptions.debugOptions.l1.l2 === currentOptions.debugOptions.l1.l2);
+            console.log('Immutable l2:', newOptionsImmutable.debugOptions.l1.l2 === currentOptions.debugOptions.l1.l2);
+            console.log('Immutable l1:', newOptionsImmutable.debugOptions.l1 === currentOptions.debugOptions.l1);
             onPanelOptionsChanged(newOptions);
           };
 

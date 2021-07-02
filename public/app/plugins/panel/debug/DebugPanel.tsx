@@ -21,7 +21,13 @@ export class DebugPanel extends Component<Props> {
     }
 
     if (options.mode === DebugMode.Options) {
-      return <OptionsView panelOptions={options} fieldConfig={fieldConfig.defaults.custom} />;
+      return (
+        <OptionsView
+          panelOptions={options}
+          fieldConfig={fieldConfig.defaults.custom}
+          configRev={this.props.configRev}
+        />
+      );
     }
 
     return <RenderInfoViewer {...this.props} />;
@@ -89,8 +95,8 @@ class OptionsView extends React.Component<OptionsViewProps, OptionsViewState> {
   // }
   render() {
     // const { fcRev, fcTextlORev, fcL2, fcL1, prevFc } = this.state;
-    const { fieldConfig, panelOptions } = this.props;
-    console.log('rnd');
+    const { fieldConfig, panelOptions, configRev } = this.props;
+    console.log(configRev);
     return (
       <>
         {/*<h2>Panel Options equality:</h2>*/}
@@ -120,8 +126,8 @@ class OptionsView extends React.Component<OptionsViewProps, OptionsViewState> {
         {/*<div>Text l0 rev: {fcTextlORev}</div>*/}
         {/*<div>Object nested l1 rev: {fcL1}</div>*/}
         {/*<div>Object nested l2 rev: {fcL2}</div>*/}
-        <Nested title="l1" options={panelOptions.debugOptions} />
-        <Nested title="l2" options={panelOptions.debugOptions?.l1} />
+        <Nested title="l1" options={panelOptions.debugOptions} configRev={configRev} />
+        <Nested title="l2" options={panelOptions.debugOptions?.l1} configRev={configRev} />
         {/*<div>*/}
         {/*  Value nested l2({previousFieldConfig?.l1?.l2?.text}/{fieldConfig?.l1?.l2?.text} ):{' '}*/}
         {/*  {previousFieldConfig?.l1?.l2?.text === fieldConfig?.l1?.l2?.text ? 'Equal' : 'Not equal'}*/}
@@ -135,10 +141,14 @@ const Nested = (props: any) => {
   // const [renderCtr, setRenderCtr] = useState(0);
 
   const prv = usePrevious(props.options);
+  const prvRev = usePrevious(props.configRev);
 
+  console.log('nested');
   return (
     <>
-      <h2>{props.title} - render Panel</h2>
+      <h2>
+        {props.title} - render Panel , configRev {props.configRev}, {prvRev}
+      </h2>
       <pre>{JSON.stringify(prv)}</pre>
       <pre>{JSON.stringify(props.options)}</pre>
     </>
