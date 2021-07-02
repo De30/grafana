@@ -14,7 +14,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, HorizontalGroup, PageToolbar } from '@grafana/ui';
+import { Button, PageToolbar, ValuePicker } from '@grafana/ui';
 import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
@@ -27,7 +27,7 @@ interface StoryboardRouteParams {
 const locationSrv = getLocationSrv();
 
 export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
-  const { boards, updateBoard } = useSavedStoryboards();
+  const { boards, updateBoard, addCellToBoard } = useSavedStoryboards();
   const board = boards.find((b) => b.uid === uid) as Storyboard;
   if (board === undefined) {
     locationSrv.update({ path: '/storyboards', partial: true });
@@ -42,6 +42,15 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
     board.notebook,
   ]);
   const evaluation = useObservable(evaled);
+
+  const newCellOptions = [
+    { label: 'Markdown cell', value: 'markdown' },
+    { label: 'Query cell', value: 'query' },
+    { label: 'Plot cell', value: 'timeseries-plot' },
+    { label: 'Plain text cell', value: 'plaintext' },
+    { label: 'Python cell', value: 'python' },
+    { label: 'CSV cell', value: 'csv' },
+  ];
 
   return (
     <Page>
@@ -99,20 +108,12 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
               </div>
             ))}
           </div>
-          <HorizontalGroup wrap>
-            <Button icon="plus" variant="secondary">
-              Add text cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add query cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add Python cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add CSV cell
-            </Button>
-          </HorizontalGroup>
+          <ValuePicker
+            options={newCellOptions}
+            label="Add new cell"
+            onChange={(value) => addCellToBoard(value.value!, board)}
+            isFullWidth={false}
+          />
         </div>
       </Page.Contents>
     </Page>

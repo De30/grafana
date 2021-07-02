@@ -7,7 +7,7 @@ import {
   StoryboardVariable,
 } from '../../types';
 import { css } from '@emotion/css';
-import { renderMarkdown, PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
+import { PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
 import { PanelChrome } from '@grafana/ui';
 
