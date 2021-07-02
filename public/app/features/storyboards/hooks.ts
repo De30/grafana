@@ -48,14 +48,15 @@ export function useSavedStoryboards() {
         };
         break;
       case 'query':
+        const id = 'query' + nextId;
         cell = {
-          id: 'query' + nextId,
+          id,
           type: 'query',
           datasource: '',
           query: {
-            refId: '',
+            refId: id,
           },
-          timeRange: { from: 'now', to: 'now-1d' },
+          timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
         };
         break;
       case 'plaintext':
