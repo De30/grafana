@@ -8,7 +8,6 @@ import { StoryboardForm } from '../components/StoryboardForm';
 import { v4 as uuidv4 } from 'uuid';
 import { getLocationSrv } from '@grafana/runtime';
 import { UnevaluatedStoryboardDocument } from '../types';
-import { DataFrame, FieldType, MutableDataFrame } from '@grafana/data';
 
 const locationSrv = getLocationSrv();
 
@@ -46,15 +45,6 @@ export const StoryboardListView = () => {
   );
 };
 
-const frame = new MutableDataFrame({
-  fields: [
-    { name: 'Field 1', type: FieldType.number, config: {}, values: [1, 4] },
-    { name: 'Field 2', type: FieldType.number, config: {}, values: [2, 5] },
-    { name: 'Field 3', type: FieldType.number, config: {}, values: [3, 6] },
-  ],
-});
-const CSVdata = [frame];
-
 export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
   status: 'unevaluated',
   elements: [
@@ -67,7 +57,6 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       type: 'csv',
       content: {
         text: '1,2,3\n4,5,6\n',
-        data: CSVdata,
       },
     },
 
