@@ -33,11 +33,11 @@ export function ShowStoryboardDocumentElementResult({
     }
     // Maybe use the Table component here?
     case 'csv': {
-      if (!element.content.data) {
+      if (!result.value) {
         return <></>;
       }
       const panelData = {
-        series: element.content.data,
+        series: result.value,
         timeRange: getDefaultTimeRange(),
         state: LoadingState.Done,
       };
