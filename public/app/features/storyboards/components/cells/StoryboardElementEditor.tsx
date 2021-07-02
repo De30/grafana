@@ -37,7 +37,7 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
           text={element.content.text}
           onSeriesParsed={(data, text) => {
             let newElement = element;
-            newElement.content.data = data[0];
+            newElement.content.data = data;
             newElement.content.text = text;
             onUpdate(newElement);
           }}

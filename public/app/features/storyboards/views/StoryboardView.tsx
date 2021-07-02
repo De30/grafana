@@ -65,7 +65,14 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   padding-bottom: 50px;
                 `}
               >
-                <CellTypeIcon type={m.type} />
+                <span
+                  className={css`
+                    margin: 0;
+                  `}
+                >
+                  <CellTypeIcon type={m.type} aria-hidden />
+                  {m.type}
+                </span>
                 <ShowStoryboardDocumentElementEditor
                   element={m}
                   onUpdate={(newElement) => {

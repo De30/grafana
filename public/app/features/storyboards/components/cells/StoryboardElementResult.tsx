@@ -7,9 +7,9 @@ import {
   StoryboardVariable,
 } from '../../types';
 import { css } from '@emotion/css';
-import { renderMarkdown, PanelData } from '@grafana/data';
+import { renderMarkdown, PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
-import { PanelChrome, Table } from '@grafana/ui';
+import { PanelChrome } from '@grafana/ui';
 
 export function ShowStoryboardDocumentElementResult({
   element,
@@ -33,7 +33,15 @@ export function ShowStoryboardDocumentElementResult({
     }
     // Maybe use the Table component here?
     case 'csv': {
-      return element.content.data ? <Table data={element.content.data} width={100} height={300} /> : <></>;
+      if (!element.content.data) {
+        return <></>;
+      }
+      const panelData = {
+        series: element.content.data,
+        timeRange: getDefaultTimeRange(),
+        state: LoadingState.Done,
+      };
+      return <PanelRenderer title="CSV" pluginId="table" data={panelData} width={100} height={300} />;
     }
     case 'plaintext': {
       return null;
@@ -50,13 +58,14 @@ export function ShowStoryboardDocumentElementResult({
           >
             RESULT:
           </div>
-          <pre>{JSON.stringify(result.value)}</pre>
+          <pre>{JSON.stringify(result.value || '')}</pre>
         </div>
       );
     }
     case 'query': {
       // TODO: Result of query as table
-      return <Table data={(result.value as PanelData).series[0]} height={300} width={400} />;
+      return <></>;
+      // return <Table data={(result.value as PanelData).series[0]} height={300} width={400} />;
     }
     case 'timeseries-plot': {
       const target = context[element.from];

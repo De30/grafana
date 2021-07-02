@@ -6,7 +6,6 @@ import { useSavedStoryboards } from '../hooks';
 import { Button, VerticalGroup } from '@grafana/ui';
 import { StoryboardForm } from '../components/StoryboardForm';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_NOTEBOOK } from '../components/StarboardNotebook';
 import { getLocationSrv } from '@grafana/runtime';
 import { UnevaluatedStoryboardDocument } from '../types';
 
