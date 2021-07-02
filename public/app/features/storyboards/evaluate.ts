@@ -1,6 +1,6 @@
 import { Observable, from } from 'rxjs';
 import { concatMap, filter, first } from 'rxjs/operators';
-import { rangeUtil, QueryRunner } from '@grafana/data';
+import { rangeUtil, readCSV, QueryRunner } from '@grafana/data';
 import {
   StoryboardContext,
   StoryboardDocumentElement,
@@ -49,7 +49,7 @@ export async function evaluateElement(
     }
     case 'csv': {
       // TODO: Use real CSV algorithm to split!
-      result.value = n.content.text.split('\n').map((line) => line.split(','));
+      result.value = readCSV(n.content.text);
       break;
     }
     case 'plaintext': {
