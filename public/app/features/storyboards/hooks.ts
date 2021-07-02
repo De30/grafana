@@ -35,10 +35,12 @@ export function useSavedStoryboards() {
   };
 
   const addCellToBoard = (type: string, board: Storyboard) => {
+    const nextId = findNextIdForCellType(type, board);
+
     switch (type) {
       case 'markdown':
         const markdownCell: StoryboardMarkdown = {
-          id: 'markdown',
+          id: 'markdown' + nextId,
           type: 'markdown',
           content: '',
           editing: true,
@@ -47,7 +49,7 @@ export function useSavedStoryboards() {
         break;
       case 'csv':
         const csvCell: StoryboardCsv = {
-          id: 'csv',
+          id: 'csv' + nextId,
           type: 'csv',
           content: {
             text: '',
@@ -57,7 +59,7 @@ export function useSavedStoryboards() {
         break;
       case 'query':
         const queryCell: StoryboardDatasourceQuery = {
-          id: 'query',
+          id: 'query' + nextId,
           type: 'query',
           datasource: '',
           query: {
@@ -69,7 +71,7 @@ export function useSavedStoryboards() {
         break;
       case 'plaintext':
         const textCell: StoryboardPlainText = {
-          id: 'plaintext',
+          id: 'plaintext' + nextId,
           type: 'plaintext',
           content: '',
         };
@@ -77,7 +79,7 @@ export function useSavedStoryboards() {
         break;
       case 'python':
         const pythonCell: StoryboardPython = {
-          id: 'python',
+          id: 'python' + nextId,
           type: 'python',
           script: '',
         };
@@ -85,7 +87,7 @@ export function useSavedStoryboards() {
         break;
       case 'timeseries-plot':
         const plotCell: StoryboardTimeseriesPlot = {
-          id: 'timeseries-plot',
+          id: 'timeseries-plot' + nextId,
           type: 'timeseries-plot',
           from: '',
         };
@@ -111,4 +113,19 @@ export function useRunner() {
   }, [runner]);
 
   return runner;
+}
+
+function findNextIdForCellType(type: string, board: Storyboard) {
+  // Scans the list of elements for their IDs of form "${type}${id}" to find a next unique id
+  const elements = board.notebook.elements;
+
+  const ids = Array.from(elements, (element) => element.id)
+    .filter((id) => id.startsWith(type))
+    .map((id) => Number(id.slice(type.length)));
+
+  if (ids.length > 0) {
+    return Math.max(...ids) + 1;
+  } else {
+    return 0;
+  }
 }
