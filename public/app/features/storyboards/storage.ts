@@ -9,9 +9,9 @@ export const getStoryboards = (): Storyboard[] => {
 
 export const updateStoryboard = (newBoard: Storyboard) => {
   let boards = getStoryboards();
-  for (let board of boards) {
-    if (board.uid === newBoard.uid) {
-      board = newBoard;
+  for (let i = 0; i < boards.length; i++) {
+    if (boards[i].uid === newBoard.uid) {
+      boards[i] = newBoard;
     }
   }
   store.setObject(STORAGE_KEY, boards);
