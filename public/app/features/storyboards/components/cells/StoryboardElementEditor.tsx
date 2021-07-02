@@ -78,9 +78,11 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
           height={200}
           showLineNumbers
           onBlur={(newCode) => {
-            let newElement = element;
-            newElement.script = newCode;
-            onUpdate(newElement);
+            if (newCode !== element.script) {
+              let newElement = element;
+              newElement.script = newCode;
+              onUpdate(newElement);
+            }
           }}
         />
       );
