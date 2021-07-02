@@ -1,5 +1,7 @@
 import React from 'react';
 import { TextArea, Field, TableInputCSV, CodeEditor } from '@grafana/ui';
+
+import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
 import { StoryboardDocumentElement } from '../../types';
 
 interface Props {
@@ -52,13 +54,29 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
     }
     case 'query': {
       return (
-        <>
-          <div>datasource: {element.datasource}</div>
-          <div>
-            <CodeEditor value={JSON.stringify(element.query)} height={100} language="promql" showLineNumbers />
-          </div>
-        </>
+        <StoryboardDatasourceQueryEditor
+          datasourceUidOrName={element.datasource}
+          onChangeDatasource={(newDatasource) => {
+            let newElement = { ...element };
+            newElement.datasource = newDatasource;
+            onUpdate(newElement);
+          }}
+          query={element.query}
+          onChangeQuery={(newQuery) => {
+            let newElement = { ...element };
+            newElement.query = newQuery;
+            onUpdate(newElement);
+          }}
+        />
       );
+      // return (
+      //   <>
+      //     <div>datasource: {element.datasource}</div>
+      //     <div>
+      //       query: <pre>{JSON.stringify(element.query)}</pre>
+      //     </div>
+      //   </>
+      // );
     }
     case 'timeseries-plot': {
       return (

@@ -37,7 +37,10 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
   const { title } = board as Storyboard;
 
   const runner = useRunner();
-  const evaled = useMemo(() => evaluateDocument(runner, board.notebook as UnevaluatedStoryboardDocument), [runner]);
+  const evaled = useMemo(() => evaluateDocument(runner, board.notebook as UnevaluatedStoryboardDocument), [
+    runner,
+    board.notebook,
+  ]);
   const evaluation = useObservable(evaled);
 
   return (
@@ -76,10 +79,12 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                 <ShowStoryboardDocumentElementEditor
                   element={m}
                   onUpdate={(newElement) => {
+                    console.log(newElement);
                     let updatedDoc = board;
                     updatedDoc.notebook.elements[index] = newElement;
 
                     updateBoard(updatedDoc);
+                    console.log(updatedDoc);
                   }}
                 />
                 <ShowStoryboardDocumentElementResult

@@ -64,7 +64,7 @@ export function ShowStoryboardDocumentElementResult({
     }
     case 'query': {
       // TODO: Result of query as table
-      return <></>;
+      return null;
       // return <Table data={(result.value as PanelData).series[0]} height={300} width={400} />;
     }
     case 'timeseries-plot': {
