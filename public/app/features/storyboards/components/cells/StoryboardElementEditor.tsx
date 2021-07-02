@@ -15,7 +15,7 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
     case 'markdown': {
       return (
         <Field>
-          {element.editing ? (
+          {element.editing || element.content.trim() === '' ? (
             <div className="gf-form--grow">
               <TextArea
                 defaultValue={element.content}
