@@ -92,18 +92,6 @@ module.exports = {
           from: './node_modules/@kusto/monaco-kusto/release/min/',
           to: '../lib/monaco/min/vs/language/kusto/',
         },
-        {
-          context: path.resolve(__dirname, '../../node_modules/starboard-notebook/dist/'),
-          from: './*',
-          to: './starboard-notebook',
-          globOptions: {
-            deep: 1,
-          },
-        },
-        {
-          from: './node_modules/starboard-grafana/dist/index.js',
-          to: './starboard-grafana.js',
-        },
       ],
     }),
   ],
