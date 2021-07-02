@@ -2,7 +2,13 @@ importScripts('https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js');
 
 async function loadPyodideAndPackages() {
   await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/' });
-  await self.pyodide.loadPackage(['numpy', 'pytz']);
+  await self.pyodide.loadPackage(['numpy', 'pandas', 'pytz']);
+  await self.pyodide.runPythonAsync(`def DF(df):
+    import pandas
+    return pandas.DataFrame({
+      field.name: list(field.values)
+      for field in df[0].fields
+    })`);
 }
 let pyodideReadyPromise = loadPyodideAndPackages();
 

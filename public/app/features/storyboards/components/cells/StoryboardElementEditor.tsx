@@ -50,7 +50,19 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
       return <pre>{element.content}</pre>;
     }
     case 'python': {
-      return <CodeEditor value={element.script} language="python" height={200} showLineNumbers />;
+      return (
+        <CodeEditor
+          value={element.script}
+          language="python"
+          height={200}
+          showLineNumbers
+          onBlur={(newCode) => {
+            let newElement = element;
+            newElement.script = newCode;
+            onUpdate(newElement);
+          }}
+        />
+      );
     }
     case 'query': {
       return (

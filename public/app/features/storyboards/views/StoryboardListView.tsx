@@ -56,7 +56,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       id: 'some_data',
       type: 'csv',
       content: {
-        text: '1,2,3\n4,5,6\n',
+        text: 'a,b,c\n1,2,3\n4,5,6\n',
       },
     },
 
@@ -96,7 +96,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       id: 'compute1',
       type: 'python',
       script: `from js import some_data;
-42 + int(some_data[0][1])`,
+int(DF(some_data)["a"][0])`,
     },
     {
       id: 'compute2',
