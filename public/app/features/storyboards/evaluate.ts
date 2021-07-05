@@ -36,11 +36,10 @@ export async function evaluateElement(
         const value = await runner
           .get()
           .pipe(
-            filter((ev) => ev.state === 'Done' && ev.series[0].refId === n.id),
+            filter((ev) => ev.state === 'Done' && ev.series.length > 0 && ev.series[0].refId === n.id),
             first()
           )
           .toPromise();
-        // Need to deep copy to avoid DOMException: object could not be cloned.
         result.value = value;
       } catch (e) {
         console.error('TEMP ERROR HANDLER: ', e);

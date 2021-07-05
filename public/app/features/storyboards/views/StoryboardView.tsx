@@ -5,7 +5,12 @@ import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { StoreState } from 'app/types';
 import { connect } from 'react-redux';
 import { useRunner, useSavedStoryboards } from '../hooks';
-import { Storyboard, UnevaluatedStoryboardDocument } from '../types';
+import {
+  EvaluatedStoryboardDocument,
+  Storyboard,
+  StoryboardDocumentElement,
+  UnevaluatedStoryboardDocument,
+} from '../types';
 import { getLocationSrv } from '@grafana/runtime';
 import { Page } from 'app/core/components/Page/Page';
 
@@ -14,7 +19,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, HorizontalGroup, PageToolbar } from '@grafana/ui';
+import { Button, Card, IconButton, PageToolbar, ValuePicker } from '@grafana/ui';
 import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
@@ -26,8 +31,85 @@ interface StoryboardRouteParams {
 
 const locationSrv = getLocationSrv();
 
+interface StoryboardCellElementProps {
+  element: StoryboardDocumentElement;
+  index: number;
+  board: Storyboard;
+  addCellToBoard: (type: string, board: Storyboard, index?: number) => void;
+  removeCellFromBoard: (board: Storyboard, index: number) => void;
+  updateBoard: (board: Storyboard) => void;
+  evaluation: EvaluatedStoryboardDocument;
+}
+
+const newCellOptions = [
+  { label: 'Markdown cell', value: 'markdown' },
+  { label: 'Query cell', value: 'query' },
+  { label: 'Plot cell', value: 'timeseries-plot' },
+  { label: 'Plain text cell', value: 'plaintext' },
+  { label: 'Python cell', value: 'python' },
+  { label: 'CSV cell', value: 'csv' },
+];
+
+const StoryboardCellElement = ({
+  element,
+  index,
+  board,
+  addCellToBoard,
+  removeCellFromBoard,
+  updateBoard,
+  evaluation,
+}: StoryboardCellElementProps) => {
+  const addCell = (type: string) => addCellToBoard(type, board, index + 1);
+  return (
+    <Card heading={element.id}>
+      <Card.Figure>
+        <CellTypeIcon type={element.type} aria-hidden />
+      </Card.Figure>
+      <Card.Meta>
+        <div>
+          <ShowStoryboardDocumentElementEditor
+            element={element}
+            context={evaluation?.context}
+            onUpdate={(newElement) => {
+              let updatedDoc = board;
+              updatedDoc.notebook.elements[index] = newElement;
+
+              updateBoard(updatedDoc);
+            }}
+          />
+          <ShowStoryboardDocumentElementResult
+            element={element}
+            context={evaluation?.context}
+            result={evaluation?.context[element.id]}
+          />
+          {element.type !== 'markdown' && element.type !== 'plaintext' ? (
+            <div>
+              Result saved in variable: <CellType element={element} />
+            </div>
+          ) : null}
+        </div>
+      </Card.Meta>
+      <Card.SecondaryActions>
+        <ValuePicker
+          options={newCellOptions}
+          label="Add cell below"
+          onChange={(value) => addCell(value.value!)}
+          variant="secondary"
+          isFullWidth={false}
+        />
+        <IconButton
+          key="delete"
+          name="trash-alt"
+          tooltip="Delete this cell"
+          onClick={() => removeCellFromBoard(board, index)}
+        />
+      </Card.SecondaryActions>
+    </Card>
+  );
+};
+
 export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
-  const { boards, updateBoard } = useSavedStoryboards();
+  const { boards, updateBoard, addCellToBoard, removeCellFromBoard } = useSavedStoryboards();
   const board = boards.find((b) => b.uid === uid) as Storyboard;
   if (board === undefined) {
     locationSrv.update({ path: '/storyboards', partial: true });
@@ -62,72 +144,25 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             `}
           >
             {evaluation?.elements.map((m, index) => (
-              <div
-                key={m.id}
-                className={css`
-                  padding-bottom: 50px;
-                `}
-              >
-                <div
-                  className={css`
-                    margin: 0;
-                    float: right;
-                  `}
-                >
-                  <CellTypeIcon type={m.type} aria-hidden />
-                  {m.type}
-                </div>
-                <ShowStoryboardDocumentElementEditor
+              <li key={m.id}>
+                <StoryboardCellElement
                   element={m}
-                  onUpdate={(newElement) => {
-                    console.log(newElement);
-                    let updatedDoc = board;
-                    updatedDoc.notebook.elements[index] = newElement;
-
-                    updateBoard(updatedDoc);
-                    console.log(updatedDoc);
-                  }}
+                  index={index}
+                  board={board}
+                  addCellToBoard={addCellToBoard}
+                  removeCellFromBoard={removeCellFromBoard}
+                  updateBoard={updateBoard}
+                  evaluation={evaluation}
                 />
-                <ShowStoryboardDocumentElementResult
-                  element={m}
-                  context={evaluation?.context}
-                  result={evaluation?.context[m.id]}
-                />
-                <div>
-                  Result saved in variable: <CellType element={m} />
-                </div>
-              </div>
+              </li>
             ))}
           </div>
-          <HorizontalGroup wrap>
-            <Button
-              icon="plus"
-              variant="secondary"
-              onClick={() => {
-                const newMarkdownCell = {
-                  id: `markdown-${board.notebook.elements.length}`,
-                  type: 'markdown',
-                  content: '',
-                  editing: true,
-                };
-
-                let updatedDoc = { ...board };
-                updatedDoc.notebook.elements.push(newMarkdownCell);
-                updateBoard(updatedDoc);
-              }}
-            >
-              Add text cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add query cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add Python cell
-            </Button>
-            <Button icon="plus" variant="secondary">
-              Add CSV cell
-            </Button>
-          </HorizontalGroup>
+          <ValuePicker
+            options={newCellOptions}
+            label="Add new cell"
+            onChange={(value) => addCellToBoard(value.value!, board)}
+            isFullWidth={false}
+          />
         </div>
       </Page.Contents>
     </Page>

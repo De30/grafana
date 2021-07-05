@@ -7,7 +7,7 @@ import {
   StoryboardVariable,
 } from '../../types';
 import { css } from '@emotion/css';
-import { renderMarkdown, PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
+import { PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
 import { PanelChrome } from '@grafana/ui';
 
@@ -66,6 +66,9 @@ export function ShowStoryboardDocumentElementResult({
     }
     case 'timeseries-plot': {
       const target = context[element.from];
+      if (target == null) {
+        return null;
+      }
       return (
         <div style={{ width: '100%', height: '400px' }}>
           <AutoSizer>
