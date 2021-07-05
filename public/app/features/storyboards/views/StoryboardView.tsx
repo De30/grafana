@@ -19,7 +19,16 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, Card, IconButton, PageToolbar, ValuePicker, useTheme2, getCardStyles } from '@grafana/ui';
+import {
+  Button,
+  Card,
+  IconButton,
+  PageToolbar,
+  ValuePicker,
+  useTheme2,
+  getCardStyles,
+  HorizontalGroup,
+} from '@grafana/ui';
 import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
@@ -215,12 +224,20 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
               </div>
             ))}
           </div>
-          <ValuePicker
-            options={newCellOptions}
-            label="Add new cell"
-            onChange={(value) => addCellToBoard(value.value!, board)}
-            isFullWidth={false}
-          />
+          <HorizontalGroup justify="center">
+            {newCellOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant="secondary"
+                icon="plus"
+                onClick={() => {
+                  addCellToBoard(option.value, board);
+                }}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </HorizontalGroup>
         </div>
       </Page.Contents>
     </Page>
