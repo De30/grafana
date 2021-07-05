@@ -12,6 +12,7 @@ import { AnnotationsPlugin } from './plugins/AnnotationsPlugin';
 import { ContextMenuPlugin } from './plugins/ContextMenuPlugin';
 import { ExemplarsPlugin } from './plugins/ExemplarsPlugin';
 import { OutsideRangePlugin } from './plugins/OutsideRangePlugin';
+import { AudiblePlugin } from './plugins/AudiblePlugin';
 import { ThresholdControlsPlugin } from './plugins/ThresholdControlsPlugin';
 import { TimeSeriesOptions } from './types';
 import { getTimezones, prepareGraphableFields } from './utils';
@@ -81,6 +82,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
               />
             )}
             {/* Renders annotation markers*/}
+            <AudiblePlugin config={config} frames={data.series} />
             {data.annotations && (
               <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
             )}

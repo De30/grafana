@@ -77,6 +77,12 @@ export interface DashScrollPayload {
   pos?: number;
 }
 
+export interface AudiblePanelPayload {
+  panelId: number;
+  seriesIndex: number;
+  pointIndex: number;
+}
+
 export interface PanelChangeViewPayload {}
 
 /**
@@ -161,6 +167,10 @@ export class AbsoluteTimeEvent extends BusEventBase {
 
 export class RemovePanelEvent extends BusEventWithPayload<number> {
   static type = 'remove-panel';
+}
+
+export class AudiblePanelEvent extends BusEventWithPayload<AudiblePanelPayload> {
+  static type = 'audible-panel';
 }
 
 /**
