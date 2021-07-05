@@ -49,7 +49,14 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
   status: 'unevaluated',
   elements: [
     // presentational markdown
-    { id: 'markdown', type: 'markdown', content: '# This is markdown\n\n*Double-click* me to edit', editing: false },
+    {
+      id: 'markdown',
+      type: 'markdown',
+      content: '# This is markdown\n\n*Double-click* me to edit',
+      editing: false,
+      isEditorVisible: true,
+      isResultVisible: true,
+    },
 
     // Directly embed csv
     {
@@ -58,6 +65,8 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       content: {
         text: 'a,b,c\n1,2,3\n4,5,6\n',
       },
+      isEditorVisible: true,
+      isResultVisible: true,
     },
 
     // Fetch data from remote url and expose result
@@ -70,6 +79,9 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       datasource: 'prometheus',
       query: { refId: 'query', expr: 'go_goroutines' },
       timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
+
+      isEditorVisible: true,
+      isResultVisible: true,
     },
     {
       id: 'query2',
@@ -77,10 +89,12 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       datasource: 'prometheus',
       query: { refId: 'query2', expr: 'prometheus_engine_queries' },
       timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
+      isEditorVisible: true,
+      isResultVisible: true,
     },
 
     // Show a timeseries
-    { id: 'presentation', type: 'timeseries-plot', from: 'query' },
+    { id: 'presentation', type: 'timeseries-plot', from: 'query', isEditorVisible: true, isResultVisible: true },
 
     // raw json data
     // {
@@ -97,12 +111,17 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       type: 'python',
       script: `from js import some_data;
 int(DF(some_data)["a"][0])`,
+
+      isEditorVisible: true,
+      isResultVisible: true,
     },
     {
       id: 'compute2',
       type: 'python',
       script: `from js import compute1;
 compute1 + 42`,
+      isEditorVisible: true,
+      isResultVisible: true,
     },
   ],
 };

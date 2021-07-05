@@ -80,28 +80,37 @@ const StoryboardCellElement = ({
 
   const addCell = (type: string) => addCellToBoard(type, board, index + 1);
   return (
-    <Card heading={element.id}>
+    <Card
+      heading={element.id}
+      className={css`
+        background-color: transparent;
+      `}
+    >
       <Card.Figure>
         <CellTypeIcon type={element.type} aria-hidden />
       </Card.Figure>
       <Card.Meta styles={cardStyle}>
         <div>
-          <ShowStoryboardDocumentElementEditor
-            element={element}
-            context={evaluation?.context}
-            onUpdate={(newElement) => {
-              let updatedDoc = board;
-              updatedDoc.notebook.elements[index] = newElement;
+          {element.isEditorVisible && (
+            <ShowStoryboardDocumentElementEditor
+              element={element}
+              context={evaluation?.context}
+              onUpdate={(newElement) => {
+                let updatedDoc = board;
+                updatedDoc.notebook.elements[index] = newElement;
 
-              updateBoard(updatedDoc);
-            }}
-          />
-          <ShowStoryboardDocumentElementResult
-            element={element}
-            context={evaluation?.context}
-            result={evaluation?.context[element.id]}
-          />
-          {element.type !== 'markdown' && element.type !== 'plaintext' ? (
+                updateBoard(updatedDoc);
+              }}
+            />
+          )}
+          {element.isResultVisible && (
+            <ShowStoryboardDocumentElementResult
+              element={element}
+              context={evaluation?.context}
+              result={evaluation?.context[element.id]}
+            />
+          )}
+          {element.type !== 'markdown' && element.type !== 'plaintext' && element.isResultVisible ? (
             <div>
               Result saved in variable: <CellType element={element} />
             </div>
@@ -109,6 +118,36 @@ const StoryboardCellElement = ({
         </div>
       </Card.Meta>
       <Card.SecondaryActions>
+        {element.type !== 'markdown' && element.type !== 'plaintext' ? (
+          <>
+            <Button
+              onClick={() => {
+                let newElement = { ...element };
+                newElement.isEditorVisible = !element.isEditorVisible;
+                let updatedDoc = board;
+                updatedDoc.notebook.elements[index] = newElement;
+
+                updateBoard(updatedDoc);
+              }}
+              variant="secondary"
+              icon={element.isEditorVisible ? 'eye-slash' : 'eye'}
+            >{`${element.isEditorVisible ? 'Hide' : 'Show'} editor`}</Button>
+            <Button
+              onClick={() => {
+                let newElement = { ...element };
+                newElement.isResultVisible = !element.isResultVisible;
+                let updatedDoc = board;
+                updatedDoc.notebook.elements[index] = newElement;
+
+                updateBoard(updatedDoc);
+              }}
+              variant="secondary"
+              icon={element.isResultVisible ? 'eye-slash' : 'eye'}
+            >{`${element.isResultVisible ? 'Hide' : 'Show'} result`}</Button>
+          </>
+        ) : (
+          <></>
+        )}
         <ValuePicker
           options={newCellOptions}
           label="Add cell below"
@@ -163,7 +202,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             `}
           >
             {evaluation?.elements.map((m, index) => (
-              <li key={m.id}>
+              <div key={m.id}>
                 <StoryboardCellElement
                   element={m}
                   index={index}
@@ -173,7 +212,7 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
                   updateBoard={updateBoard}
                   evaluation={evaluation}
                 />
-              </li>
+              </div>
             ))}
           </div>
           <ValuePicker

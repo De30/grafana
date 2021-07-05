@@ -32,8 +32,14 @@ export interface StoryboardContext {
   [property: string]: StoryboardVariable;
 }
 
-export interface StoryboardCsv {
+interface StoryboardCellBase {
   id: StoryboardId;
+  type: string;
+  isEditorVisible: boolean;
+  isResultVisible: boolean;
+}
+
+export interface StoryboardCsv extends StoryboardCellBase {
   type: 'csv';
   content: {
     text: string;
@@ -44,35 +50,30 @@ export interface StoryboardCsv {
   };
 }
 
-export interface StoryboardPlainText {
-  id: StoryboardId;
+export interface StoryboardPlainText extends StoryboardCellBase {
   type: 'plaintext';
   content: string;
 }
 
-export interface StoryboardDatasourceQuery {
-  id: StoryboardId;
+export interface StoryboardDatasourceQuery extends StoryboardCellBase {
   type: 'query';
   datasource: string;
   query: DataQuery;
   timeRange: RawTimeRange;
 }
 
-export interface StoryboardMarkdown {
-  id: StoryboardId;
+export interface StoryboardMarkdown extends StoryboardCellBase {
   type: string;
   content: string;
   editing: boolean;
 }
 
-export interface StoryboardPython {
-  id: StoryboardId;
+export interface StoryboardPython extends StoryboardCellBase {
   type: 'python';
   script: string;
 }
 
-export interface StoryboardTimeseriesPlot {
-  id: StoryboardId;
+export interface StoryboardTimeseriesPlot extends StoryboardCellBase {
   type: 'timeseries-plot';
   from: StoryboardId;
 }
