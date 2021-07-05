@@ -18,11 +18,11 @@ export const StoryboardForm: FC<Props> = ({ onSubmit, onCancel }) => {
             <Input {...register('title', { required: true })} />
           </Field>
           <HorizontalGroup>
-            <Button variant="secondary" icon="x" onClick={() => onCancel()}>
-              Cancel
-            </Button>
             <Button type="submit" icon="plus">
               Create Storyboard
+            </Button>
+            <Button variant="secondary" icon="x" onClick={() => onCancel()}>
+              Cancel
             </Button>
           </HorizontalGroup>
         </VerticalGroup>
