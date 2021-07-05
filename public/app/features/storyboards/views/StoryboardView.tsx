@@ -100,7 +100,22 @@ export const StoryboardView: FC<StoryboardRouteParams> = ({ uid }) => {
             ))}
           </div>
           <HorizontalGroup wrap>
-            <Button icon="plus" variant="secondary">
+            <Button
+              icon="plus"
+              variant="secondary"
+              onClick={() => {
+                const newMarkdownCell = {
+                  id: `markdown-${board.notebook.elements.length}`,
+                  type: 'markdown',
+                  content: '',
+                  editing: true,
+                };
+
+                let updatedDoc = { ...board };
+                updatedDoc.notebook.elements.push(newMarkdownCell);
+                updateBoard(updatedDoc);
+              }}
+            >
               Add text cell
             </Button>
             <Button icon="plus" variant="secondary">

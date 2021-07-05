@@ -60,7 +60,7 @@ export interface StoryboardDatasourceQuery {
 
 export interface StoryboardMarkdown {
   id: StoryboardId;
-  type: 'markdown';
+  type: string;
   content: string;
   editing: boolean;
 }

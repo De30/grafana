@@ -43,7 +43,7 @@ export function ShowStoryboardDocumentElementEditor({ element, onUpdate }: Props
                 // https://github.com/rexxars/commonmark-react-renderer
                 { __html: renderMarkdown(element.content as string) }
               }
-              onDoubleClick={() => {
+              onClick={() => {
                 element.editing = true;
                 onUpdate(element);
               }}
