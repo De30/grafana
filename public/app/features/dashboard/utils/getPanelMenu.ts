@@ -137,6 +137,13 @@ export function getPanelMenu(
     shortcut: 'p s',
   });
 
+  menu.push({
+    text: 'Audible',
+    iconClassName: 'headphones',
+    onClick: onSonifyPanel,
+    shortcut: 'p a',
+  });
+
   if (contextSrv.hasAccessToExplore() && !(panel.plugin && panel.plugin.meta.skipDataQuery)) {
     menu.push({
       text: 'Explore',
@@ -210,12 +217,6 @@ export function getPanelMenu(
     subMenu.push({
       text: 'Copy',
       onClick: onCopyPanel,
-    });
-
-    subMenu.push({
-      text: 'Sonify',
-      onClick: onSonifyPanel,
-      shortcut: 'p a',
     });
 
     if (isPanelModelLibraryPanel(panel)) {
