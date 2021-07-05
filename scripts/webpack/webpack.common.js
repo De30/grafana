@@ -1,7 +1,9 @@
 const fs = require('fs-extra');
 const path = require('path');
-
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const deps = require('../../package.json').dependencies;
 
 class CopyUniconsPlugin {
   apply(compiler) {
@@ -60,6 +62,12 @@ module.exports = {
   },
   plugins: [
     new CopyUniconsPlugin(),
+    new ModuleFederationPlugin({
+      shared: {
+        react: { eager: true, singleton: true, requiredVersion: deps.react },
+        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] },
+      },
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -137,42 +145,42 @@ module.exports = {
   optimization: {
     moduleIds: 'named',
     runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'all',
-      minChunks: 1,
-      cacheGroups: {
-        unicons: {
-          test: /[\\/]node_modules[\\/]@iconscout[\\/]react-unicons[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 20,
-          enforce: true,
-        },
-        moment: {
-          test: /[\\/]node_modules[\\/]moment[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 20,
-          enforce: true,
-        },
-        angular: {
-          test: /[\\/]node_modules[\\/]angular[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 50,
-          enforce: true,
-        },
-        defaultVendors: {
-          test: /[\\/]node_modules[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: -10,
-          reuseExistingChunk: true,
-          enforce: true,
-        },
-        default: {
-          priority: -20,
-          chunks: 'all',
-          test: /.*[jt]sx?$/,
-          reuseExistingChunk: true,
-        },
-      },
-    },
+    // splitChunks: {
+    //   chunks: 'all',
+    //   minChunks: 1,
+    //   cacheGroups: {
+    //     unicons: {
+    //       test: /[\\/]node_modules[\\/]@iconscout[\\/]react-unicons[\\/].*[jt]sx?$/,
+    //       chunks: 'initial',
+    //       priority: 20,
+    //       enforce: true,
+    //     },
+    //     moment: {
+    //       test: /[\\/]node_modules[\\/]moment[\\/].*[jt]sx?$/,
+    //       chunks: 'initial',
+    //       priority: 20,
+    //       enforce: true,
+    //     },
+    //     angular: {
+    //       test: /[\\/]node_modules[\\/]angular[\\/].*[jt]sx?$/,
+    //       chunks: 'initial',
+    //       priority: 50,
+    //       enforce: true,
+    //     },
+    //     defaultVendors: {
+    //       test: /[\\/]node_modules[\\/].*[jt]sx?$/,
+    //       chunks: 'initial',
+    //       priority: -10,
+    //       reuseExistingChunk: true,
+    //       enforce: true,
+    //     },
+    //     default: {
+    //       priority: -20,
+    //       chunks: 'all',
+    //       test: /.*[jt]sx?$/,
+    //       reuseExistingChunk: true,
+    //     },
+    //   },
+    // },
   },
 };
