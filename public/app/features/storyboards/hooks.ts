@@ -63,6 +63,8 @@ export function useSavedStoryboards() {
           isEditorVisible: true,
           isResultVisible: true,
           timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       case 'plaintext':

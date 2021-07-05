@@ -104,7 +104,7 @@ const StoryboardCellElement = ({
       </Card.Figure>
       <Card.Meta styles={cardStyle}>
         <div>
-          {element.isEditorVisible && (
+          {(element.isEditorVisible || element.type === 'markdown') && (
             <ShowStoryboardDocumentElementEditor
               element={element}
               context={evaluation?.context}
