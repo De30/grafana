@@ -59,6 +59,7 @@ export async function evaluateElement(
       const runOutput = await run(n.script, context);
       result.value = runOutput.results;
       result.stdout = runOutput.stdout;
+      result.error = runOutput.error;
       break;
     }
   }

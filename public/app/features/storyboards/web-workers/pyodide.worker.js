@@ -41,7 +41,7 @@ self.onmessage = async (event) => {
       stdout,
     });
   } catch (error) {
-    console.error('ERROR: %o, (%o)', error, stdout);
+    console.error('ERROR: %o, (%o)', error);
     self.postMessage({ error: error.message });
   }
 };

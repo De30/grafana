@@ -9,7 +9,7 @@ import {
 import { css } from '@emotion/css';
 import { PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
-import { PanelChrome } from '@grafana/ui';
+import { PanelChrome, Alert } from '@grafana/ui';
 
 export function ShowStoryboardDocumentElementResult({
   element,
@@ -67,16 +67,25 @@ export function ShowStoryboardDocumentElementResult({
               </p>
             </>
           ) : null}
-          <div
-            className={css`
-              font-size: 10px;
-              margin-top: 20px;
-              opacity: 0.5;
-            `}
-          >
-            RESULT:
-          </div>
-          <pre>{JSON.stringify(result.value || '')}</pre>
+
+          {result.error ? (
+            <Alert title="Python Error">
+              <pre>{result.error}</pre>
+            </Alert>
+          ) : (
+            <>
+              <div
+                className={css`
+                  font-size: 10px;
+                  margin-top: 20px;
+                  opacity: 0.5;
+                `}
+              >
+                RESULT:
+              </div>
+              <pre>{JSON.stringify(result.value || '')}</pre>
+            </>
+          )}
         </div>
       );
     }
