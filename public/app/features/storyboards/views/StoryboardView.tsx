@@ -19,7 +19,7 @@ import { ShowStoryboardDocumentElementEditor } from '../components/cells/Storybo
 import { ShowStoryboardDocumentElementResult } from '../components/cells/StoryboardElementResult';
 import { evaluateDocument } from '../evaluate';
 import { CellType } from '../components/cells/CellType';
-import { Button, Card, IconButton, PageToolbar, ValuePicker } from '@grafana/ui';
+import { Button, Card, IconButton, PageToolbar, ValuePicker, useTheme2, getCardStyles } from '@grafana/ui';
 import { CellTypeIcon } from '../components/CellTypeIcon';
 
 interface StoryboardRouteParams {
@@ -59,13 +59,32 @@ const StoryboardCellElement = ({
   updateBoard,
   evaluation,
 }: StoryboardCellElementProps) => {
+  // Workaround: prefer if Card.Meta didn't use flex layout
+  const theme = useTheme2();
+  const cardStyle = getCardStyles(theme);
+  cardStyle.info = css`
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  `;
+  cardStyle.metadata = css`
+    align-items: center;
+    width: 100%;
+    font-size: ${theme.typography.size.sm};
+    color: ${theme.colors.text.secondary};
+    margin: ${theme.spacing(0.5, 0, 0)};
+    line-height: ${theme.typography.bodySmall.lineHeight};
+    overflow-wrap: anywhere;
+  `;
+  // End workaround
+
   const addCell = (type: string) => addCellToBoard(type, board, index + 1);
   return (
     <Card heading={element.id}>
       <Card.Figure>
         <CellTypeIcon type={element.type} aria-hidden />
       </Card.Figure>
-      <Card.Meta>
+      <Card.Meta styles={cardStyle}>
         <div>
           <ShowStoryboardDocumentElementEditor
             element={element}
