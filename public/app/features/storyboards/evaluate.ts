@@ -56,7 +56,9 @@ export async function evaluateElement(
       break;
     }
     case 'python': {
-      result.value = await run(n.script, context);
+      const runOutput = await run(n.script, context);
+      result.value = runOutput.results;
+      result.stdout = runOutput.stdout;
       break;
     }
   }
@@ -98,14 +100,14 @@ pyodideWorker = (() => {
 export function runCallback(
   script: string,
   context: StoryboardContext,
-  onSuccess: (data: string) => void,
+  onSuccess: (data: any) => void,
   onError: (ev: ErrorEvent) => any
 ) {
   if (pyodideWorker == null) {
     return;
   }
   pyodideWorker.onerror = (e) => onError(e);
-  pyodideWorker.onmessage = (e) => onSuccess(e.data.results);
+  pyodideWorker.onmessage = (e) => onSuccess(e.data);
   pyodideWorker.postMessage({
     // Need to deep copy the object to avoid DOMExceptions when objects can't be cloned.
     ...JSON.parse(JSON.stringify(context)),

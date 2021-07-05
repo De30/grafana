@@ -52,7 +52,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
     {
       id: 'markdown',
       type: 'markdown',
-      content: '# This is markdown\n\n*Double-click* me to edit',
+      content: '# This is markdown\n\n*Click* me to edit',
       editing: false,
       isEditorVisible: true,
       isResultVisible: true,
@@ -63,7 +63,7 @@ export const DEFAULT_DOCUMENT: UnevaluatedStoryboardDocument = {
       id: 'some_data',
       type: 'csv',
       content: {
-        text: 'a,b,c\n1,2,3\n4,5,6\n',
+        text: 'a,b,c\n3,2,1\n4,5,6\n',
       },
       isEditorVisible: true,
       isResultVisible: true,
@@ -119,6 +119,7 @@ int(DF(some_data)["a"][0])`,
       id: 'compute2',
       type: 'python',
       script: `from js import compute1;
+print(f"Compute 1 is {compute1}, whose value squared is {compute1**2}");
 compute1 + 42`,
       isEditorVisible: true,
       isResultVisible: true,

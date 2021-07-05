@@ -46,6 +46,27 @@ export function ShowStoryboardDocumentElementResult({
     case 'python': {
       return (
         <div>
+          {result.stdout ? (
+            <>
+              <span
+                className={css`
+                  font-size: 10px;
+                  margin-top: 20px;
+                  opacity: 0.5;
+                `}
+              >
+                CONSOLE OUTPUT:
+              </span>
+              <p
+                className={css`
+                  font-family: monospace;
+                  white-space: pre;
+                `}
+              >
+                {result.stdout}
+              </p>
+            </>
+          ) : null}
           <div
             className={css`
               font-size: 10px;
