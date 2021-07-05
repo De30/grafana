@@ -1,6 +1,7 @@
 import React from 'react';
-import { TextArea, Field, TableInputCSV, CodeEditor, Select } from '@grafana/ui';
-import { renderMarkdown } from '@grafana/data';
+import { TextArea, Field, TableInputCSV, CodeEditor, Select, TimeRangePicker } from '@grafana/ui';
+import { rangeUtil, renderMarkdown } from '@grafana/data';
+import { css } from 'emotion';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
 import { StoryboardContext, StoryboardDocumentElement } from '../../types';
@@ -101,6 +102,12 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
           onChangeQuery={(newQuery) => {
             let newElement = { ...element };
             newElement.query = newQuery;
+            onUpdate(newElement);
+          }}
+          timeRange={element.timeRange}
+          onChangeTimeRange={(range) => {
+            let newElement = { ...element };
+            newElement.timeRange = range;
             onUpdate(newElement);
           }}
         />

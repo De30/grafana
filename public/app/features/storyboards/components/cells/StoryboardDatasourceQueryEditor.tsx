@@ -1,8 +1,10 @@
 import React from 'react';
 import { useAsync } from 'react-use';
+import { css } from 'emotion';
 
-import { DataQuery } from '@grafana/data';
+import { rangeUtil, DataQuery, RawTimeRange, TimeRange } from '@grafana/data';
 import { getDataSourceSrv, DataSourcePicker } from '@grafana/runtime';
+import { TimeRangePicker } from '@grafana/ui';
 
 interface QueryEditorProps {
   datasourceUid: string | null;
@@ -59,6 +61,8 @@ export interface Props {
   onChangeDatasource: (datasource: string) => void;
   query: DataQuery;
   onChangeQuery: (query: DataQuery) => void;
+  timeRange: RawTimeRange | TimeRange | null;
+  onChangeTimeRange: (range: TimeRange) => void;
 }
 
 export const StoryboardDatasourceQueryEditor = ({
@@ -66,13 +70,31 @@ export const StoryboardDatasourceQueryEditor = ({
   onChangeDatasource,
   query,
   onChangeQuery,
+  timeRange,
+  onChangeTimeRange,
 }: Props) => (
   <div>
-    <DataSourcePicker
-      noDefault
-      onChange={(ds) => onChangeDatasource(ds.uid ?? ds.name)}
-      current={datasourceUidOrName}
-    />
+    <div
+      className={css`
+        display: flex;
+      `}
+    >
+      <DataSourcePicker
+        noDefault
+        onChange={(ds) => onChangeDatasource(ds.uid ?? ds.name)}
+        current={datasourceUidOrName}
+      />
+      {timeRange !== null && (
+        <TimeRangePicker
+          value={rangeUtil.convertRawToRange(timeRange)}
+          onChange={onChangeTimeRange}
+          onChangeTimeZone={() => {}}
+          onMoveForward={() => {}}
+          onMoveBackward={() => {}}
+          onZoom={() => {}}
+        />
+      )}
+    </div>
     <QueryEditor datasourceUid={datasourceUidOrName} query={query} onChangeQuery={onChangeQuery} />;
   </div>
 );
