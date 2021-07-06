@@ -1,10 +1,10 @@
 import React from 'react';
-import { TextArea, Field, TableInputCSV, CodeEditor, Select, TimeRangePicker } from '@grafana/ui';
-import { rangeUtil, renderMarkdown } from '@grafana/data';
-import { css } from 'emotion';
+import { TextArea, Field, TableInputCSV, CodeEditor, Select, HorizontalGroup, IconButton } from '@grafana/ui';
+import { renderMarkdown } from '@grafana/data';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
 import { StoryboardContext, StoryboardDocumentElement } from '../../types';
+import { css } from '@emotion/css';
 
 interface Props {
   element: StoryboardDocumentElement;
@@ -17,40 +17,55 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
     case 'markdown': {
       return (
         <Field>
-          {element.editing || element.content.trim() === '' ? (
-            <div className="gf-form--grow">
-              <TextArea
-                defaultValue={element.content}
-                className="gf-form-input"
-                onBlur={(event) => {
-                  element.editing = false;
-                  let newElement = element;
-                  newElement.content = event.currentTarget.value;
-                  onUpdate(newElement);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && event.shiftKey) {
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+            `}
+          >
+            {element.editing || element.content.trim() === '' ? (
+              <div className="gf-form--grow">
+                <TextArea
+                  defaultValue={element.content}
+                  className="gf-form-input"
+                  onBlur={(event) => {
                     element.editing = false;
                     let newElement = element;
                     newElement.content = event.currentTarget.value;
                     onUpdate(newElement);
-                  }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && event.shiftKey) {
+                      element.editing = false;
+                      let newElement = element;
+                      newElement.content = event.currentTarget.value;
+                      onUpdate(newElement);
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <div
+                dangerouslySetInnerHTML={
+                  // we should parse markdown with a strict subset of options directly to JSX with a library like this:
+                  // https://github.com/rexxars/commonmark-react-renderer
+                  { __html: renderMarkdown(element.content as string) }
+                }
+                onClick={() => {
+                  element.editing = true;
+                  onUpdate(element);
                 }}
               />
-            </div>
-          ) : (
-            <div
-              dangerouslySetInnerHTML={
-                // we should parse markdown with a strict subset of options directly to JSX with a library like this:
-                // https://github.com/rexxars/commonmark-react-renderer
-                { __html: renderMarkdown(element.content as string) }
-              }
+            )}
+            <IconButton
+              size="lg"
+              name={element.editing ? 'x' : 'pen'}
               onClick={() => {
-                element.editing = true;
+                element.editing = !element.editing;
                 onUpdate(element);
               }}
             />
-          )}
+          </div>
         </Field>
       );
     }
