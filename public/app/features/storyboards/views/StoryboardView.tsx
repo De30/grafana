@@ -143,6 +143,7 @@ const StoryboardCellElement = ({
                 updateBoard(updatedDoc);
               }}
               variant="secondary"
+              size="sm"
               icon={element.isEditorVisible ? 'eye-slash' : 'eye'}
             >{`${element.isEditorVisible ? 'Hide' : 'Show'} editor`}</Button>
             <Button
@@ -155,6 +156,7 @@ const StoryboardCellElement = ({
                 updateBoard(updatedDoc);
               }}
               variant="secondary"
+              size="sm"
               icon={element.isResultVisible ? 'eye-slash' : 'eye'}
             >{`${element.isResultVisible ? 'Hide' : 'Show'} result`}</Button>
           </>
