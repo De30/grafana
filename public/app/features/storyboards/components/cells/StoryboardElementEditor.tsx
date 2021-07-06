@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, TextArea, Field, TableInputCSV, CodeEditor, Select, IconButton } from '@grafana/ui';
+import { InlineSwitch, TextArea, Tooltip, Field, TableInputCSV, CodeEditor, Select, IconButton } from '@grafana/ui';
 import { renderMarkdown } from '@grafana/data';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
@@ -91,23 +91,26 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
     case 'python': {
       return (
         <div>
-          <Field
-            label="Cell returns DataFrame?"
-            description={`Check this box if your Python code returns a DataFrame.
-              Convert Pandas Dataframes with the toDF function!
+          <Tooltip
+            content={`Check this box if your Python code returns a DataFrame.
+            Convert Pandas Dataframes with the toDF function!
 
-              Only cells returning DataFrames can be used in timeseries plots. These DataFrames
-              must have a 'Time' column containing pd.Timestamps, and any number of other columns.`}
+            Only cells returning DataFrames can be used in timeseries plots. These DataFrames
+            must have a 'Time' column containing pd.Timestamps, and any number of other columns.`}
           >
-            <Switch
-              value={element.returnsDF ?? false}
-              onChange={(e) => {
-                let newElement = element;
-                newElement.returnsDF = e.currentTarget.checked;
-                onUpdate(newElement);
-              }}
-            />
-          </Field>
+            <span>
+              <InlineSwitch
+                label="Cell returns DataFrame?"
+                showLabel={true}
+                value={element.returnsDF ?? false}
+                onChange={(e) => {
+                  let newElement = element;
+                  newElement.returnsDF = e.currentTarget.checked;
+                  onUpdate(newElement);
+                }}
+              />
+            </span>
+          </Tooltip>
           <CodeEditor
             value={element.script}
             language="python"
