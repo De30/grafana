@@ -1,6 +1,6 @@
 import { Observable, from } from 'rxjs';
 import { concatMap, filter, first } from 'rxjs/operators';
-import { rangeUtil, readCSV, QueryRunner } from '@grafana/data';
+import { rangeUtil, readCSV, toDataFrame, QueryRunner } from '@grafana/data';
 import {
   StoryboardContext,
   StoryboardDocumentElement,
@@ -57,9 +57,16 @@ export async function evaluateElement(
     }
     case 'python': {
       const runOutput = await run(n.script, context);
-      result.value = runOutput.results;
       result.stdout = runOutput.stdout;
       result.error = runOutput.error;
+      if (n.returnsDF && runOutput.error === undefined) {
+        try {
+          result.value = toDataFrame(JSON.parse(runOutput.results));
+        } catch (error) {
+          result.error = `Error getting DataFrame from Python cell:
+          ${error.toString()}`;
+        }
+      }
       break;
     }
   }

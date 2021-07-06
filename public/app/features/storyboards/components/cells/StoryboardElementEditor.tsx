@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextArea, Field, TableInputCSV, CodeEditor, Select, HorizontalGroup, IconButton } from '@grafana/ui';
+import { Switch, TextArea, Field, TableInputCSV, CodeEditor, Select, IconButton } from '@grafana/ui';
 import { renderMarkdown } from '@grafana/data';
 
 import { StoryboardDatasourceQueryEditor } from './StoryboardDatasourceQueryEditor';
@@ -90,19 +90,38 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
     }
     case 'python': {
       return (
-        <CodeEditor
-          value={element.script}
-          language="python"
-          height={200}
-          showLineNumbers
-          onBlur={(newCode) => {
-            if (newCode !== element.script) {
-              let newElement = element;
-              newElement.script = newCode;
-              onUpdate(newElement);
-            }
-          }}
-        />
+        <div>
+          <Field
+            label="Cell returns DataFrame?"
+            description={`Check this box if your Python code returns a DataFrame.
+              Convert Pandas Dataframes with the toDF function!
+
+              Only cells returning DataFrames can be used in timeseries plots. These DataFrames
+              must have a 'Time' column containing pd.Timestamps, and any number of other columns.`}
+          >
+            <Switch
+              value={element.returnsDF ?? false}
+              onChange={(e) => {
+                let newElement = element;
+                newElement.returnsDF = e.currentTarget.checked;
+                onUpdate(newElement);
+              }}
+            />
+          </Field>
+          <CodeEditor
+            value={element.script}
+            language="python"
+            height={200}
+            showLineNumbers
+            onBlur={(newCode) => {
+              if (newCode !== element.script) {
+                let newElement = element;
+                newElement.script = newCode;
+                onUpdate(newElement);
+              }
+            }}
+          />
+        </div>
       );
     }
     case 'query': {
@@ -131,7 +150,9 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
     }
     case 'timeseries-plot': {
       const options = Object.entries(context)
-        .filter(([k, v]) => v.element?.type === 'query')
+        .filter(
+          ([k, v]) => v.element?.type === 'query' || (v.element?.type === 'python' && v.element?.returnsDF === true)
+        )
         .map(([k, v]) => ({ label: k, value: k }));
       return (
         <Select

@@ -71,6 +71,7 @@ export interface StoryboardMarkdown extends StoryboardCellBase {
 export interface StoryboardPython extends StoryboardCellBase {
   type: 'python';
   script: string;
+  returnsDF: boolean;
 }
 
 export interface StoryboardTimeseriesPlot extends StoryboardCellBase {

@@ -81,6 +81,7 @@ export function useSavedStoryboards() {
           id: 'python' + nextId,
           type: 'python',
           script: '',
+          returnsDF: false,
           isEditorVisible: true,
           isResultVisible: true,
         };

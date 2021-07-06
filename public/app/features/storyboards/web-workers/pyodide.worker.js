@@ -10,12 +10,27 @@ async function loadPyodideAndPackages() {
   sys.stdout = StringIO()
   sys.stderr = StringIO()
 
-  def DF(df):
+  def fromDF(df):
     import pandas
     return pandas.DataFrame({
       field.name: list(field.values)
       for field in df[0].fields
-    })`);
+    }).assign(Time=lambda x: pandas.to_datetime(x.Time, unit="ms"))
+
+  def toDF(df):
+    import json
+    import pandas as pd
+    fields = []
+    try:
+      time_col = [c for c in df.columns if c.lower() == "time"][0]
+    except IndexError:
+      raise ValueError("No column named 'time' found!")
+    time_values = (df[time_col] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1ms")
+    fields.append({"name": "Time", "values": time_values.tolist()})
+    for col in df.columns:
+      if col != time_col:
+        fields.append({"name": col, "values": df[col].tolist()})
+    return json.dumps({"fields": fields})`);
 }
 let pyodideReadyPromise = loadPyodideAndPackages();
 

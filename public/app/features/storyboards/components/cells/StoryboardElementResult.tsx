@@ -1,3 +1,5 @@
+/* eslint-disable id-blacklist, no-restricted-imports, @typescript-eslint/ban-types */
+import moment from 'moment';
 import React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import {
@@ -7,7 +9,7 @@ import {
   StoryboardVariable,
 } from '../../types';
 import { css } from '@emotion/css';
-import { PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
+import { dateTime, PanelData, LoadingState, getDefaultTimeRange } from '@grafana/data';
 import { PanelRenderer } from '@grafana/runtime';
 import { PanelChrome, Alert } from '@grafana/ui';
 
@@ -96,9 +98,20 @@ export function ShowStoryboardDocumentElementResult({
     }
     case 'timeseries-plot': {
       const target = context[element.from];
-      if (target == null) {
+      if (target == null || target.value == null) {
         return null;
       }
+      // Horrible hack to check if the target cell is Python
+      const data = (target.stdout !== undefined
+        ? {
+            series: [target.value],
+            state: LoadingState.Done,
+            timeRange: {
+              from: moment.unix(Math.min(...target.value.fields[0].values) / 1000),
+              to: moment.unix(Math.max(...target.value.fields[0].values) / 1000),
+            },
+          }
+        : target.value) as PanelData;
       return (
         <div style={{ width: '100%', height: '400px' }}>
           <AutoSizer>
@@ -112,11 +125,11 @@ export function ShowStoryboardDocumentElementResult({
                   {(innerWidth, innerHeight) => {
                     return (
                       <PanelRenderer
-                        title={(target.element as StoryboardDatasourceQuery)?.query.expr}
+                        title=""
                         pluginId="timeseries"
                         width={innerWidth}
                         height={innerHeight}
-                        data={target.value as PanelData}
+                        data={data}
                       />
                     );
                   }}
