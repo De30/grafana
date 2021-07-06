@@ -50,7 +50,7 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
                 dangerouslySetInnerHTML={
                   // we should parse markdown with a strict subset of options directly to JSX with a library like this:
                   // https://github.com/rexxars/commonmark-react-renderer
-                  { __html: renderMarkdown(element.content as string) }
+                  { __html: renderMarkdown((element.content as string) || '') }
                 }
                 onClick={() => {
                   element.editing = true;

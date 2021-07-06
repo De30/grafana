@@ -36,6 +36,8 @@ export function useSavedStoryboards() {
           type: 'markdown',
           content: '',
           editing: true,
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       case 'csv':
@@ -45,6 +47,8 @@ export function useSavedStoryboards() {
           content: {
             text: '',
           },
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       case 'query':
@@ -56,6 +60,8 @@ export function useSavedStoryboards() {
           query: {
             refId: id,
           },
+          isEditorVisible: true,
+          isResultVisible: true,
           timeRange: { from: '2021-07-01T09:00:00', to: '2021-07-01T15:00:00' },
         };
         break;
@@ -64,6 +70,8 @@ export function useSavedStoryboards() {
           id: 'plaintext' + nextId,
           type: 'plaintext',
           content: '',
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       case 'python':
@@ -71,6 +79,8 @@ export function useSavedStoryboards() {
           id: 'python' + nextId,
           type: 'python',
           script: '',
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       case 'timeseries-plot':
@@ -78,6 +88,8 @@ export function useSavedStoryboards() {
           id: 'timeseries-plot' + nextId,
           type: 'timeseries-plot',
           from: '',
+          isEditorVisible: true,
+          isResultVisible: true,
         };
         break;
       default:
