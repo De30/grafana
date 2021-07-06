@@ -46,6 +46,7 @@ export function ShowStoryboardDocumentElementEditor({ element, context, onUpdate
               </div>
             ) : (
               <div
+                className="gf-form--grow"
                 dangerouslySetInnerHTML={
                   // we should parse markdown with a strict subset of options directly to JSX with a library like this:
                   // https://github.com/rexxars/commonmark-react-renderer
