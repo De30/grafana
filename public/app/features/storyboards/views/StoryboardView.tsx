@@ -90,7 +90,7 @@ const StoryboardCellElement = ({
   const addCell = (type: string) => addCellToBoard(type, board, index + 1);
   return (
     <Card
-      heading={element.id}
+      heading=""
       className={css`
         background-color: transparent;
         & p,
