@@ -93,6 +93,9 @@ const StoryboardCellElement = ({
       heading={element.id}
       className={css`
         background-color: transparent;
+        & p {
+          font-size: 16px;
+        }
       `}
     >
       <Card.Figure>
