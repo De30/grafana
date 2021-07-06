@@ -93,7 +93,8 @@ const StoryboardCellElement = ({
       heading={element.id}
       className={css`
         background-color: transparent;
-        & p {
+        & p,
+        li {
           font-size: 16px;
         }
       `}
