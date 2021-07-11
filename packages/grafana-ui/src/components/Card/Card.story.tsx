@@ -19,7 +19,7 @@ export default {
       page: mdx,
     },
     controls: {
-      exclude: ['onClick', 'href', 'heading', 'description', 'className'],
+      exclude: ['onClick', 'href', 'heading', 'description', 'className', 'internalSpacing'],
     },
   },
 };
@@ -29,6 +29,17 @@ export const Basic: Story<Props> = ({ disabled }) => {
     <Card
       heading="Filter by name"
       description="Filter data by query. This is useful if you are sharing the results from a different panel that has many queries and you want to only visualize a subset of that in this panel."
+      disabled={disabled}
+    />
+  );
+};
+
+export const InternalSpacingSmall: Story<Props> = ({ disabled }) => {
+  return (
+    <Card
+      heading="Filter by name"
+      description="Filter data by query. This is useful if you are sharing the results from a different panel that has many queries and you want to only visualize a subset of that in this panel."
+      internalSpacing={1}
       disabled={disabled}
     />
   );

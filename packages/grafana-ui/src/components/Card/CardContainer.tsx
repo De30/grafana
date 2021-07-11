@@ -9,17 +9,16 @@ import { styleMixins, stylesFactory, useTheme2 } from '../../themes';
 export interface CardInnerProps {
   href?: string;
   children?: ReactNode;
+  className?: string;
 }
 
-const CardInner = ({ children, href }: CardInnerProps) => {
-  const theme = useTheme2();
-  const { inner } = getCardContainerStyles(theme);
+const CardInner = ({ children, href, className }: CardInnerProps) => {
   return href ? (
-    <a className={inner} href={href}>
+    <a className={className} href={href}>
       {children}
     </a>
   ) : (
-    <div className={inner}>{children}</div>
+    <div className={className}>{children}</div>
   );
 };
 
@@ -33,6 +32,8 @@ export interface CardContainerProps extends HTMLAttributes<HTMLOrSVGElement>, Ca
   disableHover?: boolean;
   /** Custom container styles */
   className?: string;
+  /** Controls internal padding and spacing, defaults to 2 (grid units) */
+  internalSpacing?: number;
 }
 
 export const CardContainer = ({
@@ -40,45 +41,50 @@ export const CardContainer = ({
   children,
   disableEvents,
   disableHover,
+  internalSpacing = 2,
   className,
   ...props
 }: CardContainerProps) => {
   const theme = useTheme2();
-  const { container } = getCardContainerStyles(theme, disableEvents, disableHover);
+  const styles = getCardContainerStyles(theme, disableEvents, disableHover, internalSpacing);
   return (
-    <div {...props} className={cx(container, className)}>
-      <CardInner href={href}>{children}</CardInner>
+    <div {...props} className={cx(styles.container, className)}>
+      <CardInner className={styles.inner} href={href}>
+        {children}
+      </CardInner>
     </div>
   );
 };
 
-const getCardContainerStyles = stylesFactory((theme: GrafanaTheme2, disabled = false, disableHover = false) => {
-  return {
-    container: css({
-      display: 'flex',
-      width: '100%',
-      background: theme.colors.background.secondary,
-      borderRadius: theme.shape.borderRadius(),
-      position: 'relative',
-      pointerEvents: disabled ? 'none' : 'auto',
-      marginBottom: theme.spacing(1),
-      transition: theme.transitions.create(['background-color', 'box-shadow', 'border-color', 'color'], {
-        duration: theme.transitions.duration.short,
-      }),
+const getCardContainerStyles = stylesFactory(
+  (theme: GrafanaTheme2, disabled = false, disableHover = false, internalSpacing: number) => {
+    return {
+      container: css({
+        display: 'flex',
+        width: '100%',
+        background: theme.colors.background.secondary,
+        borderRadius: theme.shape.borderRadius(),
+        position: 'relative',
+        pointerEvents: disabled ? 'none' : 'auto',
+        marginBottom: theme.spacing(1),
+        transition: theme.transitions.create(['background-color', 'box-shadow', 'border-color', 'color'], {
+          duration: theme.transitions.duration.short,
+        }),
 
-      ...(!disableHover && {
-        '&:hover': {
-          background: theme.colors.emphasize(theme.colors.background.secondary, 0.03),
-          cursor: 'pointer',
-          zIndex: 1,
-        },
-        '&:focus': styleMixins.getFocusStyles(theme),
+        ...(!disableHover && {
+          '&:hover': {
+            background: theme.colors.emphasize(theme.colors.background.secondary, 0.03),
+            cursor: 'pointer',
+            zIndex: 1,
+          },
+          '&:focus': styleMixins.getFocusStyles(theme),
+        }),
       }),
-    }),
-    inner: css({
-      display: 'flex',
-      width: '100%',
-      padding: theme.spacing(2),
-    }),
-  };
-});
+      inner: css({
+        display: 'flex',
+        width: '100%',
+        padding: theme.spacing(internalSpacing),
+      }),
+    };
+  }
+);

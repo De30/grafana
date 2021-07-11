@@ -33,9 +33,18 @@ export interface CardInterface extends FC<Props> {
  *
  * @public
  */
-export const Card: CardInterface = ({ heading, description, disabled, href, onClick, children, ...htmlProps }) => {
+export const Card: CardInterface = ({
+  heading,
+  description,
+  disabled,
+  href,
+  onClick,
+  internalSpacing = 2,
+  children,
+  ...htmlProps
+}) => {
   const theme = useTheme2();
-  const styles = getCardStyles(theme);
+  const styles = getCardStyles(theme, internalSpacing);
   const [tags, figure, meta, actions, secondaryActions] = ['Tags', 'Figure', 'Meta', 'Actions', 'SecondaryActions'].map(
     (item) => {
       const found = React.Children.toArray(children as React.ReactElement[]).find((child) => {
@@ -61,6 +70,7 @@ export const Card: CardInterface = ({ heading, description, disabled, href, onCl
       onClick={onCardClick}
       disableEvents={disableEvents}
       disableHover={disableHover}
+      internalSpacing={internalSpacing}
       href={href}
       {...htmlProps}
     >
@@ -90,7 +100,7 @@ export const Card: CardInterface = ({ heading, description, disabled, href, onCl
 /**
  * @public
  */
-export const getCardStyles = stylesFactory((theme: GrafanaTheme2) => {
+export const getCardStyles = stylesFactory((theme: GrafanaTheme2, internalSpacing: number) => {
   return {
     inner: css`
       display: flex;
@@ -129,7 +139,7 @@ export const getCardStyles = stylesFactory((theme: GrafanaTheme2) => {
     `,
     description: css`
       width: 100%;
-      margin: ${theme.spacing(1, 0, 0)};
+      margin: ${theme.spacing(internalSpacing / 2, 0, 0)};
       color: ${theme.colors.text.secondary};
       line-height: ${theme.typography.body.lineHeight};
     `,
