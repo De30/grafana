@@ -41,6 +41,7 @@
     "@visx/scale": "1.4.0",
     "@visx/shape": "1.4.0",
     "@visx/tooltip": "1.7.2",
+    "@grafana/azure-sdk-react": "https://github.com/grafana/grafana-azure-sdk-react#2c59c9cd749e69f90a01039e75bf57a688552ba1",
     "ansicolor": "1.1.95",
     "classnames": "2.2.6",
     "d3": "5.15.0",
