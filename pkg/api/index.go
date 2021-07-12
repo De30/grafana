@@ -185,6 +185,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		SortWeight: dtos.WeightDashboard,
 		Children:   dashboardChildNavs,
 	})
+
 	if hs.Cfg.IsStoryboardsEnabled() {
 		navTree = append(navTree, &dtos.NavLink{
 			Text:       "Storyboards",
@@ -195,7 +196,12 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 			Url:        hs.Cfg.AppSubURL + "/storyboards",
 		})
 	}
-	if setting.ExploreEnabled && (c.OrgRole == models.ROLE_ADMIN || c.OrgRole == models.ROLE_EDITOR || setting.ViewersCanEdit) {
+
+	canExplore := func(context *models.ReqContext) bool {
+		return c.OrgRole == models.ROLE_ADMIN || c.OrgRole == models.ROLE_EDITOR || setting.ViewersCanEdit
+	}
+
+	if setting.ExploreEnabled && hasAccess(canExplore, ac.ActionDatasourcesExplore) {
 		navTree = append(navTree, &dtos.NavLink{
 			Text:       "Explore",
 			Id:         "explore",
@@ -215,6 +221,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 			{Text: "Alert rules", Id: "alert-list", Url: hs.Cfg.AppSubURL + "/alerting/list", Icon: "list-ul"},
 		}
 		if hs.Cfg.IsNgAlertEnabled() {
+			alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Notifications", Id: "notifications", Url: hs.Cfg.AppSubURL + "/alerting/alertmanager", Icon: "layer-group"})
 			alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Silences", Id: "silences", Url: hs.Cfg.AppSubURL + "/alerting/silences", Icon: "bell-slash"})
 		}
 		if c.OrgRole == models.ROLE_ADMIN || c.OrgRole == models.ROLE_EDITOR {
@@ -380,14 +387,6 @@ func (hs *HTTPServer) buildAdminNavLinks(c *models.ReqContext) []*dtos.NavLink {
 		})
 	}
 
-	if c.IsGrafanaAdmin {
-		if hs.Cfg.PluginAdminEnabled {
-			adminNavLinks = append(adminNavLinks, &dtos.NavLink{
-				Text: "Plugin catalog", Id: "plugin-catalog", Url: hs.Cfg.AppSubURL + "/a/grafana-plugin-admin-app", Icon: "plug",
-			})
-		}
-	}
-
 	if hs.Cfg.LDAPEnabled && hasAccess(ac.ReqGrafanaAdmin, ac.ActionLDAPStatusRead) {
 		adminNavLinks = append(adminNavLinks, &dtos.NavLink{
 			Text: "LDAP", Id: "ldap", Url: hs.Cfg.AppSubURL + "/admin/ldap", Icon: "book",
@@ -479,6 +478,7 @@ func (hs *HTTPServer) setIndexViewData(c *models.ReqContext) (*dtos.IndexViewDat
 		Sentry:                  &hs.Cfg.Sentry,
 		Nonce:                   c.RequestNonce,
 		ContentDeliveryURL:      hs.Cfg.GetContentDeliveryURL(hs.License.ContentDeliveryPrefix()),
+		LoadingLogo:             "public/img/grafana_icon.svg",
 	}
 
 	if hs.Cfg.FeatureToggles["accesscontrol"] {
