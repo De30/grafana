@@ -16,6 +16,9 @@ import { SigV4AuthSettings } from './SigV4AuthSettings';
 import { useTheme } from '../../themes';
 import { HttpSettingsProps } from './types';
 
+// @ts-ignore
+import { AzureCredentialsForm as TestAzureCredentialsForm } from '@grafana/azure-sdk-react';
+
 const ACCESS_OPTIONS: Array<SelectableValue<string>> = [
   {
     label: 'Server (default)',
@@ -122,6 +125,7 @@ export const DataSourceHttpSettings: React.FC<HttpSettingsProps> = (props) => {
   return (
     <div className="gf-form-group">
       <>
+        <TestAzureCredentialsForm />
         <h3 className="page-heading">HTTP</h3>
         <div className="gf-form-group">
           <div className="gf-form">

@@ -16,6 +16,9 @@ import { AzureDataSourceJsonData, AzureDataSourceSecureJsonData, AzureDataSource
 import { getAzureCloud, isAppInsightsConfigured } from '../credentials';
 import { getManagementApiRoute } from '../api/routes';
 
+// @ts-ignore
+import { AzureCredentialsForm as TestAzureCredentialsForm } from '@grafana/azure-sdk-react';
+
 export type Props = DataSourcePluginOptionsEditorProps<AzureDataSourceJsonData, AzureDataSourceSecureJsonData>;
 
 export interface State {
@@ -127,6 +130,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
 
     return (
       <>
+        <TestAzureCredentialsForm />
         <MonitorConfig options={options} updateOptions={this.updateOptions} getSubscriptions={this.getSubscriptions} />
 
         <AnalyticsConfig
