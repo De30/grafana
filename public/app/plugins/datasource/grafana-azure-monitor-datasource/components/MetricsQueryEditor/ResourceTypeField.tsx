@@ -5,6 +5,7 @@ import { SelectableValue } from '@grafana/data';
 import { Field } from '../Field';
 import { findOption, toOption } from '../../utils/common';
 import { AzureQueryEditorFieldProps, AzureMonitorOption } from '../../types';
+import { setResourceType } from './setQueryValue';
 
 const ERROR_SOURCE = 'resource-type';
 const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
@@ -18,7 +19,7 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
   const [namespaces, setNamespaces] = useState<AzureMonitorOption[]>([]);
 
   useEffect(() => {
-    const { resourceGroup } = query.azureMonitor;
+    const { resourceGroup } = query.azureMonitor ?? {};
 
     if (!(subscriptionId && resourceGroup)) {
       namespaces.length && setNamespaces([]);
@@ -37,19 +38,8 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
         return;
       }
 
-      onQueryChange({
-        ...query,
-        azureMonitor: {
-          ...query.azureMonitor,
-          metricDefinition: change.value,
-          resourceName: undefined,
-          metricNamespace: undefined,
-          metricName: undefined,
-          aggregation: undefined,
-          timeGrain: '',
-          dimensionFilters: [],
-        },
-      });
+      const newQuery = setResourceType(query, change.value);
+      onQueryChange(newQuery);
     },
     [onQueryChange, query]
   );
@@ -61,7 +51,7 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
       {/* It's expected that the label reads Resource type but the property is metricDefinition */}
       <Select
         inputId="azure-monitor-metrics-resource-type-field"
-        value={findOption(namespaces, query.azureMonitor.metricDefinition)}
+        value={findOption(namespaces, query.azureMonitor?.metricDefinition)}
         onChange={handleChange}
         options={options}
         width={38}

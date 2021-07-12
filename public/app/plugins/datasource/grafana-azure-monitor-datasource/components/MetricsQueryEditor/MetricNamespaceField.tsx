@@ -5,6 +5,7 @@ import { SelectableValue } from '@grafana/data';
 import { Field } from '../Field';
 import { findOption, toOption } from '../../utils/common';
 import { AzureQueryEditorFieldProps, AzureMonitorOption } from '../../types';
+import { setMetricNamespace } from './setQueryValue';
 
 const ERROR_SOURCE = 'metrics-metricnamespace';
 const MetricNamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
@@ -19,7 +20,7 @@ const MetricNamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const { resourceGroup, metricDefinition, resourceName } = query.azureMonitor;
+    const { resourceGroup, metricDefinition, resourceName } = query.azureMonitor ?? {};
     if (!(subscriptionId && resourceGroup && metricDefinition && resourceName)) {
       metricNamespaces.length > 0 && setMetricNamespaces([]);
       return;
@@ -53,16 +54,8 @@ const MetricNamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
         return;
       }
 
-      onQueryChange({
-        ...query,
-        azureMonitor: {
-          ...query.azureMonitor,
-          metricNamespace: change.value,
-
-          metricName: undefined,
-          dimensionFilters: [],
-        },
-      });
+      const newQuery = setMetricNamespace(query, change.value);
+      onQueryChange(newQuery);
     },
     [onQueryChange, query]
   );
@@ -73,7 +66,7 @@ const MetricNamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
     <Field label="Metric namespace">
       <Select
         inputId="azure-monitor-metrics-metric-namespace-field"
-        value={findOption(metricNamespaces, query.azureMonitor.metricNamespace)}
+        value={findOption(metricNamespaces, query.azureMonitor?.metricNamespace)}
         onChange={handleChange}
         options={options}
         width={38}
