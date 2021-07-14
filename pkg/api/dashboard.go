@@ -213,20 +213,6 @@ func getDashboardHelper(ctx context.Context, orgID int64, id int64, uid string) 
 	return query.Result, nil
 }
 
-func (hs *HTTPServer) DeleteDashboardBySlug(c *models.ReqContext) response.Response {
-	query := models.GetDashboardsBySlugQuery{OrgId: c.OrgId, Slug: c.Params(":slug")}
-
-	if err := bus.Dispatch(&query); err != nil {
-		return response.Error(500, "Failed to retrieve dashboards by slug", err)
-	}
-
-	if len(query.Result) > 1 {
-		return response.JSON(412, util.DynMap{"status": "multiple-slugs-exists", "message": models.ErrDashboardsWithSameSlugExists.Error()})
-	}
-
-	return hs.deleteDashboard(c)
-}
-
 func (hs *HTTPServer) DeleteDashboardByUID(c *models.ReqContext) response.Response {
 	return hs.deleteDashboard(c)
 }

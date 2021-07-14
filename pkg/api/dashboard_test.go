@@ -98,6 +98,13 @@ func newTestLive(t *testing.T) *live.GrafanaLive {
 
 func TestDashboardAPIEndpoint(t *testing.T) {
 	t.Run("Given a dashboard with a parent folder which does not have an ACL", func(t *testing.T) {
+		hs := &HTTPServer{
+			Cfg:                   setting.NewCfg(),
+			Live:                  newTestLive(t),
+			LibraryPanelService:   &mockLibraryPanelService{},
+			LibraryElementService: &mockLibraryElementService{},
+		}
+
 		setUp := func() *testState {
 			fakeDash := models.NewDashboard("Child dash")
 			fakeDash.Id = 1
@@ -163,11 +170,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 				"/api/dashboards/uid/:uid", role, func(sc *scenarioContext) {
 					state := setUp()
 
-					callDeleteDashboardBySlug(sc, &HTTPServer{
-						Cfg:                   setting.NewCfg(),
-						LibraryPanelService:   &mockLibraryPanelService{},
-						LibraryElementService: &mockLibraryElementService{},
-					})
+					callDeleteDashboardByUID(sc, hs)
 					assert.Equal(t, 403, sc.resp.Code)
 
 					assert.Equal(t, "abcdefghi", state.dashQueries[0].Uid)
@@ -209,11 +212,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 				"/api/dashboards/uid/:uid", role, func(sc *scenarioContext) {
 					state := setUp()
 
-					callDeleteDashboardBySlug(sc, &HTTPServer{
-						Cfg:                   setting.NewCfg(),
-						LibraryPanelService:   &mockLibraryPanelService{},
-						LibraryElementService: &mockLibraryElementService{},
-					})
+					callDeleteDashboardByUID(sc, hs)
 					assert.Equal(t, 200, sc.resp.Code)
 					assert.Equal(t, "abcdefghi", state.dashQueries[0].Uid)
 				})
@@ -951,14 +950,23 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			})
 		}
 
-		loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/dashboards/db/abcdefghi", "/api/dashboards/db/:uid", models.ROLE_EDITOR, func(sc *scenarioContext) {
+		loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/dashboards/uid/abcdefghi", "/api/dashboards/uid/:uid", models.ROLE_EDITOR, func(sc *scenarioContext) {
 			setUp()
 
-			callDeleteDashboardBySlug(sc, &HTTPServer{
+			mock := provisioning.NewProvisioningServiceMock()
+			mock.GetDashboardProvisionerResolvedPathFunc = func(name string) string {
+				return "/tmp/grafana/dashboards"
+			}
+
+			hs := &HTTPServer{
 				Cfg:                   setting.NewCfg(),
+				Live:                  newTestLive(t),
 				LibraryPanelService:   &mockLibraryPanelService{},
 				LibraryElementService: &mockLibraryElementService{},
-			})
+				ProvisioningService:   mock,
+			}
+
+			callDeleteDashboardByUID(sc, hs)
 
 			assert.Equal(t, 400, sc.resp.Code)
 			result := sc.ToJSON()
@@ -1062,15 +1070,6 @@ func callGetDashboardVersions(sc *scenarioContext) {
 
 	sc.handlerFunc = GetDashboardVersions
 	sc.fakeReqWithParams("GET", sc.url, map[string]string{}).exec()
-}
-
-func callDeleteDashboardBySlug(sc *scenarioContext, hs *HTTPServer) {
-	bus.AddHandler("test", func(cmd *models.DeleteDashboardCommand) error {
-		return nil
-	})
-
-	sc.handlerFunc = hs.DeleteDashboardBySlug
-	sc.fakeReqWithParams("DELETE", sc.url, map[string]string{}).exec()
 }
 
 func callDeleteDashboardByUID(sc *scenarioContext, hs *HTTPServer) {
