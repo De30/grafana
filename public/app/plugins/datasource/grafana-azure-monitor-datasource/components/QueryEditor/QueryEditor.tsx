@@ -1,6 +1,7 @@
 import { Alert } from '@grafana/ui';
 import { QueryEditorProps } from '@grafana/data';
 import React from 'react';
+import { RecoilRoot } from 'recoil';
 import AzureMonitorDatasource from '../../datasource';
 import {
   AzureMonitorQuery,
@@ -17,6 +18,7 @@ import ArgQueryEditor from '../ArgQueryEditor';
 import ApplicationInsightsEditor from '../ApplicationInsightsEditor';
 import InsightsAnalyticsEditor from '../InsightsAnalyticsEditor';
 import { Space } from '../Space';
+import { dangerouslySetDatasource } from '../MetricsQueryEditor/recoilState';
 
 export type AzureMonitorQueryEditorProps = QueryEditorProps<
   AzureMonitorDatasource,
@@ -32,28 +34,33 @@ const QueryEditor: React.FC<AzureMonitorQueryEditorProps> = ({ query, datasource
     options: datasource.getVariables().map((v) => ({ label: v, value: v })),
   };
 
+  // NOTE: this will not work if there's multiple queries in the same panel!!!!!
+  dangerouslySetDatasource(datasource);
+
   return (
-    <div data-testid="azure-monitor-query-editor">
-      <QueryTypeField query={query} onQueryChange={onChange} />
+    <RecoilRoot>
+      <div data-testid="azure-monitor-query-editor">
+        <QueryTypeField query={query} onQueryChange={onChange} />
 
-      <EditorForQueryType
-        subscriptionId={subscriptionId}
-        query={query}
-        datasource={datasource}
-        onChange={onChange}
-        variableOptionGroup={variableOptionGroup}
-        setError={setError}
-      />
+        <EditorForQueryType
+          subscriptionId={subscriptionId}
+          query={query}
+          datasource={datasource}
+          onChange={onChange}
+          variableOptionGroup={variableOptionGroup}
+          setError={setError}
+        />
 
-      {errorMessage && (
-        <>
-          <Space v={2} />
-          <Alert severity="error" title="An error occurred while requesting metadata from Azure Monitor">
-            {errorMessage}
-          </Alert>
-        </>
-      )}
-    </div>
+        {errorMessage && (
+          <>
+            <Space v={2} />
+            <Alert severity="error" title="An error occurred while requesting metadata from Azure Monitor">
+              {errorMessage}
+            </Alert>
+          </>
+        )}
+      </div>
+    </RecoilRoot>
   );
 };
 

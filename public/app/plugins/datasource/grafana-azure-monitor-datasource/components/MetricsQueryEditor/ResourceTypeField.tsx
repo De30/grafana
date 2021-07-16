@@ -17,10 +17,9 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
   setError,
 }) => {
   const [namespaces, setNamespaces] = useState<AzureMonitorOption[]>([]);
+  const { resourceGroup, metricDefinition } = query.azureMonitor ?? {};
 
   useEffect(() => {
-    const { resourceGroup } = query.azureMonitor ?? {};
-
     if (!(subscriptionId && resourceGroup)) {
       namespaces.length && setNamespaces([]);
       return;
@@ -28,9 +27,19 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
 
     datasource
       .getMetricDefinitions(subscriptionId, resourceGroup)
-      .then((results) => setNamespaces(results.map(toOption)))
+      .then((results) => {
+        setNamespaces(results.map(toOption));
+        // const options = results.map(toOption);
+
+        // setNamespaces(options);
+
+        // if (metricDefinition && !findOption(options, metricDefinition)) {
+        //   console.log('could not find metric definition in query, resetting!');
+        //   setResourceType(query, undefined);
+        // }
+      })
       .catch((err) => setError(ERROR_SOURCE, err));
-  }, [datasource, namespaces.length, query.azureMonitor, setError, subscriptionId]);
+  }, [datasource, query, namespaces.length, resourceGroup, metricDefinition, setError, subscriptionId]);
 
   const handleChange = useCallback(
     (change: SelectableValue<string>) => {
@@ -51,7 +60,7 @@ const NamespaceField: React.FC<AzureQueryEditorFieldProps> = ({
       {/* It's expected that the label reads Resource type but the property is metricDefinition */}
       <Select
         inputId="azure-monitor-metrics-resource-type-field"
-        value={findOption(namespaces, query.azureMonitor?.metricDefinition)}
+        value={findOption(namespaces, metricDefinition)}
         onChange={handleChange}
         options={options}
         width={38}

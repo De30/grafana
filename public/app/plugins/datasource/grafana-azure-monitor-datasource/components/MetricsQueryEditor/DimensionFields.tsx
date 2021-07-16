@@ -1,54 +1,37 @@
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { Button, Select, Input, HorizontalGroup, VerticalGroup, InlineLabel } from '@grafana/ui';
 
 import { Field } from '../Field';
 import { findOption } from '../../utils/common';
 import { AzureMetricDimension, AzureMonitorOption, AzureQueryEditorFieldProps } from '../../types';
-import { setDimensionFilters as setQueryDimensionFilters } from './setQueryValue';
+import { appendDimensionFilter, modifyDimensionFilter, removeDimensionFilter } from './setQueryValue';
 
 interface DimensionFieldsProps extends AzureQueryEditorFieldProps {
   dimensionOptions: AzureMonitorOption[];
 }
 
 const DimensionFields: React.FC<DimensionFieldsProps> = ({ query, dimensionOptions, onQueryChange }) => {
-  const dimensionFilters = useMemo(() => query.azureMonitor?.dimensionFilters ?? [], [
-    query.azureMonitor?.dimensionFilters,
-  ]);
+  const dimensionFilters = query.azureMonitor?.dimensionFilters ?? [];
 
-  const setDimensionFilters = (newFilters: AzureMetricDimension[]) => {
-    const newQuery = setQueryDimensionFilters(query, newFilters);
+  const addFilter = () => {
+    const newQuery = appendDimensionFilter(query, {
+      dimension: '',
+      operator: 'eq',
+      filter: '',
+    });
     onQueryChange(newQuery);
   };
 
-  const addFilter = () => {
-    // TODO: move this to setQueryValue
-    setDimensionFilters([
-      ...dimensionFilters,
-      {
-        dimension: '',
-        operator: 'eq',
-        filter: '',
-      },
-    ]);
-  };
-
   const removeFilter = (index: number) => {
-    // TODO: move this to setQueryValue
-    const newFilters = [...dimensionFilters];
-    newFilters.splice(index, 1);
-    setDimensionFilters(newFilters);
+    const newQuery = removeDimensionFilter(query, index);
+    onQueryChange(newQuery);
   };
 
   const onFieldChange = <Key extends keyof AzureMetricDimension>(
     filterIndex: number,
     fieldName: Key,
     value: AzureMetricDimension[Key]
-  ) => {
-    const newFilters = [...dimensionFilters];
-    const newFilter = newFilters[filterIndex];
-    newFilter[fieldName] = value;
-    setDimensionFilters(newFilters);
-  };
+  ) => onQueryChange(modifyDimensionFilter(query, filterIndex, fieldName, value));
 
   const onFilterInputChange = (index: number, ev: React.FormEvent) => {
     if (ev.target instanceof HTMLInputElement) {
