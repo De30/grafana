@@ -3,10 +3,16 @@ package schedule_test
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/grafana/grafana/pkg/services/ngalert/store"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -222,6 +228,80 @@ func TestAlertingTicker(t *testing.T) {
 	})
 }
 
+func TestSendingToExternalAlertmanager(t *testing.T) {
+	dbstore := tests.SetupTestEnv(t, 1)
+	t.Cleanup(registry.ClearOverrides)
+
+	alerts := make([]*models.AlertRule, 0)
+
+	// create alert rule with one second interval
+	alerts = append(alerts, tests.CreateTestAlertRule(t, dbstore, 1))
+
+	var mtx sync.Mutex
+	var alertsCount int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		mtx.Lock()
+		alertsCount++
+		mtx.Unlock()
+
+		fmt.Println(b)
+	}))
+	defer server.Close()
+
+	// First, let's create an admin configuration that holds an alertmanager.
+	cmd := store.UpdateAdminConfigurationCmd{AdminConfiguration: &models.AdminConfiguration{OrgID: 1, Alertmanagers: []string{server.URL}}}
+	require.NoError(t, dbstore.UpdateAdminConfiguration(cmd))
+
+	evalAppliedCh := make(chan evalAppliedInfo, len(alerts))
+	stopAppliedCh := make(chan models.AlertRuleKey, len(alerts))
+
+	mockedClock := clock.NewMock()
+	baseInterval := time.Second
+
+	schedCfg := schedule.SchedulerCfg{
+		C:            mockedClock,
+		BaseInterval: baseInterval,
+		EvalAppliedFunc: func(alertDefKey models.AlertRuleKey, now time.Time) {
+			evalAppliedCh <- evalAppliedInfo{alertDefKey: alertDefKey, now: now}
+		},
+		StopAppliedFunc: func(alertDefKey models.AlertRuleKey) {
+			stopAppliedCh <- alertDefKey
+		},
+		RuleStore:        dbstore,
+		InstanceStore:    dbstore,
+		AdminConfigStore: dbstore,
+		Logger:           log.New("ngalert schedule test"),
+		Metrics:          metrics.NewMetrics(prometheus.NewRegistry()),
+	}
+	st := state.NewManager(schedCfg.Logger, nilMetrics, dbstore, dbstore)
+	sched := schedule.NewScheduler(schedCfg, nil, "http://localhost", st)
+
+	ctx := context.Background()
+
+	go func() {
+		schedule.PollingInterval = 3 * time.Second
+		err := sched.Run(ctx)
+		require.NoError(t, err)
+	}()
+	runtime.Gosched()
+
+	// Make sure the alert is evaluated
+	expectedAlertRulesEvaluated := []models.AlertRuleKey{alerts[0].GetKey()}
+	mockedClock.Add(5 * time.Second)
+	assertEvalRun(t, evalAppliedCh, mockedClock.Now(), expectedAlertRulesEvaluated...)
+
+	require.Eventually(t, func() bool {
+		mtx.Lock()
+		ac := alertsCount
+		mtx.Unlock()
+
+		return ac == 1
+	}, 6*time.Second, 1*time.Second)
+}
 func assertEvalRun(t *testing.T, ch <-chan evalAppliedInfo, tick time.Time, keys ...models.AlertRuleKey) {
 	timeout := time.After(time.Second)
 
