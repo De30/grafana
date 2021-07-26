@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -100,6 +101,60 @@ func (s *PostgresService) generateConnectionString(datasource *models.DataSource
 		} else {
 			s.logger.Debug("Generating connection string with network host", "host", host)
 		}
+	}
+
+	var c strings.Builder
+	if strings.Contains(datasource.User, " ") {
+		if port > 0 {
+			psswd := datasource.DecryptedPassword()
+			if len(psswd) > 0 {
+				c.WriteString(fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+					url.PathEscape(escape(datasource.User)),
+					url.PathEscape(escape(psswd)),
+					url.PathEscape(escape(host)),
+					port,
+					url.PathEscape(escape(datasource.Database))),
+				)
+			} else {
+				c.WriteString(fmt.Sprintf("postgres://%s@%s:%d/%s",
+					url.PathEscape(escape(datasource.User)),
+					url.PathEscape(escape(host)),
+					port,
+					url.PathEscape(escape(datasource.Database))),
+				)
+			}
+		} else {
+			c.WriteString(fmt.Sprintf("postgres://%s:%s@%s/%s",
+				url.PathEscape(escape(datasource.User)),
+				url.PathEscape(escape(datasource.DecryptedPassword())),
+				url.PathEscape(escape(host)),
+				url.PathEscape(escape(datasource.Database))),
+			)
+		}
+
+		tlsSettings, err := s.tlsManager.getTLSSettings(datasource)
+		if err != nil {
+			return "", err
+		}
+
+		// add params
+		c.WriteString(fmt.Sprintf("?%s=%s", "sslmode", url.QueryEscape(escape(tlsSettings.Mode))))
+
+		if tlsSettings.RootCertFile != "" {
+			s.logger.Debug("Setting server root certificate", "tlsRootCert", tlsSettings.RootCertFile)
+			c.WriteString(fmt.Sprintf("&%s=%s", "sslrootcert", url.QueryEscape(escape(tlsSettings.RootCertFile))))
+		}
+
+		// Attach client certificate and key if both are provided
+		if tlsSettings.CertFile != "" && tlsSettings.CertKeyFile != "" {
+			s.logger.Debug("Setting TLS/SSL client auth", "tlsCert", tlsSettings.CertFile, "tlsKey", tlsSettings.CertKeyFile)
+			c.WriteString(fmt.Sprintf("&%s=%s", "sslcert", url.QueryEscape(escape(tlsSettings.CertFile))))
+			c.WriteString(fmt.Sprintf("&%s=%s", "sslkey", url.QueryEscape(escape(tlsSettings.CertKeyFile))))
+		} else if tlsSettings.CertFile != "" || tlsSettings.CertKeyFile != "" {
+			return "", fmt.Errorf("TLS/SSL client certificate and key must both be specified")
+		}
+
+		return c.String(), nil
 	}
 
 	connStr := fmt.Sprintf("user='%s' password='%s' host='%s' dbname='%s'",
