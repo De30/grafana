@@ -41,13 +41,13 @@ Grafana 8.1 introduces the foundation for our new map panel. This new panel leve
 
 The new Geomap panel is also able to share views across multiple Geomap panels on the same dashboard, making it straightforward to visualize and explore multiple types of geospacial data using the same map zoom and focus settings. Read about this and more on the [Geomap panel]({{< relref "../panels/visualizations/geomap.md" >}}) page.
 
-{{< figure src="/static/img/docs/geomap/geomap_heatmap.png" max-width="1200px" caption="Geomap panel: Heatmap" >}}
+{{< figure src="/static/img/docs/panels/geomap/geomap_heatmap.png" max-width="1200px" caption="Geomap panel: Heatmap" >}}
 
 ### Annotation panel
 
 The new Annotations panel shows a list of available annotations you can use to create lists of annotated data available within your organization. Various options are available to filter the list based on tags and on the current dashboard. This panel makes it easy to find and filter annotated data within and across multiple dashboards.
 
-{{< figure src="/static/img/docs/annolist/annolist.png" max-width="1200px" caption="Geomap panel: Heatmap" >}}
+{{< figure src="/static/img/docs/annotations-panel/annolist.png" max-width="1200px" caption="Geomap panel: Heatmap" >}}
 
 ### Transformations improvements
 
