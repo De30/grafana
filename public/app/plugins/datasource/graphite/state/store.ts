@@ -19,6 +19,7 @@ import {
   spliceSegments,
 } from './helpers';
 import { Action } from 'redux';
+import { FuncDefs } from '../gfunc';
 
 export type GraphiteQueryEditorState = {
   /**
@@ -37,6 +38,8 @@ export type GraphiteQueryEditorState = {
   panelCtrl: any;
 
   target: { target: string; textEditor: boolean };
+
+  funcDefs: FuncDefs | null;
 
   segments: GraphiteSegment[];
   queryModel: GraphiteQuery;
@@ -63,6 +66,7 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
       supportsTags: deps.datasource.supportsTags,
       paused: false,
       removeTagValue: '-- remove tag --',
+      funcDefs: deps.datasource.funcDefs,
     };
 
     await buildSegments(state, false);
@@ -142,11 +146,15 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
     handleTargetChanged(state);
   }
   if (actions.updateFunctionParam.match(action)) {
+    const { func, index, value } = action.payload;
+    func.updateParam(value, index);
     handleTargetChanged(state);
   }
   if (actions.updateQuery.match(action)) {
     state.target.target = action.payload.query;
     handleTargetChanged(state);
+  }
+  if (actions.runQuery.match(action)) {
     // handleTargetChanged() builds target from segments/tags/functions only,
     // it doesn't handle refresh when target is change explicitly
     state.panelCtrl.refresh();

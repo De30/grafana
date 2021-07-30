@@ -1,6 +1,3 @@
-import './add_graphite_func';
-import './func_editor';
-
 import GraphiteQuery from './graphite_query';
 import { QueryCtrl } from 'app/plugins/sdk';
 import { auto } from 'angular';
@@ -26,10 +23,10 @@ import { ChangeEvent } from 'react';
 export class GraphiteQueryCtrl extends QueryCtrl {
   static templateUrl = 'partials/query.editor.html';
 
-  queryModel: GraphiteQuery;
+  declare queryModel: GraphiteQuery;
   segments: any[] = [];
   addTagSegments: any[] = [];
-  removeTagValue: string;
+  declare removeTagValue: string;
   supportsTags = false;
   paused = false;
 
@@ -143,7 +140,7 @@ export class GraphiteQueryCtrl extends QueryCtrl {
   }
 
   async targetTextChanged(event: ChangeEvent<HTMLInputElement>) {
-    await this.dispatch(actions.updateQuery({ query: event.target.value }));
+    // WIP: removed, handled by GraphiteTextEditor
   }
 
   updateModelTarget() {
