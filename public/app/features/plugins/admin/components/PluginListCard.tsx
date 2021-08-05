@@ -1,6 +1,6 @@
 import React from 'react';
 import { css } from '@emotion/css';
-import { Icon, useStyles2, CardContainer, VerticalGroup } from '@grafana/ui';
+import { Icon, useStyles2, CardContainer, VerticalGroup, Tooltip } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { CatalogPlugin } from '../types';
 import { PluginLogo } from './PluginLogo';
@@ -13,6 +13,13 @@ enum IconName {
   datasource = 'database',
   panel = 'credit-card',
   renderer = 'pen',
+}
+
+enum TypeName {
+  app = 'App',
+  datasource = 'Data source',
+  panel = 'Panel',
+  renderer = 'Renderer',
 }
 
 type PluginListCardProps = {
@@ -37,7 +44,9 @@ export function PluginListCard({ plugin, pathName }: PluginListCardProps) {
           <h3 className={styles.name}>{name}</h3>
           {type && (
             <div className={styles.icon}>
-              <Icon name={IconName[type]} aria-label={`${type} plugin icon`} />
+              <Tooltip placement="top" content={TypeName[type]}>
+                <Icon name={IconName[type]} aria-label={`${type} plugin icon`} />
+              </Tooltip>
             </div>
           )}
         </div>
