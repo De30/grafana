@@ -116,6 +116,19 @@ Family: scuemata.#Family & {
                     }
                     // Panel links.
                     // links?: [..._panelLink]
+                    // TODO docs
+                    // FIXME the following items are temporarily specified as a
+                    // closed list while we're working on bringing schema to
+                    // maturity, so that validation will pass when empty but to
+                    // force a failure as soon as it's checked against there
+                    // being anything in the list so it can be fixed in
+                    // accordance with that object
+                    links?: []
+                    thresholds: []
+                    timeRegions: []
+                    // FIXME this one is quite complicated, as it duplicates the #Panel object's own structure (...?)
+                    seriesOverrides: []
+
                     // Name of template variable to repeat for.
                     repeat?: string
                     // Direction to repeat in if 'repeat' is set.
@@ -132,6 +145,69 @@ Family: scuemata.#Family & {
 
                     // The values depend on panel type
                     options: {...}
+
+                    // TODO docs
+                    // TODO tighter constraint
+                    aliasColors?: [string]: string
+
+                    // TODO docs
+                    bars: bool | *false
+                    // TODO docs
+                    dashes: bool | *false
+                    // TODO docs
+                    dashLength: number | *10
+                    // TODO docs
+                    // TODO tighter constraint
+                    fill?: number
+                    // TODO docs
+                    // TODO tighter constraint
+                    fillGradient?: number
+
+                    // TODO docs
+                    hiddenSeries: bool | *false
+
+                    // FIXME idk where this comes from, leaving it very open and very wrong for now
+                    legend: {...}
+
+                    // TODO docs
+                    // TODO tighter constraint
+                    lines: bool | *false
+                    // TODO docs
+                    linewidth?: number
+                    // TODO docs
+                    nullPointMode: *"null" | "connected" | "null as zero"
+                    // TODO docs
+                    percentage: bool | *false
+                    // TODO docs
+                    points: bool | *false
+                    // TODO docs
+                    // FIXME this is the kind of case that makes
+                    // optional/non-default tricky: it's optional because it
+                    // only makes sense when points is true (right?), but if it
+                    // is, then there actually is a default value. Easier way to
+                    // represent this would be to wrap up this handling into a
+                    // struct
+                    pointradius?: number
+                    // TODO docs
+                    // TODO tighter constraint
+                    renderer: string
+                    // TODO docs
+                    spaceLength: number | *10
+                    // TODO docs
+                    stack: bool | *false
+                    // TODO docs
+                    steppedLine: bool | *false
+                    // TODO docs
+                    tooltip?: {
+                        // TODO docs
+                        shared?: bool
+                        // TODO docs
+                        sort: number | *0
+                        // TODO docs
+                        // FIXME literally no idea if these values are sane
+                        value_type: *"individual" | "cumulative"
+                    }
+
                     fieldConfig: {
                         defaults: {
                             // The display value for this field.  This supports template variables blank is auto
@@ -165,18 +241,6 @@ Family: scuemata.#Family & {
 
                             min?: number
                             max?: number
-
-                            //   // Convert input values into a display string
-                            //   mappings?: ValueMapping[];
-
-                            //   // Map numeric values to states
-                            //   thresholds?: ThresholdsConfig;
-
-                            //   // Map values to a display color
-                            //   color?: FieldColor;
-
-                            //   // Used when reducing field values
-                            //   nullValueMode?: NullValueMode;
 
                             //   // The behavior when clicking on a result
                             links?: [...]
