@@ -9,19 +9,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
-
-	"github.com/grafana/grafana/pkg/registry"
-
-	"github.com/grafana/grafana/pkg/util"
-
 	"github.com/grafana/grafana/pkg/bus"
-
+	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
+	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/secrets/encryption"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
-
-	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/setting"
+	"github.com/grafana/grafana/pkg/util"
 )
 
 func init() {
@@ -58,7 +53,7 @@ func (s *SecretsService) Init() error {
 	s.providers = map[string]Provider{
 		"grafana-provider": newGrafanaProvider(s.Settings, s.Enc),
 	}
-	s.defaultProvider = "grafana-provider"
+	s.defaultProvider = "awskms"
 	s.log = log.New("secrets")
 	logger.Debug("configured secrets provider", s.defaultProvider)
 
@@ -68,6 +63,10 @@ func (s *SecretsService) Init() error {
 	util.Decrypt = s.Decrypt
 
 	return nil
+}
+
+func (s *SecretsService) RegisterProvider(id string, provider Provider) {
+	s.providers[id] = provider
 }
 
 // newDataKey creates a new random DEK, caches it and returns its value
