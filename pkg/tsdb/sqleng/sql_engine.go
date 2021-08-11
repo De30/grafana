@@ -67,6 +67,7 @@ type dataPlugin struct {
 	queryResultTransformer SqlQueryResultTransformer
 	engine                 *xorm.Engine
 	timeColumnNames        []string
+	timeEndColumnNames     []string
 	metricColumnTypes      []string
 	log                    log.Logger
 }
@@ -101,6 +102,7 @@ func NewDataPlugin(config DataPluginConfiguration, queryResultTransformer SqlQue
 		queryResultTransformer: queryResultTransformer,
 		macroEngine:            macroEngine,
 		timeColumnNames:        []string{"time"},
+		timeEndColumnNames:     []string{"timeend"},
 		log:                    log,
 	}
 
@@ -277,6 +279,13 @@ func (e *dataPlugin) executeQuery(query plugins.DataSubQuery, wg *sync.WaitGroup
 		}
 	}
 
+	if qm.timeEndIndex != -1 {
+		if err := convertSQLTimeColumnToEpochMS(frame, qm.timeEndIndex); err != nil {
+			errAppendDebug("db convert time column failed", err, interpolatedQuery)
+			return
+		}
+	}
+
 	if qm.Format == dataQueryFormatSeries {
 		// time series has to have time column
 		if qm.timeIndex == -1 {
@@ -288,7 +297,7 @@ func (e *dataPlugin) executeQuery(query plugins.DataSubQuery, wg *sync.WaitGroup
 		frame.Fields[qm.timeIndex].Name = data.TimeSeriesTimeFieldName
 
 		for i := range qm.columnNames {
-			if i == qm.timeIndex || i == qm.metricIndex {
+			if i == qm.timeIndex || i == qm.timeEndIndex || i == qm.metricIndex {
 				continue
 			}
 
@@ -378,6 +387,7 @@ func (e *dataPlugin) newProcessCfg(query plugins.DataSubQuery, queryContext plug
 		columnNames:  columnNames,
 		rows:         rows,
 		timeIndex:    -1,
+		timeEndIndex: -1,
 		metricIndex:  -1,
 		metricPrefix: false,
 		queryContext: queryContext,
@@ -421,6 +431,14 @@ func (e *dataPlugin) newProcessCfg(query plugins.DataSubQuery, queryContext plug
 				break
 			}
 		}
+
+		for _, tc := range e.timeEndColumnNames {
+			if col == tc {
+				qm.timeEndIndex = i
+				break
+			}
+		}
+
 		switch col {
 		case "metric":
 			qm.metricIndex = i
@@ -459,6 +477,7 @@ type dataQueryModel struct {
 	columnNames       []string
 	columnTypes       []*sql.ColumnType
 	timeIndex         int
+	timeEndIndex      int
 	metricIndex       int
 	rows              *core.Rows
 	metricPrefix      bool

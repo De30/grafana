@@ -35,7 +35,7 @@ var serverIP = "localhost"
 
 func TestMSSQL(t *testing.T) {
 	// change to true to run the MSSQL tests
-	const runMssqlTests = false
+	const runMssqlTests = true
 
 	if !(sqlstore.IsTestDBMSSQL() || runMssqlTests) {
 		t.Skip()
@@ -151,7 +151,7 @@ func TestMSSQL(t *testing.T) {
 			require.Equal(t, 1, len(frames))
 			require.Equal(t, 24, len(frames[0].Fields))
 
-			require.Equal(t, true, frames[0].Fields[0].At(0).(bool))
+			require.Equal(t, true, *frames[0].Fields[0].At(0).(*bool))
 			require.Equal(t, int64(5), *frames[0].Fields[1].At(0).(*int64))
 			require.Equal(t, int64(20020), *frames[0].Fields[2].At(0).(*int64))
 			require.Equal(t, int64(980300), *frames[0].Fields[3].At(0).(*int64))
@@ -451,7 +451,7 @@ func TestMSSQL(t *testing.T) {
 				Queries: []plugins.DataSubQuery{
 					{
 						Model: simplejson.NewFromAny(map[string]interface{}{
-							"rawSql": `SELECT TOP 1 timeInt64 as time, timeInt64 FROM metric_values ORDER BY time`,
+							"rawSql": `SELECT TOP 1 timeInt64 as time, timeInt64 as timeend, timeInt64 FROM metric_values ORDER BY time`,
 							"format": "time_series",
 						}),
 						RefID: "A",
@@ -467,6 +467,7 @@ func TestMSSQL(t *testing.T) {
 			frames, _ := queryResult.Dataframes.Decoded()
 			require.Equal(t, 1, len(frames))
 			require.Equal(t, tInitial, *frames[0].Fields[0].At(0).(*time.Time))
+			require.Equal(t, tInitial, *frames[0].Fields[1].At(0).(*time.Time))
 		})
 
 		t.Run("When doing a metric query using epoch (int64 nullable) as time column and value column (int64 nullable) should return metric with time in time.Time", func(t *testing.T) {
@@ -654,8 +655,8 @@ func TestMSSQL(t *testing.T) {
 			require.Equal(t, 1, len(frames))
 
 			require.Equal(t, 3, len(frames[0].Fields))
-			require.Equal(t, data.Labels{"metric": "Metric A - value one"}, frames[0].Fields[1].Labels)
-			require.Equal(t, data.Labels{"metric": "Metric B - value one"}, frames[0].Fields[2].Labels)
+			require.Equal(t, "Metric A - value one", frames[0].Fields[1].Name)
+			require.Equal(t, "Metric B - value one", frames[0].Fields[2].Name)
 		})
 
 		t.Run("When doing a metric query grouping by time should return correct series", func(t *testing.T) {
