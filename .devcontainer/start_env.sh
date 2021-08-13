@@ -1,0 +1,1 @@
+make run && yarn start
