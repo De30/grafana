@@ -13,9 +13,8 @@ RUN npm install -g yarn
 RUN yarn install --pure-lockfile
 
 # Setup gdev data source and load gdev dashboards
-RUN ./devenv/setup.sh
+# RUN ./devenv/setup.sh
 
-CMD [ "./start_env.sh" ]
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
