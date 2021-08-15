@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Select } from '@grafana/ui';
 import { SelectableValue } from '@grafana/data';
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv } from '../../../../../../../packages/grafana-runtime/src';
 
 interface Props {
   value: string;
@@ -30,7 +30,6 @@ const IconSelector: React.FC<Props> = ({ value, onChange }) => {
   }, [iconRoot]);
   return (
     <Select
-      menuShouldPortal
       options={icons}
       value={icon}
       onChange={(selectedValue) => {
