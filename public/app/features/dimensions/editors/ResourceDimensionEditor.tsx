@@ -1,6 +1,4 @@
 import React, { FC, useCallback } from 'react';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import {
   FieldNamePickerConfigSettings,
   StandardEditorProps,
@@ -10,18 +8,6 @@ import {
 import { ResourceDimensionConfig, ResourceDimensionMode, ResourceDimensionOptions } from '../types';
 import { InlineField, InlineFieldRow, RadioButtonGroup, StringValueEditor } from '@grafana/ui';
 import { FieldNamePicker } from '../../../../../packages/grafana-ui/src/components/MatchersUI/FieldNamePicker';
-=======
-import { FieldNamePickerConfigSettings, StandardEditorProps, StandardEditorsRegistryItem } from '@grafana/data';
-import { ResourceDimensionConfig, ResourceDimensionMode, ResourceDimensionOptions } from '../types';
-import { InlineField, InlineFieldRow, RadioButtonGroup } from '@grafana/ui';
-import { FieldNamePicker } from '../../../../../../../packages/grafana-ui/src/components/MatchersUI/FieldNamePicker';
->>>>>>> 8e965213c5 (more options)
-=======
-import { FieldNamePickerConfigSettings, StandardEditorProps, StandardEditorsRegistryItem } from '@grafana/data';
-import { ResourceDimensionConfig, ResourceDimensionMode, ResourceDimensionOptions } from '../types';
-import { InlineField, InlineFieldRow, RadioButtonGroup } from '@grafana/ui';
-import { FieldNamePicker } from '../../../../../packages/grafana-ui/src/components/MatchersUI/FieldNamePicker';
->>>>>>> 765023b1ce (move dimensions out of geomap)
 import IconSelector from './IconSelector';
 
 const resourceOptions = [
@@ -34,8 +20,6 @@ const dummyFieldSettings: StandardEditorsRegistryItem<string, FieldNamePickerCon
   settings: {},
 } as any;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 const dummyImageStringSettings: StandardEditorsRegistryItem<string, StringFieldConfigSettings> = {
   settings: {
     placeholder: 'Enter image URL',
@@ -45,16 +29,6 @@ const dummyImageStringSettings: StandardEditorsRegistryItem<string, StringFieldC
 export const ResourceDimensionEditor: FC<
   StandardEditorProps<ResourceDimensionConfig, ResourceDimensionOptions, any>
 > = (props) => {
-=======
-export const IconDimensionEditor: FC<StandardEditorProps<ResourceDimensionConfig, ResourceDimensionOptions, any>> = (
-  props
-) => {
->>>>>>> 8e965213c5 (more options)
-=======
-export const IconDimensionEditor: FC<StandardEditorProps<ResourceDimensionConfig, ResourceDimensionOptions, any>> = (
-  props
-) => {
->>>>>>> 765023b1ce (move dimensions out of geomap)
   const { value, context, onChange, item } = props;
   const resourceType = item.settings?.resourceType ?? 'icon';
   const labelWidth = 9;
@@ -112,8 +86,6 @@ export const IconDimensionEditor: FC<StandardEditorProps<ResourceDimensionConfig
       )}
       {mode === ResourceDimensionMode.Fixed && (
         <InlineFieldRow>
-<<<<<<< HEAD
-<<<<<<< HEAD
           {resourceType === 'icon' && (
             <InlineField label="Icon" labelWidth={labelWidth} grow={true}>
               <IconSelector value={value?.fixed} onChange={onFixedChange} />
@@ -129,16 +101,6 @@ export const IconDimensionEditor: FC<StandardEditorProps<ResourceDimensionConfig
               />
             </InlineField>
           )}
-=======
-          <InlineField label={resourceType === 'icon' ? 'Icon' : 'Image'} labelWidth={labelWidth} grow={true}>
-            <IconSelector value={value?.fixed} onChange={onFixedChange} />
-          </InlineField>
->>>>>>> 8e965213c5 (more options)
-=======
-          <InlineField label={resourceType === 'icon' ? 'Icon' : 'Image'} labelWidth={labelWidth} grow={true}>
-            <IconSelector value={value?.fixed} onChange={onFixedChange} />
-          </InlineField>
->>>>>>> 765023b1ce (move dimensions out of geomap)
         </InlineFieldRow>
       )}
       {mode === ResourceDimensionMode.Mapping && (
