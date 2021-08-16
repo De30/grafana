@@ -1,4 +1,5 @@
 import React, { FC, useCallback } from 'react';
+<<<<<<< HEAD
 import {
   FieldNamePickerConfigSettings,
   StandardEditorProps,
@@ -8,6 +9,12 @@ import {
 import { ResourceDimensionConfig, ResourceDimensionMode, ResourceDimensionOptions } from '../types';
 import { InlineField, InlineFieldRow, RadioButtonGroup, StringValueEditor } from '@grafana/ui';
 import { FieldNamePicker } from '../../../../../packages/grafana-ui/src/components/MatchersUI/FieldNamePicker';
+=======
+import { FieldNamePickerConfigSettings, StandardEditorProps, StandardEditorsRegistryItem } from '@grafana/data';
+import { ResourceDimensionConfig, ResourceDimensionMode, ResourceDimensionOptions } from '../types';
+import { InlineField, InlineFieldRow, RadioButtonGroup } from '@grafana/ui';
+import { FieldNamePicker } from '../../../../../../../packages/grafana-ui/src/components/MatchersUI/FieldNamePicker';
+>>>>>>> 8e965213c5 (more options)
 import IconSelector from './IconSelector';
 
 const resourceOptions = [
@@ -20,6 +27,7 @@ const dummyFieldSettings: StandardEditorsRegistryItem<string, FieldNamePickerCon
   settings: {},
 } as any;
 
+<<<<<<< HEAD
 const dummyImageStringSettings: StandardEditorsRegistryItem<string, StringFieldConfigSettings> = {
   settings: {
     placeholder: 'Enter image URL',
@@ -29,6 +37,11 @@ const dummyImageStringSettings: StandardEditorsRegistryItem<string, StringFieldC
 export const ResourceDimensionEditor: FC<
   StandardEditorProps<ResourceDimensionConfig, ResourceDimensionOptions, any>
 > = (props) => {
+=======
+export const IconDimensionEditor: FC<StandardEditorProps<ResourceDimensionConfig, ResourceDimensionOptions, any>> = (
+  props
+) => {
+>>>>>>> 8e965213c5 (more options)
   const { value, context, onChange, item } = props;
   const resourceType = item.settings?.resourceType ?? 'icon';
   const labelWidth = 9;
@@ -86,6 +99,7 @@ export const ResourceDimensionEditor: FC<
       )}
       {mode === ResourceDimensionMode.Fixed && (
         <InlineFieldRow>
+<<<<<<< HEAD
           {resourceType === 'icon' && (
             <InlineField label="Icon" labelWidth={labelWidth} grow={true}>
               <IconSelector value={value?.fixed} onChange={onFixedChange} />
@@ -101,6 +115,11 @@ export const ResourceDimensionEditor: FC<
               />
             </InlineField>
           )}
+=======
+          <InlineField label={resourceType === 'icon' ? 'Icon' : 'Image'} labelWidth={labelWidth} grow={true}>
+            <IconSelector value={value?.fixed} onChange={onFixedChange} />
+          </InlineField>
+>>>>>>> 8e965213c5 (more options)
         </InlineFieldRow>
       )}
       {mode === ResourceDimensionMode.Mapping && (
