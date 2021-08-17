@@ -1,0 +1,32 @@
+@startuml
+
+box "Explore" #white
+participant "Explore UI" as UI
+participant "app/feature/explore/\nstate/query" as S
+endbox
+
+box "Core" #white
+participant "app/feature/query/\nstate/runRequest" as S2
+endbox
+
+box "Plugin" #white
+participant Datasource as DS
+endbox
+
+participant Backend as B
+
+-> UI : user loads on demand histogram
+UI -> S : loadHistogram(exploreId)
+note over S : - DataQueryRequest from\n   ExploreItemState.panelData.logsResult.histogramQueryOptions\n- DataSourceApi from \n   ExploreItemState.datasourceInstnce
+S -> S2 : runRequest(DataSourceApi, DataQueryRequest)
+S2 -> DS : query(options: DataQueryRequest)
+DS -> B : POST /query-endpoint/
+DS <-- B : JSON
+S2 <- DS : DataQueryResponse
+S <- S2 : panelData: PanelData
+S -> S : update ExplorePanelData.logResults.series
+UI <- S : ExplorePanelData
+
+
+
+@enduml

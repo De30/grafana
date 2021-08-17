@@ -1,0 +1,97 @@
+@startuml
+
+package "app/feature/explore/state/query" {
+  interface DataFrame #white extends QueryResultBase  {
+    name?: string;
+    fields: Field[];
+    length: number;
+  }
+
+  interface QueryResultBase #white {
+    refId?: string;
+    meta?: QueryResultMeta;
+  }
+
+  interface QueryResultMeta #white {
+    custom?: Record<string, any>;
+    stats?: QueryResultMetaStat[];
+    notices?: QueryResultMetaNotice[];
+    transformations?: string[];
+    preferredVisualisationType?: PreferredVisualisationType;
+    channel?: string;
+    dataTopic?: DataTopic;
+    executedQueryString?: string;
+    path?: string;
+    pathSeparator?: string;
+    alignmentPeriod?: number;
+    searchWords?: string[];
+    limit?: number;
+    json?: boolean;
+    instant?: boolean;
+    <b>histogram: LogsHistogram</b>
+  }
+
+  interface LogsHistogram {
+    // options to pass to data source to get histogram on-demand
+    <b>queryOptions?: DataQueryRequest;</b>
+
+    // filled with histogram data if it's available
+    // straight away with the query result
+    <b>data?: DataFrame[];</b>
+  }
+
+}
+
+QueryResultBase *- QueryResultMeta
+QueryResultMeta *-- LogsHistogram
+
+package "UI State" {
+  interface PanelData #white {
+    state: LoadingState;
+    series: DataFrame[];
+    structureRev?: number;
+    annotations?: DataFrame[];
+    alertState?: AlertStateInfo;
+    request?: DataQueryRequest;
+    timings?: DataQueryTimings;
+    error?: DataQueryError;
+    timeRange: TimeRange;
+  }
+
+  interface ExplorePanelData #white extends PanelData {
+    graphFrames: DataFrame[];
+    tableFrames: DataFrame[];
+    logsFrames: DataFrame[];
+    traceFrames: DataFrame[];
+    nodeGraphFrames: DataFrame[];
+    graphResult: DataFrame[] | null;
+    tableResult: DataFrame | null;
+    logsResult: LogsModel | null;
+  }
+
+  interface LogsModel #white {
+    hasUniqueLabels: boolean;
+    meta?: LogsMetaItem[];
+    rows: LogRowModel[];
+    // <b>could be renamed to "histogram"
+    series?: DataFrame[];
+    <b>histogramQueryOptions?: DataQueryRequest;</b>
+    visibleRange?: AbsoluteTimeRange;
+    queries?: DataQuery[];
+  }
+
+  interface ExploreItemState #white {
+    <b>// can be used to query correct DataSource for histogram</b>
+    <b>// Might need to be a separate property in LogsModel
+    <b>// when mixed queries are added to Explore.</b>
+    datasourceInstance?: DataSourceApi | null;
+    queryResponse: PanelData;
+  }
+}
+
+ExplorePanelData -* ExploreItemState
+ExplorePanelData *-- LogsModel
+
+LogsHistogram . LogsModel : created by\ndecorateData() +\ndataFrameToLogsModel()
+
+@enduml

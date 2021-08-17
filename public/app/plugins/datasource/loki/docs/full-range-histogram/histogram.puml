@@ -1,0 +1,41 @@
+@startuml
+
+box "Explore" #white
+participant "Explore UI" as UI
+participant "app/feature/explore/\nstate/query" as S
+endbox
+
+box "Core" #white
+participant "app/feature/query/\nstate/runRequest" as S2
+endbox
+
+box "Plugin" #white
+participant Datasource as DS
+endbox
+
+participant Backend as B
+
+-> UI : "Run query" button clicked
+UI -> S : runQueries(...)
+S -> S2 : runRequest(DataSourceApi, DataQueryRequest)
+S2 -> DS : query(options: DataQueryRequest)
+DS -> B : POST /query-endpoint/
+DS <-- B : JSON
+note over DS: data source enriches DataFrame.meta with histogram\n(see LogsHistogram in class diagram)
+S2 <- DS : DataQueryResponse\n(mainly { data: DataFrame[] })
+S <- S2 : panelData: PanelData\n contains { series: DataFrame[]; }
+activate S
+S -> S : decorateData(panelData)
+note right S : decorateData() extracts DataFrame.meta to LogsModel:\n-  ExplorePanelData.logsResult.histogramQueryOptions\n -ExplorePanelData.logsResult.series
+UI <- S : ExplorePanelData
+deactivate S
+
+alt ExplorePanelData.series !== undefined
+  UI -> UI : render histogram
+else ExplorePanelData.histogramQueryOptions !== undefined
+  UI -> UI : show message to load histogram on demand
+else
+  UI -> UI : do not show the histogram
+end
+
+@enduml

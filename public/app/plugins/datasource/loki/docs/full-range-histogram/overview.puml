@@ -1,0 +1,29 @@
+@startuml
+
+box "Explore" #white
+participant "Explore UI" as UI
+participant "app/feature/explore/\nstate/query" as S
+endbox
+
+box "Core" #white
+participant "app/feature/query/\nstate/runRequest" as S2
+endbox
+
+box "Plugin" #white
+participant Datasource as DS
+endbox
+
+participant Backend as B
+
+-> UI : "Run query" button clicked
+UI -> S : runQueries(...)
+S -> S2 : runRequest(DataSourceApi, DataQueryRequest)
+S2 -> DS : query(options: DataQueryRequest)
+DS -> B : POST /query-endpoint/
+DS <-- B : JSON
+S2 <- DS : DataQueryResponse\n(mainly { data: DataFrame[] })
+S <- S2 : panelData: PanelData\n contains { series: DataFrame[]; }
+S -> S : decorateData(panelData)
+UI <- S : ExplorePanelData\n(contains logsResult: LogsModel with "series" for histogram)
+
+@enduml
