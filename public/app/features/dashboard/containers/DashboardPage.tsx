@@ -188,6 +188,9 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
     // leaving edit mode
     if (!this.state.editPanel && prevState.editPanel) {
       dashboardWatcher.setEditingState(false);
+
+      // Some panels need kicked when leaving edit mode
+      this.props.dashboard?.events.publish(new PanelEditFinishedEvent(prevState.editPanel.id));
     }
 
     if (this.state.editPanelAccessDenied) {
