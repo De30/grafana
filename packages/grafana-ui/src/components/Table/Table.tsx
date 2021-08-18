@@ -169,6 +169,15 @@ export const Table: FC<Props> = memo((props: Props) => {
   );
 
   const { fields } = data;
+  // Find the string that will need to be highlighted in each cell entry
+  const highlightReg = /"[^\s"0-9]+"[ ]=~[ ]\/([^\r\n\t\f\v]+)\//gm;
+  let highlightString = '';
+  if (data.meta && data.meta.executedQueryString) {
+    const match = highlightReg.exec(data.meta.executedQueryString);
+    if (match) {
+      highlightString = match[1];
+    }
+  }
 
   const RenderRow = React.useCallback(
     ({ index: rowIndex, style }) => {
@@ -185,6 +194,7 @@ export const Table: FC<Props> = memo((props: Props) => {
               onCellFilterAdded={onCellFilterAdded}
               columnIndex={index}
               columnCount={row.cells.length}
+              highlightString={highlightString}
             />
           ))}
         </div>
