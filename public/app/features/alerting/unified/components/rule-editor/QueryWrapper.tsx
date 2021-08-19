@@ -49,7 +49,7 @@ export const QueryWrapper: FC<Props> = ({
   const [pluginId, changePluginId] = useState<SupportedPanelPlugins>(isExpression ? TABLE : TIMESERIES);
 
   const renderTimePicker = (query: AlertQuery, index: number): ReactNode => {
-    if (isExpressionQuery(query.model) || !onChangeTimeRange) {
+    if (!onChangeTimeRange) {
       return null;
     }
 
@@ -59,6 +59,18 @@ export const QueryWrapper: FC<Props> = ({
         onChange={(range) => onChangeTimeRange(range, index)}
       />
     );
+  };
+
+  const renderQueryOptions = () => {
+    return <div></div>;
+  };
+
+  const renderHeaderExtras = () => {
+    if (isExpressionQuery(query.model)) {
+      return null;
+    }
+
+    return <div>{renderTimePicker(query, index)}</div>;
   };
 
   return (
@@ -76,7 +88,7 @@ export const QueryWrapper: FC<Props> = ({
         onAddQuery={onDuplicateQuery}
         onRunQuery={onRunQueries}
         queries={queries}
-        renderHeaderExtras={() => renderTimePicker(query, index)}
+        renderHeaderExtras={renderHeaderExtras}
         visualization={data ? <VizWrapper data={data} changePanel={changePluginId} currentPanel={pluginId} /> : null}
         hideDisableQuery={true}
       />
