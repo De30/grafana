@@ -144,7 +144,7 @@ func CreateDashboardSnapshot(c *models.ReqContext, cmd models.CreateDashboardSna
 }
 
 // GET /api/snapshots/:key
-func GetDashboardSnapshot(c *models.ReqContext) response.Response {
+func (hs *HTTPServer) GetDashboardSnapshot(c *models.ReqContext) response.Response {
 	key := c.Params(":key")
 	query := &models.GetDashboardSnapshotQuery{Key: key}
 

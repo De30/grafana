@@ -122,14 +122,18 @@ func newRandomDataKey() ([]byte, error) {
 
 var b64 = base64.RawStdEncoding
 
-func (s *SecretsService) Encrypt(payload []byte, opt util.EncryptionOption) ([]byte, error) {
-	scope := opt()
-	keyName := fmt.Sprintf("%s/%s@%s", time.Now().Format("2006-01-02"), scope, s.defaultProvider)
+func (s *SecretsService) Encrypt(payload []byte, opts ...util.EncryptionOption) ([]byte, error) {
+	tmp := defaultOptions()
+	for _, opt := range opts {
+		opt(tmp)
+	}
+
+	keyName := fmt.Sprintf("%s/%s@%s", time.Now().Format("2006-01-02"), tmp.Scope, s.defaultProvider)
 
 	dataKey, err := s.dataKey(keyName)
 	if err != nil {
 		if errors.Is(err, types.ErrDataKeyNotFound) {
-			dataKey, err = s.newDataKey(context.TODO(), keyName, scope)
+			dataKey, err = s.newDataKey(context.TODO(), keyName, tmp.Scope)
 			if err != nil {
 				return nil, err
 			}
@@ -153,6 +157,12 @@ func (s *SecretsService) Encrypt(payload []byte, opt util.EncryptionOption) ([]b
 	copy(blob[len(prefix):], encrypted)
 
 	return blob, nil
+}
+
+func defaultOptions() *util.EncryptionOptions {
+	return &util.EncryptionOptions{
+		Scope: "root",
+	}
 }
 
 func (s *SecretsService) Decrypt(payload []byte) ([]byte, error) {
