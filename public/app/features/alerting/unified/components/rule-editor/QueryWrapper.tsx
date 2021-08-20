@@ -16,6 +16,7 @@ import { isExpressionQuery } from 'app/features/expressions/guards';
 import { TABLE, TIMESERIES } from '../../utils/constants';
 import { AlertQuery } from 'app/types/unified-alerting-dto';
 import { SupportedPanelPlugins } from '../PanelPluginsButtonGroup';
+import { QueryOperationRow } from '../../../../../core/components/QueryOperationRow/QueryOperationRow';
 
 interface Props {
   data: PanelData;
@@ -47,6 +48,7 @@ export const QueryWrapper: FC<Props> = ({
   const styles = useStyles2(getStyles);
   const isExpression = isExpressionQuery(query.model);
   const [pluginId, changePluginId] = useState<SupportedPanelPlugins>(isExpression ? TABLE : TIMESERIES);
+  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
 
   const renderTimePicker = (query: AlertQuery, index: number): ReactNode => {
     if (!onChangeTimeRange) {
@@ -62,7 +64,19 @@ export const QueryWrapper: FC<Props> = ({
   };
 
   const renderQueryOptions = () => {
-    return <div></div>;
+    return (
+      <QueryOperationRow
+        index={0}
+        id="query-options"
+        title="Query options"
+        headerElement={() => <div>Options....</div>}
+        isOpen={optionsOpen}
+        onOpen={() => setOptionsOpen(true)}
+        onClose={() => setOptionsOpen(false)}
+      >
+        options
+      </QueryOperationRow>
+    );
   };
 
   const renderHeaderExtras = () => {
@@ -70,7 +84,12 @@ export const QueryWrapper: FC<Props> = ({
       return null;
     }
 
-    return <div>{renderTimePicker(query, index)}</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {renderTimePicker(query, index)}
+        {renderQueryOptions()}
+      </div>
+    );
   };
 
   return (
