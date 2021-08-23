@@ -6,11 +6,7 @@ import {
   useFieldDisplayNames,
   useSelectOptions,
 } from '../../../../../packages/grafana-ui/src/components/MatchersUI/utils';
-<<<<<<< HEAD:public/app/features/dimensions/editors/ScaleDimensionEditor.tsx
 import { NumberInput } from './NumberInput';
-=======
-import { NumberInput } from '../../../plugins/panel/geomap/components/NumberInput';
->>>>>>> 765023b1ce (move dimensions out of geomap):public/app/plugins/panel/geomap/dims/editors/ScaleDimensionEditor.tsx
 import { css } from '@emotion/css';
 import { validateScaleOptions, validateScaleConfig } from '../scale';
 
