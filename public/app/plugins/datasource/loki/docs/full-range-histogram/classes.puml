@@ -1,5 +1,7 @@
 @startuml
 
+title: Changes to model structure (in bold)
+
 package "app/feature/explore/state/query" {
   interface DataFrame #white extends QueryResultBase  {
     name?: string;
@@ -28,22 +30,21 @@ package "app/feature/explore/state/query" {
     limit?: number;
     json?: boolean;
     instant?: boolean;
-    <b>histogram: LogsHistogram</b>
+    <b>histogram: HistogramInfo</b>
   }
 
-  interface LogsHistogram {
+  interface HistogramInfo {
     // options to pass to data source to get histogram on-demand
     <b>queryOptions?: DataQueryRequest;</b>
 
-    // filled with histogram data if it's available
-    // straight away with the query result
-    <b>data?: DataFrame[];</b>
+    // if true the histogram can be extracted from data frames
+    <b>available: boolean</b>
   }
 
 }
 
 QueryResultBase *- QueryResultMeta
-QueryResultMeta *-- LogsHistogram
+QueryResultMeta *-- HistogramInfo
 
 package "UI State" {
   interface PanelData #white {
@@ -92,6 +93,6 @@ package "UI State" {
 ExplorePanelData -* ExploreItemState
 ExplorePanelData *-- LogsModel
 
-LogsHistogram . LogsModel : created by\ndecorateData() +\ndataFrameToLogsModel()
+HistogramInfo . LogsModel : created by\ndecorateData() +\ndataFrameToLogsModel()
 
 @enduml

@@ -1,5 +1,7 @@
 @startuml
 
+title Proposed changes to the flow
+
 box "Explore" #white
 participant "Explore UI" as UI
 participant "app/feature/explore/\nstate/query" as S
@@ -26,7 +28,13 @@ S2 <- DS : DataQueryResponse\n(mainly { data: DataFrame[] })
 S <- S2 : panelData: PanelData\n contains { series: DataFrame[]; }
 activate S
 S -> S : decorateData(panelData)
-note right S : decorateData() extracts DataFrame.meta to LogsModel:\n-  ExplorePanelData.logsResult.histogramQueryOptions\n -ExplorePanelData.logsResult.series
+
+alt DataFrame.meta.histogram.available == true
+note right S : histogram can be extracted\nfrom existing results into\nExplorePanelData.logsResult.series
+else DataFrame.meta.histogram.queryOptions is defined
+note right S : histogram can be run on demand\nby running DataFrame.meta.histogram.queryOptions\nwhich is saved in LogsModel
+end
+
 UI <- S : ExplorePanelData
 deactivate S
 

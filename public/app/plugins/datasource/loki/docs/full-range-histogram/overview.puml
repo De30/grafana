@@ -1,5 +1,7 @@
 @startuml
 
+title Current flow of running queires in Explore
+
 box "Explore" #white
 participant "Explore UI" as UI
 participant "app/feature/explore/\nstate/query" as S

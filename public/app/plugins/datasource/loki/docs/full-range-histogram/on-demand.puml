@@ -1,5 +1,7 @@
 @startuml
 
+title Flow for running the query histogram on demand
+
 box "Explore" #white
 participant "Explore UI" as UI
 participant "app/feature/explore/\nstate/query" as S
@@ -17,7 +19,7 @@ participant Backend as B
 
 -> UI : user loads on demand histogram
 UI -> S : loadHistogram(exploreId)
-note over S : - DataQueryRequest from\n   ExploreItemState.panelData.logsResult.histogramQueryOptions\n- DataSourceApi from \n   ExploreItemState.datasourceInstnce
+note over S : - DataQueryRequest from\n   ExploreItemState.panelData.logsResult.histogramQueryOptions\n- DataSourceApi from \n   ExploreItemState.datasourceInstance
 S -> S2 : runRequest(DataSourceApi, DataQueryRequest)
 S2 -> DS : query(options: DataQueryRequest)
 DS -> B : POST /query-endpoint/
