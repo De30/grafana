@@ -56,6 +56,7 @@ type ResponseModel struct {
 	LegendFormat string `json:"legendFormat"`
 	Interval     string `json:"interval"`
 	IntervalMS   int    `json:"intervalMS"`
+	Resolution   int64  `json:"resolution"`
 }
 
 func init() {
@@ -73,7 +74,7 @@ func (s *Service) Init() error {
 		QueryDataHandler: s,
 	})
 
-	if err := s.BackendPluginManager.RegisterAndStart(context.Background(), "loki", factory); err != nil {
+	if err := s.BackendPluginManager.Register("loki", factory); err != nil {
 		plog.Error("Failed to register plugin", "error", err)
 	}
 
@@ -210,7 +211,12 @@ func (s *Service) parseQuery(dsInfo *datasourceInfo, queryContext *backend.Query
 			return nil, err
 		}
 
-		step := time.Duration(int64(interval.Value))
+		var resolution int64 = 1
+		if model.Resolution >= 1 && model.Resolution <= 5 || model.Resolution == 10 {
+			resolution = model.Resolution
+		}
+
+		step := time.Duration(int64(interval.Value) * resolution)
 
 		qs = append(qs, &lokiQuery{
 			Expr:         model.Expr,
