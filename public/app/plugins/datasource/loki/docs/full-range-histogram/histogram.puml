@@ -29,9 +29,7 @@ S <- S2 : panelData: PanelData\n contains { series: DataFrame[]; }
 activate S
 S -> S : decorateData(panelData)
 
-alt DataFrame.meta.histogram.available == true
-note right S : histogram can be extracted\nfrom existing results into\nExplorePanelData.logsResult.series
-else DataFrame.meta.histogram.queryOptions is defined
+alt if DataFrame.meta.histogram.queryOptions is defined
 note right S : histogram can be run on demand\nby running DataFrame.meta.histogram.queryOptions\nwhich is saved in LogsModel
 end
 
@@ -42,8 +40,8 @@ alt ExplorePanelData.series !== undefined
   UI -> UI : render histogram
 else ExplorePanelData.histogramQueryOptions !== undefined
   UI -> UI : show message to load histogram on demand
-else
-  UI -> UI : do not show the histogram
+else otherwise
+  UI -> UI : do not show anything
 end
 
 @enduml

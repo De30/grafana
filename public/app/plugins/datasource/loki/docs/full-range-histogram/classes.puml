@@ -36,9 +36,6 @@ package "app/feature/explore/state/query" {
   interface HistogramInfo {
     // options to pass to data source to get histogram on-demand
     <b>queryOptions?: DataQueryRequest;</b>
-
-    // if true the histogram can be extracted from data frames
-    <b>available: boolean</b>
   }
 
 }
@@ -83,8 +80,6 @@ package "UI State" {
 
   interface ExploreItemState #white {
     <b>// can be used to query correct DataSource for histogram</b>
-    <b>// Might need to be a separate property in LogsModel
-    <b>// when mixed queries are added to Explore.</b>
     datasourceInstance?: DataSourceApi | null;
     queryResponse: PanelData;
   }
