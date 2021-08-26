@@ -9,6 +9,34 @@ import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { preProcessPanelData, runRequest } from './runRequest';
 import { isSharedDashboardQuery, runSharedRequest } from '../../../plugins/datasource/dashboard';
 
+const isObj = (v: any) => v != null && typeof v === 'object';
+
+const copy = (o: any) => {
+  let out: any;
+
+  if (Array.isArray(o)) {
+    let val = o.find((v) => v != null);
+
+    if (Array.isArray(val) || isObj(val)) {
+      out = Array(o.length);
+      for (let i = 0; i < o.length; i++) {
+        out[i] = copy(o[i]);
+      }
+    } else {
+      out = o.slice();
+    }
+  } else if (isObj(o)) {
+    out = {};
+    for (let [k, v] of Object.entries(o)) {
+      out[k] = copy(v);
+    }
+  } else {
+    out = o;
+  }
+
+  return out;
+};
+
 // Types
 import {
   applyFieldOverrides,
@@ -91,6 +119,14 @@ export class PanelQueryRunner {
       map((data: PanelData) => {
         let processedData = data;
         let sameStructure = false;
+
+        /* eslint-disable */
+        console.time('copy');
+        let c = copy(data.series);
+        console.timeEnd('copy');
+
+        console.log(c);
+        /* eslint-enable */
 
         if (withFieldConfig && data.series?.length) {
           // Apply field defaults and overrides
