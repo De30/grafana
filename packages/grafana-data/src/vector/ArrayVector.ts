@@ -69,7 +69,9 @@ Object.assign(Array.prototype, {
 });
 
 Object.defineProperty(Array.prototype, 'buffer', {
-	get: function() { return this; }
+	get: function() {
+    return this;
+  }
 });
 
 let notified = false;
@@ -80,7 +82,7 @@ function ArrayVector(arr) {
   	console.error(notice);
   	notified = true;
   }
-  return arr || [];
+  return arr ?? [];
 }
 
 
