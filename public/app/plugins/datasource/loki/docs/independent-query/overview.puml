@@ -17,6 +17,15 @@ endbox
 
 participant Backend as B
 
+-> UI : User changes query
+UI -> S : changeQuery(exploreId)
+S -> S : updateQuery
+S -> DS : getLogsVolumeQuery(query)
+S <-- DS : save in ExplorePanelData
+UI <- S : ExplorePanelData
+
+...
+
 -> UI : "Run query" button clicked
 UI -> S : runQueries(exploreId)
 activate S
