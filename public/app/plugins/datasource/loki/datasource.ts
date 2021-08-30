@@ -21,6 +21,7 @@ import {
   FieldCache,
   LoadingState,
   LogRowModel,
+  PanelData,
   QueryResultMeta,
   ScopedVars,
   TimeRange,
@@ -100,6 +101,40 @@ export class LokiDatasource extends DataSourceApi<LokiQuery, LokiOptions> {
     };
 
     return getBackendSrv().fetch<Record<string, any>>(req);
+  }
+
+  getLogsHistogram(
+    panelData?: Observable<PanelData>,
+    request?: DataQueryRequest<LokiQuery>
+  ): Promise<DataQueryResponse | undefined> {
+    // Datasource can wait for data to be loaded to not lock the UI with expensive histogram query
+    const prerequisitesPromise = window.location.href.includes('waitForLogs=on')
+      ? panelData!.toPromise()
+      : Promise.resolve();
+
+    const histogramDelay = window.location.href.includes('histogramDelay=on') ? 2000 : 0;
+    const delayPromise = new Promise((resolve) => {
+      setTimeout(resolve, histogramDelay);
+    });
+
+    const histogramRequest = cloneDeep(request!);
+
+    histogramRequest.targets = histogramRequest.targets
+      .filter((target) => !isMetricsQuery(target.expr))
+      .map((target) => {
+        target.expr = `count_over_time(${target.expr}[$__interval])`;
+        return target;
+      });
+
+    return prerequisitesPromise
+      .then(() => delayPromise)
+      .then(() => {
+        return this.query(histogramRequest!).toPromise();
+      });
+  }
+
+  isHistogramSupported(panelData: Observable<PanelData>, request: DataQueryRequest<LokiQuery>) {
+    return request.targets.some((target) => !isMetricsQuery(target.expr) && !!target.expr);
   }
 
   query(options: DataQueryRequest<LokiQuery>): Observable<DataQueryResponse> {

@@ -1,4 +1,4 @@
-import { Unsubscribable } from 'rxjs';
+import { Observable, Unsubscribable } from 'rxjs';
 import {
   AbsoluteTimeRange,
   DataFrame,
@@ -156,6 +156,12 @@ export interface ExploreItemState {
    * We are currently caching last 5 query responses.
    */
   cache: Array<{ key: string; value: PanelData }>;
+
+  observableData?: Observable<PanelData>;
+  lastQueryTransaction?: QueryTransaction;
+  logsHistogram?: DataFrame[] | null;
+  isHistogramSupported?: boolean;
+  logsHistogramIsLoading?: boolean;
 }
 
 export interface ExploreUpdateState {

@@ -207,6 +207,26 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
     );
   }
 
+  renderLogsHistogram(width: number) {
+    const { logsHistogram, absoluteRange, timeZone, splitOpen, queryResponse, loading, theme } = this.props;
+    const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
+    return (
+      <Collapse label="Logs volume" loading={loading} isOpen>
+        <ExploreGraphNGPanel
+          data={logsHistogram!}
+          height={150}
+          width={width - spacing}
+          tooltipDisplayMode={TooltipDisplayMode.Single}
+          absoluteRange={absoluteRange}
+          timeZone={timeZone}
+          onUpdateTimeRange={this.onUpdateTimeRange}
+          annotations={queryResponse.annotations}
+          splitOpenFn={splitOpen}
+        />
+      </Collapse>
+    );
+  }
+
   renderTablePanel(width: number) {
     const { exploreId, datasourceInstance } = this.props;
     return (
@@ -271,6 +291,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       exploreId,
       queryKeys,
       graphResult,
+      logsHistogram,
+      logsHistogramIsLoading,
       queryResponse,
       isLive,
       theme,
@@ -321,6 +343,12 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                           {showMetrics && graphResult && (
                             <ErrorBoundaryAlert>{this.renderGraphPanel(width)}</ErrorBoundaryAlert>
                           )}
+                          {logsHistogramIsLoading && !logsHistogram && (
+                            <Collapse label="Logs volume" isOpen={true}>
+                              <div style={{ height: '150px' }}>Histogram is loading...</div>
+                            </Collapse>
+                          )}
+                          {logsHistogram && <ErrorBoundaryAlert>{this.renderLogsHistogram(width)}</ErrorBoundaryAlert>}
                           {showTable && <ErrorBoundaryAlert>{this.renderTablePanel(width)}</ErrorBoundaryAlert>}
                           {showLogs && <ErrorBoundaryAlert>{this.renderLogsPanel(width)}</ErrorBoundaryAlert>}
                           {showNodeGraph && <ErrorBoundaryAlert>{this.renderNodeGraphPanel()}</ErrorBoundaryAlert>}
@@ -364,6 +392,8 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     queryKeys,
     isLive,
     graphResult,
+    logsHistogram,
+    logsHistogramIsLoading,
     logsResult,
     showLogs,
     showMetrics,
@@ -381,6 +411,8 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     queryKeys,
     isLive,
     graphResult,
+    logsHistogram,
+    logsHistogramIsLoading,
     logsResult: logsResult ?? undefined,
     absoluteRange,
     queryResponse,

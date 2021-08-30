@@ -2,12 +2,12 @@ import React, { PureComponent } from 'react';
 import { hot } from 'react-hot-loader';
 import { connect, ConnectedProps } from 'react-redux';
 import { css } from 'emotion';
-import { Collapse } from '@grafana/ui';
+import { Button, Collapse } from '@grafana/ui';
 import { AbsoluteTimeRange, Field, LogRowModel, RawTimeRange } from '@grafana/data';
 import { ExploreId, ExploreItemState } from 'app/types/explore';
 import { StoreState } from 'app/types';
 import { splitOpen } from './state/main';
-import { addResultsToCache, clearCache } from './state/query';
+import { addResultsToCache, clearCache, loadHistogram } from './state/query';
 import { updateTimeRange } from './state/time';
 import { getTimeZone } from '../profile/state/selectors';
 import { LiveLogsWithTheme } from './LiveLogs';
@@ -25,6 +25,7 @@ interface LogsContainerProps extends PropsFromRedux {
   onClickFilterOutLabel?: (key: string, value: string) => void;
   onStartScanning: () => void;
   onStopScanning: () => void;
+  isHistogramSupported: boolean;
 }
 
 export class LogsContainer extends PureComponent<LogsContainerProps> {
@@ -79,6 +80,10 @@ export class LogsContainer extends PureComponent<LogsContainerProps> {
       isLive,
       exploreId,
       addResultsToCache,
+      loadHistogram,
+      isHistogramSupported,
+      logsHistogram,
+      logsHistogramIsLoading,
       clearCache,
     } = this.props;
 
@@ -116,6 +121,9 @@ export class LogsContainer extends PureComponent<LogsContainerProps> {
         </LogsCrossFadeTransition>
         <LogsCrossFadeTransition visible={!isLive}>
           <Collapse label="Logs" loading={loading} isOpen className={styleOverridesForStickyNavigation}>
+            {isHistogramSupported && !logsHistogram && !logsHistogramIsLoading && (
+              <Button onClick={() => loadHistogram(exploreId)}>Load histogram</Button>
+            )}
             <Logs
               logRows={logRows}
               logsMeta={logsMeta}
@@ -157,6 +165,9 @@ function mapStateToProps(state: StoreState, { exploreId }: { exploreId: string }
     loading,
     scanning,
     datasourceInstance,
+    isHistogramSupported,
+    logsHistogram,
+    logsHistogramIsLoading,
     isLive,
     isPaused,
     range,
@@ -175,6 +186,9 @@ function mapStateToProps(state: StoreState, { exploreId }: { exploreId: string }
     scanning,
     timeZone,
     datasourceInstance,
+    isHistogramSupported,
+    logsHistogram,
+    logsHistogramIsLoading,
     isLive,
     isPaused,
     range,
@@ -186,6 +200,7 @@ const mapDispatchToProps = {
   updateTimeRange,
   splitOpen,
   addResultsToCache,
+  loadHistogram,
   clearCache,
 };
 

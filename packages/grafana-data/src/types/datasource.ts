@@ -231,6 +231,13 @@ abstract class DataSourceApi<
    */
   abstract query(request: DataQueryRequest<TQuery>): Promise<DataQueryResponse> | Observable<DataQueryResponse>;
 
+  getLogsHistogram?(
+    panelData?: Observable<PanelData>,
+    request?: DataQueryRequest<TQuery>
+  ): Promise<DataQueryResponse | undefined>;
+
+  isHistogramSupported?(panelData: Observable<PanelData>, request: DataQueryRequest<TQuery>): boolean;
+
   /**
    * Test & verify datasource settings & connection details (returning TestingStatus)
    *

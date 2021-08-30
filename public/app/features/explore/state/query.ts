@@ -1,13 +1,17 @@
 import { mergeMap, throttleTime } from 'rxjs/operators';
-import { identity, Unsubscribable, of } from 'rxjs';
+import { identity, Unsubscribable, of, Observable } from 'rxjs';
 import {
   DataQuery,
   DataQueryErrorType,
+  DataQueryResponse,
   DataSourceApi,
+  FieldCache,
+  FieldType,
   LoadingState,
   PanelData,
   PanelEvents,
   QueryFixAction,
+  toDataFrame,
   toLegacyResponseData,
 } from '@grafana/data';
 
@@ -22,7 +26,7 @@ import {
   updateHistory,
 } from 'app/core/utils/explore';
 import { addToRichHistory } from 'app/core/utils/richHistory';
-import { ExploreItemState, ExplorePanelData, ThunkResult } from 'app/types';
+import { ExploreItemState, ExplorePanelData, QueryTransaction, ThunkResult } from 'app/types';
 import { ExploreId, QueryOptions } from 'app/types/explore';
 import { getTimeZone } from 'app/features/profile/state/selectors';
 import { getShiftedTimeRange } from 'app/core/utils/timePicker';
@@ -35,6 +39,7 @@ import { AnyAction, createAction, PayloadAction } from '@reduxjs/toolkit';
 import { updateTime } from './time';
 import { historyUpdatedAction } from './history';
 import { createEmptyQueryResponse, createCacheKey, getResultsFromCache } from './utils';
+import { BarAlignment, GraphDrawStyle, StackingMode } from '@grafana/schema';
 
 //
 // Actions and Payloads
@@ -109,8 +114,18 @@ export interface QueryStoreSubscriptionPayload {
   exploreId: ExploreId;
   querySubscription: Unsubscribable;
 }
+
+export interface QueryStoreObservableDataPayload {
+  exploreId: ExploreId;
+  observableData?: Observable<PanelData>;
+  lastQueryTransaction?: QueryTransaction;
+  isHistogramSupported?: boolean;
+}
 export const queryStoreSubscriptionAction = createAction<QueryStoreSubscriptionPayload>(
   'explore/queryStoreSubscription'
+);
+export const queryStoreObservableData = createAction<QueryStoreObservableDataPayload>(
+  'explore/queryStoreObservableData'
 );
 
 export interface QueryEndedPayload {
@@ -169,6 +184,13 @@ export interface AddResultsToCachePayload {
   queryResponse: PanelData;
 }
 export const addResultsToCacheAction = createAction<AddResultsToCachePayload>('explore/addResultsToCache');
+
+export interface LoadHistogramPayload {
+  exploreId: ExploreId;
+  logsResponse?: DataQueryResponse;
+}
+export const histogramLoadedAction = createAction<LoadHistogramPayload>('explore/loadHistogram');
+export const histogramLoadingStarted = createAction<{ exploreId: ExploreId }>('explore/histogramLoadingStarted');
 
 /**
  *  Clears cache.
@@ -306,9 +328,11 @@ export function modifyQueries(
  */
 export const runQueries = (
   exploreId: ExploreId,
-  options?: { replaceUrl?: boolean; preserveCache?: boolean }
+  options?: { replaceUrl?: boolean; preserveCache?: boolean; autoLoadHistogram?: boolean }
 ): ThunkResult<void> => {
   return (dispatch, getState) => {
+    options = options || {};
+    options.autoLoadHistogram = window.location.href.includes('autoLoadHistogram=on');
     dispatch(updateTime({ exploreId }));
 
     // We always want to clear cache unless we explicitly pass preserveCache parameter
@@ -333,7 +357,7 @@ export const runQueries = (
       absoluteRange,
       cache,
     } = exploreItemState;
-    let newQuerySub;
+    let newQuerySub, observableData;
 
     const cachedValue = getResultsFromCache(cache, absoluteRange);
 
@@ -388,7 +412,9 @@ export const runQueries = (
       let firstResponse = true;
       dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Loading }));
 
-      newQuerySub = runRequest(datasourceInstance, transaction.request)
+      observableData = runRequest(datasourceInstance, transaction.request);
+
+      newQuerySub = observableData
         .pipe(
           // Simple throttle for live tailing, in case of > 1000 rows per interval we spend about 200ms on processing and
           // rendering. In case this is optimized this can be tweaked, but also it should be only as fast as user
@@ -439,6 +465,15 @@ export const runQueries = (
             console.error(error);
           }
         );
+      const isHistogramSupported = datasourceInstance.isHistogramSupported
+        ? datasourceInstance.isHistogramSupported(observableData, transaction.request as any)
+        : false;
+      dispatch(
+        queryStoreObservableData({ exploreId, observableData, lastQueryTransaction: transaction, isHistogramSupported })
+      );
+      if (options.autoLoadHistogram && isHistogramSupported) {
+        dispatch(loadHistogram(exploreId));
+      }
     }
 
     dispatch(queryStoreSubscriptionAction({ exploreId, querySubscription: newQuerySub }));
@@ -489,8 +524,23 @@ export function addResultsToCache(exploreId: ExploreId): ThunkResult<void> {
   };
 }
 
-export function clearCache(exploreId: ExploreId): ThunkResult<void> {
+export function loadHistogram(exploreId: ExploreId): ThunkResult<void> {
   return (dispatch, getState) => {
+    const state = getState().explore[exploreId]!;
+    const observableData = state.observableData;
+    const datasource = state.datasourceInstance;
+    const transaction = state.lastQueryTransaction;
+    if (datasource?.getLogsHistogram) {
+      dispatch(histogramLoadingStarted({ exploreId }));
+      datasource.getLogsHistogram(observableData, transaction?.request).then((result) => {
+        dispatch(histogramLoadedAction({ exploreId, logsResponse: result }));
+      });
+    }
+  };
+}
+
+export function clearCache(exploreId: ExploreId): ThunkResult<void> {
+  return (dispatch) => {
     dispatch(clearCacheAction({ exploreId }));
   };
 }
@@ -640,6 +690,18 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     };
   }
 
+  if (queryStoreObservableData.match(action)) {
+    const { observableData, lastQueryTransaction, isHistogramSupported } = action.payload;
+    return {
+      ...state,
+      observableData,
+      lastQueryTransaction,
+      isHistogramSupported,
+      logsHistogramIsLoading: false,
+      logsHistogram: undefined,
+    };
+  }
+
   if (queryStreamUpdatedAction.match(action)) {
     return processQueryResponse(state, action);
   }
@@ -701,6 +763,49 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     return {
       ...state,
       cache: newCache,
+    };
+  }
+
+  if (histogramLoadedAction.match(action)) {
+    const { logsResponse } = action.payload;
+    const data = logsResponse?.data.map((series) => {
+      const data = toDataFrame(series);
+      const fieldCache = new FieldCache(data);
+
+      const valueField = fieldCache.getFirstFieldOfType(FieldType.number)!;
+
+      data.fields[valueField.index].config.min = 0;
+      data.fields[valueField.index].config.decimals = 0;
+
+      data.fields[valueField.index].config.custom = {
+        drawStyle: GraphDrawStyle.Bars,
+        barAlignment: BarAlignment.Center,
+        barWidthFactor: 0.9,
+        barMaxWidth: 5,
+        lineColor: '#888',
+        pointColor: '#888',
+        fillColor: '#888',
+        lineWidth: 0,
+        fillOpacity: 100,
+        stacking: {
+          mode: StackingMode.Normal,
+          group: 'A',
+        },
+      };
+      return data;
+    });
+    console.log(data);
+
+    return {
+      ...state,
+      logsHistogram: data || null,
+    };
+  }
+
+  if (histogramLoadingStarted.match(action)) {
+    return {
+      ...state,
+      logsHistogramIsLoading: true,
     };
   }
 
