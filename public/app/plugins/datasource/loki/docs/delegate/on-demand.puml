@@ -1,0 +1,47 @@
+@startuml
+
+title autoLoadHistogram = false
+
+box "Explore" #white
+participant "Explore UI" as UI
+participant "app/feature/explore/\nstate/query" as S
+endbox
+
+box "Core" #white
+participant "app/feature/query/\nstate/runRequest" as S2
+endbox
+
+box "Plugin" #white
+participant Datasource as DS
+endbox
+
+participant Backend as B
+
+-> UI : "Run query" button clicked
+UI -> S: runQueries(exploreId, { autoLoadHistogram: boolean = false })
+S -> S2 : runRequest(DataSourceApi, DataQueryRequest)
+
+activate S2
+S <-- S2: Observable<PanelData>
+
+S2 -> DS : query(options: DataQueryRequest)
+DS -> B : POST /query
+DS <-- B : JSON
+S2 <- DS : DataQueryResponse
+S <- S2 : panelData
+deactivate S2
+
+S -> S : decorateData(panelData)
+S <-> DS : ExplorePanelData.isHistogramAvailable = isHistogramAvailable(panelData, DataQueryRequest);
+note over S : used to show a placeholder
+UI <- S : ExplorePanelData
+
+...
+-> UI : user clicks to show the histogram
+UI -> S : getLogHistogram()
+S -> DS : getLogsHistogram(Observable<PanelData>, TimeRange, DataQueryRequest)
+DS -> B : POST /histogram
+DS <-- B : JSON
+S <- DS : ExplorePanelData.histogram = HistogramData
+UI <- S : ExplorePanelData
+@enduml
