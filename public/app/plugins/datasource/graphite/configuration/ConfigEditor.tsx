@@ -64,6 +64,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
         <DataSourceHttpSettings
           defaultUrl="http://localhost:8080"
           dataSourceConfig={options}
+          showAccessOptions={true}
           onChange={onOptionsChange}
         />
         <h3 className="page-heading">Graphite details</h3>
