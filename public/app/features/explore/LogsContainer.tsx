@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { hot } from 'react-hot-loader';
 import { connect, ConnectedProps } from 'react-redux';
 import { css } from 'emotion';
-import { Button, Collapse } from '@grafana/ui';
+import { Collapse } from '@grafana/ui';
 import { AbsoluteTimeRange, Field, LogRowModel, RawTimeRange } from '@grafana/data';
 import { ExploreId, ExploreItemState } from 'app/types/explore';
 import { StoreState } from 'app/types';
@@ -80,10 +80,6 @@ export class LogsContainer extends PureComponent<LogsContainerProps> {
       isLive,
       exploreId,
       addResultsToCache,
-      loadHistogram,
-      isHistogramSupported,
-      logsHistogram,
-      logsHistogramIsLoading,
       clearCache,
     } = this.props;
 
@@ -121,9 +117,6 @@ export class LogsContainer extends PureComponent<LogsContainerProps> {
         </LogsCrossFadeTransition>
         <LogsCrossFadeTransition visible={!isLive}>
           <Collapse label="Logs" loading={loading} isOpen className={styleOverridesForStickyNavigation}>
-            {isHistogramSupported && !logsHistogram && !logsHistogramIsLoading && (
-              <Button onClick={() => loadHistogram(exploreId)}>Load histogram</Button>
-            )}
             <Logs
               logRows={logRows}
               logsMeta={logsMeta}

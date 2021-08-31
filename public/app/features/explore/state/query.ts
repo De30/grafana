@@ -782,9 +782,6 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
         barAlignment: BarAlignment.Center,
         barWidthFactor: 0.9,
         barMaxWidth: 5,
-        lineColor: '#888',
-        pointColor: '#888',
-        fillColor: '#888',
         lineWidth: 0,
         fillOpacity: 100,
         stacking: {

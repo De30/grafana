@@ -7,7 +7,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import memoizeOne from 'memoize-one';
 import { selectors } from '@grafana/e2e-selectors';
 import { TooltipDisplayMode } from '@grafana/schema';
-import { ErrorBoundaryAlert, CustomScrollbar, Collapse, withTheme2, Themeable2 } from '@grafana/ui';
+import { ErrorBoundaryAlert, CustomScrollbar, Collapse, withTheme2, Themeable2, Button } from '@grafana/ui';
 import { AbsoluteTimeRange, DataQuery, LoadingState, RawTimeRange, DataFrame, GrafanaTheme2 } from '@grafana/data';
 
 import LogsContainer from './LogsContainer';
@@ -18,7 +18,7 @@ import ExploreQueryInspector from './ExploreQueryInspector';
 import { splitOpen } from './state/main';
 import { changeSize } from './state/explorePane';
 import { updateTimeRange } from './state/time';
-import { scanStopAction, addQueryRow, modifyQueries, setQueries, scanStart } from './state/query';
+import { scanStopAction, addQueryRow, modifyQueries, setQueries, scanStart, loadHistogram } from './state/query';
 import { ExploreId, ExploreItemState } from 'app/types/explore';
 import { StoreState } from 'app/types';
 import { ExploreToolbar } from './ExploreToolbar';
@@ -292,6 +292,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       queryKeys,
       graphResult,
       logsHistogram,
+      isHistogramSupported,
+      loadHistogram,
       logsHistogramIsLoading,
       queryResponse,
       isLive,
@@ -343,9 +345,26 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                           {showMetrics && graphResult && (
                             <ErrorBoundaryAlert>{this.renderGraphPanel(width)}</ErrorBoundaryAlert>
                           )}
+                          {isHistogramSupported && !logsHistogram && !logsHistogramIsLoading && (
+                            <Collapse label="Logs volume" isOpen={true}>
+                              <div style={{ height: '150px', textAlign: 'center', paddingTop: '50px' }}>
+                                <Button
+                                  size="lg"
+                                  onClick={() => {
+                                    console.log(exploreId);
+                                    loadHistogram(exploreId);
+                                  }}
+                                >
+                                  Load histogram
+                                </Button>
+                              </div>
+                            </Collapse>
+                          )}
                           {logsHistogramIsLoading && !logsHistogram && (
                             <Collapse label="Logs volume" isOpen={true}>
-                              <div style={{ height: '150px' }}>Histogram is loading...</div>
+                              <div style={{ height: '150px', textAlign: 'center', paddingTop: '50px' }}>
+                                Histogram is loading...
+                              </div>
                             </Collapse>
                           )}
                           {logsHistogram && <ErrorBoundaryAlert>{this.renderLogsHistogram(width)}</ErrorBoundaryAlert>}
@@ -394,6 +413,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     graphResult,
     logsHistogram,
     logsHistogramIsLoading,
+    isHistogramSupported,
     logsResult,
     showLogs,
     showMetrics,
@@ -413,6 +433,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     graphResult,
     logsHistogram,
     logsHistogramIsLoading,
+    isHistogramSupported,
     logsResult: logsResult ?? undefined,
     absoluteRange,
     queryResponse,
@@ -434,6 +455,7 @@ const mapDispatchToProps = {
   scanStopAction,
   setQueries,
   updateTimeRange,
+  loadHistogram,
   addQueryRow,
   splitOpen,
 };
