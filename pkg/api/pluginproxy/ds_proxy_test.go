@@ -12,9 +12,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/grafana/pkg/services/encryption/ossencryption"
+
 	"github.com/grafana/grafana/pkg/api/datasource"
 	"github.com/grafana/grafana/pkg/bus"
-	"github.com/grafana/grafana/pkg/components/securejsondata"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/models"
@@ -809,9 +810,11 @@ func createAuthTest(t *testing.T, dsType string, authType string, authCheck stri
 		message = fmt.Sprintf("%v should add username and password", dsType)
 		test.datasource.User = "user"
 		if useSecureJsonData {
-			test.datasource.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{
+			var err error
+			test.datasource.SecureJsonData, err = ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
 				"password": "password",
 			})
+			require.NoError(t, err)
 		} else {
 			test.datasource.Password = "password"
 		}
@@ -820,9 +823,11 @@ func createAuthTest(t *testing.T, dsType string, authType string, authCheck stri
 		test.datasource.BasicAuth = true
 		test.datasource.BasicAuthUser = "user"
 		if useSecureJsonData {
-			test.datasource.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{
+			var err error
+			test.datasource.SecureJsonData, err = ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
 				"basicAuthPassword": "password",
 			})
+			require.NoError(t, err)
 		} else {
 			test.datasource.BasicAuthPassword = "password"
 		}

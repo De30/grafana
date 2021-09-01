@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/encryption/ossencryption"
+
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/alerting"
@@ -52,7 +54,10 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		Convey("Can read correct properties", func() {
 			_ = os.Setenv("TEST_VAR", "default")
-			cfgProvider := &configReader{log: log.New("test logger")}
+			cfgProvider := &configReader{
+				log:               log.New("test logger"),
+				encryptionService: ossencryption.ProvideService(),
+			}
 			cfg, err := cfgProvider.readConfig(correctProperties)
 			_ = os.Unsetenv("TEST_VAR")
 			if err != nil {
@@ -125,7 +130,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		Convey("One configured notification", func() {
 			Convey("no notification in database", func() {
-				dc := newNotificationProvisioner(logger)
+				dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 				err := dc.applyChanges(twoNotificationsConfig)
 				if err != nil {
 					t.Fatalf("applyChanges return an error %v", err)
@@ -154,7 +159,7 @@ func TestNotificationAsConfig(t *testing.T) {
 				So(len(notificationsQuery.Result), ShouldEqual, 1)
 
 				Convey("should update one notification", func() {
-					dc := newNotificationProvisioner(logger)
+					dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 					err = dc.applyChanges(twoNotificationsConfig)
 					if err != nil {
 						t.Fatalf("applyChanges return an error %v", err)
@@ -177,7 +182,7 @@ func TestNotificationAsConfig(t *testing.T) {
 				})
 			})
 			Convey("Two notifications with is_default", func() {
-				dc := newNotificationProvisioner(logger)
+				dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 				err := dc.applyChanges(doubleNotificationsConfig)
 				Convey("should both be inserted", func() {
 					So(err, ShouldBeNil)
@@ -219,7 +224,7 @@ func TestNotificationAsConfig(t *testing.T) {
 				So(len(notificationsQuery.Result), ShouldEqual, 2)
 
 				Convey("should have two new notifications", func() {
-					dc := newNotificationProvisioner(logger)
+					dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 					err := dc.applyChanges(twoNotificationsConfig)
 					if err != nil {
 						t.Fatalf("applyChanges return an error %v", err)
@@ -252,7 +257,7 @@ func TestNotificationAsConfig(t *testing.T) {
 			err = sqlstore.CreateAlertNotificationCommand(&existingNotificationCmd)
 			So(err, ShouldBeNil)
 
-			dc := newNotificationProvisioner(logger)
+			dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 			err = dc.applyChanges(correctPropertiesWithOrgName)
 			if err != nil {
 				t.Fatalf("applyChanges return an error %v", err)
@@ -270,7 +275,7 @@ func TestNotificationAsConfig(t *testing.T) {
 		})
 
 		Convey("Config doesn't contain required field", func() {
-			dc := newNotificationProvisioner(logger)
+			dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 			err := dc.applyChanges(noRequiredFields)
 			So(err, ShouldNotBeNil)
 
@@ -283,7 +288,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		Convey("Empty yaml file", func() {
 			Convey("should have not changed repo", func() {
-				dc := newNotificationProvisioner(logger)
+				dc := newNotificationProvisioner(logger, ossencryption.ProvideService())
 				err := dc.applyChanges(emptyFile)
 				if err != nil {
 					t.Fatalf("applyChanges return an error %v", err)
@@ -296,13 +301,19 @@ func TestNotificationAsConfig(t *testing.T) {
 		})
 
 		Convey("Broken yaml should return error", func() {
-			reader := &configReader{log: log.New("test logger")}
+			reader := &configReader{
+				log:               log.New("test logger"),
+				encryptionService: ossencryption.ProvideService(),
+			}
 			_, err := reader.readConfig(brokenYaml)
 			So(err, ShouldNotBeNil)
 		})
 
 		Convey("Skip invalid directory", func() {
-			cfgProvider := &configReader{log: log.New("test logger")}
+			cfgProvider := &configReader{
+				log:               log.New("test logger"),
+				encryptionService: ossencryption.ProvideService(),
+			}
 			cfg, err := cfgProvider.readConfig(emptyFolder)
 			if err != nil {
 				t.Fatalf("readConfig return an error %v", err)
@@ -311,14 +322,20 @@ func TestNotificationAsConfig(t *testing.T) {
 		})
 
 		Convey("Unknown notifier should return error", func() {
-			cfgProvider := &configReader{log: log.New("test logger")}
+			cfgProvider := &configReader{
+				log:               log.New("test logger"),
+				encryptionService: ossencryption.ProvideService(),
+			}
 			_, err := cfgProvider.readConfig(unknownNotifier)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, `unsupported notification type "nonexisting"`)
 		})
 
 		Convey("Read incorrect properties", func() {
-			cfgProvider := &configReader{log: log.New("test logger")}
+			cfgProvider := &configReader{
+				log:               log.New("test logger"),
+				encryptionService: ossencryption.ProvideService(),
+			}
 			_, err := cfgProvider.readConfig(incorrectSettings)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "alert validation error: token must be specified when using the Slack chat API")

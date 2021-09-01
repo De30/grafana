@@ -7,16 +7,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/grafana/grafana/pkg/components/securejsondata"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/alerting"
+	"github.com/grafana/grafana/pkg/services/encryption"
 	"github.com/grafana/grafana/pkg/services/provisioning/utils"
 	"gopkg.in/yaml.v2"
 )
 
 type configReader struct {
-	log log.Logger
+	log               log.Logger
+	encryptionService encryption.Service
 }
 
 func (cr *configReader) readConfig(path string) ([]*notificationsAsConfig, error) {
@@ -52,7 +53,7 @@ func (cr *configReader) readConfig(path string) ([]*notificationsAsConfig, error
 		return nil, err
 	}
 
-	if err := validateNotifications(notifications); err != nil {
+	if err := cr.validateNotifications(notifications); err != nil {
 		return nil, err
 	}
 
@@ -150,17 +151,22 @@ func validateRequiredField(notifications []*notificationsAsConfig) error {
 	return nil
 }
 
-func validateNotifications(notifications []*notificationsAsConfig) error {
+func (cr *configReader) validateNotifications(notifications []*notificationsAsConfig) error {
 	for i := range notifications {
 		if notifications[i].Notifications == nil {
 			continue
 		}
 
 		for _, notification := range notifications[i].Notifications {
-			_, err := alerting.InitNotifier(&models.AlertNotification{
+			secureSettings, err := cr.encryptionService.GetEncryptedJsonData(notification.SecureSettings)
+			if err != nil {
+				return err
+			}
+
+			_, err = alerting.InitNotifier(&models.AlertNotification{
 				Name:           notification.Name,
 				Settings:       notification.SettingsToJSON(),
-				SecureSettings: securejsondata.GetEncryptedJsonData(notification.SecureSettings),
+				SecureSettings: secureSettings,
 				Type:           notification.Type,
 			})
 

@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/grafana/grafana/pkg/services/encryption"
+
 	"github.com/grafana/grafana/pkg/infra/log"
 	plugifaces "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/registry"
@@ -57,7 +59,7 @@ func NewProvisioningServiceImpl() *ProvisioningServiceImpl {
 // Used for testing purposes
 func newProvisioningServiceImpl(
 	newDashboardProvisioner dashboards.DashboardProvisionerFactory,
-	provisionNotifiers func(string) error,
+	provisionNotifiers func(string, encryption.Service) error,
 	provisionDatasources func(string) error,
 	provisionPlugins func(string, plugifaces.Manager) error,
 ) *ProvisioningServiceImpl {
@@ -74,11 +76,12 @@ type ProvisioningServiceImpl struct {
 	Cfg                     *setting.Cfg
 	SQLStore                *sqlstore.SQLStore
 	PluginManager           plugifaces.Manager
+	EncryptionService       encryption.Service
 	log                     log.Logger
 	pollingCtxCancel        context.CancelFunc
 	newDashboardProvisioner dashboards.DashboardProvisionerFactory
 	dashboardProvisioner    dashboards.DashboardProvisioner
-	provisionNotifiers      func(string) error
+	provisionNotifiers      func(string, encryption.Service) error
 	provisionDatasources    func(string) error
 	provisionPlugins        func(string, plugifaces.Manager) error
 	mutex                   sync.Mutex
@@ -146,7 +149,7 @@ func (ps *ProvisioningServiceImpl) ProvisionPlugins() error {
 
 func (ps *ProvisioningServiceImpl) ProvisionNotifications() error {
 	alertNotificationsPath := filepath.Join(ps.Cfg.ProvisioningPath, "notifiers")
-	err := ps.provisionNotifiers(alertNotificationsPath)
+	err := ps.provisionNotifiers(alertNotificationsPath, ps.EncryptionService)
 	return errutil.Wrap("Alert notification provisioning error", err)
 }
 

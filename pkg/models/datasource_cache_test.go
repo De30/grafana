@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/grafana/pkg/services/encryption/ossencryption"
+
 	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
-	"github.com/grafana/grafana/pkg/components/securejsondata"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/setting"
@@ -348,14 +349,17 @@ func TestDataSource_DecryptedValue(t *testing.T) {
 	t.Run("When datasource hasn't been updated, encrypted JSON should be fetched from cache", func(t *testing.T) {
 		ClearDSDecryptionCache()
 
+		dsSecureJsonData, err := ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
+			"password": "password",
+		})
+		require.NoError(t, err)
+
 		ds := DataSource{
-			Id:       1,
-			Type:     DS_INFLUXDB_08,
-			JsonData: simplejson.New(),
-			User:     "user",
-			SecureJsonData: securejsondata.GetEncryptedJsonData(map[string]string{
-				"password": "password",
-			}),
+			Id:             1,
+			Type:           DS_INFLUXDB_08,
+			JsonData:       simplejson.New(),
+			User:           "user",
+			SecureJsonData: dsSecureJsonData,
 		}
 
 		// Populate cache
@@ -363,9 +367,10 @@ func TestDataSource_DecryptedValue(t *testing.T) {
 		require.True(t, ok)
 		require.Equal(t, "password", password)
 
-		ds.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{
+		ds.SecureJsonData, err = ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
 			"password": "",
 		})
+		require.NoError(t, err)
 
 		password, ok = ds.DecryptedValue("password")
 		require.True(t, ok)
@@ -375,14 +380,17 @@ func TestDataSource_DecryptedValue(t *testing.T) {
 	t.Run("When datasource is updated, encrypted JSON should not be fetched from cache", func(t *testing.T) {
 		ClearDSDecryptionCache()
 
+		dsSecureJsonData, err := ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
+			"password": "password",
+		})
+		require.NoError(t, err)
+
 		ds := DataSource{
-			Id:       1,
-			Type:     DS_INFLUXDB_08,
-			JsonData: simplejson.New(),
-			User:     "user",
-			SecureJsonData: securejsondata.GetEncryptedJsonData(map[string]string{
-				"password": "password",
-			}),
+			Id:             1,
+			Type:           DS_INFLUXDB_08,
+			JsonData:       simplejson.New(),
+			User:           "user",
+			SecureJsonData: dsSecureJsonData,
 		}
 
 		// Populate cache
@@ -390,9 +398,11 @@ func TestDataSource_DecryptedValue(t *testing.T) {
 		require.True(t, ok)
 		require.Equal(t, "password", password)
 
-		ds.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{
+		ds.SecureJsonData, err = ossencryption.ProvideService().GetEncryptedJsonData(map[string]string{
 			"password": "",
 		})
+		require.NoError(t, err)
+
 		ds.Updated = time.Now()
 
 		password, ok = ds.DecryptedValue("password")

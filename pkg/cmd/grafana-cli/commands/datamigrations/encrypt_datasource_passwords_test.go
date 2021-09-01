@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/grafana/pkg/services/encryption/ossencryption"
+
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/commands/commandstest"
-	"github.com/grafana/grafana/pkg/components/securejsondata"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,8 @@ func TestPasswordMigrationCommand(t *testing.T) {
 	session := sqlstore.NewSession(context.Background())
 	defer session.Close()
 
+	encryptionService := ossencryption.ProvideService()
+
 	datasources := []*models.DataSource{
 		{Type: "influxdb", Name: "influxdb", Password: "foobar", Uid: "influx"},
 		{Type: "graphite", Name: "graphite", BasicAuthPassword: "foobar", Uid: "graphite"},
@@ -30,13 +33,17 @@ func TestPasswordMigrationCommand(t *testing.T) {
 	for _, ds := range datasources {
 		ds.Created = time.Now()
 		ds.Updated = time.Now()
+
+		var err error
 		if ds.Name == "elasticsearch" {
-			ds.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{
+			ds.SecureJsonData, err = encryptionService.GetEncryptedJsonData(map[string]string{
 				"key": "value",
 			})
 		} else {
-			ds.SecureJsonData = securejsondata.GetEncryptedJsonData(map[string]string{})
+			ds.SecureJsonData, err = encryptionService.GetEncryptedJsonData(map[string]string{})
 		}
+
+		require.NoError(t, err)
 	}
 
 	_, err := session.Insert(&datasources)
