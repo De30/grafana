@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ComponentType } from 'react';
 import { GrafanaPlugin, PluginMeta } from './plugin';
 import { PanelData } from './panel';
@@ -233,8 +233,9 @@ abstract class DataSourceApi<
 
   getLogsHistogram?(
     panelData?: Observable<PanelData>,
-    request?: DataQueryRequest<TQuery>
-  ): Promise<DataQueryResponse | undefined>;
+    request?: DataQueryRequest<TQuery>,
+    panelDataSubject?: Subject<PanelData>
+  ): Observable<DataQueryResponse | undefined>;
 
   isHistogramSupported?(panelData: Observable<PanelData>, request: DataQueryRequest<TQuery>): boolean;
 
