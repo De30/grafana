@@ -1,4 +1,4 @@
-import { Observable, Unsubscribable } from 'rxjs';
+import { Observable, Subject, Unsubscribable } from 'rxjs';
 import {
   AbsoluteTimeRange,
   DataFrame,
@@ -158,6 +158,7 @@ export interface ExploreItemState {
   cache: Array<{ key: string; value: PanelData }>;
 
   observableData?: Observable<PanelData>;
+  panelDataSubject?: Subject<PanelData>;
   lastQueryTransaction?: QueryTransaction;
   logsHistogram?: DataFrame[] | null;
   isHistogramSupported?: boolean;

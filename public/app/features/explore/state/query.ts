@@ -1,5 +1,5 @@
 import { mergeMap, throttleTime } from 'rxjs/operators';
-import { identity, Unsubscribable, of, Observable } from 'rxjs';
+import { identity, Unsubscribable, of, Observable, Subject, BehaviorSubject } from 'rxjs';
 import {
   DataQuery,
   DataQueryErrorType,
@@ -118,6 +118,7 @@ export interface QueryStoreSubscriptionPayload {
 export interface QueryStoreObservableDataPayload {
   exploreId: ExploreId;
   observableData?: Observable<PanelData>;
+  panelDataSubject?: Subject<PanelData>;
   lastQueryTransaction?: QueryTransaction;
   isHistogramSupported?: boolean;
 }
@@ -414,6 +415,8 @@ export const runQueries = (
 
       observableData = runRequest(datasourceInstance, transaction.request);
 
+      const subject = new BehaviorSubject<ExplorePanelData | undefined>(undefined);
+
       newQuerySub = observableData
         .pipe(
           // Simple throttle for live tailing, in case of > 1000 rows per interval we spend about 200ms on processing and
@@ -422,54 +425,63 @@ export const runQueries = (
           live ? throttleTime(500) : identity,
           mergeMap((data: PanelData) => decorateData(data, queryResponse, absoluteRange, refreshInterval, queries))
         )
-        .subscribe(
-          (data) => {
-            if (!data.error && firstResponse) {
-              // Side-effect: Saving history in localstorage
-              const nextHistory = updateHistory(history, datasourceId, queries);
-              const nextRichHistory = addToRichHistory(
-                richHistory || [],
-                datasourceId,
-                datasourceName,
-                queries,
-                false,
-                '',
-                ''
-              );
-              dispatch(historyUpdatedAction({ exploreId, history: nextHistory }));
-              dispatch(richHistoryUpdatedAction({ richHistory: nextRichHistory }));
+        .subscribe(subject);
 
-              // We save queries to the URL here so that only successfully run queries change the URL.
-              dispatch(stateSave({ replace: options?.replaceUrl }));
-            }
+      subject.subscribe(
+        (data) => {
+          if (!data.error && firstResponse) {
+            // Side-effect: Saving history in localstorage
+            const nextHistory = updateHistory(history, datasourceId, queries);
+            const nextRichHistory = addToRichHistory(
+              richHistory || [],
+              datasourceId,
+              datasourceName,
+              queries,
+              false,
+              '',
+              ''
+            );
+            dispatch(historyUpdatedAction({ exploreId, history: nextHistory }));
+            dispatch(richHistoryUpdatedAction({ richHistory: nextRichHistory }));
 
-            firstResponse = false;
-
-            dispatch(queryStreamUpdatedAction({ exploreId, response: data }));
-
-            // Keep scanning for results if this was the last scanning transaction
-            if (getState().explore[exploreId]!.scanning) {
-              if (data.state === LoadingState.Done && data.series.length === 0) {
-                const range = getShiftedTimeRange(-1, getState().explore[exploreId]!.range);
-                dispatch(updateTime({ exploreId, absoluteRange: range }));
-                dispatch(runQueries(exploreId));
-              } else {
-                // We can stop scanning if we have a result
-                dispatch(scanStopAction({ exploreId }));
-              }
-            }
-          },
-          (error) => {
-            dispatch(notifyApp(createErrorNotification('Query processing error', error)));
-            dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Error }));
-            console.error(error);
+            // We save queries to the URL here so that only successfully run queries change the URL.
+            dispatch(stateSave({ replace: options?.replaceUrl }));
           }
-        );
+
+          firstResponse = false;
+
+          dispatch(queryStreamUpdatedAction({ exploreId, response: data }));
+
+          // Keep scanning for results if this was the last scanning transaction
+          if (getState().explore[exploreId]!.scanning) {
+            if (data.state === LoadingState.Done && data.series.length === 0) {
+              const range = getShiftedTimeRange(-1, getState().explore[exploreId]!.range);
+              dispatch(updateTime({ exploreId, absoluteRange: range }));
+              dispatch(runQueries(exploreId));
+            } else {
+              // We can stop scanning if we have a result
+              dispatch(scanStopAction({ exploreId }));
+            }
+          }
+        },
+        (error) => {
+          dispatch(notifyApp(createErrorNotification('Query processing error', error)));
+          dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Error }));
+          console.error(error);
+        }
+      );
+
       const isHistogramSupported = datasourceInstance.isHistogramSupported
         ? datasourceInstance.isHistogramSupported(observableData, transaction.request as any)
         : false;
       dispatch(
-        queryStoreObservableData({ exploreId, observableData, lastQueryTransaction: transaction, isHistogramSupported })
+        queryStoreObservableData({
+          exploreId,
+          observableData,
+          panelDataSubject: subject,
+          lastQueryTransaction: transaction,
+          isHistogramSupported,
+        })
       );
       if (options.autoLoadHistogram && isHistogramSupported) {
         dispatch(loadHistogram(exploreId));
@@ -530,9 +542,12 @@ export function loadHistogram(exploreId: ExploreId): ThunkResult<void> {
     const observableData = state.observableData;
     const datasource = state.datasourceInstance;
     const transaction = state.lastQueryTransaction;
+    const panelDataSubject = state.panelDataSubject;
+
     if (datasource?.getLogsHistogram) {
       dispatch(histogramLoadingStarted({ exploreId }));
-      datasource.getLogsHistogram(observableData, transaction?.request).then((result) => {
+      datasource.getLogsHistogram(observableData, transaction?.request, panelDataSubject).subscribe((result) => {
+        console.log('result loaded!');
         dispatch(histogramLoadedAction({ exploreId, logsResponse: result }));
       });
     }
@@ -691,12 +706,13 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
   }
 
   if (queryStoreObservableData.match(action)) {
-    const { observableData, lastQueryTransaction, isHistogramSupported } = action.payload;
+    const { observableData, lastQueryTransaction, isHistogramSupported, panelDataSubject } = action.payload;
     return {
       ...state,
       observableData,
       lastQueryTransaction,
       isHistogramSupported,
+      panelDataSubject,
       logsHistogramIsLoading: false,
       logsHistogram: undefined,
     };
@@ -793,9 +809,11 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     });
     console.log(data);
 
+    const result = (state.logsHistogram || []).concat(data || []);
+
     return {
       ...state,
-      logsHistogram: data || null,
+      logsHistogram: result,
     };
   }
 

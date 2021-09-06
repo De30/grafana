@@ -1,6 +1,6 @@
 // Libraries
 import { cloneDeep, isEmpty, map as lodashMap } from 'lodash';
-import { lastValueFrom, merge, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, merge, Observable, of, Subject, tap, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import Prism from 'prismjs';
 
@@ -105,18 +105,9 @@ export class LokiDatasource extends DataSourceApi<LokiQuery, LokiOptions> {
 
   getLogsHistogram(
     panelData?: Observable<PanelData>,
-    request?: DataQueryRequest<LokiQuery>
-  ): Promise<DataQueryResponse | undefined> {
-    // Datasource can wait for data to be loaded to not lock the UI with expensive histogram query
-    const prerequisitesPromise = window.location.href.includes('waitForLogs=on')
-      ? panelData!.toPromise()
-      : Promise.resolve();
-
-    const histogramDelay = window.location.href.includes('histogramDelay=on') ? 2000 : 0;
-    const delayPromise = new Promise((resolve) => {
-      setTimeout(resolve, histogramDelay);
-    });
-
+    request?: DataQueryRequest<LokiQuery>,
+    panelDataSubject?: BehaviorSubject<PanelData>
+  ): Observable<DataQueryResponse | undefined> {
     const histogramRequest = cloneDeep(request!);
 
     histogramRequest.targets = histogramRequest.targets
@@ -126,11 +117,35 @@ export class LokiDatasource extends DataSourceApi<LokiQuery, LokiOptions> {
         return target;
       });
 
-    return prerequisitesPromise
-      .then(() => delayPromise)
-      .then(() => {
-        return this.query(histogramRequest!).toPromise();
-      });
+    return new Observable((observer) => {
+      const shouldWaitForLogs = window.location.href.includes('waitForLogs=on');
+      if (shouldWaitForLogs) {
+        panelDataSubject!.subscribe({
+          complete: () => {
+            const panelData = panelDataSubject?.getValue();
+            console.log('Panel data loaded. Logs can be extracted from it.', panelData);
+            this.query(histogramRequest!)
+              .pipe(
+                tap((value) => {
+                  console.log('Histogram data loaded.', value);
+                  observer.next(value);
+                })
+              )
+              .subscribe();
+          },
+        });
+      } else {
+        console.log('Not waiting for panel data. Requesting the histogram immediately.');
+        this.query(histogramRequest!)
+          .pipe(
+            tap((value) => {
+              console.log('Histogram data loaded (2).', value);
+              observer.next(value);
+            })
+          )
+          .subscribe();
+      }
+    });
   }
 
   isHistogramSupported(panelData: Observable<PanelData>, request: DataQueryRequest<LokiQuery>) {
