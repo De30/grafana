@@ -361,6 +361,43 @@ describe('metricNamesToVariableValues', () => {
   });
 });
 
+it.only('breaks', () => {
+  const metricNames = [
+    {
+      text: 'grafana',
+      expandable: true,
+    },
+    {
+      text: 'prometheus',
+      expandable: true,
+    },
+    {
+      text: 'node_exporter',
+      expandable: true,
+    },
+    {
+      text: 'prometheus-random-data',
+      expandable: true,
+    },
+  ];
+
+  const expected = [
+    {
+      text: 'prometheus',
+      value: 'prometheus',
+      selected: false,
+    },
+    {
+      text: 'prometheus-random-data',
+      value: 'prometheus-random-data',
+      selected: false,
+    },
+  ];
+
+  const variableRegEx = '/.*(prometheus).*/';
+  expect(metricNamesToVariableValues(variableRegEx, VariableSort.disabled, metricNames)).toEqual(expected);
+});
+
 function createMetric(value: string) {
   return {
     text: value,
