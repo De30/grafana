@@ -85,6 +85,7 @@ export const AnnotationEditorForm = React.forwardRef<HTMLDivElement, AnnotationE
                 <>
                   <Field label={'Description'} invalid={!!errors.description} error={errors?.description?.message}>
                     <TextArea
+                      autoFocus
                       {...register('description', {
                         required: 'Annotation description is required',
                       })}
