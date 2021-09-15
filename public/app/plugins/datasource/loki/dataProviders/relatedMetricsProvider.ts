@@ -23,7 +23,7 @@ export class RelatedMetricsProvider implements RelatedDataProvider<RelatedQuerie
       // })
       //
       // similar behavior simulated below
-      observer.next(this.queries);
+      observer.next({ ...this.queries });
       setTimeout(() => {
         if (this.dataQueryRequest.targets[0]) {
           this.queries[this.dataQueryRequest.targets[0].refId] = [
@@ -43,7 +43,7 @@ export class RelatedMetricsProvider implements RelatedDataProvider<RelatedQuerie
             },
           ];
         }
-        observer.next(this.queries);
+        observer.next({ ...this.queries });
       }, 2000);
 
       setTimeout(() => {
@@ -58,7 +58,7 @@ export class RelatedMetricsProvider implements RelatedDataProvider<RelatedQuerie
             },
           ];
         }
-        observer.next(this.queries);
+        observer.next({ ...this.queries });
       }, 6000);
     });
   }
