@@ -6,7 +6,7 @@ import { has, cloneDeep } from 'lodash';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { AngularComponent, getAngularLoader } from '@grafana/runtime';
 import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';
-import { ErrorBoundaryAlert, HorizontalGroup } from '@grafana/ui';
+import { ErrorBoundaryAlert, HorizontalGroup, LinkButton } from '@grafana/ui';
 import {
   CoreApp,
   DataQuery,
@@ -35,6 +35,7 @@ import { OperationRowHelp } from 'app/core/components/QueryOperationRow/Operatio
 interface Props<TQuery extends DataQuery> {
   data: PanelData;
   query: TQuery;
+  relatedQueries?: DataQuery[];
   queries: TQuery[];
   id: string;
   index: number;
@@ -360,7 +361,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   render() {
-    const { query, id, index, visualization } = this.props;
+    const { query, id, index, visualization, relatedQueries } = this.props;
     const { datasource, showingHelp } = this.state;
     const isDisabled = query.hide;
 
@@ -397,6 +398,15 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                 </OperationRowHelp>
               )}
               {editor}
+              {relatedQueries?.length ? (
+                <div>
+                  {relatedQueries.map((query: DataQuery, index: number) => (
+                    <div key={index} style={{ padding: '5px' }}>
+                      There are related {query.queryType} in {query.datasource}. <LinkButton size="sm">show</LinkButton>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </ErrorBoundaryAlert>
             {visualization}
           </div>

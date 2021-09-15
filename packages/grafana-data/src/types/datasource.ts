@@ -27,12 +27,17 @@ export type DataSourceOptionsType<DSType> = DSType extends DataSourceApi<any, in
 
 export enum RelatedDataType {
   LogsVolume = 'LogsVolume',
+  RelatedQuery = 'RelatedQuery',
 }
 
 export type LogsVolume = {
   data?: DataFrame[];
   error?: DataQueryError;
   isLoading?: boolean;
+};
+
+export type RelatedQueries = {
+  [refId in string]: DataQuery[];
 };
 
 export type RelatedDataProviders = {

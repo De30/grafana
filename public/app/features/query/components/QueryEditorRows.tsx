@@ -9,14 +9,17 @@ import {
   EventBusExtended,
   HistoryItem,
   PanelData,
+  RelatedQueries,
 } from '@grafana/data';
 import { QueryEditorRow } from './QueryEditorRow';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { getDataSourceSrv } from '@grafana/runtime';
+import { get } from 'lodash';
 
 interface Props {
   // The query configuration
   queries: DataQuery[];
+  relatedQueries?: RelatedQueries;
   dsSettings: DataSourceInstanceSettings;
 
   // Query editing
@@ -101,7 +104,7 @@ export class QueryEditorRows extends PureComponent<Props> {
   };
 
   render() {
-    const { dsSettings, data, queries, app, history, eventBus } = this.props;
+    const { dsSettings, data, queries, app, history, eventBus, relatedQueries } = this.props;
 
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
@@ -114,10 +117,12 @@ export class QueryEditorRows extends PureComponent<Props> {
                   const onChangeDataSourceSettings = dsSettings.meta.mixed
                     ? (settings: DataSourceInstanceSettings) => this.onDataSourceChange(settings, index)
                     : undefined;
+                  const currentRelatedQueries = app === CoreApp.Explore ? get(relatedQueries, query.refId, []) : [];
 
                   return (
                     <QueryEditorRow
                       id={query.refId}
+                      relatedQueries={currentRelatedQueries}
                       index={index}
                       key={query.refId}
                       data={data}

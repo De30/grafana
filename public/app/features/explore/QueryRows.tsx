@@ -3,7 +3,7 @@ import { ExploreId } from 'app/types/explore';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDatasourceSrv } from '../plugins/datasource_srv';
 import { runQueries, changeQueriesAction } from './state/query';
-import { CoreApp, DataQuery } from '@grafana/data';
+import { CoreApp, DataQuery, RelatedDataType } from '@grafana/data';
 import { getNextRefIdChar } from 'app/core/utils/query';
 import { QueryEditorRows } from '../query/components/QueryEditorRows';
 import { createSelector } from '@reduxjs/toolkit';
@@ -24,21 +24,27 @@ const makeSelectors = (exploreId: ExploreId) => {
       exploreItemSelector,
       (s) => getDatasourceSrv().getInstanceSettings(s!.datasourceInstance?.name)!
     ),
+    getRelatedQueries: createSelector(exploreItemSelector, (s) => s!.relatedData[RelatedDataType.RelatedQuery] || {}),
   };
 };
 
 export const QueryRows = ({ exploreId }: Props) => {
   const dispatch = useDispatch();
-  const { getQueries, getDatasourceInstanceSettings, getQueryResponse, getHistory, getEventBridge } = useMemo(
-    () => makeSelectors(exploreId),
-    [exploreId]
-  );
+  const {
+    getQueries,
+    getDatasourceInstanceSettings,
+    getQueryResponse,
+    getHistory,
+    getEventBridge,
+    getRelatedQueries,
+  } = useMemo(() => makeSelectors(exploreId), [exploreId]);
 
   const queries = useSelector(getQueries);
   const dsSettings = useSelector(getDatasourceInstanceSettings);
   const queryResponse = useSelector(getQueryResponse);
   const history = useSelector(getHistory);
   const eventBridge = useSelector(getEventBridge);
+  const relatedQueries = useSelector(getRelatedQueries);
 
   const onRunQueries = useCallback(() => {
     dispatch(runQueries(exploreId));
@@ -74,6 +80,7 @@ export const QueryRows = ({ exploreId }: Props) => {
       app={CoreApp.Explore}
       history={history}
       eventBus={eventBridge}
+      relatedQueries={relatedQueries}
     />
   );
 };
