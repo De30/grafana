@@ -74,7 +74,6 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     data: undefined,
     isOpen: true,
     showingHelp: false,
-    relatedQueries: [],
   };
 
   componentDidMount() {
