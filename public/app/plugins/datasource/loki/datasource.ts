@@ -55,6 +55,7 @@ import { RowContextOptions } from '@grafana/ui/src/components/Logs/LogRowContext
 import syntax from './syntax';
 import { DEFAULT_RESOLUTION } from './components/LokiOptionFields';
 import { LokiLogsVolumeProvider } from './dataProviders/logsVolumeProvider';
+import { RelatedMetricsProvider } from './dataProviders/relatedMetricsProvider';
 
 export type RangeQueryOptions = DataQueryRequest<LokiQuery> | AnnotationQueryRequest<LokiQuery>;
 export const DEFAULT_MAX_LINES = 1000;
@@ -112,6 +113,7 @@ export class LokiDatasource extends DataSourceApi<LokiQuery, LokiOptions> {
     } else {
       return {
         [RelatedDataType.LogsVolume]: new LokiLogsVolumeProvider(this, request),
+        [RelatedDataType.RelatedQuery]: new RelatedMetricsProvider(this, request),
       };
     }
   }

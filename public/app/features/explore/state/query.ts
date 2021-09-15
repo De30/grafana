@@ -480,6 +480,8 @@ export const runQueries = (
       if (autoLoadLogsVolume && logsVolumeProvider) {
         dispatch(loadRelatedData(exploreId, RelatedDataType.LogsVolume));
       }
+
+      dispatch(loadRelatedData(exploreId, RelatedDataType.RelatedQuery));
     }
 
     dispatch(queryStoreSubscriptionAction({ exploreId, querySubscription: newQuerySub }));

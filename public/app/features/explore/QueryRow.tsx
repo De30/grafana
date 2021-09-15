@@ -1,17 +1,18 @@
 // Libraries
 import React, { PureComponent } from 'react';
-import { debounce, has } from 'lodash';
+import { debounce, get, has } from 'lodash';
 import { connect, ConnectedProps } from 'react-redux';
 import AngularQueryEditor from './QueryEditor';
 import { QueryRowActions } from './QueryRowActions';
 import { StoreState } from 'app/types';
-import { DataQuery, LoadingState, DataSourceApi } from '@grafana/data';
+import { DataQuery, LoadingState, DataSourceApi, RelatedDataType } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { ExploreItemState, ExploreId } from 'app/types/explore';
 import { highlightLogsExpressionAction } from './state/explorePane';
 import { ErrorContainer } from './ErrorContainer';
 import { changeQuery, modifyQueries, removeQueryRowAction, runQueries } from './state/query';
 import { HelpToggle } from '../query/components/HelpToggle';
+import { LinkButton } from '@grafana/ui';
 
 interface OwnProps {
   exploreId: ExploreId;
@@ -140,7 +141,7 @@ export class QueryRow extends PureComponent<QueryRowProps, QueryRowState> {
   }, 500);
 
   render() {
-    const { datasourceInstance, query, queryResponse, latency } = this.props;
+    const { datasourceInstance, query, queryResponse, latency, relatedQueries } = this.props;
 
     if (!datasourceInstance) {
       return <>Loading data source</>;
@@ -167,6 +168,15 @@ export class QueryRow extends PureComponent<QueryRowProps, QueryRowState> {
           />
         </div>
         {queryErrors.length > 0 && <ErrorContainer queryError={queryErrors[0]} />}
+        {relatedQueries.length ? (
+          <div>
+            {relatedQueries.map((query: DataQuery, index: number) => (
+              <div key={index} style={{ padding: '5px' }}>
+                There are related {query.queryType} in {query.datasource}. <LinkButton size="sm">show</LinkButton>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </>
     );
   }
@@ -177,6 +187,7 @@ function mapStateToProps(state: StoreState, { exploreId, index }: OwnProps) {
   const item: ExploreItemState = explore[exploreId]!;
   const { datasourceInstance, history, queries, range, absoluteRange, queryResponse, latency, eventBridge } = item;
   const query = queries[index];
+  const relatedQueries = get(item.relatedData, [RelatedDataType.RelatedQuery, query.refId], []);
 
   return {
     datasourceInstance,
@@ -186,6 +197,7 @@ function mapStateToProps(state: StoreState, { exploreId, index }: OwnProps) {
     absoluteRange,
     queryResponse,
     latency,
+    relatedQueries,
     exploreEvents: eventBridge,
   };
 }
