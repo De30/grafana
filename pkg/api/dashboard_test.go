@@ -1136,7 +1136,7 @@ func postDashboardScenario(t *testing.T, desc string, url string, routePattern s
 			dashboards.NewFolderService = origNewFolderService
 		})
 		dashboards.MockDashboardService(mock)
-		dashboards.NewProvisioningService = func(dboards.Store) dashboards.DashboardProvisioningService {
+		dashboards.NewProvisioningService = func(dboards.Store, bool) dashboards.DashboardProvisioningService {
 			return mockDashboardProvisioningService{}
 		}
 		mockFolderService(mockFolder)
@@ -1203,7 +1203,7 @@ func restoreDashboardVersionScenario(t *testing.T, desc string, url string, rout
 			dashboards.NewService = origNewDashboardService
 			dashboards.NewProvisioningService = origProvisioningService
 		})
-		dashboards.NewProvisioningService = func(dboards.Store) dashboards.DashboardProvisioningService {
+		dashboards.NewProvisioningService = func(dboards.Store, bool) dashboards.DashboardProvisioningService {
 			return mockDashboardProvisioningService{}
 		}
 		dashboards.MockDashboardService(mock)

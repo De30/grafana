@@ -33,7 +33,7 @@ func (l *LibraryElementService) requirePermissionsOnFolder(ctx context.Context, 
 		return models.ErrFolderAccessDenied
 	}
 
-	s := dashboards.NewFolderService(user.OrgId, user, l.SQLStore)
+	s := dashboards.NewFolderService(user.OrgId, user, l.SQLStore, l.Cfg.LegacyAlertingIsEnabled)
 	folder, err := s.GetFolderByID(ctx, folderID)
 	if err != nil {
 		return err

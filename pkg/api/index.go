@@ -215,7 +215,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		navTree = append(navTree, hs.getProfileNode(c))
 	}
 
-	if setting.AlertingEnabled {
+	if hs.Cfg.LegacyAlertingIsEnabled {
 		alertChildNavs := []*dtos.NavLink{
 			{Text: "Alert rules", Id: "alert-list", Url: hs.Cfg.AppSubURL + "/alerting/list", Icon: "list-ul"},
 		}

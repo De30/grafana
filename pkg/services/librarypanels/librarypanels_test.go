@@ -1099,7 +1099,7 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user models.Sign
 		return nil
 	}
 
-	dashboard, err := dashboards.NewService(sqlStore).SaveDashboard(dashItem, true)
+	dashboard, err := dashboards.NewService(sqlStore, true).SaveDashboard(dashItem, true)
 	require.NoError(t, err)
 
 	return dashboard
@@ -1109,7 +1109,7 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	items []folderACLItem) *models.Folder {
 	t.Helper()
 
-	s := dashboards.NewFolderService(user.OrgId, &user, sqlStore)
+	s := dashboards.NewFolderService(user.OrgId, &user, sqlStore, true)
 	t.Logf("Creating folder with title and UID %q", title)
 	folder, err := s.CreateFolder(context.Background(), title, title)
 	require.NoError(t, err)

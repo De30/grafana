@@ -38,16 +38,17 @@ type DashboardProvisioningService interface {
 }
 
 // NewService is a factory for creating a new dashboard service.
-var NewService = func(store dashboards.Store) DashboardService {
+var NewService = func(store dashboards.Store, legacyAlertingEnabled bool) DashboardService {
 	return &dashboardServiceImpl{
-		dashboardStore: store,
-		log:            log.New("dashboard-service"),
+		dashboardStore:          store,
+		log:                     log.New("dashboard-service"),
+		legacyAlertingIsEnabled: legacyAlertingEnabled,
 	}
 }
 
 // NewProvisioningService is a factory for creating a new dashboard provisioning service.
-var NewProvisioningService = func(store dashboards.Store) DashboardProvisioningService {
-	return NewService(store).(*dashboardServiceImpl)
+var NewProvisioningService = func(store dashboards.Store, legacyAlertingEnabled bool) DashboardProvisioningService {
+	return NewService(store, legacyAlertingEnabled).(*dashboardServiceImpl)
 }
 
 type SaveDashboardDTO struct {
@@ -60,10 +61,11 @@ type SaveDashboardDTO struct {
 }
 
 type dashboardServiceImpl struct {
-	dashboardStore dashboards.Store
-	orgId          int64
-	user           *models.SignedInUser
-	log            log.Logger
+	dashboardStore          dashboards.Store
+	orgId                   int64
+	user                    *models.SignedInUser
+	log                     log.Logger
+	legacyAlertingIsEnabled bool
 }
 
 func (dr *dashboardServiceImpl) GetProvisionedDashboardData(name string) ([]*models.DashboardProvisioning, error) {
@@ -152,6 +154,7 @@ func (dr *dashboardServiceImpl) buildSaveDashboardCommand(dto *SaveDashboardDTO,
 		return nil, models.ErrDashboardUpdateAccessDenied
 	}
 
+	fmt.Println(">>>>", dto.User)
 	cmd := &models.SaveDashboardCommand{
 		Dashboard: dash.Data,
 		Message:   dto.Message,
@@ -229,7 +232,7 @@ func (dr *dashboardServiceImpl) SaveProvisionedDashboard(dto *SaveDashboardDTO,
 		OrgId:   dto.OrgId,
 	}
 
-	cmd, err := dr.buildSaveDashboardCommand(dto, true, false)
+	cmd, err := dr.buildSaveDashboardCommand(dto, dr.legacyAlertingIsEnabled, false)
 	if err != nil {
 		return nil, err
 	}
@@ -240,9 +243,11 @@ func (dr *dashboardServiceImpl) SaveProvisionedDashboard(dto *SaveDashboardDTO,
 		return nil, err
 	}
 
-	// alerts
-	if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
-		return nil, err
+	if dr.legacyAlertingIsEnabled {
+		// alerts
+		if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
+			return nil, err
+		}
 	}
 
 	return dash, nil
@@ -263,8 +268,10 @@ func (dr *dashboardServiceImpl) SaveFolderForProvisionedDashboards(dto *SaveDash
 		return nil, err
 	}
 
-	if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
-		return nil, err
+	if dr.legacyAlertingIsEnabled {
+		if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
+			return nil, err
+		}
 	}
 
 	return dash, nil
@@ -278,7 +285,7 @@ func (dr *dashboardServiceImpl) SaveDashboard(dto *SaveDashboardDTO, allowUiUpda
 		dto.Dashboard.Data.Set("refresh", setting.MinRefreshInterval)
 	}
 
-	cmd, err := dr.buildSaveDashboardCommand(dto, true, !allowUiUpdate)
+	cmd, err := dr.buildSaveDashboardCommand(dto, dr.legacyAlertingIsEnabled, !allowUiUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -288,8 +295,10 @@ func (dr *dashboardServiceImpl) SaveDashboard(dto *SaveDashboardDTO, allowUiUpda
 		return nil, fmt.Errorf("saving dashboard failed: %w", err)
 	}
 
-	if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
-		return nil, err
+	if dr.legacyAlertingIsEnabled {
+		if err := UpdateAlerting(dr.dashboardStore, dto.OrgId, dash, dto.User); err != nil {
+			return nil, err
+		}
 	}
 
 	return dash, nil
@@ -388,7 +397,7 @@ func (s *FakeDashboardService) GetProvisionedDashboardDataByDashboardID(id int64
 }
 
 func MockDashboardService(mock *FakeDashboardService) {
-	NewService = func(dashboards.Store) DashboardService {
+	NewService = func(dashboards.Store, bool) DashboardService {
 		return mock
 	}
 }

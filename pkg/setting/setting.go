@@ -154,7 +154,6 @@ var (
 	Quota QuotaSettings
 
 	// Alerting
-	AlertingEnabled            bool
 	ExecuteAlerts              bool
 	AlertingRenderLimit        int
 	AlertingErrorOrTimeout     string
@@ -413,7 +412,8 @@ type Cfg struct {
 
 	// AlertingBaseInterval controls the alerting base interval in seconds.
 	// Only for internal use and not user configuration.
-	AlertingBaseInterval time.Duration
+	AlertingBaseInterval    time.Duration
+	LegacyAlertingIsEnabled bool
 
 	// Geomap base layer config
 	GeomapDefaultBaseLayerConfig map[string]interface{}
@@ -913,7 +913,7 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 	cfg.ApplicationInsightsConnectionString = analytics.Key("application_insights_connection_string").String()
 	cfg.ApplicationInsightsEndpointUrl = analytics.Key("application_insights_endpoint_url").String()
 
-	if err := readAlertingSettings(iniFile); err != nil {
+	if err := cfg.readAlertingSettings(iniFile); err != nil {
 		return err
 	}
 
@@ -1381,9 +1381,9 @@ func (cfg *Cfg) readUnifiedAlertingSettings(iniFile *ini.File) error {
 	return nil
 }
 
-func readAlertingSettings(iniFile *ini.File) error {
+func (cfg *Cfg) readAlertingSettings(iniFile *ini.File) error {
 	alerting := iniFile.Section("alerting")
-	AlertingEnabled = alerting.Key("enabled").MustBool(true)
+	cfg.LegacyAlertingIsEnabled = alerting.Key("enabled").MustBool(true)
 	ExecuteAlerts = alerting.Key("execute_alerts").MustBool(true)
 	AlertingRenderLimit = alerting.Key("concurrent_render_limit").MustInt(5)
 

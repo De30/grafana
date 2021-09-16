@@ -152,7 +152,7 @@ func (ps *ProvisioningServiceImpl) ProvisionNotifications() error {
 
 func (ps *ProvisioningServiceImpl) ProvisionDashboards() error {
 	dashboardPath := filepath.Join(ps.Cfg.ProvisioningPath, "dashboards")
-	dashProvisioner, err := ps.newDashboardProvisioner(dashboardPath, ps.SQLStore)
+	dashProvisioner, err := ps.newDashboardProvisioner(dashboardPath, ps.SQLStore, ps.Cfg.LegacyAlertingIsEnabled)
 	if err != nil {
 		return errutil.Wrap("Failed to create provisioner", err)
 	}

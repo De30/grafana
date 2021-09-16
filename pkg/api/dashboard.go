@@ -148,7 +148,7 @@ func (hs *HTTPServer) GetDashboard(c *models.ReqContext) response.Response {
 		meta.FolderUrl = query.Result.GetUrl()
 	}
 
-	svc := dashboards.NewProvisioningService(hs.SQLStore)
+	svc := dashboards.NewProvisioningService(hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	provisioningData, err := svc.GetProvisionedDashboardDataByDashboardID(dash.Id)
 	if err != nil {
 		return response.Error(500, "Error while checking if dashboard is provisioned", err)
@@ -249,7 +249,7 @@ func (hs *HTTPServer) deleteDashboard(c *models.ReqContext) response.Response {
 		hs.log.Error("Failed to disconnect library elements", "dashboard", dash.Id, "user", c.SignedInUser.UserId, "error", err)
 	}
 
-	svc := dashboards.NewService(hs.SQLStore)
+	svc := dashboards.NewService(hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	err = svc.DeleteDashboard(dash.Id, c.OrgId)
 	if err != nil {
 		var dashboardErr models.DashboardErr
@@ -282,7 +282,7 @@ func (hs *HTTPServer) PostDashboard(c *models.ReqContext, cmd models.SaveDashboa
 	cmd.OrgId = c.OrgId
 	cmd.UserId = c.UserId
 	if cmd.FolderUid != "" {
-		folders := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+		folders := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 		folder, err := folders.GetFolderByUID(ctx, cmd.FolderUid)
 		if err != nil {
 			if errors.Is(err, models.ErrFolderNotFound) {
@@ -305,7 +305,7 @@ func (hs *HTTPServer) PostDashboard(c *models.ReqContext, cmd models.SaveDashboa
 		}
 	}
 
-	svc := dashboards.NewProvisioningService(hs.SQLStore)
+	svc := dashboards.NewProvisioningService(hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	provisioningData, err := svc.GetProvisionedDashboardDataByDashboardID(dash.Id)
 	if err != nil {
 		return response.Error(500, "Error while checking if dashboard is provisioned", err)
@@ -330,7 +330,7 @@ func (hs *HTTPServer) PostDashboard(c *models.ReqContext, cmd models.SaveDashboa
 		Overwrite: cmd.Overwrite,
 	}
 
-	dashSvc := dashboards.NewService(hs.SQLStore)
+	dashSvc := dashboards.NewService(hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	dashboard, err := dashSvc.SaveDashboard(dashItem, allowUiUpdate)
 
 	if hs.Live != nil {

@@ -20,8 +20,9 @@ func TestDashboardService(t *testing.T) {
 
 		fakeStore := fakeDashboardStore{}
 		service := &dashboardServiceImpl{
-			log:            log.New("test.logger"),
-			dashboardStore: &fakeStore,
+			log:                     log.New("test.logger"),
+			dashboardStore:          &fakeStore,
+			legacyAlertingIsEnabled: true,
 		}
 
 		origNewDashboardGuardian := guardian.New
@@ -132,6 +133,7 @@ func TestDashboardService(t *testing.T) {
 				}
 
 				dto.Dashboard = models.NewDashboard("Dash")
+				dto.User = &models.SignedInUser{UserId: 1}
 				_, err := service.SaveDashboard(dto, false)
 				So(err.Error(), ShouldEqual, "alert validation error")
 			})

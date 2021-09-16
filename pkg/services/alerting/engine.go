@@ -40,7 +40,7 @@ type AlertEngine struct {
 
 // IsDisabled returns true if the alerting service is disable for this instance.
 func (e *AlertEngine) IsDisabled() bool {
-	return !setting.AlertingEnabled || !setting.ExecuteAlerts || e.Cfg.IsNgAlertEnabled()
+	return !e.Cfg.LegacyAlertingIsEnabled || !setting.ExecuteAlerts || e.Cfg.IsNgAlertEnabled()
 }
 
 // ProvideAlertEngine returns a new AlertEngine.

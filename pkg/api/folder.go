@@ -17,7 +17,7 @@ import (
 )
 
 func (hs *HTTPServer) GetFolders(c *models.ReqContext) response.Response {
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	folders, err := s.GetFolders(c.Req.Context(), c.QueryInt64("limit"), c.QueryInt64("page"))
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (hs *HTTPServer) GetFolders(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) GetFolderByUID(c *models.ReqContext) response.Response {
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	folder, err := s.GetFolderByUID(c.Req.Context(), macaron.Params(c.Req)[":uid"])
 	if err != nil {
 		return apierrors.ToFolderErrorResponse(err)
@@ -49,7 +49,7 @@ func (hs *HTTPServer) GetFolderByUID(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) GetFolderByID(c *models.ReqContext) response.Response {
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	folder, err := s.GetFolderByID(c.Req.Context(), c.ParamsInt64(":id"))
 	if err != nil {
 		return apierrors.ToFolderErrorResponse(err)
@@ -60,7 +60,7 @@ func (hs *HTTPServer) GetFolderByID(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) CreateFolder(c *models.ReqContext, cmd models.CreateFolderCommand) response.Response {
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	folder, err := s.CreateFolder(c.Req.Context(), cmd.Title, cmd.Uid)
 	if err != nil {
 		return apierrors.ToFolderErrorResponse(err)
@@ -78,7 +78,7 @@ func (hs *HTTPServer) CreateFolder(c *models.ReqContext, cmd models.CreateFolder
 }
 
 func (hs *HTTPServer) UpdateFolder(c *models.ReqContext, cmd models.UpdateFolderCommand) response.Response {
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	err := s.UpdateFolder(c.Req.Context(), macaron.Params(c.Req)[":uid"], &cmd)
 	if err != nil {
 		return apierrors.ToFolderErrorResponse(err)
@@ -89,7 +89,7 @@ func (hs *HTTPServer) UpdateFolder(c *models.ReqContext, cmd models.UpdateFolder
 }
 
 func (hs *HTTPServer) DeleteFolder(c *models.ReqContext) response.Response { // temporarily adding this function to HTTPServer, will be removed from HTTPServer when librarypanels featuretoggle is removed
-	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore)
+	s := dashboards.NewFolderService(c.OrgId, c.SignedInUser, hs.SQLStore, hs.Cfg.LegacyAlertingIsEnabled)
 	err := hs.LibraryElementService.DeleteLibraryElementsInFolder(c, macaron.Params(c.Req)[":uid"])
 	if err != nil {
 		if errors.Is(err, libraryelements.ErrFolderHasConnectedLibraryElements) {

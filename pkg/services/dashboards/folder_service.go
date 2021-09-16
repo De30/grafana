@@ -25,11 +25,12 @@ type FolderService interface {
 }
 
 // NewFolderService is a factory for creating a new folder service.
-var NewFolderService = func(orgID int64, user *models.SignedInUser, store dashboards.Store) FolderService {
+var NewFolderService = func(orgID int64, user *models.SignedInUser, store dashboards.Store, legacyAlertingIsEnabled bool) FolderService {
 	return &dashboardServiceImpl{
-		orgId:          orgID,
-		user:           user,
-		dashboardStore: store,
+		orgId:                   orgID,
+		user:                    user,
+		dashboardStore:          store,
+		legacyAlertingIsEnabled: legacyAlertingIsEnabled,
 	}
 }
 

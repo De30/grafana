@@ -246,7 +246,7 @@ func (s *fakeFolderService) DeleteFolder(ctx context.Context, uid string, forceD
 
 func mockFolderService(mock *fakeFolderService) {
 	dashboards.NewFolderService = func(orgId int64, user *models.SignedInUser,
-		dashboardStore dboards.Store) dashboards.FolderService {
+		dashboardStore dboards.Store, legacyAlertingEnabled bool) dashboards.FolderService {
 		return mock
 	}
 }

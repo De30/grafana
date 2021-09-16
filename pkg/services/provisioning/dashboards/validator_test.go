@@ -46,10 +46,10 @@ func TestDuplicatesValidator(t *testing.T) {
 			Options: map[string]interface{}{"path": dashboardContainingUID},
 		}
 
-		reader1, err := NewDashboardFileReader(cfg1, logger, nil)
+		reader1, err := NewDashboardFileReader(cfg1, logger, nil, true)
 		require.NoError(t, err)
 
-		reader2, err := NewDashboardFileReader(cfg2, logger, nil)
+		reader2, err := NewDashboardFileReader(cfg2, logger, nil, true)
 		require.NoError(t, err)
 
 		duplicateValidator := newDuplicateValidator(logger, []*FileReader{reader1, reader2})
@@ -87,10 +87,10 @@ func TestDuplicatesValidator(t *testing.T) {
 			Options: map[string]interface{}{"path": defaultDashboards},
 		}
 
-		reader1, err := NewDashboardFileReader(cfg1, logger, nil)
+		reader1, err := NewDashboardFileReader(cfg1, logger, nil, true)
 		require.NoError(t, err)
 
-		reader2, err := NewDashboardFileReader(cfg2, logger, nil)
+		reader2, err := NewDashboardFileReader(cfg2, logger, nil, true)
 		require.NoError(t, err)
 
 		duplicateValidator := newDuplicateValidator(logger, []*FileReader{reader1, reader2})
