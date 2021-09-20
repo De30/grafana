@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend"
-
 	"github.com/grafana/grafana/pkg/models"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/live"
 )
@@ -18,7 +17,6 @@ import (
 // Channel is used for rule routing, if the channel is empty then frame processing
 // will try to take current rule Processor and Outputter. If channel is not empty
 // then frame processing will be redirected to a corresponding channel rule.
-// TODO: avoid recursion, increment a counter while frame travels over pipeline steps, make it configurable.
 type ChannelFrame struct {
 	Channel string
 	Frame   *data.Frame
@@ -112,7 +110,7 @@ func New(ruleGetter ChannelRuleGetter) (*Pipeline, error) {
 		ruleGetter: ruleGetter,
 	}
 	if os.Getenv("GF_LIVE_PIPELINE_DEV") != "" {
-		go postTestData() // TODO: temporary for development, remove before merge.
+		go postTestData() // TODO: temporary for pipeline development, remove before releasing.
 	}
 	return p, nil
 }
