@@ -49,12 +49,22 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
     const deps = action.payload;
     deps.target.target = deps.target.target || '';
 
-    await deps.datasource.waitForFuncDefsLoaded();
+    let { queryModel } = state;
+    let modelChanged = deps.target?.target !== state.target?.target;
+    let datasourceChanged = deps.datasource !== state.datasource;
+
+    if (datasourceChanged) {
+      await deps.datasource.waitForFuncDefsLoaded();
+    }
+
+    if (modelChanged || datasourceChanged) {
+      queryModel = new GraphiteQuery(deps.datasource, deps.target, getTemplateSrv());
+    }
 
     state = {
       ...state,
       ...deps,
-      queryModel: new GraphiteQuery(deps.datasource, deps.target, getTemplateSrv()),
+      queryModel,
       supportsTags: deps.datasource.supportsTags,
       paused: false,
       removeTagValue: '-- remove tag --',
@@ -62,7 +72,9 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
       queries: deps.queries,
     };
 
-    await buildSegments(state, false);
+    if (modelChanged) {
+      await buildSegments(state, false);
+    }
   }
   if (actions.timeRangeChanged.match(action)) {
     state.range = action.payload;
