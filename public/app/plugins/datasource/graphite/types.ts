@@ -1,6 +1,5 @@
 import { DataQuery, DataSourceJsonData, TimeRange } from '@grafana/data';
 import { GraphiteDatasource } from './datasource';
-import { TemplateSrv } from '../../../features/templating/template_srv';
 
 export interface GraphiteQuery extends DataQuery {
   target?: string;
@@ -75,7 +74,6 @@ export type GraphiteQueryEditorDependencies = {
   target: any;
   datasource: GraphiteDatasource;
   range?: TimeRange;
-  templateSrv: TemplateSrv;
   queries: DataQuery[];
   refresh: (target: string) => void;
 };

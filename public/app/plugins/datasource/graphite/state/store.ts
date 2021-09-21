@@ -45,13 +45,14 @@ export type GraphiteQueryEditorState = {
 const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise<GraphiteQueryEditorState> => {
   state = { ...state };
 
-  if (actions.init.match(action)) {
+  if (actions.updateProps.match(action)) {
     const deps = action.payload;
     deps.target.target = deps.target.target || '';
 
     let { queryModel } = state;
     let modelChanged = deps.target?.target !== state.target?.target;
     let datasourceChanged = deps.datasource !== state.datasource;
+    let queriesChanged = deps.queries !== state.queries;
 
     if (datasourceChanged) {
       await deps.datasource.waitForFuncDefsLoaded();
@@ -74,19 +75,9 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
 
     if (modelChanged) {
       await buildSegments(state, false);
+    } else if (queriesChanged) {
+      handleTargetChanged(state);
     }
-  }
-  if (actions.timeRangeChanged.match(action)) {
-    state.range = action.payload;
-  }
-  if (actions.queriesChanged.match(action)) {
-    state.queries = action.payload;
-    handleTargetChanged(state);
-  }
-  if (actions.queryChanged.match(action)) {
-    state.target.target = action.payload.target || '';
-    await parseTarget(state);
-    handleTargetChanged(state);
   }
   if (actions.segmentValueChanged.match(action)) {
     const { segment: segmentOrString, index: segmentIndex } = action.payload;

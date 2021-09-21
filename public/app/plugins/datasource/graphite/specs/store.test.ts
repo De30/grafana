@@ -1,11 +1,19 @@
 import { dispatch } from 'app/store/store';
 import gfunc from '../gfunc';
-import { TemplateSrvStub } from 'test/specs/helpers';
 import { silenceConsoleOutput } from 'test/core/utils/silenceConsoleOutput';
 import { actions } from '../state/actions';
 import { getAltSegmentsSelectables, getTagsSelectables, getTagsAsSegmentsSelectables } from '../state/providers';
 import { GraphiteSegment } from '../types';
 import { createStore } from '../state/store';
+import { DataQuery } from '@grafana/data';
+import { TemplateSrv } from '../../../../features/templating/template_srv';
+
+const templateSrv = new TemplateSrv();
+
+jest.mock('@grafana/runtime', () => ({
+  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  getTemplateSrv: () => templateSrv,
+}));
 
 jest.mock('app/core/utils/promiseToDigest', () => ({
   promiseToDigest: (scope: any) => {
@@ -28,7 +36,7 @@ async function changeTarget(ctx: any, target: string): Promise<void> {
   await ctx.dispatch(actions.toggleEditorMode());
 }
 
-describe('Graphite actions', async () => {
+describe('Graphite actions', () => {
   const ctx = {
     datasource: {
       metricFindQuery: jest.fn(() => Promise.resolve([])),
@@ -50,13 +58,11 @@ describe('Graphite actions', async () => {
     });
 
     await ctx.dispatch(
-      actions.init({
+      actions.updateProps({
         datasource: ctx.datasource,
         target: ctx.target,
         refresh: jest.fn(),
         queries: [],
-        //@ts-ignore
-        templateSrv: new TemplateSrvStub(),
       })
     );
   });
@@ -176,7 +182,14 @@ describe('Graphite actions', async () => {
       expect(ctx.state.segments[0].value).toBe('my');
       expect(ctx.state.segments[1].value).toBe('query');
 
-      await ctx.dispatch(actions.queryChanged({ target: 'new.metrics.*', refId: 'A' }));
+      await ctx.dispatch(
+        actions.updateProps({
+          datasource: ctx.datasource,
+          target: { target: 'new.metrics.*', refId: 'A' },
+          refresh: jest.fn(),
+          queries: [],
+        })
+      );
       expect(ctx.state.target.target).toBe('new.metrics.*');
       expect(ctx.state.segments[0].value).toBe('new');
       expect(ctx.state.segments[1].value).toBe('metrics');
@@ -327,12 +340,17 @@ describe('Graphite actions', async () => {
 
     it('targetFull should include nested queries', async () => {
       await ctx.dispatch(
-        actions.queriesChanged([
-          {
-            target: 'nested.query.count',
-            refId: 'A',
-          },
-        ])
+        actions.updateProps({
+          datasource: ctx.datasource,
+          target: ctx.target,
+          refresh: jest.fn(),
+          queries: [
+            {
+              target: 'nested.query.count',
+              refId: 'A',
+            } as DataQuery,
+          ],
+        })
       );
 
       expect(ctx.state.target.target).toBe('scaleToSeconds(#A, 60)');

@@ -4,7 +4,6 @@ import { QueryEditorProps } from '@grafana/data';
 import { GraphiteDatasource } from '../datasource';
 import { GraphiteOptions, GraphiteQuery } from '../types';
 import { createStore, GraphiteQueryEditorState } from './store';
-import { getTemplateSrv } from 'app/features/templating/template_srv';
 import { actions } from './actions';
 import { useDebounce } from 'react-use';
 
@@ -42,11 +41,10 @@ export const GraphiteQueryEditorContext = ({
   useDebounce(
     () => {
       dispatch(
-        actions.init({
+        actions.updateProps({
           target: query,
           datasource: datasource,
           range: range,
-          templateSrv: getTemplateSrv(),
           // list of queries is passed only when the editor is in Dashboards. This is to allow interpolation
           // of sub-queries which are stored in "targetFull" property used by alerting in the backend.
           queries: queries || [],
