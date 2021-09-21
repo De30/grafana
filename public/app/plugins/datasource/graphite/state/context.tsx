@@ -45,8 +45,6 @@ export const GraphiteQueryEditorContext = ({
           target: query,
           datasource: datasource,
           range: range,
-          // list of queries is passed only when the editor is in Dashboards. This is to allow interpolation
-          // of sub-queries which are stored in "targetFull" property used by alerting in the backend.
           queries: queries || [],
           refresh: (target: string) => {
             onChange({ ...query, target: target });
