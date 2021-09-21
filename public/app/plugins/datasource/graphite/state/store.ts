@@ -50,8 +50,11 @@ const reducer = async (action: Action, state: GraphiteQueryEditorState): Promise
     deps.target.target = deps.target.target || '';
 
     let { queryModel } = state;
+    // model should be updated unconditionally because it makes a HTTP request to validate the query
     let modelChanged = deps.target?.target !== state.target?.target;
+    // when data source changes - a new model is created and functions are loaded
     let datasourceChanged = deps.datasource !== state.datasource;
+    // current model has to be updated when queries change to support sub-queries
     let queriesChanged = deps.queries !== state.queries;
 
     if (datasourceChanged) {
