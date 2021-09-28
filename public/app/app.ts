@@ -36,6 +36,7 @@ import { getDefaultVariableAdapters, variableAdapters } from './features/variabl
 import { initDevFeatures } from './dev';
 import { getStandardTransformers } from 'app/core/utils/standardTransformers';
 import { SentryEchoBackend } from './core/services/echo/backends/sentry/SentryBackend';
+import { profiler } from 'app/core/profiler';
 import { setVariableQueryRunner, VariableQueryRunner } from './features/variables/query/VariableQueryRunner';
 import { configureStore } from './store/configureStore';
 import { AppWrapper } from './AppWrapper';
@@ -88,6 +89,7 @@ export class GrafanaApp {
     standardTransformersRegistry.setInit(getStandardTransformers);
     variableAdapters.setInit(getDefaultVariableAdapters);
     monacoLanguageRegistry.setInit(getDefaultMonacoLanguages);
+    profiler.init();
 
     setQueryRunnerFactory(() => new QueryRunner());
     setVariableQueryRunner(new VariableQueryRunner());

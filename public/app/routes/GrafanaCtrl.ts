@@ -14,7 +14,6 @@ import {
 } from '@grafana/runtime';
 import config from 'app/core/config';
 import coreModule from 'app/core/core_module';
-import { profiler } from 'app/core/profiler';
 import appEvents from 'app/core/app_events';
 import { DatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { AngularLoader, setAngularLoader } from 'app/core/services/AngularLoader';
@@ -64,7 +63,6 @@ export class GrafanaCtrl {
       $scope.appSubUrl = config.appSubUrl;
       $scope._ = _;
 
-      profiler.init(config, $rootScope);
       utilSrv.init();
     };
 

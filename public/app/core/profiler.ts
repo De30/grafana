@@ -1,18 +1,9 @@
-import { GrafanaRootScope } from 'app/routes/GrafanaCtrl';
-
 export class Profiler {
   panelsRendered = 0;
-  enabled?: boolean = undefined;
-  $rootScope?: GrafanaRootScope = undefined;
   window?: any = undefined;
 
-  init(config: any, $rootScope: GrafanaRootScope) {
-    this.$rootScope = $rootScope;
+  init() {
     this.window = window;
-
-    if (!this.enabled) {
-      return;
-    }
   }
 
   renderingCompleted() {
