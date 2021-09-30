@@ -328,9 +328,13 @@ export class QueryGroup extends PureComponent<Props, State> {
     return (dsSettings.meta.alerting || dsSettings.meta.mixed) === true;
   }
 
-  renderExtraActions() {
+  renderExtraActions(dsSettings: DataSourceInstanceSettings) {
     return GroupActionComponents.getAllExtraRenderAction().map((c) => {
-      return React.createElement(c, { onAddQuery: this.onAddQuery });
+      return React.createElement(c, {
+        onAddQuery: this.onAddQuery,
+        onChangeDataSource: this.onChangeDataSource,
+        dataSource: dsSettings,
+      });
     });
   }
 
@@ -363,7 +367,7 @@ export class QueryGroup extends PureComponent<Props, State> {
             </Button>
           </Tooltip>
         )}
-        {this.renderExtraActions()}
+        {this.renderExtraActions(dsSettings)}
       </HorizontalGroup>
     );
   }
