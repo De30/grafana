@@ -698,8 +698,7 @@ def postgres_integration_tests_step():
             'POSTGRES_HOST': 'postgres',
         },
         'commands': [
-            'mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30',
-            'mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list',
+            'apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30',
             'apt-get install -yq postgresql-client',
             './bin/dockerize -wait tcp://postgres:5432 -timeout 120s',
             'psql -p 5432 -h postgres -U grafanatest -d grafanatest -f ' +
@@ -723,8 +722,7 @@ def mysql_integration_tests_step():
             'MYSQL_HOST': 'mysql',
         },
         'commands': [
-            'mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30',
-            'mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list',
+            'apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30',
             'apt-get install -yq default-mysql-client',
             './bin/dockerize -wait tcp://mysql:3306 -timeout 120s',
             'cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass',

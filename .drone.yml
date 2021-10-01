@@ -198,8 +198,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -216,8 +215,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -508,8 +506,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -526,8 +523,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -937,8 +933,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -955,8 +950,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -1335,8 +1329,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -1353,8 +1346,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -1885,8 +1877,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -1903,8 +1894,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -2272,8 +2262,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -2290,8 +2279,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -2818,8 +2806,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -2836,8 +2823,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -3183,8 +3169,7 @@ steps:
 - name: postgres-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq postgresql-client
   - ./bin/dockerize -wait tcp://postgres:5432 -timeout 120s
   - psql -p 5432 -h postgres -U grafanatest -d grafanatest -f devenv/docker/blocks/postgres_tests/setup.sql
@@ -3201,8 +3186,7 @@ steps:
 - name: mysql-integration-tests
   image: grafana/build-container:1.4.2
   commands:
-  - mv /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.list.disabled; apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
-  - mv /etc/apt/sources.list.d/nodesource.list.disabled /etc/apt/sources.list.d/nodesource.list
+  - apt-get update; apt-get -y upgrade; apt-get  install -y ca-certificates libgnutls30
   - apt-get install -yq default-mysql-client
   - ./bin/dockerize -wait tcp://mysql:3306 -timeout 120s
   - cat devenv/docker/blocks/mysql_tests/setup.sql | mysql -h mysql -P 3306 -u root -prootpass
@@ -3524,6 +3508,6 @@ get:
 
 ---
 kind: signature
-hmac: 1963852802141adda7e86247b0c80e85a2cb90edef6486abdfbefd095e903201
+hmac: be7eda35d5b0b8f3110a2225ef2277ea331eb3b90fcffd275c144a95d300d127
 
 ...
