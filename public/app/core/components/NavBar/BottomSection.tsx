@@ -44,54 +44,56 @@ export default function BottomSection() {
 
   return (
     <div data-testid="bottom-section-items" className={styles.container}>
-      {!isSignedIn && (
-        <NavBarItem label="Sign In" target="_self" url={forcedLoginUrl}>
-          <Icon name="signout" size="xl" />
-        </NavBarItem>
-      )}
-      {bottomNav.map((link, index) => {
-        let menuItems = link.children || [];
-
-        if (link.id === 'help') {
-          menuItems = [
-            ...getFooterLinks(),
-            {
-              text: 'Keyboard shortcuts',
-              icon: 'keyboard',
-              onClick: onOpenShortcuts,
-            },
-          ];
-        }
-
-        if (link.showOrgSwitcher) {
-          menuItems = [
-            ...menuItems,
-            {
-              text: 'Switch organization',
-              icon: 'arrow-random',
-              onClick: toggleSwitcherModal,
-            },
-          ];
-        }
-
-        return (
-          <NavBarItem
-            key={`${link.url}-${index}`}
-            isActive={!isSearchActive(location) && activeItemId === link.id}
-            label={link.text}
-            menuItems={menuItems}
-            menuSubTitle={link.subTitle}
-            onClick={link.onClick}
-            reverseMenuDirection
-            target={link.target}
-            url={link.url}
-          >
-            {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-            {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+      <ul role="menu">
+        {!isSignedIn && (
+          <NavBarItem label="Sign In" target="_self" url={forcedLoginUrl}>
+            <Icon name="signout" size="xl" />
           </NavBarItem>
-        );
-      })}
-      {showSwitcherModal && <OrgSwitcher onDismiss={toggleSwitcherModal} />}
+        )}
+        {bottomNav.map((link, index) => {
+          let menuItems = link.children || [];
+
+          if (link.id === 'help') {
+            menuItems = [
+              ...getFooterLinks(),
+              {
+                text: 'Keyboard shortcuts',
+                icon: 'keyboard',
+                onClick: onOpenShortcuts,
+              },
+            ];
+          }
+
+          if (link.showOrgSwitcher) {
+            menuItems = [
+              ...menuItems,
+              {
+                text: 'Switch organization',
+                icon: 'arrow-random',
+                onClick: toggleSwitcherModal,
+              },
+            ];
+          }
+
+          return (
+            <NavBarItem
+              key={`${link.url}-${index}`}
+              isActive={!isSearchActive(location) && activeItemId === link.id}
+              label={link.text}
+              menuItems={menuItems}
+              menuSubTitle={link.subTitle}
+              onClick={link.onClick}
+              reverseMenuDirection
+              target={link.target}
+              url={link.url}
+            >
+              {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+              {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+            </NavBarItem>
+          );
+        })}
+        {showSwitcherModal && <OrgSwitcher onDismiss={toggleSwitcherModal} />}
+      </ul>
     </div>
   );
 }

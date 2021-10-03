@@ -29,9 +29,13 @@ export const NavBar: FC = React.memo(() => {
 
   return (
     <nav className={cx(styles.sidemenu, 'sidemenu')} data-testid="sidemenu" aria-label="Main menu">
-      <a href={homeUrl} className={styles.homeLogo}>
-        <Branding.MenuLogo />
-      </a>
+      <ul>
+        <li>
+          <a href={homeUrl} className={styles.homeLogo}>
+            <Branding.MenuLogo />
+          </a>
+        </li>
+      </ul>
       <div className={styles.mobileSidemenuLogo} onClick={toggleNavBarSmallBreakpoint} key="hamburger">
         <Icon name="bars" size="xl" />
         <span className={styles.closeButton}>

@@ -23,24 +23,26 @@ const TopSection = () => {
 
   return (
     <div data-testid="top-section-items" className={styles.container}>
-      <NavBarItem isActive={isSearchActive(location)} label="Search dashboards" onClick={onOpenSearch}>
-        <Icon name="search" size="xl" />
-      </NavBarItem>
-      {mainLinks.map((link, index) => {
-        return (
-          <NavBarItem
-            key={`${link.id}-${index}`}
-            isActive={!isSearchActive(location) && activeItemId === link.id}
-            label={link.text}
-            menuItems={link.children}
-            target={link.target}
-            url={link.url}
-          >
-            {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-            {link.img && <img src={link.img} alt={`${link.text} logo`} />}
-          </NavBarItem>
-        );
-      })}
+      <ul role="menu">
+        <NavBarItem isActive={isSearchActive(location)} label="Search dashboards" onClick={onOpenSearch}>
+          <Icon name="search" size="xl" />
+        </NavBarItem>
+        {mainLinks.map((link, index) => {
+          return (
+            <NavBarItem
+              key={`${link.id}-${index}`}
+              isActive={!isSearchActive(location) && activeItemId === link.id}
+              label={link.text}
+              menuItems={link.children}
+              target={link.target}
+              url={link.url}
+            >
+              {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+              {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+            </NavBarItem>
+          );
+        })}
+      </ul>
     </div>
   );
 };
@@ -54,7 +56,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 
     ${theme.breakpoints.up('md')} {
       display: flex;
-      flex-direction: inherit;
+      flex-direction: column;
       margin-top: ${theme.spacing(5)};
     }
 

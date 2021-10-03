@@ -56,7 +56,7 @@ const NavBarItem = ({
   }
 
   return (
-    <div className={cx(styles.container, 'dropdown', { dropup: reverseMenuDirection })}>
+    <li role="menuitem" className={cx(styles.container, 'dropdown', { dropup: reverseMenuDirection })}>
       {element}
       <NavBarDropdown
         headerTarget={target}
@@ -67,7 +67,7 @@ const NavBarItem = ({
         reverseDirection={reverseMenuDirection}
         subtitleText={menuSubTitle}
       />
-    </div>
+    </li>
   );
 };
 
