@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { css, cx } from '@emotion/css';
 import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 import { Link, useTheme2 } from '@grafana/ui';
@@ -14,7 +14,11 @@ export interface Props {
   reverseMenuDirection?: boolean;
   target?: HTMLAnchorElement['target'];
   url?: string;
+  shouldOpen?: boolean;
 }
+
+const modulo = (a: number, n: number) => ((a % n) + n) % n;
+const UNFOCUSED = -1;
 
 const NavBarItem = ({
   isActive = false,
@@ -26,6 +30,7 @@ const NavBarItem = ({
   reverseMenuDirection = false,
   target,
   url,
+  shouldOpen = false,
 }: Props) => {
   const theme = useTheme2();
   const styles = getStyles(theme, isActive);
@@ -34,18 +39,28 @@ const NavBarItem = ({
       <span className={styles.icon}>{children}</span>
     </button>
   );
+  const navItemRef = useRef<HTMLLIElement>(null);
+  const [focusedSubNavItem, setFocusedSubNavItem] = useState(UNFOCUSED);
+
+  useEffect(() => {
+    if (navItemRef.current !== null) {
+      const navSubItems = navItemRef?.current?.querySelectorAll<HTMLLIElement>(':scope > ul > li');
+      navSubItems[focusedSubNavItem]?.focus();
+
+      navSubItems?.forEach((subItem, index) => {
+        if (shouldOpen && index === focusedSubNavItem) {
+          subItem.tabIndex = 0;
+        } else {
+          subItem.tabIndex = -1;
+        }
+      });
+    }
+  }, [navItemRef, shouldOpen, focusedSubNavItem]);
 
   if (url) {
     element =
       !target && url.startsWith('/') ? (
-        <Link
-          className={styles.element}
-          href={url}
-          target={target}
-          aria-label={label}
-          onClick={onClick}
-          aria-haspopup="true"
-        >
+        <Link className={styles.element} href={url} target={target} aria-label={label} onClick={onClick}>
           <span className={styles.icon}>{children}</span>
         </Link>
       ) : (
@@ -55,8 +70,54 @@ const NavBarItem = ({
       );
   }
 
+  const handleKeys = (event: React.KeyboardEvent) => {
+    const navSubItemsCount = navItemRef?.current?.querySelectorAll<HTMLLIElement>(':scope > ul > li').length ?? 0;
+    switch (event.key) {
+      case 'ArrowRight': {
+        const nextFocusSubItem = modulo(focusedSubNavItem + 1, navSubItemsCount);
+        setFocusedSubNavItem(nextFocusSubItem);
+        break;
+      }
+      case 'ArrowDown': {
+        const nextFocusSubItem = modulo(focusedSubNavItem + 1, navSubItemsCount);
+        setFocusedSubNavItem(nextFocusSubItem);
+        break;
+      }
+      case 'ArrowUp': {
+        const nextFocusSubItem = modulo(focusedSubNavItem - 1, navSubItemsCount);
+        setFocusedSubNavItem(nextFocusSubItem);
+        break;
+      }
+      case 'ArrowLeft': {
+        setFocusedSubNavItem(UNFOCUSED);
+        break;
+      }
+
+      case 'Enter': {
+        setFocusedSubNavItem(UNFOCUSED);
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  };
+
+  const handleFocus = () => {
+    // open tv mode
+    navItemRef.current?.setAttribute('aria-expanded', 'true');
+  };
+
   return (
-    <li role="menuitem" className={cx(styles.container, 'dropdown', { dropup: reverseMenuDirection })}>
+    <li
+      role="menuitem"
+      aria-haspopup={menuItems?.length > 0 ? 'true' : false}
+      className={cx(styles.container, 'dropdown', { dropup: reverseMenuDirection })}
+      onFocus={handleFocus}
+      ref={navItemRef}
+      onKeyDown={handleKeys}
+    >
       {element}
       <NavBarDropdown
         headerTarget={target}
@@ -107,6 +168,20 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
 
         &.dropup .dropdown-menu {
           top: auto;
+        }
+      }
+
+      &[aria-expanded='true'] {
+        .dropdown-menu {
+          animation: dropdown-anim 150ms ease-in-out 100ms forwards;
+          display: flex;
+          // important to overlap it otherwise it can be hidden
+          // again by the mouse getting outside the hover space
+          left: ${theme.components.sidemenu.width - 1}px;
+          margin: 0;
+          opacity: 0;
+          top: 0;
+          z-index: ${theme.zIndex.sidemenu};
         }
       }
     }
