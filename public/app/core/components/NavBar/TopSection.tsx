@@ -74,12 +74,34 @@ const TopSection = () => {
         }
         break;
       }
+
+      case 'ArrowDown': {
+        event.stopPropagation();
+        event.preventDefault();
+        // focus  next element submenu
+        if (!shouldFocusSubItems) {
+          setFocusedItem(modulo(focusedItem + 1, menuCount));
+        }
+
+        break;
+      }
+
+      case 'ArrowUp': {
+        event.stopPropagation();
+        event.preventDefault();
+        // focus  next element submenu
+        if (!shouldFocusSubItems) {
+          setFocusedItem(modulo(focusedItem - 1, menuCount));
+        }
+        break;
+      }
       case 'ArrowLeft': {
         event.stopPropagation();
         event.preventDefault();
         // focus  first element submenu
         if (currentMenuItemFocus?.getAttribute('aria-expanded') === 'true') {
           setShouldFocusSubItems(false);
+          currentMenuItemFocus?.focus();
         }
         break;
       }
@@ -92,6 +114,8 @@ const TopSection = () => {
 
         // go to link
         event.target.querySelector('a')?.click();
+        event.target.querySelector('button')?.click();
+
         break;
       }
       default:
@@ -111,9 +135,18 @@ const TopSection = () => {
 
   const closeSubMenus = () => {};
 
+  const handleHover = (event: React.MouseEvent) => {
+    const currentMenuItemFocus = menuRef.current?.children[focusedItem] as HTMLLIElement | null;
+
+    if (event.target !== currentMenuItemFocus) {
+      currentMenuItemFocus?.setAttribute('aria-expanded', 'false');
+      setFocusedItem(UNFOCUSED);
+    }
+  };
+
   return (
     <div data-testid="top-section-items" className={styles.container}>
-      <ul role="menu" ref={menuRef} onKeyDown={handleKeys} onFocus={handleFocus}>
+      <ul role="menu" ref={menuRef} onKeyDown={handleKeys} onFocus={handleFocus} onMouseEnter={handleHover}>
         <NavBarItem
           shouldOpen={shouldFocusSubItems}
           isActive={isSearchActive(location)}

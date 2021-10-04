@@ -81,11 +81,19 @@ const NavBarItem = ({
       case 'ArrowDown': {
         const nextFocusSubItem = modulo(focusedSubNavItem + 1, navSubItemsCount);
         setFocusedSubNavItem(nextFocusSubItem);
+        if (shouldOpen) {
+          event.stopPropagation();
+        }
         break;
       }
+
       case 'ArrowUp': {
         const nextFocusSubItem = modulo(focusedSubNavItem - 1, navSubItemsCount);
         setFocusedSubNavItem(nextFocusSubItem);
+        if (shouldOpen) {
+          event.stopPropagation();
+        }
+
         break;
       }
       case 'ArrowLeft': {
