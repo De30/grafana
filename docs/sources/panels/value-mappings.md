@@ -118,7 +118,7 @@ Create a mapping for a range of values.
 
 Create a mapping based on a regular expression.
 
-![Map a regular expression](/static/img/docs/value-mappings/map-regex-8-0.png)
+![Map a regular expression](/static/img/docs/panels/value-mappings/regex-value-mapping.png)
 
 1. [Open the panel editor]({{< relref "./panel-editor.md#open-the-panel-editor" >}}).
 1. In the Value mappings section of the side pane, click **Add value mappings**.
