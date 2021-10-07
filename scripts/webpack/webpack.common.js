@@ -1,8 +1,10 @@
 const fs = require('fs-extra');
 const path = require('path');
 const webpack = require('webpack');
-
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const deps = require('../../package.json').dependencies;
 
 class CopyUniconsPlugin {
   apply(compiler) {
@@ -71,6 +73,13 @@ module.exports = {
       Buffer: ['buffer', 'Buffer'],
     }),
     new CopyUniconsPlugin(),
+    new ModuleFederationPlugin({
+      name: 'grafana',
+      shared: {
+        react: { eager: true, singleton: true, requiredVersion: deps.react },
+        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] },
+      },
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {
