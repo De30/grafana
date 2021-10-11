@@ -248,9 +248,49 @@ export function importPanelPluginFromMeta(meta: grafanaData.PanelPluginMeta): Pr
   return getPanelPlugin(meta);
 }
 
+declare let __webpack_init_sharing__;
+declare let __webpack_share_scopes__;
+
+async function importFederatedModule({ url, scope, module }: { url: string; scope: string; module: string }) {
+  await new Promise<void>((resolve, reject) => {
+    const element = document.createElement('script');
+
+    element.src = url;
+    element.type = 'text/javascript';
+    element.async = true;
+
+    element.onload = () => {
+      console.log(`Dynamic Script Loaded: ${url}`);
+      resolve();
+    };
+
+    element.onerror = (err) => {
+      console.error(`Dynamic Script Error: ${url}`);
+      reject(err);
+    };
+
+    document.body.appendChild(element);
+  });
+
+  await __webpack_init_sharing__('default');
+  const container = window[scope];
+  await container.init(__webpack_share_scopes__.default);
+  const factory = await container.get(module);
+
+  return factory();
+}
+
 function getPanelPlugin(meta: grafanaData.PanelPluginMeta): Promise<grafanaData.PanelPlugin> {
   if (meta.moduleLoader === 'federated-modules') {
-    return Promise.reject('Federated Modules needs a module loader');
+    console.log({ meta });
+    // return Promise.reject('Federated Modules needs a module loader');
+    return importFederatedModule({
+      scope: _.camelCase(meta.id),
+      url: `${meta.baseUrl}/remoteEntry.js`,
+      module: './module',
+    }).then((factory) => {
+      console.log(factory);
+    });
   } else {
     return importPluginModule(meta.module)
       .then((pluginExports) => {
