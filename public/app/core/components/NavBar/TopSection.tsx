@@ -59,7 +59,16 @@ const TopSection = () => {
         if (event.shiftKey) {
           setFocusedItem(modulo(focusedItem - 1, menuCount));
         } else {
-          setFocusedItem(modulo(focusedItem + 1, menuCount));
+          if (focusedItem === menuCount - 1) {
+            if (currentMenuItemFocus?.getAttribute('aria-expanded') === 'true') {
+              currentMenuItemFocus.setAttribute('aria-expanded', 'false');
+              setFocusedItem(UNFOCUSED);
+            }
+
+            document.querySelector<HTMLAnchorElement>('.main-view a')?.focus();
+          } else {
+            setFocusedItem(modulo(focusedItem + 1, menuCount));
+          }
         }
         //reset subindex
         // setFocusedSubItem(-1);
@@ -117,6 +126,15 @@ const TopSection = () => {
         event.target.querySelector('button')?.click();
 
         break;
+      }
+      case 'Escape':
+      case 'Esc': {
+        if (currentMenuItemFocus?.getAttribute('aria-expanded') === 'true') {
+          currentMenuItemFocus.setAttribute('aria-expanded', 'false');
+          setFocusedItem(UNFOCUSED);
+        }
+
+        document.querySelector<HTMLAnchorElement>('.main-view a')?.focus();
       }
       default:
         break;
