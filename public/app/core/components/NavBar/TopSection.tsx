@@ -64,8 +64,7 @@ const TopSection = () => {
               currentMenuItemFocus.setAttribute('aria-expanded', 'false');
               setFocusedItem(UNFOCUSED);
             }
-
-            document.querySelector<HTMLAnchorElement>('.main-view a')?.focus();
+            document.querySelector<HTMLAnchorElement>('div[data-testid=bottom-section-items] a')?.focus();
           } else {
             setFocusedItem(modulo(focusedItem + 1, menuCount));
           }
@@ -89,7 +88,15 @@ const TopSection = () => {
         event.preventDefault();
         // focus  next element submenu
         if (!shouldFocusSubItems) {
-          setFocusedItem(modulo(focusedItem + 1, menuCount));
+          if (focusedItem === menuCount - 1) {
+            if (currentMenuItemFocus?.getAttribute('aria-expanded') === 'true') {
+              currentMenuItemFocus.setAttribute('aria-expanded', 'false');
+              setFocusedItem(UNFOCUSED);
+            }
+            document.querySelector<HTMLAnchorElement>('div[data-testid=bottom-section-items] a')?.focus();
+          } else {
+            setFocusedItem(modulo(focusedItem + 1, menuCount));
+          }
         }
 
         break;

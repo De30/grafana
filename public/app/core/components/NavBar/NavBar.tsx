@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
@@ -27,9 +27,25 @@ export const NavBar: FC = React.memo(() => {
     return null;
   }
 
+  const handleKeys = (event: React.KeyboardEvent) => {
+    switch (event.key) {
+      case 'ArrowDown': {
+        document.querySelector<HTMLAnchorElement>('div[data-testid=top-section-items] a')?.focus();
+        break;
+      }
+      case 'Escape':
+      case 'Esc': {
+        document.querySelector<HTMLAnchorElement>('.main-view a')?.focus();
+      }
+
+      default:
+        break;
+    }
+  };
+
   return (
     <nav className={cx(styles.sidemenu, 'sidemenu')} data-testid="sidemenu" aria-label="Main menu">
-      <ul>
+      <ul onKeyDown={handleKeys}>
         <li>
           <a href={homeUrl} className={styles.homeLogo}>
             <Branding.MenuLogo />
