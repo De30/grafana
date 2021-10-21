@@ -429,6 +429,7 @@ func matrixToDataFrames(matrix model.Matrix, query *PrometheusQuery) data.Frames
 			Custom: map[string]string{
 				"resultType": "matrix",
 			},
+			ExecutedQueryString: query.Expr,
 		}
 		frames = append(frames, frame)
 	}
