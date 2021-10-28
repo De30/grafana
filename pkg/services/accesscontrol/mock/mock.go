@@ -14,21 +14,17 @@ type fullAccessControl interface {
 }
 
 type Calls struct {
-	CloneUserToServiceAccount  []interface{}
-	Evaluate                   []interface{}
-	GetUserPermissions         []interface{}
-	GetUserRoles               []interface{}
-	IsDisabled                 []interface{}
-	DeclareFixedRoles          []interface{}
-	GetUserBuiltInRoles        []interface{}
-	RegisterFixedRoles         []interface{}
-	LinkAPIKeyToServiceAccount []interface{}
-	DeleteServiceAccount       []interface{}
+	Evaluate             []interface{}
+	GetUserPermissions   []interface{}
+	GetUserRoles         []interface{}
+	IsDisabled           []interface{}
+	DeclareFixedRoles    []interface{}
+	GetUserBuiltInRoles  []interface{}
+	RegisterFixedRoles   []interface{}
+	DeleteServiceAccount []interface{}
 }
 
 type Mock struct {
-	// Unless an override is provided, user will be returned by CloneUserToServiceAccount
-	createduser *models.User
 	// Unless an override is provided, permissions will be returned by GetUserPermissions
 	permissions []*accesscontrol.Permission
 	// Unless an override is provided, roles will be returned by GetUserRoles
@@ -42,16 +38,14 @@ type Mock struct {
 	Calls Calls
 
 	// Override functions
-	CloneUserToServiceAccountFunc  func(context.Context, *models.SignedInUser) (*models.User, error)
-	LinkAPIKeyToServiceAccountFunc func(context.Context, *models.ApiKey, *models.User) error
-	DeleteServiceAccountFunc       func(context.Context, int64) error
-	EvaluateFunc                   func(context.Context, *models.SignedInUser, accesscontrol.Evaluator) (bool, error)
-	GetUserPermissionsFunc         func(context.Context, *models.SignedInUser) ([]*accesscontrol.Permission, error)
-	GetUserRolesFunc               func(context.Context, *models.SignedInUser) ([]*accesscontrol.RoleDTO, error)
-	IsDisabledFunc                 func() bool
-	DeclareFixedRolesFunc          func(...accesscontrol.RoleRegistration) error
-	GetUserBuiltInRolesFunc        func(user *models.SignedInUser) []string
-	RegisterFixedRolesFunc         func() error
+	DeleteServiceAccountFunc func(context.Context, int64) error
+	EvaluateFunc             func(context.Context, *models.SignedInUser, accesscontrol.Evaluator) (bool, error)
+	GetUserPermissionsFunc   func(context.Context, *models.SignedInUser) ([]*accesscontrol.Permission, error)
+	GetUserRolesFunc         func(context.Context, *models.SignedInUser) ([]*accesscontrol.RoleDTO, error)
+	IsDisabledFunc           func() bool
+	DeclareFixedRolesFunc    func(...accesscontrol.RoleRegistration) error
+	GetUserBuiltInRolesFunc  func(user *models.SignedInUser) []string
+	RegisterFixedRolesFunc   func() error
 }
 
 // Ensure the mock stays in line with the interface
@@ -119,26 +113,6 @@ func (m *Mock) GetUserRoles(ctx context.Context, user *models.SignedInUser) ([]*
 	}
 	// Otherwise return the Roles list
 	return m.roles, nil
-}
-
-func (m *Mock) CloneUserToServiceAccount(ctx context.Context, user *models.SignedInUser) (*models.User, error) {
-	m.Calls.CloneUserToServiceAccount = append(m.Calls.CloneUserToServiceAccount, []interface{}{ctx, user})
-	// Use override if provided
-	if m.CloneUserToServiceAccountFunc != nil {
-		return m.CloneUserToServiceAccountFunc(ctx, user)
-	}
-	// Otherwise return the user
-	return m.createduser, nil
-}
-
-func (m *Mock) LinkAPIKeyToServiceAccount(ctx context.Context, apikey *models.ApiKey, service_account *models.User) error {
-	m.Calls.LinkAPIKeyToServiceAccount = append(m.Calls.LinkAPIKeyToServiceAccount, []interface{}{ctx, apikey, service_account})
-	// Use override if provided
-	if m.LinkAPIKeyToServiceAccountFunc != nil {
-		return m.LinkAPIKeyToServiceAccountFunc(ctx, apikey, service_account)
-	}
-	// Otherwise return the default
-	return nil
 }
 
 func (m *Mock) DeleteServiceAccount(ctx context.Context, serviceAccountId int64) error {
