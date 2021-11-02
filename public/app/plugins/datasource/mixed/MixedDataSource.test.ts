@@ -30,9 +30,9 @@ describe('MixedDatasource', () => {
       const ds = new MixedDatasource({} as any);
       const requestMixed = getQueryOptions({
         targets: [
-          { refId: 'QA', datasource: { uid: 'A' } }, // 1
-          { refId: 'QB', datasource: { uid: 'B' } }, // 2
-          { refId: 'QC', datasource: { uid: 'C' } }, // 3
+          { refId: 'QA', datasource: { uid: 'A', type: 'X' } }, // 1
+          { refId: 'QB', datasource: { uid: 'B', type: 'X' } }, // 2
+          { refId: 'QC', datasource: { uid: 'C', type: 'X' } }, // 3
         ],
       });
 
@@ -52,11 +52,11 @@ describe('MixedDatasource', () => {
       const ds = new MixedDatasource({} as any);
       const requestMixed = getQueryOptions({
         targets: [
-          { refId: 'QA', datasource: { uid: 'A' } }, // 1
-          { refId: 'QD', datasource: { uid: 'D' } }, // 2
-          { refId: 'QB', datasource: { uid: 'B' } }, // 3
-          { refId: 'QE', datasource: { uid: 'E' } }, // 4
-          { refId: 'QC', datasource: { uid: 'C' } }, // 5
+          { refId: 'QA', datasource: { uid: 'A', type: 'X' } }, // 1
+          { refId: 'QD', datasource: { uid: 'D', type: 'X' } }, // 2
+          { refId: 'QB', datasource: { uid: 'B', type: 'X' } }, // 3
+          { refId: 'QE', datasource: { uid: 'E', type: 'X' } }, // 4
+          { refId: 'QC', datasource: { uid: 'C', type: 'X' } }, // 5
         ],
       });
 

@@ -12,7 +12,7 @@ export enum DataTopic {
  */
 export interface DataSourceRef {
   /** The plugin type-id */
-  type?: string;
+  type: string;
 
   /** Specific datasource instance */
   uid?: string;
