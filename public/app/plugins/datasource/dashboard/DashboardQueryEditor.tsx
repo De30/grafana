@@ -141,7 +141,7 @@ export class DashboardQueryEditor extends PureComponent<Props, State> {
         continue;
       }
 
-      if (panel.targets && panel.datasource !== SHARED_DASHBODARD_QUERY) {
+      if (panel.targets && panel.datasource?.uid !== SHARED_DASHBODARD_QUERY) {
         const item = {
           value: panel.id,
           label: panel.title ? panel.title : 'Panel ' + panel.id,

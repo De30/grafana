@@ -75,7 +75,7 @@ describe('Gauge Panel Migrations', () => {
       timeShift: null,
       title: 'Panel Title',
       type: 'gauge',
-    } as Omit<PanelModel, 'fieldConfig'>;
+    } as Omit<PanelModel, 'fieldConfig' | 'datasource'>;
 
     const result = gaugePanelMigrationHandler(panel as PanelModel);
     expect(result).toMatchSnapshot();

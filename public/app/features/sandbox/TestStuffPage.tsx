@@ -120,7 +120,8 @@ export function getDefaultState(): State {
     queryOptions: {
       queries: [],
       dataSource: {
-        name: 'gdev-testdata',
+        type: 'testdata',
+        uid: 'gdev-testdata',
       },
       maxDataPoints: 100,
     },
