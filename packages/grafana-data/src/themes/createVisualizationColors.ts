@@ -35,13 +35,7 @@ export interface ThemeVizHue {
  * @internal
  */
 export function createVisualizationColors(colors: ThemeColors): ThemeVisualizationColors {
-  let hues: ThemeVizHue[] = [];
-
-  if (colors.mode === 'dark') {
-    hues = getDarkHues();
-  } else if (colors.mode === 'light') {
-    hues = getLightHues();
-  }
+  const hues = colors.mode === 'dark' ? getDarkHues() : getLightHues();
 
   const byNameIndex: Record<string, string> = {};
 
