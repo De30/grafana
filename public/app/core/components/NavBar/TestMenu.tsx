@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { css, cx } from '@emotion/css';
-import { useMenuTriggerState, useTreeState } from 'react-stately';
-import {
-  DismissButton,
-  FocusScope,
-  mergeProps,
-  useButton,
-  useFocus,
-  useFocusWithin,
-  useMenu,
-  useMenuItem,
-  useMenuTrigger,
-  useOverlay,
-} from 'react-aria';
+import { useMenuTriggerState } from '@react-stately/menu';
+import { useTreeState } from '@react-stately/tree';
+
+import { FocusScope } from '@react-aria/focus';
+import { useFocusWithin, useFocus } from '@react-aria/interactions';
+import { useMenu, useMenuItem, useMenuTrigger } from '@react-aria/menu';
+import { useOverlay, DismissButton } from '@react-aria/overlays';
+import { useButton } from '@react-aria/button';
+import { mergeProps } from '@react-aria/utils';
+
 import { Icon, IconName, Link, useTheme2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
-
-console.log('test');
 
 export function MenuButton(props: any) {
   const theme = useTheme2();
@@ -120,7 +115,6 @@ export function MenuButton(props: any) {
   return (
     <li className={cx(styles.container, 'dropdown')} {...focusWithinProps}>
       {element}
-      {/*state.isOpen && (*/}
       {state.isOpen && (
         <MenuPopup
           {...rest}

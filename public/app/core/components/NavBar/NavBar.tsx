@@ -14,7 +14,7 @@ import { OrgSwitcher } from '../OrgSwitcher';
 import NavBarItem from './NavBarItem';
 
 import { MenuButton } from './TestMenu';
-import { Item } from 'react-stately';
+import { Item } from '@react-stately/collections';
 import DropdownChild from './DropdownChild';
 const homeUrl = config.appSubUrl || '/';
 
