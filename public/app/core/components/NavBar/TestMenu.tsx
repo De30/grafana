@@ -15,17 +15,13 @@ import { GrafanaTheme2 } from '@grafana/data';
 
 export function MenuButton(props: any) {
   const theme = useTheme2();
+  console.log('test');
 
   const { link, isActive, ...rest } = props;
   const styles = getStyles(theme, isActive);
 
   // Create state based on the incoming props
-  const state = useMenuTriggerState({
-    ...rest,
-    onOpenChange: (isOpen) => {
-      console.log({ isOpen });
-    },
-  });
+  const state = useMenuTriggerState({ ...rest });
 
   // Get props for the menu trigger and menu elements
   const ref = React.useRef(null);
@@ -52,7 +48,7 @@ export function MenuButton(props: any) {
           case 'Enter':
           case ' ':
             e.continuePropagation();
-            link.onClick();
+            link?.onClick();
             break;
           case 'ArrowRight':
             setEnableAllItems(true);
@@ -85,28 +81,28 @@ export function MenuButton(props: any) {
   );
 
   let element = (
-    <button {...buttonProps} ref={ref} onClick={link.onClick} aria-label={link.label}>
+    <button {...buttonProps} ref={ref} onClick={link?.onClick} aria-label={link?.label}>
       <span>
-        {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-        {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+        {link?.icon && <Icon name={link.icon as IconName} size="xl" />}
+        {link?.img && <img src={link.img} alt={`${link.text} logo`} />}
       </span>
     </button>
   );
 
-  if (link.url) {
+  if (link?.url) {
     element =
       !link.target && link.url.startsWith('/') ? (
-        <Link {...buttonProps} ref={ref} href={link.url} target={link.target} onClick={link.onClick}>
+        <Link {...buttonProps} ref={ref} href={link.url} target={link.target} onClick={link?.onClick}>
           <span>
-            {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-            {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+            {link?.icon && <Icon name={link.icon as IconName} size="xl" />}
+            {link?.img && <img src={link.img} alt={`${link.text} logo`} />}
           </span>
         </Link>
       ) : (
-        <a href={link.url} target={link.target} onClick={link.onClick} {...buttonProps} ref={ref}>
+        <a href={link.url} target={link.target} onClick={link?.onClick} {...buttonProps} ref={ref}>
           <span>
-            {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-            {link.img && <img src={link.img} alt={`${link.text} logo`} style={{ width: '100%' }} />}
+            {link?.icon && <Icon name={link.icon as IconName} size="xl" />}
+            {link?.img && <img src={link.img} alt={`${link.text} logo`} />}
           </span>
         </a>
       );
@@ -133,7 +129,7 @@ function MenuPopup(props: any) {
   const { enableAllItems, parent, ...rest } = props;
   const disabledKeys = enableAllItems
     ? []
-    : parent.children?.map((item: any, index: number) => {
+    : parent?.children?.map((item: any, index: number) => {
         return `${item.id}-${index}`;
       });
 
