@@ -14,6 +14,10 @@ import { OrgSwitcher } from '../OrgSwitcher';
 import { NavBarSection } from './NavBarSection';
 import NavBarItem from './NavBarItem';
 
+import { MenuButton } from './TestMenu';
+import { Item } from 'react-stately';
+import DropdownChild from './DropdownChild';
+
 const homeUrl = config.appSubUrl || '/';
 
 export const NavBarNext: FC = React.memo(() => {
@@ -76,17 +80,41 @@ export const NavBarNext: FC = React.memo(() => {
 
       <NavBarSection>
         {coreItems.map((link, index) => (
-          <NavBarItem
+          <MenuButton
             key={`${link.id}-${index}`}
-            isActive={activeItemId === link.id}
-            label={link.text}
-            menuItems={link.children}
-            target={link.target}
-            url={link.url}
+            link={link}
+            isActive={!isSearchActive(location) && activeItemId === link.id}
           >
-            {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-            {link.img && <img src={link.img} alt={`${link.text} logo`} />}
-          </NavBarItem>
+            {link &&
+              link.children &&
+              link.children.map((link, index) => {
+                return (
+                  <Item key={`${link.id}-${index}`} textValue={link.text}>
+                    <DropdownChild
+                      key={`${link.url}-${index}`}
+                      isDivider={link.divider}
+                      icon={link.icon as IconName}
+                      onClick={link.onClick}
+                      target={link.target}
+                      text={link.text}
+                      url={link.url}
+                    />
+                  </Item>
+                );
+              })}
+          </MenuButton>
+
+          // <NavBarItem
+          //   key={`${link.id}-${index}`}
+          //   isActive={activeItemId === link.id}
+          //   label={link.text}
+          //   menuItems={link.children}
+          //   target={link.target}
+          //   url={link.url}
+          // >
+          //   {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+          //   {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+          // </NavBarItem>
         ))}
       </NavBarSection>
 
