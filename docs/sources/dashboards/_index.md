@@ -12,7 +12,7 @@ A _dashboard_ is a set of one or more panels organized and arranged into one or 
 
 <img src="/static/img/docs/v50/dashboard_annotated.png" class="no-shadow" width="700px">
 
-1. Zoom out time range
+1. Zoom out time range.
 1. Time picker dropdown. Here you can access relative time range options, auto refresh options and set custom absolute time ranges.
 1. Manual refresh button. Will cause all panels to refresh (fetch new data).
 1. Dashboard panel. Click the panel title to edit panels.
