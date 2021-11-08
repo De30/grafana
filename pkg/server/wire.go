@@ -46,6 +46,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/notifications"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
+	"github.com/grafana/grafana/pkg/services/queryhistory"
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/services/rendering"
 	"github.com/grafana/grafana/pkg/services/schemaloader"
@@ -117,7 +118,9 @@ var wireBasicSet = wire.NewSet(
 	serverlock.ProvideService,
 	cleanup.ProvideService,
 	shorturls.ProvideService,
+	queryhistory.ProvideService,
 	wire.Bind(new(shorturls.Service), new(*shorturls.ShortURLService)),
+	wire.Bind(new(queryhistory.Service), new(*queryhistory.QueryHistoryService)),
 	quota.ProvideService,
 	remotecache.ProvideService,
 	loginservice.ProvideService,
