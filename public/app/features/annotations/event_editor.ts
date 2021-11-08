@@ -1,9 +1,9 @@
-import { cloneDeep, isNumber } from 'lodash';
-import { coreModule } from 'app/core/core';
-import { AnnotationEvent, dateTime } from '@grafana/data';
-import { MetricsPanelCtrl } from 'app/angular/panel/metrics_panel_ctrl';
-import { deleteAnnotation, saveAnnotation, updateAnnotation } from './api';
-import { getDashboardQueryRunner } from '../query/state/DashboardQueryRunner/DashboardQueryRunner';
+import { cloneDeep, isNumber } from "lodash";
+import { coreModule } from "app/core/core_module";
+import { AnnotationEvent, dateTime } from "@grafana/data";
+import { MetricsPanelCtrl } from "app/angular/panel/metrics_panel_ctrl";
+import { deleteAnnotation, saveAnnotation, updateAnnotation } from "./api";
+import { getDashboardQueryRunner } from "../query/state/DashboardQueryRunner/DashboardQueryRunner";
 
 export class EventEditorCtrl {
   // @ts-ignore initialized through Angular not constructor
@@ -44,7 +44,7 @@ export class EventEditorCtrl {
       saveModel.timeEnd = this.event.timeEnd!.valueOf();
 
       if (saveModel.timeEnd < saveModel.time) {
-        console.log('invalid time');
+        console.log("invalid time");
         return;
       }
     }
@@ -60,7 +60,10 @@ export class EventEditorCtrl {
       console.log(err);
     } finally {
       this.close();
-      getDashboardQueryRunner().run({ dashboard: this.panelCtrl.dashboard, range: this.panelCtrl.range });
+      getDashboardQueryRunner().run({
+        dashboard: this.panelCtrl.dashboard,
+        range: this.panelCtrl.range,
+      });
     }
   }
 
@@ -71,7 +74,10 @@ export class EventEditorCtrl {
       console.log(err);
     } finally {
       this.close();
-      getDashboardQueryRunner().run({ dashboard: this.panelCtrl.dashboard, range: this.panelCtrl.range });
+      getDashboardQueryRunner().run({
+        dashboard: this.panelCtrl.dashboard,
+        range: this.panelCtrl.range,
+      });
     }
   }
 }
@@ -87,17 +93,17 @@ function tryEpochToMoment(timestamp: any) {
 
 export function eventEditor() {
   return {
-    restrict: 'E',
+    restrict: "E",
     controller: EventEditorCtrl,
     bindToController: true,
-    controllerAs: 'ctrl',
-    templateUrl: 'public/app/features/annotations/partials/event_editor.html',
+    controllerAs: "ctrl",
+    templateUrl: "public/app/features/annotations/partials/event_editor.html",
     scope: {
-      panelCtrl: '=',
-      event: '=',
-      close: '&',
+      panelCtrl: "=",
+      event: "=",
+      close: "&",
     },
   };
 }
 
-coreModule.directive('eventEditor', eventEditor);
+coreModule.directive("eventEditor", eventEditor);

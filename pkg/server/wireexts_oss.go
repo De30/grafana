@@ -27,7 +27,7 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var wireExtsBasicSet = wire.NewSet(
+var WireExtsBasicSet = wire.NewSet(
 	auth.ProvideUserAuthTokenService,
 	wire.Bind(new(models.UserTokenService), new(*auth.UserAuthTokenService)),
 	wire.Bind(new(models.UserTokenBackgroundService), new(*auth.UserAuthTokenService)),
@@ -60,12 +60,12 @@ var wireExtsBasicSet = wire.NewSet(
 	wire.Bind(new(plugins.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
 )
 
-var wireExtsSet = wire.NewSet(
-	wireSet,
-	wireExtsBasicSet,
+var WireExtsSet = wire.NewSet(
+	WireSet,
+	WireExtsBasicSet,
 )
 
-var wireExtsTestSet = wire.NewSet(
-	wireTestSet,
-	wireExtsBasicSet,
+var WireExtsTestSet = wire.NewSet(
+	WireTestSet,
+	WireExtsBasicSet,
 )

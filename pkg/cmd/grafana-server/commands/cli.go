@@ -45,7 +45,9 @@ func (e exitWithCode) Error() string {
 	return e.reason
 }
 
-func RunServer(opt ServerOptions) int {
+type InitializeFunc func(cla setting.CommandLineArgs, opts server.Options, apiOpts api.ServerOptions) (*server.Server, error)
+
+func RunServer(opt ServerOptions, initialize InitializeFunc) int {
 	var (
 		configFile = serverFs.String("config", "", "path to config file")
 		homePath   = serverFs.String("homepath", "", "path to grafana install/home path, defaults to working directory")
@@ -102,7 +104,7 @@ func RunServer(opt ServerOptions) int {
 		}()
 	}
 
-	if err := executeServer(*configFile, *homePath, *pidFile, *packaging, traceDiagnostics, opt); err != nil {
+	if err := executeServer(*configFile, *homePath, *pidFile, *packaging, initialize, traceDiagnostics, opt); err != nil {
 		code := 1
 		var ewc exitWithCode
 		if errors.As(err, &ewc) {
@@ -118,7 +120,7 @@ func RunServer(opt ServerOptions) int {
 	return 0
 }
 
-func executeServer(configFile, homePath, pidFile, packaging string, traceDiagnostics *tracingDiagnostics, opt ServerOptions) error {
+func executeServer(configFile, homePath, pidFile, packaging string, initialize InitializeFunc, traceDiagnostics *tracingDiagnostics, opt ServerOptions) error {
 	defer func() {
 		if err := log.Close(); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to close log: %s\n", err)
@@ -165,7 +167,7 @@ func executeServer(configFile, homePath, pidFile, packaging string, traceDiagnos
 		fmt.Println("Grafana server is running with elevated privileges. This is not recommended")
 	}
 
-	s, err := server.Initialize(setting.CommandLineArgs{
+	s, err := initialize(setting.CommandLineArgs{
 		Config: configFile, HomePath: homePath, Args: serverFs.Args(),
 	}, server.Options{
 		PidFile: pidFile, Version: opt.Version, Commit: opt.Commit, BuildBranch: opt.BuildBranch,
