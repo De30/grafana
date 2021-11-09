@@ -1,8 +1,9 @@
-import React, { FC, ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 import { useStyles2 } from '../../themes';
-import { Icon } from '..';
 import { GrafanaTheme2 } from '@grafana/data';
+import { getFocusStyles } from '../../themes/mixins';
+import { Icon } from '../Icon/Icon';
 
 export interface Props {
   label: string;
@@ -10,33 +11,52 @@ export interface Props {
   children: ReactNode;
 }
 
-export const CollapsableSection: FC<Props> = ({ label, isOpen, children }) => {
-  const [open, toggleOpen] = useState<boolean>(isOpen);
+export const CollapsableSection = ({ label, isOpen, children }: Props) => {
   const styles = useStyles2(collapsableSectionStyles);
-  const headerStyle = open ? styles.header : styles.headerCollapsed;
+  const [open, setOpen] = useState(isOpen);
   const tooltip = `Click to ${open ? 'collapse' : 'expand'}`;
+  const toggleOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setOpen((o) => !o);
+  }, []);
 
   return (
-    <div>
-      <div onClick={() => toggleOpen(!open)} className={headerStyle} title={tooltip}>
-        {label}
-        <Icon name={open ? 'angle-down' : 'angle-right'} size="xl" className={styles.icon} />
-      </div>
-      {open && <div className={styles.content}>{children}</div>}
-    </div>
+    <details className={styles.details} open={open}>
+      <summary className={styles.summary} onClick={toggleOpen} title={tooltip}>
+        {/** Extra div needed here as safari doesn't support flex on summary tags */}
+        <div className={styles.summaryContents}>
+          {label}
+          <Icon name={open ? 'angle-down' : 'angle-right'} size="xl" className={styles.icon} />
+        </div>
+      </summary>
+      <div className={styles.content}>{children}</div>
+    </details>
   );
 };
 
 const collapsableSectionStyles = (theme: GrafanaTheme2) => {
-  const header = css({
+  const focusStyle = getFocusStyles(theme);
+
+  const details = css({
+    '&:not([open])': {
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+    },
+  });
+  const summary = css({
+    '&:focus-visible': focusStyle,
+    padding: `${theme.spacing(0.5)} 0`,
+    fontSize: theme.typography.size.lg,
+    cursor: 'pointer',
+    // Needed so safari doesn't show the default disclosure arrow
+    '&::-webkit-details-marker': {
+      display: 'none',
+    },
+  });
+  const summaryContents = css({
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: theme.typography.size.lg,
-    padding: `${theme.spacing(0.5)} 0`,
-    cursor: 'pointer',
-  });
-  const headerCollapsed = css(header, {
-    borderBottom: `1px solid ${theme.colors.border.weak}`,
   });
   const icon = css({
     color: theme.colors.text.secondary,
@@ -45,5 +65,5 @@ const collapsableSectionStyles = (theme: GrafanaTheme2) => {
     padding: `${theme.spacing(2)} 0`,
   });
 
-  return { header, headerCollapsed, icon, content };
+  return { details, summary, summaryContents, icon, content };
 };
