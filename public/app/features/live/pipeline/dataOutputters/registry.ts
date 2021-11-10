@@ -1,10 +1,8 @@
 import { Registry } from '@grafana/data';
-import { jsonAuto } from './jsonAuto';
-import { PipelineConverterItem, PipelineDataOutputterItem } from '../types';
-import { jsonExact } from './jsonExact';
-import { jsonFrame } from './jsonFrame';
-import { influxAuto } from './influxAuto';
+import { PipelineDataOutputterItem } from '../types';
+import { builtin } from './buildin';
+import { redirect } from './redirect';
 
 export const dataOutputters = new Registry<PipelineDataOutputterItem>(() => {
-  return [jsonAuto, jsonExact, influxAuto, jsonFrame];
+  return [builtin, redirect];
 });

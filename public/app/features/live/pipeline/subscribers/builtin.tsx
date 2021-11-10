@@ -1,5 +1,5 @@
-import { BuildtinSubscriberConfig, KeepFieldsFrameProcessorConfig } from '../models.gen';
-import { PipelineConfigKind, PipelineFrameProcessorItem, PipelineSubscriberItem } from '../types';
+import { BuildtinSubscriberConfig } from '../models.gen';
+import { PipelineConfigKind, PipelineSubscriberItem } from '../types';
 
 export const builtin: PipelineSubscriberItem<BuildtinSubscriberConfig> = {
   kind: PipelineConfigKind.Subscriber,

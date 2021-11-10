@@ -1,4 +1,4 @@
-import { JsonAutoConverterConfig, JsonFrameConverterConfig } from '../models.gen';
+import { JsonFrameConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
 export const jsonFrame: PipelineConverterItem<JsonFrameConverterConfig> = {

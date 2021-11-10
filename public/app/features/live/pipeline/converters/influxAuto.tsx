@@ -1,4 +1,4 @@
-import { InfluxAutoConverterConfig, JsonAutoConverterConfig } from '../models.gen';
+import { InfluxAutoConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
 export const influxAuto: PipelineConverterItem<InfluxAutoConverterConfig> = {

@@ -1,4 +1,4 @@
-import { ConditionalFrameOutputterConfig, ManagedStreamFrameOutputterConfig } from '../models.gen';
+import { ConditionalFrameOutputterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
 export const conditional: PipelineFrameOutputterItem<ConditionalFrameOutputterConfig> = {

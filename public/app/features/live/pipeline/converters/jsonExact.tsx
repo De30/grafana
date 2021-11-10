@@ -1,4 +1,4 @@
-import { JsonAutoConverterConfig, JsonExactConverterConfig } from '../models.gen';
+import { JsonExactConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
 export const jsonExact: PipelineConverterItem<JsonExactConverterConfig> = {
