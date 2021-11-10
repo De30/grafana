@@ -1,11 +1,7 @@
+import { JsonAutoConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
-// This type must match the type defined in golang
-export interface JsonAutoConfig {
-  // hints?
-}
-
-export const jsonAuto: PipelineConverterItem<JsonAutoConfig> = {
+export const jsonAuto: PipelineConverterItem<JsonAutoConverterConfig> = {
   kind: PipelineConfigKind.Converter,
   id: 'jsonAuto',
   description: 'Convert json to frame automatically',
