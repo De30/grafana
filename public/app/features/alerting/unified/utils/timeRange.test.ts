@@ -3,6 +3,7 @@ import { getTimeRangeForExpression } from './timeRange';
 import { defaultCondition } from 'app/features/expressions/utils/expressionTypes';
 import { ExpressionQuery, ExpressionQueryType } from 'app/features/expressions/types';
 import { AlertQuery } from 'app/types/unified-alerting-dto';
+import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
 
 describe('timeRange', () => {
   describe('getTimeRangeForExpression', () => {
@@ -14,7 +15,7 @@ describe('timeRange', () => {
           datasourceUid: '-100',
           model: {
             queryType: 'query',
-            datasource: '__expr__',
+            datasource: ExpressionDatasourceRef,
             refId: 'B',
             conditions: [{ ...defaultCondition, query: { params: ['A'] } }],
             type: ExpressionQueryType.classic,
@@ -42,7 +43,7 @@ describe('timeRange', () => {
           datasourceUid: '-100',
           model: {
             queryType: 'query',
-            datasource: '__expr__',
+            datasource: ExpressionDatasourceRef,
             refId: 'C',
             conditions: [
               { ...defaultCondition, query: { params: ['A'] } },
@@ -82,7 +83,7 @@ describe('timeRange', () => {
         datasourceUid: '-100',
         model: {
           queryType: 'query',
-          datasource: '__expr__',
+          datasource: ExpressionDatasourceRef,
           refId: 'B',
           expression: '$A > 10',
           type: ExpressionQueryType.math,
@@ -107,7 +108,7 @@ describe('timeRange', () => {
         datasourceUid: '-100',
         model: {
           queryType: 'query',
-          datasource: '__expr__',
+          datasource: ExpressionDatasourceRef,
           refId: 'C',
           expression: '$A > 10 && $queryB > 20',
           type: ExpressionQueryType.math,
@@ -144,7 +145,7 @@ describe('timeRange', () => {
         datasourceUid: '-100',
         model: {
           queryType: 'query',
-          datasource: '__expr__',
+          datasource: ExpressionDatasourceRef,
           refId: 'B',
           expression: 'A',
           type: ExpressionQueryType.resample,
@@ -177,7 +178,7 @@ describe('timeRange', () => {
         datasourceUid: '-100',
         model: {
           queryType: 'query',
-          datasource: '__expr__',
+          datasource: ExpressionDatasourceRef,
           refId: 'B',
           expression: 'A',
           type: ExpressionQueryType.reduce,

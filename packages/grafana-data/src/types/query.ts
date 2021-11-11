@@ -11,7 +11,11 @@ export enum DataTopic {
  * @public
  */
 export interface DataSourceRef {
-  /** The plugin type-id */
+  /**
+   * The plugin type-id
+   *
+   * NOTE: this should be required, we are slowly fixing types so it can be
+   */
   type?: string;
 
   /** Specific datasource instance */

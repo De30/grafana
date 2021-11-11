@@ -59,8 +59,14 @@ export class MockDataSourceApi extends DataSourceApi {
 export class MockObservableDataSourceApi extends DataSourceApi {
   results: DataQueryResponse[] = [{ data: [] }];
 
-  constructor(name?: string, results?: DataQueryResponse[], meta?: any, private error: string | null = null) {
-    super({ name: name ? name : 'MockDataSourceApi' } as DataSourceInstanceSettings);
+  constructor(
+    name?: string,
+    results?: DataQueryResponse[],
+    meta?: any,
+    private error: string | null = null,
+    type = 'mock'
+  ) {
+    super({ name: name ? name : 'MockDataSourceApi', type } as DataSourceInstanceSettings);
 
     if (results) {
       this.results = results;

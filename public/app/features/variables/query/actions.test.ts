@@ -331,7 +331,7 @@ describe('query actions', () => {
         .givenRootReducer(getRootReducer())
         .whenActionIsDispatched(addVariable(toVariablePayload(variable, { global: false, index: 0, model: variable })))
         .whenAsyncActionIsDispatched(
-          changeQueryVariableDataSource(toVariablePayload(variable), { uid: 'datasource' }),
+          changeQueryVariableDataSource(toVariablePayload(variable), { type: 'datasource' }),
           true
         );
 
@@ -366,7 +366,7 @@ describe('query actions', () => {
             addVariable(toVariablePayload(variable, { global: false, index: 0, model: variable }))
           )
           .whenAsyncActionIsDispatched(
-            changeQueryVariableDataSource(toVariablePayload(variable), { uid: 'datasource' }),
+            changeQueryVariableDataSource(toVariablePayload(variable), { type: 'datasource' }),
             true
           );
 
@@ -403,7 +403,7 @@ describe('query actions', () => {
         .givenRootReducer(getRootReducer())
         .whenActionIsDispatched(addVariable(toVariablePayload(variable, { global: false, index: 0, model: variable })))
         .whenAsyncActionIsDispatched(
-          changeQueryVariableDataSource(toVariablePayload(variable), { uid: 'datasource' }),
+          changeQueryVariableDataSource(toVariablePayload(variable), { type: 'datasource' }),
           true
         );
 
@@ -426,7 +426,7 @@ describe('query actions', () => {
   describe('when changeQueryVariableQuery is dispatched', () => {
     it('then correct actions are dispatched', async () => {
       const optionsMetrics = [createMetric('A'), createMetric('B')];
-      const variable = createVariable({ datasource: { uid: 'datasource' }, includeAll: true });
+      const variable = createVariable({ datasource: { type: 'datasource' }, includeAll: true });
 
       const query = '$datasource';
       const definition = 'depends on datasource variable';
@@ -456,7 +456,7 @@ describe('query actions', () => {
   describe('when changeQueryVariableQuery is dispatched for variable without tags', () => {
     it('then correct actions are dispatched', async () => {
       const optionsMetrics = [createMetric('A'), createMetric('B')];
-      const variable = createVariable({ datasource: { uid: 'datasource' }, includeAll: true });
+      const variable = createVariable({ datasource: { type: 'datasource' }, includeAll: true });
 
       const query = '$datasource';
       const definition = 'depends on datasource variable';
@@ -486,7 +486,7 @@ describe('query actions', () => {
   describe('when changeQueryVariableQuery is dispatched for variable without tags and all', () => {
     it('then correct actions are dispatched', async () => {
       const optionsMetrics = [createMetric('A'), createMetric('B')];
-      const variable = createVariable({ datasource: { uid: 'datasource' }, includeAll: false });
+      const variable = createVariable({ datasource: { type: 'datasource' }, includeAll: false });
       const query = '$datasource';
       const definition = 'depends on datasource variable';
 
@@ -514,7 +514,7 @@ describe('query actions', () => {
 
   describe('when changeQueryVariableQuery is dispatched with invalid query', () => {
     it('then correct actions are dispatched', async () => {
-      const variable = createVariable({ datasource: { uid: 'datasource' }, includeAll: false });
+      const variable = createVariable({ datasource: { type: 'datasource' }, includeAll: false });
       const query = `$${variable.name}`;
       const definition = 'depends on datasource variable';
 
@@ -716,7 +716,7 @@ function createVariable(extend?: Partial<QueryVariableModel>): QueryVariableMode
     hide: VariableHide.dontHide,
     skipUrlSync: false,
     index: 0,
-    datasource: { uid: 'datasource' },
+    datasource: { type: 'datasource' },
     definition: '',
     sort: VariableSort.alphabeticalAsc,
     refresh: VariableRefresh.onDashboardLoad,

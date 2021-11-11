@@ -22,6 +22,7 @@ import {
   DataQuery,
   DataSourceApi,
   DataSourceInstanceSettings,
+  getDataSourceRef,
   getDefaultTimeRange,
   LoadingState,
   PanelData,
@@ -141,10 +142,15 @@ export class QueryGroup extends PureComponent<Props, State> {
   newQuery(): Partial<DataQuery> {
     const { dsSettings, defaultDataSource } = this.state;
 
-    const ds = !dsSettings?.meta.mixed ? dsSettings : defaultDataSource;
+    if (!dsSettings || dsSettings?.meta.mixed) {
+      if (defaultDataSource) {
+        return { datasource: defaultDataSource.getRef() };
+      }
+      return {};
+    }
 
     return {
-      datasource: { uid: ds?.uid, type: ds?.type },
+      datasource: getDataSourceRef(dsSettings),
     };
   }
 
@@ -258,7 +264,7 @@ export class QueryGroup extends PureComponent<Props, State> {
 
   onAddQuery = (query: Partial<DataQuery>) => {
     const { dsSettings, queries } = this.state;
-    this.onQueriesChange(addQuery(queries, query, { type: dsSettings?.type, uid: dsSettings?.uid }));
+    this.onQueriesChange(addQuery(queries, query, dsSettings ? getDataSourceRef(dsSettings) : undefined));
     this.onScrollBottom();
   };
 
