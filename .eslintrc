@@ -1,12 +1,13 @@
 {
-  "extends": ["@grafana/eslint-config"],
+  "extends": ["@grafana/eslint-config", "plugin:import/recommended", "plugin:import/typescript"],
   "root": true,
-  "plugins": ["no-only-tests", "@emotion", "lodash"],
+  "plugins": ["no-only-tests", "@emotion", "lodash", "import"],
   "rules": {
     "no-only-tests/no-only-tests": "error",
     "react/prop-types": "off",
     "@emotion/jsx-import": "error",
-    "lodash/import-scope": [2, "member"]
+    "lodash/import-scope": [2, "member"],
+    "import/no-cycle": 1
   },
   "overrides": [
     {
