@@ -1,8 +1,7 @@
 import { Registry } from '@grafana/data';
 import { PipelineSubscriberItem } from '../types';
-import { builtin } from './builtin';
-import { managedStream } from './managedStream';
+import { multiple } from './multiple';
 
 export const subscribers = new Registry<PipelineSubscriberItem>(() => {
-  return [managedStream, builtin];
+  return [multiple];
 });

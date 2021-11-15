@@ -1,7 +1,7 @@
-import { ManagedStreamFrameOutputterConfig } from '../models.gen';
+import { ThresholdOutputConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const threshold: PipelineFrameOutputterItem<ManagedStreamFrameOutputterConfig> = {
+export const threshold: PipelineFrameOutputterItem<ThresholdOutputConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
   id: 'threshold',
   description: 'Output threshold values',

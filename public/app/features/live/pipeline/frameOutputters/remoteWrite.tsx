@@ -1,7 +1,7 @@
-import { ConditionalFrameOutputterConfig } from '../models.gen';
+import { RemoteWriteOutputConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const remoteWrite: PipelineFrameOutputterItem<ConditionalFrameOutputterConfig> = {
+export const remoteWrite: PipelineFrameOutputterItem<RemoteWriteOutputConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
   id: 'remoteWrite',
   description: 'Write to prometheus',

@@ -1,7 +1,7 @@
-import { ConditionalFrameOutputterConfig } from '../models.gen';
+import { ConditionalOutputConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const conditional: PipelineFrameOutputterItem<ConditionalFrameOutputterConfig> = {
+export const conditional: PipelineFrameOutputterItem<ConditionalOutputConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
   id: 'conditional',
   description: 'Conditionally output values',

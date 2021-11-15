@@ -1,7 +1,7 @@
-import { ManagedStreamFrameOutputterConfig } from '../models.gen';
+import { RedirectOutputConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const redirect: PipelineFrameOutputterItem<ManagedStreamFrameOutputterConfig> = {
+export const redirect: PipelineFrameOutputterItem<RedirectOutputConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
   id: 'redirect',
   description: 'Redirect frame to another channel',

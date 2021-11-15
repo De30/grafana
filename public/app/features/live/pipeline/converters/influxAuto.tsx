@@ -1,7 +1,7 @@
-import { InfluxAutoConverterConfig } from '../models.gen';
+import { AutoInfluxConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
-export const influxAuto: PipelineConverterItem<InfluxAutoConverterConfig> = {
+export const influxAuto: PipelineConverterItem<AutoInfluxConverterConfig> = {
   kind: PipelineConfigKind.Converter,
   id: 'influxAuto',
   description: 'Convert influx line protocol',

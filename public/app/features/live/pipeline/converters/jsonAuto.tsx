@@ -1,7 +1,7 @@
-import { JsonAutoConverterConfig } from '../models.gen';
+import { AutoJsonConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
-export const jsonAuto: PipelineConverterItem<JsonAutoConverterConfig> = {
+export const jsonAuto: PipelineConverterItem<AutoJsonConverterConfig> = {
   kind: PipelineConfigKind.Converter,
   id: 'jsonAuto',
   description: 'Convert json to frame automatically',

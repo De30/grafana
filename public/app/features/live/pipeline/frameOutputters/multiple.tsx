@@ -1,11 +1,11 @@
-import { ManagedStreamOutputConfig } from '../models.gen';
+import { MultipleOutputterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const managedStream: PipelineFrameOutputterItem<ManagedStreamOutputConfig> = {
+export const multiple: PipelineFrameOutputterItem<MultipleOutputterConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
-  id: 'managedStream',
-  description: 'Send schema when it changes',
-  name: 'Managed stream',
+  id: 'multiple',
+  description: 'Write to multiple outputs',
+  name: 'multiple',
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');

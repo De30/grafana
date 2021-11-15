@@ -1,5 +1,3 @@
-//    { type: 'influxAuto', description: 'accept influx line protocol', example: { frameFormat: 'labels_column' } },
-
 import { DataFrame, RegistryItemWithOptions, SelectableValue } from '@grafana/data';
 import { PipelineConfigSupplier } from './builder';
 

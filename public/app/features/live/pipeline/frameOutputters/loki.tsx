@@ -1,11 +1,11 @@
-import { ManagedStreamOutputConfig } from '../models.gen';
+import { LokiOutputConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineFrameOutputterItem } from '../types';
 
-export const managedStream: PipelineFrameOutputterItem<ManagedStreamOutputConfig> = {
+export const loki: PipelineFrameOutputterItem<LokiOutputConfig> = {
   kind: PipelineConfigKind.FrameOutputter,
-  id: 'managedStream',
-  description: 'Send schema when it changes',
-  name: 'Managed stream',
+  id: 'loki',
+  description: 'Write to loki',
+  name: 'loki',
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');

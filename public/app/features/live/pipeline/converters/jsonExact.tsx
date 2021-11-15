@@ -1,7 +1,7 @@
-import { JsonExactConverterConfig } from '../models.gen';
+import { ExactJsonConverterConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineConverterItem } from '../types';
 
-export const jsonExact: PipelineConverterItem<JsonExactConverterConfig> = {
+export const jsonExact: PipelineConverterItem<ExactJsonConverterConfig> = {
   kind: PipelineConfigKind.Converter,
   id: 'jsonExact',
   description: 'Convert json to frame with explicit fields',

@@ -1,11 +1,11 @@
-import { ManagedStreamSubscriberConfig } from '../models.gen';
+import { MultipleSubscriberConfig } from '../models.gen';
 import { PipelineConfigKind, PipelineSubscriberItem } from '../types';
 
-export const managedStream: PipelineSubscriberItem<ManagedStreamSubscriberConfig> = {
+export const multiple: PipelineSubscriberItem<MultipleSubscriberConfig> = {
   kind: PipelineConfigKind.Subscriber,
-  id: 'managedStream',
-  description: 'Return the full schema on subscribe',
-  name: 'Managed stream',
+  id: 'multiple',
+  description: 'Multiple subscribers',
+  name: 'Multiple',
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');
