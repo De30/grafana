@@ -5,7 +5,7 @@ export const redirect: PipelineDataOutputterItem<RedirectDataOutputConfig> = {
   kind: PipelineConfigKind.DataOutputter,
   id: 'redirect',
   description: 'redirect to another channel',
-  name: 'builtin',
+  name: 'Redirect',
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');

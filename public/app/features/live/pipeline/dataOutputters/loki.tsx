@@ -5,7 +5,7 @@ export const loki: PipelineDataOutputterItem<LokiOutputConfig> = {
   kind: PipelineConfigKind.DataOutputter,
   id: 'loki',
   description: 'write to loki',
-  name: 'builtin',
+  name: 'Loki',
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');
