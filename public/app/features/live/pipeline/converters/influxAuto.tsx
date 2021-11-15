@@ -9,6 +9,17 @@ export const influxAuto: PipelineConverterItem<AutoInfluxConverterConfig> = {
   builder: (builder, context) => {
     // builder.addCustomEditor
     console.log('ADD ITEMS!!');
+
+    builder.addSelect({
+      name: 'Frame format',
+      path: 'frameFormat',
+      settings: {
+        options: [
+          { label: 'Labels field', value: 'labels_field' },
+          { label: 'Wide frame', value: 'wide' },
+        ],
+      },
+    });
   },
   //viewer: () => <div>JSON AUTO viewer</div>,
 };
