@@ -41,6 +41,8 @@ type exitWithCode struct {
 
 var serverFs = flag.NewFlagSet("server", flag.ContinueOnError)
 
+var clilog = log.New("cli")
+
 func (e exitWithCode) Error() string {
 	return e.reason
 }
@@ -135,7 +137,7 @@ func executeServer(configFile, homePath, pidFile, packaging string, initialize I
 		}
 		defer func() {
 			if err := f.Close(); err != nil {
-				log.Error("Failed to write trace diagnostics", "path", traceDiagnostics.file, "err", err)
+				clilog.Error("Failed to write trace diagnostics", "path", traceDiagnostics.file, "err", err)
 			}
 		}()
 

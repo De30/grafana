@@ -1,48 +1,32 @@
-import "vendor/flot/jquery.flot";
-import "vendor/flot/jquery.flot.selection";
-import "vendor/flot/jquery.flot.time";
-import "vendor/flot/jquery.flot.stack";
-import "vendor/flot/jquery.flot.stackpercent";
-import "vendor/flot/jquery.flot.fillbelow";
-import "vendor/flot/jquery.flot.crosshair";
-import "vendor/flot/jquery.flot.dashes";
-import "./jquery.flot.events";
+import 'vendor/flot/jquery.flot';
+import 'vendor/flot/jquery.flot.selection';
+import 'vendor/flot/jquery.flot.time';
+import 'vendor/flot/jquery.flot.stack';
+import 'vendor/flot/jquery.flot.stackpercent';
+import 'vendor/flot/jquery.flot.fillbelow';
+import 'vendor/flot/jquery.flot.crosshair';
+import 'vendor/flot/jquery.flot.dashes';
+import './jquery.flot.events';
 
-import $ from "jquery";
-import {
-  clone,
-  find,
-  flatten,
-  isUndefined,
-  map,
-  max as _max,
-  min as _min,
-  sortBy as _sortBy,
-  toNumber,
-} from "lodash";
-import { tickStep } from "app/core/utils/ticks";
-import { coreModule } from "app/core/core_module";
-import { updateLegendValues } from "app/core/core";
-import GraphTooltip from "./graph_tooltip";
-import { ThresholdManager } from "./threshold_manager";
-import { TimeRegionManager } from "./time_region_manager";
-import { EventManager } from "app/features/annotations/all";
-import { convertToHistogramData } from "./histogram";
-import { alignYLevel } from "./align_yaxes";
-import config from "app/core/config";
-import React from "react";
-import ReactDOM from "react-dom";
-import { GraphLegendProps, Legend } from "./Legend/Legend";
+import $ from 'jquery';
+import { clone, find, flatten, isUndefined, map, max as _max, min as _min, sortBy as _sortBy, toNumber } from 'lodash';
+import { tickStep } from 'app/core/utils/ticks';
+import { updateLegendValues } from 'app/core/core';
+import { coreModule } from 'app/angular/core_module';
+import GraphTooltip from './graph_tooltip';
+import { ThresholdManager } from './threshold_manager';
+import { TimeRegionManager } from './time_region_manager';
+import { EventManager } from './event_manager';
+import { convertToHistogramData } from './histogram';
+import { alignYLevel } from './align_yaxes';
+import config from 'app/core/config';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { GraphLegendProps, Legend } from './Legend/Legend';
 
-import { GraphCtrl } from "./module";
-import {
-  graphTickFormatter,
-  graphTimeFormat,
-  IconName,
-  MenuItemProps,
-  MenuItemsGroup,
-} from "@grafana/ui";
-import { provideTheme } from "app/core/utils/ConfigProvider";
+import { GraphCtrl } from './module';
+import { graphTickFormatter, graphTimeFormat, IconName, MenuItemProps, MenuItemsGroup } from '@grafana/ui';
+import { provideTheme } from 'app/core/utils/ConfigProvider';
 import {
   DataFrame,
   DataFrameView,
@@ -64,13 +48,13 @@ import {
   LinkModelSupplier,
   PanelEvents,
   toUtc,
-} from "@grafana/data";
-import { GraphContextMenuCtrl } from "./GraphContextMenuCtrl";
-import { TimeSrv } from "app/features/dashboard/services/TimeSrv";
-import { ContextSrv } from "app/core/services/context_srv";
-import { getFieldLinksSupplier } from "app/angular/panel/panellinks/linkSuppliers";
-import { DashboardModel } from "../../../features/dashboard/state";
-import { isLegacyGraphHoverEvent } from "./utils";
+} from '@grafana/data';
+import { GraphContextMenuCtrl } from './GraphContextMenuCtrl';
+import { TimeSrv } from 'app/features/dashboard/services/TimeSrv';
+import { ContextSrv } from 'app/core/services/context_srv';
+import { getFieldLinksSupplier } from 'app/features/panel/panellinks/linkSuppliers';
+import { DashboardModel } from '../../../features/dashboard/state';
+import { isLegacyGraphHoverEvent } from './utils';
 
 const LegendWithThemeProvider = provideTheme(Legend);
 
@@ -93,10 +77,7 @@ class GraphElement {
   constructor(
     private scope: any,
     private elem: JQuery & {
-      bind(
-        eventType: string,
-        handler: (eventObject: JQueryEventObject, ...args: any[]) => any
-      ): JQuery; // need to extend with Plot
+      bind(eventType: string, handler: (eventObject: JQueryEventObject, ...args: any[]) => any): JQuery; // need to extend with Plot
     },
     private timeSrv: TimeSrv
   ) {
@@ -111,53 +92,29 @@ class GraphElement {
     this.thresholdManager = new ThresholdManager(this.ctrl);
     this.timeRegionManager = new TimeRegionManager(this.ctrl);
     // @ts-ignore
-    this.tooltip = new GraphTooltip(
-      this.elem,
-      this.ctrl.dashboard,
-      this.scope,
-      () => {
-        return this.sortedSeries;
-      }
-    );
+    this.tooltip = new GraphTooltip(this.elem, this.ctrl.dashboard, this.scope, () => {
+      return this.sortedSeries;
+    });
 
     // panel events
-    this.ctrl.events.on(
-      PanelEvents.panelTeardown,
-      this.onPanelTeardown.bind(this)
-    );
+    this.ctrl.events.on(PanelEvents.panelTeardown, this.onPanelTeardown.bind(this));
     this.ctrl.events.on(PanelEvents.render, this.onRender.bind(this));
 
     // global events
     // Using old way here to use the scope unsubscribe model as the new $on function does not take scope
-    this.ctrl.dashboard.events.on(
-      LegacyGraphHoverEvent.type,
-      this.onGraphHover.bind(this),
-      this.scope
-    );
-    this.ctrl.dashboard.events.on(
-      LegacyGraphHoverClearEvent.type,
-      this.onGraphHoverClear.bind(this),
-      this.scope
-    );
+    this.ctrl.dashboard.events.on(LegacyGraphHoverEvent.type, this.onGraphHover.bind(this), this.scope);
+    this.ctrl.dashboard.events.on(LegacyGraphHoverClearEvent.type, this.onGraphHoverClear.bind(this), this.scope);
 
-    this.ctrl.dashboard.events.on(
-      DataHoverEvent.type,
-      this.onGraphHover.bind(this),
-      this.scope
-    );
-    this.ctrl.dashboard.events.on(
-      DataHoverClearEvent.type,
-      this.onGraphHoverClear.bind(this),
-      this.scope
-    );
+    this.ctrl.dashboard.events.on(DataHoverEvent.type, this.onGraphHover.bind(this), this.scope);
+    this.ctrl.dashboard.events.on(DataHoverClearEvent.type, this.onGraphHoverClear.bind(this), this.scope);
 
     // plot events
-    this.elem.bind("plotselected", this.onPlotSelected.bind(this));
-    this.elem.bind("plotclick", this.onPlotClick.bind(this));
+    this.elem.bind('plotselected', this.onPlotSelected.bind(this));
+    this.elem.bind('plotclick', this.onPlotClick.bind(this));
 
     // get graph legend element
     if (this.elem && this.elem.parent) {
-      this.legendElem = this.elem.parent().find(".graph-legend")[0];
+      this.legendElem = this.elem.parent().find('.graph-legend')[0];
     }
   }
 
@@ -181,24 +138,8 @@ class GraphElement {
     }
 
     const { values, min, max, avg, current, total } = this.panel.legend;
-    const {
-      alignAsTable,
-      rightSide,
-      sideWidth,
-      sort,
-      sortDesc,
-      hideEmpty,
-      hideZero,
-    } = this.panel.legend;
-    const legendOptions = {
-      alignAsTable,
-      rightSide,
-      sideWidth,
-      sort,
-      sortDesc,
-      hideEmpty,
-      hideZero,
-    };
+    const { alignAsTable, rightSide, sideWidth, sort, sortDesc, hideEmpty, hideZero } = this.panel.legend;
+    const legendOptions = { alignAsTable, rightSide, sideWidth, sort, sortDesc, hideEmpty, hideZero };
     const valueOptions = { values, min, max, avg, current, total };
     const legendProps: GraphLegendProps = {
       seriesList: this.data,
@@ -211,10 +152,7 @@ class GraphElement {
       onToggleAxis: this.ctrl.onToggleAxis,
     };
 
-    const legendReactElem = React.createElement(
-      LegendWithThemeProvider,
-      legendProps
-    );
+    const legendReactElem = React.createElement(LegendWithThemeProvider, legendProps);
     ReactDOM.render(legendReactElem, this.legendElem, () => this.renderPanel());
   }
 
@@ -226,11 +164,7 @@ class GraphElement {
 
     if (isLegacyGraphHoverEvent(evt)) {
       // ignore if we are the emitter
-      if (
-        !this.plot ||
-        evt.panel?.id === this.panel.id ||
-        this.ctrl.otherPanelInFullscreenMode()
-      ) {
+      if (!this.plot || evt.panel?.id === this.panel.id || this.ctrl.otherPanelInFullscreenMode()) {
         return;
       }
 
@@ -242,10 +176,7 @@ class GraphElement {
       return;
     }
 
-    this.tooltip.show({
-      x: evt.point.time,
-      panelRelY: evt.point.panelRelY ?? 1,
-    });
+    this.tooltip.show({ x: evt.point.time, panelRelY: evt.point.panelRelY ?? 1 });
   }
 
   onPanelTeardown() {
@@ -268,16 +199,13 @@ class GraphElement {
   }
 
   onPlotSelected(event: JQueryEventObject, ranges: any) {
-    if (this.panel.xaxis.mode !== "time") {
+    if (this.panel.xaxis.mode !== 'time') {
       // Skip if panel in histogram or series mode
       this.plot.clearSelection();
       return;
     }
 
-    if (
-      (ranges.ctrlKey || ranges.metaKey) &&
-      this.dashboard.canAddAnnotations()
-    ) {
+    if ((ranges.ctrlKey || ranges.metaKey) && this.dashboard.canAddAnnotations()) {
       // Add annotation
       setTimeout(() => {
         this.eventManager.updateTime(ranges.xaxis);
@@ -303,14 +231,10 @@ class GraphElement {
             {
               items: [
                 {
-                  label: "Add annotation",
-                  ariaLabel: "Add annotation",
-                  icon: "comment-alt",
-                  onClick: () =>
-                    this.eventManager.updateTime({
-                      from: flotPosition.x,
-                      to: null,
-                    }),
+                  label: 'Add annotation',
+                  ariaLabel: 'Add annotation',
+                  icon: 'comment-alt',
+                  onClick: () => this.eventManager.updateTime({ from: flotPosition.x, to: null }),
                 },
               ],
             },
@@ -323,20 +247,16 @@ class GraphElement {
 
       const dataLinks = [
         {
-          items: linksSupplier
-            .getLinks(this.panel.replaceVariables)
-            .map<MenuItemProps>((link) => {
-              return {
-                label: link.title,
-                ariaLabel: link.title,
-                url: link.href,
-                target: link.target,
-                icon: `${
-                  link.target === "_self" ? "link" : "external-link-alt"
-                }` as IconName,
-                onClick: link.onClick,
-              };
-            }),
+          items: linksSupplier.getLinks(this.panel.replaceVariables).map<MenuItemProps>((link) => {
+            return {
+              label: link.title,
+              ariaLabel: link.title,
+              url: link.href,
+              target: link.target,
+              icon: `${link.target === '_self' ? 'link' : 'external-link-alt'}` as IconName,
+              onClick: link.onClick,
+            };
+          }),
         },
       ];
 
@@ -345,12 +265,10 @@ class GraphElement {
   };
 
   onPlotClick(event: JQueryEventObject, pos: any, item: any) {
-    const scrollContextElement = this.elem.closest(".view")
-      ? this.elem.closest(".view").get()[0]
-      : null;
+    const scrollContextElement = this.elem.closest('.view') ? this.elem.closest('.view').get()[0] : null;
     const contextMenuSourceItem = item;
 
-    if (this.panel.xaxis.mode !== "time") {
+    if (this.panel.xaxis.mode !== 'time') {
       // Skip if panel in histogram or series mode
       return;
     }
@@ -379,10 +297,7 @@ class GraphElement {
         const yAxisConfig = this.panel.yaxes[item.series.yaxis.n === 2 ? 1 : 0];
         const dataFrame = this.ctrl.dataList[item.series.dataFrameIndex];
         const field = dataFrame.fields[item.series.fieldIndex];
-        const dataIndex = this.getDataIndexWithNullValuesCorrection(
-          item,
-          dataFrame
-        );
+        const dataIndex = this.getDataIndexWithNullValuesCorrection(item, dataFrame);
 
         let links: any[] = this.panel.options.dataLinks || [];
         const hasLinksValue = hasLinks(field);
@@ -416,18 +331,13 @@ class GraphElement {
         // Setting nearest CustomScrollbar element as a scroll context for graph context menu
         this.contextMenu.setScrollContextElement(scrollContextElement);
         this.contextMenu.setSource(contextMenuSourceItem);
-        this.contextMenu.setMenuItemsSupplier(
-          this.getContextMenuItemsSupplier(pos, linksSupplier) as any
-        );
+        this.contextMenu.setMenuItemsSupplier(this.getContextMenuItemsSupplier(pos, linksSupplier) as any);
         this.contextMenu.toggleMenu(pos);
       });
     }
   }
 
-  getDataIndexWithNullValuesCorrection(
-    item: any,
-    dataFrame: DataFrame
-  ): number {
+  getDataIndexWithNullValuesCorrection(item: any, dataFrame: DataFrame): number {
     /** This is one added to handle the scenario where we have null values in
      *  the time series data and the: "visualization options -> null value"
      *  set to "connected". In this scenario we will get the wrong dataIndex.
@@ -453,9 +363,7 @@ class GraphElement {
       return dataIndex;
     }
 
-    const correctIndex = timeField.values
-      .toArray()
-      .findIndex((value) => value === ts);
+    const correctIndex = timeField.values.toArray().findIndex((value) => value === ts);
     return correctIndex > -1 ? correctIndex : dataIndex;
   }
 
@@ -488,13 +396,9 @@ class GraphElement {
 
     const { dataWarning } = this.ctrl;
     if (dataWarning) {
-      const msg = $(
-        `<div class="datapoints-warning flot-temp-elem">${dataWarning.title}</div>`
-      );
+      const msg = $(`<div class="datapoints-warning flot-temp-elem">${dataWarning.title}</div>`);
       if (dataWarning.action) {
-        $(
-          `<button class="btn btn-secondary">${dataWarning.actionText}</button>`
-        )
+        $(`<button class="btn btn-secondary">${dataWarning.actionText}</button>`)
           .click(dataWarning.action)
           .appendTo(msg);
       }
@@ -519,10 +423,8 @@ class GraphElement {
     for (let i = 0; i < yaxis.length; i++) {
       const axis: any = yaxis[i];
       const panelOptions = this.panel.yaxes[i];
-      axis.options.max =
-        axis.options.max !== null ? axis.options.max : panelOptions.max;
-      axis.options.min =
-        axis.options.min !== null ? axis.options.min : panelOptions.min;
+      axis.options.max = axis.options.max !== null ? axis.options.max : panelOptions.max;
+      axis.options.min = axis.options.min !== null ? axis.options.min : panelOptions.min;
     }
   }
 
@@ -551,11 +453,7 @@ class GraphElement {
           continue;
         }
       } else {
-        if (
-          typeof data[i].bars === "undefined" ||
-          typeof data[i].bars.show === "undefined" ||
-          !data[i].bars.show
-        ) {
+        if (typeof data[i].bars === 'undefined' || typeof data[i].bars.show === 'undefined' || !data[i].bars.show) {
           continue;
         }
       }
@@ -596,11 +494,9 @@ class GraphElement {
   buildFlotPairs(data: any) {
     for (let i = 0; i < data.length; i++) {
       const series = data[i];
-      series.data = series.getFlotPairs(
-        series.nullPointMode || this.panel.nullPointMode
-      );
+      series.data = series.getFlotPairs(series.nullPointMode || this.panel.nullPointMode);
 
-      if (series.transform === "constant") {
+      if (series.transform === 'constant') {
         series.data = getFlotPairsConstant(series.data, this.ctrl.range!);
       }
 
@@ -614,9 +510,9 @@ class GraphElement {
 
   prepareXAxis(options: any, panel: any) {
     switch (panel.xaxis.mode) {
-      case "series": {
+      case 'series': {
         options.series.bars.barWidth = 0.7;
-        options.series.bars.align = "center";
+        options.series.bars.align = 'center';
 
         for (let i = 0; i < this.data.length; i++) {
           const series = this.data[i];
@@ -626,7 +522,7 @@ class GraphElement {
         this.addXSeriesAxis(options);
         break;
       }
-      case "histogram": {
+      case 'histogram': {
         let bucketSize: number;
 
         if (this.data.length) {
@@ -634,24 +530,16 @@ class GraphElement {
           let histMax = _max(map(this.data, (s) => s.stats.max));
           const ticks = panel.xaxis.buckets || this.panelWidth / 50;
           if (panel.xaxis.min != null) {
-            const isInvalidXaxisMin =
-              tickStep(panel.xaxis.min, histMax, ticks) <= 0;
+            const isInvalidXaxisMin = tickStep(panel.xaxis.min, histMax, ticks) <= 0;
             histMin = isInvalidXaxisMin ? histMin : panel.xaxis.min;
           }
           if (panel.xaxis.max != null) {
-            const isInvalidXaxisMax =
-              tickStep(histMin, panel.xaxis.max, ticks) <= 0;
+            const isInvalidXaxisMax = tickStep(histMin, panel.xaxis.max, ticks) <= 0;
             histMax = isInvalidXaxisMax ? histMax : panel.xaxis.max;
           }
           bucketSize = tickStep(histMin, histMax, ticks);
           options.series.bars.barWidth = bucketSize * 0.8;
-          this.data = convertToHistogramData(
-            this.data,
-            bucketSize,
-            this.ctrl.hiddenSeries,
-            histMin,
-            histMax
-          );
+          this.data = convertToHistogramData(this.data, bucketSize, this.ctrl.hiddenSeries, histMin, histMax);
         } else {
           bucketSize = 0;
         }
@@ -659,15 +547,14 @@ class GraphElement {
         this.addXHistogramAxis(options, bucketSize);
         break;
       }
-      case "table": {
+      case 'table': {
         options.series.bars.barWidth = 0.7;
-        options.series.bars.align = "center";
+        options.series.bars.align = 'center';
         this.addXTableAxis(options);
         break;
       }
       default: {
-        options.series.bars.barWidth =
-          this.getMinTimeStepOfSeries(this.data) / 1.5;
+        options.series.bars.barWidth = this.getMinTimeStepOfSeries(this.data) / 1.5;
         this.addTimeAxis(options);
         break;
       }
@@ -681,8 +568,8 @@ class GraphElement {
         delete this.ctrl.error;
       }
     } catch (e) {
-      console.error("flotcharts error", e);
-      this.ctrl.error = e.message || "Render Error";
+      console.error('flotcharts error', e);
+      this.ctrl.error = e.message || 'Render Error';
       this.ctrl.renderError = true;
     }
 
@@ -692,9 +579,9 @@ class GraphElement {
   }
 
   buildFlotOptions(panel: any) {
-    let gridColor = "#c8c8c8";
+    let gridColor = '#c8c8c8';
     if (config.bootData.user.lightTheme === true) {
-      gridColor = "#a1a1a1";
+      gridColor = '#a1a1a1';
     }
     const stack = panel.stack ? true : null;
     const options: any = {
@@ -750,11 +637,11 @@ class GraphElement {
         mouseActiveRadius: 30,
       },
       selection: {
-        mode: "x",
-        color: "#666",
+        mode: 'x',
+        color: '#666',
       },
       crosshair: {
-        mode: "x",
+        mode: 'x',
       },
     };
     return options;
@@ -763,11 +650,9 @@ class GraphElement {
   sortSeries(series: any, panel: any) {
     const sortBy = panel.legend.sort;
     const sortOrder = panel.legend.sortDesc;
-    const haveSortBy =
-      sortBy !== null && sortBy !== undefined && panel.legend[sortBy];
+    const haveSortBy = sortBy !== null && sortBy !== undefined && panel.legend[sortBy];
     const haveSortOrder = sortOrder !== null && sortOrder !== undefined;
-    const shouldSortBy =
-      panel.stack && haveSortBy && haveSortOrder && panel.legend.alignAsTable;
+    const shouldSortBy = panel.stack && haveSortBy && haveSortOrder && panel.legend.alignAsTable;
     const sortDesc = panel.legend.sortDesc === true ? -1 : 1;
 
     if (shouldSortBy) {
@@ -797,20 +682,16 @@ class GraphElement {
 
   addTimeAxis(options: any) {
     const ticks = this.panelWidth / 100;
-    const min = isUndefined(this.ctrl.range!.from)
-      ? null
-      : this.ctrl.range!.from.valueOf();
-    const max = isUndefined(this.ctrl.range!.to)
-      ? null
-      : this.ctrl.range!.to.valueOf();
+    const min = isUndefined(this.ctrl.range!.from) ? null : this.ctrl.range!.from.valueOf();
+    const max = isUndefined(this.ctrl.range!.to) ? null : this.ctrl.range!.to.valueOf();
 
     options.xaxis = {
       timezone: this.dashboard.getTimezone(),
       show: this.panel.xaxis.show,
-      mode: "time",
+      mode: 'time',
       min: min,
       max: max,
-      label: "Datetime",
+      label: 'Datetime',
       ticks: ticks,
       timeformat: graphTimeFormat(ticks, min, max),
       tickFormatter: graphTickFormatter,
@@ -828,7 +709,7 @@ class GraphElement {
       mode: null,
       min: 0,
       max: ticks.length + 1,
-      label: "Datetime",
+      label: 'Datetime',
       ticks: ticks,
     };
   }
@@ -883,12 +764,12 @@ class GraphElement {
       mode: null,
       min: min,
       max: max,
-      label: "Histogram",
+      label: 'Histogram',
       ticks: ticks,
     };
 
     // Use 'short' format for histogram values
-    this.configureAxisMode(options.xaxis, "short", null);
+    this.configureAxisMode(options.xaxis, 'short', null);
   }
 
   addXTableAxis(options: any) {
@@ -907,14 +788,14 @@ class GraphElement {
       mode: null,
       min: 0,
       max: ticks.length + 1,
-      label: "Datetime",
+      label: 'Datetime',
       ticks: ticks,
     };
   }
 
   configureYAxisOptions(data: any, options: any) {
     const defaults = {
-      position: "left",
+      position: 'left',
       show: this.panel.yaxes[0].show,
       index: 1,
       logBase: this.panel.yaxes[0].logBase || 1,
@@ -930,7 +811,7 @@ class GraphElement {
       secondY.index = 2;
       secondY.show = this.panel.yaxes[1].show;
       secondY.logBase = this.panel.yaxes[1].logBase || 1;
-      secondY.position = "right";
+      secondY.position = 'right';
       secondY.min = this.parseNumber(this.panel.yaxes[1].min);
       secondY.max = this.parseNumber(this.panel.yaxes[1].max);
       secondY.tickDecimals = this.panel.yaxes[1].decimals;
@@ -939,24 +820,20 @@ class GraphElement {
       this.applyLogScale(options.yaxes[1], data);
       this.configureAxisMode(
         options.yaxes[1],
-        this.panel.percentage && this.panel.stack
-          ? "percent"
-          : this.panel.yaxes[1].format,
+        this.panel.percentage && this.panel.stack ? 'percent' : this.panel.yaxes[1].format,
         this.panel.yaxes[1].decimals
       );
     }
     this.applyLogScale(options.yaxes[0], data);
     this.configureAxisMode(
       options.yaxes[0],
-      this.panel.percentage && this.panel.stack
-        ? "percent"
-        : this.panel.yaxes[0].format,
+      this.panel.percentage && this.panel.stack ? 'percent' : this.panel.yaxes[0].format,
       this.panel.yaxes[0].decimals
     );
   }
 
   parseNumber(value: any) {
-    if (value === null || typeof value === "undefined") {
+    if (value === null || typeof value === 'undefined') {
       return null;
     }
 
@@ -1084,19 +961,15 @@ class GraphElement {
 }
 
 /** @ngInject */
-function graphDirective(
-  timeSrv: TimeSrv,
-  popoverSrv: any,
-  contextSrv: ContextSrv
-) {
+function graphDirective(timeSrv: TimeSrv, popoverSrv: any, contextSrv: ContextSrv) {
   return {
-    restrict: "A",
-    template: "",
+    restrict: 'A',
+    template: '',
     link: (scope: any, elem: JQuery) => {
       return new GraphElement(scope, elem, timeSrv);
     },
   };
 }
 
-coreModule.directive("grafanaGraph", graphDirective);
+coreModule.directive('grafanaGraph', graphDirective);
 export { GraphElement, graphDirective };
