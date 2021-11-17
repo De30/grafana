@@ -3,6 +3,7 @@ package cloudwatch
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -95,7 +96,27 @@ func (e *cloudWatchExecutor) executeTimeSeriesQuery(ctx context.Context, req *ba
 	}
 	close(resultChan)
 
+	results := []*responseWrapper{}
 	for result := range resultChan {
+		results = append(results, result)
+	}
+
+	getInitialQueryIndex := func(response *responseWrapper) int {
+		for index, query := range req.Queries {
+			if response.RefId == query.RefID {
+				return index
+			}
+		}
+
+		return 0
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return getInitialQueryIndex(results[i]) < getInitialQueryIndex(results[j])
+	})
+
+	for _, result := range results {
+		plog.Info("CW order", " ================================="+result.RefId)
 		resp.Responses[result.RefId] = *result.DataResponse
 	}
 
