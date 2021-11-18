@@ -451,6 +451,7 @@ func (hs *HTTPServer) registerRoutes() {
 		// query history
 		apiRoute.Group("/query-history", func(queryHistoryRoute routing.RouteRegister) {
 			queryHistoryRoute.Post("/", bind(dtos.QueryHistory{}), routing.Wrap(hs.createQueryHistory))
+			queryHistoryRoute.Get("/", bind(dtos.GetQueryHistory{}), routing.Wrap(hs.getQueryHistory))
 		}, reqSignedIn)
 
 		// short urls

@@ -37,7 +37,7 @@ import { localStorageFullAction, richHistoryLimitExceededAction, richHistoryUpda
 import { AnyAction, createAction, PayloadAction } from '@reduxjs/toolkit';
 import { updateTime } from './time';
 import { historyUpdatedAction } from './history';
-import { createCacheKey, getResultsFromCache } from './utils';
+import { createCacheKey, getResultsFromCache, addQueryToQueryHistory } from './utils';
 import deepEqual from 'fast-deep-equal';
 
 //
@@ -323,7 +323,7 @@ export const runQueries = (
     } = exploreItemState;
     let newQuerySub;
 
-    const queries = exploreItemState.queries.map((query) => ({
+    const queries: DataQuery[] = exploreItemState.queries.map((query) => ({
       ...query,
       datasource: query.datasource || datasourceInstance?.getRef(),
     }));
@@ -406,6 +406,7 @@ export const runQueries = (
             if (!data.error && firstResponse) {
               // Side-effect: Saving history in localstorage
               const nextHistory = updateHistory(history, datasourceId, queries);
+              addQueryToQueryHistory(queries[0]?.datasource?.uid ?? '', queries);
               const { richHistory: nextRichHistory, localStorageFull, limitExceeded } = addToRichHistory(
                 richHistory || [],
                 datasourceId,

@@ -16,14 +16,15 @@ func ProvideService(sqlStore *sqlstore.SQLStore) *QueryHistoryService {
 }
 
 type Service interface {
-	CreateQueryHistory(ctx context.Context, user *models.SignedInUser, queries string, datasourceUid int64) (*models.QueryHistory, error)
+	CreateQueryHistory(ctx context.Context, user *models.SignedInUser, queries string, datasourceUid string) (*models.QueryHistory, error)
+	GetQueryHistory(ctx context.Context, user *models.SignedInUser, datasourceUid string) ([]models.QueryHistory, error)
 }
 
 type QueryHistoryService struct {
 	SQLStore *sqlstore.SQLStore
 }
 
-func (s QueryHistoryService) CreateQueryHistory(ctx context.Context, user *models.SignedInUser, queries string, datasourceUid int64) (*models.QueryHistory, error) {
+func (s QueryHistoryService) CreateQueryHistory(ctx context.Context, user *models.SignedInUser, queries string, datasourceUid string) (*models.QueryHistory, error) {
 	now := time.Now().Unix()
 	queryHistory := models.QueryHistory{
 		OrgId:         user.OrgId,
@@ -44,6 +45,20 @@ func (s QueryHistoryService) CreateQueryHistory(ctx context.Context, user *model
 	}
 
 	return &queryHistory, nil
+}
+
+func (s QueryHistoryService) GetQueryHistory(ctx context.Context, user *models.SignedInUser, datasourceUid string) ([]models.QueryHistory, error) {
+	var queryHistory []models.QueryHistory
+	err := s.SQLStore.WithDbSession(ctx, func(session *sqlstore.DBSession) error {
+		err := session.Where("org_id = ? AND created_by = ? AND datasource_uid = ?", user.OrgId, user.UserId, datasourceUid).Find(&queryHistory)
+		return err
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return queryHistory, nil
 }
 
 var _ Service = &QueryHistoryService{}

@@ -4,7 +4,6 @@ import React, { PureComponent } from 'react';
 import { RICH_HISTORY_SETTING_KEYS, SortOrder } from 'app/core/utils/richHistory';
 import store from 'app/core/store';
 import { Themeable, withTheme, TabbedContainer, TabConfig } from '@grafana/ui';
-import { getBackendSrv } from '@grafana/runtime';
 
 //Types
 import { RichHistoryQuery, ExploreId } from 'app/types/explore';
@@ -109,19 +108,10 @@ class UnThemedRichHistory extends PureComponent<RichHistoryProps, RichHistorySta
       : this.onSelectDatasourceFilters(this.state.datasourceFilters);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.updateFilters();
-    try {
-      const history = await getBackendSrv().post(`/api/query-history`, {
-        datasourceUid: 1,
-        queries: 'test query',
-      });
-      console.log(history);
-      return history;
-    } catch (err) {
-      console.log(err);
-    }
   }
+
   componentDidUpdate(prevProps: RichHistoryProps, prevState: RichHistoryState) {
     if (
       this.props.activeDatasourceInstance !== prevProps.activeDatasourceInstance ||

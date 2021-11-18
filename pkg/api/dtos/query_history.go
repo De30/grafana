@@ -1,6 +1,12 @@
 package dtos
 
 type QueryHistory struct {
-	DataSourceUid int64  `json:"datasourceUid"`
+	DataSourceUid string `json:"datasourceUid"`
 	Queries       string `json:"queries"`
+}
+
+type GetQueryHistory struct {
+	DataSourceUid string `json:"datasourceUid"`
+
+	Result []QueryHistory
 }

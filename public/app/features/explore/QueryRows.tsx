@@ -8,6 +8,7 @@ import { getNextRefIdChar } from 'app/core/utils/query';
 import { QueryEditorRows } from '../query/components/QueryEditorRows';
 import { createSelector } from '@reduxjs/toolkit';
 import { getExploreItemSelector } from './state/selectors';
+import { getBackendSrv } from '@grafana/runtime';
 
 interface Props {
   exploreId: ExploreId;
@@ -40,9 +41,13 @@ export const QueryRows = ({ exploreId }: Props) => {
   const history = useSelector(getHistory);
   const eventBridge = useSelector(getEventBridge);
 
-  const onRunQueries = useCallback(() => {
+  const onRunQueries = useCallback(async () => {
     dispatch(runQueries(exploreId));
-  }, [dispatch, exploreId]);
+    const history = await getBackendSrv().get(`/api/query-history`, {
+      datasourceUid: queries[0].datasource?.uid ?? '',
+    });
+    console.log(history);
+  }, [dispatch, exploreId, queries]);
 
   const onChange = useCallback(
     (newQueries: DataQuery[]) => {
