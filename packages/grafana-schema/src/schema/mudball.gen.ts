@@ -256,6 +256,7 @@ export enum TableCellDisplayMode {
   Image = 'image',
   JSONView = 'json-view',
   LcdGauge = 'lcd-gauge',
+  AreaChart = 'area-chart',
   BarChart = 'bar-chart',
 }
 

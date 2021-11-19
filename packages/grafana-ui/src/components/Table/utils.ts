@@ -15,6 +15,7 @@ import { BarGaugeCell } from './BarGaugeCell';
 import { DefaultCell } from './DefaultCell';
 import { GeoCell } from './GeoCell';
 import { ImageCell } from './ImageCell';
+import { AreaChartCell } from './AreaChartCell';
 import { BarChartCell } from './BarChartCell';
 import { getFooterValue } from './FooterRow';
 import { JSONViewCell } from './JSONViewCell';
@@ -133,6 +134,8 @@ export function getCellComponent(displayMode: TableCellDisplayMode, field: Field
       return BarGaugeCell;
     case TableCellDisplayMode.JSONView:
       return JSONViewCell;
+    case TableCellDisplayMode.AreaChart:
+      return AreaChartCell;
     case TableCellDisplayMode.BarChart:
       return BarChartCell;
   }
