@@ -11,6 +11,7 @@ import {
   ThresholdsMode,
   FieldConfig,
   formattedValueToString,
+  FieldColorModeId,
 } from '@grafana/data';
 import { Table } from '@grafana/ui';
 
@@ -34,8 +35,8 @@ const meta: ComponentMeta<typeof Table> = {
     },
   },
   args: {
-    width: 700,
-    height: 500,
+    width: 900,
+    height: 800,
     columnMinWidth: 150,
   },
 };
@@ -63,6 +64,9 @@ function buildData(theme: GrafanaTheme2, config: Record<string, FieldConfig>): D
         values: [],
         config: {
           decimals: 2,
+          custom: {
+            width: 100,
+          },
         },
       },
       {
@@ -73,9 +77,6 @@ function buildData(theme: GrafanaTheme2, config: Record<string, FieldConfig>): D
           unit: 'percent',
           min: 0,
           max: 100,
-          custom: {
-            width: 150,
-          },
         },
       },
     ],
@@ -164,7 +165,6 @@ export const ColoredCells: ComponentStory<typeof Table> = (args) => {
   const data = buildData(theme, {
     Progress: {
       custom: {
-        width: 80,
         displayMode: 'color-background',
       },
       thresholds: defaultThresholds,
@@ -196,3 +196,74 @@ Pagination.args = {
 };
 
 export default meta;
+
+export const ChartCells: Story = (args) => {
+  const theme = useTheme2();
+  const data = withChartData(theme, {
+    Trend: {
+      color: {
+        mode: FieldColorModeId.Fixed,
+        fixedColor: 'blue',
+      },
+      custom: {
+        displayMode: 'bar-chart',
+      },
+      thresholds: defaultThresholds,
+    },
+  });
+
+  return (
+    <div className="panel-container" style={{ width: 'auto' }}>
+      <Table data={data} height={args.height} width={args.width} {...args} />
+    </div>
+  );
+};
+
+function withChartData(theme: GrafanaTheme2, config: Record<string, FieldConfig>): DataFrame {
+  const data = new MutableDataFrame({
+    fields: [
+      { name: 'Name', type: FieldType.string, values: [], config: { custom: { width: 100 } } }, // The time field
+      { name: 'Status', type: FieldType.string, values: [], config: { custom: { width: 100 } } }, // The time field
+      {
+        name: 'Quantity',
+        type: FieldType.number,
+        values: [],
+        config: {
+          decimals: 0,
+          custom: {
+            align: 'center',
+            width: 80,
+          },
+        },
+      },
+      {
+        name: 'Trend',
+        type: FieldType.other,
+        values: [],
+        config: {},
+      },
+    ],
+  });
+
+  for (const field of data.fields) {
+    field.config = merge(field.config, config[field.name]);
+  }
+
+  for (let i = 0; i < 1000; i++) {
+    const values = [];
+    let walker = Math.random();
+    for (let valueIndex = 0; valueIndex < 100; valueIndex++) {
+      walker += (Math.random() - 0.5) * 10;
+      values[valueIndex] = Math.max(walker, 0);
+    }
+
+    data.appendRow([
+      Math.random() > 0.7 ? 'Sensor A' : 'Sensor B',
+      Math.random() > 0.7 ? 'Active' : 'Cancelled',
+      Math.random() * 2,
+      values,
+    ]);
+  }
+
+  return prepDataForStorybook([data], theme)[0];
+}
