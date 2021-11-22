@@ -18,7 +18,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func runRunnerCommand(command func(commandLine utils.CommandLine, runner runner.Runner) error) func(context *cli.Context) error {
+// Initializer represents the generated Initialize function that's only available after using wire to generate it.
+type Initializer func(cfg *setting.Cfg) (runner.Runner, error)
+
+func runRunnerCommand(initialize Initializer, command func(commandLine utils.CommandLine, runner runner.Runner) error) func(context *cli.Context) error {
 	return func(context *cli.Context) error {
 		cmd := &utils.ContextCommandLine{Context: context}
 
@@ -27,7 +30,7 @@ func runRunnerCommand(command func(commandLine utils.CommandLine, runner runner.
 			return errutil.Wrap("failed to load configuration", err)
 		}
 
-		r, err := runner.Initialize(cfg)
+		r, err := initialize(cfg)
 		if err != nil {
 			return errutil.Wrap("failed to initialize runner", err)
 		}
@@ -145,41 +148,43 @@ var pluginCommands = []*cli.Command{
 	},
 }
 
-var adminCommands = []*cli.Command{
-	{
-		Name:   "reset-admin-password",
-		Usage:  "reset-admin-password <new password>",
-		Action: runDbCommand(resetPasswordCommand),
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "password-from-stdin",
-				Usage: "Read the password from stdin",
-				Value: false,
+var adminCommands = func(initializer Initializer) []*cli.Command {
+	return []*cli.Command{
+		{
+			Name:   "reset-admin-password",
+			Usage:  "reset-admin-password <new password>",
+			Action: runDbCommand(resetPasswordCommand),
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:  "password-from-stdin",
+					Usage: "Read the password from stdin",
+					Value: false,
+				},
 			},
 		},
-	},
-	{
-		Name:  "data-migration",
-		Usage: "Runs a script that migrates or cleanups data in your database",
-		Subcommands: []*cli.Command{
-			{
-				Name:   "encrypt-datasource-passwords",
-				Usage:  "Migrates passwords from unsecured fields to secure_json_data field. Return ok unless there is an error. Safe to execute multiple times.",
-				Action: runDbCommand(datamigrations.EncryptDatasourcePasswords),
+		{
+			Name:  "data-migration",
+			Usage: "Runs a script that migrates or cleanups data in your database",
+			Subcommands: []*cli.Command{
+				{
+					Name:   "encrypt-datasource-passwords",
+					Usage:  "Migrates passwords from unsecured fields to secure_json_data field. Return ok unless there is an error. Safe to execute multiple times.",
+					Action: runDbCommand(datamigrations.EncryptDatasourcePasswords),
+				},
 			},
 		},
-	},
-	{
-		Name:  "secrets-migration",
-		Usage: "Runs a script that migrates secrets in your database",
-		Subcommands: []*cli.Command{
-			{
-				Name:   "re-encrypt",
-				Usage:  "Re-encrypts secrets by decrypting and re-encrypting them with the currently configured encryption. Returns ok unless there is an error. Safe to execute multiple times.",
-				Action: runRunnerCommand(secretsmigrations.ReEncryptSecrets),
+		{
+			Name:  "secrets-migration",
+			Usage: "Runs a script that migrates secrets in your database",
+			Subcommands: []*cli.Command{
+				{
+					Name:   "re-encrypt",
+					Usage:  "Re-encrypts secrets by decrypting and re-encrypting them with the currently configured encryption. Returns ok unless there is an error. Safe to execute multiple times.",
+					Action: runRunnerCommand(initializer, secretsmigrations.ReEncryptSecrets),
+				},
 			},
 		},
-	},
+	}
 }
 
 var cueCommands = []*cli.Command{
@@ -245,20 +250,22 @@ so must be recompiled to validate newly-added CUE files.`,
 	},
 }
 
-var Commands = []*cli.Command{
-	{
-		Name:        "plugins",
-		Usage:       "Manage plugins for grafana",
-		Subcommands: pluginCommands,
-	},
-	{
-		Name:        "admin",
-		Usage:       "Grafana admin commands",
-		Subcommands: adminCommands,
-	},
-	{
-		Name:        "cue",
-		Usage:       "Cue validation commands",
-		Subcommands: cueCommands,
-	},
+var Commands = func(initializer Initializer) []*cli.Command {
+	return []*cli.Command{
+		{
+			Name:        "plugins",
+			Usage:       "Manage plugins for grafana",
+			Subcommands: pluginCommands,
+		},
+		{
+			Name:        "admin",
+			Usage:       "Grafana admin commands",
+			Subcommands: adminCommands(initializer),
+		},
+		{
+			Name:        "cue",
+			Usage:       "Cue validation commands",
+			Subcommands: cueCommands,
+		},
+	}
 }

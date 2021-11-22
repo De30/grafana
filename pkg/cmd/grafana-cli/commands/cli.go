@@ -13,7 +13,7 @@ import (
 )
 
 // RunCLI is the entrypoint for the grafana-cli command. It returns the exit code for the grafana-cli program.
-func RunCLI(version string) int {
+func RunCLI(initializer Initializer, version string) int {
 	setupLogging()
 
 	app := &cli.App{
@@ -65,7 +65,7 @@ func RunCLI(version string) int {
 				Usage: "Path to config file",
 			},
 		},
-		Commands:        Commands,
+		Commands:        Commands(initializer),
 		CommandNotFound: cmdNotFound,
 	}
 

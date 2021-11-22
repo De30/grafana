@@ -15,7 +15,7 @@ import (
 )
 
 var wireExtsSet = wire.NewSet(
-	wireSet,
+	WireSet,
 	migrations.ProvideOSSMigrations,
 	wire.Bind(new(registry.DatabaseMigrator), new(*migrations.OSSMigrations)),
 	setting.ProvideProvider,
