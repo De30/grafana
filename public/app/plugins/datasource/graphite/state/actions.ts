@@ -15,6 +15,7 @@ const init = createAction<GraphiteQueryEditorDependencies>('init');
 const timeRangeChanged = createAction<TimeRange | undefined>('time-range-changed');
 const queriesChanged = createAction<GraphiteQuery[] | undefined>('queries-changed');
 const queryChanged = createAction<GraphiteQuery>('query-changed');
+const refreshChanged = createAction<(target: string) => void>('refreshChanged');
 
 // Metrics & Tags
 const segmentValueChanged = createAction<{ segment: GraphiteSegment | string; index: number }>('segment-value-changed');
@@ -37,6 +38,7 @@ const toggleEditorMode = createAction('toggle-editor');
 
 export const actions = {
   init,
+  refreshChanged,
   timeRangeChanged,
   queriesChanged,
   queryChanged,
