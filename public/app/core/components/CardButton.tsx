@@ -3,22 +3,24 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Icon, IconName, useStyles2 } from '@grafana/ui';
 
-interface Props extends HTMLAttributes<HTMLDivElement> {
+interface Props extends HTMLAttributes<HTMLButtonElement> {
   icon: IconName;
   onClick: () => void;
   children: React.ReactNode;
 }
 
-export const CardButton = React.forwardRef<HTMLDivElement, Props>(({ icon, children, onClick, ...restProps }, ref) => {
-  const styles = useStyles2(getStyles);
+export const CardButton = React.forwardRef<HTMLButtonElement, Props>(
+  ({ icon, children, onClick, ...restProps }, ref) => {
+    const styles = useStyles2(getStyles);
 
-  return (
-    <div {...restProps} className={styles.action} onClick={onClick}>
-      <Icon name={icon} size="xl" />
-      {children}
-    </div>
-  );
-});
+    return (
+      <button {...restProps} className={styles.action} onClick={onClick}>
+        <Icon name={icon} size="xl" />
+        {children}
+      </button>
+    );
+  }
+);
 
 CardButton.displayName = 'CardButton';
 
@@ -34,6 +36,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       background: ${theme.colors.background.secondary};
       border-radius: ${theme.shape.borderRadius(1)};
       color: ${theme.colors.text.primary};
+      border: unset;
       width: 100%;
       display: flex;
 

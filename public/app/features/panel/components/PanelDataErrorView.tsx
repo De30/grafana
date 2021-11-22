@@ -38,7 +38,7 @@ export function PanelDataErrorView(props: PanelDataErrorViewProps) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.message}>{message}</div>
-      {context.app === CoreApp.PanelEditor && (
+      {context.app === CoreApp.PanelEditor && dataSummary.hasData && (
         <div className={styles.actions}>
           <CardButton icon="table" onClick={switchToTable}>
             Switch to table
