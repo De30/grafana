@@ -31,22 +31,23 @@ import (
 )
 
 func TestTestReceivers(t *testing.T) {
+	// Setup Grafana and its Database
+	tmpDir, paths := testinfra.CreateGrafanaDirs(t)
+	cfgPath := testinfra.CreateCfg(t, paths, testinfra.GrafanaOpts{
+		DisableLegacyAlerting: true,
+		EnableUnifiedAlerting: true,
+	})
+
+	grafanaListedAddr, s := testinfra.StartGrafana(t, tmpDir, cfgPath)
+	s.Bus = bus.GetBus()
+
+	createUser(t, s, models.CreateUserCommand{
+		DefaultOrgRole: string(models.ROLE_EDITOR),
+		Login:          "grafana",
+		Password:       "password",
+	})
+
 	t.Run("assert no receivers returns 400 Bad Request", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		testReceiversURL := fmt.Sprintf("http://grafana:password@%s/api/alertmanager/grafana/config/api/v1/receivers/test", grafanaListedAddr)
 		// nolint
 		resp := postRequest(t, testReceiversURL, `{
@@ -63,21 +64,6 @@ func TestTestReceivers(t *testing.T) {
 	})
 
 	t.Run("assert working receiver returns OK", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandler{}
 		bus.AddHandlerCtx("", mockEmails.sendEmailCommandHandlerSync)
@@ -149,21 +135,6 @@ func TestTestReceivers(t *testing.T) {
 	})
 
 	t.Run("assert invalid receiver returns 400 Bad Request", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandler{}
 		bus.AddHandlerCtx("", mockEmails.sendEmailCommandHandlerSync)
@@ -230,21 +201,6 @@ func TestTestReceivers(t *testing.T) {
 	})
 
 	t.Run("assert timed out receiver returns 408 Request Timeout", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandlerWithTimeout{
 			timeout: 5 * time.Second,
@@ -321,21 +277,6 @@ func TestTestReceivers(t *testing.T) {
 	})
 
 	t.Run("assert multiple different errors returns 207 Multi Status", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandlerWithTimeout{
 			timeout: 5 * time.Second,
@@ -437,22 +378,23 @@ func TestTestReceivers(t *testing.T) {
 }
 
 func TestTestReceiversAlertCustomization(t *testing.T) {
+	// Setup Grafana and its Database
+	tmpDir, paths := testinfra.CreateGrafanaDirs(t)
+	cfgPath := testinfra.CreateCfg(t, paths, testinfra.GrafanaOpts{
+		DisableLegacyAlerting: true,
+		EnableUnifiedAlerting: true,
+	})
+
+	grafanaListedAddr, store := testinfra.StartGrafana(t, tmpDir, cfgPath)
+	store.Bus = bus.GetBus()
+
+	createUser(t, store, models.CreateUserCommand{
+		DefaultOrgRole: string(models.ROLE_EDITOR),
+		Login:          "grafana",
+		Password:       "password",
+	})
+
 	t.Run("assert custom annotations and labels are sent", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandler{}
 		bus.AddHandlerCtx("", mockEmails.sendEmailCommandHandlerSync)
@@ -535,21 +477,6 @@ func TestTestReceiversAlertCustomization(t *testing.T) {
 	})
 
 	t.Run("assert custom annotations can replace default annotations", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandler{}
 		bus.AddHandlerCtx("", mockEmails.sendEmailCommandHandlerSync)
@@ -627,21 +554,6 @@ func TestTestReceiversAlertCustomization(t *testing.T) {
 	})
 
 	t.Run("assert custom labels can replace default label", func(t *testing.T) {
-		// Setup Grafana and its Database
-		dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
-			DisableLegacyAlerting: true,
-			EnableUnifiedAlerting: true,
-		})
-
-		grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
-		store.Bus = bus.GetBus()
-
-		createUser(t, store, models.CreateUserCommand{
-			DefaultOrgRole: string(models.ROLE_EDITOR),
-			Login:          "grafana",
-			Password:       "password",
-		})
-
 		oldEmailBus := bus.GetHandlerCtx("SendEmailCommandSync")
 		mockEmails := &mockEmailHandler{}
 		bus.AddHandlerCtx("", mockEmails.sendEmailCommandHandlerSync)
@@ -719,13 +631,15 @@ func TestTestReceiversAlertCustomization(t *testing.T) {
 }
 
 func TestNotificationChannels(t *testing.T) {
-	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
+	// Setup Grafana and its Database
+	tmpDir, paths := testinfra.CreateGrafanaDirs(t)
+	cfgPath := testinfra.CreateCfg(t, paths, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
 		EnableUnifiedAlerting: true,
 		DisableAnonymous:      true,
 	})
 
-	grafanaListedAddr, s := testinfra.StartGrafana(t, dir, path)
+	grafanaListedAddr, s := testinfra.StartGrafana(t, tmpDir, cfgPath)
 	s.Bus = bus.GetBus()
 
 	mockChannel := newMockNotificationChannel(t, grafanaListedAddr)

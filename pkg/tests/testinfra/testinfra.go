@@ -68,27 +68,15 @@ func StartGrafana(t *testing.T, grafDir, cfgPath string) (string, *sqlstore.SQLS
 	return addr, env.SQLStore
 }
 
-// SetUpDatabase sets up the Grafana database.
-func SetUpDatabase(t *testing.T, grafDir string) *sqlstore.SQLStore {
-	t.Helper()
-
-	sqlStore := sqlstore.InitTestDB(t, sqlstore.InitTestDBOpt{
-		EnsureDefaultOrgAndUser: true,
-	})
-	// We need the main org, since it's used for anonymous access
-	org, err := sqlStore.GetOrgByName(sqlstore.MainOrgName)
-	require.NoError(t, err)
-	require.NotNil(t, org)
-
-	// Make sure changes are synced with other goroutines
-	err = sqlStore.Sync()
-	require.NoError(t, err)
-
-	return sqlStore
-}
-
 // CreateGrafDir creates the Grafana directory.
 func CreateGrafDir(t *testing.T, opts ...GrafanaOpts) (string, string) {
+	tmpDir, dirs := CreateGrafanaDirs(t)
+
+	return tmpDir, CreateCfg(t, dirs, opts...)
+}
+
+// CreateGrafanaDirs creates all relevant Grafana directories.
+func CreateGrafanaDirs(t *testing.T) (string, GrafanaDirs) {
 	t.Helper()
 
 	tmpDir, err := ioutil.TempDir("", "")
@@ -162,18 +150,28 @@ func CreateGrafDir(t *testing.T, opts ...GrafanaOpts) (string, string) {
 	err = fs.CopyRecursive(filepath.Join(rootDir, "public", "app/plugins"), corePluginsDir)
 	require.NoError(t, err)
 
+	return tmpDir, GrafanaDirs{
+		rootProjDir: rootDir,
+		cfgDir:      cfgDir,
+		dataDir:     dataDir,
+		logsDir:     logsDir,
+		pluginsDir:  pluginsDir,
+	}
+}
+
+func CreateCfg(t *testing.T, paths GrafanaDirs, opts ...GrafanaOpts) string {
 	cfg := ini.Empty()
 	dfltSect := cfg.Section("")
-	_, err = dfltSect.NewKey("app_mode", "development")
+	_, err := dfltSect.NewKey("app_mode", "development")
 	require.NoError(t, err)
 
 	pathsSect, err := cfg.NewSection("paths")
 	require.NoError(t, err)
-	_, err = pathsSect.NewKey("data", dataDir)
+	_, err = pathsSect.NewKey("data", paths.dataDir)
 	require.NoError(t, err)
-	_, err = pathsSect.NewKey("logs", logsDir)
+	_, err = pathsSect.NewKey("logs", paths.logsDir)
 	require.NoError(t, err)
-	_, err = pathsSect.NewKey("plugins", pluginsDir)
+	_, err = pathsSect.NewKey("plugins", paths.pluginsDir)
 	require.NoError(t, err)
 
 	logSect, err := cfg.NewSection("log")
@@ -286,14 +284,14 @@ func CreateGrafDir(t *testing.T, opts ...GrafanaOpts) (string, string) {
 		}
 	}
 
-	cfgPath := filepath.Join(cfgDir, "test.ini")
+	cfgPath := filepath.Join(paths.cfgDir, "test.ini")
 	err = cfg.SaveTo(cfgPath)
 	require.NoError(t, err)
 
-	err = fs.CopyFile(filepath.Join(rootDir, "conf", "defaults.ini"), filepath.Join(cfgDir, "defaults.ini"))
+	err = fs.CopyFile(filepath.Join(paths.rootProjDir, "conf", "defaults.ini"), filepath.Join(paths.cfgDir, "defaults.ini"))
 	require.NoError(t, err)
 
-	return tmpDir, cfgPath
+	return cfgPath
 }
 
 type GrafanaOpts struct {
@@ -311,4 +309,8 @@ type GrafanaOpts struct {
 	DisableLegacyAlerting                 bool
 	EnableUnifiedAlerting                 bool
 	UnifiedAlertingDisabledOrgs           []int64
+}
+
+type GrafanaDirs struct {
+	rootProjDir, cfgDir, dataDir, logsDir, pluginsDir string
 }

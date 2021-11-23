@@ -28,11 +28,12 @@ const (
 var updateSnapshotFlag = false
 
 func TestPlugins(t *testing.T) {
-	dir, cfgPath := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
+	tmpDir, dirs := testinfra.CreateGrafanaDirs(t)
+	cfgPath := testinfra.CreateCfg(t, dirs, testinfra.GrafanaOpts{
 		PluginAdminEnabled: true,
 	})
 
-	grafanaListedAddr, store := testinfra.StartGrafana(t, dir, cfgPath)
+	grafanaListedAddr, store := testinfra.StartGrafana(t, tmpDir, cfgPath)
 
 	type testCase struct {
 		desc        string
