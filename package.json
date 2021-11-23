@@ -5,6 +5,7 @@
   "name": "grafana",
   "version": "8.3.0-pre",
   "repository": "github:grafana/grafana",
+  "type": "module",
   "scripts": {
     "api-tests": "jest --notify --watch --config=devenv/e2e-api-tests/jest.js",
     "build": "NODE_ENV=production webpack --config scripts/webpack/webpack.prod.js",
@@ -45,7 +46,8 @@
     "plugins:build-bundled": "grafana-toolkit plugin:bundle-managed",
     "watch": "yarn start -d watch,start core:start --watchTheme",
     "ci:test-frontend": "yarn run test:ci && yarn grafana-toolkit node-version-check",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "levi-1": "tsc --out test.js --project ./tsconfig.json --allowSyntheticDefaultImports true ./test.ts"
   },
   "grafana": {
     "whatsNewUrl": "https://grafana.com/docs/grafana/next/whatsnew/whats-new-in-v8-2/",
@@ -144,6 +146,7 @@
     "@typescript-eslint/eslint-plugin": "4.28.0",
     "@typescript-eslint/parser": "4.28.0",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.2",
+    "acorn": "^8.6.0",
     "angular-mocks": "1.6.6",
     "autoprefixer": "10.2.6",
     "axios": "0.21.2",

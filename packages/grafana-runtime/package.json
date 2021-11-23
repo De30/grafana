@@ -19,7 +19,8 @@
     "bundle": "rollup -c rollup.config.ts",
     "clean": "rimraf ./dist ./compiled",
     "docsExtract": "mkdir -p ../../reports/docs && api-extractor run 2>&1 | tee ../../reports/docs/$(basename $(pwd)).log",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "levi": "tsc ./test.ts"
   },
   "dependencies": {
     "@emotion/css": "11.1.3",

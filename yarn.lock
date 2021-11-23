@@ -2387,6 +2387,7 @@ __metadata:
     "@testing-library/user-event": 13.3.0
     "@types/braintree__sanitize-url": 4.1.0
     "@types/d3-interpolate": ^1.4.0
+    "@types/estraverse": ^5
     "@types/jest": 27.0.2
     "@types/jquery": 3.3.38
     "@types/lodash": 4.14.123
@@ -2399,8 +2400,10 @@ __metadata:
     "@types/testing-library__jest-dom": 5.9.5
     "@types/testing-library__react-hooks": ^3.2.0
     "@types/tinycolor2": 1.4.2
+    acorn: ^8.6.0
     d3-interpolate: 1.4.0
     date-fns: 2.21.3
+    estraverse: ^5.3.0
     eventemitter3: 4.0.7
     lodash: 4.17.21
     marked: 4.0.0
@@ -7702,6 +7705,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/estraverse@npm:^5":
+  version: 5.1.1
+  resolution: "@types/estraverse@npm:5.1.1"
+  dependencies:
+    "@types/estree": "*"
+  checksum: 919a0be99505d2596054966e1545d4b3a2520f3ecac9d25cc1f8a5c0ba2ad4e622eafd85f1406ae8cf1e78413d54148088dda971cb3df493db1afcb0f460f072
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*, @types/estree@npm:^0.0.50":
   version: 0.0.50
   resolution: "@types/estree@npm:0.0.50"
@@ -9928,6 +9940,15 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 2e4c1dbed3da327684863debf31d341bf8882c6893c506653872c00977eee45675feb9129255d6c74c88424d2b20d889ca6de5b39776e5e3cccfc756b3ca1da8
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "acorn@npm:8.6.0"
+  bin:
+    acorn: bin/acorn
+  checksum: 9d0de73b73cb6ea8ccd8263a8144d9e2c4b6af90ea0c429997538af0ebbe83c5addecee814b2a7f91f7f615d0bd1547cc7137b3fa236ce058adc64feccee850b
   languageName: node
   linkType: hard
 
@@ -16026,7 +16047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"estraverse@npm:^5.1.0, estraverse@npm:^5.2.0":
+"estraverse@npm:^5.1.0, estraverse@npm:^5.2.0, estraverse@npm:^5.3.0":
   version: 5.3.0
   resolution: "estraverse@npm:5.3.0"
   checksum: 072780882dc8416ad144f8fe199628d2b3e7bbc9989d9ed43795d2c90309a2047e6bc5979d7e2322a341163d22cfad9e21f4110597fe487519697389497e4e2b
@@ -17940,6 +17961,7 @@ __metadata:
     "@welldone-software/why-did-you-render": 6.2.1
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.2
     abortcontroller-polyfill: 1.4.0
+    acorn: ^8.6.0
     angular: 1.8.2
     angular-bindonce: 0.3.1
     angular-mocks: 1.6.6

@@ -15,7 +15,7 @@
     "url": "http://github.com/grafana/grafana.git",
     "directory": "packages/grafana-ui"
   },
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "grafana-toolkit package:build --scope=ui",
     "bundle": "rollup -c rollup.config.ts",
