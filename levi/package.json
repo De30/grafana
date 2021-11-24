@@ -1,0 +1,21 @@
+{
+  "name": "levi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc-watch ./main.ts --m commonjs",
+    "build": "tsc ./main.ts --m commonjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.10",
+    "tsc-watch": "^4.5.0"
+  }
+}
