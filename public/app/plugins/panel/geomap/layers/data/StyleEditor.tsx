@@ -1,11 +1,24 @@
 import React, { FC } from 'react';
 import { StandardEditorProps } from '@grafana/data';
-import { Field, HorizontalGroup, NumberValueEditor, RadioButtonGroup, SliderValueEditor } from '@grafana/ui';
+import {
+  ColorPicker,
+  Field,
+  HorizontalGroup,
+  InlineField,
+  InlineFieldRow,
+  InlineLabel,
+  NumberValueEditor,
+  RadioButtonGroup,
+  SliderValueEditor,
+} from '@grafana/ui';
+import { Observable } from 'rxjs';
+import { useObservable } from 'react-use';
 
 import {
   ColorDimensionEditor,
   ResourceDimensionEditor,
   ScaleDimensionEditor,
+  ScalarDimensionEditor,
   TextDimensionEditor,
 } from 'app/features/dimensions/editors';
 import {
@@ -15,10 +28,26 @@ import {
   ResourceFolderName,
   TextDimensionConfig,
   defaultTextConfig,
+  ScalarDimensionConfig,
 } from 'app/features/dimensions/types';
-import { defaultStyleConfig, StyleConfig, TextAlignment, TextBaseline } from '../../style/types';
+import { defaultStyleConfig, GeometryTypeId, StyleConfig, TextAlignment, TextBaseline } from '../../style/types';
+import { styleUsesText } from '../../style/utils';
+import { LayerContentInfo } from '../../utils/getFeatures';
 
-export const StyleEditor: FC<StandardEditorProps<StyleConfig, any, any>> = ({ value, context, onChange }) => {
+export interface StyleEditorOptions {
+  layerInfo?: Observable<LayerContentInfo>;
+  simpleFixedValues?: boolean;
+  displayRotation?: boolean;
+}
+
+export const StyleEditor: FC<StandardEditorProps<StyleConfig, StyleEditorOptions, any>> = ({
+  value,
+  context,
+  onChange,
+  item,
+}) => {
+  const settings = item.settings;
+
   const onSizeChange = (sizeValue: ScaleDimensionConfig | undefined) => {
     onChange({ ...value, size: sizeValue });
   };
@@ -33,6 +62,10 @@ export const StyleEditor: FC<StandardEditorProps<StyleConfig, any, any>> = ({ va
 
   const onOpacityChange = (opacityValue: number | undefined) => {
     onChange({ ...value, opacity: opacityValue });
+  };
+
+  const onRotationChange = (rotationValue: ScalarDimensionConfig | undefined) => {
+    onChange({ ...value, rotation: rotationValue });
   };
 
   const onTextChange = (textValue: TextDimensionConfig | undefined) => {
@@ -59,7 +92,89 @@ export const StyleEditor: FC<StandardEditorProps<StyleConfig, any, any>> = ({ va
     onChange({ ...value, textConfig: { ...value.textConfig, textBaseline: textBaseline as TextBaseline } });
   };
 
-  const hasTextLabel = Boolean(value.text?.fixed || value.text?.field);
+  let featuresHavePoints = false;
+  if (settings?.layerInfo) {
+    const propertyOptions = useObservable(settings?.layerInfo);
+    featuresHavePoints = propertyOptions?.geometryType === GeometryTypeId.Point;
+  }
+  const hasTextLabel = styleUsesText(value);
+
+  // Simple fixed value display
+  if (settings?.simpleFixedValues) {
+    return (
+      <>
+        {featuresHavePoints && (
+          <>
+            <InlineFieldRow>
+              <InlineField label={'Symbol'}>
+                <ResourceDimensionEditor
+                  value={value.symbol ?? defaultStyleConfig.symbol}
+                  context={context}
+                  onChange={onSymbolChange}
+                  item={
+                    {
+                      settings: {
+                        resourceType: 'icon',
+                        folderName: ResourceFolderName.Marker,
+                        placeholderText: hasTextLabel ? 'Select a symbol' : 'Select a symbol or add a text label',
+                        placeholderValue: defaultStyleConfig.symbol.fixed,
+                        showSourceRadio: false,
+                      },
+                    } as any
+                  }
+                />
+              </InlineField>
+            </InlineFieldRow>
+            <Field label={'Rotation angle'}>
+              <ScalarDimensionEditor
+                value={value.rotation ?? defaultStyleConfig.rotation}
+                context={context}
+                onChange={onRotationChange}
+                item={
+                  {
+                    settings: {
+                      min: defaultStyleConfig.rotation.min,
+                      max: defaultStyleConfig.rotation.max,
+                    },
+                  } as any
+                }
+              />
+            </Field>
+          </>
+        )}
+        <InlineFieldRow>
+          <InlineField label="Color" labelWidth={10}>
+            <InlineLabel width={4}>
+              <ColorPicker
+                color={value.color?.fixed ?? defaultStyleConfig.color.fixed}
+                onChange={(v) => {
+                  onColorChange({ fixed: v });
+                }}
+              />
+            </InlineLabel>
+          </InlineField>
+        </InlineFieldRow>
+        <InlineFieldRow>
+          <InlineField label="Opacity" labelWidth={10} grow>
+            <SliderValueEditor
+              value={value.opacity ?? defaultStyleConfig.opacity}
+              context={context}
+              onChange={onOpacityChange}
+              item={
+                {
+                  settings: {
+                    min: 0,
+                    max: 1,
+                    step: 0.1,
+                  },
+                } as any
+              }
+            />
+          </InlineField>
+        </InlineFieldRow>
+      </>
+    );
+  }
 
   return (
     <>
@@ -120,6 +235,23 @@ export const StyleEditor: FC<StandardEditorProps<StyleConfig, any, any>> = ({ va
           }
         />
       </Field>
+      {settings?.displayRotation && (
+        <Field label={'Rotation angle'}>
+          <ScalarDimensionEditor
+            value={value.rotation ?? defaultStyleConfig.rotation}
+            context={context}
+            onChange={onRotationChange}
+            item={
+              {
+                settings: {
+                  min: defaultStyleConfig.rotation.min,
+                  max: defaultStyleConfig.rotation.max,
+                },
+              } as any
+            }
+          />
+        </Field>
+      )}
       <Field label={'Text label'}>
         <TextDimensionEditor
           value={value.text ?? defaultTextConfig}
@@ -128,7 +260,8 @@ export const StyleEditor: FC<StandardEditorProps<StyleConfig, any, any>> = ({ va
           item={{} as any}
         />
       </Field>
-      {(value.text?.fixed || value.text?.field) && (
+
+      {hasTextLabel && (
         <>
           <HorizontalGroup>
             <Field label={'Font size'}>
