@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec 'tsc ./main.ts --m commonjs && node ./main.js ./bundle-old.ts ./bundle-new.ts'",
+    "start": "DEBUG=compare nodemon --exec 'tsc ./main.ts --m commonjs && node ./main.js ./bundle-old.ts ./bundle-new.ts'",
     "build": "tsc ./main.ts --m commonjs"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "dependencies": {
     "ast-compare": "^3.0.6",
     "debug": "^4.3.2",
+    "lodash": "^4.17.21",
     "typescript": "^4.5.2"
   },
   "devDependencies": {

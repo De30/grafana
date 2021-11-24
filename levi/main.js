@@ -27,25 +27,46 @@ function compareExports(oldFile, newFile) {
     var additions = {};
     var removals = {};
     var changes = {};
-    debug('Old file: %o exports', Object.keys(oldFileExports).length);
-    debug('New file: %o exports', Object.keys(newFileExports).length);
+    debug('Old file: %o exports', Object.keys(oldFileExports.allExports).length);
+    debug('New file: %o exports', Object.keys(newFileExports.allExports).length);
     // Look for additions and changes
-    for (var _i = 0, _a = Object.entries(newFileExports); _i < _a.length; _i++) {
+    for (var _i = 0, _a = Object.entries(newFileExports.allExports); _i < _a.length; _i++) {
         var _b = _a[_i], key = _b[0], value = _b[1];
         // Addition
-        if (!oldFileExports[key]) {
+        if (!oldFileExports.allExports[key]) {
             additions[key] = value;
             // Change
         }
         else {
-            //
+            var oldSymbol = oldFileExports.allExports[key];
+            var newSymbol = value;
+            if (value.flags & ts.SymbolFlags.Interface) {
+                console.log('(Interface)', key);
+            }
+            else if (value.flags & ts.SymbolFlags.Function) {
+                console.log('(Function)', key);
+                console.log('    changed: ', isFunctionChanged(oldSymbol, newSymbol));
+            }
+            else if (value.flags & ts.SymbolFlags.Variable) {
+                console.log('(Var)', key);
+            }
+            else if (value.flags & ts.SymbolFlags.Class) {
+                console.log('(Class)', key);
+            }
+            else if (value.flags & ts.SymbolFlags.Enum) {
+                console.log('(Enum)', key);
+            }
+            else if (value.flags & ts.SymbolFlags.Type) {
+                console.log('(Type)', key);
+            }
+            console.log('');
         }
     }
     // Look for removals
-    for (var _c = 0, _d = Object.entries(oldFileExports); _c < _d.length; _c++) {
+    for (var _c = 0, _d = Object.entries(oldFileExports.allExports); _c < _d.length; _c++) {
         var _e = _d[_c], key = _e[0], value = _e[1];
         // Removal
-        if (!newFileExports[key]) {
+        if (!newFileExports.allExports[key]) {
             removals[key] = value;
         }
     }
@@ -58,6 +79,26 @@ function compareExports(oldFile, newFile) {
     console.log('Changes:', Object.keys(changes));
     console.log('Removals:', Object.keys(removals));
 }
+function isFunctionChanged(oldSymbol, newSymbol) {
+    var oldDeclaration = oldSymbol.valueDeclaration;
+    var newDeclaration = newSymbol.valueDeclaration;
+    if (stringify({
+        kind: oldDeclaration.type.kind,
+        // @ts-ignore
+        elementType: oldDeclaration.type.elementType
+    }) !==
+        stringify({
+            kind: newDeclaration.type.kind,
+            // @ts-ignore
+            elementType: newDeclaration.type.elementType
+        })) {
+        return true;
+    }
+    if (oldDeclaration.parameters.length !== newDeclaration.parameters.length) {
+        return true;
+    }
+    return false;
+}
 function getAllExports(fileName) {
     var program = ts.createProgram([fileName], { target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS });
     var checker = program.getTypeChecker();
@@ -68,7 +109,7 @@ function getAllExports(fileName) {
         var fileExports = getFileSymbolExports(fileSymbol);
         allExports = __assign(__assign({}, allExports), fileExports);
     }
-    return allExports;
+    return { checker: checker, allExports: allExports };
 }
 function getFileSymbolExports(file) {
     var fileExports = {};
@@ -80,4 +121,19 @@ function getFileSymbolExports(file) {
         });
     }
     return fileExports;
+}
+function censor(censor) {
+    var i = 0;
+    return function (key, value) {
+        if (i !== 0 && typeof censor === 'object' && typeof value == 'object' && censor == value)
+            return '[Circular]';
+        if (i >= 29)
+            // seems to be a harded maximum of 30 serialized objects?
+            return '[Unknown]';
+        ++i; // so we know we aren't using the original object anymore
+        return value;
+    };
+}
+function stringify(obj) {
+    return JSON.stringify(obj, censor(obj));
 }
