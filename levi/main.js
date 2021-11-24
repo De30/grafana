@@ -9,21 +9,21 @@ start(process.argv.slice(2), {
 function start(fileNames, options) {
     var program = ts.createProgram(fileNames, options);
     var checker = program.getTypeChecker();
-    var allExportedNames = [];
+    var allExportNames = [];
     for (var _i = 0, _a = program.getSourceFiles(); _i < _a.length; _i++) {
         var sourceFile = _a[_i];
         var fileSymbol = checker.getSymbolAtLocation(sourceFile);
-        var exportedNames = getExportedNames(fileSymbol);
+        var exportNames = getExportNames(fileSymbol);
         // Print to console
-        if (exportedNames.length) {
+        if (exportNames.length) {
             console.log(sourceFile.fileName);
-            console.log(exportedNames);
+            console.log(exportNames);
         }
-        allExportedNames = allExportedNames.concat(exportedNames);
+        allExportNames = allExportNames.concat(exportNames);
     }
-    fs.writeFileSync('classes.json', JSON.stringify(allExportedNames, undefined, 4));
+    fs.writeFileSync('classes.json', JSON.stringify(allExportNames, undefined, 4));
 }
-function getExportedNames(fileSymbol) {
+function getExportNames(fileSymbol) {
     var exportedNames = [];
     if (fileSymbol === null || fileSymbol === void 0 ? void 0 : fileSymbol.exports) {
         fileSymbol.exports.forEach(function (value, key) {

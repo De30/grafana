@@ -9,25 +9,25 @@ start(process.argv.slice(2), {
 function start(fileNames: string[], options: ts.CompilerOptions): void {
   let program = ts.createProgram(fileNames, options);
   let checker = program.getTypeChecker();
-  let allExportedNames = [];
+  let allExportNames = [];
 
   for (const sourceFile of program.getSourceFiles()) {
     const fileSymbol = checker.getSymbolAtLocation(sourceFile);
-    const exportedNames = getExportedNames(fileSymbol);
+    const exportNames = getExportNames(fileSymbol);
 
     // Print to console
-    if (exportedNames.length) {
+    if (exportNames.length) {
       console.log(sourceFile.fileName);
-      console.log(exportedNames);
+      console.log(exportNames);
     }
 
-    allExportedNames = allExportedNames.concat(exportedNames);
+    allExportNames = allExportNames.concat(exportNames);
   }
 
-  fs.writeFileSync('classes.json', JSON.stringify(allExportedNames, undefined, 4));
+  fs.writeFileSync('classes.json', JSON.stringify(allExportNames, undefined, 4));
 }
 
-function getExportedNames(fileSymbol: ts.Symbol) {
+function getExportNames(fileSymbol: ts.Symbol) {
   const exportedNames = [];
 
   if (fileSymbol?.exports) {
