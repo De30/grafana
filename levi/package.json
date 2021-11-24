@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc-watch ./main.ts --m commonjs",
+    "start": "DEBUG=compare tsc-watch ./main.ts --m commonjs --onSuccess \"node ./main.js ./bundle-old.ts ./bundle-new.ts\"",
     "build": "tsc ./main.ts --m commonjs"
   },
   "keywords": [],
