@@ -5,5 +5,5 @@ export interface DataSourceRef {
   uid?: string;
 }
 
-export declare function isDataSourceRef(ref: DataSourceRef | string | null): string[];
+export declare function isDataSourceRef(ref: DataSourceRef | string | null, foo?: string): string[];
 export declare function getDataSourceUID(ref: DataSourceRef | string | null): string | undefined;

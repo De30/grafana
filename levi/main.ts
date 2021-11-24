@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import getDebug from 'debug';
 
 const debug = getDebug('compare');
+let oldChecker: ts.TypeChecker;
+let newChecker: ts.TypeChecker;
 
 run();
 
@@ -21,6 +23,10 @@ function compareExports(oldFile: string, newFile: string): void {
   const removals = {};
   const changes = {};
 
+  // Cache
+  oldChecker = oldFileExports.checker;
+  newChecker = newFileExports.checker;
+
   debug('Old file: %o exports', Object.keys(oldFileExports.allExports).length);
   debug('New file: %o exports', Object.keys(newFileExports.allExports).length);
 
@@ -38,7 +44,7 @@ function compareExports(oldFile: string, newFile: string): void {
         console.log('(Interface)', key);
       } else if (value.flags & ts.SymbolFlags.Function) {
         console.log('(Function)', key);
-        console.log('    changed: ', isFunctionChanged(oldSymbol, newSymbol));
+        console.log('    changed: ', hasFunctionChanged(oldSymbol, newSymbol));
       } else if (value.flags & ts.SymbolFlags.Variable) {
         console.log('(Var)', key);
       } else if (value.flags & ts.SymbolFlags.Class) {
@@ -71,31 +77,49 @@ function compareExports(oldFile: string, newFile: string): void {
   console.log('Removals:', Object.keys(removals));
 }
 
-function isFunctionChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+// Returns TRUE if the function has changed in a way that it could break the current implementations using it.
+function hasFunctionChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
   const oldDeclaration = oldSymbol.valueDeclaration as ts.FunctionDeclaration;
   const newDeclaration = newSymbol.valueDeclaration as ts.FunctionDeclaration;
 
-  if (
-    stringify({
-      kind: oldDeclaration.type.kind,
-      // @ts-ignore
-      elementType: oldDeclaration.type!.elementType,
-    }) !==
-    stringify({
-      kind: newDeclaration.type.kind,
-      // @ts-ignore
-      elementType: newDeclaration.type!.elementType,
-    })
-  ) {
-    return true;
+  // Check every function parameter
+  // All old parameters must be present at their old position
+  for (let i = 0; i < oldDeclaration.parameters.length; i++) {
+    // No parameter at the same position
+    if (!newDeclaration.parameters[i]) {
+      return true;
+    }
+
+    // Changed parameter at the old position
+    if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
+      return true;
+    }
   }
 
-  if (oldDeclaration.parameters.length !== newDeclaration.parameters.length) {
+  // All new parameters must be optional
+  for (let i = 0; i < newDeclaration.parameters.length; i++) {
+    if (!oldDeclaration.parameters[i] && !newChecker.isOptionalParameter(newDeclaration.parameters[i])) {
+      return true;
+    }
+  }
+
+  // Function return type signature must be the same
+  if (oldDeclaration.type.getText() !== newDeclaration.type.getText()) {
     return true;
   }
 
   return false;
 }
+
+function hasInterfaceChanged() {}
+
+function hasVariableChanged() {}
+
+function hasClassChanged() {}
+
+function hasEnumChanged() {}
+
+function hasTypeChanged() {}
 
 function getAllExports(fileName: string): { checker: ts.TypeChecker; allExports: Record<string, ts.Symbol> } {
   let program = ts.createProgram([fileName], { target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS });

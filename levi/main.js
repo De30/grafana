@@ -14,6 +14,8 @@ exports.__esModule = true;
 var ts = require("typescript");
 var debug_1 = require("debug");
 var debug = (0, debug_1["default"])('compare');
+var oldChecker;
+var newChecker;
 run();
 function run() {
     var _a = process.argv.slice(2), oldFile = _a[0], newFile = _a[1];
@@ -27,6 +29,9 @@ function compareExports(oldFile, newFile) {
     var additions = {};
     var removals = {};
     var changes = {};
+    // Cache
+    oldChecker = oldFileExports.checker;
+    newChecker = newFileExports.checker;
     debug('Old file: %o exports', Object.keys(oldFileExports.allExports).length);
     debug('New file: %o exports', Object.keys(newFileExports.allExports).length);
     // Look for additions and changes
@@ -45,7 +50,7 @@ function compareExports(oldFile, newFile) {
             }
             else if (value.flags & ts.SymbolFlags.Function) {
                 console.log('(Function)', key);
-                console.log('    changed: ', isFunctionChanged(oldSymbol, newSymbol));
+                console.log('    changed: ', hasFunctionChanged(oldSymbol, newSymbol));
             }
             else if (value.flags & ts.SymbolFlags.Variable) {
                 console.log('(Var)', key);
@@ -79,26 +84,39 @@ function compareExports(oldFile, newFile) {
     console.log('Changes:', Object.keys(changes));
     console.log('Removals:', Object.keys(removals));
 }
-function isFunctionChanged(oldSymbol, newSymbol) {
+// Returns TRUE if the function has changed in a way that it could break the current implementations using it.
+function hasFunctionChanged(oldSymbol, newSymbol) {
     var oldDeclaration = oldSymbol.valueDeclaration;
     var newDeclaration = newSymbol.valueDeclaration;
-    if (stringify({
-        kind: oldDeclaration.type.kind,
-        // @ts-ignore
-        elementType: oldDeclaration.type.elementType
-    }) !==
-        stringify({
-            kind: newDeclaration.type.kind,
-            // @ts-ignore
-            elementType: newDeclaration.type.elementType
-        })) {
-        return true;
+    // Check every function parameter
+    // All old parameters must be present at their old position
+    for (var i = 0; i < oldDeclaration.parameters.length; i++) {
+        // No parameter at the same position
+        if (!newDeclaration.parameters[i]) {
+            return true;
+        }
+        // Changed parameter at the old position
+        if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
+            return true;
+        }
     }
-    if (oldDeclaration.parameters.length !== newDeclaration.parameters.length) {
+    // All new parameters must be optional
+    for (var i = 0; i < newDeclaration.parameters.length; i++) {
+        if (!oldDeclaration.parameters[i] && !newChecker.isOptionalParameter(newDeclaration.parameters[i])) {
+            return true;
+        }
+    }
+    // Function return type signature must be the same
+    if (oldDeclaration.type.getText() !== newDeclaration.type.getText()) {
         return true;
     }
     return false;
 }
+function hasInterfaceChanged() { }
+function hasVariableChanged() { }
+function hasClassChanged() { }
+function hasEnumChanged() { }
+function hasTypeChanged() { }
 function getAllExports(fileName) {
     var program = ts.createProgram([fileName], { target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS });
     var checker = program.getTypeChecker();
