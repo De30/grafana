@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "DEBUG=compare tsc-watch ./main.ts --m commonjs --onSuccess \"node ./main.js ./bundle-old.ts ./bundle-new.ts\"",
+    "start": "nodemon --exec 'tsc ./main.ts --m commonjs && node ./main.js ./bundle-old.ts ./bundle-new.ts'",
     "build": "tsc ./main.ts --m commonjs"
   },
   "keywords": [],
@@ -18,6 +17,16 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.10",
+    "nodemon": "^2.0.15",
     "tsc-watch": "^4.5.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "*.ts"
+    ],
+    "ext": "*",
+    "events": {
+      "start": "cls || clear"
+    }
   }
 }

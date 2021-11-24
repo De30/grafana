@@ -49,10 +49,14 @@ function compareExports(oldFile, newFile) {
             removals[key] = value;
         }
     }
+    // Validate comparison
+    var isBreaking = Object.keys(removals).length > 0 || Object.keys(changes).length > 0;
+    // Print comparison
     console.log('');
-    console.log('ADDITIONS:', Object.keys(additions));
-    console.log('CHANGES:', Object.keys(changes));
-    console.log('REMOVALS:', Object.keys(removals));
+    console.log('Is breaking?', isBreaking);
+    console.log('Additions:', Object.keys(additions));
+    console.log('Changes:', Object.keys(changes));
+    console.log('Removals:', Object.keys(removals));
 }
 function getAllExports(fileName) {
     var program = ts.createProgram([fileName], { target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS });

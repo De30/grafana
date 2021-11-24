@@ -44,10 +44,15 @@ function compareExports(oldFile: string, newFile: string): void {
     }
   }
 
+  // Validate comparison
+  const isBreaking = Object.keys(removals).length > 0 || Object.keys(changes).length > 0;
+
+  // Print comparison
   console.log('');
-  console.log('ADDITIONS:', Object.keys(additions));
-  console.log('CHANGES:', Object.keys(changes));
-  console.log('REMOVALS:', Object.keys(removals));
+  console.log('Is breaking?', isBreaking);
+  console.log('Additions:', Object.keys(additions));
+  console.log('Changes:', Object.keys(changes));
+  console.log('Removals:', Object.keys(removals));
 }
 
 function getAllExports(fileName: string) {
