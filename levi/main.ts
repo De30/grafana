@@ -1,12 +1,12 @@
 import * as ts from 'typescript';
 import * as fs from 'fs';
 
-start(process.argv.slice(2), {
+findExports(process.argv.slice(2), {
   target: ts.ScriptTarget.ES5,
   module: ts.ModuleKind.CommonJS,
 });
 
-function start(fileNames: string[], options: ts.CompilerOptions): void {
+function findExports(fileNames: string[], options: ts.CompilerOptions): void {
   let program = ts.createProgram(fileNames, options);
   let checker = program.getTypeChecker();
   let allExportNames = [];

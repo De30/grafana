@@ -2,11 +2,11 @@
 exports.__esModule = true;
 var ts = require("typescript");
 var fs = require("fs");
-start(process.argv.slice(2), {
+findExports(process.argv.slice(2), {
     target: ts.ScriptTarget.ES5,
     module: ts.ModuleKind.CommonJS
 });
-function start(fileNames, options) {
+function findExports(fileNames, options) {
     var program = ts.createProgram(fileNames, options);
     var checker = program.getTypeChecker();
     var allExportNames = [];
