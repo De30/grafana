@@ -220,6 +220,25 @@ function hasClassChanged(prev, current) {
     return false;
 }
 function hasEnumChanged(prev, current) {
+    var prevDeclaration = prev.symbol.declarations[0];
+    var currentDeclaration = current.symbol.declarations[0];
+    var _loop_5 = function (i) {
+        var prevMemberText = prevDeclaration.members[i].getText();
+        var currentMember = currentDeclaration.members.find(function (member) { return prevMemberText === member.getText(); });
+        // Member is missing in the current declaration, or has changed
+        if (!currentMember) {
+            return { value: true };
+        }
+    };
+    // Check previous members
+    // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
+    for (var i = 0; i < prevDeclaration.members.length; i++) {
+        var state_5 = _loop_5(i);
+        if (typeof state_5 === "object")
+            return state_5.value;
+    }
+    // We don't care about any new members added at the moment
+    // TODO: check if the statement above is valid
     return false;
 }
 function hasTypeChanged(prev, current) {

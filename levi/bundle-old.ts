@@ -1,3 +1,7 @@
+export declare enum StreamingFrameAction {
+  Append = 'append',
+  Replace = 'replace',
+}
 export interface DataSourceRef {
   /** The plugin type-id */
   type?: string;
