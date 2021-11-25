@@ -3,6 +3,7 @@ export interface DataSourceRef {
   type?: string;
   /** Specific datasource instance */
   uid?: string;
+  foo?: string;
 }
 
 export declare function isDataSourceRef(ref: DataSourceRef | string | null, foo?: string): string[];

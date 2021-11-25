@@ -4,7 +4,7 @@ import getDebug from 'debug';
 
 const debug = getDebug('compare');
 let oldChecker: ts.TypeChecker;
-let newChecker: ts.TypeChecker;
+let currentChecker: ts.TypeChecker;
 
 type KeyAndSymbol = {
   key: string;
@@ -30,7 +30,7 @@ function compareExports(oldFile: string, newFile: string): void {
 
   // Cache
   oldChecker = prevExports.checker;
-  newChecker = currentExports.checker;
+  currentChecker = currentExports.checker;
 
   debug('Previous file: %o exports', Object.keys(prevExports.allExports).length);
   debug('Current file: %o exports', Object.keys(currentExports.allExports).length);
@@ -142,8 +142,8 @@ function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   const prevDeclaration = prev.symbol.valueDeclaration as ts.FunctionDeclaration;
   const currentDeclaration = current.symbol.valueDeclaration as ts.FunctionDeclaration;
 
-  // Check old function parameters
-  // (all old parameters must be present at their old position)
+  // Check previous function parameters
+  // (all previous parameters must be present at their previous position)
   for (let i = 0; i < prevDeclaration.parameters.length; i++) {
     // No parameter at the same position
     if (!currentDeclaration.parameters[i]) {
@@ -156,10 +156,10 @@ function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
     }
   }
 
-  // Check new function parameters
-  // (all new parameters must be optional)
+  // Check current function parameters
+  // (all current parameters must be optional)
   for (let i = 0; i < currentDeclaration.parameters.length; i++) {
-    if (!prevDeclaration.parameters[i] && !newChecker.isOptionalParameter(currentDeclaration.parameters[i])) {
+    if (!prevDeclaration.parameters[i] && !currentChecker.isOptionalParameter(currentDeclaration.parameters[i])) {
       return true;
     }
   }
@@ -175,26 +175,30 @@ function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
 
 // Returns TRUE changed in a non-compatible way.
 function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
-  const oldDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
-  const newDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
+  const prevDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
+  const currentDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
 
-  if (!oldDeclaration) {
-    debug(`hasInterfaceChanged() - no old declaration found for ${prev}`);
-    return false;
+  // Check previous members
+  // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
+  for (let i = 0; i < prevDeclaration.members.length; i++) {
+    // Removed member
+    if (!currentDeclaration.members[i]) {
+      return true;
+    }
+
+    // Changed member
+    if (currentDeclaration.members[i].getText() !== prevDeclaration.members[i].getText()) {
+      return true;
+    }
   }
 
-  // Check members
-  // for (let i = 0; i < prev.symbol.parameters.length; i++) {
-  //   // No parameter at the same position
-  //   if (!newDeclaration.parameters[i]) {
-  //     return true;
-  //   }
-
-  //   // Changed parameter at the old position
-  //   if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
-  //     return true;
-  //   }
-  // }
+  // Check current members
+  // (only optional members are allowed)
+  for (let i = 0; i < currentDeclaration.members.length; i++) {
+    if (!prevDeclaration.members[i] && !currentDeclaration.members[i].questionToken) {
+      return true;
+    }
+  }
 
   return false;
 }

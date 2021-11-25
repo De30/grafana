@@ -15,7 +15,7 @@ var ts = require("typescript");
 var debug_1 = require("debug");
 var debug = (0, debug_1["default"])('compare');
 var oldChecker;
-var newChecker;
+var currentChecker;
 run();
 function run() {
     var _a = process.argv.slice(2), oldFile = _a[0], newFile = _a[1];
@@ -31,7 +31,7 @@ function compareExports(oldFile, newFile) {
     var changes = {};
     // Cache
     oldChecker = prevExports.checker;
-    newChecker = currentExports.checker;
+    currentChecker = currentExports.checker;
     debug('Previous file: %o exports', Object.keys(prevExports.allExports).length);
     debug('Current file: %o exports', Object.keys(currentExports.allExports).length);
     // Look for additions and changes
@@ -111,8 +111,8 @@ function hasChanged(prev, current) {
 function hasFunctionChanged(prev, current) {
     var prevDeclaration = prev.symbol.valueDeclaration;
     var currentDeclaration = current.symbol.valueDeclaration;
-    // Check old function parameters
-    // (all old parameters must be present at their old position)
+    // Check previous function parameters
+    // (all previous parameters must be present at their previous position)
     for (var i = 0; i < prevDeclaration.parameters.length; i++) {
         // No parameter at the same position
         if (!currentDeclaration.parameters[i]) {
@@ -123,10 +123,10 @@ function hasFunctionChanged(prev, current) {
             return true;
         }
     }
-    // Check new function parameters
-    // (all new parameters must be optional)
+    // Check current function parameters
+    // (all current parameters must be optional)
     for (var i = 0; i < currentDeclaration.parameters.length; i++) {
-        if (!prevDeclaration.parameters[i] && !newChecker.isOptionalParameter(currentDeclaration.parameters[i])) {
+        if (!prevDeclaration.parameters[i] && !currentChecker.isOptionalParameter(currentDeclaration.parameters[i])) {
             return true;
         }
     }
@@ -139,23 +139,27 @@ function hasFunctionChanged(prev, current) {
 }
 // Returns TRUE changed in a non-compatible way.
 function hasInterfaceChanged(prev, current) {
-    var oldDeclaration = prev.symbol.declarations[0];
-    var newDeclaration = current.symbol.declarations[0];
-    if (!oldDeclaration) {
-        debug("hasInterfaceChanged() - no old declaration found for ".concat(prev));
-        return false;
+    var prevDeclaration = prev.symbol.declarations[0];
+    var currentDeclaration = current.symbol.declarations[0];
+    // Check previous members
+    // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
+    for (var i = 0; i < prevDeclaration.members.length; i++) {
+        // Removed member
+        if (!currentDeclaration.members[i]) {
+            return true;
+        }
+        // Changed member
+        if (currentDeclaration.members[i].getText() !== prevDeclaration.members[i].getText()) {
+            return true;
+        }
     }
-    // Check members
-    // for (let i = 0; i < prev.symbol.parameters.length; i++) {
-    //   // No parameter at the same position
-    //   if (!newDeclaration.parameters[i]) {
-    //     return true;
-    //   }
-    //   // Changed parameter at the old position
-    //   if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
-    //     return true;
-    //   }
-    // }
+    // Check current members
+    // (only optional members are allowed)
+    for (var i = 0; i < currentDeclaration.members.length; i++) {
+        if (!prevDeclaration.members[i] && !currentDeclaration.members[i].questionToken) {
+            return true;
+        }
+    }
     return false;
 }
 function hasVariableChanged(prev, current) {
