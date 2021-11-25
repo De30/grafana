@@ -6,6 +6,11 @@ const debug = getDebug('compare');
 let oldChecker: ts.TypeChecker;
 let newChecker: ts.TypeChecker;
 
+type KeyAndSymbol = {
+  key: string;
+  symbol: ts.Symbol;
+};
+
 run();
 
 function run() {
@@ -17,41 +22,43 @@ function compareExports(oldFile: string, newFile: string): void {
   debug('Old filename: %o', oldFile);
   debug('New filename: %o', newFile);
 
-  const oldFileExports = getAllExports(oldFile);
-  const newFileExports = getAllExports(newFile);
+  const prevExports = getAllExports(oldFile);
+  const currentExports = getAllExports(newFile);
   const additions = {};
   const removals = {};
   const changes = {};
 
   // Cache
-  oldChecker = oldFileExports.checker;
-  newChecker = newFileExports.checker;
+  oldChecker = prevExports.checker;
+  newChecker = currentExports.checker;
 
-  debug('Old file: %o exports', Object.keys(oldFileExports.allExports).length);
-  debug('New file: %o exports', Object.keys(newFileExports.allExports).length);
+  debug('Previous file: %o exports', Object.keys(prevExports.allExports).length);
+  debug('Current file: %o exports', Object.keys(currentExports.allExports).length);
 
   // Look for additions and changes
-  for (const [key, value] of Object.entries(newFileExports.allExports)) {
+  for (const [exportName, exportSymbol] of Object.entries(currentExports.allExports)) {
     // Addition
-    if (!oldFileExports.allExports[key]) {
-      additions[key] = value;
+    if (!prevExports.allExports[exportName]) {
+      additions[exportName] = exportSymbol;
 
       // Change
     } else {
-      const oldSymbol = oldFileExports.allExports[key];
-      const newSymbol = value;
-
-      if (hasChanged(oldSymbol, newSymbol)) {
-        changes[key] = value;
+      if (
+        hasChanged(
+          { key: exportName, symbol: prevExports.allExports[exportName] },
+          { key: exportName, symbol: exportSymbol }
+        )
+      ) {
+        changes[exportName] = exportSymbol;
       }
     }
   }
 
   // Look for removals
-  for (const [key, value] of Object.entries(oldFileExports.allExports)) {
+  for (const [exportName, exportSymbol] of Object.entries(prevExports.allExports)) {
     // Removal
-    if (!newFileExports.allExports[key]) {
-      removals[key] = value;
+    if (!currentExports.allExports[exportName]) {
+      removals[exportName] = exportSymbol;
     }
   }
 
@@ -70,7 +77,10 @@ function printResults({
 }) {
   const resultObject = {
     isBreaking: areChangesBreaking({ changes, additions, removals }),
-    additions: Object.keys(additions),
+    additions: Object.keys(additions).map((name) => ({
+      name,
+      value: additions[name].declarations[0].getText(),
+    })),
     changes: Object.keys(changes),
     removals: Object.keys(removals),
   };
@@ -81,6 +91,7 @@ function printResults({
   console.log('===================================');
 }
 
+// Tip: use https://ts-ast-viewer.com for discovering certain types more easily
 function areChangesBreaking({
   changes,
   additions,
@@ -94,89 +105,113 @@ function areChangesBreaking({
 }
 
 // Returns TRUE if the Symbol has changed in a non-compatible way
-function hasChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
-  if (newSymbol.flags & ts.SymbolFlags.Function) {
-    debug('Checking changes (Function)');
-    return hasFunctionChanged(oldSymbol, newSymbol);
+function hasChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  if (current.symbol.flags & ts.SymbolFlags.Function) {
+    debug(`Checking changes for "${current.key}" (Function)`);
+    return hasFunctionChanged(prev, current);
   }
 
-  if (newSymbol.flags & ts.SymbolFlags.Class) {
-    debug('Checking changes (Class)');
-    return hasClassChanged(oldSymbol, newSymbol);
+  if (current.symbol.flags & ts.SymbolFlags.Class) {
+    debug(`Checking changes for "${current.key}" (Class)`);
+    return hasClassChanged(prev, current);
   }
 
-  if (newSymbol.flags & ts.SymbolFlags.Variable) {
-    debug('Checking changes (Variable)');
-    return hasVariableChanged(oldSymbol, newSymbol);
+  if (current.symbol.flags & ts.SymbolFlags.Variable) {
+    debug(`Checking changes for "${current.key}" (Variable)`);
+    return hasVariableChanged(prev, current);
   }
 
-  if (newSymbol.flags & ts.SymbolFlags.Interface) {
-    debug('Checking changes (Interface)');
-    return hasInterfaceChanged(oldSymbol, newSymbol);
+  if (current.symbol.flags & ts.SymbolFlags.Interface) {
+    debug(`Checking changes for "${current.key}" (Interface)`);
+    return hasInterfaceChanged(prev, current);
   }
 
-  if (newSymbol.flags & ts.SymbolFlags.Enum) {
-    debug('Checking changes (Enum)');
-    return hasEnumChanged(oldSymbol, newSymbol);
+  if (current.symbol.flags & ts.SymbolFlags.Enum) {
+    debug(`Checking changes for "${current.key}" (Enum)`);
+    return hasEnumChanged(prev, current);
   }
 
-  if (newSymbol.flags & ts.SymbolFlags.Type) {
-    debug('Checking changes (Type)');
-    return hasTypeChanged(oldSymbol, newSymbol);
+  if (current.symbol.flags & ts.SymbolFlags.Type) {
+    debug(`Checking changes for "${current.key}" (Type)`);
+    return hasTypeChanged(prev, current);
   }
 }
 
-// Returns TRUE if the function has changed in a way that it could break the current implementations using it.
-function hasFunctionChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
-  const oldDeclaration = oldSymbol.valueDeclaration as ts.FunctionDeclaration;
-  const newDeclaration = newSymbol.valueDeclaration as ts.FunctionDeclaration;
+// Returns TRUE changed in a non-compatible way.
+function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  const prevDeclaration = prev.symbol.valueDeclaration as ts.FunctionDeclaration;
+  const currentDeclaration = current.symbol.valueDeclaration as ts.FunctionDeclaration;
 
-  // Check every function parameter
-  // All old parameters must be present at their old position
-  for (let i = 0; i < oldDeclaration.parameters.length; i++) {
+  // Check old function parameters
+  // (all old parameters must be present at their old position)
+  for (let i = 0; i < prevDeclaration.parameters.length; i++) {
     // No parameter at the same position
-    if (!newDeclaration.parameters[i]) {
+    if (!currentDeclaration.parameters[i]) {
       return true;
     }
 
     // Changed parameter at the old position
-    if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
+    if (currentDeclaration.parameters[i].getText() !== prevDeclaration.parameters[i].getText()) {
       return true;
     }
   }
 
-  // All new parameters must be optional
-  for (let i = 0; i < newDeclaration.parameters.length; i++) {
-    if (!oldDeclaration.parameters[i] && !newChecker.isOptionalParameter(newDeclaration.parameters[i])) {
+  // Check new function parameters
+  // (all new parameters must be optional)
+  for (let i = 0; i < currentDeclaration.parameters.length; i++) {
+    if (!prevDeclaration.parameters[i] && !newChecker.isOptionalParameter(currentDeclaration.parameters[i])) {
       return true;
     }
   }
 
-  // Function return type signature must be the same
-  if (oldDeclaration.type.getText() !== newDeclaration.type.getText()) {
+  // Check return type signatures
+  // (they must be the same)
+  if (prevDeclaration.type.getText() !== currentDeclaration.type.getText()) {
     return true;
   }
 
   return false;
 }
 
-function hasInterfaceChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+// Returns TRUE changed in a non-compatible way.
+function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  const oldDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
+  const newDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
+
+  if (!oldDeclaration) {
+    debug(`hasInterfaceChanged() - no old declaration found for ${prev}`);
+    return false;
+  }
+
+  // Check members
+  // for (let i = 0; i < prev.symbol.parameters.length; i++) {
+  //   // No parameter at the same position
+  //   if (!newDeclaration.parameters[i]) {
+  //     return true;
+  //   }
+
+  //   // Changed parameter at the old position
+  //   if (newDeclaration.parameters[i].getText() !== oldDeclaration.parameters[i].getText()) {
+  //     return true;
+  //   }
+  // }
+
   return false;
 }
 
-function hasVariableChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+function hasVariableChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   return false;
 }
 
-function hasClassChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+function hasClassChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   return false;
 }
 
-function hasEnumChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+function hasEnumChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   return false;
 }
 
-function hasTypeChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+function hasTypeChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   return false;
 }
 
@@ -207,24 +242,4 @@ function getFileSymbolExports(file: ts.Symbol): Record<string, ts.Symbol> {
   }
 
   return fileExports;
-}
-
-function censor(censor) {
-  var i = 0;
-
-  return function (key, value) {
-    if (i !== 0 && typeof censor === 'object' && typeof value == 'object' && censor == value) return '[Circular]';
-
-    if (i >= 29)
-      // seems to be a harded maximum of 30 serialized objects?
-      return '[Unknown]';
-
-    ++i; // so we know we aren't using the original object anymore
-
-    return value;
-  };
-}
-
-function stringify(obj: any) {
-  return JSON.stringify(obj, censor(obj));
 }
