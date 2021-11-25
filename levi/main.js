@@ -139,24 +139,36 @@ function hasFunctionChanged(prev, current) {
 function hasInterfaceChanged(prev, current) {
     var prevDeclaration = prev.symbol.declarations[0];
     var currentDeclaration = current.symbol.declarations[0];
+    var _loop_1 = function (i) {
+        var prevMemberText = prevDeclaration.members[i].getText();
+        var currentMember = currentDeclaration.members.find(function (member) { return prevMemberText === member.getText(); });
+        // Member is missing in the current declaration, or has changed
+        // TODO: This is quite basic at the moment, it could be refined to give less "false negatives".
+        //       (Consider a case for example when an interface method receives a new optional parameter, which should not mean a breaking change)
+        if (!currentMember) {
+            return { value: true };
+        }
+    };
     // Check previous members
     // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
     for (var i = 0; i < prevDeclaration.members.length; i++) {
-        // No member at the previous location
-        if (!currentDeclaration.members[i]) {
-            return true;
-        }
-        // Member at the previous location changed
-        if (currentDeclaration.members[i].getText() !== prevDeclaration.members[i].getText()) {
-            return true;
-        }
+        var state_1 = _loop_1(i);
+        if (typeof state_1 === "object")
+            return state_1.value;
     }
+    var _loop_2 = function (i) {
+        var currentMemberText = currentDeclaration.members[i].getText();
+        var prevMember = prevDeclaration.members.find(function (member) { return currentMemberText === member.getText(); });
+        if (!prevMember && !currentDeclaration.members[i].questionToken) {
+            return { value: true };
+        }
+    };
     // Check current members
     // (only optional new members are allowed)
     for (var i = 0; i < currentDeclaration.members.length; i++) {
-        if (!prevDeclaration.members[i] && !currentDeclaration.members[i].questionToken) {
-            return true;
-        }
+        var state_2 = _loop_2(i);
+        if (typeof state_2 === "object")
+            return state_2.value;
     }
     return false;
 }
@@ -173,7 +185,7 @@ function hasVariableChanged(prev, current) {
 function hasClassChanged(prev, current) {
     var prevDeclaration = prev.symbol.declarations[0];
     var currentDeclaration = current.symbol.declarations[0];
-    var _loop_1 = function (i) {
+    var _loop_3 = function (i) {
         var prevMemberText = prevDeclaration.members[i].getText();
         var currentMember = currentDeclaration.members.find(function (member) { return prevMemberText === member.getText(); });
         // Member is missing in the current declaration, or has changed
@@ -186,11 +198,11 @@ function hasClassChanged(prev, current) {
     // Check previous members
     // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
     for (var i = 0; i < prevDeclaration.members.length; i++) {
-        var state_1 = _loop_1(i);
-        if (typeof state_1 === "object")
-            return state_1.value;
+        var state_3 = _loop_3(i);
+        if (typeof state_3 === "object")
+            return state_3.value;
     }
-    var _loop_2 = function (i) {
+    var _loop_4 = function (i) {
         var currentMemberText = currentDeclaration.members[i].getText();
         var prevMember = prevDeclaration.members.find(function (member) { return currentMemberText === member.getText(); });
         // The `questionToken` is not available on certain member types, but we don't let ourselves to be bothered by it being `undefined`
@@ -201,9 +213,9 @@ function hasClassChanged(prev, current) {
     // Check current members
     // (only optional new members are allowed)
     for (var i = 0; i < currentDeclaration.members.length; i++) {
-        var state_2 = _loop_2(i);
-        if (typeof state_2 === "object")
-            return state_2.value;
+        var state_4 = _loop_4(i);
+        if (typeof state_4 === "object")
+            return state_4.value;
     }
     return false;
 }

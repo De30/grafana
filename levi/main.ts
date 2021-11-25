@@ -179,13 +179,13 @@ function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   // Check previous members
   // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
   for (let i = 0; i < prevDeclaration.members.length; i++) {
-    // No member at the previous location
-    if (!currentDeclaration.members[i]) {
-      return true;
-    }
+    const prevMemberText = prevDeclaration.members[i].getText();
+    const currentMember = currentDeclaration.members.find((member) => prevMemberText === member.getText());
 
-    // Member at the previous location changed
-    if (currentDeclaration.members[i].getText() !== prevDeclaration.members[i].getText()) {
+    // Member is missing in the current declaration, or has changed
+    // TODO: This is quite basic at the moment, it could be refined to give less "false negatives".
+    //       (Consider a case for example when an interface method receives a new optional parameter, which should not mean a breaking change)
+    if (!currentMember) {
       return true;
     }
   }
@@ -193,7 +193,10 @@ function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   // Check current members
   // (only optional new members are allowed)
   for (let i = 0; i < currentDeclaration.members.length; i++) {
-    if (!prevDeclaration.members[i] && !currentDeclaration.members[i].questionToken) {
+    const currentMemberText = currentDeclaration.members[i].getText();
+    const prevMember = prevDeclaration.members.find((member) => currentMemberText === member.getText());
+
+    if (!prevMember && !currentDeclaration.members[i].questionToken) {
       return true;
     }
   }
