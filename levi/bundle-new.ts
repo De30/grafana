@@ -1,3 +1,5 @@
+export declare type ScaleCalculator = (value: number) => string;
+
 export declare enum StreamingFrameAction {
   Append = 'append',
   Replace = 'replace',

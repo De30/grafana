@@ -273,6 +273,16 @@ function hasEnumChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
 }
 
 function hasTypeChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  const prevDeclaration = prev.symbol.declarations[0] as ts.TypeAliasDeclaration;
+  const currentDeclaration = current.symbol.declarations[0] as ts.TypeAliasDeclaration;
+
+  // Changed if anything has changed.
+  // (This is a bit tricky, as a type declaration can be a `FunctionType`, a `UnionType`, a `TypeLiteral`, etc. A `TypeLiteral` should need to be checked similarly to a Class or an Interface.)
+  // TODO: revisit how much trouble "false negatives" coming from this are causing us.
+  if (prevDeclaration.getText() !== currentDeclaration.getText()) {
+    return true;
+  }
+
   return false;
 }
 
