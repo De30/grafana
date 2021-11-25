@@ -179,19 +179,19 @@ function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   // Check previous members
   // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
   for (let i = 0; i < prevDeclaration.members.length; i++) {
-    // Removed member
+    // No member at the previous location
     if (!currentDeclaration.members[i]) {
       return true;
     }
 
-    // Changed member
+    // Member at the previous location changed
     if (currentDeclaration.members[i].getText() !== prevDeclaration.members[i].getText()) {
       return true;
     }
   }
 
   // Check current members
-  // (only optional members are allowed)
+  // (only optional new members are allowed)
   for (let i = 0; i < currentDeclaration.members.length; i++) {
     if (!prevDeclaration.members[i] && !currentDeclaration.members[i].questionToken) {
       return true;
@@ -202,8 +202,8 @@ function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
 }
 
 function hasVariableChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
-  const prevDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
-  const currentDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
+  const prevDeclaration = prev.symbol.declarations[0] as ts.VariableDeclaration;
+  const currentDeclaration = current.symbol.declarations[0] as ts.VariableDeclaration;
 
   // Changed if anything has changed in its type signature
   // (any type changes can cause issues in the code that depends on them)
@@ -215,6 +215,35 @@ function hasVariableChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
 }
 
 function hasClassChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  const prevDeclaration = prev.symbol.declarations[0] as ts.ClassDeclaration;
+  const currentDeclaration = current.symbol.declarations[0] as ts.ClassDeclaration;
+
+  // Check previous members
+  // (all previous members must be left intact, otherwise any code that depends on them can possibly have type errors)
+  for (let i = 0; i < prevDeclaration.members.length; i++) {
+    const prevMemberText = prevDeclaration.members[i].getText();
+    const currentMember = currentDeclaration.members.find((member) => prevMemberText === member.getText());
+
+    // Member is missing in the current declaration, or has changed
+    // TODO: This is quite basic at the moment, it could be refined to give less "false negatives".
+    //       (Consider a case for example when a class method receives a new optional parameter, which should not mean a breaking change)
+    if (!currentMember) {
+      return true;
+    }
+  }
+
+  // Check current members
+  // (only optional new members are allowed)
+  for (let i = 0; i < currentDeclaration.members.length; i++) {
+    const currentMemberText = currentDeclaration.members[i].getText();
+    const prevMember = prevDeclaration.members.find((member) => currentMemberText === member.getText());
+
+    // The `questionToken` is not available on certain member types, but we don't let ourselves to be bothered by it being `undefined`
+    if (!prevMember && !(currentDeclaration.members[i] as ts.PropertyDeclaration).questionToken) {
+      return true;
+    }
+  }
+
   return false;
 }
 
