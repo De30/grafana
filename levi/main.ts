@@ -40,21 +40,10 @@ function compareExports(oldFile: string, newFile: string): void {
     } else {
       const oldSymbol = oldFileExports.allExports[key];
       const newSymbol = value;
-      if (value.flags & ts.SymbolFlags.Interface) {
-        console.log('(Interface)', key);
-      } else if (value.flags & ts.SymbolFlags.Function) {
-        console.log('(Function)', key);
-        console.log('    changed: ', hasFunctionChanged(oldSymbol, newSymbol));
-      } else if (value.flags & ts.SymbolFlags.Variable) {
-        console.log('(Var)', key);
-      } else if (value.flags & ts.SymbolFlags.Class) {
-        console.log('(Class)', key);
-      } else if (value.flags & ts.SymbolFlags.Enum) {
-        console.log('(Enum)', key);
-      } else if (value.flags & ts.SymbolFlags.Type) {
-        console.log('(Type)', key);
+
+      if (hasChanged(oldSymbol, newSymbol)) {
+        changes[key] = value;
       }
-      console.log('');
     }
   }
 
@@ -66,15 +55,75 @@ function compareExports(oldFile: string, newFile: string): void {
     }
   }
 
-  // Validate comparison
-  const isBreaking = Object.keys(removals).length > 0 || Object.keys(changes).length > 0;
-
   // Print comparison
+  printResults({ changes, additions, removals });
+}
+
+function printResults({
+  changes,
+  additions,
+  removals,
+}: {
+  changes: Record<string, ts.Symbol>;
+  additions: Record<string, ts.Symbol>;
+  removals: Record<string, ts.Symbol>;
+}) {
+  const resultObject = {
+    isBreaking: areChangesBreaking({ changes, additions, removals }),
+    additions: Object.keys(additions),
+    changes: Object.keys(changes),
+    removals: Object.keys(removals),
+  };
+
   console.log('');
-  console.log('Is breaking?', isBreaking);
-  console.log('Additions:', Object.keys(additions));
-  console.log('Changes:', Object.keys(changes));
-  console.log('Removals:', Object.keys(removals));
+  console.log('===================================');
+  console.log(JSON.stringify(resultObject, null, 4));
+  console.log('===================================');
+}
+
+function areChangesBreaking({
+  changes,
+  additions,
+  removals,
+}: {
+  changes: Record<string, ts.Symbol>;
+  additions: Record<string, ts.Symbol>;
+  removals: Record<string, ts.Symbol>;
+}) {
+  return Object.keys(removals).length > 0 || Object.keys(changes).length > 0;
+}
+
+// Returns TRUE if the Symbol has changed in a non-compatible way
+function hasChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  if (newSymbol.flags & ts.SymbolFlags.Function) {
+    debug('Checking changes (Function)');
+    return hasFunctionChanged(oldSymbol, newSymbol);
+  }
+
+  if (newSymbol.flags & ts.SymbolFlags.Class) {
+    debug('Checking changes (Class)');
+    return hasClassChanged(oldSymbol, newSymbol);
+  }
+
+  if (newSymbol.flags & ts.SymbolFlags.Variable) {
+    debug('Checking changes (Variable)');
+    return hasVariableChanged(oldSymbol, newSymbol);
+  }
+
+  if (newSymbol.flags & ts.SymbolFlags.Interface) {
+    debug('Checking changes (Interface)');
+    return hasInterfaceChanged(oldSymbol, newSymbol);
+  }
+
+  if (newSymbol.flags & ts.SymbolFlags.Enum) {
+    debug('Checking changes (Enum)');
+    return hasEnumChanged(oldSymbol, newSymbol);
+  }
+
+  if (newSymbol.flags & ts.SymbolFlags.Type) {
+    debug('Checking changes (Type)');
+    return hasTypeChanged(oldSymbol, newSymbol);
+  }
 }
 
 // Returns TRUE if the function has changed in a way that it could break the current implementations using it.
@@ -111,15 +160,25 @@ function hasFunctionChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
   return false;
 }
 
-function hasInterfaceChanged() {}
+function hasInterfaceChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  return false;
+}
 
-function hasVariableChanged() {}
+function hasVariableChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  return false;
+}
 
-function hasClassChanged() {}
+function hasClassChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  return false;
+}
 
-function hasEnumChanged() {}
+function hasEnumChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  return false;
+}
 
-function hasTypeChanged() {}
+function hasTypeChanged(oldSymbol: ts.Symbol, newSymbol: ts.Symbol) {
+  return false;
+}
 
 function getAllExports(fileName: string): { checker: ts.TypeChecker; allExports: Record<string, ts.Symbol> } {
   let program = ts.createProgram([fileName], { target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS });
