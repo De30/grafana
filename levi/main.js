@@ -107,7 +107,6 @@ function hasChanged(prev, current) {
         return hasTypeChanged(prev, current);
     }
 }
-// Returns TRUE changed in a non-compatible way.
 function hasFunctionChanged(prev, current) {
     var prevDeclaration = prev.symbol.valueDeclaration;
     var currentDeclaration = current.symbol.valueDeclaration;
@@ -137,7 +136,6 @@ function hasFunctionChanged(prev, current) {
     }
     return false;
 }
-// Returns TRUE changed in a non-compatible way.
 function hasInterfaceChanged(prev, current) {
     var prevDeclaration = prev.symbol.declarations[0];
     var currentDeclaration = current.symbol.declarations[0];
@@ -163,6 +161,13 @@ function hasInterfaceChanged(prev, current) {
     return false;
 }
 function hasVariableChanged(prev, current) {
+    var prevDeclaration = prev.symbol.declarations[0];
+    var currentDeclaration = current.symbol.declarations[0];
+    // Changed if anything has changed in its type signature
+    // (any type changes can cause issues in the code that depends on them)
+    if (prevDeclaration.getText() !== currentDeclaration.getText()) {
+        return true;
+    }
     return false;
 }
 function hasClassChanged(prev, current) {

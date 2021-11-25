@@ -8,3 +8,5 @@ export interface DataSourceRef {
 
 export declare function isDataSourceRef(ref: DataSourceRef | string | null, foo?: string): string[];
 export declare function getDataSourceUID(ref: DataSourceRef | string | null): string | undefined;
+
+export declare const isTableData: (data: string) => number;

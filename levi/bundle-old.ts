@@ -6,3 +6,5 @@ export interface DataSourceRef {
 }
 
 export declare function isDataSourceRef(ref: DataSourceRef | string | null): string[];
+
+export declare const isTableData: (data: string) => number;

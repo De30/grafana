@@ -137,7 +137,6 @@ function hasChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   }
 }
 
-// Returns TRUE changed in a non-compatible way.
 function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   const prevDeclaration = prev.symbol.valueDeclaration as ts.FunctionDeclaration;
   const currentDeclaration = current.symbol.valueDeclaration as ts.FunctionDeclaration;
@@ -173,7 +172,6 @@ function hasFunctionChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   return false;
 }
 
-// Returns TRUE changed in a non-compatible way.
 function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
   const prevDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
   const currentDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
@@ -204,6 +202,15 @@ function hasInterfaceChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
 }
 
 function hasVariableChanged(prev: KeyAndSymbol, current: KeyAndSymbol) {
+  const prevDeclaration = prev.symbol.declarations[0] as ts.InterfaceDeclaration;
+  const currentDeclaration = current.symbol.declarations[0] as ts.InterfaceDeclaration;
+
+  // Changed if anything has changed in its type signature
+  // (any type changes can cause issues in the code that depends on them)
+  if (prevDeclaration.getText() !== currentDeclaration.getText()) {
+    return true;
+  }
+
   return false;
 }
 
