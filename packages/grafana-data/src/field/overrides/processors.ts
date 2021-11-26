@@ -94,6 +94,7 @@ export interface StringFieldConfigSettings {
   maxLength?: number;
   expandTemplateVars?: boolean;
   useTextarea?: boolean;
+  noTrim?: boolean;
   rows?: number;
 }
 

@@ -188,6 +188,7 @@ export const getStandardFieldConfigs = () => {
 
     settings: {
       placeholder: '-',
+      noTrim: true,
     },
     // ??? any optionsUi with no value
     shouldApply: () => true,

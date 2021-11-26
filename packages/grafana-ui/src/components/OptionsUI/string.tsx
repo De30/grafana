@@ -17,19 +17,27 @@ export const StringValueEditor: React.FC<StandardEditorProps<string, StringField
         // handling keyboard event
         const evt = e as React.KeyboardEvent<HTMLInputElement>;
         if (evt.key === 'Enter' && !item.settings?.useTextarea) {
-          nextValue = evt.currentTarget.value.trim();
+          if (item.settings?.noTrim) {
+            nextValue = evt.currentTarget.value;
+          } else {
+            nextValue = evt.currentTarget.value.trim();
+          }
         }
       } else {
         // handling form event
         const evt = e as React.FormEvent<HTMLInputElement>;
-        nextValue = evt.currentTarget.value.trim();
+        if (item.settings?.noTrim) {
+          nextValue = evt.currentTarget.value;
+        } else {
+          nextValue = evt.currentTarget.value.trim();
+        }
       }
       if (nextValue === value) {
         return; // no change
       }
       onChange(nextValue === '' ? undefined : nextValue);
     },
-    [value, item.settings?.useTextarea, onChange]
+    [value, item.settings?.useTextarea, onChange, item.settings?.noTrim]
   );
 
   return (
