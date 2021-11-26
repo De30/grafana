@@ -31,6 +31,6 @@ var WireSet = wire.NewSet(
 )
 
 func Initialize(cfg *setting.Cfg) (Runner, error) {
-	wire.Build(wireExtsSet)
+	wire.Build(WireSet)
 	return Runner{}, nil
 }

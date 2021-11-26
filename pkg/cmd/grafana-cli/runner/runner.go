@@ -44,7 +44,7 @@ func (NoOpUsageStats) RegisterMetricsFunc(_ usagestats.MetricsFunc) {}
 
 func (NoOpUsageStats) RegisterSendReportCallback(_ usagestats.SendReportCallbackFunc) {}
 
-func (NoOpUsageStats) ShouldBeReported(string) bool { return false }
+func (NoOpUsageStats) ShouldBeReported(context.Context, string) bool { return false }
 
 type NoOpRouteRegister struct{}
 
