@@ -166,7 +166,9 @@ export class DatasourceSrv implements DataSourceService {
           instanceSettings,
         });
       } else {
+        console.log('yes');
         instance = new dsPlugin.DataSourceClass(instanceSettings);
+        console.log('no');
       }
 
       instance.components = dsPlugin.components;
@@ -187,6 +189,7 @@ export class DatasourceSrv implements DataSourceService {
       this.datasources[instance.uid] = instance;
       return instance;
     } catch (err) {
+      console.log(err);
       appEvents.emit(AppEvents.alertError, [instanceSettings.name + ' plugin failed', err.toString()]);
       return Promise.reject({ message: `Datasource: ${key} was not found` });
     }
