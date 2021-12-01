@@ -99,6 +99,8 @@ export function convertFieldType(field: Field, opts: ConvertFieldTypeOptions): F
       return fieldToStringField(field);
     case FieldType.boolean:
       return fieldToBooleanField(field);
+    case FieldType.other:
+      return fieldToObjcet(field);
     default:
       return field;
   }
@@ -175,6 +177,22 @@ function fieldToStringField(field: Field): Field {
     ...field,
     type: FieldType.string,
     values: new ArrayVector(stringValues),
+  };
+}
+
+function fieldToObjcet(field: Field): Field {
+  const values = field.values.toArray().slice();
+
+  for (let s = 0; s < values.length; s++) {
+    try {
+      values[s] = JSON.parse(values[s]);
+    } catch {}
+  }
+
+  return {
+    ...field,
+    type: FieldType.other,
+    values: new ArrayVector(values),
   };
 }
 
