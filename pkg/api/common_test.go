@@ -334,7 +334,7 @@ func setupHTTPServer(t *testing.T, useFakeAccessControl bool, enableAccessContro
 		}
 		hs.AccessControl = acmock
 	} else {
-		ac = ossaccesscontrol.ProvideService(cfg, &usagestats.UsageStatsMock{T: t}, db)
+		ac = ossaccesscontrol.ProvideService(cfg, &usagestats.UsageStatsMock{T: t})
 		hs.AccessControl = ac
 		// Perform role registration
 		err := hs.declareFixedRoles()
