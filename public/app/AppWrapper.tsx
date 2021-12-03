@@ -16,6 +16,7 @@ import { AppNotificationList } from './core/components/AppNotifications/AppNotif
 import { SearchWrapper } from 'app/features/search';
 import { LiveConnectionWarning } from './features/live/LiveConnectionWarning';
 import { AngularRoot } from './angular/AngularRoot';
+import { FeatureFlag, FlagContextProvider } from './core/featureflags/flagsProvider';
 
 interface AppWrapperProps {
   app: GrafanaApp;
@@ -23,6 +24,7 @@ interface AppWrapperProps {
 
 interface AppWrapperState {
   ngInjector: any;
+  featureFlags: String;
 }
 
 /** Used by enterprise */
@@ -44,15 +46,31 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
 
     this.state = {
       ngInjector: null,
+      featureFlags: '',
     };
   }
 
   componentDidMount() {
+    contextSrv.featureFlagsUpdated = (flagsString) => {
+      if (this.state.featureFlags !== flagsString) {
+        this.setState((state) => {
+          return { ...state, ...{ featureFlags: flagsString } };
+        });
+      }
+    };
     if (this.container) {
       this.bootstrapNgApp();
     } else {
       throw new Error('Failed to boot angular app, no container to attach to');
     }
+  }
+
+  getFlags() {
+    return this.state.featureFlags.split(',').map((fs) => {
+      return {
+        name: fs,
+      };
+    });
   }
 
   bootstrapNgApp() {
@@ -92,39 +110,40 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
     navigationLogger('AppWrapper', false, 'rendering');
 
     const newNavigationEnabled = config.featureToggles.newNavigation;
-
     return (
-      <Provider store={store}>
-        <ErrorBoundaryAlert style="page">
-          <ConfigContext.Provider value={config}>
-            <ThemeProvider>
-              <ModalsProvider>
-                <GlobalStyles />
-                <div className="grafana-app">
-                  <Router history={locationService.getHistory()}>
-                    {newNavigationEnabled ? <NavBarNext /> : <NavBar />}
-                    <main className="main-view">
-                      {pageBanners.map((Banner, index) => (
-                        <Banner key={index.toString()} />
-                      ))}
+      <FlagContextProvider value={this.getFlags()}>
+        <Provider store={store}>
+          <ErrorBoundaryAlert style="page">
+            <ConfigContext.Provider value={config}>
+              <ThemeProvider>
+                <ModalsProvider>
+                  <GlobalStyles />
+                  <div className="grafana-app">
+                    <Router history={locationService.getHistory()}>
+                      {newNavigationEnabled ? <NavBarNext /> : <NavBar />}
+                      <main className="main-view">
+                        {pageBanners.map((Banner, index) => (
+                          <Banner key={index.toString()} />
+                        ))}
 
-                      <AngularRoot ref={this.container} />
-                      <AppNotificationList />
-                      <SearchWrapper />
-                      {this.state.ngInjector && this.renderRoutes()}
-                      {bodyRenderHooks.map((Hook, index) => (
-                        <Hook key={index.toString()} />
-                      ))}
-                    </main>
-                  </Router>
-                </div>
-                <LiveConnectionWarning />
-                <ModalRoot />
-              </ModalsProvider>
-            </ThemeProvider>
-          </ConfigContext.Provider>
-        </ErrorBoundaryAlert>
-      </Provider>
+                        <AngularRoot ref={this.container} />
+                        <AppNotificationList />
+                        <SearchWrapper />
+                        {this.state.ngInjector && this.renderRoutes()}
+                        {bodyRenderHooks.map((Hook, index) => (
+                          <Hook key={index.toString()} />
+                        ))}
+                      </main>
+                    </Router>
+                  </div>
+                  <LiveConnectionWarning />
+                  <ModalRoot />
+                </ModalsProvider>
+              </ThemeProvider>
+            </ConfigContext.Provider>
+          </ErrorBoundaryAlert>
+        </Provider>
+      </FlagContextProvider>
     );
   }
 }

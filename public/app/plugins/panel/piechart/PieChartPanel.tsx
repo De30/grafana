@@ -23,6 +23,7 @@ import {
   VizLegendItem,
 } from '@grafana/ui';
 import { filterDisplayItems, sumDisplayItemsReducer } from './utils';
+import { ExperimentFlag, NormalFlag } from 'app/core/featureflags/flagsProvider';
 
 const defaultLegendOptions: PieChartLegendOptions = {
   displayMode: LegendDisplayMode.List,
@@ -62,15 +63,17 @@ export function PieChartPanel(props: Props) {
     <VizLayout width={width} height={height} legend={getLegend(props, fieldDisplayValues)}>
       {(vizWidth: number, vizHeight: number) => {
         return (
-          <PieChart
-            width={vizWidth}
-            height={vizHeight}
-            highlightedTitle={highlightedTitle}
-            fieldDisplayValues={fieldDisplayValues}
-            tooltipOptions={options.tooltip}
-            pieType={options.pieType}
-            displayLabels={options.displayLabels}
-          />
+          <ExperimentFlag featureFlag={{ name: 'piechart' }}>
+            <PieChart
+              width={vizWidth}
+              height={vizHeight}
+              highlightedTitle={highlightedTitle}
+              fieldDisplayValues={fieldDisplayValues}
+              tooltipOptions={options.tooltip}
+              pieType={options.pieType}
+              displayLabels={options.displayLabels}
+            />
+          </ExperimentFlag>
         );
       }}
     </VizLayout>

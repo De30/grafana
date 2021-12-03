@@ -2,6 +2,7 @@ import config from '../../core/config';
 import { extend } from 'lodash';
 import { rangeUtil } from '@grafana/data';
 import { AccessControlAction, UserPermission } from 'app/types';
+import { FeatureFlag } from '../featureflags/flagsProvider';
 
 export class User {
   id: number;
@@ -51,6 +52,8 @@ export class ContextSrv {
   sidemenuSmallBreakpoint = false;
   hasEditPermissionInFolders: boolean;
   minRefreshInterval: string;
+  featureFlags: string;
+  featureFlagsUpdated: (flags: string) => void;
 
   constructor() {
     if (!config.bootData) {
@@ -63,6 +66,8 @@ export class ContextSrv {
     this.isEditor = this.hasRole('Editor') || this.hasRole('Admin');
     this.hasEditPermissionInFolders = this.user.hasEditPermissionInFolders;
     this.minRefreshInterval = config.minRefreshInterval;
+    this.featureFlags = '';
+    this.featureFlagsUpdated = () => {};
   }
 
   /**
@@ -71,6 +76,13 @@ export class ContextSrv {
   setLoggedOut() {
     this.user.isSignedIn = false;
     this.isSignedIn = false;
+  }
+
+  setFeatureFlags(flagsString?: string) {
+    if (flagsString && this.featureFlags !== flagsString) {
+      this.featureFlags = flagsString;
+      this.featureFlagsUpdated(this.featureFlags);
+    }
   }
 
   hasRole(role: string) {

@@ -160,6 +160,7 @@ func JSON(status int, body interface{}) *NormalResponse {
 func JSONStreaming(status int, body interface{}) StreamingResponse {
 	header := make(http.Header)
 	header.Set("Content-Type", "application/json")
+	header.Add("x-feature-flags", "stuff,piechart")
 	return StreamingResponse{
 		body:   body,
 		status: status,
