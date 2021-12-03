@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -169,7 +171,29 @@ func DeleteOrgByID(c *models.ReqContext) response.Response {
 	return response.Success("Organization deleted")
 }
 
-func SearchOrgs(c *models.ReqContext) response.Response {
+func (hs *HTTPServer) getOrgsAccessControlMetadata(c *models.ReqContext, orgs []*models.OrgDTO) error {
+	if !hs.Cfg.FeatureToggles["accesscontrol"] || !c.QueryBool("metadata") {
+		return nil
+	}
+
+	orgIDs := make([]int64, len(orgs))
+	for _, org := range orgs {
+		orgIDs = append(orgIDs, org.Id)
+	}
+
+	orgsMetadata, err := accesscontrol.GetOrgsMetadata(c.Req.Context(), hs.AccessControl, hs.SQLStore, c.SignedInUser, orgIDs)
+	if err != nil || len(orgsMetadata) == 0 {
+		return err
+	}
+
+	for _, org := range orgs {
+		org.Metadata = orgsMetadata[org.Id]
+	}
+
+	return nil
+}
+
+func (hs *HTTPServer) SearchOrgs(c *models.ReqContext) response.Response {
 	perPage := c.QueryInt("perpage")
 	if perPage <= 0 {
 		perPage = 1000
@@ -186,6 +210,10 @@ func SearchOrgs(c *models.ReqContext) response.Response {
 
 	if err := sqlstore.SearchOrgs(c.Req.Context(), &query); err != nil {
 		return response.Error(500, "Failed to search orgs", err)
+	}
+
+	if err := hs.getOrgsAccessControlMetadata(c, query.Result); err != nil {
+		return response.Error(http.StatusInternalServerError, "Failed to search orgs metadata", err)
 	}
 
 	return response.JSON(200, query.Result)

@@ -73,8 +73,9 @@ type SearchOrgsQuery struct {
 }
 
 type OrgDTO struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id       int64           `json:"id"`
+	Name     string          `json:"name"`
+	Metadata map[string]bool `json:"accessControl,omitempty"`
 }
 
 type OrgDetailsDTO struct {

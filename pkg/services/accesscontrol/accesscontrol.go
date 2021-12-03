@@ -229,15 +229,25 @@ func GetResourcesMetadata(ctx context.Context, permissions []*Permission, resour
 	return result, nil
 }
 
+func addActionToOrgMetadata(allMetadata map[int64]Metadata, action string, id int64) map[int64]Metadata {
+	metadata, initialized := allMetadata[id]
+	if !initialized {
+		metadata = Metadata{}
+	}
+	metadata[action] = true
+	allMetadata[id] = metadata
+	return allMetadata
+}
+
 // GetOrgsMetadata returns a map of accesscontrol metadata, listing for each org, users available actions
-func GetOrgsMetadata(ctx context.Context, ac AccessControl, db *sqlstore.SQLStore, user *models.SignedInUser, orgIDs []int64) (map[string]Metadata, error) {
+func GetOrgsMetadata(ctx context.Context, ac AccessControl, db *sqlstore.SQLStore, user *models.SignedInUser, orgIDs []int64) (map[int64]Metadata, error) {
 	// Define filtering regexp
 	actionFilter, err := regexp.Compile("^orgs[.:].*")
 	if err != nil {
 		return nil, fmt.Errorf("could not parse actions for orgs: %w", err)
 	}
 
-	result := map[string]Metadata{}
+	result := map[int64]Metadata{}
 	for _, id := range orgIDs {
 		userCopy, err := SwitchUserOrg(ctx, db, *user, id)
 		if err != nil {
@@ -250,7 +260,7 @@ func GetOrgsMetadata(ctx context.Context, ac AccessControl, db *sqlstore.SQLStor
 		// Search for orgs related actions
 		for _, p := range permissions {
 			if actionFilter.Match([]byte(p.Action)) {
-				result = addActionToMetadata(result, p.Action, fmt.Sprintf("%d", id))
+				result = addActionToOrgMetadata(result, p.Action, id)
 			}
 		}
 	}
