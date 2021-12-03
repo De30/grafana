@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
 type AccessControl interface {
@@ -210,5 +211,50 @@ func GetResourcesMetadata(ctx context.Context, permissions []*Permission, resour
 		}
 	}
 
+	return result, nil
+}
+
+func SwitchUserOrg(ctx context.Context, db *sqlstore.SQLStore, user models.SignedInUser, orgID int64) (*models.SignedInUser, error) {
+	if orgID == GlobalOrgID {
+		user.OrgId = orgID
+		user.OrgName = ""
+		user.OrgRole = ""
+	} else {
+		query := models.GetSignedInUserQuery{UserId: user.UserId, OrgId: orgID}
+		if err := db.GetSignedInUserWithCacheCtx(ctx, &query); err != nil {
+			return nil, fmt.Errorf("failed to authenticate user in target org: %w", err)
+		}
+		user.OrgId = query.Result.OrgId
+		user.OrgName = query.Result.OrgName
+		user.OrgRole = query.Result.OrgRole
+	}
+	return &user, nil
+}
+
+// GetOrgsMetadata returns a map of accesscontrol metadata, listing for each org, users available actions
+func GetOrgsMetadata(ctx context.Context, ac AccessControl, db *sqlstore.SQLStore, user *models.SignedInUser, orgIDs []int64) (map[string]Metadata, error) {
+	// Define filtering regexp
+	actionFilter, err := regexp.Compile("^orgs[.:].*")
+	if err != nil {
+		return nil, fmt.Errorf("could not parse actions for orgs: %w", err)
+	}
+
+	result := map[string]Metadata{}
+	for _, id := range orgIDs {
+		userCopy, err := SwitchUserOrg(ctx, db, *user, id)
+		if err != nil {
+			continue
+		}
+		permissions, err := ac.GetUserPermissions(ctx, userCopy)
+		if err != nil {
+			continue
+		}
+		// Search for orgs related actions
+		for _, p := range permissions {
+			if actionFilter.Match([]byte(p.Action)) {
+				result = addActionToMetadata(result, p.Action, fmt.Sprintf("%d", id))
+			}
+		}
+	}
 	return result, nil
 }

@@ -97,29 +97,19 @@ func AuthorizeInOrgMiddleware(ac accesscontrol.AccessControl, db *sqlstore.SQLSt
 		}
 
 		return func(c *models.ReqContext) {
-			// using a copy of the user not to modify the signedInUser, yet perform the permission evaluation in another org
-			userCopy := *(c.SignedInUser)
 			orgID, err := getTargetOrg(c)
 			if err != nil {
 				Deny(c, nil, fmt.Errorf("failed to get target org: %w", err))
 				return
 			}
-			if orgID == accesscontrol.GlobalOrgID {
-				userCopy.OrgId = orgID
-				userCopy.OrgName = ""
-				userCopy.OrgRole = ""
-			} else {
-				query := models.GetSignedInUserQuery{UserId: c.UserId, OrgId: orgID}
-				if err := db.GetSignedInUserWithCacheCtx(c.Req.Context(), &query); err != nil {
-					Deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
-					return
-				}
-				userCopy.OrgId = query.Result.OrgId
-				userCopy.OrgName = query.Result.OrgName
-				userCopy.OrgRole = query.Result.OrgRole
+			// using a copy of the user not to modify the signedInUser, yet perform the permission evaluation in another org
+			userCopy, err := accesscontrol.SwitchUserOrg(c.Req.Context(), db, *c.SignedInUser, orgID)
+			if err != nil {
+				Deny(c, nil, fmt.Errorf("failed to switch user org: %w", err))
+				return
 			}
 
-			authorize(c, ac, &userCopy, evaluator)
+			authorize(c, ac, userCopy, evaluator)
 		}
 	}
 }
