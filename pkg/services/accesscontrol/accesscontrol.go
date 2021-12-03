@@ -49,6 +49,24 @@ type ResourceStore interface {
 // Ex: map[string]bool{"create":true, "delete": true}
 type Metadata map[string]bool
 
+// SwitchUserOrg changes a SignedInUser organization and fetches the user's role in it.
+func SwitchUserOrg(ctx context.Context, db *sqlstore.SQLStore, user models.SignedInUser, orgID int64) (*models.SignedInUser, error) {
+	if orgID == GlobalOrgID {
+		user.OrgId = orgID
+		user.OrgName = ""
+		user.OrgRole = ""
+	} else {
+		query := models.GetSignedInUserQuery{UserId: user.UserId, OrgId: orgID}
+		if err := db.GetSignedInUserWithCacheCtx(ctx, &query); err != nil {
+			return nil, fmt.Errorf("failed to authenticate user in target org: %w", err)
+		}
+		user.OrgId = query.Result.OrgId
+		user.OrgName = query.Result.OrgName
+		user.OrgRole = query.Result.OrgRole
+	}
+	return &user, nil
+}
+
 // HasGlobalAccess checks user access with globally assigned permissions only
 func HasGlobalAccess(ac AccessControl, c *models.ReqContext) func(fallback func(*models.ReqContext) bool, evaluator Evaluator) bool {
 	return func(fallback func(*models.ReqContext) bool, evaluator Evaluator) bool {
@@ -56,11 +74,8 @@ func HasGlobalAccess(ac AccessControl, c *models.ReqContext) func(fallback func(
 			return fallback(c)
 		}
 
-		userCopy := *c.SignedInUser
-		userCopy.OrgId = GlobalOrgID
-		userCopy.OrgRole = ""
-		userCopy.OrgName = ""
-		hasAccess, err := ac.Evaluate(c.Req.Context(), &userCopy, evaluator)
+		userCopy, _ := SwitchUserOrg(c.Req.Context(), nil, *c.SignedInUser, GlobalOrgID)
+		hasAccess, err := ac.Evaluate(c.Req.Context(), userCopy, evaluator)
 		if err != nil {
 			c.Logger.Error("Error from access control system", "error", err)
 			return false
@@ -212,23 +227,6 @@ func GetResourcesMetadata(ctx context.Context, permissions []*Permission, resour
 	}
 
 	return result, nil
-}
-
-func SwitchUserOrg(ctx context.Context, db *sqlstore.SQLStore, user models.SignedInUser, orgID int64) (*models.SignedInUser, error) {
-	if orgID == GlobalOrgID {
-		user.OrgId = orgID
-		user.OrgName = ""
-		user.OrgRole = ""
-	} else {
-		query := models.GetSignedInUserQuery{UserId: user.UserId, OrgId: orgID}
-		if err := db.GetSignedInUserWithCacheCtx(ctx, &query); err != nil {
-			return nil, fmt.Errorf("failed to authenticate user in target org: %w", err)
-		}
-		user.OrgId = query.Result.OrgId
-		user.OrgName = query.Result.OrgName
-		user.OrgRole = query.Result.OrgRole
-	}
-	return &user, nil
 }
 
 // GetOrgsMetadata returns a map of accesscontrol metadata, listing for each org, users available actions
