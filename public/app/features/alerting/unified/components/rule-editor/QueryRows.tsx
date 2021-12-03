@@ -5,7 +5,6 @@ import {
   DataSourceInstanceSettings,
   LoadingState,
   PanelData,
-  RelativeTimeRange,
   ThresholdsConfig,
   ThresholdsMode,
 } from '@grafana/data';
@@ -41,21 +40,6 @@ export class QueryRows extends PureComponent<Props, State> {
     this.props.onQueriesChange(
       this.props.queries.filter((item) => {
         return item.model.refId !== query.refId;
-      })
-    );
-  };
-
-  onChangeTimeRange = (timeRange: RelativeTimeRange, index: number) => {
-    const { queries, onQueriesChange } = this.props;
-    onQueriesChange(
-      queries.map((item, itemIndex) => {
-        if (itemIndex !== index) {
-          return item;
-        }
-        return {
-          ...item,
-          relativeTimeRange: timeRange,
-        };
       })
     );
   };
@@ -228,7 +212,7 @@ export class QueryRows extends PureComponent<Props, State> {
   };
 
   render() {
-    const { onDuplicateQuery, onRunQueries, queries } = this.props;
+    const { onDuplicateQuery, onRunQueries, queries, onQueriesChange } = this.props;
     const thresholdByRefId = this.getThresholdsForQueries(queries);
 
     return (
@@ -254,13 +238,13 @@ export class QueryRows extends PureComponent<Props, State> {
                       dsSettings={dsSettings}
                       data={data}
                       query={query}
+                      onQueriesChange={onQueriesChange}
                       onChangeQuery={this.onChangeQuery}
                       onRemoveQuery={this.onRemoveQuery}
                       queries={queries}
                       onChangeDataSource={this.onChangeDataSource}
                       onDuplicateQuery={onDuplicateQuery}
                       onRunQueries={onRunQueries}
-                      onChangeTimeRange={this.onChangeTimeRange}
                       thresholds={thresholdByRefId[query.refId]}
                       onChangeThreshold={this.onChangeThreshold}
                     />

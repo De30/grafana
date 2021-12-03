@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
 import {
@@ -12,9 +12,10 @@ import {
   RelativeTimeRange,
   ThresholdsConfig,
 } from '@grafana/data';
-import { Icon, InlineField, Input, RelativeTimeRangePicker, useStyles2 } from '@grafana/ui';
+import { RelativeTimeRangePicker, useStyles2 } from '@grafana/ui';
 import { QueryEditorRow } from 'app/features/query/components/QueryEditorRow';
 import { VizWrapper } from './VizWrapper';
+import { QueryOptions } from './QueryOptions';
 import { isExpressionQuery } from 'app/features/expressions/guards';
 import { TABLE, TIMESERIES } from '../../utils/constants';
 import { SupportedPanelPlugins } from '../PanelPluginsButtonGroup';
@@ -27,10 +28,10 @@ interface Props {
   dsSettings: DataSourceInstanceSettings;
   onChangeDataSource: (settings: DataSourceInstanceSettings, index: number) => void;
   onChangeQuery: (query: DataQuery, index: number) => void;
-  onChangeTimeRange?: (timeRange: RelativeTimeRange, index: number) => void;
   onRemoveQuery: (query: DataQuery) => void;
   onDuplicateQuery: (query: AlertQuery) => void;
   onRunQueries: () => void;
+  onQueriesChange: (queries: AlertQuery[]) => void;
   index: number;
   thresholds: ThresholdsConfig;
   onChangeThreshold: (thresholds: ThresholdsConfig, index: number) => void;
@@ -42,10 +43,10 @@ export const QueryWrapper: FC<Props> = ({
   index,
   onChangeDataSource,
   onChangeQuery,
-  onChangeTimeRange,
   onRunQueries,
   onRemoveQuery,
   onDuplicateQuery,
+  onQueriesChange,
   query,
   queries,
   thresholds,
@@ -54,55 +55,18 @@ export const QueryWrapper: FC<Props> = ({
   const styles = useStyles2(getStyles);
   const isExpression = isExpressionQuery(query.model);
   const [pluginId, changePluginId] = useState<SupportedPanelPlugins>(isExpression ? TABLE : TIMESERIES);
-  const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
 
-  const renderTimePicker = (): ReactNode => {
-    if (isExpressionQuery(query.model) || !onChangeTimeRange) {
-      return null;
-    }
-
-    return (
-      <RelativeTimeRangePicker
-        timeRange={query.relativeTimeRange ?? getDefaultRelativeTimeRange()}
-        onChange={(range) => onChangeTimeRange(range, index)}
-      />
-    );
-  };
-
-  const renderQueryOptions = () => {
-    return (
-      <div className={styles.queryOptions}>
-        <div onClick={() => setOptionsOpen(!optionsOpen)}>
-          Query options <Icon name={optionsOpen ? 'angle-left' : 'angle-right'} />
-        </div>
-        {optionsOpen ? (
-          <>
-            <InlineField
-              label="Min interval"
-              tooltip={
-                <>
-                  A lower limit for the interval. Recommended to be set to write frequency, for example <code>1m</code>{' '}
-                  if your data is written every minute. Default value can be set in data source settings for most data
-                  sources.
-                </>
-              }
-            >
-              <Input placeholder="15s" />
-            </InlineField>
-            <InlineField
-              label="Max data points"
-              tooltip={
-                <>
-                  The maximum data points per series. Used directly by some data sources and used in calculation of auto
-                  interval. With streaming data this value is used for the rolling buffer.
-                </>
-              }
-            >
-              <Input />
-            </InlineField>
-          </>
-        ) : null}
-      </div>
+  const onChangeTimeRange = (timeRange: RelativeTimeRange, index: number) => {
+    onQueriesChange(
+      queries.map((item, itemIndex) => {
+        if (itemIndex !== index) {
+          return item;
+        }
+        return {
+          ...item,
+          relativeTimeRange: timeRange,
+        };
+      })
     );
   };
 
@@ -113,8 +77,11 @@ export const QueryWrapper: FC<Props> = ({
 
     return (
       <div className={styles.headerExtras}>
-        {renderTimePicker()}
-        {renderQueryOptions()}
+        <RelativeTimeRangePicker
+          timeRange={query.relativeTimeRange ?? getDefaultRelativeTimeRange()}
+          onChange={(range) => onChangeTimeRange(range, index)}
+        />
+        <QueryOptions onQueriesChange={onQueriesChange} queries={queries} index={index} />
       </div>
     );
   };
@@ -160,10 +127,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     border: 1px solid ${theme.colors.border.medium};
     border-radius: ${theme.shape.borderRadius(1)};
     padding-bottom: ${theme.spacing(1)};
-  `,
-  queryOptions: css`
-    display: flex;
-    margin-left: ${theme.spacing(1)};
   `,
   headerExtras: css`
     display: flex;
