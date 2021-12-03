@@ -12101,6 +12101,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base64-arraybuffer@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "base64-arraybuffer@npm:0.2.0"
+  checksum: eaf06558fe9bc250f1c43fcd316e6c726da494e93cc195ff472da61874b75d3bb9e93f3a3d4fd0da13630214eb5a9dbeeec249d085b70d10c8b21990fdae8086
+  languageName: node
+  linkType: hard
+
+"base64-arraybuffer@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "base64-arraybuffer@npm:1.0.1"
+  checksum: 04b6fe6818b1c79774fa8aea169063521ad177f2ba04d2a4a0f00fca297d516319b551a3cda76050263da751b4ffb07d939fc1b5eb155f0e429659733e60afb0
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.0.2, base64-js@npm:^1.3.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -14358,6 +14372,15 @@ __metadata:
     hyphenate-style-name: ^1.0.2
     isobject: ^3.0.1
   checksum: c9964c4708216954c468b69bbee2d971fd759ada4f40637b8ca4d3f79caba4818d0532a4f190ac560227c08742ad063ffec7a30afddc4d96b66a18c3a008f0d8
+  languageName: node
+  linkType: hard
+
+"css-line-break@npm:2.0.1":
+  version: 2.0.1
+  resolution: "css-line-break@npm:2.0.1"
+  dependencies:
+    base64-arraybuffer: ^0.2.0
+  checksum: 71ea449986bc2f8d1cfebe102a5a6f9419c3f6ebb4b622ac0f530a6aa2d1d8de0f4688a2c09a85486cfb074eed59eeaf226dc2fd3727295885553b489abf63fd
   languageName: node
   linkType: hard
 
@@ -18979,6 +19002,7 @@ __metadata:
     html-loader: 3.0.1
     html-webpack-harddisk-plugin: 2.0.0
     html-webpack-plugin: 5.5.0
+    html2canvas: ^1.3.3
     http-server: 14.0.0
     husky: ^7.0.0
     iconscout-unicons-tarball: "https://github.com/grafana/icons/tarball/63056cd833ba7ee4e94904492b3a8c0cabc38d28"
@@ -19705,6 +19729,16 @@ __metadata:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: 25ca0b341234501c64754ba8f9bb84f978e50f3f90affc199d18d04511cdc2c0c8ef8a975901a0fbcfe5bae32f80e8fd5ef52f1ce3672d3ff5307057ccb5a063
+  languageName: node
+  linkType: hard
+
+"html2canvas@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "html2canvas@npm:1.3.3"
+  dependencies:
+    css-line-break: 2.0.1
+    text-segmentation: ^1.0.2
+  checksum: 570ee6342d87610883a842d8d45aa29a3550bf8ff46af195d2b33f5243b814471cac61435718059ffd2b316673f0fe16baa24ecac800935c7e425c8dbe8f7f4f
   languageName: node
   linkType: hard
 
@@ -32329,6 +32363,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"text-segmentation@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "text-segmentation@npm:1.0.2"
+  dependencies:
+    utrie: ^1.0.1
+  checksum: 087ae66abef4f2b6ecd7a3aff1c0ed6f84e0dd3bb92d339237b6d15e6227cab5b1cfcef95b9734713e1026bdaa9d3207585cabac277049aa3e8a9187d93c10da
+  languageName: node
+  linkType: hard
+
 "text-table@npm:0.2.0, text-table@npm:^0.2.0":
   version: 0.2.0
   resolution: "text-table@npm:0.2.0"
@@ -33728,6 +33771,15 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: c81095493225ecfc28add49c106ca4f09cdf56bc66731aa8dabc2edbbccb1e1bfe2de6a115e5c6a380d3ea166d1636410b62ef216bb07b3feb1cfde1d95d5080
+  languageName: node
+  linkType: hard
+
+"utrie@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "utrie@npm:1.0.1"
+  dependencies:
+    base64-arraybuffer: ^1.0.1
+  checksum: 7c021a0b581ab55d57c4436c1431e64b31a920e037d4f3c7139a670be64232a5426142b1523351f7852a1c7e777755701fd96a5aeb82fc35eb8722cc7b01b868
   languageName: node
   linkType: hard
 

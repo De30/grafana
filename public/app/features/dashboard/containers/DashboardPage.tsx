@@ -31,6 +31,7 @@ import { DashboardPrompt } from '../components/DashboardPrompt/DashboardPrompt';
 import classnames from 'classnames';
 import { PanelEditEnteredEvent, PanelEditExitedEvent } from 'app/types/events';
 import { liveTimer } from '../dashgrid/liveTimer';
+import html2canvas from 'html2canvas';
 
 export interface DashboardPageRouteParams {
   uid?: string;
@@ -102,6 +103,19 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
   componentDidMount() {
     this.initDashboard();
     this.forceRouteReloadCounter = (this.props.history.location.state as any)?.routeReloadCounter || 0;
+    setTimeout(() => {
+      html2canvas(document.getElementById('dashboard-content'), {
+        backgroundColor: `${this.props.theme.colors.background.canvas}`,
+        height: 1024,
+        scale: 0.5,
+        width: 1024,
+        windowHeight: 1024,
+        windowWidth: 1024,
+      }).then(function (canvas) {
+        const base64image = canvas.toDataURL('image/webp');
+        console.log(base64image);
+      });
+    }, 5000);
   }
 
   componentWillUnmount() {
@@ -366,7 +380,7 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
             hideHorizontalTrack={true}
             updateAfterMountMs={500}
           >
-            <div className={styles.dashboardContent}>
+            <div id="dashboard-content" className={styles.dashboardContent}>
               {initError && <DashboardFailed />}
               {showSubMenu && (
                 <section aria-label={selectors.pages.Dashboard.SubMenu.submenu}>
