@@ -586,7 +586,13 @@ func (m *PluginManager) unregisterAndStop(ctx context.Context, p *plugins.Plugin
 
 // start starts a backend plugin process
 func (m *PluginManager) start(ctx context.Context, p *plugins.Plugin) error {
+	remotePlugins, err := m.sqlStore.GetAllRemotePlugins(ctx)
+	if err != nil {
+		return err
+	}
+
 	if !p.IsManaged() || !p.Backend || p.SignatureError != nil {
+		m.log.Error(fmt.Sprint("Not starting plugin ", p))
 		return nil
 	}
 
@@ -594,6 +600,7 @@ func (m *PluginManager) start(ctx context.Context, p *plugins.Plugin) error {
 		return backendplugin.ErrPluginNotRegistered
 	}
 
+	p.Addr = remotePlugins[p.ID]
 	if err := startPluginAndRestartKilledProcesses(ctx, p); err != nil {
 		return err
 	}

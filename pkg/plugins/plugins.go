@@ -142,6 +142,9 @@ type JSONData struct {
 
 	// Backend (Datasource + Renderer)
 	Executable string `json:"executable,omitempty"`
+
+	// Remote
+	Addr string `json:"addr,omitempty"`
 }
 
 // Route describes a plugin route that is defined in

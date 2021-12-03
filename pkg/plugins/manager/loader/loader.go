@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/grafana/grafana/pkg/services/sqlstore"
+
 	"github.com/grafana/grafana/pkg/infra/fs"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
@@ -37,15 +39,15 @@ type Loader struct {
 	errs map[string]*plugins.SignatureError
 }
 
-func ProvideService(license models.Licensing, cfg *setting.Cfg, authorizer plugins.PluginLoaderAuthorizer) (*Loader, error) {
-	return New(license, cfg, authorizer), nil
+func ProvideService(license models.Licensing, cfg *setting.Cfg, authorizer plugins.PluginLoaderAuthorizer, sqlStore *sqlstore.SQLStore) (*Loader, error) {
+	return New(license, cfg, authorizer, sqlStore), nil
 }
 
-func New(license models.Licensing, cfg *setting.Cfg, authorizer plugins.PluginLoaderAuthorizer) *Loader {
+func New(license models.Licensing, cfg *setting.Cfg, authorizer plugins.PluginLoaderAuthorizer, sqlStore *sqlstore.SQLStore) *Loader {
 	return &Loader{
 		cfg:                cfg,
 		pluginFinder:       finder.New(cfg),
-		pluginInitializer:  initializer.New(cfg, license),
+		pluginInitializer:  initializer.New(cfg, license, sqlStore),
 		signatureValidator: signature.NewValidator(authorizer),
 		errs:               make(map[string]*plugins.SignatureError),
 		log:                log.New("plugin.loader"),

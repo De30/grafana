@@ -1,12 +1,15 @@
 package initializer
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 
 	"github.com/grafana/grafana-aws-sdk/pkg/awsds"
 
@@ -24,16 +27,23 @@ import (
 )
 
 type Initializer struct {
-	cfg     *setting.Cfg
-	license models.Licensing
-	log     log.Logger
+	cfg           *setting.Cfg
+	license       models.Licensing
+	log           log.Logger
+	remotePlugins map[string]string
 }
 
-func New(cfg *setting.Cfg, license models.Licensing) Initializer {
+func New(cfg *setting.Cfg, license models.Licensing, sqlStore *sqlstore.SQLStore) Initializer {
+	remotePlugins, err := sqlStore.GetAllRemotePlugins(context.Background())
+	if err != nil {
+		remotePlugins = make(map[string]string)
+	}
+
 	return Initializer{
-		cfg:     cfg,
-		license: license,
-		log:     log.New("plugin.initializer"),
+		cfg:           cfg,
+		license:       license,
+		log:           log.New("plugin.initializer"),
+		remotePlugins: remotePlugins,
 	}
 }
 
@@ -82,6 +92,16 @@ func (i *Initializer) Initialize(p *plugins.Plugin) error {
 
 	pluginLog := i.log.New("pluginID", p.ID)
 	p.SetLogger(pluginLog)
+
+	p.Addr = i.remotePlugins[p.ID]
+	if p.Backend && p.Addr != "" {
+		client, err := backendplugin.NewRemotePlugin(p.ID, p.Addr, pluginLog)
+		if err != nil {
+			return err
+		}
+		p.RegisterClient(client)
+		return nil
+	}
 
 	if p.Backend {
 		var backendFactory backendplugin.PluginFactoryFunc

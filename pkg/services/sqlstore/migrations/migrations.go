@@ -3,6 +3,8 @@ package migrations
 import (
 	"os"
 
+	"github.com/grafana/grafana/pkg/plugins"
+
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/ualert"
 	. "github.com/grafana/grafana/pkg/services/sqlstore/migrator"
@@ -64,6 +66,7 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 	addKVStoreMigrations(mg)
 	ualert.AddDashboardUIDPanelIDMigration(mg)
 	accesscontrol.AddMigration(mg)
+	plugins.AddMigration(mg)
 }
 
 func addMigrationLogMigrations(mg *Migrator) {
