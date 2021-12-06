@@ -1,3 +1,13 @@
+import { eslint } from '@betterer/eslint';
+
 export default {
-  // Add tests here ☀️
+  'no more type assertions': () =>
+    eslint({
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        {
+          assertionStyle: 'never',
+        },
+      ],
+    }).include('./public/**/*.ts'),
 };
