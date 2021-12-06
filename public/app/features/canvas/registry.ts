@@ -2,6 +2,7 @@ import { Registry } from '@grafana/data';
 import { CanvasElementItem, CanvasElementOptions } from './element';
 import { iconItem } from './elements/icon';
 import { textBoxItem } from './elements/textBox';
+import { buttonItem } from './elements/button';
 
 export const DEFAULT_CANVAS_ELEMENT_CONFIG: CanvasElementOptions = {
   ...iconItem.getNewOptions(),
@@ -12,4 +13,5 @@ export const DEFAULT_CANVAS_ELEMENT_CONFIG: CanvasElementOptions = {
 export const canvasElementRegistry = new Registry<CanvasElementItem>(() => [
   iconItem, // default for now
   textBoxItem,
+  buttonItem,
 ]);

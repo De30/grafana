@@ -5,6 +5,7 @@ import { DimensionContext } from 'app/features/dimensions/context';
 import { TextDimensionEditor } from 'app/features/dimensions/editors/TextDimensionEditor';
 import { TextDimensionConfig } from 'app/features/dimensions/types';
 import { CanvasElementItem, CanvasElementProps } from '../element';
+import { apiEditor } from 'app/plugins/panel/canvas/editor/apiEditor';
 
 interface ButtonData {
   text?: string;
@@ -57,6 +58,13 @@ export const buttonItem: CanvasElementItem<ButtonConfig, ButtonData> = {
       path: 'config.text',
       name: 'Text',
       editor: TextDimensionEditor,
+    });
+    builder.addCustomEditor({
+      category,
+      id: 'apiSelector',
+      path: 'config.api',
+      name: 'API',
+      editor: apiEditor,
     });
   },
 };
