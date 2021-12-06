@@ -5,20 +5,50 @@ import { DimensionContext } from 'app/features/dimensions/context';
 import { TextDimensionEditor } from 'app/features/dimensions/editors/TextDimensionEditor';
 import { TextDimensionConfig } from 'app/features/dimensions/types';
 import { CanvasElementItem, CanvasElementProps } from '../element';
-import { apiEditor } from 'app/plugins/panel/canvas/editor/apiEditor';
+import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/APIEditor';
+import { getBackendSrv } from '@grafana/runtime';
 
 interface ButtonData {
   text?: string;
+  api?: APIEditorConfig;
 }
 
 interface ButtonConfig {
   text?: TextDimensionConfig;
+  api?: APIEditorConfig;
 }
 
 class ButtonDisplay extends PureComponent<CanvasElementProps<ButtonConfig, ButtonData>> {
   render() {
     const { data } = this.props;
-    const onClick = () => console.log('button being clicked :)');
+    const onClick = () => {
+      if (data?.api) {
+        getBackendSrv()
+          .fetch({
+            url: data?.api.endpoint!,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+            data: data?.api.data ?? {},
+          })
+          .subscribe({
+            next: (v: any) => {
+              console.log('GOT', v);
+            },
+            error: (err: any) => {
+              console.log('GOT ERROR', err);
+              alert('TODO... button click: ' + JSON.stringify(err));
+            },
+            complete: () => {
+              // this.setState({ working: false });
+            },
+          });
+      }
+    };
 
     return <Button onClick={onClick}>{data?.text}</Button>;
   }
@@ -44,6 +74,7 @@ export const buttonItem: CanvasElementItem<ButtonConfig, ButtonData> = {
   prepareData: (ctx: DimensionContext, cfg: ButtonConfig) => {
     const data: ButtonData = {
       text: cfg?.text ? ctx.getText(cfg.text).value() : '',
+      api: cfg?.api ?? undefined,
     };
 
     return data;
@@ -64,7 +95,7 @@ export const buttonItem: CanvasElementItem<ButtonConfig, ButtonData> = {
       id: 'apiSelector',
       path: 'config.api',
       name: 'API',
-      editor: apiEditor,
+      editor: APIEditor,
     });
   },
 };
