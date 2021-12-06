@@ -75,7 +75,7 @@
     "@babel/preset-env": "7.14.7",
     "@babel/preset-react": "7.14.5",
     "@babel/preset-typescript": "7.14.5",
-    "@betterer/cli": "^5.0.0",
+    "@betterer/cli": "5.1.5",
     "@emotion/eslint-plugin": "11.2.0",
     "@grafana/api-documenter": "7.11.2",
     "@grafana/e2e": "workspace:*",
