@@ -13,11 +13,14 @@ import { css } from '@emotion/css';
 import { isString } from 'lodash';
 import { LineConfig } from '../types';
 import { DimensionContext } from 'app/features/dimensions/context';
+import { getBackendSrv } from '@grafana/runtime';
+import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/APIEditor';
 
 export interface IconConfig {
   path?: ResourceDimensionConfig;
   fill?: ColorDimensionConfig;
   stroke?: LineConfig;
+  api?: APIEditorConfig;
 }
 
 interface IconData {
@@ -25,6 +28,7 @@ interface IconData {
   fill: string;
   strokeColor?: string;
   stroke?: number;
+  api?: APIEditorConfig;
 }
 
 // When a stoke is defined, we want the path to be in page units
@@ -46,8 +50,38 @@ export function IconDisplay(props: CanvasElementProps) {
     strokeWidth: data?.stroke,
   };
 
+  const onClick = () => {
+    if (data?.api) {
+      getBackendSrv()
+        .fetch({
+          url: data?.api.endpoint!,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+          data: data?.api.data ?? {},
+        })
+        .subscribe({
+          next: (v: any) => {
+            console.log('GOT', v);
+          },
+          error: (err: any) => {
+            console.log('GOT ERROR', err);
+            alert('TODO... button click: ' + JSON.stringify(err));
+          },
+          complete: () => {
+            // this.setState({ working: false });
+          },
+        });
+    }
+  };
+
   return (
     <SVG
+      onClick={onClick}
       src={data.path}
       width={width}
       height={height}
@@ -92,6 +126,7 @@ export const iconItem: CanvasElementItem<IconConfig, IconData> = {
     const data: IconData = {
       path,
       fill: cfg.fill ? ctx.getColor(cfg.fill).value() : '#CCC',
+      api: cfg?.api ?? undefined,
     };
 
     if (cfg.stroke?.width && cfg.stroke.color) {
@@ -151,6 +186,13 @@ export const iconItem: CanvasElementItem<IconConfig, IconData> = {
           fixed: 'grey',
         },
         showIf: (cfg) => Boolean(cfg?.config?.stroke?.width),
+      })
+      .addCustomEditor({
+        category,
+        id: 'apiSelector',
+        path: 'config.api',
+        name: 'API',
+        editor: APIEditor,
       });
   },
 };

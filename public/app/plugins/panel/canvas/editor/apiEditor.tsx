@@ -35,7 +35,7 @@ export const APIEditor: FC<StandardEditorProps<APIEditorConfig, any, any>> = (pr
     [onChange, value]
   );
 
-  const renderJSON = (data: string | undefined) => {
+  const renderJSON = (data: string) => {
     try {
       const json = JSON.parse(data);
       return <JSONFormatter json={json} />;
@@ -58,10 +58,15 @@ export const APIEditor: FC<StandardEditorProps<APIEditorConfig, any, any>> = (pr
       </InlineFieldRow>
       <InlineFieldRow>
         <InlineField label={'Data'} labelWidth={labelWidth} grow={true}>
-          <StringValueEditor context={context} value={value?.data} onChange={onDataChange} item={dummyStringSettings} />
+          <StringValueEditor
+            context={context}
+            value={value?.data ?? '{}'}
+            onChange={onDataChange}
+            item={dummyStringSettings}
+          />
         </InlineField>
       </InlineFieldRow>
-      {renderJSON(value?.data)}
+      {renderJSON(value?.data ?? '{}')}
     </>
   );
 };
