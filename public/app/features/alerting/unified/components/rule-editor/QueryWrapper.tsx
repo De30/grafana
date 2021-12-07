@@ -34,7 +34,6 @@ interface Props {
   onQueriesChange: (queries: AlertQuery[]) => void;
   index: number;
   thresholds: ThresholdsConfig;
-  onChangeThreshold: (thresholds: ThresholdsConfig, index: number) => void;
 }
 
 export const QueryWrapper: FC<Props> = ({
@@ -50,11 +49,45 @@ export const QueryWrapper: FC<Props> = ({
   query,
   queries,
   thresholds,
-  onChangeThreshold,
 }) => {
   const styles = useStyles2(getStyles);
   const isExpression = isExpressionQuery(query.model);
   const [pluginId, changePluginId] = useState<SupportedPanelPlugins>(isExpression ? TABLE : TIMESERIES);
+
+  const onChangeThreshold = (thresholds: ThresholdsConfig, index: number) => {
+    const referencedRefId = queries[index].refId;
+
+    onQueriesChange(
+      queries.map((query) => {
+        if (!isExpressionQuery(query.model)) {
+          return query;
+        }
+
+        if (query.model.conditions && query.model.conditions[0].query.params[0] === referencedRefId) {
+          return {
+            ...query,
+            model: {
+              ...query.model,
+              conditions: query.model.conditions.map((condition, conditionIndex) => {
+                // Only update the first condition for a given refId.
+                if (condition.query.params[0] === referencedRefId && conditionIndex === 0) {
+                  return {
+                    ...condition,
+                    evaluator: {
+                      ...condition.evaluator,
+                      params: [parseFloat(thresholds.steps[1].value.toPrecision(3))],
+                    },
+                  };
+                }
+                return condition;
+              }),
+            },
+          };
+        }
+        return query;
+      })
+    );
+  };
 
   const onChangeTimeRange = (timeRange: RelativeTimeRange, index: number) => {
     onQueriesChange(
@@ -81,7 +114,13 @@ export const QueryWrapper: FC<Props> = ({
           timeRange={query.relativeTimeRange ?? getDefaultRelativeTimeRange()}
           onChange={(range) => onChangeTimeRange(range, index)}
         />
-        <QueryOptions onQueriesChange={onQueriesChange} queries={queries} index={index} />
+        <QueryOptions
+          onQueriesChange={onQueriesChange}
+          queries={queries}
+          index={index}
+          query={query}
+          dataSourceSettings={dsSettings}
+        />
       </div>
     );
   };
