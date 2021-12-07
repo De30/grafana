@@ -3,6 +3,7 @@ import { CanvasElementItem, CanvasElementOptions } from './element';
 import { iconItem } from './elements/icon';
 import { textBoxItem } from './elements/textBox';
 import { buttonItem } from './elements/button';
+import { droneItem } from './elements/drone';
 
 export const DEFAULT_CANVAS_ELEMENT_CONFIG: CanvasElementOptions = {
   ...iconItem.getNewOptions(),
@@ -14,4 +15,5 @@ export const canvasElementRegistry = new Registry<CanvasElementItem>(() => [
   iconItem, // default for now
   textBoxItem,
   buttonItem,
+  droneItem,
 ]);
