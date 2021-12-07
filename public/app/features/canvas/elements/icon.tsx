@@ -14,7 +14,7 @@ import { isString } from 'lodash';
 import { LineConfig } from '../types';
 import { DimensionContext } from 'app/features/dimensions/context';
 import { getBackendSrv } from '@grafana/runtime';
-import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/APIEditor';
+import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/apiEditor';
 
 export interface IconConfig {
   path?: ResourceDimensionConfig;

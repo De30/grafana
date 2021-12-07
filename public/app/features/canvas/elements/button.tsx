@@ -5,7 +5,7 @@ import { DimensionContext } from 'app/features/dimensions/context';
 import { TextDimensionEditor } from 'app/features/dimensions/editors/TextDimensionEditor';
 import { TextDimensionConfig } from 'app/features/dimensions/types';
 import { CanvasElementItem, CanvasElementProps } from '../element';
-import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/APIEditor';
+import { APIEditor, APIEditorConfig } from 'app/plugins/panel/canvas/editor/apiEditor';
 import { getBackendSrv } from '@grafana/runtime';
 
 interface ButtonData {
