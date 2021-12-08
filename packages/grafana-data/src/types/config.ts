@@ -135,6 +135,7 @@ export interface GrafanaConfig {
   theme2: GrafanaTheme2;
   pluginsToPreload: PreloadPlugin[];
   featureToggles: FeatureToggles;
+  experiments: { [key: string]: boolean };
   licenseInfo: LicenseInfo;
   http2Enabled: boolean;
   dateFormats?: SystemDateFormatSettings;

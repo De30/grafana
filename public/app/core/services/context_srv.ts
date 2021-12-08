@@ -2,7 +2,6 @@ import config from '../../core/config';
 import { extend } from 'lodash';
 import { rangeUtil } from '@grafana/data';
 import { AccessControlAction, UserPermission } from 'app/types';
-import { FeatureFlag } from '../featureflags/flagsProvider';
 
 export class User {
   id: number;

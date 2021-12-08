@@ -16,6 +16,7 @@ import { VisualizationSuggestions } from 'app/features/panel/components/VizTypeP
 import { useLocalStorage } from 'react-use';
 import { VisualizationSelectPaneTab } from './types';
 import { LS_VISUALIZATION_SELECT_TAB_KEY } from 'app/core/constants';
+import { useExperiment } from 'app/core/experiments/experimentsProvider';
 
 interface Props {
   panel: PanelModel;
@@ -53,6 +54,8 @@ export const VisualizationSelectPane: FC<Props> = ({ panel, data }) => {
     }
   }, [listMode]);
 
+  const suggestions = useExperiment('suggestions');
+
   const onCloseVizPicker = () => {
     dispatch(toggleVizPicker(false));
   };
@@ -61,15 +64,24 @@ export const VisualizationSelectPane: FC<Props> = ({ panel, data }) => {
     return null;
   }
 
-  const radioOptions: Array<SelectableValue<VisualizationSelectPaneTab>> = [
-    { label: 'Visualizations', value: VisualizationSelectPaneTab.Visualizations },
-    { label: 'Suggestions', value: VisualizationSelectPaneTab.Suggestions },
-    {
-      label: 'Library panels',
-      value: VisualizationSelectPaneTab.LibraryPanels,
-      description: 'Reusable panels you can share between multiple dashboards.',
-    },
-  ];
+  const radioOptions: Array<SelectableValue<VisualizationSelectPaneTab>> = suggestions
+    ? [
+        { label: 'Visualizations', value: VisualizationSelectPaneTab.Visualizations },
+        { label: 'Suggestions', value: VisualizationSelectPaneTab.Suggestions },
+        {
+          label: 'Library panels',
+          value: VisualizationSelectPaneTab.LibraryPanels,
+          description: 'Reusable panels you can share between multiple dashboards.',
+        },
+      ]
+    : [
+        { label: 'Visualizations', value: VisualizationSelectPaneTab.Visualizations },
+        {
+          label: 'Library panels',
+          value: VisualizationSelectPaneTab.LibraryPanels,
+          description: 'Reusable panels you can share between multiple dashboards.',
+        },
+      ];
 
   return (
     <div className={styles.openWrapper}>

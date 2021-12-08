@@ -16,7 +16,7 @@ import { AppNotificationList } from './core/components/AppNotifications/AppNotif
 import { SearchWrapper } from 'app/features/search';
 import { LiveConnectionWarning } from './features/live/LiveConnectionWarning';
 import { AngularRoot } from './angular/AngularRoot';
-import { FeatureFlag, FlagContextProvider } from './core/featureflags/flagsProvider';
+import { ExperimentContextProvider } from './core/experiments/experimentsProvider';
 
 interface AppWrapperProps {
   app: GrafanaApp;
@@ -111,7 +111,7 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
 
     const newNavigationEnabled = config.featureToggles.newNavigation;
     return (
-      <FlagContextProvider value={this.getFlags()}>
+      <ExperimentContextProvider value={config.experiments}>
         <Provider store={store}>
           <ErrorBoundaryAlert style="page">
             <ConfigContext.Provider value={config}>
@@ -143,7 +143,7 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
             </ConfigContext.Provider>
           </ErrorBoundaryAlert>
         </Provider>
-      </FlagContextProvider>
+      </ExperimentContextProvider>
     );
   }
 }
