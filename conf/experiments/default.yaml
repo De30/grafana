@@ -1,3 +1,6 @@
 - name: feature1
   description: feature1
   expression: "false"
+- name: feature3
+  description: feature3
+  expression: "true"

@@ -2,6 +2,7 @@ package backgroundsvcs
 
 import (
 	"github.com/grafana/grafana/pkg/api"
+	"github.com/grafana/grafana/pkg/experiments"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/infra/remotecache"
 	"github.com/grafana/grafana/pkg/infra/tracing"
@@ -45,7 +46,7 @@ func ProvideBackgroundServiceRegistry(
 	rendering *rendering.RenderingService, tokenService models.UserTokenBackgroundService,
 	provisioning *provisioning.ProvisioningServiceImpl, alerting *alerting.AlertEngine, pm *manager.PluginManager,
 	metrics *metrics.InternalMetricsService, usageStats *uss.UsageStats, updateChecker *updatechecker.Service,
-	tracing *tracing.TracingService, remoteCache *remotecache.RemoteCache,
+	tracing *tracing.TracingService, remoteCache *remotecache.RemoteCache, expService *experiments.ExperimentsService,
 	// Need to make sure these are initialized, is there a better place to put them?
 	_ *azuremonitor.Service, _ *cloudwatch.CloudWatchService, _ *elasticsearch.Service, _ *graphite.Service,
 	_ *influxdb.Service, _ *loki.Service, _ *opentsdb.Service, _ *prometheus.Service, _ *tempo.Service,
@@ -69,7 +70,8 @@ func ProvideBackgroundServiceRegistry(
 		metrics,
 		usageStats,
 		tracing,
-		remoteCache)
+		remoteCache,
+		expService)
 }
 
 // BackgroundServiceRegistry provides background services.

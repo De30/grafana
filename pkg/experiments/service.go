@@ -21,15 +21,12 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		log:      log.New("experiments"),
 		filename: "conf/experiments/default.yaml",
 		exps:     make(map[string]Experiment),
+		defaults: make(map[string]Experiment),
 	}
 
 	exps, err := readExperiments(s.filename)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, e := range exps {
-		s.exps[e.Name] = e
 	}
 
 	s.AddExperiment(Experiment{
@@ -44,6 +41,16 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		Expression:  "true",
 	})
 
+	// add default experiments
+	for k, v := range s.defaults {
+		s.exps[k] = v
+	}
+
+	// override with exps from config
+	for _, e := range exps {
+		s.exps[e.Name] = e
+	}
+
 	return s, nil
 }
 
@@ -51,6 +58,7 @@ type ExperimentsService struct {
 	log      log.Logger
 	Cfg      *setting.Cfg
 	exps     map[string]Experiment
+	defaults map[string]Experiment
 	filename string
 }
 
@@ -73,19 +81,25 @@ func (srv *ExperimentsService) Run(ctx context.Context) error {
 			if err != nil {
 				srv.log.Error("failed to read experiments file", "event", event, "error", err)
 			} else {
-				// TODO: need a lock to avoid breaking experiments while reloading
 				srv.log.Info("reloading experiments file", "path", srv.filename)
-				srv.exps = make(map[string]Experiment)
-				for _, e := range exps {
-					srv.exps[e.Name] = e
+				newExps := make(map[string]Experiment)
+
+				// add default experiments
+				for k, v := range srv.defaults {
+					newExps[k] = v
 				}
+
+				// override with exps from config
+				for _, e := range exps {
+					newExps[e.Name] = e
+				}
+
+				srv.exps = newExps
 			}
 		case err := <-watcher.Errors:
 			srv.log.Error("failed to watch experiments file", "error", err)
 		case <-ctx.Done():
-			{
-				return ctx.Err()
-			}
+			return ctx.Err()
 		}
 	}
 
@@ -102,6 +116,7 @@ func (srv *ExperimentsService) IsEnabled(ctx context.Context, name string) bool 
 	// loop over config items
 	_, exist := srv.exps[name]
 	if exist {
+		// eval for real
 		return srv.exps[name].Expression == "true"
 	}
 
@@ -109,11 +124,7 @@ func (srv *ExperimentsService) IsEnabled(ctx context.Context, name string) bool 
 }
 
 func (srv *ExperimentsService) AddExperiment(exp Experiment) {
-	// deal with the error
-	_, exist := srv.exps[exp.Name]
-	if !exist {
-		srv.exps[exp.Name] = exp
-	}
+	srv.defaults[exp.Name] = exp
 }
 
 func (srv *ExperimentsService) ListOfExperiments(ctx context.Context) map[string]bool {
