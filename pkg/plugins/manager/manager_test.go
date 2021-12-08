@@ -435,7 +435,10 @@ func TestPluginManager_lifecycle_managed(t *testing.T) {
 							}, nil
 						}
 
-						res, err := ctx.manager.CheckHealth(context.Background(), &backend.CheckHealthRequest{PluginContext: backend.PluginContext{PluginID: testPluginID}})
+						res, err := ctx.manager.CheckHealth(context.Background(), &backend.CheckHealthRequest{PluginContext: backend.PluginContext{
+							PluginID:                   testPluginID,
+							DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{JSONData: []byte("{}")},
+						}})
 						require.NoError(t, err)
 						require.NotNil(t, res)
 						require.Equal(t, backend.HealthStatusOk, res.Status)

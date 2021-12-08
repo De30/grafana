@@ -27,6 +27,10 @@ type AddOpts struct {
 	PluginInstallDir, PluginZipURL, PluginRepoURL string
 }
 
+type remotePluginGetter interface {
+	GetAllRemotePlugins(ctx context.Context) (map[string]string, error)
+}
+
 // Loader is responsible for loading plugins from the file system.
 type Loader interface {
 	// Load will return a list of plugins found in the provided file system paths.

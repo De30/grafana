@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,12 +15,15 @@ import (
 	"sync"
 	"time"
 
+	eplugins "github.com/grafana/grafana-enterprise-sdk/plugins"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
 	"github.com/grafana/grafana/pkg/infra/fs"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
+
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/instrumentation"
 	"github.com/grafana/grafana/pkg/plugins/manager/installer"
@@ -60,8 +64,7 @@ func ProvideService(cfg *setting.Cfg, requestValidator models.PluginRequestValid
 	return pm, nil
 }
 
-func newManager(cfg *setting.Cfg, pluginRequestValidator models.PluginRequestValidator, pluginLoader plugins.Loader,
-	sqlStore *sqlstore.SQLStore) *PluginManager {
+func newManager(cfg *setting.Cfg, pluginRequestValidator models.PluginRequestValidator, pluginLoader plugins.Loader, sqlStore *sqlstore.SQLStore) *PluginManager {
 	return &PluginManager{
 		cfg:              cfg,
 		requestValidator: pluginRequestValidator,
@@ -214,13 +217,19 @@ func (m *PluginManager) Renderer() *plugins.Plugin {
 }
 
 func (m *PluginManager) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	jd, err := jsonDataWithLicense(req.PluginContext.DataSourceInstanceSettings.JSONData)
+	if err != nil {
+		return nil, err
+	}
+	req.PluginContext.DataSourceInstanceSettings.JSONData = jd
+
 	plugin, exists := m.plugin(req.PluginContext.PluginID)
 	if !exists {
 		return nil, backendplugin.ErrPluginNotRegistered
 	}
 
 	var resp *backend.QueryDataResponse
-	err := instrumentation.InstrumentQueryDataRequest(req.PluginContext.PluginID, func() (innerErr error) {
+	err = instrumentation.InstrumentQueryDataRequest(req.PluginContext.PluginID, func() (innerErr error) {
 		resp, innerErr = plugin.QueryData(ctx, req)
 		return
 	})
@@ -250,12 +259,18 @@ func (m *PluginManager) QueryData(ctx context.Context, req *backend.QueryDataReq
 }
 
 func (m *PluginManager) CallResource(pCtx backend.PluginContext, reqCtx *models.ReqContext, path string) {
+	jd, err := jsonDataWithLicense(pCtx.DataSourceInstanceSettings.JSONData)
+	if err != nil {
+		return
+	}
+	pCtx.DataSourceInstanceSettings.JSONData = jd
+
 	var dsURL string
 	if pCtx.DataSourceInstanceSettings != nil {
 		dsURL = pCtx.DataSourceInstanceSettings.URL
 	}
 
-	err := m.requestValidator.Validate(dsURL, reqCtx.Req)
+	err = m.requestValidator.Validate(dsURL, reqCtx.Req)
 	if err != nil {
 		reqCtx.JsonApiErr(http.StatusForbidden, "Access denied", err)
 		return
@@ -425,12 +440,18 @@ func (m *PluginManager) CollectMetrics(ctx context.Context, pluginID string) (*b
 }
 
 func (m *PluginManager) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+	jd, err := jsonDataWithLicense(req.PluginContext.DataSourceInstanceSettings.JSONData)
+	if err != nil {
+		return nil, err
+	}
+	req.PluginContext.DataSourceInstanceSettings.JSONData = jd
+
 	var dsURL string
 	if req.PluginContext.DataSourceInstanceSettings != nil {
 		dsURL = req.PluginContext.DataSourceInstanceSettings.URL
 	}
 
-	err := m.requestValidator.Validate(dsURL, nil)
+	err = m.requestValidator.Validate(dsURL, nil)
 	if err != nil {
 		return &backend.CheckHealthResult{
 			Status:  http.StatusForbidden,
@@ -462,6 +483,32 @@ func (m *PluginManager) CheckHealth(ctx context.Context, req *backend.CheckHealt
 	}
 
 	return resp, nil
+}
+
+func jsonDataWithLicense(jsonData json.RawMessage) ([]byte, error) {
+	b, err := jsonData.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	jd := make(map[string]interface{})
+	if err := json.Unmarshal(b, &jd); err != nil {
+		return nil, err
+	}
+
+	license := eplugins.ReadPluginLicense()
+	lb, err := json.Marshal(license)
+	if err != nil {
+		return nil, err
+	}
+	jd["license"] = base64.StdEncoding.EncodeToString(lb) //work around any special characters for gRPC transport
+
+	njd, err := json.Marshal(jd)
+	if err != nil {
+		return nil, err
+	}
+
+	return njd, nil
 }
 
 func (m *PluginManager) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
@@ -586,11 +633,6 @@ func (m *PluginManager) unregisterAndStop(ctx context.Context, p *plugins.Plugin
 
 // start starts a backend plugin process
 func (m *PluginManager) start(ctx context.Context, p *plugins.Plugin) error {
-	remotePlugins, err := m.sqlStore.GetAllRemotePlugins(ctx)
-	if err != nil {
-		return err
-	}
-
 	if !p.IsManaged() || !p.Backend || p.SignatureError != nil {
 		m.log.Error(fmt.Sprint("Not starting plugin ", p))
 		return nil
@@ -600,7 +642,14 @@ func (m *PluginManager) start(ctx context.Context, p *plugins.Plugin) error {
 		return backendplugin.ErrPluginNotRegistered
 	}
 
+	remotePlugins := make(map[string]string)
+	if m.sqlStore != nil {
+		if rp, err := m.sqlStore.GetAllRemotePlugins(context.Background()); err == nil {
+			remotePlugins = rp
+		}
+	}
 	p.Addr = remotePlugins[p.ID]
+
 	if err := startPluginAndRestartKilledProcesses(ctx, p); err != nil {
 		return err
 	}

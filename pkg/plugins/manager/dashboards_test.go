@@ -23,7 +23,7 @@ func TestGetPluginDashboards(t *testing.T) {
 			},
 		},
 	}
-	pm := newManager(cfg, nil, loader.New(nil, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}), &sqlstore.SQLStore{})
+	pm := newManager(cfg, nil, loader.New(nil, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}, &sqlstore.SQLStore{}), &sqlstore.SQLStore{})
 	err := pm.init()
 	require.NoError(t, err)
 

@@ -42,7 +42,7 @@ func TestPluginManager_int_init(t *testing.T) {
 	license := &licensing.OSSLicensingService{
 		Cfg: cfg,
 	}
-	pm := newManager(cfg, nil, loader.New(license, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}), nil)
+	pm := newManager(cfg, nil, loader.New(license, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}, nil), nil)
 
 	err = pm.init()
 	require.NoError(t, err)

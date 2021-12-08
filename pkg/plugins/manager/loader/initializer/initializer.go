@@ -34,9 +34,11 @@ type Initializer struct {
 }
 
 func New(cfg *setting.Cfg, license models.Licensing, sqlStore *sqlstore.SQLStore) Initializer {
-	remotePlugins, err := sqlStore.GetAllRemotePlugins(context.Background())
-	if err != nil {
-		remotePlugins = make(map[string]string)
+	remotePlugins := make(map[string]string)
+	if sqlStore != nil {
+		if rp, err := sqlStore.GetAllRemotePlugins(context.Background()); err == nil {
+			remotePlugins = rp
+		}
 	}
 
 	return Initializer{

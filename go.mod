@@ -259,6 +259,7 @@ require (
 require (
 	github.com/Azure/go-autorest/autorest/adal v0.9.15 // indirect
 	github.com/grafana/dskit v0.0.0-20211011144203-3a88ec0b675f // indirect
+	github.com/grafana/grafana-enterprise-sdk v0.0.0-20211208151614-bdcd44c83eca // indirect
 )
 
 // Use fork of crewjam/saml with fixes for some issues until changes get merged into upstream

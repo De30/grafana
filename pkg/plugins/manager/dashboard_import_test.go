@@ -91,7 +91,7 @@ func pluginScenario(t *testing.T, desc string, fn func(*testing.T, *PluginManage
 				},
 			},
 		}
-		pm := newManager(cfg, nil, loader.New(nil, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}), &sqlstore.SQLStore{})
+		pm := newManager(cfg, nil, loader.New(nil, cfg, &signature.UnsignedPluginAuthorizer{Cfg: cfg}, &sqlstore.SQLStore{}), &sqlstore.SQLStore{}) // TODO: sqlstore stuff is bad!
 		err := pm.init()
 		require.NoError(t, err)
 
