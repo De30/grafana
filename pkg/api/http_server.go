@@ -446,6 +446,7 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 	m.Use(hs.metricsEndpoint)
 
 	m.Use(hs.ContextHandler.Middleware)
+	m.Use(hs.experimentsService.Middleware)
 	m.Use(middleware.OrgRedirect(hs.Cfg))
 
 	// needs to be after context handler

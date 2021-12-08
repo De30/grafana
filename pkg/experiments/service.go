@@ -5,9 +5,13 @@ import (
 	"io/ioutil"
 
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/services/contexthandler"
+	"github.com/grafana/grafana/pkg/web"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/grafana/grafana/pkg/setting"
+	ol "github.com/opentracing/opentracing-go/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -169,22 +173,45 @@ func readExperiments(filename string) ([]Experiment, error) {
 // 	return res
 // }
 
-// func Experiments(cfg *setting.Cfg) web.Handler {
-// 	return func(next http.Handler) http.Handler {
-// 		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-// 			headerValues := req.Header.Get(experimentsHeaderName)
+type experimentAttributeContextKey struct{}
 
-// 			if headerValues == "" {
-// 				next.ServeHTTP(rw, req)
-// 				return
-// 			}
+type experimentsContextKey struct{}
 
-// 			exps := extractKV(headerValues)
+func GetExperiments(ctx context.Context) map[string]bool {
+	ctxValue := ctx.Value(experimentsContextKey{})
 
-// 			ctxWithExps := context.WithValue(req.Context(), "experiments", exps)
-// 			req = req.WithContext(ctxWithExps)
+	value, ok := ctxValue.(map[string]bool)
+	if ok {
+		return value
+	}
 
-// 			next.ServeHTTP(rw, req)
-// 		})
-// 	}
-// }
+	return map[string]bool{}
+}
+
+func (srv *ExperimentsService) Middleware(mContext *web.Context) {
+	span, _ := opentracing.StartSpanFromContext(mContext.Req.Context(), "Experiments - Middleware")
+	defer span.Finish()
+
+	ctx := mContext.Req.Context()
+
+	reqContext := contexthandler.FromContext(ctx)
+
+	attributes := map[string]interface{}{}
+	attributes["userid"] = reqContext.UserId
+	attributes["grafana-version"] = srv.Cfg.BuildVersion
+	attributes["browser-user-agent"] = mContext.Req.UserAgent
+
+	ctx = context.WithValue(ctx, experimentAttributeContextKey{}, attributes)
+
+	exps := srv.ListOfExperiments(ctx)
+
+	mContext.Req = mContext.Req.WithContext(context.WithValue(ctx, experimentsContextKey{}, exps))
+	mContext.Map(mContext.Req)
+
+	traceFields := make([]ol.Field, 0)
+	for k, v := range exps {
+		traceFields = append(traceFields, ol.Bool(k, v))
+	}
+
+	span.LogFields(traceFields...)
+}
