@@ -5,6 +5,7 @@ import { textBoxItem } from './elements/textBox';
 import { buttonItem } from './elements/button';
 import { droneItem } from './elements/drone';
 import { droneFrontItem } from './elements/droneFront';
+import { droneSideItem } from './elements/droneSide';
 
 export const DEFAULT_CANVAS_ELEMENT_CONFIG: CanvasElementOptions = {
   ...iconItem.getNewOptions(),
@@ -18,4 +19,5 @@ export const canvasElementRegistry = new Registry<CanvasElementItem>(() => [
   buttonItem,
   droneItem,
   droneFrontItem,
+  droneSideItem,
 ]);
