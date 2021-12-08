@@ -96,6 +96,15 @@ func (i *Initializer) Initialize(p *plugins.Plugin) error {
 	p.SetLogger(pluginLog)
 
 	p.Addr = i.remotePlugins[p.ID]
+	if p.Arrow {
+		client, err := backendplugin.NewArrowPlugin(p.ID, pluginLog)
+		if err != nil {
+			return err
+		}
+		p.RegisterClient(client)
+		return nil
+	}
+
 	if p.Backend && p.Addr != "" {
 		client, err := backendplugin.NewRemotePlugin(p.ID, p.Addr, pluginLog)
 		if err != nil {

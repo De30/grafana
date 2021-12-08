@@ -118,6 +118,7 @@ type JSONData struct {
 	HideFromList bool         `json:"hideFromList,omitempty"`
 	Preload      bool         `json:"preload"`
 	Backend      bool         `json:"backend"`
+	Arrow        bool         `json:"arrow"`
 	Routes       []*Route     `json:"routes"`
 
 	// Panel settings
