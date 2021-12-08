@@ -281,7 +281,7 @@ func (hs *HTTPServer) getFrontendSettingsMap(c *models.ReqContext) (map[string]i
 			"edition":         hs.License.Edition(),
 		},
 		"featureToggles":                   hs.Cfg.FeatureToggles,
-		"experiments":                      map[string]bool{"experiment1": false, "experiment2": true},
+		"experiments":                      hs.experimentsService.ListOfExperiments(c.Req.Context()),
 		"rendererAvailable":                hs.RenderService.IsAvailable(),
 		"rendererVersion":                  hs.RenderService.Version(),
 		"http2Enabled":                     hs.Cfg.Protocol == setting.HTTP2Scheme,
