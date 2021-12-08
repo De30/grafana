@@ -12,6 +12,7 @@ interface DroneData {
   bLeftRotorRPM?: number;
   fRightRotorRPM?: number;
   fLeftRotorRPM?: number;
+  yawAngle?: number;
 }
 
 interface DroneConfig {
@@ -19,6 +20,7 @@ interface DroneConfig {
   bLeftRotorRPM?: TextDimensionConfig;
   fRightRotorRPM?: TextDimensionConfig;
   fLeftRotorRPM?: TextDimensionConfig;
+  yawAngle?: TextDimensionConfig;
 }
 
 const DroneDisplay: FC<CanvasElementProps<DroneConfig, DroneData>> = (props) => {
@@ -42,12 +44,15 @@ const DroneDisplay: FC<CanvasElementProps<DroneConfig, DroneData>> = (props) => 
     data?.bLeftRotorRPM && data?.bLeftRotorRPM > 0 ? 60 / data.bLeftRotorRPM : 0
   }s linear infinite`;
 
+  const droneTransformStyle = `rotate(${data?.yawAngle ? data.yawAngle : 0}deg)`;
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox="-43 -43 640 640"
       xmlSpace="preserve"
+      style={{ transform: droneTransformStyle }}
     >
       <path
         fillRule="evenodd"
@@ -106,6 +111,7 @@ export const droneItem: CanvasElementItem<any, any> = {
       bLeftRotorRPM: cfg?.bLeftRotorRPM ? Number(ctx.getText(cfg.bLeftRotorRPM).value()) : 0,
       fRightRotorRPM: cfg?.fRightRotorRPM ? Number(ctx.getText(cfg.fRightRotorRPM).value()) : 0,
       fLeftRotorRPM: cfg?.fLeftRotorRPM ? Number(ctx.getText(cfg.fLeftRotorRPM).value()) : 0,
+      yawAngle: cfg?.yawAngle ? Number(ctx.getText(cfg.yawAngle).value()) : 0,
     };
 
     return data;
@@ -141,6 +147,13 @@ export const droneItem: CanvasElementItem<any, any> = {
         id: 'fLeftRotorRPM',
         path: 'config.fLeftRotorRPM',
         name: 'Front Left Rotor RPM',
+        editor: TextDimensionEditor,
+      })
+      .addCustomEditor({
+        category,
+        id: 'yawAngle',
+        path: 'config.yawAngle',
+        name: 'Yaw Angle',
         editor: TextDimensionEditor,
       });
   },
