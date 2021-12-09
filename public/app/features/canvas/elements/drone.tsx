@@ -28,21 +28,13 @@ const DroneDisplay: FC<CanvasElementProps<DroneConfig, DroneData>> = (props) => 
 
   const { data } = props;
 
-  const fRightRotorAnimation = `spin ${
-    data?.fRightRotorRPM && data?.fRightRotorRPM > 0 ? 60 / data.fRightRotorRPM : 0
-  }s linear infinite`;
+  const fRightRotorAnimation = `spin ${data?.fRightRotorRPM ? 60 / Math.abs(data.fRightRotorRPM) : 0}s linear infinite`;
 
-  const fLeftRotorAnimation = `spin ${
-    data?.fLeftRotorRPM && data?.fLeftRotorRPM > 0 ? 60 / data.fLeftRotorRPM : 0
-  }s linear infinite`;
+  const fLeftRotorAnimation = `spin ${data?.fLeftRotorRPM ? 60 / Math.abs(data.fLeftRotorRPM) : 0}s linear infinite`;
 
-  const bRightRotorAnimation = `spin ${
-    data?.bRightRotorRPM && data?.bRightRotorRPM > 0 ? 60 / data.bRightRotorRPM : 0
-  }s linear infinite`;
+  const bRightRotorAnimation = `spin ${data?.bRightRotorRPM ? 60 / Math.abs(data.bRightRotorRPM) : 0}s linear infinite`;
 
-  const bLeftRotorAnimation = `spin ${
-    data?.bLeftRotorRPM && data?.bLeftRotorRPM > 0 ? 60 / data.bLeftRotorRPM : 0
-  }s linear infinite`;
+  const bLeftRotorAnimation = `spin ${data?.bLeftRotorRPM ? 60 / Math.abs(data.bLeftRotorRPM) : 0}s linear infinite`;
 
   const droneTransformStyle = `rotate(${data?.yawAngle ? data.yawAngle : 0}deg)`;
 
