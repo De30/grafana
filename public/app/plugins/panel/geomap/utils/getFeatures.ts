@@ -44,7 +44,11 @@ export const getFeatures = async (
 
       // style based on dynamic style maker
       if (dims.symbol) {
-        const symbol = dims.symbol.get(i);
+        let symbol = dims.symbol.get(i);
+
+        if (!symbol) {
+          symbol = 'circle'; // default when field is blank
+        }
 
         const symbolMaker = markerMakers.getIfExists(symbol);
 

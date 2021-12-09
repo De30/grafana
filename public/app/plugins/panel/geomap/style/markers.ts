@@ -240,6 +240,10 @@ export const markerMakers = new Registry<SymbolMaker>(() => makers);
 // const icons = ReplaySubject<>(); //need to cache?
 
 export const prepareImage = async (url: string, size: number, color?: string): Promise<string> => {
+  if (url.includes('https://ca.slack-edge.com/')) {
+    url = url.replace('https://ca.slack-edge.com/', 'img/grafanearstas/');
+    url = getPublicOrAbsoluteUrl(url);
+  }
   const img = new Image();
   img.crossOrigin = ''; //'' and 'anonymous' interchangeable
   return new Promise((resolve, reject) => {
