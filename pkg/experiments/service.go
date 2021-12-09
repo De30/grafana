@@ -35,6 +35,11 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		return nil, err
 	}
 
+	s.vars, err = readExperimentsVars(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	s.AddExperiment(Experiment{
 		Name:        "feature1",
 		Description: "feature1",
@@ -56,10 +61,23 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 	for _, e := range exps {
 		s.exps[e.Name] = e
 	}
+
 	// compile the expressions
 	s.compile()
 
 	return s, nil
+}
+
+func readExperimentsVars(cfg *setting.Cfg) (map[string]string, error) {
+	environmentMetricsSection := cfg.Raw.Section("experiments.vars")
+	keys := environmentMetricsSection.Keys()
+	result := make(map[string]string, len(keys))
+
+	for _, key := range keys {
+		result[key.Name()] = key.Value()
+	}
+
+	return result
 }
 
 type ExperimentsService struct {
@@ -69,6 +87,7 @@ type ExperimentsService struct {
 	defaults map[string]Experiment
 	filename string
 	progs    map[string]cel.Program
+	vars     map[string]string
 }
 
 func (srv *ExperimentsService) Run(ctx context.Context) error {
@@ -118,12 +137,19 @@ func (srv *ExperimentsService) compile() {
 	progs := make(map[string]cel.Program)
 
 	// TODO: how/where to declare supported variables?
-	d := cel.Declarations(
-		decls.NewVar("userid", decls.Int),
-		decls.NewVar("grafana-version", decls.String),
-		decls.NewVar("browser-user-agent", decls.String),
-		decls.NewVar("locale", decls.String),
-	)
+
+	decs := []*Dec1{}
+	decs = append(decs, decls.NewVar("user.id", decls.Int))
+	decs = append(decs, decls.NewVar("grafana.version", decls.String))
+	decs = append(decs, decls.NewVar("req.user-agent", decls.String))
+	decs = append(decs, decls.NewVar("req.locale", decls.String))
+
+	// add variables types from grafana.ini
+	for k, v := range srv.vars {
+		decs = append(decs, decls.NewVar("config."+k, decls.String))
+	}
+
+	d := cel.Declarations(decs...)
 	// Create a standard environment
 	env, err := cel.NewEnv(d)
 	if err != nil {
@@ -144,13 +170,13 @@ func (srv *ExperimentsService) compile() {
 			srv.log.Error("expression type-checking error", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
 			continue
 		}
-		// Check the result type is a string
+		// Check the result type is a bool
 		if checked.ResultType() != decls.Bool {
 			srv.log.Error("expression should return a boolean", "name", exp.Name, "expression", exp.Expression, "got", checked.ResultType())
 			continue
 		}
-		// Plan the program
-		prg, err := env.Program(ast)
+		// Plan the program and pass the global variables from the grafana.ini experiments section
+		prg, err := env.Program(ast, cel.Globals(srv.vars))
 		if err != nil {
 			srv.log.Error("failed to generate program", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
 			continue
@@ -171,7 +197,6 @@ func (srv *ExperimentsService) IsEnabled(ctx context.Context, name string) bool 
 	_, exist := srv.progs[name]
 	if exist {
 		// evaludate the expression
-		// TODO: extract the variables from context
 		attributes := ctx.Value(experimentAttributeContextKey{})
 		out, _, err := (srv.progs[name]).Eval(attributes)
 		if err != nil {
@@ -214,23 +239,6 @@ func readExperiments(filename string) ([]Experiment, error) {
 	return exps, nil
 }
 
-// // this could be a regexp but I'm lazy
-// func extractKV(input string) map[string]bool {
-// 	res := map[string]bool{}
-
-// 	tags := strings.Split(input, ",")
-// 	for _, v := range tags {
-// 		kv := strings.Split(v, "=")
-// 		if len(kv) > 1 {
-// 			// TODO(Carl Bergquist): decide how to handle this error
-// 			boolValue, _ := strconv.ParseBool(kv[1])
-// 			res[kv[0]] = boolValue
-// 		}
-// 	}
-
-// 	return res
-// }
-
 type experimentAttributeContextKey struct{}
 
 type experimentsContextKey struct{}
@@ -255,10 +263,10 @@ func (srv *ExperimentsService) Middleware(mContext *web.Context) {
 	reqContext := contexthandler.FromContext(ctx)
 
 	attributes := map[string]interface{}{}
-	attributes["userid"] = reqContext.UserId
-	attributes["grafana-version"] = srv.Cfg.BuildVersion
-	attributes["browser-user-agent"] = mContext.Req.UserAgent()
-	attributes["locale"] = mContext.Req.Header.Get("Accept-Language")
+	attributes["user.id"] = reqContext.UserId
+	attributes["grafana.version"] = srv.Cfg.BuildVersion
+	attributes["req.user-agent"] = mContext.Req.UserAgent()
+	attributes["req.locale"] = mContext.Req.Header.Get("Accept-Language")
 
 	ctx = context.WithValue(ctx, experimentAttributeContextKey{}, attributes)
 
