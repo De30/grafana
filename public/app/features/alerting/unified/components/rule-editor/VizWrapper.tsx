@@ -15,9 +15,17 @@ interface Props {
   changePanel: (panel: SupportedPanelPlugins) => void;
   thresholds: ThresholdsConfig;
   onThresholdsChange: (thresholds: ThresholdsConfig) => void;
+  setMaxDataPoints: (maxDataPoints: number) => void;
 }
 
-export const VizWrapper: FC<Props> = ({ data, currentPanel, changePanel, onThresholdsChange, thresholds }) => {
+export const VizWrapper: FC<Props> = ({
+  data,
+  currentPanel,
+  changePanel,
+  onThresholdsChange,
+  thresholds,
+  setMaxDataPoints,
+}) => {
   const [options, setOptions] = useState<PanelOptions>({
     frameIndex: 0,
     showHeader: true,
@@ -67,6 +75,7 @@ export const VizWrapper: FC<Props> = ({ data, currentPanel, changePanel, onThres
           if (width === 0) {
             return null;
           }
+          setMaxDataPoints(width);
           return (
             <div style={{ height: `${vizHeight}px`, width: `${width}px` }}>
               <PanelContextProvider value={context}>

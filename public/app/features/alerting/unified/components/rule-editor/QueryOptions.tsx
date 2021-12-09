@@ -15,17 +15,15 @@ interface Props {
 export const QueryOptions: FC<Props> = ({ dataSourceSettings, index, onQueriesChange, queries, query }) => {
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const styles = useStyles2(getStyles);
+
   const minInterval = useMemo(() => {
-    return dataSourceSettings.meta?.queryOptions?.minInterval;
-  }, [dataSourceSettings]);
-  const maxDataPoints = useMemo(() => {
-    return dataSourceSettings.meta?.queryOptions?.maxDataPoints;
-  }, [dataSourceSettings]);
+    return query.model.intervalMs ?? dataSourceSettings?.meta?.queryOptions?.minInterval;
+  }, [dataSourceSettings, query]);
 
   const onChangeMinInterval = (event: FormEvent<HTMLInputElement>) => {
     const minInterval = parseFloat(event.currentTarget.value);
 
-    if (minInterval === -1) {
+    if (minInterval !== -1) {
       onQueriesChange(
         queries.map((item, itemIndex) => {
           if (itemIndex !== index) {
@@ -35,7 +33,7 @@ export const QueryOptions: FC<Props> = ({ dataSourceSettings, index, onQueriesCh
             ...item,
             model: {
               ...item.model,
-              minInterval,
+              intervalMs: minInterval,
             },
           };
         })
@@ -46,7 +44,7 @@ export const QueryOptions: FC<Props> = ({ dataSourceSettings, index, onQueriesCh
   const onChangeMaxDataPoints = (event: FormEvent<HTMLInputElement>) => {
     const maxDataPoints = parseFloat(event.currentTarget.value);
 
-    if (maxDataPoints === -1) {
+    if (maxDataPoints !== -1) {
       onQueriesChange(
         queries.map((item, itemIndex) => {
           if (itemIndex !== index) {
@@ -82,13 +80,7 @@ export const QueryOptions: FC<Props> = ({ dataSourceSettings, index, onQueriesCh
               </>
             }
           >
-            <Input
-              onChange={onChangeMinInterval}
-              placeholder="15s"
-              width={10}
-              default={minInterval}
-              value={query.model.intervalMs}
-            />
+            <Input onChange={onChangeMinInterval} placeholder="15s" width={10} value={query.model.intervalMs} />
           </InlineField>
           <InlineField
             className={styles.inlineFieldOverride}
@@ -100,12 +92,7 @@ export const QueryOptions: FC<Props> = ({ dataSourceSettings, index, onQueriesCh
               </>
             }
           >
-            <Input
-              onChange={onChangeMaxDataPoints}
-              width={10}
-              default={maxDataPoints}
-              value={query.model.maxDataPoints}
-            />
+            <Input onChange={onChangeMaxDataPoints} width={10} value={query.model.maxDataPoints} />
           </InlineField>
         </>
       ) : null}

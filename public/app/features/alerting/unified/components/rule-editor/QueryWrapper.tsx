@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
 import {
@@ -53,6 +53,26 @@ export const QueryWrapper: FC<Props> = ({
   const styles = useStyles2(getStyles);
   const isExpression = isExpressionQuery(query.model);
   const [pluginId, changePluginId] = useState<SupportedPanelPlugins>(isExpression ? TABLE : TIMESERIES);
+
+  const setMaxDataPoints = useCallback(
+    (maxDataPoints: number) => {
+      onQueriesChange(
+        queries.map((item, itemIndex) => {
+          if (itemIndex !== index) {
+            return item;
+          }
+          return {
+            ...item,
+            model: {
+              ...item.model,
+              maxDataPoints,
+            },
+          };
+        })
+      );
+    },
+    [onQueriesChange, index, queries]
+  );
 
   const onChangeThreshold = (thresholds: ThresholdsConfig, index: number) => {
     const referencedRefId = queries[index].refId;
@@ -150,6 +170,7 @@ export const QueryWrapper: FC<Props> = ({
               currentPanel={pluginId}
               thresholds={thresholds}
               onThresholdsChange={(thresholds) => onChangeThreshold(thresholds, index)}
+              setMaxDataPoints={setMaxDataPoints}
             />
           ) : null
         }
