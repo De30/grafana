@@ -74,11 +74,6 @@ export class BackendSrv implements BackendService {
     return await lastValueFrom(this.fetch<T>(options).pipe(map((response: FetchResponse<T>) => response.data)));
   }
 
-  flagObserver<T>(value: FetchResponse<T>) {
-    const flags = value.headers.get('x-feature-flags') ?? undefined;
-    contextSrv.setFeatureFlags(flags);
-  }
-
   fetch<T>(options: BackendSrvRequest): Observable<FetchResponse<T>> {
     // We need to match an entry added to the queue stream with the entry that is eventually added to the response stream
     const id = uuidv4();
@@ -97,8 +92,6 @@ export class BackendSrv implements BackendService {
           // By passing the outer observer object then any updates on result.observable are passed through to any subscriber of the fetch<T> function.
           // Secondly, we're adding the subscription implicitly returned by result.observable.subscribe(observer).
           subscriptions.add(result.observable.subscribe(observer));
-
-          subscriptions.add(result.observable.subscribe(this.flagObserver));
         })
       );
 
