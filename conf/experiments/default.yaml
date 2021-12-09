@@ -1,18 +1,21 @@
 - name: feature1
   description: feature1
   expression: "false"
+
 - name: feature3
   description: feature3
   expression: "true"
+
 - name: displaySwedishTheme
   description: enable swedish background theme
   expression: |
     // restrict to users allowing swedish language
-    locale.contains("sv")
+    req.locale.contains("sv")
+
 - name: displayFrenchFlag
   description: sho background theme
   expression: |
     // only admins
-    userid == 1
+    user.id == 1
     // show to users allowing french language
-    && locale.contains("fr")
+    && req.locale.contains("fr")

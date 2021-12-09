@@ -3,11 +3,15 @@ package experiments
 import (
 	"context"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
 	"github.com/grafana/grafana/pkg/web"
 	"github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	exprpb "google.golang.org/genproto/googleapis/api/expr/v1alpha1"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/cel-go/cel"
@@ -18,10 +22,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	experimentsHeaderName = "x-experiments"
-)
-
 func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 	s := &ExperimentsService{
 		Cfg:      cfg,
@@ -30,15 +30,19 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		exps:     make(map[string]Experiment),
 		defaults: make(map[string]Experiment),
 	}
+
+	s.experiments_outcome = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name:      "experiments_enabled",
+		Help:      "numbers of experiments checks",
+		Namespace: "grafana",
+	}, []string{"name", "outcome"})
+
 	exps, err := readExperiments(s.filename)
 	if err != nil {
 		return nil, err
 	}
 
-	s.vars, err = readExperimentsVars(cfg)
-	if err != nil {
-		return nil, err
-	}
+	s.vars = readExperimentsVars(cfg)
 
 	s.AddExperiment(Experiment{
 		Name:        "feature1",
@@ -68,7 +72,7 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 	return s, nil
 }
 
-func readExperimentsVars(cfg *setting.Cfg) (map[string]string, error) {
+func readExperimentsVars(cfg *setting.Cfg) map[string]string {
 	environmentMetricsSection := cfg.Raw.Section("experiments.vars")
 	keys := environmentMetricsSection.Keys()
 	result := make(map[string]string, len(keys))
@@ -81,13 +85,14 @@ func readExperimentsVars(cfg *setting.Cfg) (map[string]string, error) {
 }
 
 type ExperimentsService struct {
-	log      log.Logger
-	Cfg      *setting.Cfg
-	exps     map[string]Experiment
-	defaults map[string]Experiment
-	filename string
-	progs    map[string]cel.Program
-	vars     map[string]string
+	log                 log.Logger
+	Cfg                 *setting.Cfg
+	exps                map[string]Experiment
+	defaults            map[string]Experiment
+	filename            string
+	progs               map[string]cel.Program
+	vars                map[string]string
+	experiments_outcome *prometheus.CounterVec
 }
 
 func (srv *ExperimentsService) Run(ctx context.Context) error {
@@ -138,14 +143,14 @@ func (srv *ExperimentsService) compile() {
 
 	// TODO: how/where to declare supported variables?
 
-	decs := []*Dec1{}
+	decs := []*exprpb.Decl{}
 	decs = append(decs, decls.NewVar("user.id", decls.Int))
 	decs = append(decs, decls.NewVar("grafana.version", decls.String))
 	decs = append(decs, decls.NewVar("req.user-agent", decls.String))
 	decs = append(decs, decls.NewVar("req.locale", decls.String))
 
 	// add variables types from grafana.ini
-	for k, v := range srv.vars {
+	for k := range srv.vars {
 		decs = append(decs, decls.NewVar("config."+k, decls.String))
 	}
 
@@ -175,8 +180,14 @@ func (srv *ExperimentsService) compile() {
 			srv.log.Error("expression should return a boolean", "name", exp.Name, "expression", exp.Expression, "got", checked.ResultType())
 			continue
 		}
+
+		globalVars := map[string]interface{}{}
+		for k, v := range srv.vars {
+			globalVars[k] = v
+		}
+
 		// Plan the program and pass the global variables from the grafana.ini experiments section
-		prg, err := env.Program(ast, cel.Globals(srv.vars))
+		prg, err := env.Program(ast, cel.Globals(globalVars))
 		if err != nil {
 			srv.log.Error("failed to generate program", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
 			continue
@@ -195,19 +206,23 @@ type Experiment struct {
 func (srv *ExperimentsService) IsEnabled(ctx context.Context, name string) bool {
 	// loop over config items
 	_, exist := srv.progs[name]
-	if exist {
-		// evaludate the expression
-		attributes := ctx.Value(experimentAttributeContextKey{})
-		out, _, err := (srv.progs[name]).Eval(attributes)
-		if err != nil {
-			srv.log.Error("expression evaluation error", "name", name, "error", err)
-		}
-		res := out == types.True
-		srv.log.Debug("IsEnabled", "name", name, "attributes", attributes, "res", res)
-		return res
+	if !exist {
+		srv.log.Debug("experiment not found", "name", name)
+		return false
 	}
-	srv.log.Debug("experiment not found", "name", name)
-	return false
+
+	// evaludate the expression
+	attributes := ctx.Value(experimentAttributeContextKey{})
+	out, _, err := (srv.progs[name]).Eval(attributes)
+	if err != nil {
+		srv.log.Error("expression evaluation error", "name", name, "error", err)
+	}
+	res := out == types.True
+
+	srv.experiments_outcome.With(prometheus.Labels{"name": name, "outcome": strconv.FormatBool(res)}).Add(1)
+
+	srv.log.Debug("IsEnabled", "name", name, "attributes", attributes, "res", res)
+	return res
 }
 
 func (srv *ExperimentsService) AddExperiment(exp Experiment) {
