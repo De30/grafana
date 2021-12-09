@@ -84,15 +84,24 @@ func (s LibraryCredentialsService) AddLibraryCredential(ctx context.Context, cmd
 		}
 
 		cred := &models.LibraryCredential{
-			OrgId:          cmd.OrgId,
-			Name:           cmd.Name,
-			Type:           cmd.Type,
-			JsonData:       cmd.JsonData,
-			SecureJsonData: cmd.EncryptedSecureJsonData,
-			Created:        time.Now(),
-			Updated:        time.Now(),
-			ReadOnly:       cmd.ReadOnly,
-			Uid:            cmd.Uid,
+			OrgId:             cmd.OrgId,
+			Name:              cmd.Name,
+			Type:              cmd.Type,
+			JsonData:          cmd.JsonData,
+			SecureJsonData:    cmd.EncryptedSecureJsonData,
+			Created:           time.Now(),
+			Updated:           time.Now(),
+			ReadOnly:          cmd.ReadOnly,
+			Uid:               cmd.Uid,
+			Access:            cmd.Access,
+			Url:               cmd.Url,
+			Password:          cmd.Password,
+			User:              cmd.User,
+			Database:          cmd.Database,
+			BasicAuth:         cmd.BasicAuth,
+			BasicAuthUser:     cmd.BasicAuthUser,
+			BasicAuthPassword: cmd.BasicAuthPassword,
+			WithCredentials:   cmd.WithCredentials,
 		}
 
 		if _, err := dbSession.Insert(cred); err != nil {
@@ -117,16 +126,24 @@ func (s LibraryCredentialsService) UpdateLibraryCredential(ctx context.Context, 
 		}
 
 		cred := &models.LibraryCredential{
-			Id:             cmd.Id,
-			OrgId:          cmd.OrgId,
-			Name:           cmd.Name,
-			Type:           cmd.Type,
-			JsonData:       cmd.JsonData,
-			SecureJsonData: cmd.EncryptedSecureJsonData,
-			Created:        time.Now(),
-			Updated:        time.Now(),
-			ReadOnly:       cmd.ReadOnly,
-			Uid:            cmd.Uid,
+			Id:                cmd.Id,
+			OrgId:             cmd.OrgId,
+			Name:              cmd.Name,
+			Type:              cmd.Type,
+			JsonData:          cmd.JsonData,
+			SecureJsonData:    cmd.EncryptedSecureJsonData,
+			Updated:           time.Now(),
+			ReadOnly:          cmd.ReadOnly,
+			Uid:               cmd.Uid,
+			Access:            cmd.Access,
+			Url:               cmd.Url,
+			Password:          cmd.Password,
+			User:              cmd.User,
+			Database:          cmd.Database,
+			BasicAuth:         cmd.BasicAuth,
+			BasicAuthUser:     cmd.BasicAuthUser,
+			BasicAuthPassword: cmd.BasicAuthPassword,
+			WithCredentials:   cmd.WithCredentials,
 		}
 
 		sess.UseBool("read_only")
@@ -148,6 +165,18 @@ func (s LibraryCredentialsService) UpdateLibraryCredential(ctx context.Context, 
 		}
 
 		for _, ds := range datasources {
+			if cred.Type == "http" {
+				ds.Access = cred.Access
+				ds.Url = cred.Url
+				ds.Password = cred.Password
+				ds.User = cred.User
+				ds.Database = cred.Database
+				ds.BasicAuth = cred.BasicAuth
+				ds.BasicAuthUser = cred.BasicAuthUser
+				ds.BasicAuthPassword = cred.BasicAuthPassword
+				ds.WithCredentials = cred.WithCredentials
+			}
+
 			for key, value := range cred.JsonData.MustMap() {
 				if _, ok := ds.JsonData.CheckGet(key); ok {
 					ds.JsonData.Set(key, value)

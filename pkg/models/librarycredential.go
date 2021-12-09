@@ -22,6 +22,16 @@ type LibraryCredential struct {
 	JsonData       *simplejson.Json  `json:"jsonData"`
 	SecureJsonData map[string][]byte `json:"secureJsonData"`
 	ReadOnly       bool              `json:"readOnly"`
+
+	Access            DsAccess `json:"access"`
+	Url               string   `json:"url"`
+	Password          string   `json:"password"`
+	User              string   `json:"user"`
+	Database          string   `json:"database"`
+	BasicAuth         bool     `json:"basicAuth"`
+	BasicAuthUser     string   `json:"basicAuthUser"`
+	BasicAuthPassword string   `json:"basicAuthPassword"`
+	WithCredentials   bool     `json:"withCredentials"`
 }
 
 // COMMANDS
@@ -35,6 +45,16 @@ type AddLibraryCredentialCommand struct {
 	OrgId                   int64             `json:"-"`
 	ReadOnly                bool              `json:"-"`
 	EncryptedSecureJsonData map[string][]byte `json:"-"`
+
+	Access            DsAccess `json:"access"`
+	Url               string   `json:"url"`
+	Password          string   `json:"password"`
+	User              string   `json:"user"`
+	Database          string   `json:"database"`
+	BasicAuth         bool     `json:"basicAuth"`
+	BasicAuthUser     string   `json:"basicAuthUser"`
+	BasicAuthPassword string   `json:"basicAuthPassword"`
+	WithCredentials   bool     `json:"withCredentials"`
 
 	Result *LibraryCredential
 }
@@ -50,6 +70,16 @@ type UpdateLibraryCredentialCommand struct {
 	OrgId                   int64             `json:"-"`
 	ReadOnly                bool              `json:"-"`
 	EncryptedSecureJsonData map[string][]byte `json:"-"`
+
+	Access            DsAccess `json:"access"`
+	Url               string   `json:"url"`
+	Password          string   `json:"password"`
+	User              string   `json:"user"`
+	Database          string   `json:"database"`
+	BasicAuth         bool     `json:"basicAuth"`
+	BasicAuthUser     string   `json:"basicAuthUser"`
+	BasicAuthPassword string   `json:"basicAuthPassword"`
+	WithCredentials   bool     `json:"withCredentials"`
 
 	Result *LibraryCredential
 }
