@@ -5,9 +5,16 @@ import (
 	"io/ioutil"
 
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/services/contexthandler"
+	"github.com/grafana/grafana/pkg/web"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/google/cel-go/cel"
+	"github.com/google/cel-go/checker/decls"
+	"github.com/google/cel-go/common/types"
 	"github.com/grafana/grafana/pkg/setting"
+	ol "github.com/opentracing/opentracing-go/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -21,15 +28,11 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		log:      log.New("experiments"),
 		filename: "conf/experiments/default.yaml",
 		exps:     make(map[string]Experiment),
+		defaults: make(map[string]Experiment),
 	}
-
 	exps, err := readExperiments(s.filename)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, e := range exps {
-		s.exps[e.Name] = e
 	}
 
 	s.AddExperiment(Experiment{
@@ -44,6 +47,18 @@ func ProvideService(cfg *setting.Cfg) (*ExperimentsService, error) {
 		Expression:  "true",
 	})
 
+	// add default experiments
+	for k, v := range s.defaults {
+		s.exps[k] = v
+	}
+
+	// override with exps from config
+	for _, e := range exps {
+		s.exps[e.Name] = e
+	}
+	// compile the expressions
+	s.compile()
+
 	return s, nil
 }
 
@@ -51,7 +66,9 @@ type ExperimentsService struct {
 	log      log.Logger
 	Cfg      *setting.Cfg
 	exps     map[string]Experiment
+	defaults map[string]Experiment
 	filename string
+	progs    map[string]cel.Program
 }
 
 func (srv *ExperimentsService) Run(ctx context.Context) error {
@@ -73,23 +90,74 @@ func (srv *ExperimentsService) Run(ctx context.Context) error {
 			if err != nil {
 				srv.log.Error("failed to read experiments file", "event", event, "error", err)
 			} else {
-				// TODO: need a lock to avoid breaking experiments while reloading
 				srv.log.Info("reloading experiments file", "path", srv.filename)
-				srv.exps = make(map[string]Experiment)
-				for _, e := range exps {
-					srv.exps[e.Name] = e
+				newExps := make(map[string]Experiment)
+
+				// add default experiments
+				for k, v := range srv.defaults {
+					newExps[k] = v
 				}
+
+				// override with exps from config
+				for _, e := range exps {
+					newExps[e.Name] = e
+				}
+
+				srv.exps = newExps
+				srv.compile()
 			}
 		case err := <-watcher.Errors:
 			srv.log.Error("failed to watch experiments file", "error", err)
 		case <-ctx.Done():
-			{
-				return ctx.Err()
-			}
+			return ctx.Err()
 		}
 	}
+}
 
-	return nil
+func (srv *ExperimentsService) compile() {
+	progs := make(map[string]cel.Program)
+
+	// TODO: how/where to declare supported variables?
+	d := cel.Declarations(
+		decls.NewVar("userid", decls.Int),
+		decls.NewVar("grafana-version", decls.String),
+		decls.NewVar("browser-user-agent", decls.String),
+		decls.NewVar("locale", decls.String),
+	)
+	// Create a standard environment
+	env, err := cel.NewEnv(d)
+	if err != nil {
+		srv.log.Error("environment creation error", "error", err)
+		return
+	}
+
+	for _, exp := range srv.exps {
+		// Check the expression for syntactic errors
+		ast, iss := env.Parse(exp.Expression)
+		if iss.Err() != nil {
+			srv.log.Error("expression parsing error", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
+			continue
+		}
+		// Type-check the expression for correctness
+		checked, iss := env.Check(ast)
+		if iss.Err() != nil {
+			srv.log.Error("expression type-checking error", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
+			continue
+		}
+		// Check the result type is a string
+		if checked.ResultType() != decls.Bool {
+			srv.log.Error("expression should return a boolean", "name", exp.Name, "expression", exp.Expression, "got", checked.ResultType())
+			continue
+		}
+		// Plan the program
+		prg, err := env.Program(ast)
+		if err != nil {
+			srv.log.Error("failed to generate program", "name", exp.Name, "expression", exp.Expression, "error", iss.Err())
+			continue
+		}
+		progs[exp.Name] = prg
+	}
+	srv.progs = progs
 }
 
 type Experiment struct {
@@ -100,20 +168,25 @@ type Experiment struct {
 
 func (srv *ExperimentsService) IsEnabled(ctx context.Context, name string) bool {
 	// loop over config items
-	_, exist := srv.exps[name]
+	_, exist := srv.progs[name]
 	if exist {
-		return srv.exps[name].Expression == "true"
+		// evaludate the expression
+		// TODO: extract the variables from context
+		attributes := ctx.Value(experimentAttributeContextKey{})
+		out, _, err := (srv.progs[name]).Eval(attributes)
+		if err != nil {
+			srv.log.Error("expression evaluation error", "name", name, "error", err)
+		}
+		res := out == types.True
+		srv.log.Debug("IsEnabled", "name", name, "attributes", attributes, "res", res)
+		return res
 	}
-
+	srv.log.Debug("experiment not found", "name", name)
 	return false
 }
 
 func (srv *ExperimentsService) AddExperiment(exp Experiment) {
-	// deal with the error
-	_, exist := srv.exps[exp.Name]
-	if !exist {
-		srv.exps[exp.Name] = exp
-	}
+	srv.defaults[exp.Name] = exp
 }
 
 func (srv *ExperimentsService) ListOfExperiments(ctx context.Context) map[string]bool {
@@ -158,22 +231,46 @@ func readExperiments(filename string) ([]Experiment, error) {
 // 	return res
 // }
 
-// func Experiments(cfg *setting.Cfg) web.Handler {
-// 	return func(next http.Handler) http.Handler {
-// 		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-// 			headerValues := req.Header.Get(experimentsHeaderName)
+type experimentAttributeContextKey struct{}
 
-// 			if headerValues == "" {
-// 				next.ServeHTTP(rw, req)
-// 				return
-// 			}
+type experimentsContextKey struct{}
 
-// 			exps := extractKV(headerValues)
+func GetExperiments(ctx context.Context) map[string]bool {
+	ctxValue := ctx.Value(experimentsContextKey{})
 
-// 			ctxWithExps := context.WithValue(req.Context(), "experiments", exps)
-// 			req = req.WithContext(ctxWithExps)
+	value, ok := ctxValue.(map[string]bool)
+	if ok {
+		return value
+	}
 
-// 			next.ServeHTTP(rw, req)
-// 		})
-// 	}
-// }
+	return map[string]bool{}
+}
+
+func (srv *ExperimentsService) Middleware(mContext *web.Context) {
+	span, _ := opentracing.StartSpanFromContext(mContext.Req.Context(), "Experiments - Middleware")
+	defer span.Finish()
+
+	ctx := mContext.Req.Context()
+
+	reqContext := contexthandler.FromContext(ctx)
+
+	attributes := map[string]interface{}{}
+	attributes["userid"] = reqContext.UserId
+	attributes["grafana-version"] = srv.Cfg.BuildVersion
+	attributes["browser-user-agent"] = mContext.Req.UserAgent()
+	attributes["locale"] = mContext.Req.Header.Get("Accept-Language")
+
+	ctx = context.WithValue(ctx, experimentAttributeContextKey{}, attributes)
+
+	exps := srv.ListOfExperiments(ctx)
+
+	mContext.Req = mContext.Req.WithContext(context.WithValue(ctx, experimentsContextKey{}, exps))
+	mContext.Map(mContext.Req)
+
+	traceFields := make([]ol.Field, 0)
+	for k, v := range exps {
+		traceFields = append(traceFields, ol.Bool(k, v))
+	}
+
+	span.LogFields(traceFields...)
+}

@@ -3,7 +3,10 @@ package grpcplugin
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
+
+	"github.com/grafana/grafana/pkg/experiments"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -151,6 +154,11 @@ func (p *grpcPlugin) QueryData(ctx context.Context, req *backend.QueryDataReques
 	pluginClient, ok := p.getPluginClient()
 	if !ok {
 		return nil, backendplugin.ErrPluginUnavailable
+	}
+
+	exps := experiments.GetExperiments(ctx)
+	for k, v := range exps {
+		req.Headers["x-experiment-"+k] = strconv.FormatBool(v)
 	}
 
 	return pluginClient.QueryData(ctx, req)
