@@ -61,6 +61,19 @@ const BasicSettings: FC<Props> = ({
             Use library credential
           </Button>
         )}
+        {dataSource.libraryCredential && (
+          <Button
+            type="button"
+            variant="secondary"
+            icon="link"
+            onClick={async () => {
+              await updateDataSource({ ...dataSource, libraryCredentialId: null });
+              location.reload();
+            }}
+          >
+            Unlink library credential
+          </Button>
+        )}
         {showLibraryCredentialsPicker && (
           <Modal
             title="Select library credential"
