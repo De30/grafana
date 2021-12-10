@@ -8,6 +8,12 @@ export * from './config';
 export * from './types';
 export { loadPluginCss, SystemJS, PluginCssOptions } from './utils/plugin';
 export { reportMetaAnalytics, reportInteraction, reportPageview } from './utils/analytics';
+export {
+  Experiment,
+  useExperiment,
+  ExperimentContextProvider,
+  ExperimentContextConsumer,
+} from './utils/experimentsProvider';
 export { logInfo, logDebug, logWarning, logError } from './utils/logging';
 export {
   DataSourceWithBackend,

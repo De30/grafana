@@ -16,7 +16,7 @@ import { AppNotificationList } from './core/components/AppNotifications/AppNotif
 import { SearchWrapper } from 'app/features/search';
 import { LiveConnectionWarning } from './features/live/LiveConnectionWarning';
 import { AngularRoot } from './angular/AngularRoot';
-import { ExperimentContextProvider } from './core/experiments/experimentsProvider';
+import { ExperimentContextProvider } from '@grafana/runtime/src/utils/experimentsProvider';
 
 interface AppWrapperProps {
   app: GrafanaApp;

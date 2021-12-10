@@ -23,7 +23,7 @@ import {
   VizLegendItem,
 } from '@grafana/ui';
 import { filterDisplayItems, sumDisplayItemsReducer } from './utils';
-import { Experiment } from 'app/core/experiments/experimentsProvider';
+import { Experiment } from '@grafana/runtime';
 
 const defaultLegendOptions: PieChartLegendOptions = {
   displayMode: LegendDisplayMode.List,

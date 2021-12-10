@@ -70,7 +70,7 @@ export class GrafanaBootConfig implements GrafanaConfig {
     newNavigation: false,
     fullRangeLogsVolume: false,
   };
-  experiments = { pieChart: false, suggestions: true };
+  experiments = {};
   licenseInfo: LicenseInfo = {} as LicenseInfo;
   rendererAvailable = false;
   rendererVersion = '';

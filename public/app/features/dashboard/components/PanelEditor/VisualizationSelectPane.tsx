@@ -16,7 +16,7 @@ import { VisualizationSuggestions } from 'app/features/panel/components/VizTypeP
 import { useLocalStorage } from 'react-use';
 import { VisualizationSelectPaneTab } from './types';
 import { LS_VISUALIZATION_SELECT_TAB_KEY } from 'app/core/constants';
-import { useExperiment } from 'app/core/experiments/experimentsProvider';
+import { useExperiment } from '@grafana/runtime';
 
 interface Props {
   panel: PanelModel;
@@ -54,7 +54,7 @@ export const VisualizationSelectPane: FC<Props> = ({ panel, data }) => {
     }
   }, [listMode]);
 
-  const suggestions = useExperiment('suggestions');
+  const suggestions = useExperiment('Suggestions');
 
   const onCloseVizPicker = () => {
     dispatch(toggleVizPicker(false));
