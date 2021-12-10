@@ -245,7 +245,6 @@ export const prepareImage = async (url: string, size: number, color?: string): P
     url = getPublicOrAbsoluteUrl(url);
   }
   const img = new Image();
-  img.crossOrigin = ''; //'' and 'anonymous' interchangeable
   return new Promise((resolve, reject) => {
     img.onload = async () => {
       const canvas = document.createElement('canvas');
@@ -267,7 +266,7 @@ export const prepareImage = async (url: string, size: number, color?: string): P
       resolve(canvas.toDataURL());
     };
     img.onerror = reject;
-    img.src = url + `?${Math.random() * 1000}`;
+    img.src = url;
   });
 };
 

@@ -16,6 +16,7 @@ export const CSVFileEditor = ({ onChange, query }: EditorProps) => {
     'ohlc_dogecoin.csv',
     'weight_height.csv',
     'browser_marketshare.csv',
+    'grafanearstas.csv',
   ].map((name) => ({ label: name, value: name }));
 
   return (

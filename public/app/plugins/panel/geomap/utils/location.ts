@@ -161,6 +161,26 @@ export function dataFrameToPoints(frame: DataFrame, location: LocationFieldMatch
   switch (fields.mode) {
     case FrameGeometrySourceMode.Coords:
       if (fields.latitude && fields.longitude) {
+        let lons = fields.longitude.values.toArray();
+        let lats = fields.latitude.values.toArray();
+
+        let pairs = new Set();
+        let dupes = new Set();
+
+        for (let i = 0; i < lons.length; i++) {
+          let pair = `${lats[i]},${lons[i]}`;
+          if (pairs.has(pair)) {
+            dupes.add(i);
+          } else {
+            pairs.add(pair);
+          }
+        }
+
+        dupes.forEach((i) => {
+          fields.latitude.values.buffer[i] = lats[i] + Math.random() * 0.01;
+          fields.longitude.values.buffer[i] = lons[i] + Math.random() * 0.01;
+        });
+
         info.points = getPointsFromLonLat(fields.longitude, fields.latitude);
       } else {
         info.warning = 'Missing latitude/longitude fields';
