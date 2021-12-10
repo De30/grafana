@@ -180,7 +180,7 @@ describe('Variables - Add variable', () => {
       .within(() => {
         e2e().get('.variable-link-wrapper').should('be.visible').click();
         e2e().wait(500);
-        e2e.pages.Dashboard.SubMenu.submenuItemValueDropDownDropDown()
+        e2e.pages.Dashboard.SubMenu.()
           .should('be.visible')
           .within(() => {
             e2e().get('.variable-option').should('have.length', 2);
