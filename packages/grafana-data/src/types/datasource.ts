@@ -547,6 +547,16 @@ export interface LibraryCredential {
   secureJsonData?: any;
   secureJsonFields: KeyValue<boolean>;
   [key: string]: any; // TODO maybe we can specify for http instead?
+
+  access: string;
+  url: string;
+  password: string;
+  user: string;
+  database: string;
+  basicAuth: boolean;
+  basicAuthPassword: string;
+  basicAuthUser: string;
+  withCredentials: boolean;
 }
 
 /**

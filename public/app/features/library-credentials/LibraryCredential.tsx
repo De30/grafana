@@ -2,7 +2,7 @@
 import { ConnectionConfig } from '@grafana/aws-sdk';
 import { KeyValue } from '@grafana/data';
 import { getBackendSrv, locationService } from '@grafana/runtime';
-import { Button, Field, FieldSet, Form, Input, Select } from '@grafana/ui';
+import { Button, DataSourceHttpSettings, Field, FieldSet, Form, Input, Select } from '@grafana/ui';
 import Page from 'app/core/components/Page/Page';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { getNavModel } from 'app/core/selectors/navModel';
@@ -40,10 +40,21 @@ export type Props = OwnProps & ConnectedProps<typeof connector>;
 
 interface State {
   name: string;
-  type?: 'aws' | 'azure' | 'gcp' | 'custom' | undefined;
+  type?: 'aws' | 'azure' | 'gcp' | 'custom' | 'http' | undefined;
   jsonData: any;
   secureJsonData: any;
   secureJsonFields: KeyValue<boolean>;
+
+  access: string;
+  url: string;
+  password: string;
+  user: string;
+  database: string;
+  basicAuth: boolean;
+  basicAuthPassword: string;
+  basicAuthUser: string;
+  withCredentials: boolean;
+  [key: string]: any;
 }
 
 export class LibraryCredentialUnconnected extends PureComponent<Props, State> {
@@ -111,6 +122,27 @@ export class LibraryCredentialUnconnected extends PureComponent<Props, State> {
       },
     };
 
+    const datasourceConfig = {
+      name: '',
+      typeLogoUrl: '',
+      access: 'proxy',
+      url: '',
+      password: '',
+      user: '',
+      database: '',
+      basicAuth: false,
+      basicAuthUser: '',
+      basicAuthPassword: '',
+      withCredentials: false,
+      isDefault: false,
+      jsonData: {},
+      secureJsonFields: {},
+      version: 1,
+      readOnly: true,
+      libraryCredential: null,
+      ...(this.state as any),
+    };
+
     return (
       <Page navModel={navModel}>
         <Page.Contents>
@@ -138,6 +170,7 @@ export class LibraryCredentialUnconnected extends PureComponent<Props, State> {
                       { label: 'AWS plugin', value: 'aws' },
                       { label: 'Azure plugin', value: 'azure' },
                       { label: 'GCP plugin', value: 'gcp' },
+                      { label: 'Http settings', value: 'http' },
                       { label: 'Custom', value: 'custom' },
                     ]}
                     value={this.state?.type}
@@ -148,6 +181,17 @@ export class LibraryCredentialUnconnected extends PureComponent<Props, State> {
                 </Field>
 
                 {this.state?.type === 'aws' && <ConnectionConfig {...connectionConfigProps}></ConnectionConfig>}
+
+                {this.state?.type === 'http' && (
+                  <DataSourceHttpSettings
+                    defaultUrl={this.state.defaultUrl}
+                    dataSourceConfig={datasourceConfig as any}
+                    onChange={(datasourceConfig) => {
+                      this.setState({ ...this.state, ...(datasourceConfig as any) });
+                    }}
+                    sigV4AuthToggleEnabled={false}
+                  ></DataSourceHttpSettings>
+                )}
 
                 {this.state?.type === 'custom' && (
                   <CustomFieldsEditor

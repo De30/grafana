@@ -133,6 +133,14 @@ func convertLibraryCredentialModelToDto(lc *models.LibraryCredential) *dtos.Libr
 		JsonData:         lc.JsonData,
 		ReadOnly:         lc.ReadOnly,
 		SecureJsonFields: map[string]bool{},
+
+		Access:            lc.Access,
+		Url:               lc.Url,
+		Password:          lc.Password,
+		BasicAuth:         lc.BasicAuth,
+		BasicAuthUser:     lc.BasicAuthUser,
+		BasicAuthPassword: lc.BasicAuthPassword,
+		WithCredentials:   lc.WithCredentials,
 	}
 
 	for k, v := range lc.SecureJsonData {
