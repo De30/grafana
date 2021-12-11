@@ -33,44 +33,118 @@ func NewArrowPlugin(pluginId string, l log.Logger) (*ArrowPlugin, error) {
 	return plugin, nil
 }
 
-// QueryData makes a QueryData request to the connected plugin This does the arrow stuff
-func (p *ArrowPlugin) QueryData(ctx context.Context, r *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-	p.logger.Info("QueryData called", "request", r)
-
-	// create response struct
-	response := backend.NewQueryDataResponse()
-
-	// loop over queries and execute them individually.
-	for _, q := range r.Queries {
-		res := p.query(ctx, r.PluginContext, q)
-
-		// save the response in a hashmap
-		// based on with RefID as identifier
-		response.Responses[q.RefID] = res
-	}
-
-	return response, nil
-}
-
 type flightQuery struct {
 	Query         backend.DataQuery     `json:"query"`
 	PluginContext backend.PluginContext `json:"context"`
 }
 
-func (p *ArrowPlugin) query(ctx context.Context, pCtx backend.PluginContext, query backend.DataQuery) backend.DataResponse {
-	response := backend.DataResponse{}
-	q := flightQuery{
-		Query:         query,
-		PluginContext: pCtx,
+func (p *ArrowPlugin) mergeFrames(a *data.Frame, b *data.Frame) *data.Frame {
+	if a.Name != b.Name {
+		p.logger.Error("frame merge error: names do not match", "a", a.Name, "b", b.Name)
+		return a
 	}
 
-	payload, err := json.Marshal(&q)
+	if len(a.Fields) != len(b.Fields) {
+		p.logger.Error("frame merge error: field lengths do not match", "a", len(a.Fields), "b", len(b.Fields))
+		return a
+	}
+
+	for i := 0; i < b.Rows(); i++ {
+		a.AppendRow(b.RowCopy(i)...)
+	}
+
+	return a
+}
+
+type partitionedResponse struct {
+	RefID  string
+	Frames []*data.Frame
+	Error  error
+}
+
+// QueryData makes a QueryData request to the connected plugin This does the arrow stuff
+func (p *ArrowPlugin) QueryData(ctx context.Context, r *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	// create response struct
+	response := backend.NewQueryDataResponse()
+
+	payload, err := json.Marshal(&r)
 	if err != nil {
-		p.logger.Error("flight json.Marshal error", "error", err)
+		return nil, err
+	}
+
+	info, err := p.client.GetFlightInfo(ctx, &flight.FlightDescriptor{Type: flight.FlightDescriptor_CMD, Cmd: payload})
+	if err != nil {
+		return nil, err
+	}
+
+	var responses_mu sync.Mutex
+	var wg sync.WaitGroup
+	responses := make([]partitionedResponse, len(info.Endpoint))
+
+	p.logger.Info("endpoints", "e", len(info.Endpoint))
+	for i, f := range info.Endpoint {
+		wg.Add(1)
+		go (func(i int, fe *flight.FlightEndpoint) {
+			var q flightQuery
+			if err := json.Unmarshal(fe.Ticket.Ticket, &q); err != nil {
+				return
+			}
+			res := p.query(ctx, r.PluginContext, fe)
+			responses_mu.Lock()
+			p.logger.Info("Set partitionedResponse", "i", i, "len", len(res.Frames))
+			responses[i] = partitionedResponse{
+				RefID:  q.Query.RefID,
+				Frames: res.Frames,
+				Error:  res.Error,
+			}
+			responses_mu.Unlock()
+			wg.Done()
+
+		})(i, f)
+	}
+
+	wg.Wait()
+
+	merged := make(map[string][]*data.Frame)
+	for i, r := range responses {
+		if r.Error != nil {
+			p.logger.Error("Response error", "refID", r.RefID, "i", i, "err", r.Error)
+			continue
+
+		}
+		p.logger.Info("Response", "refID", r.RefID, "i", i)
+		if len(merged[r.RefID]) == 0 {
+			p.logger.Info("refID init", "i", i, "refID", r.RefID, "len", len(r.Frames))
+			merged[r.RefID] = r.Frames
+			continue
+		}
+		if len(merged[r.RefID]) != len(r.Frames) {
+			p.logger.Error("response merge error: frame lengths do not match", "i", i, "existing", len(merged[r.RefID]), "res", len(r.Frames))
+			continue
+		}
+		for i, a := range merged[r.RefID] {
+			merged[r.RefID][i] = p.mergeFrames(a, r.Frames[i])
+		}
+	}
+
+	for refID, r := range merged {
+		response.Responses[refID] = backend.DataResponse{
+			Frames: r,
+			Error:  nil,
+		}
+	}
+
+	return response, nil
+}
+
+func (p *ArrowPlugin) query(ctx context.Context, pCtx backend.PluginContext, e *flight.FlightEndpoint) backend.DataResponse {
+	response := backend.DataResponse{}
+	client, err := flight.NewFlightClient(e.Location[0].GetUri(), nil, grpc.WithInsecure())
+	if err != nil {
 		response.Error = err
 		return response
 	}
-	resp, err := p.client.DoGet(ctx, &flight.Ticket{Ticket: payload})
+	resp, err := client.DoGet(ctx, e.Ticket)
 	if err != nil {
 		p.logger.Error("flight DoGet error", "error", err)
 		response.Error = err
@@ -97,6 +171,11 @@ func (p *ArrowPlugin) query(ctx context.Context, pCtx backend.PluginContext, que
 		rb.Release()
 	}
 
+	if r.Err() != nil {
+		response.Error = r.Err()
+		return response
+	}
+
 	return response
 }
 
@@ -115,6 +194,10 @@ func (p *ArrowPlugin) CheckHealth(ctx context.Context, r *backend.CheckHealthReq
 
 // CallResource makes a CallResource request to the connected plugin
 func (p *ArrowPlugin) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+	client, err := flight.NewFlightClient("127.0.0.1:5002", nil, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
 	payload, err := json.Marshal(&req)
 	if err != nil {
 		return err
@@ -123,12 +206,12 @@ func (p *ArrowPlugin) CallResource(ctx context.Context, req *backend.CallResourc
 		Type: "resource",
 		Body: payload,
 	}
-	client, err := p.client.DoAction(ctx, &action)
+	c, err := client.DoAction(ctx, &action)
 	if err != nil {
 		return err
 	}
 
-	r, err := client.Recv()
+	r, err := c.Recv()
 	if err != nil {
 		return err
 	}
@@ -146,7 +229,7 @@ func (p *ArrowPlugin) Start(ctx context.Context) error {
 
 	p.logger.Error("Starting plugin")
 	client, err := flight.NewFlightClient("127.0.0.1:5000", nil, grpc.WithInsecure())
-	p.logger.Info("connected to flight`")
+	p.logger.Info("connected to flight")
 	if err != nil {
 		return err
 	}
