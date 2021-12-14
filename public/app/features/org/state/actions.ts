@@ -53,3 +53,21 @@ export function createOrganization(
     window.location.href = getConfig().appSubUrl + '/org';
   };
 }
+
+export function validatOrganization(
+  orgName: string,
+  dependencies: OrganizationDependencies = { getBackendSrv: getBackendSrv }
+): ThunkResult<any> {
+  return async () => {
+    try {
+      await dependencies.getBackendSrv().get(`api/orgs/name/${encodeURI(orgName)}`);
+    } catch (error) {
+      if (error.status === 404) {
+        error.isHandled = true;
+        return true;
+      }
+      return 'Something went wrong';
+    }
+    return 'Organization already exists';
+  };
+}
