@@ -48,8 +48,8 @@ export class LokiQueryModeller extends LokiAndPromQueryModellerBase<LokiVisualQu
         operations: [
           { id: LokiOperationId.LineMatchesRegex, params: [''] },
           { id: LokiOperationId.Logfmt, params: [] },
-          { id: LokiOperationId.LabelFilterNoErrors, params: [] },
           { id: LokiOperationId.Unwrap, params: [''] },
+          { id: LokiOperationId.LabelFilterNoErrors, params: [] },
           { id: LokiOperationId.SumOverTime, params: ['auto'] },
           { id: LokiOperationId.Sum, params: [] },
         ],

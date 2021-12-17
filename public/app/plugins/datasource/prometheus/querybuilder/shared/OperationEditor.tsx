@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
-import { DataSourceApi, GrafanaTheme2 } from '@grafana/data';
+import { colorManipulator, DataSourceApi, GrafanaTheme2 } from '@grafana/data';
 import { FlexItem, Stack } from '@grafana/experimental';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import {
@@ -108,7 +108,7 @@ export function OperationEditor({
     <Draggable draggableId={`operation-${index}`} index={index}>
       {(provided) => (
         <div className={styles.card} ref={provided.innerRef} {...provided.draggableProps}>
-          <div className={styles.header} {...provided.dragHandleProps}>
+          <div className={styles.header}>
             <OperationName
               operation={operation}
               def={def}
@@ -118,12 +118,23 @@ export function OperationEditor({
             />
             <FlexItem grow={1} />
             <div className={`${styles.operationHeaderButtons} operation-header-show-on-hover`}>
+              <div className={styles.dragHandle} {...provided.dragHandleProps}>
+                <Icon name="draggabledots" size="sm" />
+              </div>
               <OperationInfoButton def={def} operation={operation} />
               <Button
-                icon="times"
-                size="sm"
+                icon="eye"
                 onClick={() => onRemove(index)}
                 fill="text"
+                size="sm"
+                variant="secondary"
+                title="Disable"
+              />
+              <Button
+                icon="times"
+                onClick={() => onRemove(index)}
+                fill="text"
+                size="sm"
                 variant="secondary"
                 title="Remove operation"
               />
@@ -183,6 +194,10 @@ const getStyles = (theme: GrafanaTheme2) => {
       borderRadius: theme.shape.borderRadius(1),
       marginBottom: theme.spacing(1),
       position: 'relative',
+      '&:hover .operation-header-show-on-hover': css({
+        opacity: 1,
+      }),
+      minWidth: '104px',
     }),
     header: css({
       borderBottom: `1px solid ${theme.colors.border.medium}`,
@@ -190,9 +205,6 @@ const getStyles = (theme: GrafanaTheme2) => {
       gap: theme.spacing(1),
       display: 'flex',
       alignItems: 'center',
-      '&:hover .operation-header-show-on-hover': css({
-        opacity: 1,
-      }),
     }),
     infoIcon: css({
       color: theme.colors.text.secondary,
@@ -215,8 +227,22 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     operationHeaderButtons: css({
       opacity: 0,
+      display: 'flex',
+      background: theme.colors.background.primary,
+      position: 'absolute',
+      padding: '2px',
+      top: '-28px',
+      right: '-1px',
+      left: '-1px',
+      textAlign: 'right',
+      zIndex: theme.zIndex.tooltip,
+      border: `1px solid ${theme.colors.border.medium}`,
+      borderBottom: 'none',
       transition: theme.transitions.create(['opacity'], {
         duration: theme.transitions.duration.short,
+      }),
+      '&:hover': css({
+        opacity: 1,
       }),
     }),
     paramValue: css({
@@ -239,6 +265,17 @@ const getStyles = (theme: GrafanaTheme2) => {
       backgroundColor: theme.colors.border.strong,
       position: 'relative',
       top: '14px',
+    }),
+    dragHandle: css({
+      cursor: 'grab',
+      textAlign: 'left',
+      flexGrow: 1,
+      transition: theme.transitions.create(['background'], {
+        duration: theme.transitions.duration.short,
+      }),
+      '&:hover': {
+        background: colorManipulator.alpha(theme.colors.secondary.shade, theme.colors.action.hoverOpacity),
+      },
     }),
     arrowArrow: css({
       width: 0,

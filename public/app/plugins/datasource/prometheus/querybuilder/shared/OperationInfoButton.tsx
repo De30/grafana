@@ -36,10 +36,11 @@ export const OperationInfoButton = React.memo<Props>(({ def, operation }) => {
     <>
       <Button
         ref={setPopperTrigger}
-        icon="info-circle"
-        size="sm"
+        icon="question-circle"
         variant="secondary"
+        title="Description"
         fill="text"
+        size="sm"
         onClick={toggleIsOpen}
       />
       {isOpen && (

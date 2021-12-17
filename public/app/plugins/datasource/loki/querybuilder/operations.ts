@@ -122,7 +122,7 @@ export function getOperationDefintions(): QueryBuilderOperationDef[] {
       renderer: (op, def, innerExpr) => `${innerExpr} | unwrap ${op.params[0]}`,
       addOperationHandler: addLokiOperation,
       explainHandler: (op) =>
-        `Use the extracted label \`${op.params[0]}\` as sample values instead of log lines for the subsequent range aggregation.`,
+        `Use the extracted label \`${op.params[0]}\` as the source of sample values instead of log lines for the subsequent range aggregation.`,
     },
   ];
 
@@ -143,7 +143,7 @@ function createRangeOperation(name: string): QueryBuilderOperationDef {
       let opDocs = FUNCTIONS.find((x) => x.insertText === op.id)?.documentation ?? '';
 
       if (op.params[0] === 'auto' || op.params[0] === '$__interval') {
-        return `${opDocs} \`$__interval\` is variable that will be replaced with a calculated interval based on **Max data points**,  **Min interval** and query time range. You find these options you find under **Query options** at the right of the data source select dropdown.`;
+        return `${opDocs} \`$__interval\` is variable that will be replaced with a calculated interval based on **Max data points**,  **Min interval** and query time range. You find these options under **Query options** at the right of the data source select dropdown.`;
       } else {
         return `${opDocs} The [range vector](https://grafana.com/docs/loki/latest/logql/metric_queries/#range-vector-aggregation) is set to \`${op.params[0]}\`.`;
       }
