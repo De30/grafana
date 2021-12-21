@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { ComponentType } from 'react';
+import { ComponentType, SyntheticEvent } from 'react';
 import { GrafanaPlugin, PluginMeta } from './plugin';
 import { PanelData } from './panel';
 import { LogRowModel } from './logs';
@@ -381,8 +381,9 @@ export interface QueryEditorProps<
 > {
   datasource: DSType;
   query: TVQuery;
-  onRunQuery: () => void;
+  onRunQuery: (options?: QueryEditorRunQueryOptions<TQuery> | SyntheticEvent<any>) => void;
   onChange: (value: TVQuery) => void;
+  /** @deprecated This is not used / does nothing */
   onBlur?: () => void;
   /**
    * Contains query response filtered by refId of QueryResultBase and possible query error
@@ -393,6 +394,14 @@ export interface QueryEditorProps<
   history?: Array<HistoryItem<TQuery>>;
   queries?: DataQuery[];
   app?: CoreApp;
+}
+
+export interface QueryEditorRunQueryOptions<TQuery extends DataQuery = DataQuery> {
+  /**
+   * Set this if you want to run specific queries that are not the same as the current query model for the editor.
+   * This makes it possible from a query editor to issue & view results for a single query, or partial query
+   */
+  queries?: TQuery[];
 }
 
 // TODO: not really needed but used as type in some data sources and in DataQueryRequest

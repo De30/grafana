@@ -31,7 +31,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps) {
           placeholder="legend format"
           value={query.legendFormat || ''}
           onChange={onLegendChange}
-          onBlur={onRunQuery}
+          onBlur={onRunQuery as any}
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 // Libraries
-import React, { PureComponent } from 'react';
+import React, { PureComponent, SyntheticEvent } from 'react';
 
 // Types
 import {
@@ -9,6 +9,7 @@ import {
   EventBusExtended,
   HistoryItem,
   PanelData,
+  QueryEditorRunQueryOptions,
 } from '@grafana/data';
 import { QueryEditorRow } from './QueryEditorRow';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
@@ -22,7 +23,7 @@ interface Props {
   // Query editing
   onQueriesChange: (queries: DataQuery[]) => void;
   onAddQuery: (query: DataQuery) => void;
-  onRunQueries: () => void;
+  onRunQueries: (options?: QueryEditorRunQueryOptions | SyntheticEvent<any>) => void;
 
   // Query Response Data
   data: PanelData;

@@ -1,5 +1,5 @@
 // Libraries
-import React, { PureComponent } from 'react';
+import React, { PureComponent, SyntheticEvent } from 'react';
 // Components
 import {
   Button,
@@ -25,6 +25,7 @@ import {
   getDefaultTimeRange,
   LoadingState,
   PanelData,
+  QueryEditorRunQueryOptions,
 } from '@grafana/data';
 import { PluginHelp } from 'app/core/components/PluginHelp/PluginHelp';
 import { addQuery } from 'app/core/utils/query';
@@ -43,7 +44,7 @@ interface Props {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
   onOpenQueryInspector?: () => void;
-  onRunQueries: () => void;
+  onRunQueries: (options?: QueryEditorRunQueryOptions | SyntheticEvent<any>) => void;
   onOptionsChange: (options: QueryGroupOptions) => void;
 }
 

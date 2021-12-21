@@ -1,5 +1,5 @@
 // Libraries
-import React, { PureComponent, ReactNode } from 'react';
+import React, { PureComponent, ReactNode, SyntheticEvent } from 'react';
 import classNames from 'classnames';
 import { cloneDeep, has } from 'lodash';
 // Utils & Services
@@ -18,6 +18,7 @@ import {
   LoadingState,
   PanelData,
   PanelEvents,
+  QueryEditorRunQueryOptions,
   TimeRange,
   toLegacyResponseData,
 } from '@grafana/data';
@@ -45,7 +46,7 @@ interface Props<TQuery extends DataQuery> {
   onAddQuery: (query: TQuery) => void;
   onRemoveQuery: (query: TQuery) => void;
   onChange: (query: TQuery) => void;
-  onRunQuery: () => void;
+  onRunQuery: (options?: QueryEditorRunQueryOptions | SyntheticEvent<any>) => void;
   visualization?: ReactNode;
   hideDisableQuery?: boolean;
   app?: CoreApp;
