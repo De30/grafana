@@ -376,7 +376,6 @@ export function prepareBarChartDisplayValues(
           copy.config.unit = 'percentunit';
           copy.display = getDisplayProcessor({ field: copy, theme });
         }
-
         fields.push(copy);
       }
     }
@@ -431,7 +430,7 @@ export function prepareBarChartDisplayValues(
     },
     legend: {
       length: firstField.values.length,
-      fields: fields.filter((f) => !Boolean(f.config.custom?.hideFrom?.legend)),
+      fields: fields.filter((f, idx) => idx > 0 && !Boolean(f.config.custom?.hideFrom?.legend)),
     },
   };
 }

@@ -3,8 +3,12 @@ import { TooltipDisplayMode, StackingMode, LegendDisplayMode } from '@grafana/sc
 import {
   compareDataFrameStructures,
   DataFrame,
+  DisplayValue,
+  fieldReducers,
   getFieldDisplayName,
+  getFieldSeriesColor,
   PanelProps,
+  reduceField,
   TimeRange,
   VizOrientation,
 } from '@grafana/data';
@@ -12,7 +16,6 @@ import {
   GraphNG,
   GraphNGProps,
   measureText,
-  PlotLegend,
   TooltipPlugin,
   UPlotConfigBuilder,
   UPLOT_AXIS_FONT_SIZE,
@@ -20,6 +23,7 @@ import {
   useTheme2,
   VizLayout,
   VizLegend,
+  VizLegendItem,
 } from '@grafana/ui';
 import { BarChartOptions } from './types';
 import { prepareBarChartDisplayValues, preparePlotConfigBuilder } from './utils';
@@ -28,9 +32,6 @@ import { DataHoverView } from '../geomap/components/DataHoverView';
 import { getFieldLegendItem } from '../state-timeline/utils';
 import { PropDiffFn } from '@grafana/ui/src/components/GraphNG/GraphNG';
 
-/**
- * @alpha
- */
 export interface BarChartProps
   extends BarChartOptions,
     Omit<GraphNGProps, 'prepConfig' | 'propsToDiff' | 'renderLegend' | 'theme'> {}
@@ -53,9 +54,6 @@ const propsToDiff: Array<string | PropDiffFn> = [
 
 interface Props extends PanelProps<BarChartOptions> {}
 
-/**
- * @alpha
- */
 export const BarChartPanel: React.FunctionComponent<Props> = ({ data, options, width, height, timeZone, id }) => {
   const theme = useTheme2();
   const { eventBus } = usePanelContext();
@@ -125,18 +123,56 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({ data, options, w
       return null;
     }
 
+    let items: Array<VizLegendItem<any>> | undefined = [];
     if (info.colorByField) {
-      const items = getFieldLegendItem([info.colorByField], theme);
-      if (items?.length) {
-        return (
-          <VizLayout.Legend placement={legend.placement}>
-            <VizLegend placement={legend.placement} items={items} displayMode={legend.displayMode} />
-          </VizLayout.Legend>
-        );
-      }
+      items = getFieldLegendItem([info.colorByField], theme);
+    } else {
+      const calcs = options.legend.calcs;
+      items = info.legend.fields.map((field, idx) => {
+        const label = getFieldDisplayName(field, info.aligned);
+        const scaleColor = getFieldSeriesColor(field, theme);
+        const seriesColor = scaleColor.color;
+
+        return {
+          disabled: false, //!(seriesConfig.show ?? true),
+          color: seriesColor,
+          label,
+          yAxis: 1, // axisPlacement === AxisPlacement.Left ? 1 : 2,
+          getDisplayValues: () => {
+            if (!calcs?.length) {
+              return [];
+            }
+
+            const fmt = field.display ?? defaultFormatter;
+            const fieldCalcs = reduceField({
+              field,
+              reducers: calcs,
+            });
+
+            return calcs.map<DisplayValue>((reducerId) => {
+              const fieldReducer = fieldReducers.get(reducerId);
+
+              return {
+                ...fmt(fieldCalcs[reducerId]),
+                title: fieldReducer.name,
+                description: fieldReducer.description,
+              };
+            });
+          },
+          getItemKey: () => `${label}-${idx}`,
+        };
+      });
     }
 
-    return <PlotLegend data={[info.legend]} config={config} maxHeight="35%" maxWidth="60%" {...options.legend} />;
+    if (!items?.length) {
+      return null;
+    }
+
+    return (
+      <VizLayout.Legend placement={legend.placement} maxHeight="35%" maxWidth="60%">
+        <VizLegend {...legend} items={items} />
+      </VizLayout.Legend>
+    );
   };
 
   const rawValue = (seriesIdx: number, valueIdx: number) => {
@@ -224,3 +260,5 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({ data, options, w
     </GraphNG>
   );
 };
+
+const defaultFormatter = (v: any) => (v == null ? '-' : v.toFixed(1));
