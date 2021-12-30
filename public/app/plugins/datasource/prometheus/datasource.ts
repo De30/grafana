@@ -241,6 +241,8 @@ export class PrometheusDatasource
       }
 
       target.requestId = options.panelId + target.refId;
+      target.dashboardId = options.dashboardId;
+      target.panelId = options.panelId;
       const metricName = this.languageProvider.histogramMetrics.find((m) => target.expr.includes(m));
 
       // In Explore, we run both (instant and range) queries if both are true (selected) or both are undefined (legacy Explore queries)
@@ -333,6 +335,8 @@ export class PrometheusDatasource
   processTargetV2(target: PromQuery, request: DataQueryRequest<PromQuery>) {
     const processedTarget = {
       ...target,
+      dashboardId: request.dashboardId,
+      panelId: request.panelId,
       queryType: PromQueryType.timeSeriesQuery,
       exemplar: this.shouldRunExemplarQuery(target, request),
       requestId: request.panelId + target.refId,

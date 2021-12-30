@@ -112,6 +112,7 @@ class DataSourceWithBackend<
     }
 
     const queries = targets.map((q) => {
+      let { dashboardId, panelId } = q;
       let datasource = this.getRef();
       let datasourceId = this.id;
 
@@ -139,6 +140,8 @@ class DataSourceWithBackend<
         datasourceId, // deprecated!
         intervalMs,
         maxDataPoints,
+        dashboardId,
+        panelId,
       };
     });
 

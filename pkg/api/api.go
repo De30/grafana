@@ -335,6 +335,8 @@ func (hs *HTTPServer) registerRoutes() {
 			dashboardRoute.Get("/tags", GetDashboardTags)
 			dashboardRoute.Post("/import", routing.Wrap(hs.ImportDashboard))
 
+			dashboardRoute.Post("/uid/:uid/query", routing.Wrap(hs.QueryMetricsFromDashboard))
+
 			dashboardRoute.Group("/id/:dashboardId", func(dashIdRoute routing.RouteRegister) {
 				dashIdRoute.Get("/versions", routing.Wrap(GetDashboardVersions))
 				dashIdRoute.Get("/versions/:id", routing.Wrap(GetDashboardVersion))
