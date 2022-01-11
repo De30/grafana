@@ -28,6 +28,8 @@ import (
 	"github.com/grafana/grafana/pkg/util/errutil"
 	"github.com/grafana/grafana/pkg/util/proxyutil"
 	"github.com/grafana/grafana/pkg/web"
+
+	"github.com/xeipuuv/gojsonschema"
 )
 
 func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
@@ -241,6 +243,26 @@ func (hs *HTTPServer) ImportDashboard(c *models.ReqContext) response.Response {
 		if err != nil {
 			return response.Error(500, "Error while applying default value to the dashboard json", err)
 		}
+	}
+
+	// here we can validate before import
+	schemaLoader := gojsonschema.NewReferenceLoader("../../packages/grafana-schema/jsonschema/dashboard.json")
+
+	// input dashboard json
+	dbbytes, _ := apiCmd.Dashboard.Bytes()
+	documentLoader := gojsonschema.NewBytesLoader(dbbytes)
+
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if !result.Valid() {
+		var res string
+		for _, desc := range result.Errors() {
+			res += res + desc.String() + "\n"
+		}
+		return response.Error(500, "Import failed\n", errors.New("The dashboard is not valid. \n"+res))
 	}
 
 	dashInfo, dash, err := hs.pluginDashboardManager.ImportDashboard(c.Req.Context(), apiCmd.PluginId, apiCmd.Path, c.OrgId, apiCmd.FolderId,
