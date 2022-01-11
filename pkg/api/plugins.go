@@ -237,13 +237,13 @@ func (hs *HTTPServer) ImportDashboard(c *models.ReqContext) response.Response {
 		return response.Error(403, "Quota reached", nil)
 	}
 
-	// trimDefaults := c.QueryBoolWithDefault("trimdefaults", true)
-	// if trimDefaults && !hs.LoadSchemaService.IsDisabled() {
-	// 	apiCmd.Dashboard, err = hs.LoadSchemaService.DashboardApplyDefaults(apiCmd.Dashboard)
-	// 	if err != nil {
-	// 		return response.Error(500, "Error while applying default value to the dashboard json", err)
-	// 	}
-	// }
+	trimDefaults := c.QueryBoolWithDefault("trimdefaults", true)
+	if trimDefaults && !hs.LoadSchemaService.IsDisabled() {
+		apiCmd.Dashboard, err = hs.LoadSchemaService.DashboardApplyDefaults(apiCmd.Dashboard)
+		if err != nil {
+			return response.Error(500, "Error while applying default value to the dashboard json", err)
+		}
+	}
 
 	// here we can validate before import
 	compiler := jsonschema.NewCompiler()
@@ -255,11 +255,11 @@ func (hs *HTTPServer) ImportDashboard(c *models.ReqContext) response.Response {
 	}
 
 	val, _ := apiCmd.Dashboard.Map()
+	// we need to remove the null from dashboard json here
 	dbbytes, err := json.Marshal(val)
 	if err != nil {
 		fmt.Println("2222222222222222222222", err)
 	}
-	fmt.Println("11111111111111111111", string(dbbytes))
 
 	err = schema.Validate(strings.NewReader(string(dbbytes)))
 	if err != nil {
