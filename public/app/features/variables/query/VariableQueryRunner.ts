@@ -1,5 +1,5 @@
 import { merge, Observable, of, Subject, throwError, Unsubscribable } from 'rxjs';
-import { catchError, filter, finalize, first, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, filter, finalize, first, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import {
   CoreApp,
   DataQuery,
@@ -112,12 +112,21 @@ export class VariableQueryRunner {
       runner
         .runRequest(runnerArgs, request)
         .pipe(
+          tap(() => {
+            console.log('beforeFilter');
+          }),
           filter(() => {
             // Lets check if we started another batch during the execution of the observable. If so we just want to abort the rest.
             const afterUid = getState().templating.transaction.uid;
             return beforeUid === afterUid;
           }),
+          tap(() => {
+            console.log('afterFilter');
+          }),
           first((data) => data.state === LoadingState.Done || data.state === LoadingState.Error),
+          tap(() => {
+            console.log('beforeMergeMap');
+          }),
           mergeMap((data) => {
             if (data.state === LoadingState.Error) {
               return throwError(data.error);
@@ -125,9 +134,21 @@ export class VariableQueryRunner {
 
             return of(data);
           }),
+          tap(() => {
+            console.log('afterMergeMap');
+          }),
           toMetricFindValues(),
+          tap(() => {
+            console.log('beforeUpdateOptionsState');
+          }),
           updateOptionsState({ variable, dispatch, getTemplatedRegexFunc }),
+          tap(() => {
+            console.log('afterUpdateOptionsState');
+          }),
           validateVariableSelection({ variable, dispatch, searchFilter }),
+          tap(() => {
+            console.log('beforeTakeUntil');
+          }),
           takeUntil(
             merge(this.updateOptionsRequests, this.cancelRequests).pipe(
               filter((args) => {
@@ -142,6 +163,9 @@ export class VariableQueryRunner {
               })
             )
           ),
+          tap(() => {
+            console.log('ass');
+          }),
           catchError((error) => {
             if (error.cancelled) {
               return of({});
