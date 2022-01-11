@@ -29,7 +29,7 @@ import (
 	"github.com/grafana/grafana/pkg/util/proxyutil"
 	"github.com/grafana/grafana/pkg/web"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/santhosh-tekuri/jsonschema"
 )
 
 func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
@@ -237,32 +237,37 @@ func (hs *HTTPServer) ImportDashboard(c *models.ReqContext) response.Response {
 		return response.Error(403, "Quota reached", nil)
 	}
 
-	trimDefaults := c.QueryBoolWithDefault("trimdefaults", true)
-	if trimDefaults && !hs.LoadSchemaService.IsDisabled() {
-		apiCmd.Dashboard, err = hs.LoadSchemaService.DashboardApplyDefaults(apiCmd.Dashboard)
-		if err != nil {
-			return response.Error(500, "Error while applying default value to the dashboard json", err)
-		}
-	}
+	// trimDefaults := c.QueryBoolWithDefault("trimdefaults", true)
+	// if trimDefaults && !hs.LoadSchemaService.IsDisabled() {
+	// 	apiCmd.Dashboard, err = hs.LoadSchemaService.DashboardApplyDefaults(apiCmd.Dashboard)
+	// 	if err != nil {
+	// 		return response.Error(500, "Error while applying default value to the dashboard json", err)
+	// 	}
+	// }
 
 	// here we can validate before import
-	schemaLoader := gojsonschema.NewReferenceLoader("../../packages/grafana-schema/jsonschema/dashboard.json")
+	compiler := jsonschema.NewCompiler()
+	compiler.Draft = jsonschema.Draft4
 
-	// input dashboard json
-	dbbytes, _ := apiCmd.Dashboard.Bytes()
-	documentLoader := gojsonschema.NewBytesLoader(dbbytes)
-
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	schema, err := compiler.Compile("packages/grafana-schema/jsonschema/dashboard.json")
 	if err != nil {
-		panic(err.Error())
+		return response.Error(403, "Import failed\n", errors.New("problem loading schema \n"+err.Error()))
 	}
 
-	if !result.Valid() {
+	val, _ := apiCmd.Dashboard.Map()
+	dbbytes, err := json.Marshal(val)
+	if err != nil {
+		fmt.Println("2222222222222222222222", err)
+	}
+	fmt.Println("11111111111111111111", string(dbbytes))
+
+	err = schema.Validate(strings.NewReader(string(dbbytes)))
+	if err != nil {
 		var res string
-		for _, desc := range result.Errors() {
-			res += res + desc.String() + "\n"
+		if _, ok := err.(*jsonschema.ValidationError); ok {
+			res += err.(*jsonschema.ValidationError).Message + "\n"
 		}
-		return response.Error(500, "Import failed\n", errors.New("The dashboard is not valid. \n"+res))
+		return response.Error(403, "Schema validation failed "+res, err)
 	}
 
 	dashInfo, dash, err := hs.pluginDashboardManager.ImportDashboard(c.Req.Context(), apiCmd.PluginId, apiCmd.Path, c.OrgId, apiCmd.FolderId,
