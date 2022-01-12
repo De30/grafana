@@ -128,9 +128,10 @@ func Recovery(cfg *setting.Cfg) web.Handler {
 				panicLogger.Error("Request error", "error", r, "stack", string(stack))
 
 				// if response has already been written, skip.
-				if c.Resp.Written() {
-					return
-				}
+				// XXX:zserge
+				// if c.Resp.Written() {
+				// return
+				// }
 
 				data := struct {
 					Title     string

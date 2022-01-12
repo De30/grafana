@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/web"
 )
 
 var (
@@ -24,16 +24,11 @@ func HandleNoCacheHeader(ctx *models.ReqContext) {
 	ctx.SkipCache = ctx.Req.Header.Get("X-Grafana-NoCache") == "true"
 }
 
-func AddDefaultResponseHeaders(cfg *setting.Cfg) web.Handler {
-	return func(c *web.Context) {
-		c.Resp.Before(func(w web.ResponseWriter) {
-			// if response has already been written, skip.
-			if w.Written() {
-				return
-			}
-
-			if !strings.HasPrefix(c.Req.URL.Path, "/api/datasources/proxy/") {
-				addNoCacheHeaders(c.Resp)
+func AddDefaultResponseHeaders(cfg *setting.Cfg) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !strings.HasPrefix(r.URL.Path, "/api/datasources/proxy/") {
+				addNoCacheHeaders(w)
 			}
 
 			if !cfg.AllowEmbedding {
@@ -41,12 +36,13 @@ func AddDefaultResponseHeaders(cfg *setting.Cfg) web.Handler {
 			}
 
 			addSecurityHeaders(w, cfg)
+			next.ServeHTTP(w, r)
 		})
 	}
 }
 
 // addSecurityHeaders adds HTTP(S) response headers that enable various security protections in the client's browser.
-func addSecurityHeaders(w web.ResponseWriter, cfg *setting.Cfg) {
+func addSecurityHeaders(w http.ResponseWriter, cfg *setting.Cfg) {
 	if (cfg.Protocol == setting.HTTPSScheme || cfg.Protocol == setting.HTTP2Scheme) && cfg.StrictTransportSecurity {
 		strictHeaderValues := []string{fmt.Sprintf("max-age=%v", cfg.StrictTransportSecurityMaxAge)}
 		if cfg.StrictTransportSecurityPreload {
@@ -67,12 +63,12 @@ func addSecurityHeaders(w web.ResponseWriter, cfg *setting.Cfg) {
 	}
 }
 
-func addNoCacheHeaders(w web.ResponseWriter) {
+func addNoCacheHeaders(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "-1")
 }
 
-func addXFrameOptionsDenyHeader(w web.ResponseWriter) {
+func addXFrameOptionsDenyHeader(w http.ResponseWriter) {
 	w.Header().Set("X-Frame-Options", "deny")
 }

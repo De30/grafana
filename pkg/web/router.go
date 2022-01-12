@@ -15,7 +15,9 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 )
@@ -133,7 +135,13 @@ func (r *Router) handle(method, pattern string, handle Handle) {
 }
 
 // Handle registers a new request handle with the given pattern, method and handlers.
+var types = map[string]int{}
+
 func (r *Router) Handle(method string, pattern string, handlers []Handler) {
+	for _, h := range handlers {
+		name := reflect.TypeOf(h).String()
+		types[name] = types[name] + 1
+	}
 	if len(r.groups) > 0 {
 		groupPattern := ""
 		h := make([]Handler, 0)
@@ -205,6 +213,9 @@ func (r *Router) NotFound(handlers ...Handler) {
 }
 
 func (r *Router) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	for k, v := range types {
+		fmt.Println("TYPE", k, v)
+	}
 	if t, ok := r.routers[req.Method]; ok {
 		// Fast match for static routes
 		if !strings.ContainsAny(req.URL.Path, ":*") {

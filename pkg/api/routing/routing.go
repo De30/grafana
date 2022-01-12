@@ -1,21 +1,18 @@
 package routing
 
 import (
+	"net/http"
+
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/web"
+	"github.com/grafana/grafana/pkg/services/contexthandler"
 )
 
-var (
-	ServerError = func(err error) response.Response {
-		return response.Error(500, "Server error", err)
-	}
-)
-
-func Wrap(handler func(c *models.ReqContext) response.Response) web.Handler {
-	return func(c *models.ReqContext) {
+func Wrap(handler func(c *models.ReqContext) response.Response) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c := contexthandler.FromContext(r.Context())
 		if res := handler(c); res != nil {
 			res.WriteTo(c)
 		}
-	}
+	})
 }

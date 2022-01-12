@@ -350,7 +350,9 @@ func (h *ContextHandler) initContextWithToken(reqContext *models.ReqContext, org
 
 	// Rotate the token just before we write response headers to ensure there is no delay between
 	// the new token being generated and the client receiving it.
-	reqContext.Resp.Before(h.rotateEndOfRequestFunc(reqContext, h.AuthTokenService, token))
+	if rw, ok := reqContext.Resp.(web.ResponseWriter); ok {
+		rw.Before(h.rotateEndOfRequestFunc(reqContext, h.AuthTokenService, token))
+	}
 
 	return true
 }

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/api/response"
-	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 
@@ -260,7 +259,7 @@ func Instrument(
 		if err == nil && val != nil && len(val) > 0 {
 			res = val[0].Interface().(response.Response)
 		} else {
-			res = routing.ServerError(err)
+			res = response.Error(500, "Server error", err)
 		}
 
 		// TODO: We could look up the datasource type via our datasource service

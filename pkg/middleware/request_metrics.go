@@ -47,7 +47,8 @@ func init() {
 // RequestMetrics is a middleware handler that instruments the request.
 func RequestMetrics(cfg *setting.Cfg) func(handler string) web.Handler {
 	return func(handler string) web.Handler {
-		return func(res http.ResponseWriter, req *http.Request, c *web.Context) {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			c := web.FromContext(req.Context())
 			rw := res.(web.ResponseWriter)
 			now := time.Now()
 			httpRequestsInFlight.Inc()
@@ -89,7 +90,7 @@ func RequestMetrics(cfg *setting.Cfg) func(handler string) web.Handler {
 			default:
 				countPageRequests(status)
 			}
-		}
+		})
 	}
 }
 

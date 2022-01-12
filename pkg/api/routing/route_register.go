@@ -2,6 +2,8 @@ package routing
 
 import (
 	"net/http"
+	"reflect"
+	"runtime/debug"
 	"strings"
 
 	"github.com/grafana/grafana/pkg/middleware"
@@ -136,6 +138,12 @@ func (rr *RouteRegisterImpl) Register(router Router) {
 }
 
 func (rr *RouteRegisterImpl) route(pattern, method string, handlers ...web.Handler) {
+	for _, h := range handlers {
+		name := reflect.TypeOf(h).String()
+		if name == "func(*models.ReqContext) response.Response" {
+			debug.PrintStack()
+		}
+	}
 	h := make([]web.Handler, 0)
 	fullPattern := rr.prefix + pattern
 

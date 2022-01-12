@@ -20,10 +20,11 @@ var routeOperationNameKey = contextKey{}
 // the context with the route operation name that can be used later in the request pipeline.
 // Implements routing.RegisterNamedMiddleware.
 func ProvideRouteOperationName(name string) web.Handler {
-	return func(res http.ResponseWriter, req *http.Request, c *web.Context) {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		c := web.FromContext(req.Context())
 		ctx := context.WithValue(c.Req.Context(), routeOperationNameKey, name)
 		c.Req = c.Req.WithContext(ctx)
-	}
+	})
 }
 
 // RouteOperationNameFromContext receives the route operation name from context, if set.
@@ -37,7 +38,8 @@ func RouteOperationNameFromContext(ctx context.Context) (string, bool) {
 }
 
 func RequestTracing() web.Handler {
-	return func(res http.ResponseWriter, req *http.Request, c *web.Context) {
+	return func(res http.ResponseWriter, req *http.Request) {
+		c := web.FromContext(req.Context())
 		if strings.HasPrefix(c.Req.URL.Path, "/public/") ||
 			c.Req.URL.Path == "robots.txt" {
 			c.Next()

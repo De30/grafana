@@ -16,7 +16,8 @@ import (
 // OrgRedirect changes org and redirects users if the
 // querystring `orgId` doesn't match the active org.
 func OrgRedirect(cfg *setting.Cfg) web.Handler {
-	return func(res http.ResponseWriter, req *http.Request, c *web.Context) {
+	return func(res http.ResponseWriter, req *http.Request) {
+		c := web.FromContext(req.Context())
 		orgIdValue := req.URL.Query().Get("orgId")
 		orgId, err := strconv.ParseInt(orgIdValue, 10, 64)
 

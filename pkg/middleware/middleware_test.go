@@ -682,7 +682,7 @@ func middlewareScenario(t *testing.T, desc string, fn scenarioFunc, cbs ...func(
 		require.Truef(t, exists, "Views directory should exist at %q", viewsPath)
 
 		sc.m = web.New()
-		sc.m.Use(AddDefaultResponseHeaders(cfg))
+		sc.m.UseMiddleware(AddDefaultResponseHeaders(cfg))
 		sc.m.UseMiddleware(AddCSPHeader(cfg, logger))
 		sc.m.UseMiddleware(web.Renderer(viewsPath, "[[", "]]"))
 

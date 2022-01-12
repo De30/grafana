@@ -26,8 +26,9 @@ import (
 )
 
 func Logger(cfg *setting.Cfg) web.Handler {
-	return func(res http.ResponseWriter, req *http.Request, c *web.Context) {
+	return func(res http.ResponseWriter, req *http.Request) {
 		start := time.Now()
+		c := web.FromContext(req.Context())
 
 		rw := res.(web.ResponseWriter)
 		c.Next()

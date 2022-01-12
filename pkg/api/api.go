@@ -39,7 +39,7 @@ func (hs *HTTPServer) registerRoutes() {
 	// not logged in views
 	r.Get("/logout", hs.Logout)
 	r.Post("/login", quota("session"), routing.Wrap(hs.LoginPost))
-	r.Get("/login/:name", quota("session"), hs.OAuthLogin)
+	r.Get("/login/:name", quota("session"), routing.Wrap(hs.OAuthLogin))
 	r.Get("/login", hs.LoginView)
 	r.Get("/invite/:code", hs.Index)
 
@@ -507,7 +507,7 @@ func (hs *HTTPServer) registerRoutes() {
 	r.Get("/avatar/:hash", avatarCacheServer.Handler)
 
 	// Snapshots
-	r.Post("/api/snapshots/", reqSnapshotPublicModeOrSignedIn, CreateDashboardSnapshot)
+	r.Post("/api/snapshots/", reqSnapshotPublicModeOrSignedIn, routing.Wrap(CreateDashboardSnapshot))
 	r.Get("/api/snapshot/shared-options/", reqSignedIn, GetSharingOptions)
 	r.Get("/api/snapshots/:key", routing.Wrap(GetDashboardSnapshot))
 	r.Get("/api/snapshots-delete/:deleteKey", reqSnapshotPublicModeOrSignedIn, routing.Wrap(DeleteDashboardSnapshotByDeleteKey))
