@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/grafana/grafana/pkg/services/dashboards/manager"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -62,7 +63,7 @@ func NewDashboardFileReader(cfg *config, log log.Logger, store dboards.Store) (*
 		Cfg:                          cfg,
 		Path:                         path,
 		log:                          log,
-		dashboardProvisioningService: dashboards.NewProvisioningService(store),
+		dashboardProvisioningService: manager.ProvideDashboardService(store),
 		FoldersFromFilesStructure:    foldersFromFilesStructure,
 		usageTracker:                 newUsageTracker(),
 	}, nil
