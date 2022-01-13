@@ -91,7 +91,7 @@ You can share a playlist by copying the link address on the view mode you prefer
 
 1.  From the Dashboards submenu, click **Playlists**.
 1.  Next to the playlist you want to share, click **Start playlist**.
-1.  In the dropdown, right click the view mode you prefer.
+1.  Select the view mode you prefer.
 1.  Click **Copy Link Address** to copy the URL to your clipboard.
 
         Example: The URL for the first playlist on the Grafana Play site in Kiosk mode will look like this:
