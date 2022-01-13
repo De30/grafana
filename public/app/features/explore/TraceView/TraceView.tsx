@@ -1,4 +1,13 @@
-import { DataFrame, DataFrameView, SplitOpen, TraceSpanRow } from '@grafana/data';
+import {
+  DataFrame,
+  DataFrameView,
+  DataLink,
+  Field,
+  mapInternalLinkToExplore,
+  SplitOpen,
+  TraceSpanRow,
+} from '@grafana/data';
+import { getTemplateSrv } from '@grafana/runtime';
 import {
   Trace,
   TracePageHeader,
@@ -15,7 +24,8 @@ import { getTimeZone } from 'app/features/profile/state/selectors';
 import { StoreState } from 'app/types';
 import { ExploreId } from 'app/types/explore';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { changePanelState } from '../state/explorePane';
 import { createSpanLinkFactory } from './createSpanLink';
 import { UIElements } from './uiElements';
 import { useChildrenState } from './useChildrenState';
@@ -64,12 +74,53 @@ export function TraceView(props: Props) {
    */
   const [slim, setSlim] = useState(false);
 
+  const panelState = useSelector((state: StoreState) => state.explore[props.exploreId]?.panelsState.trace);
+  const dispatch = useDispatch();
+  const focusedSpanId = panelState?.spanId;
+  const setFocusedSpanId = (spanId?: string) =>
+    dispatch(
+      changePanelState(props.exploreId, 'trace', {
+        ...panelState,
+        spanId,
+      })
+    );
+
   const traceProp = useMemo(() => transformDataFrames(frame), [frame]);
   const { search, setSearch, spanFindMatches } = useSearch(traceProp?.spans);
-  const dataSourceName = useSelector((state: StoreState) => state.explore[props.exploreId]?.datasourceInstance?.name);
-  const traceToLogsOptions = (getDatasourceSrv().getInstanceSettings(dataSourceName)?.jsonData as TraceToLogsData)
+  const datasource = useSelector((state: StoreState) => state.explore[props.exploreId]?.datasourceInstance);
+  const query = useSelector((state: StoreState) =>
+    state.explore[props.exploreId]?.queries.find((query) => query.refId === frame.refId)
+  );
+  const traceToLogsOptions = (getDatasourceSrv().getInstanceSettings(datasource?.name)?.jsonData as TraceToLogsData)
     ?.tracesToLogs;
   const timeZone = useSelector((state: StoreState) => getTimeZone(state.user));
+
+  const createFocusSpanLink = (traceId: string, spanId: string) => {
+    const link: DataLink = {
+      title: 'Deep link to this span',
+      url: '',
+      internal: {
+        datasourceUid: datasource?.uid!,
+        datasourceName: datasource?.name!,
+        query,
+        panelsState: {
+          trace: {
+            spanId,
+          },
+        },
+      },
+    };
+
+    return mapInternalLinkToExplore({
+      link,
+      internalLink: link.internal!,
+      scopedVars: {},
+      range: {} as any,
+      field: {} as Field,
+      onClickFn: () => setFocusedSpanId(focusedSpanId === spanId ? undefined : spanId),
+      replaceVariables: getTemplateSrv().replace.bind(getTemplateSrv()),
+    });
+  };
 
   const traceTimeline: TTraceTimeline = useMemo(
     () => ({
@@ -151,6 +202,8 @@ export function TraceView(props: Props) {
         uiFind={search}
         createSpanLink={createSpanLink}
         scrollElement={props.scrollElement}
+        focusedSpanId={focusedSpanId}
+        createFocusSpanLink={createFocusSpanLink}
       />
     </UIElementsContext.Provider>
   );
