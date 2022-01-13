@@ -1,5 +1,6 @@
-import { StatementPosition, SuggestionKind } from './types';
+import { StatementPosition, SuggestionKind } from '../../monarch/types';
 
+// you give it where you are it gives you what are the possible choices of what comes next?
 export function getSuggestionKinds(statementPosition: StatementPosition): SuggestionKind[] {
   switch (statementPosition) {
     case StatementPosition.SelectKeyword:
