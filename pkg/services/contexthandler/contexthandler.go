@@ -4,6 +4,7 @@ package contexthandler
 import (
 	"context"
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -72,83 +73,88 @@ func FromContext(c context.Context) *models.ReqContext {
 }
 
 // Middleware provides a middleware to initialize the Macaron context.
-func (h *ContextHandler) Middleware(mContext *web.Context) {
-	span, _ := opentracing.StartSpanFromContext(mContext.Req.Context(), "Auth - Middleware")
-	defer span.Finish()
+func (h *ContextHandler) Middleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			mContext := web.FromContext(req.Context())
+			span, _ := opentracing.StartSpanFromContext(mContext.Req.Context(), "Auth - Middleware")
+			defer span.Finish()
 
-	reqContext := &models.ReqContext{
-		Context:        mContext,
-		SignedInUser:   &models.SignedInUser{},
-		IsSignedIn:     false,
-		AllowAnonymous: false,
-		SkipCache:      false,
-		Logger:         log.New("context"),
-	}
+			reqContext := &models.ReqContext{
+				Context:        mContext,
+				SignedInUser:   &models.SignedInUser{},
+				IsSignedIn:     false,
+				AllowAnonymous: false,
+				SkipCache:      false,
+				Logger:         log.New("context"),
+			}
 
-	// Inject ReqContext into a request context and replace the request instance in the macaron context
-	mContext.Req = mContext.Req.WithContext(context.WithValue(mContext.Req.Context(), reqContextKey{}, reqContext))
-	mContext.Map(mContext.Req)
+			// Inject ReqContext into a request context and replace the request instance in the macaron context
+			mContext.Req = mContext.Req.WithContext(context.WithValue(mContext.Req.Context(), reqContextKey{}, reqContext))
+			mContext.Map(mContext.Req)
 
-	traceID, exists := cw.ExtractTraceID(mContext.Req.Context())
-	if exists {
-		reqContext.Logger = reqContext.Logger.New("traceID", traceID)
-	}
+			traceID, exists := cw.ExtractTraceID(mContext.Req.Context())
+			if exists {
+				reqContext.Logger = reqContext.Logger.New("traceID", traceID)
+			}
 
-	const headerName = "X-Grafana-Org-Id"
-	orgID := int64(0)
-	orgIDHeader := reqContext.Req.Header.Get(headerName)
-	if orgIDHeader != "" {
-		id, err := strconv.ParseInt(orgIDHeader, 10, 64)
-		if err == nil {
-			orgID = id
-		} else {
-			reqContext.Logger.Debug("Received invalid header", "header", headerName, "value", orgIDHeader)
-		}
-	}
+			const headerName = "X-Grafana-Org-Id"
+			orgID := int64(0)
+			orgIDHeader := reqContext.Req.Header.Get(headerName)
+			if orgIDHeader != "" {
+				id, err := strconv.ParseInt(orgIDHeader, 10, 64)
+				if err == nil {
+					orgID = id
+				} else {
+					reqContext.Logger.Debug("Received invalid header", "header", headerName, "value", orgIDHeader)
+				}
+			}
 
-	queryParameters, err := url.ParseQuery(reqContext.Req.URL.RawQuery)
-	if err != nil {
-		reqContext.Logger.Error("Failed to parse query parameters", "error", err)
-	}
-	if queryParameters.Has("targetOrgId") {
-		targetOrg, err := strconv.ParseInt(queryParameters.Get("targetOrgId"), 10, 64)
-		if err == nil {
-			orgID = targetOrg
-		} else {
-			reqContext.Logger.Error("Invalid target organization ID", "error", err)
-		}
-	}
+			queryParameters, err := url.ParseQuery(reqContext.Req.URL.RawQuery)
+			if err != nil {
+				reqContext.Logger.Error("Failed to parse query parameters", "error", err)
+			}
+			if queryParameters.Has("targetOrgId") {
+				targetOrg, err := strconv.ParseInt(queryParameters.Get("targetOrgId"), 10, 64)
+				if err == nil {
+					orgID = targetOrg
+				} else {
+					reqContext.Logger.Error("Invalid target organization ID", "error", err)
+				}
+			}
 
-	// the order in which these are tested are important
-	// look for api key in Authorization header first
-	// then init session and look for userId in session
-	// then look for api key in session (special case for render calls via api)
-	// then test if anonymous access is enabled
-	switch {
-	case h.initContextWithRenderAuth(reqContext):
-	case h.initContextWithAPIKey(reqContext):
-	case h.initContextWithBasicAuth(reqContext, orgID):
-	case h.initContextWithAuthProxy(reqContext, orgID):
-	case h.initContextWithToken(reqContext, orgID):
-	case h.initContextWithJWT(reqContext, orgID):
-	case h.initContextWithAnonymousUser(reqContext):
-	}
+			// the order in which these are tested are important
+			// look for api key in Authorization header first
+			// then init session and look for userId in session
+			// then look for api key in session (special case for render calls via api)
+			// then test if anonymous access is enabled
+			switch {
+			case h.initContextWithRenderAuth(reqContext):
+			case h.initContextWithAPIKey(reqContext):
+			case h.initContextWithBasicAuth(reqContext, orgID):
+			case h.initContextWithAuthProxy(reqContext, orgID):
+			case h.initContextWithToken(reqContext, orgID):
+			case h.initContextWithJWT(reqContext, orgID):
+			case h.initContextWithAnonymousUser(reqContext):
+			}
 
-	reqContext.Logger = log.New("context", "userId", reqContext.UserId, "orgId", reqContext.OrgId, "uname", reqContext.Login)
+			reqContext.Logger = log.New("context", "userId", reqContext.UserId, "orgId", reqContext.OrgId, "uname", reqContext.Login)
 
-	span.LogFields(
-		ol.String("uname", reqContext.Login),
-		ol.Int64("orgId", reqContext.OrgId),
-		ol.Int64("userId", reqContext.UserId))
+			span.LogFields(
+				ol.String("uname", reqContext.Login),
+				ol.Int64("orgId", reqContext.OrgId),
+				ol.Int64("userId", reqContext.UserId))
 
-	mContext.Map(reqContext)
+			mContext.Map(reqContext)
 
-	// update last seen every 5min
-	if reqContext.ShouldUpdateLastSeenAt() {
-		reqContext.Logger.Debug("Updating last user_seen_at", "user_id", reqContext.UserId)
-		if err := bus.Dispatch(mContext.Req.Context(), &models.UpdateUserLastSeenAtCommand{UserId: reqContext.UserId}); err != nil {
-			reqContext.Logger.Error("Failed to update last_seen_at", "error", err)
-		}
+			// update last seen every 5min
+			if reqContext.ShouldUpdateLastSeenAt() {
+				reqContext.Logger.Debug("Updating last user_seen_at", "user_id", reqContext.UserId)
+				if err := bus.Dispatch(mContext.Req.Context(), &models.UpdateUserLastSeenAtCommand{UserId: reqContext.UserId}); err != nil {
+					reqContext.Logger.Error("Failed to update last_seen_at", "error", err)
+				}
+			}
+		})
 	}
 }
 

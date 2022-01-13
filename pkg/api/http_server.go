@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/thumbs"
 
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	httpstatic "github.com/grafana/grafana/pkg/api/static"
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/components/simplejson"
@@ -401,7 +402,7 @@ func (hs *HTTPServer) applyRoutes() {
 	// then custom app proxy routes
 	hs.initAppPluginRoutes(hs.web)
 	// lastly not found route
-	hs.web.NotFound(middleware.ReqSignedIn, hs.NotFoundHandler)
+	hs.web.NotFound(middleware.ReqSignedIn, wrap.WrapNoResponse(hs.NotFoundHandler))
 }
 
 func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
@@ -425,7 +426,7 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 		hs.mapStatic(m, hs.Cfg.ImagesDir, "", "/public/img/attachments")
 	}
 
-	m.Use(middleware.AddDefaultResponseHeaders(hs.Cfg))
+	m.UseMiddleware(middleware.AddDefaultResponseHeaders(hs.Cfg))
 
 	if hs.Cfg.ServeFromSubPath && hs.Cfg.AppSubURL != "" {
 		m.SetURLPrefix(hs.Cfg.AppSubURL)
@@ -435,11 +436,11 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 
 	// These endpoints are used for monitoring the Grafana instance
 	// and should not be redirected or rejected.
-	m.Use(hs.healthzHandler)
-	m.Use(hs.apiHealthHandler)
-	m.Use(hs.metricsEndpoint)
+	m.Use(wrap.WrapNoResponse(hs.healthzHandler))
+	m.Use(wrap.WrapNoResponse(hs.apiHealthHandler))
+	m.Use(wrap.WrapNoResponse(hs.metricsEndpoint))
 
-	m.Use(hs.ContextHandler.Middleware)
+	m.UseMiddleware(hs.ContextHandler.Middleware())
 	m.Use(middleware.OrgRedirect(hs.Cfg))
 	m.Use(acmiddleware.LoadPermissionsMiddleware(hs.AccessControl))
 
@@ -448,7 +449,7 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 		m.Use(middleware.ValidateHostHeader(hs.Cfg))
 	}
 
-	m.Use(middleware.HandleNoCacheHeader)
+	m.Use(wrap.WrapNoResponse(middleware.HandleNoCacheHeader))
 	m.UseMiddleware(middleware.AddCSPHeader(hs.Cfg, hs.log))
 
 	for _, mw := range hs.middlewares {
@@ -456,7 +457,7 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 	}
 }
 
-func (hs *HTTPServer) metricsEndpoint(ctx *web.Context) {
+func (hs *HTTPServer) metricsEndpoint(ctx *models.ReqContext) {
 	if !hs.Cfg.MetricsEndpointEnabled {
 		return
 	}
@@ -476,7 +477,7 @@ func (hs *HTTPServer) metricsEndpoint(ctx *web.Context) {
 }
 
 // healthzHandler always return 200 - Ok if Grafana's web server is running
-func (hs *HTTPServer) healthzHandler(ctx *web.Context) {
+func (hs *HTTPServer) healthzHandler(ctx *models.ReqContext) {
 	notHeadOrGet := ctx.Req.Method != http.MethodGet && ctx.Req.Method != http.MethodHead
 	if notHeadOrGet || ctx.Req.URL.Path != "/healthz" {
 		return
@@ -492,7 +493,7 @@ func (hs *HTTPServer) healthzHandler(ctx *web.Context) {
 // apiHealthHandler will return ok if Grafana's web server is running and it
 // can access the database. If the database cannot be accessed it will return
 // http status code 503.
-func (hs *HTTPServer) apiHealthHandler(ctx *web.Context) {
+func (hs *HTTPServer) apiHealthHandler(ctx *models.ReqContext) {
 	notHeadOrGet := ctx.Req.Method != http.MethodGet && ctx.Req.Method != http.MethodHead
 	if notHeadOrGet || ctx.Req.URL.Path != "/api/health" {
 		return

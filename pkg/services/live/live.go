@@ -25,6 +25,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/infra/localcache"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/usagestats"
@@ -342,7 +343,7 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 		CheckOrigin:     checkOrigin,
 	})
 
-	g.websocketHandler = func(ctx *models.ReqContext) {
+	g.websocketHandler = wrap.Wrap(func(ctx *models.ReqContext) response.Response {
 		user := ctx.SignedInUser
 
 		// Centrifuge expects Credentials in context with a current user ID.
@@ -353,23 +354,26 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 		newCtx = livecontext.SetContextSignedUser(newCtx, user)
 		r := ctx.Req.WithContext(newCtx)
 		wsHandler.ServeHTTP(ctx.Resp, r)
-	}
+		return nil
+	})
 
-	g.pushWebsocketHandler = func(ctx *models.ReqContext) {
+	g.pushWebsocketHandler = wrap.Wrap(func(ctx *models.ReqContext) response.Response {
 		user := ctx.SignedInUser
 		newCtx := livecontext.SetContextSignedUser(ctx.Req.Context(), user)
 		newCtx = livecontext.SetContextStreamID(newCtx, web.Params(ctx.Req)[":streamId"])
 		r := ctx.Req.WithContext(newCtx)
 		pushWSHandler.ServeHTTP(ctx.Resp, r)
-	}
+		return nil
+	})
 
-	g.pushPipelineWebsocketHandler = func(ctx *models.ReqContext) {
+	g.pushPipelineWebsocketHandler = wrap.Wrap(func(ctx *models.ReqContext) response.Response {
 		user := ctx.SignedInUser
 		newCtx := livecontext.SetContextSignedUser(ctx.Req.Context(), user)
 		newCtx = livecontext.SetContextChannelID(newCtx, web.Params(ctx.Req)["*"])
 		r := ctx.Req.WithContext(newCtx)
 		pushPipelineWSHandler.ServeHTTP(ctx.Resp, r)
-	}
+		return nil
+	})
 
 	g.RouteRegister.Group("/api/live", func(group routing.RouteRegister) {
 		group.Get("/ws", g.websocketHandler)
@@ -406,9 +410,9 @@ type GrafanaLive struct {
 	surveyCaller *survey.Caller
 
 	// Websocket handlers
-	websocketHandler             interface{}
-	pushWebsocketHandler         interface{}
-	pushPipelineWebsocketHandler interface{}
+	websocketHandler             http.Handler
+	pushWebsocketHandler         http.Handler
+	pushPipelineWebsocketHandler http.Handler
 
 	// Full channel handler
 	channels   map[string]models.ChannelHandler

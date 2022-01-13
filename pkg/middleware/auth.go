@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/grafana/grafana/pkg/api/response"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/middleware/cookies"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -80,7 +82,7 @@ func EnsureEditorOrViewerCanEdit(c *models.ReqContext) {
 }
 
 func RoleAuth(roles ...models.RoleType) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		ok := false
 		for _, role := range roles {
 			if role == c.OrgRole {
@@ -91,11 +93,12 @@ func RoleAuth(roles ...models.RoleType) web.Handler {
 		if !ok {
 			accessForbidden(c)
 		}
-	}
+		return nil
+	})
 }
 
 func Auth(options *AuthOptions) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		forceLogin := false
 		if c.AllowAnonymous {
 			forceLogin = shouldForceLogin(c)
@@ -114,18 +117,19 @@ func Auth(options *AuthOptions) web.Handler {
 			var revokedErr *models.TokenRevokedError
 			if errors.As(c.LookupTokenErr, &revokedErr) {
 				tokenRevoked(c, revokedErr)
-				return
+				return nil
 			}
 
 			notAuthorized(c)
-			return
+			return nil
 		}
 
 		if !c.IsGrafanaAdmin && options.ReqGrafanaAdmin {
 			accessForbidden(c)
-			return
+			return nil
 		}
-	}
+		return nil
+	})
 }
 
 // AdminOrFeatureEnabled creates a middleware that allows access
@@ -134,30 +138,32 @@ func Auth(options *AuthOptions) web.Handler {
 // Intended for when feature flags open up access to APIs that
 // are otherwise only available to admins.
 func AdminOrFeatureEnabled(enabled bool) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		if c.OrgRole == models.ROLE_ADMIN {
-			return
+			return nil
 		}
 
 		if !enabled {
 			accessForbidden(c)
 		}
-	}
+		return nil
+	})
 }
 
 // SnapshotPublicModeOrSignedIn creates a middleware that allows access
 // if snapshot public mode is enabled or if user is signed in.
 func SnapshotPublicModeOrSignedIn(cfg *setting.Cfg) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		if cfg.SnapshotPublicMode {
-			return
+			return nil
 		}
 
 		if !c.IsSignedIn {
 			notAuthorized(c)
-			return
+			return nil
 		}
-	}
+		return nil
+	})
 }
 
 func ReqNotSignedIn(c *models.ReqContext) {
@@ -169,12 +175,13 @@ func ReqNotSignedIn(c *models.ReqContext) {
 // NoAuth creates a middleware that doesn't require any authentication.
 // If forceLogin param is set it will redirect the user to the login page.
 func NoAuth() web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		if shouldForceLogin(c) {
 			notAuthorized(c)
-			return
+			return nil
 		}
-	}
+		return nil
+	})
 }
 
 // shouldForceLogin checks if user should be enforced to login.

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/api/response"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/models"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 
@@ -252,7 +253,7 @@ func Instrument(
 ) web.Handler {
 	normalizedPath := MakeLabelValue(path)
 
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		start := time.Now()
 		var res response.Response
 		val, err := c.Invoke(action)
@@ -279,7 +280,8 @@ func Instrument(
 		}
 		res.WriteTo(c)
 		metrics.RequestDuration.With(ls).Observe(time.Since(start).Seconds())
-	}
+		return nil
+	})
 }
 
 var invalidChars = regexp.MustCompile(`[^a-zA-Z0-9]+`)

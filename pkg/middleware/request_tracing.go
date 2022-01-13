@@ -38,7 +38,7 @@ func RouteOperationNameFromContext(ctx context.Context) (string, bool) {
 }
 
 func RequestTracing() web.Handler {
-	return func(res http.ResponseWriter, req *http.Request) {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		c := web.FromContext(req.Context())
 		if strings.HasPrefix(c.Req.URL.Path, "/public/") ||
 			c.Req.URL.Path == "robots.txt" {
@@ -73,5 +73,5 @@ func RequestTracing() web.Handler {
 		if status >= 400 {
 			ext.Error.Set(span, true)
 		}
-	}
+	})
 }

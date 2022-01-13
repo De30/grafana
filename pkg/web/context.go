@@ -51,7 +51,7 @@ func (ctx *Context) handler() Handler {
 		return ctx.handlers[ctx.index]
 	}
 	if ctx.index == len(ctx.handlers) {
-		return func() {}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	}
 	panic("invalid index for context handler")
 }

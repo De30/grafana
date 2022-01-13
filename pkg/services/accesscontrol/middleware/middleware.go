@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/grafana/grafana/pkg/api/response"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -33,9 +35,10 @@ func Middleware(ac accesscontrol.AccessControl) func(web.Handler, accesscontrol.
 			return fallback
 		}
 
-		return func(c *models.ReqContext) {
+		return wrap.Wrap(func(c *models.ReqContext) response.Response {
 			authorize(c, ac, c.SignedInUser, evaluator)
-		}
+			return nil
+		})
 	}
 }
 
@@ -96,13 +99,13 @@ func AuthorizeInOrgMiddleware(ac accesscontrol.AccessControl, db *sqlstore.SQLSt
 			return fallback
 		}
 
-		return func(c *models.ReqContext) {
+		return wrap.Wrap(func(c *models.ReqContext) response.Response {
 			// using a copy of the user not to modify the signedInUser, yet perform the permission evaluation in another org
 			userCopy := *(c.SignedInUser)
 			orgID, err := getTargetOrg(c)
 			if err != nil {
 				Deny(c, nil, fmt.Errorf("failed to get target org: %w", err))
-				return
+				return nil
 			}
 			if orgID == accesscontrol.GlobalOrgID {
 				userCopy.OrgId = orgID
@@ -112,7 +115,7 @@ func AuthorizeInOrgMiddleware(ac accesscontrol.AccessControl, db *sqlstore.SQLSt
 				query := models.GetSignedInUserQuery{UserId: c.UserId, OrgId: orgID}
 				if err := db.GetSignedInUserWithCacheCtx(c.Req.Context(), &query); err != nil {
 					Deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
-					return
+					return nil
 				}
 				userCopy.OrgId = query.Result.OrgId
 				userCopy.OrgName = query.Result.OrgName
@@ -120,7 +123,8 @@ func AuthorizeInOrgMiddleware(ac accesscontrol.AccessControl, db *sqlstore.SQLSt
 			}
 
 			authorize(c, ac, &userCopy, evaluator)
-		}
+			return nil
+		})
 	}
 }
 
@@ -140,29 +144,30 @@ func UseGlobalOrg(c *models.ReqContext) (int64, error) {
 
 // Disable returns http 404 if shouldDisable is set to true
 func Disable(shouldDisable bool) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		if shouldDisable {
 			c.Resp.WriteHeader(http.StatusNotFound)
-			return
 		}
-	}
+		return nil
+	})
 }
 
 func LoadPermissionsMiddleware(ac accesscontrol.AccessControl) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		if ac.IsDisabled() {
-			return
+			return nil
 		}
 
 		permissions, err := ac.GetUserPermissions(c.Req.Context(), c.SignedInUser)
 		if err != nil {
 			c.JsonApiErr(http.StatusForbidden, "", err)
-			return
+			return nil
 		}
 
 		if c.SignedInUser.Permissions == nil {
 			c.SignedInUser.Permissions = make(map[int64]map[string][]string)
 		}
 		c.SignedInUser.Permissions[c.OrgId] = accesscontrol.GroupScopesByAction(permissions)
-	}
+		return nil
+	})
 }

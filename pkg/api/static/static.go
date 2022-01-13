@@ -115,12 +115,12 @@ func prepareStaticOptions(dir string, options []StaticOptions) StaticOptions {
 	return prepareStaticOption(dir, opt)
 }
 
-func staticHandler(ctx *web.Context, log log.Logger, opt StaticOptions) bool {
-	if ctx.Req.Method != "GET" && ctx.Req.Method != "HEAD" {
+func staticHandler(res http.ResponseWriter, req *http.Request, log log.Logger, opt StaticOptions) bool {
+	if req.Method != "GET" && req.Method != "HEAD" {
 		return false
 	}
 
-	file := ctx.Req.URL.Path
+	file := req.URL.Path
 	// if we have a prefix, filter requests by stripping the prefix
 	if opt.Prefix != "" {
 		if !strings.HasPrefix(file, opt.Prefix) {
@@ -150,8 +150,8 @@ func staticHandler(ctx *web.Context, log log.Logger, opt StaticOptions) bool {
 	// Try to serve index file
 	if fi.IsDir() {
 		// Redirect if missing trailing slash.
-		if !strings.HasSuffix(ctx.Req.URL.Path, "/") {
-			path := fmt.Sprintf("%s/", ctx.Req.URL.Path)
+		if !strings.HasSuffix(req.URL.Path, "/") {
+			path := fmt.Sprintf("%s/", req.URL.Path)
 			if !strings.HasPrefix(path, "/") {
 				// Disambiguate that it's a path relative to this server
 				path = fmt.Sprintf("/%s", path)
@@ -160,7 +160,7 @@ func staticHandler(ctx *web.Context, log log.Logger, opt StaticOptions) bool {
 				rePrefix := regexp.MustCompile(`^(?:/\\|/+)`)
 				path = rePrefix.ReplaceAllString(path, "/")
 			}
-			http.Redirect(ctx.Resp, ctx.Req, path, http.StatusFound)
+			http.Redirect(res, req, path, http.StatusFound)
 			return true
 		}
 
@@ -187,10 +187,10 @@ func staticHandler(ctx *web.Context, log log.Logger, opt StaticOptions) bool {
 
 	// Add an Expires header to the static content
 	if opt.AddHeaders != nil {
-		opt.AddHeaders(ctx)
+		opt.AddHeaders(web.FromContext(req.Context()))
 	}
 
-	http.ServeContent(ctx.Resp, ctx.Req, file, fi.ModTime(), f)
+	http.ServeContent(res, req, file, fi.ModTime(), f)
 	return true
 }
 
@@ -199,7 +199,7 @@ func Static(directory string, staticOpt ...StaticOptions) web.Handler {
 	opt := prepareStaticOptions(directory, staticOpt)
 
 	logger := log.New("static")
-	return func(ctx *web.Context) {
-		staticHandler(ctx, logger, opt)
-	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		staticHandler(w, r, logger, opt)
+	})
 }

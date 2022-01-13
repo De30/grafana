@@ -3,16 +3,18 @@ package middleware
 import (
 	"strings"
 
+	"github.com/grafana/grafana/pkg/api/response"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
 
 func ValidateHostHeader(cfg *setting.Cfg) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.Wrap(func(c *models.ReqContext) response.Response {
 		// ignore local render calls
 		if c.IsRenderCall {
-			return
+			return nil
 		}
 
 		h := c.Req.Host
@@ -22,7 +24,8 @@ func ValidateHostHeader(cfg *setting.Cfg) web.Handler {
 
 		if !strings.EqualFold(h, cfg.Domain) {
 			c.Redirect(strings.TrimSuffix(cfg.AppURL, "/")+c.Req.RequestURI, 301)
-			return
+			return nil
 		}
-	}
+		return nil
+	})
 }

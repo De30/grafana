@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/api/pluginproxy"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
@@ -60,11 +61,11 @@ func (hs *HTTPServer) initAppPluginRoutes(r *web.Mux) {
 }
 
 func AppPluginRoute(route *plugins.Route, appID string, hs *HTTPServer) web.Handler {
-	return func(c *models.ReqContext) {
+	return wrap.WrapNoResponse(func(c *models.ReqContext) {
 		path := web.Params(c.Req)["*"]
 
 		proxy := pluginproxy.NewApiPluginProxy(c, path, route, appID, hs.Cfg, hs.SecretsService)
 		proxy.Transport = pluginProxyTransport
 		proxy.ServeHTTP(c.Resp, c.Req)
-	}
+	})
 }

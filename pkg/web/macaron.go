@@ -45,7 +45,7 @@ func Version() string {
 // Handler can be any callable function.
 // Macaron attempts to inject services into the handler's argument list,
 // and panics if an argument could not be fulfilled via dependency injection.
-type Handler interface{}
+type Handler = http.Handler
 
 // handlerFuncInvoker is an inject.FastInvoker wrapper of func(http.ResponseWriter, *http.Request).
 type handlerFuncInvoker func(http.ResponseWriter, *http.Request)
@@ -59,18 +59,18 @@ func (invoke handlerFuncInvoker) Invoke(params []interface{}) ([]reflect.Value, 
 // When the handler is also potential to be any built-in inject.FastInvoker,
 // it wraps the handler automatically to have some performance gain.
 func validateAndWrapHandler(h Handler) Handler {
-	if reflect.TypeOf(h).Kind() != reflect.Func {
-		panic("Macaron handler must be a callable function")
-	}
+	// if reflect.TypeOf(h).Kind() != reflect.Func {
+	// 	panic("Macaron handler must be a callable function")
+	// }
 
-	if !IsFastInvoker(h) {
-		switch v := h.(type) {
-		case func(*Context):
-			return ContextInvoker(v)
-		case func(http.ResponseWriter, *http.Request):
-			return handlerFuncInvoker(v)
-		}
-	}
+	// if !IsFastInvoker(h) {
+	// 	switch v := h.(type) {
+	// 	case func(*Context):
+	// 		return ContextInvoker(v)
+	// 	case func(http.ResponseWriter, *http.Request):
+	// 		return handlerFuncInvoker(v)
+	// 	}
+	// }
 	return h
 }
 
@@ -99,7 +99,7 @@ type Macaron struct {
 func New() *Macaron {
 	m := &Macaron{Router: NewRouter()}
 	m.Router.m = m
-	m.NotFound(http.NotFound)
+	m.NotFound(http.HandlerFunc(http.NotFound))
 	return m
 }
 

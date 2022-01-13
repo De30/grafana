@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/api/routing/wrap"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/web"
@@ -13,13 +14,13 @@ import (
 
 func (l *LibraryElementService) registerAPIEndpoints() {
 	l.RouteRegister.Group("/api/library-elements", func(entities routing.RouteRegister) {
-		entities.Post("/", middleware.ReqSignedIn, routing.Wrap(l.createHandler))
-		entities.Delete("/:uid", middleware.ReqSignedIn, routing.Wrap(l.deleteHandler))
-		entities.Get("/", middleware.ReqSignedIn, routing.Wrap(l.getAllHandler))
-		entities.Get("/:uid", middleware.ReqSignedIn, routing.Wrap(l.getHandler))
-		entities.Get("/:uid/connections/", middleware.ReqSignedIn, routing.Wrap(l.getConnectionsHandler))
-		entities.Get("/name/:name", middleware.ReqSignedIn, routing.Wrap(l.getByNameHandler))
-		entities.Patch("/:uid", middleware.ReqSignedIn, routing.Wrap(l.patchHandler))
+		entities.Post("/", middleware.ReqSignedIn, wrap.Wrap(l.createHandler))
+		entities.Delete("/:uid", middleware.ReqSignedIn, wrap.Wrap(l.deleteHandler))
+		entities.Get("/", middleware.ReqSignedIn, wrap.Wrap(l.getAllHandler))
+		entities.Get("/:uid", middleware.ReqSignedIn, wrap.Wrap(l.getHandler))
+		entities.Get("/:uid/connections/", middleware.ReqSignedIn, wrap.Wrap(l.getConnectionsHandler))
+		entities.Get("/name/:name", middleware.ReqSignedIn, wrap.Wrap(l.getByNameHandler))
+		entities.Patch("/:uid", middleware.ReqSignedIn, wrap.Wrap(l.patchHandler))
 	})
 }
 

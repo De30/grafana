@@ -143,6 +143,7 @@ func (hs *HTTPServer) LoginView(c *models.ReqContext) {
 	}
 
 	c.HTML(200, getViewIndex(), viewData)
+	return
 }
 
 func (hs *HTTPServer) tryOAuthAutoLogin(c *models.ReqContext) bool {
@@ -283,10 +284,10 @@ func (hs *HTTPServer) loginUserWithUser(user *models.User, c *models.ReqContext)
 	return nil
 }
 
-func (hs *HTTPServer) Logout(c *models.ReqContext) {
+func (hs *HTTPServer) Logout(c *models.ReqContext) response.Response {
 	if hs.samlSingleLogoutEnabled() {
 		c.Redirect(hs.Cfg.AppSubURL + "/logout/saml")
-		return
+		return nil
 	}
 
 	err := hs.AuthTokenService.RevokeToken(c.Req.Context(), c.UserToken, false)
@@ -302,6 +303,7 @@ func (hs *HTTPServer) Logout(c *models.ReqContext) {
 		hs.log.Info("Successful Logout", "User", c.Email)
 		c.Redirect(hs.Cfg.AppSubURL + "/login")
 	}
+	return nil
 }
 
 func (hs *HTTPServer) tryGetEncryptedCookie(ctx *models.ReqContext, cookieName string) (string, bool) {
