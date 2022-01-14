@@ -173,7 +173,7 @@ func (srv *CleanUpService) expireOldUserInvites(ctx context.Context) {
 
 func (srv *CleanUpService) deleteStaleShortURLs(ctx context.Context) {
 	cmd := models.DeleteShortUrlCommand{
-		OlderThan: time.Now().Add(-time.Hour * 24 * 7),
+		OlderThan: time.Now().Add(-time.Hour * 24 * 30),
 	}
 	if err := srv.ShortURLService.DeleteStaleShortURLs(ctx, &cmd); err != nil {
 		srv.log.Error("Problem deleting stale short urls", "error", err.Error())
