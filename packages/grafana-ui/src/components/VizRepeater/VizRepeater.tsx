@@ -37,6 +37,7 @@ export interface VizRepeaterRenderValueProps<V, D = {}> {
    * Total number of values being shown in repeater
    */
   count: number;
+  index: number;
 }
 
 interface DefaultProps {
@@ -122,6 +123,7 @@ export class VizRepeater<V, D = {}> extends PureComponent<Props<V, D>, State<V>>
             alignmentFactors,
             orientation,
             count: values.length,
+            index: i,
           })}
         </div>
       );
@@ -193,6 +195,7 @@ export class VizRepeater<V, D = {}> extends PureComponent<Props<V, D>, State<V>>
                 alignmentFactors,
                 orientation: resolvedOrientation,
                 count: values.length,
+                index,
               })}
             </div>
           );

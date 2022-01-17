@@ -83,7 +83,7 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<{ sync: DashboardCursor
     builder.addAxis({
       scaleKey: xScaleKey,
       isTime: true,
-      placement: AxisPlacement.Bottom,
+      placement: xField.config.custom?.axisHidden ? AxisPlacement.Hidden : AxisPlacement.Bottom,
       label: xField.config.custom?.axisLabel,
       timeZone,
       theme,

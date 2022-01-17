@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { VizRepeater, TimeSeries, VizLegendOptions, LegendDisplayMode, VizRepeaterRenderValueProps } from '@grafana/ui';
-import { DataFrame, PanelProps, VizOrientation } from '@grafana/data';
+import { DataFrame, FieldType, PanelProps, VizOrientation } from '@grafana/data';
 
 import { config } from 'app/core/config';
 import { MultiChartOptions } from './types';
@@ -22,7 +22,14 @@ export function MultiChart(props: PanelProps<MultiChartOptions>) {
     return <PanelDataErrorView panelId={id} data={data} needsTimeField={true} needsNumberField={true} />;
   }
 
-  const renderChart = ({ width, height, value }: VizRepeaterRenderValueProps<DataFrame, any>) => {
+  const renderChart = ({ width, height, value, count, index }: VizRepeaterRenderValueProps<DataFrame, any>) => {
+    for (const field of value.fields) {
+      if (field.type === FieldType.time && count !== index + 1) {
+        field.config.custom = field.config.custom ?? {};
+        field.config.custom.axisHidden = true;
+      }
+    }
+
     return (
       <TimeSeries
         frames={[value]}
