@@ -2,7 +2,7 @@ import {
   AbsoluteTimeRange,
   DataSourceApi,
   EventBusExtended,
-  ExploreUrlState,
+  ExplorePaneURLState,
   getDefaultTimeRange,
   HistoryItem,
   LoadingState,
@@ -101,13 +101,13 @@ export async function loadAndInitDatasource(
   return { history, instance };
 }
 
-export function getUrlStateFromPaneState(pane: ExploreItemState): ExploreUrlState {
+export function getPaneUrlStateFromPaneState(pane: ExploreItemState): ExplorePaneURLState {
   return {
     // datasourceInstance should not be undefined anymore here but in case there is some path for it to be undefined
     // lets just fallback instead of crashing.
     datasource: pane.datasourceInstance?.name || '',
     queries: pane.queries.map(clearQueryKeys),
-    range: toRawTimeRange(pane.range),
+    ...toRawTimeRange(pane.range),
   };
 }
 

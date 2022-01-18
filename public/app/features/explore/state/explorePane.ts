@@ -4,7 +4,7 @@ import { isEqual } from 'lodash';
 import {
   DEFAULT_RANGE,
   getQueryKeys,
-  parseUrlState,
+  parsePaneUrlState,
   ensureQueries,
   generateNewKeyAndAddRefIdIfMissing,
   getTimeRangeFromUrl,
@@ -18,11 +18,11 @@ import {
   makeExplorePaneState,
   loadAndInitDatasource,
   createEmptyQueryResponse,
-  getUrlStateFromPaneState,
+  getPaneUrlStateFromPaneState,
   storeGraphStyle,
 } from './utils';
 import { createAction, PayloadAction } from '@reduxjs/toolkit';
-import { EventBusExtended, DataQuery, ExploreUrlState, TimeRange, HistoryItem, DataSourceApi } from '@grafana/data';
+import { EventBusExtended, DataQuery, TimeRange, HistoryItem, DataSourceApi, ExplorePaneURLState } from '@grafana/data';
 // Types
 import { ThunkResult } from 'app/types';
 import { getFiscalYearStartMonth, getTimeZone } from 'app/features/profile/state/selectors';
@@ -154,12 +154,19 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
     }
 
     // Get diff of what should be updated
-    const newUrlState = parseUrlState(newUrlQuery);
-    const update = urlDiff(newUrlState, getUrlStateFromPaneState(itemState));
+    const newPaneUrlState = parsePaneUrlState(newUrlQuery);
+    const update = urlDiff(newPaneUrlState, getPaneUrlStateFromPaneState(itemState));
 
     const { containerWidth, eventBridge } = itemState;
 
-    const { datasource, queries, range: urlRange, originPanelId } = newUrlState;
+    const {
+      datasource,
+      queries,
+      from,
+      to,
+      // TODO: check this
+      // originPanelId
+    } = newPaneUrlState;
     const refreshQueries: DataQuery[] = [];
 
     for (let index = 0; index < queries.length; index++) {
@@ -169,20 +176,29 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
 
     const timeZone = getTimeZone(getState().user);
     const fiscalYearStartMonth = getFiscalYearStartMonth(getState().user);
-    const range = getTimeRangeFromUrl(urlRange, timeZone, fiscalYearStartMonth);
+    const range = getTimeRangeFromUrl({ from, to }, timeZone, fiscalYearStartMonth);
 
     // commit changes based on the diff of new url vs old url
 
     if (update.datasource) {
       const initialQueries = ensureQueries(queries);
       await dispatch(
-        initializeExplore(exploreId, datasource, initialQueries, range, containerWidth, eventBridge, originPanelId)
+        initializeExplore(
+          exploreId,
+          datasource,
+          initialQueries,
+          range,
+          containerWidth,
+          eventBridge
+          // TODO: check this
+          // originPanelId
+        )
       );
       return;
     }
 
-    if (update.range) {
-      dispatch(updateTime({ exploreId, rawRange: range.raw }));
+    if (update.from || update.to) {
+      dispatch(updateTime({ exploreId, rawRange: { from, to } }));
     }
 
     if (update.queries) {
@@ -190,7 +206,7 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
     }
 
     // always run queries when refresh is needed
-    if (update.queries || update.range) {
+    if (update.queries || update.from || update.to) {
       dispatch(runQueries(exploreId));
     }
   };
@@ -247,21 +263,24 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
  * Compare 2 explore urls and return a map of what changed. Used to update the local state with all the
  * side effects needed.
  */
-export const urlDiff = (
-  oldUrlState: ExploreUrlState | undefined,
-  currentUrlState: ExploreUrlState | undefined
+const urlDiff = (
+  oldUrlState: ExplorePaneURLState | undefined,
+  currentUrlState: ExplorePaneURLState | undefined
 ): {
   datasource: boolean;
   queries: boolean;
-  range: boolean;
+  from: boolean;
+  to: boolean;
 } => {
   const datasource = !isEqual(currentUrlState?.datasource, oldUrlState?.datasource);
   const queries = !isEqual(currentUrlState?.queries, oldUrlState?.queries);
-  const range = !isEqual(currentUrlState?.range || DEFAULT_RANGE, oldUrlState?.range || DEFAULT_RANGE);
+  const from = !isEqual(currentUrlState?.from || DEFAULT_RANGE.from, oldUrlState?.from || DEFAULT_RANGE.from);
+  const to = !isEqual(currentUrlState?.to || DEFAULT_RANGE.to, oldUrlState?.to || DEFAULT_RANGE.to);
 
   return {
     datasource,
     queries,
-    range,
+    from,
+    to,
   };
 };

@@ -67,11 +67,15 @@ export function mapInternalLinkToExplore(options: LinkToExploreOptions): LinkMod
  */
 function generateInternalHref<T extends DataQuery = any>(datasourceName: string, query: T, range: TimeRange): string {
   return locationUtil.assureBaseUrl(
-    `/explore?left=${encodeURIComponent(
+    `/explore?state=${encodeURIComponent(
       serializeStateToUrlParam({
-        range: range.raw,
-        datasource: datasourceName,
-        queries: [query],
+        schemaVersion: 1,
+        left: {
+          from: range.raw.from,
+          to: range.raw.to,
+          datasource: datasourceName,
+          queries: [query],
+        },
       })
     )}`
   );

@@ -2,7 +2,7 @@
  * @preserve jquery-param (c) 2015 KNOWLEDGECODE | MIT
  */
 
-import { ExploreUrlState } from '../types/explore';
+import { ExploreURLState } from '../types/explore';
 
 /**
  * Type to represent the value of a single query variable.
@@ -195,9 +195,6 @@ export const urlUtil = {
   parseKeyValue,
 };
 
-export function serializeStateToUrlParam(urlState: ExploreUrlState, compact?: boolean): string {
-  if (compact) {
-    return JSON.stringify([urlState.range.from, urlState.range.to, urlState.datasource, ...urlState.queries]);
-  }
+export function serializeStateToUrlParam(urlState: ExploreURLState): string {
   return JSON.stringify(urlState);
 }

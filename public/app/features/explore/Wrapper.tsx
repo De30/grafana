@@ -43,7 +43,9 @@ class WrapperUnconnected extends PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    const { left, right } = this.props.queryParams;
+    const { state } = this.props.queryParams;
+    const { left, right } = JSON.parse(state || '{}');
+
     const hasSplit = Boolean(left) && Boolean(right);
     const datasourceTitle = hasSplit
       ? `${this.props.exploreState.left.datasourceInstance?.name} | ${this.props.exploreState.right?.datasourceInstance?.name}`
@@ -53,18 +55,20 @@ class WrapperUnconnected extends PureComponent<Props> {
   }
 
   render() {
-    const { left, right } = this.props.queryParams;
+    const { state } = this.props.queryParams;
+    const { left, right } = JSON.parse(state || '{}');
+
     const hasSplit = Boolean(left) && Boolean(right);
 
     return (
       <div className="page-scrollbar-wrapper">
         <div className="explore-wrapper">
           <ErrorBoundaryAlert style="page">
-            <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={left} />
+            <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={JSON.stringify(left)} />
           </ErrorBoundaryAlert>
           {hasSplit && (
             <ErrorBoundaryAlert style="page">
-              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlQuery={right} />
+              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlQuery={JSON.stringify(right)} />
             </ErrorBoundaryAlert>
           )}
         </div>

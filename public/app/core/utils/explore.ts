@@ -10,6 +10,7 @@ import {
   dateMath,
   DateTime,
   DefaultTimeZone,
+  ExplorePaneURLState,
   ExploreUrlState,
   HistoryItem,
   IntervalValues,
@@ -216,7 +217,7 @@ export const toGraphStyle = (data: unknown): ExploreGraphStyle => {
   return found ?? DEFAULT_GRAPH_STYLE;
 };
 
-export function parseUrlState(initial: string | undefined): ExploreUrlState {
+export function parsePaneUrlState(initial: string | undefined): ExplorePaneURLState {
   const parsed = safeParseJson(initial);
   const errorResult: any = {
     datasource: null,
@@ -247,8 +248,15 @@ export function parseUrlState(initial: string | undefined): ExploreUrlState {
   const parsedSegments = parsed.slice(ParseUrlStateIndex.SegmentsStart);
   const queries = parsedSegments.filter((segment) => !isSegment(segment, 'ui', 'originPanelId', 'mode'));
 
-  const originPanelId = parsedSegments.filter((segment) => isSegment(segment, 'originPanelId'))[0];
-  return { datasource, queries, range, originPanelId };
+  // const originPanelId = parsedSegments.filter((segment) => isSegment(segment, 'originPanelId'))[0];
+  return {
+    datasource,
+    queries,
+    from: range.from,
+    to: range.to,
+    // TODO: check this
+    // originPanelId,
+  };
 }
 
 export function generateKey(index = 0): string {

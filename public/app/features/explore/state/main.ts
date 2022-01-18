@@ -1,11 +1,11 @@
 import { AnyAction } from 'redux';
 import { DataSourceSrv, getDataSourceSrv, locationService } from '@grafana/runtime';
-import { DataQuery, ExploreUrlState, serializeStateToUrlParam, TimeRange, UrlQueryMap } from '@grafana/data';
+import { DataQuery, ExplorePaneURLState, serializeStateToUrlParam, TimeRange, UrlQueryMap } from '@grafana/data';
 import { GetExploreUrlArguments, stopQueryState } from 'app/core/utils/explore';
 import { ExploreId, ExploreItemState, ExploreState } from 'app/types/explore';
 import { paneReducer } from './explorePane';
 import { createAction } from '@reduxjs/toolkit';
-import { getUrlStateFromPaneState, makeExplorePaneState } from './utils';
+import { getPaneUrlStateFromPaneState, makeExplorePaneState } from './utils';
 import { ThunkResult } from '../../../types';
 import { TimeSrv } from '../../dashboard/services/TimeSrv';
 import { PanelModel } from 'app/features/dashboard/state';
@@ -59,23 +59,28 @@ export const cleanupPaneAction = createAction<CleanupPanePayload>('explore/clean
  * Not all of the redux state is reflected in URL though.
  */
 export const stateSave = (options?: { replace?: boolean }): ThunkResult<void> => {
-  return (dispatch, getState) => {
+  return (_, getState) => {
     const { left, right } = getState().explore;
     const orgId = getState().user.orgId.toString();
     const urlStates: { [index: string]: string | null } = { orgId };
 
-    urlStates.left = serializeStateToUrlParam(getUrlStateFromPaneState(left), true);
+    urlStates.left = JSON.stringify(getPaneUrlStateFromPaneState(left));
 
     if (right) {
-      urlStates.right = serializeStateToUrlParam(getUrlStateFromPaneState(right), true);
+      urlStates.right = JSON.stringify(getPaneUrlStateFromPaneState(right));
     } else {
       urlStates.right = null;
     }
 
     lastSavedUrl.right = urlStates.right;
     lastSavedUrl.left = urlStates.left;
+    const exploreURLState = serializeStateToUrlParam({
+      schemaVersion: 1,
+      left: getPaneUrlStateFromPaneState(left),
+      ...(right && { right: getPaneUrlStateFromPaneState(right) }),
+    });
 
-    locationService.partial({ ...urlStates }, options?.replace);
+    locationService.partial({ state: exploreURLState, orgId }, options?.replace);
   };
 };
 
@@ -93,22 +98,27 @@ export function splitOpen<T extends DataQuery = any>(options?: {
   // Don't use right now. It's used for Traces to Logs interaction but is hacky in how the range is actually handled.
   range?: TimeRange;
 }): ThunkResult<void> {
-  return async (dispatch, getState) => {
+  return async (_, getState) => {
     const leftState: ExploreItemState = getState().explore[ExploreId.left];
-    const leftUrlState = getUrlStateFromPaneState(leftState);
-    let rightUrlState: ExploreUrlState = leftUrlState;
+    const leftUrlState = getPaneUrlStateFromPaneState(leftState);
+    const rightUrlState: ExplorePaneURLState = leftUrlState;
 
-    if (options) {
-      const datasourceName = getDataSourceSrv().getInstanceSettings(options.datasourceUid)?.name || '';
-      rightUrlState = {
-        datasource: datasourceName,
-        queries: [options.query],
-        range: options.range || leftState.range,
-      };
+    if (options?.datasourceUid) {
+      rightUrlState.datasource = getDataSourceSrv().getInstanceSettings(options.datasourceUid)?.name || '';
     }
 
-    const urlState = serializeStateToUrlParam(rightUrlState, true);
-    locationService.partial({ right: urlState }, true);
+    if (options?.query) {
+      rightUrlState.queries = [options.query];
+    }
+
+    if (options?.range) {
+      rightUrlState.from = options.range.from;
+      rightUrlState.to = options.range.to;
+    }
+
+    const urlState = serializeStateToUrlParam({ schemaVersion: 1, left: leftUrlState, right: rightUrlState });
+    // TODO: check if this is correct
+    locationService.partial({ state: urlState });
   };
 }
 
@@ -172,7 +182,7 @@ export const initialExploreState: ExploreState = {
  */
 export const exploreReducer = (state = initialExploreState, action: AnyAction): ExploreState => {
   if (splitCloseAction.match(action)) {
-    const { itemId } = action.payload as SplitCloseActionPayload;
+    const { itemId } = action.payload;
     const targetSplit = {
       left: itemId === ExploreId.left ? state.right! : state.left,
       right: undefined,
@@ -184,7 +194,7 @@ export const exploreReducer = (state = initialExploreState, action: AnyAction): 
   }
 
   if (cleanupPaneAction.match(action)) {
-    const { exploreId } = action.payload as CleanupPanePayload;
+    const { exploreId } = action.payload;
 
     // We want to do this only when we remove single pane not when we are unmounting whole explore.
     // It needs to be checked like this because in component we don't get new path (which would tell us if we are

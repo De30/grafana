@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import { DataQuery, ExploreUrlState, EventBusExtended, EventBusSrv } from '@grafana/data';
+import { DataQuery, EventBusExtended, EventBusSrv } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import store from 'app/core/store';
 import { lastSavedUrl, cleanupPaneAction } from './state/main';
@@ -14,7 +14,7 @@ import {
   getTimeRange,
   getTimeRangeFromUrl,
   lastUsedDatasourceKeyForOrgId,
-  parseUrlState,
+  parsePaneUrlState,
 } from 'app/core/utils/explore';
 import { getFiscalYearStartMonth, getTimeZone } from '../profile/state/selectors';
 import Explore from './Explore';
@@ -44,7 +44,15 @@ class ExplorePaneContainerUnconnected extends React.PureComponent<Props> {
   }
 
   componentDidMount() {
-    const { initialized, exploreId, initialDatasource, initialQueries, initialRange, originPanelId } = this.props;
+    const {
+      initialized,
+      exploreId,
+      initialDatasource,
+      initialQueries,
+      initialRange,
+      // TODO: check this
+      // originPanelId
+    } = this.props;
     const width = this.el?.offsetWidth ?? 0;
 
     // initialize the whole explore first time we mount and if browser history contains a change in datasource
@@ -55,8 +63,9 @@ class ExplorePaneContainerUnconnected extends React.PureComponent<Props> {
         initialQueries,
         initialRange,
         width,
-        this.exploreEvents,
-        originPanelId
+        this.exploreEvents
+        // TODO: check this
+        // originPanelId
       );
     }
   }
@@ -97,23 +106,32 @@ const ensureQueriesMemoized = memoizeOne(ensureQueries);
 const getTimeRangeFromUrlMemoized = memoizeOne(getTimeRangeFromUrl);
 
 function mapStateToProps(state: StoreState, props: OwnProps) {
-  const urlState = parseUrlState(props.urlQuery);
+  const paneUrlState = parsePaneUrlState(props.urlQuery);
   const timeZone = getTimeZone(state.user);
   const fiscalYearStartMonth = getFiscalYearStartMonth(state.user);
 
-  const { datasource, queries, range: urlRange, originPanelId } = (urlState || {}) as ExploreUrlState;
+  const {
+    datasource,
+    queries,
+    from,
+    to,
+    // TODO: check this
+    //  originPanelId
+  } = paneUrlState;
   const initialDatasource = datasource || store.get(lastUsedDatasourceKeyForOrgId(state.user.orgId));
   const initialQueries: DataQuery[] = ensureQueriesMemoized(queries);
-  const initialRange = urlRange
-    ? getTimeRangeFromUrlMemoized(urlRange, timeZone, fiscalYearStartMonth)
-    : getTimeRange(timeZone, DEFAULT_RANGE, fiscalYearStartMonth);
+  const initialRange =
+    from && to
+      ? getTimeRangeFromUrlMemoized({ from, to }, timeZone, fiscalYearStartMonth)
+      : getTimeRange(timeZone, DEFAULT_RANGE, fiscalYearStartMonth);
 
   return {
     initialized: state.explore[props.exploreId]?.initialized,
     initialDatasource,
     initialQueries,
     initialRange,
-    originPanelId,
+    // TODO: check this
+    // originPanelId,
   };
 }
 

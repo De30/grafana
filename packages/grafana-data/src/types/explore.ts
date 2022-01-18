@@ -12,6 +12,19 @@ export interface ExploreUrlState<T extends DataQuery = AnyQuery> {
   context?: string;
 }
 
+export interface ExplorePaneURLState<T extends DataQuery = DataQuery> {
+  datasource: string;
+  queries: T[];
+  from: RawTimeRange['from'];
+  to: RawTimeRange['to'];
+}
+
+export interface ExploreURLState {
+  schemaVersion: number;
+  left: ExplorePaneURLState;
+  right?: ExplorePaneURLState;
+}
+
 /**
  * SplitOpen type is used in Explore and related components.
  */
