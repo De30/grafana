@@ -62,10 +62,10 @@ interface ChangePanelsState {
   panelsState: ExplorePanelsState;
 }
 const changePanelsStateAction = createAction<ChangePanelsState>('explore/changePanels');
-export function changePanelState<TPanel extends PreferredVisualisationType>(
+export function changePanelState(
   exploreId: ExploreId,
-  panel: TPanel,
-  panelState: ExplorePanelsState[TPanel]
+  panel: PreferredVisualisationType,
+  panelState: ExplorePanelsState[PreferredVisualisationType]
 ): ThunkResult<void> {
   return async (dispatch, getState) => {
     const exploreItem = getState().explore[exploreId];

@@ -2,7 +2,9 @@ import {
   DataFrame,
   DataFrameView,
   DataLink,
+  DataSourceApi,
   Field,
+  LinkModel,
   mapInternalLinkToExplore,
   SplitOpen,
   TraceSpanRow,
@@ -74,53 +76,18 @@ export function TraceView(props: Props) {
    */
   const [slim, setSlim] = useState(false);
 
-  const panelState = useSelector((state: StoreState) => state.explore[props.exploreId]?.panelsState.trace);
-  const dispatch = useDispatch();
-  const focusedSpanId = panelState?.spanId;
-  const setFocusedSpanId = (spanId?: string) =>
-    dispatch(
-      changePanelState(props.exploreId, 'trace', {
-        ...panelState,
-        spanId,
-      })
-    );
-
   const traceProp = useMemo(() => transformDataFrames(frame), [frame]);
   const { search, setSearch, spanFindMatches } = useSearch(traceProp?.spans);
-  const datasource = useSelector((state: StoreState) => state.explore[props.exploreId]?.datasourceInstance);
-  const query = useSelector((state: StoreState) =>
-    state.explore[props.exploreId]?.queries.find((query) => query.refId === frame.refId)
+
+  const datasource = useSelector(
+    (state: StoreState) => state.explore[props.exploreId]?.datasourceInstance ?? undefined
   );
-  const traceToLogsOptions = (getDatasourceSrv().getInstanceSettings(datasource?.name)?.jsonData as TraceToLogsData)
-    ?.tracesToLogs;
-  const timeZone = useSelector((state: StoreState) => getTimeZone(state.user));
 
-  const createFocusSpanLink = (traceId: string, spanId: string) => {
-    const link: DataLink = {
-      title: 'Deep link to this span',
-      url: '',
-      internal: {
-        datasourceUid: datasource?.uid!,
-        datasourceName: datasource?.name!,
-        query,
-        panelsState: {
-          trace: {
-            spanId,
-          },
-        },
-      },
-    };
-
-    return mapInternalLinkToExplore({
-      link,
-      internalLink: link.internal!,
-      scopedVars: {},
-      range: {} as any,
-      field: {} as Field,
-      onClickFn: () => setFocusedSpanId(focusedSpanId === spanId ? undefined : spanId),
-      replaceVariables: getTemplateSrv().replace.bind(getTemplateSrv()),
-    });
-  };
+  const [focusedSpanId, createFocusSpanLink] = useFocusSpanLink({
+    refId: frame.refId,
+    exploreId: props.exploreId,
+    datasource,
+  });
 
   const traceTimeline: TTraceTimeline = useMemo(
     () => ({
@@ -134,11 +101,14 @@ export function TraceView(props: Props) {
     [childrenHiddenIDs, detailStates, hoverIndentGuideIds, spanNameColumnWidth, traceProp?.traceID]
   );
 
+  const traceToLogsOptions = (getDatasourceSrv().getInstanceSettings(datasource?.name)?.jsonData as TraceToLogsData)
+    ?.tracesToLogs;
   const createSpanLink = useMemo(
     () => createSpanLinkFactory({ splitOpenFn: props.splitOpenFn, traceToLogsOptions, dataFrame: frame }),
     [props.splitOpenFn, traceToLogsOptions, frame]
   );
   const onSlimViewClicked = useCallback(() => setSlim(!slim), [slim]);
+  const timeZone = useSelector((state: StoreState) => getTimeZone(state.user));
 
   if (!props.dataFrames?.length || !traceProp) {
     return null;
@@ -250,4 +220,60 @@ function transformTraceDataFrame(frame: DataFrame): TraceResponse {
       };
     }),
   };
+}
+
+/**
+ * Handles focusing a span. Returns the span id to focus to based on what is in current explore state and also a
+ * function to change the focused span id.
+ * @param options
+ */
+function useFocusSpanLink(options: {
+  exploreId: ExploreId;
+  refId?: string;
+  datasource?: DataSourceApi;
+}): [string | undefined, (traceId: string, spanId: string) => LinkModel<Field>] {
+  const panelState = useSelector((state: StoreState) => state.explore[options.exploreId]?.panelsState.trace);
+  const focusedSpanId = panelState?.spanId;
+
+  const dispatch = useDispatch();
+  const setFocusedSpanId = (spanId?: string) =>
+    dispatch(
+      changePanelState(options.exploreId, 'trace', {
+        ...panelState,
+        spanId,
+      })
+    );
+
+  const query = useSelector((state: StoreState) =>
+    state.explore[options.exploreId]?.queries.find((query) => query.refId === options.refId)
+  );
+
+  const createFocusSpanLink = (traceId: string, spanId: string) => {
+    const link: DataLink = {
+      title: 'Deep link to this span',
+      url: '',
+      internal: {
+        datasourceUid: options.datasource?.uid!,
+        datasourceName: options.datasource?.name!,
+        query: query,
+        panelsState: {
+          trace: {
+            spanId,
+          },
+        },
+      },
+    };
+
+    return mapInternalLinkToExplore({
+      link,
+      internalLink: link.internal!,
+      scopedVars: {},
+      range: {} as any,
+      field: {} as Field,
+      onClickFn: () => setFocusedSpanId(focusedSpanId === spanId ? undefined : spanId),
+      replaceVariables: getTemplateSrv().replace.bind(getTemplateSrv()),
+    });
+  };
+
+  return [focusedSpanId, createFocusSpanLink];
 }
