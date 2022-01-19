@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux';
 import { DataSourceSrv, getDataSourceSrv, locationService } from '@grafana/runtime';
-import { DataQuery, ExplorePaneURLState, serializeStateToUrlParam, TimeRange, UrlQueryMap } from '@grafana/data';
+import { DataQuery, ExplorePaneURLState, serializeExploreStateToUrlParam, TimeRange, UrlQueryMap } from '@grafana/data';
 import { GetExploreUrlArguments, stopQueryState } from 'app/core/utils/explore';
 import { ExploreId, ExploreItemState, ExploreState } from 'app/types/explore';
 import { paneReducer } from './explorePane';
@@ -74,8 +74,7 @@ export const stateSave = (options?: { replace?: boolean }): ThunkResult<void> =>
 
     lastSavedUrl.right = urlStates.right;
     lastSavedUrl.left = urlStates.left;
-    const exploreURLState = serializeStateToUrlParam({
-      schemaVersion: 1,
+    const exploreURLState = serializeExploreStateToUrlParam({
       left: getPaneUrlStateFromPaneState(left),
       ...(right && { right: getPaneUrlStateFromPaneState(right) }),
     });
@@ -112,11 +111,10 @@ export function splitOpen<T extends DataQuery = any>(options?: {
     }
 
     if (options?.range) {
-      rightUrlState.from = options.range.from;
-      rightUrlState.to = options.range.to;
+      rightUrlState.range = options.range;
     }
 
-    const urlState = serializeStateToUrlParam({ schemaVersion: 1, left: leftUrlState, right: rightUrlState });
+    const urlState = serializeExploreStateToUrlParam({ left: leftUrlState, right: rightUrlState });
     // TODO: check if this is correct
     locationService.partial({ state: urlState });
   };

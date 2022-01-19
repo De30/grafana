@@ -21,7 +21,7 @@ export enum ExploreId {
 }
 
 export type ExploreQueryParams = {
-  state: string;
+  state?: string;
 };
 
 /**

@@ -4,7 +4,6 @@ import { isEqual } from 'lodash';
 import {
   DEFAULT_RANGE,
   getQueryKeys,
-  parsePaneUrlState,
   ensureQueries,
   generateNewKeyAndAddRefIdIfMissing,
   getTimeRangeFromUrl,
@@ -146,7 +145,7 @@ export function initializeExplore(
  * Reacts to changes in URL state that we need to sync back to our redux state. Computes diff of newUrlQuery vs current
  * state and runs update actions for relevant parts.
  */
-export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): ThunkResult<void> {
+export function refreshExplore(exploreId: ExploreId, newUrlState: ExplorePaneURLState): ThunkResult<void> {
   return async (dispatch, getState) => {
     const itemState = getState().explore[exploreId]!;
     if (!itemState.initialized) {
@@ -154,19 +153,17 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
     }
 
     // Get diff of what should be updated
-    const newPaneUrlState = parsePaneUrlState(newUrlQuery);
-    const update = urlDiff(newPaneUrlState, getPaneUrlStateFromPaneState(itemState));
+    const update = urlDiff(newUrlState, getPaneUrlStateFromPaneState(itemState));
 
     const { containerWidth, eventBridge } = itemState;
 
     const {
       datasource,
       queries,
-      from,
-      to,
+      range: urlRange,
       // TODO: check this
       // originPanelId
-    } = newPaneUrlState;
+    } = newUrlState;
     const refreshQueries: DataQuery[] = [];
 
     for (let index = 0; index < queries.length; index++) {
@@ -176,7 +173,7 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
 
     const timeZone = getTimeZone(getState().user);
     const fiscalYearStartMonth = getFiscalYearStartMonth(getState().user);
-    const range = getTimeRangeFromUrl({ from, to }, timeZone, fiscalYearStartMonth);
+    const range = getTimeRangeFromUrl(urlRange, timeZone, fiscalYearStartMonth);
 
     // commit changes based on the diff of new url vs old url
 
@@ -197,8 +194,8 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
       return;
     }
 
-    if (update.from || update.to) {
-      dispatch(updateTime({ exploreId, rawRange: { from, to } }));
+    if (update.range) {
+      dispatch(updateTime({ exploreId, rawRange: range.raw }));
     }
 
     if (update.queries) {
@@ -206,7 +203,7 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
     }
 
     // always run queries when refresh is needed
-    if (update.queries || update.from || update.to) {
+    if (update.queries || update.range) {
       dispatch(runQueries(exploreId));
     }
   };
@@ -269,18 +266,15 @@ const urlDiff = (
 ): {
   datasource: boolean;
   queries: boolean;
-  from: boolean;
-  to: boolean;
+  range: boolean;
 } => {
   const datasource = !isEqual(currentUrlState?.datasource, oldUrlState?.datasource);
   const queries = !isEqual(currentUrlState?.queries, oldUrlState?.queries);
-  const from = !isEqual(currentUrlState?.from || DEFAULT_RANGE.from, oldUrlState?.from || DEFAULT_RANGE.from);
-  const to = !isEqual(currentUrlState?.to || DEFAULT_RANGE.to, oldUrlState?.to || DEFAULT_RANGE.to);
+  const range = !isEqual(currentUrlState?.range || DEFAULT_RANGE, oldUrlState?.range || DEFAULT_RANGE);
 
   return {
     datasource,
     queries,
-    from,
-    to,
+    range,
   };
 };

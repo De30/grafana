@@ -107,7 +107,7 @@ export function getPaneUrlStateFromPaneState(pane: ExploreItemState): ExplorePan
     // lets just fallback instead of crashing.
     datasource: pane.datasourceInstance?.name || '',
     queries: pane.queries.map(clearQueryKeys),
-    ...toRawTimeRange(pane.range),
+    range: toRawTimeRange(pane.range),
   };
 }
 

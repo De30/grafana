@@ -2,7 +2,14 @@
 import { isEqual, omit } from 'lodash';
 
 // Services & Utils
-import { DataQuery, DataSourceApi, dateTimeFormat, urlUtil, ExploreURLState } from '@grafana/data';
+import {
+  DataQuery,
+  DataSourceApi,
+  dateTimeFormat,
+  urlUtil,
+  ExploreURLState,
+  serializeExploreStateToUrlParam,
+} from '@grafana/data';
 import store from 'app/core/store';
 import { dispatch } from 'app/store/store';
 import { notifyApp } from 'app/core/actions';
@@ -10,7 +17,6 @@ import { createErrorNotification, createWarningNotification } from 'app/core/cop
 
 // Types
 import { RichHistoryQuery } from 'app/types/explore';
-import { serializeStateToUrlParam } from '@grafana/data/src/utils/url';
 import { getDataSourceSrv } from '@grafana/runtime';
 
 const RICH_HISTORY_KEY = 'grafana.explore.richHistory';
@@ -210,8 +216,10 @@ export const createUrlFromRichHistory = (query: RichHistoryQuery) => {
     /* Default range, as we are not saving timerange in rich history */
     schemaVersion: 1,
     left: {
-      from: 'now-1h',
-      to: 'now',
+      range: {
+        from: 'now-1h',
+        to: 'now',
+      },
       datasource: query.datasourceName,
       queries: query.queries,
     },
@@ -219,7 +227,7 @@ export const createUrlFromRichHistory = (query: RichHistoryQuery) => {
     // context: 'explore',
   };
 
-  const serializedState = serializeStateToUrlParam(exploreState);
+  const serializedState = serializeExploreStateToUrlParam(exploreState);
   const baseUrl = /.*(?=\/explore)/.exec(`${window.location.href}`)![0];
   const url = urlUtil.renderUrl(`${baseUrl}/explore`, { state: serializedState });
   return url;

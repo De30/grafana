@@ -3,8 +3,11 @@ import { RawTimeRange, TimeRange } from './time';
 
 type AnyQuery = DataQuery & Record<string, any>;
 
-/** @internal */
-export interface ExploreUrlState<T extends DataQuery = AnyQuery> {
+/**
+ * @internal
+ * @deprecated the current URL state is described by `ExploreURLState`
+ * */
+export interface LegacyExploreUrlState<T extends DataQuery = AnyQuery> {
   datasource: string;
   queries: T[];
   range: RawTimeRange;
@@ -15,12 +18,11 @@ export interface ExploreUrlState<T extends DataQuery = AnyQuery> {
 export interface ExplorePaneURLState<T extends DataQuery = DataQuery> {
   datasource: string;
   queries: T[];
-  from: RawTimeRange['from'];
-  to: RawTimeRange['to'];
+  range: RawTimeRange;
 }
 
 export interface ExploreURLState {
-  schemaVersion: number;
+  schemaVersion: 1;
   left: ExplorePaneURLState;
   right?: ExplorePaneURLState;
 }

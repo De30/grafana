@@ -10,6 +10,7 @@ import { Branding } from '../../core/components/Branding/Branding';
 
 import { getNavModel } from '../../core/selectors/navModel';
 import { StoreState } from 'app/types';
+import { parseExploreURL } from './utils/URLMigrator';
 
 interface RouteProps extends GrafanaRouteComponentProps<{}, ExploreQueryParams> {}
 interface OwnProps {}
@@ -43,8 +44,7 @@ class WrapperUnconnected extends PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    const { state } = this.props.queryParams;
-    const { left, right } = JSON.parse(state || '{}');
+    const { left, right } = parseExploreURL(this.props.queryParams);
 
     const hasSplit = Boolean(left) && Boolean(right);
     const datasourceTitle = hasSplit
@@ -55,8 +55,7 @@ class WrapperUnconnected extends PureComponent<Props> {
   }
 
   render() {
-    const { state } = this.props.queryParams;
-    const { left, right } = JSON.parse(state || '{}');
+    const { left, right } = parseExploreURL(this.props.queryParams);
 
     const hasSplit = Boolean(left) && Boolean(right);
 
@@ -64,11 +63,11 @@ class WrapperUnconnected extends PureComponent<Props> {
       <div className="page-scrollbar-wrapper">
         <div className="explore-wrapper">
           <ErrorBoundaryAlert style="page">
-            <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={JSON.stringify(left)} />
+            <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlState={left} />
           </ErrorBoundaryAlert>
           {hasSplit && (
             <ErrorBoundaryAlert style="page">
-              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlQuery={JSON.stringify(right)} />
+              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlState={right} />
             </ErrorBoundaryAlert>
           )}
         </div>

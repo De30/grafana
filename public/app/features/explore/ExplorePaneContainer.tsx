@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import { DataQuery, EventBusExtended, EventBusSrv } from '@grafana/data';
+import { DataQuery, EventBusExtended, EventBusSrv, ExplorePaneURLState } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import store from 'app/core/store';
 import { lastSavedUrl, cleanupPaneAction } from './state/main';
@@ -14,14 +14,13 @@ import {
   getTimeRange,
   getTimeRangeFromUrl,
   lastUsedDatasourceKeyForOrgId,
-  parsePaneUrlState,
 } from 'app/core/utils/explore';
 import { getFiscalYearStartMonth, getTimeZone } from '../profile/state/selectors';
 import Explore from './Explore';
 
 interface OwnProps {
   exploreId: ExploreId;
-  urlQuery: string;
+  urlState?: ExplorePaneURLState;
   split: boolean;
 }
 
@@ -76,15 +75,20 @@ class ExplorePaneContainerUnconnected extends React.PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    this.refreshExplore(prevProps.urlQuery);
+    this.refreshExplore(prevProps.urlState);
   }
 
-  refreshExplore = (prevUrlQuery: string) => {
-    const { exploreId, urlQuery } = this.props;
+  refreshExplore = (prevUrlState: ExplorePaneURLState | undefined) => {
+    const { exploreId, urlState } = this.props;
 
     // Update state from url only if it changed and only if the change wasn't initialised by redux to prevent any loops
-    if (urlQuery !== prevUrlQuery && urlQuery !== lastSavedUrl[exploreId]) {
-      this.props.refreshExplore(exploreId, urlQuery);
+    // TODO: this used to work because urlState was a string before, stringifying it seems a bit hacky
+    if (
+      urlState &&
+      JSON.stringify(urlState) !== JSON.stringify(prevUrlState) &&
+      JSON.stringify(urlState) !== lastSavedUrl[exploreId]
+    ) {
+      this.props.refreshExplore(exploreId, urlState);
     }
   };
 
@@ -106,24 +110,21 @@ const ensureQueriesMemoized = memoizeOne(ensureQueries);
 const getTimeRangeFromUrlMemoized = memoizeOne(getTimeRangeFromUrl);
 
 function mapStateToProps(state: StoreState, props: OwnProps) {
-  const paneUrlState = parsePaneUrlState(props.urlQuery);
   const timeZone = getTimeZone(state.user);
   const fiscalYearStartMonth = getFiscalYearStartMonth(state.user);
 
   const {
     datasource,
     queries,
-    from,
-    to,
+    range,
     // TODO: check this
     //  originPanelId
-  } = paneUrlState;
+  } = props.urlState || {};
   const initialDatasource = datasource || store.get(lastUsedDatasourceKeyForOrgId(state.user.orgId));
   const initialQueries: DataQuery[] = ensureQueriesMemoized(queries);
-  const initialRange =
-    from && to
-      ? getTimeRangeFromUrlMemoized({ from, to }, timeZone, fiscalYearStartMonth)
-      : getTimeRange(timeZone, DEFAULT_RANGE, fiscalYearStartMonth);
+  const initialRange = range
+    ? getTimeRangeFromUrlMemoized(range, timeZone, fiscalYearStartMonth)
+    : getTimeRange(timeZone, DEFAULT_RANGE, fiscalYearStartMonth);
 
   return {
     initialized: state.explore[props.exploreId]?.initialized,

@@ -2,7 +2,7 @@
  * @preserve jquery-param (c) 2015 KNOWLEDGECODE | MIT
  */
 
-import { ExploreURLState } from '../types/explore';
+import { ExploreURLState, LegacyExploreUrlState } from '../types/explore';
 
 /**
  * Type to represent the value of a single query variable.
@@ -195,6 +195,18 @@ export const urlUtil = {
   parseKeyValue,
 };
 
-export function serializeStateToUrlParam(urlState: ExploreURLState): string {
+/** @deprecated use `serializeExploreStateToUrlParam` instead */
+export function serializeStateToUrlParam(urlState: LegacyExploreUrlState, compact?: boolean): string {
+  if (compact) {
+    return JSON.stringify([urlState.range.from, urlState.range.to, urlState.datasource, ...urlState.queries]);
+  }
   return JSON.stringify(urlState);
 }
+
+/**
+ * Serializes the internal Explore URL state representation into a string.
+ * TODO: does this need to operate also on older versions of the state?
+ */
+export const serializeExploreStateToUrlParam = (state: Omit<ExploreURLState, 'schemaVersion'>): string => {
+  return JSON.stringify(state);
+};

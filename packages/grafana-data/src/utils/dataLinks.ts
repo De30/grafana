@@ -9,7 +9,7 @@ import {
   TimeRange,
 } from '../types';
 import { locationUtil } from './location';
-import { serializeStateToUrlParam } from './url';
+import { serializeExploreStateToUrlParam } from './url';
 
 export const DataLinkBuiltInVars = {
   keepTime: '__url_time_range',
@@ -68,11 +68,9 @@ export function mapInternalLinkToExplore(options: LinkToExploreOptions): LinkMod
 function generateInternalHref<T extends DataQuery = any>(datasourceName: string, query: T, range: TimeRange): string {
   return locationUtil.assureBaseUrl(
     `/explore?state=${encodeURIComponent(
-      serializeStateToUrlParam({
-        schemaVersion: 1,
+      serializeExploreStateToUrlParam({
         left: {
-          from: range.raw.from,
-          to: range.raw.to,
+          range,
           datasource: datasourceName,
           queries: [query],
         },

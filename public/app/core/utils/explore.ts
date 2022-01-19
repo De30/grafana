@@ -11,7 +11,7 @@ import {
   DateTime,
   DefaultTimeZone,
   ExplorePaneURLState,
-  ExploreUrlState,
+  LegacyExploreUrlState,
   HistoryItem,
   IntervalValues,
   isDateTime,
@@ -61,6 +61,7 @@ export interface GetExploreUrlArguments {
 /**
  * Returns an Explore-URL that contains a panel's queries and the dashboard time range.
  */
+// TODO: this needs to use ExploreURLState
 export async function getExploreUrl(args: GetExploreUrlArguments): Promise<string | undefined> {
   const { panel, datasourceSrv, timeSrv } = args;
   let exploreDatasource = await datasourceSrv.get(panel.datasource);
@@ -86,7 +87,7 @@ export async function getExploreUrl(args: GetExploreUrlArguments): Promise<strin
 
   if (exploreDatasource) {
     const range = timeSrv.timeRangeForUrl();
-    let state: Partial<ExploreUrlState> = { range };
+    let state: Partial<LegacyExploreUrlState> = { range };
     if (exploreDatasource.interpolateVariablesInQueries) {
       const scopedVars = panel.scopedVars || {};
       state = {
@@ -166,16 +167,6 @@ export function buildQueryTransaction(
 
 export const clearQueryKeys: (query: DataQuery) => DataQuery = ({ key, ...rest }) => rest;
 
-const isSegment = (segment: { [key: string]: string }, ...props: string[]) =>
-  props.some((prop) => segment.hasOwnProperty(prop));
-
-enum ParseUrlStateIndex {
-  RangeFrom = 0,
-  RangeTo = 1,
-  Datasource = 2,
-  SegmentsStart = 3,
-}
-
 export const safeParseJson = (text?: string): any | undefined => {
   if (!text) {
     return;
@@ -217,43 +208,16 @@ export const toGraphStyle = (data: unknown): ExploreGraphStyle => {
   return found ?? DEFAULT_GRAPH_STYLE;
 };
 
-export function parsePaneUrlState(initial: string | undefined): ExplorePaneURLState {
-  const parsed = safeParseJson(initial);
-  const errorResult: any = {
-    datasource: null,
-    queries: [],
-    range: DEFAULT_RANGE,
-    mode: null,
-    originPanelId: null,
-  };
-
-  if (!parsed) {
-    return errorResult;
+export function parsePaneUrlState(initial: ExplorePaneURLState | undefined): ExplorePaneURLState | null {
+  if (!initial) {
+    return null;
   }
-
-  if (!Array.isArray(parsed)) {
-    return parsed;
-  }
-
-  if (parsed.length <= ParseUrlStateIndex.SegmentsStart) {
-    console.error('Error parsing compact URL state for Explore.');
-    return errorResult;
-  }
-
-  const range = {
-    from: parsed[ParseUrlStateIndex.RangeFrom],
-    to: parsed[ParseUrlStateIndex.RangeTo],
-  };
-  const datasource = parsed[ParseUrlStateIndex.Datasource];
-  const parsedSegments = parsed.slice(ParseUrlStateIndex.SegmentsStart);
-  const queries = parsedSegments.filter((segment) => !isSegment(segment, 'ui', 'originPanelId', 'mode'));
 
   // const originPanelId = parsedSegments.filter((segment) => isSegment(segment, 'originPanelId'))[0];
   return {
-    datasource,
-    queries,
-    from: range.from,
-    to: range.to,
+    datasource: initial.datasource,
+    queries: initial.queries,
+    range: initial.range,
     // TODO: check this
     // originPanelId,
   };
