@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
+import { GrafanaTheme2, LinkModel } from '@grafana/data';
 import { stylesFactory, withTheme2 } from '@grafana/ui';
 
 import TimelineHeaderRow from './TimelineHeaderRow';
@@ -27,7 +27,6 @@ import { TraceSpan, Trace, TraceLog, TraceKeyValuePair, TraceLink } from '../typ
 import TTraceTimeline from '../types/TTraceTimeline';
 import { autoColor } from '../Theme';
 import ExternalLinkContext from '../url/externalLinkContext';
-import { LinkModel } from '@grafana/data';
 
 type TExtractUiFindFromStateReturn = {
   uiFind: string | undefined;

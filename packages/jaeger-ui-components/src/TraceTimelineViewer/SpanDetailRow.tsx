@@ -21,11 +21,10 @@ import SpanTreeOffset from './SpanTreeOffset';
 import TimelineRow from './TimelineRow';
 import { autoColor } from '../Theme';
 import { stylesFactory, withTheme2 } from '@grafana/ui';
-import { GrafanaTheme2 } from '@grafana/data';
+import { GrafanaTheme2, LinkModel } from '@grafana/data';
 
 import { TraceLog, TraceSpan, TraceKeyValuePair, TraceLink } from '../types/trace';
 import { SpanLinkFunc } from '../types';
-import { LinkModel } from '@grafana/data';
 
 const getStyles = stylesFactory((theme: GrafanaTheme2) => {
   return {
