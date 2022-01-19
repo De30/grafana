@@ -19,23 +19,6 @@ const (
 	RenderPNG RenderType = "png"
 )
 
-type Theme string
-
-const (
-	ThemeLight Theme = "light"
-	ThemeDark  Theme = "dark"
-)
-
-func ParseTheme(str string) (Theme, error) {
-	switch str {
-	case string(ThemeLight):
-		return ThemeLight, nil
-	case string(ThemeDark):
-		return ThemeDark, nil
-	}
-	return ThemeDark, errors.New("unknown theme " + str)
-}
-
 type Opts struct {
 	Width             int
 	Height            int
@@ -49,7 +32,7 @@ type Opts struct {
 	ConcurrentLimit   int
 	DeviceScaleFactor float64
 	Headers           map[string][]string
-	Theme             Theme
+	Theme             models.Theme
 }
 
 type CSVOpts struct {
@@ -81,6 +64,6 @@ type Service interface {
 	Version() string
 	Render(ctx context.Context, opts Opts) (*RenderResult, error)
 	RenderCSV(ctx context.Context, opts CSVOpts) (*RenderCSVResult, error)
-	RenderErrorImage(theme Theme, error error) (*RenderResult, error)
+	RenderErrorImage(theme models.Theme, error error) (*RenderResult, error)
 	GetRenderUser(ctx context.Context, key string) (*RenderUser, bool)
 }

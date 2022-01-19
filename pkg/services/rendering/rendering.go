@@ -166,9 +166,9 @@ func (rs *RenderingService) Version() string {
 	return rs.version
 }
 
-func (rs *RenderingService) RenderErrorImage(theme Theme, err error) (*RenderResult, error) {
+func (rs *RenderingService) RenderErrorImage(theme models.Theme, err error) (*RenderResult, error) {
 	if theme == "" {
-		theme = ThemeDark
+		theme = models.ThemeDark
 	}
 	imgUrl := "public/img/rendering_%s_%s.png"
 	if errors.Is(err, ErrTimeout) {
@@ -209,7 +209,7 @@ func (rs *RenderingService) render(ctx context.Context, opts Opts) (*RenderResul
 	if int(atomic.LoadInt32(&rs.inProgressCount)) > opts.ConcurrentLimit {
 		rs.log.Warn("Could not render image, hit the currency limit", "concurrencyLimit", opts.ConcurrentLimit, "path", opts.Path)
 
-		theme := ThemeDark
+		theme := models.ThemeDark
 		if opts.Theme != "" {
 			theme = opts.Theme
 		}
