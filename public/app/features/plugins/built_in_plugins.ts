@@ -73,6 +73,7 @@ import * as alertGroupsPanel from 'app/plugins/panel/alertGroups/module';
 const geomapPanel = async () => await import(/* webpackChunkName: "geomapPanel" */ 'app/plugins/panel/geomap/module');
 const canvasPanel = async () => await import(/* webpackChunkName: "canvasPanel" */ 'app/plugins/panel/canvas/module');
 const iconPanel = async () => await import(/* webpackChunkName: "iconPanel" */ 'app/plugins/panel/icon/module');
+const videoPanel = async () => await import(/* webpackChunkName: "videoPanel" */ 'app/plugins/panel/video/module');
 
 const builtInPlugins: any = {
   'app/plugins/datasource/graphite/module': graphitePlugin,
@@ -127,6 +128,7 @@ const builtInPlugins: any = {
   'app/plugins/panel/nodeGraph/module': nodeGraph,
   'app/plugins/panel/histogram/module': histogramPanel,
   'app/plugins/panel/alertGroups/module': alertGroupsPanel,
+  'app/plugins/panel/video/module': videoPanel,
 };
 
 export default builtInPlugins;

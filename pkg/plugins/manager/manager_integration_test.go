@@ -133,6 +133,7 @@ func verifyCorePluginCatalogue(t *testing.T, pm *PluginManager) {
 		"table-old":      {},
 		"text":           {},
 		"timeseries":     {},
+		"video":          {},
 		"welcome":        {},
 		"xychart":        {},
 	}
