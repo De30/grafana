@@ -1,0 +1,145 @@
+@startuml "Thumbnail service"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+footer Page %page% of %lastpage%
+
+title Overview
+
+LAYOUT_TOP_DOWN()
+
+
+Person(admin_user, "Admin User")
+Person(regular_user, "Regular user")
+
+System_Boundary(g, "Grafana"){
+   Container_Boundary(gc, "Grafana Core") {
+      Component(thumbnail_service, "Thumbnail service", "Golang service", $descr="1. manages crawling process\n2. serves thumbnail storage API\n3. manages long-lived renderKey")
+      Component(grafana_rendering_service, "Rendering Service", "Golang service", "Generates renderKey cookie")
+   }
+   ContainerDb(db, Database, "", "Stores thumbnails as blobs\nStores state of each thumbnail")
+   Container_Boundary(ir, "Image renderer"){
+      Component(golang_renderer_api, "GRPC API", "plugin mode")
+      Component(http_renderer_api, "HTTP API", "http server mode")
+      Component(node_worker_pool, "browser worker pool", "maintains an open browser per renderKey")
+   }
+}
+
+Rel(regular_user, thumbnail_service, "[TBD] Mark thumbnail as stale", "HTTPS")
+Rel(regular_user, thumbnail_service, "[TBD] Upload thumbnail", "HTTPS")
+Rel(regular_user, thumbnail_service, "[TBD] Lock thumbnail", "HTTPS")
+
+Rel(admin_user, thumbnail_service, "Start crawl", "HTTPS")
+Rel(thumbnail_service, admin_user, "Update progress", "HTTPS")
+
+Rel(thumbnail_service, db, "Save thumbnail")
+Rel(thumbnail_service, db, "Find stale thumbnails")
+
+Rel(thumbnail_service, grafana_rendering_service, "Take screenshot of url")
+
+Rel_Back(thumbnail_service, grafana_rendering_service, "File")
+
+
+
+
+Rel(grafana_rendering_service, golang_renderer_api, "render")
+Rel_Back(grafana_rendering_service, golang_renderer_api, "file")
+
+Rel(grafana_rendering_service, http_renderer_api, "render")
+Rel_Back(grafana_rendering_service, http_renderer_api, "file")
+
+Rel(golang_renderer_api, node_worker_pool, "add task")
+Rel(http_renderer_api, node_worker_pool, "add task")
+
+newpage
+
+title UC 1: Show preview
+
+Person(regular_user, "Regular user")
+
+Container_Boundary(gc, "Grafana Core"){
+   Component(thumbnail_service, "Thumbnail service", "")
+   Component(guardian_service, "Dashboard guardian service", "")
+}
+ContainerDb(db, Database, "", "")
+
+
+Rel(regular_user, thumbnail_service, "1. Request thumbnail for dashboard X and theme", "HTTPS")
+
+Rel(thumbnail_service, guardian_service, "2. Verify user access to dashboard X")
+
+Rel(thumbnail_service, db, "3. Retrieve thumbnail for dashboard X and theme")
+Rel(thumbnail_service, regular_user, "4. Return thumbnail or 404")
+
+
+newpage
+
+
+
+title UC 3 & 9: Start the crawl
+
+Person(admin_user, "Admin user")
+
+Container_Boundary(gc, "Grafana Core"){
+   Boundary(thumbnail_service, "Thumbnail service") {
+      Component(thumbnail_service_api, "API Handler", "")
+      Component(thumbnail_service_crawler, "Crawler singleton", "")
+      Component(thumbnail_service_repo, "DB Access", "")
+   }
+   Component(scheduling_service, "Scheduling service", "")
+   Component(grafana_rendering_service, "Rendering Service", "")
+   Component(grafana_live, "Live Service", "")
+}
+ContainerDb(db, Database, "", "")
+
+Rel(admin_user, thumbnail_service_api, "1a. Start the crawl")
+Rel(scheduling_service, thumbnail_service_api, "1b. Start the crawl")
+note bottom of scheduling_service: does it exist? how to avoid triggering the crawler more than once in a HA setup?
+
+Rel(thumbnail_service_api, thumbnail_service_api, "2. Authorize action", "HTTPS")
+note top of thumbnail_service_api: how to authorize users as admins?
+
+Rel(thumbnail_service_api, thumbnail_service_repo, "3. Fetch dashboards with stale thumbnails")
+Rel(thumbnail_service_repo, db, "")
+Rel(thumbnail_service_api, grafana_rendering_service, "4. Create new rendering session")
+Rel(thumbnail_service_api, thumbnail_service_crawler, "5. Create and start crawler with N threads")
+Rel(thumbnail_service_crawler, grafana_rendering_service, "6: LOOP while dashboards are available a): render dashboard")
+Rel(thumbnail_service_crawler, thumbnail_service_repo, "6: b): save thumbnail")
+Rel(thumbnail_service_crawler, grafana_live, "6: c): broadcast status (UC4)")
+
+newpage
+
+title "Image renderer concurrency"
+note left of puppeteer_cluster_fork: behavior with mode **cluster**\nconcurrency type: **browserPerRenderKey**
+
+Container_Boundary(ir, "Image renderer"){
+  Component(golang_renderer_api, "GRPC API", "plugin mode")
+  Component(http_renderer_api, "HTTP API", "http server mode")
+  Component(node_worker_pool_api, "Browser.ts", "puppeteer API facade")
+  Boundary(puppeteer_cluster_fork, Puppeteer-cluster fork, "npm lib") {
+     Component(puppeteer_cluster_fork_api, "API", "")
+     Component(puppeteer_cluster_worker_pool, "Worker pool", "")
+     Component(puppeteer_cluster_open_chrome_instances, "Open chrome instances", "")
+  }
+}
+
+note left of node_worker_pool_api: puppeteer-cluster will reuse browser for all requests with the same **requestGroupId**.\n in this use case, we set the **requestGroupId** to be the same as **renderKey**
+Rel(golang_renderer_api, node_worker_pool_api, "1a. add task")
+Rel(http_renderer_api, node_worker_pool_api, "1b. add task")
+Rel(node_worker_pool_api, puppeteer_cluster_fork_api, "2. renderPage(groupId, cookies, URL)")
+Rel(puppeteer_cluster_fork_api, puppeteer_cluster_worker_pool, "3. Retrieve chrome instance for groupId")
+
+note left of puppeteer_cluster_worker_pool: Worker pool can delay creating the browser if max concurrency has been reached
+
+Rel(puppeteer_cluster_worker_pool, puppeteer_cluster_open_chrome_instances, "4. Create browser if there is none for a given **groupId** ")
+
+note left of puppeteer_cluster_worker_pool: Worker pool sets up a deletion timer for each created browser. The timer is refreshed before on each task execution
+
+Rel_Back(puppeteer_cluster_worker_pool, puppeteer_cluster_open_chrome_instances, "5. Browser ref")
+Rel_Back(puppeteer_cluster_fork_api, puppeteer_cluster_worker_pool, "6. Browser ref")
+
+Rel(puppeteer_cluster_fork_api, puppeteer_cluster_fork_api, "7. Execute render task on a new tab in the open browser")
+Rel_Back(node_worker_pool_api, puppeteer_cluster_fork_api, "8. Render results")
+
+@enduml
+
