@@ -29,10 +29,13 @@ export const HeatmapPanel: React.FC<VideoPanelProps> = ({
     mute: true,
     sources: [
       {
-        src: 'http://localhost:3000/public/videos/skate.mp4', // https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+        src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+        //src: 'http://localhost:3000/public/videos/skate.mp4',
         type: 'video/mp4',
       },
     ],
+    width,
+    height,
   };
 
   const handlePlayerReady = (player: videojs.Player) => {
