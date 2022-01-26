@@ -29,6 +29,9 @@ type Service struct {
 
 	ptc               proxyTransportCache
 	dsDecryptionCache secureJSONDecryptionCache
+
+	GetSecretOverrideFn func() string
+	SetSecretOverrideFn func() error
 }
 
 type proxyTransportCache struct {
