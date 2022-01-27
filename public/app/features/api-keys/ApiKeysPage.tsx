@@ -4,7 +4,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ApiKey, NewApiKey, StoreState } from 'app/types';
 import { getNavModel } from 'app/core/selectors/navModel';
 import { getApiKeys, getApiKeysCount, getIncludeExpired, getIncludeExpiredDisabled } from './state/selectors';
-import { addApiKey, deleteApiKey, loadApiKeys, toggleIncludeExpired } from './state/actions';
+import { addApiKey, deleteApiKey, loadApiKeys, toggleIncludeExpired, convertApiKeyToSA } from './state/actions';
 import Page from 'app/core/components/Page/Page';
 import { ApiKeysAddedModal } from './ApiKeysAddedModal';
 import config from 'app/core/config';
@@ -39,6 +39,7 @@ const mapDispatchToProps = {
   setSearchQuery,
   toggleIncludeExpired,
   addApiKey,
+  convertApiKeyToSA,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
@@ -66,6 +67,10 @@ export class ApiKeysPageUnconnected extends PureComponent<Props, State> {
 
   onDeleteApiKey = (key: ApiKey) => {
     this.props.deleteApiKey(key.id!);
+  };
+
+  onConvertApiKeyToSA = (key: ApiKey) => {
+    this.props.convertApiKeyToSA(key.id!);
   };
 
   onSearchQueryChange = (value: string) => {
@@ -162,7 +167,13 @@ export class ApiKeysPageUnconnected extends PureComponent<Props, State> {
                       <InlineField disabled={includeExpiredDisabled} label="Include expired keys">
                         <InlineSwitch id="showExpired" value={includeExpired} onChange={this.onIncludeExpiredChange} />
                       </InlineField>
-                      <ApiKeysTable apiKeys={apiKeys} timeZone={timeZone} onDelete={this.onDeleteApiKey} />
+                      <ApiKeysTable
+                        apiKeys={apiKeys}
+                        timeZone={timeZone}
+                        onDelete={this.onDeleteApiKey}
+                        serviceAccountEnabled={true}
+                        onConvert={this.onConvertApiKeyToSA}
+                      />
                     </VerticalGroup>
                   ) : null}
                 </>

@@ -35,3 +35,11 @@ export function toggleIncludeExpired(): ThunkResult<void> {
     dispatch(includeExpiredToggled());
   };
 }
+
+export function convertApiKeyToSA(keyId: number): ThunkResult<void> {
+  return async (dispatch) => {
+    getBackendSrv()
+      .post(`/api/serviceaccounts/convert/${keyId}`)
+      .then(() => dispatch(loadApiKeys()));
+  };
+}

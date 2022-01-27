@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { DeleteButton, Icon, IconName, Tooltip, useTheme2 } from '@grafana/ui';
+import { Button, ConfirmButton, DeleteButton, Icon, IconName, Tooltip, useTheme2 } from '@grafana/ui';
 import { dateTimeFormat, GrafanaTheme2, TimeZone } from '@grafana/data';
 
 import { ApiKey } from '../../types';
@@ -9,9 +9,11 @@ interface Props {
   apiKeys: ApiKey[];
   timeZone: TimeZone;
   onDelete: (apiKey: ApiKey) => void;
+  serviceAccountEnabled: boolean;
+  onConvert: (apiKey: ApiKey) => void;
 }
 
-export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete }) => {
+export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete, serviceAccountEnabled, onConvert }) => {
   const theme = useTheme2();
   const styles = getStyles(theme);
 
@@ -22,6 +24,7 @@ export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete }) => {
           <th>Name</th>
           <th>Role</th>
           <th>Expires</th>
+          <th style={{ width: '34px' }} />
           <th style={{ width: '34px' }} />
         </tr>
       </thead>
@@ -43,6 +46,24 @@ export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete }) => {
                     </span>
                   )}
                 </td>
+                {serviceAccountEnabled && (
+                  <td>
+                    <ConfirmButton
+                      confirmText="convert"
+                      confirmVariant="destructive"
+                      size={'sm'}
+                      onConfirm={() => onConvert(key)}
+                    >
+                      <Button
+                        title="Convert to service account"
+                        aria-label={'Convert to service account'}
+                        variant="destructive"
+                        icon="times"
+                        size={'sm'}
+                      />
+                    </ConfirmButton>
+                  </td>
+                )}
                 <td>
                   <DeleteButton aria-label="Delete API key" size="sm" onConfirm={() => onDelete(key)} />
                 </td>
