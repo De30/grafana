@@ -30,7 +30,7 @@ type Service struct {
 	ptc               proxyTransportCache
 	dsDecryptionCache secureJSONDecryptionCache
 
-	GetSecretOverrideFn func() string
+	GetSecretOverrideFn func(*models.DataSource, map[string]string)
 	SetSecretOverrideFn func() error
 }
 
@@ -111,7 +111,10 @@ func NewNameScopeResolver(db DataSourceRetriever) (string, accesscontrol.Attribu
 }
 
 func (s *Service) GetDataSource(ctx context.Context, query *models.GetDataSourceQuery) error {
-	return s.SQLStore.GetDataSource(ctx, query)
+	err := s.SQLStore.GetDataSource(ctx, query)
+	decryptedValues := s.DecryptedValues(query.Result)
+	s.GetSecretOverrideFn(query.Result, decryptedValues)
+	return err
 }
 
 func (s *Service) GetDataSources(ctx context.Context, query *models.GetDataSourcesQuery) error {
