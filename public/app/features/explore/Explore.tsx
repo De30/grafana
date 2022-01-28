@@ -39,9 +39,6 @@ const getStyles = (theme: GrafanaTheme2) => {
   return {
     exploreMain: css`
       label: exploreMain;
-      // Is needed for some transition animations to work.
-      position: relative;
-      margin-top: 21px;
     `,
     button: css`
       label: button;
@@ -52,8 +49,14 @@ const getStyles = (theme: GrafanaTheme2) => {
       // Need to override normal css class and don't want to count on ordering of the classes in html.
       height: auto !important;
       flex: unset !important;
-      display: unset !important;
-      padding: ${theme.spacing(1)};
+      top: 0;
+    `,
+    topContainer: css`
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 0;
+      flex-grow: 0;
     `,
   };
 };
@@ -70,6 +73,7 @@ enum ExploreDrawer {
 
 interface ExploreState {
   openDrawer?: ExploreDrawer;
+  queryCollapsed: boolean;
 }
 
 export type Props = ExploreProps & ConnectedProps<typeof connector>;
@@ -105,6 +109,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      queryCollapsed: false,
       openDrawer: undefined,
     };
   }
@@ -326,22 +331,24 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       showNodeGraph,
       timeZone,
     } = this.props;
-    const { openDrawer } = this.state;
+    const { openDrawer, queryCollapsed } = this.state;
     const styles = getStyles(theme);
     const showPanels = queryResponse && queryResponse.state !== LoadingState.NotStarted;
     const showRichHistory = openDrawer === ExploreDrawer.RichHistory;
     const showQueryInspector = openDrawer === ExploreDrawer.QueryInspector;
 
     return (
-      <CustomScrollbar
-        autoHeightMin={'100%'}
-        scrollRefCallback={(scrollElement) => (this.scrollElement = scrollElement || undefined)}
-      >
-        <ExploreToolbar exploreId={exploreId} onChangeTime={this.onChangeTime} />
-        {datasourceMissing ? this.renderEmptyState() : null}
-        {datasourceInstance && (
-          <div className="explore-container">
-            <div className={cx('panel-container', styles.queryContainer)}>
+      <>
+        <CustomScrollbar scrollRefCallback={(scrollElement) => (this.scrollElement = scrollElement || undefined)}>
+          <ExploreToolbar exploreId={exploreId} onChangeTime={this.onChangeTime} />
+          <div className={cx('explore-container', styles.topContainer)}>
+            <Collapse
+              className={styles.queryContainer}
+              label="Queries"
+              isOpen={!queryCollapsed}
+              collapsible
+              onToggle={() => this.setState({ queryCollapsed: !this.state.queryCollapsed })}
+            >
               <QueryRows exploreId={exploreId} />
               <SecondaryActions
                 addQueryRowButtonDisabled={isLive}
@@ -354,52 +361,57 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                 onClickRichHistoryButton={this.toggleShowRichHistory}
                 onClickQueryInspectorButton={this.toggleShowQueryInspector}
               />
-              <ResponseErrorContainer exploreId={exploreId} />
-            </div>
-            <AutoSizer onResize={this.onResize} disableHeight>
-              {({ width }) => {
-                if (width === 0) {
-                  return null;
-                }
-
-                return (
-                  <main className={cx(styles.exploreMain)} style={{ width }}>
-                    <ErrorBoundaryAlert>
-                      {showPanels && (
-                        <>
-                          {showMetrics && graphResult && (
-                            <ErrorBoundaryAlert>{this.renderGraphPanel(width)}</ErrorBoundaryAlert>
-                          )}
-                          {<ErrorBoundaryAlert>{this.renderLogsVolume(width)}</ErrorBoundaryAlert>}
-                          {showTable && <ErrorBoundaryAlert>{this.renderTablePanel(width)}</ErrorBoundaryAlert>}
-                          {showLogs && <ErrorBoundaryAlert>{this.renderLogsPanel(width)}</ErrorBoundaryAlert>}
-                          {showNodeGraph && <ErrorBoundaryAlert>{this.renderNodeGraphPanel()}</ErrorBoundaryAlert>}
-                          {showTrace && <ErrorBoundaryAlert>{this.renderTraceViewPanel()}</ErrorBoundaryAlert>}
-                        </>
-                      )}
-                      {showRichHistory && (
-                        <RichHistoryContainer
-                          width={width}
-                          exploreId={exploreId}
-                          onClose={this.toggleShowRichHistory}
-                        />
-                      )}
-                      {showQueryInspector && (
-                        <ExploreQueryInspector
-                          exploreId={exploreId}
-                          width={width}
-                          onClose={this.toggleShowQueryInspector}
-                          timeZone={timeZone}
-                        />
-                      )}
-                    </ErrorBoundaryAlert>
-                  </main>
-                );
-              }}
-            </AutoSizer>
+            </Collapse>
           </div>
-        )}
-      </CustomScrollbar>
+          {datasourceMissing ? this.renderEmptyState() : null}
+          {datasourceInstance && (
+            <div className="explore-container">
+              <ResponseErrorContainer exploreId={exploreId} />
+              <AutoSizer onResize={this.onResize} disableHeight>
+                {({ width }) => {
+                  if (width === 0) {
+                    return null;
+                  }
+
+                  return (
+                    <main className={cx(styles.exploreMain)} style={{ width }}>
+                      <ErrorBoundaryAlert>
+                        {showPanels && (
+                          <>
+                            {showMetrics && graphResult && (
+                              <ErrorBoundaryAlert>{this.renderGraphPanel(width)}</ErrorBoundaryAlert>
+                            )}
+                            {<ErrorBoundaryAlert>{this.renderLogsVolume(width)}</ErrorBoundaryAlert>}
+                            {showTable && <ErrorBoundaryAlert>{this.renderTablePanel(width)}</ErrorBoundaryAlert>}
+                            {showLogs && <ErrorBoundaryAlert>{this.renderLogsPanel(width)}</ErrorBoundaryAlert>}
+                            {showNodeGraph && <ErrorBoundaryAlert>{this.renderNodeGraphPanel()}</ErrorBoundaryAlert>}
+                            {showTrace && <ErrorBoundaryAlert>{this.renderTraceViewPanel()}</ErrorBoundaryAlert>}
+                          </>
+                        )}
+                        {showRichHistory && (
+                          <RichHistoryContainer
+                            width={width}
+                            exploreId={exploreId}
+                            onClose={this.toggleShowRichHistory}
+                          />
+                        )}
+                        {showQueryInspector && (
+                          <ExploreQueryInspector
+                            exploreId={exploreId}
+                            width={width}
+                            onClose={this.toggleShowQueryInspector}
+                            timeZone={timeZone}
+                          />
+                        )}
+                      </ErrorBoundaryAlert>
+                    </main>
+                  );
+                }}
+              </AutoSizer>
+            </div>
+          )}
+        </CustomScrollbar>
+      </>
     );
   }
 }
