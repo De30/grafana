@@ -30,7 +30,7 @@ type Service struct {
 	ptc               proxyTransportCache
 	dsDecryptionCache secureJSONDecryptionCache
 
-	GetSecretOverrideFn func(*models.DataSource, map[string]string)
+	GetSecretOverrideFn func(context.Context, *models.DataSource, map[string]string) error
 	SetSecretOverrideFn func() error
 }
 
@@ -112,8 +112,11 @@ func NewNameScopeResolver(db DataSourceRetriever) (string, accesscontrol.Attribu
 
 func (s *Service) GetDataSource(ctx context.Context, query *models.GetDataSourceQuery) error {
 	err := s.SQLStore.GetDataSource(ctx, query)
+	// if aws secrets manager turned on
 	decryptedValues := s.DecryptedValues(query.Result)
-	s.GetSecretOverrideFn(query.Result, decryptedValues)
+	if _, found := decryptedValues["arn"]; found {
+		err = s.GetSecretOverrideFn(ctx, query.Result, decryptedValues)
+	}
 	return err
 }
 
