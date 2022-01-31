@@ -30,8 +30,8 @@ type Service struct {
 	ptc               proxyTransportCache
 	dsDecryptionCache secureJSONDecryptionCache
 
-	GetSecretOverrideFn func(context.Context, *Service, *models.GetDataSourceQuery) error
-	SetSecretOverrideFn func(context.Context, *Service, *models.UpdateDataSourceCommand) error
+	GetSecretOverrideFn func(context.Context, *models.GetDataSourceQuery) error
+	SetSecretOverrideFn func(context.Context, *models.UpdateDataSourceCommand) error
 }
 
 type proxyTransportCache struct {
@@ -113,7 +113,7 @@ func NewNameScopeResolver(db DataSourceRetriever) (string, accesscontrol.Attribu
 func (s *Service) GetDataSource(ctx context.Context, query *models.GetDataSourceQuery) error {
 	var err error
 	if s.GetSecretOverrideFn != nil {
-		err = s.GetSecretOverrideFn(ctx, s, query)
+		err = s.GetSecretOverrideFn(ctx, query)
 	} else {
 		err = s.SQLStore.GetDataSource(ctx, query)
 	}
@@ -145,7 +145,7 @@ func (s *Service) DeleteDataSource(ctx context.Context, cmd *models.DeleteDataSo
 func (s *Service) UpdateDataSource(ctx context.Context, cmd *models.UpdateDataSourceCommand) error {
 	var err error
 	if s.SetSecretOverrideFn != nil {
-		return s.SetSecretOverrideFn(ctx, s, cmd)
+		return s.SetSecretOverrideFn(ctx, cmd)
 	} else {
 		cmd.EncryptedSecureJsonData, err = s.SecretsService.EncryptJsonData(ctx, cmd.SecureJsonData, secrets.WithoutScope())
 		if err != nil {
