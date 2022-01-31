@@ -30,8 +30,8 @@ type Service struct {
 	ptc               proxyTransportCache
 	dsDecryptionCache secureJSONDecryptionCache
 
-	GetSecretOverrideFn func(context.Context, *models.DataSource, map[string]string) error
-	SetSecretOverrideFn func() error
+	GetSecretOverrideFn func(context.Context, *Service, *models.GetDataSourceQuery) error
+	SetSecretOverrideFn func(context.Context, *Service, *models.UpdateDataSourceCommand) error
 }
 
 type proxyTransportCache struct {
@@ -111,11 +111,11 @@ func NewNameScopeResolver(db DataSourceRetriever) (string, accesscontrol.Attribu
 }
 
 func (s *Service) GetDataSource(ctx context.Context, query *models.GetDataSourceQuery) error {
-	err := s.SQLStore.GetDataSource(ctx, query)
-	// if aws secrets manager turned on
-	decryptedValues := s.DecryptedValues(query.Result)
-	if _, found := decryptedValues["arn"]; found {
-		err = s.GetSecretOverrideFn(ctx, query.Result, decryptedValues)
+	var err error
+	if s.GetSecretOverrideFn != nil {
+		err = s.GetSecretOverrideFn(ctx, s, query)
+	} else {
+		err = s.SQLStore.GetDataSource(ctx, query)
 	}
 	return err
 }
@@ -144,12 +144,16 @@ func (s *Service) DeleteDataSource(ctx context.Context, cmd *models.DeleteDataSo
 
 func (s *Service) UpdateDataSource(ctx context.Context, cmd *models.UpdateDataSourceCommand) error {
 	var err error
-	cmd.EncryptedSecureJsonData, err = s.SecretsService.EncryptJsonData(ctx, cmd.SecureJsonData, secrets.WithoutScope())
-	if err != nil {
-		return err
+	if s.SetSecretOverrideFn != nil {
+		return s.SetSecretOverrideFn(ctx, s, cmd)
+	} else {
+		cmd.EncryptedSecureJsonData, err = s.SecretsService.EncryptJsonData(ctx, cmd.SecureJsonData, secrets.WithoutScope())
+		if err != nil {
+			return err
+		}
+		return s.SQLStore.UpdateDataSource(ctx, cmd)
 	}
 
-	return s.SQLStore.UpdateDataSource(ctx, cmd)
 }
 
 func (s *Service) GetDefaultDataSource(ctx context.Context, query *models.GetDefaultDataSourceQuery) error {
