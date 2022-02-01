@@ -29,7 +29,9 @@ export const HeatmapPanel: React.FC<VideoPanelProps> = ({
     mute: true,
     sources: [
       {
-        src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+        //        src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+        // src: 'https://storage.googleapis.com/grafana-downloads/files/temp/PXL-20220122.mp4',
+        src: 'https://storage.googleapis.com/grafana-downloads/files/temp/sample-10s.mp4',
         //src: 'http://localhost:3000/public/videos/skate.mp4',
         type: 'video/mp4',
       },
