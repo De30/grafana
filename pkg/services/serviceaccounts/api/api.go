@@ -41,12 +41,9 @@ func NewServiceAccountsAPI(
 }
 
 func (api *ServiceAccountsAPI) RegisterAPIEndpoints(
-	features *featuremgmt.FeatureToggles,
+	features featuremgmt.FeatureToggles,
 ) {
-	fmt.Printf("Registering service account API endpoints\n")
-	if !features.IsServiceAccountsEnabled() {
-		fmt.Printf("%v+", features)
-		fmt.Printf("service accounts feature is disabled\n")
+	if !features.IsEnabled(featuremgmt.FlagServiceAccounts) {
 		return
 	}
 
