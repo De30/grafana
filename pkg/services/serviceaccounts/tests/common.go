@@ -17,6 +17,10 @@ type TestUser struct {
 	IsServiceAccount bool
 }
 
+type TestApiKey struct {
+	OrgID int64
+}
+
 func SetupUserServiceAccount(t *testing.T, sqlStore *sqlstore.SQLStore, testUser TestUser) *models.User {
 	u1, err := sqlStore.CreateUser(context.Background(), models.CreateUserCommand{
 		Login:            testUser.Login,
@@ -61,7 +65,7 @@ type Calls struct {
 	RetrieveServiceAccount []interface{}
 	DeleteServiceAccount   []interface{}
 	UpgradeServiceAccounts []interface{}
-	ConvertServiceAccounts []interface{}
+	ConvertServiceAccount  []interface{}
 	ListTokens             []interface{}
 }
 
@@ -86,8 +90,8 @@ func (s *ServiceAccountsStoreMock) UpgradeServiceAccounts(ctx context.Context) e
 	return nil
 }
 
-func (s *ServiceAccountsStoreMock) ConvertToServiceAccounts(ctx context.Context, keys []int64) error {
-	s.Calls.ConvertServiceAccounts = append(s.Calls.ConvertServiceAccounts, []interface{}{ctx})
+func (s *ServiceAccountsStoreMock) ConvertToServiceAccount(ctx context.Context, key int64) error {
+	s.Calls.ConvertServiceAccount = append(s.Calls.ConvertServiceAccount, []interface{}{ctx})
 	return nil
 }
 

@@ -171,7 +171,6 @@ export class ApiKeysPageUnconnected extends PureComponent<Props, State> {
                         apiKeys={apiKeys}
                         timeZone={timeZone}
                         onDelete={this.onDeleteApiKey}
-                        serviceAccountEnabled={true}
                         onConvert={this.onConvertApiKeyToSA}
                       />
                     </VerticalGroup>

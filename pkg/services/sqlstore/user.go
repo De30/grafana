@@ -215,10 +215,12 @@ func (ss *SQLStore) CreateServiceAccountForApikey(ctx context.Context, orgId int
 	}
 
 	newuser, err := ss.CreateUser(ctx, cmd)
+	if err != models.ErrUserAlreadyExists {
+		return nil, err
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-
 	return newuser, err
 }
 

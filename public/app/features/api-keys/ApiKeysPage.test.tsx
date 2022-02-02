@@ -14,6 +14,7 @@ const setup = (propOverrides: Partial<Props>) => {
   const loadApiKeysMock = jest.fn();
   const deleteApiKeyMock = jest.fn();
   const addApiKeyMock = jest.fn();
+  const convertApiKeyToSAMock = jest.fn();
   const toggleIncludeExpiredMock = jest.fn();
   const setSearchQueryMock = mockToolkitActionCreator(setSearchQuery);
   const props: Props = {
@@ -32,6 +33,7 @@ const setup = (propOverrides: Partial<Props>) => {
     deleteApiKey: deleteApiKeyMock,
     setSearchQuery: setSearchQueryMock,
     addApiKey: addApiKeyMock,
+    convertApiKeyToSA: convertApiKeyToSAMock,
     apiKeysCount: 0,
     timeZone: 'utc',
     includeExpired: false,

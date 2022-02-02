@@ -39,7 +39,7 @@ export function toggleIncludeExpired(): ThunkResult<void> {
 export function convertApiKeyToSA(keyId: number): ThunkResult<void> {
   return async (dispatch) => {
     getBackendSrv()
-      .post(`/api/serviceaccounts/convert/${keyId}`)
+      .post(`/api/org/serviceaccounts/convert/${keyId}`)
       .then(() => dispatch(loadApiKeys()));
   };
 }

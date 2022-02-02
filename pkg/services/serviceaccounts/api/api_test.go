@@ -202,3 +202,89 @@ func TestServiceAccountsAPI_RetrieveServiceAccount(t *testing.T) {
 		})
 	}
 }
+
+func TestServiceAccountsAPI_ConvertToServiceAccount(t *testing.T) {
+	store := sqlstore.InitTestDB(t)
+	svcmock := tests.ServiceAccountMock{}
+	type testConvertToServiceAccountTestCase struct {
+		desc         string
+		user         *tests.TestUser
+		apiKey       *tests.TestApiKey
+		expectedCode int
+		acmock       *accesscontrolmock.Mock
+		userID       int
+	}
+	testCases := []testConvertToServiceAccountTestCase{
+		{
+			desc: "should be ok to retrieve serviceaccount with permissions",
+			user: &tests.TestUser{Login: "servicetest1@admin", IsServiceAccount: true},
+			acmock: tests.SetupMockAccesscontrol(
+				t,
+				func(c context.Context, siu *models.SignedInUser) ([]*accesscontrol.Permission, error) {
+					return []*accesscontrol.Permission{{Action: serviceaccounts.ActionRead, Scope: serviceaccounts.ScopeAll}}, nil
+				},
+				false,
+			),
+			expectedCode: http.StatusOK,
+		},
+		{
+			desc: "should be forbidden to retrieve serviceaccount if no permissions",
+			user: &tests.TestUser{Login: "servicetest2@admin", IsServiceAccount: true},
+			acmock: tests.SetupMockAccesscontrol(
+				t,
+				func(c context.Context, siu *models.SignedInUser) ([]*accesscontrol.Permission, error) {
+					return []*accesscontrol.Permission{}, nil
+				},
+				false,
+			),
+			expectedCode: http.StatusForbidden,
+		},
+		{
+			desc:   "should be not found when the user doesnt exist",
+			user:   nil,
+			userID: 12,
+			acmock: tests.SetupMockAccesscontrol(
+				t,
+				func(c context.Context, siu *models.SignedInUser) ([]*accesscontrol.Permission, error) {
+					return []*accesscontrol.Permission{{Action: serviceaccounts.ActionRead, Scope: serviceaccounts.ScopeAll}}, nil
+				},
+				false,
+			),
+			expectedCode: http.StatusNotFound,
+		},
+	}
+
+	var requestResponse = func(server *web.Mux, httpMethod, requestpath string) *httptest.ResponseRecorder {
+		req, err := http.NewRequest(httpMethod, requestpath, nil)
+		require.NoError(t, err)
+		recorder := httptest.NewRecorder()
+		server.ServeHTTP(recorder, req)
+		return recorder
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			serviceAccountRequestScenario(t, http.MethodGet, serviceaccountIDPath, tc.user, func(httpmethod string, endpoint string, user *tests.TestUser) {
+				scopeID := tc.userID
+				if tc.user != nil {
+					createdUser := tests.SetupUserServiceAccount(t, store, *tc.user)
+					scopeID = int(createdUser.Id)
+				}
+				server := setupTestServer(t, &svcmock, routing.NewRouteRegister(), tc.acmock, store)
+
+				actual := requestResponse(server, httpmethod, fmt.Sprintf(endpoint, scopeID))
+
+				actualCode := actual.Code
+				require.Equal(t, tc.expectedCode, actualCode)
+
+				if actualCode == http.StatusOK {
+					actualBody := map[string]interface{}{}
+					err := json.Unmarshal(actual.Body.Bytes(), &actualBody)
+					require.NoError(t, err)
+					require.Equal(t, scopeID, int(actualBody["userId"].(float64)))
+					require.Equal(t, tc.user.Login, actualBody["login"].(string))
+				}
+			})
+		})
+	}
+}

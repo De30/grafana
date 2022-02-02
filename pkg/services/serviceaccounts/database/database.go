@@ -80,23 +80,15 @@ func (s *ServiceAccountsStoreImpl) UpgradeServiceAccounts(ctx context.Context) e
 	return nil
 }
 
-func (s *ServiceAccountsStoreImpl) ConvertToServiceAccounts(ctx context.Context, keys []int64) error {
-	basicKeys := s.sqlStore.GetNonServiceAccountAPIKeys(ctx)
-	if len(basicKeys) == 0 {
-		return nil
+func (s *ServiceAccountsStoreImpl) ConvertToServiceAccount(ctx context.Context, key int64) error {
+	q := &models.GetApiKeyByIdQuery{ApiKeyId: key}
+	err := s.sqlStore.GetApiKeyById(ctx, q)
+	if err != nil {
+		return err
 	}
-	if len(basicKeys) != len(keys) {
-		return fmt.Errorf("one of the keys already has a serviceaccount")
-	}
-	for _, key := range basicKeys {
-		if !contains(keys, key.Id) {
-			s.log.Error("convert service accounts stopped for keyId %d as it is not part of the query to convert or already has a service account", key.Id)
-			continue
-		}
-		err := s.CreateServiceAccountFromApikey(ctx, key)
-		if err != nil {
-			s.log.Error("converting to service accounts failed with error", err)
-		}
+	err = s.CreateServiceAccountFromApikey(ctx, q.Result)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -104,7 +96,7 @@ func (s *ServiceAccountsStoreImpl) ConvertToServiceAccounts(ctx context.Context,
 func (s *ServiceAccountsStoreImpl) CreateServiceAccountFromApikey(ctx context.Context, key *models.ApiKey) error {
 	sa, err := s.sqlStore.CreateServiceAccountForApikey(ctx, key.OrgId, key.Name, key.Role)
 	if err != nil {
-		return fmt.Errorf("failed to create service account for API key with error : %w", err)
+		return err
 	}
 
 	err = s.sqlStore.UpdateApikeyServiceAccount(ctx, key.Id, sa.Id)

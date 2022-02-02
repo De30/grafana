@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -42,7 +43,10 @@ func NewServiceAccountsAPI(
 func (api *ServiceAccountsAPI) RegisterAPIEndpoints(
 	features *featuremgmt.FeatureToggles,
 ) {
+	fmt.Printf("Registering service account API endpoints\n")
 	if !features.IsServiceAccountsEnabled() {
+		fmt.Printf("%v+", features)
+		fmt.Printf("service accounts feature is disabled\n")
 		return
 	}
 
@@ -100,11 +104,14 @@ func (api *ServiceAccountsAPI) ConvertToServiceAccount(ctx *models.ReqContext) r
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "keyId is invalid", err)
 	}
-	if err := api.store.ConvertToServiceAccounts(ctx.Req.Context(), []int64{keyId}); err == nil {
-		return response.Success("service accounts converted")
-	} else {
+	err = api.store.ConvertToServiceAccount(ctx.Req.Context(), keyId)
+	if errors.Is(err, models.ErrUserAlreadyExists) {
+		return response.Error(http.StatusBadRequest, "service account already exists", err)
+	} else if err != nil {
+		fmt.Printf("converting service account %v\n", err)
 		return response.Error(500, "Internal server error", err)
 	}
+	return response.Success("service accounts converted")
 }
 
 func (api *ServiceAccountsAPI) ListTokens(ctx *models.ReqContext) response.Response {

@@ -72,10 +72,9 @@ var (
 			State: FeatureStateBeta,
 		},
 		{
-			Name:            "service-accounts",
-			Description:     "support service accounts",
-			State:           FeatureStateBeta,
-			RequiresLicense: true,
+			Name:        "service-accounts",
+			Description: "support service accounts",
+			State:       FeatureStateBeta,
 		},
 
 		{

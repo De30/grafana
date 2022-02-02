@@ -4,18 +4,20 @@ import { dateTimeFormat, GrafanaTheme2, TimeZone } from '@grafana/data';
 
 import { ApiKey } from '../../types';
 import { css } from '@emotion/css';
+import { config } from '@grafana/runtime';
 
 interface Props {
   apiKeys: ApiKey[];
   timeZone: TimeZone;
   onDelete: (apiKey: ApiKey) => void;
-  serviceAccountEnabled: boolean;
   onConvert: (apiKey: ApiKey) => void;
 }
 
-export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete, serviceAccountEnabled, onConvert }) => {
+export const ApiKeysTable: FC<Props> = ({ apiKeys, timeZone, onDelete, onConvert }) => {
   const theme = useTheme2();
   const styles = getStyles(theme);
+
+  const serviceAccountEnabled = config.featureToggles['service-accounts'];
 
   return (
     <table className="filter-table">
