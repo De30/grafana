@@ -103,7 +103,7 @@ export const TooltipPlugin: React.FC<TooltipPluginProps> = ({
     const tooltipInterpolator = config.getTooltipInterpolator();
 
     if (tooltipInterpolator) {
-      // Custom toolitp positioning
+      // Custom tooltip positioning
       config.addHook('setCursor', (u) => {
         tooltipInterpolator(
           setFocusedSeriesIdx,

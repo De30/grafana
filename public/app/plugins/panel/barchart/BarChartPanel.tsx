@@ -36,7 +36,7 @@ import { getFieldLegendItem } from '../state-timeline/utils';
 import { CloseButton } from 'app/core/components/CloseButton/CloseButton';
 import { HoverEvent, setupConfig } from './config';
 
-const TOOLTIP_OFFSET = 10;
+export const TOOLTIP_OFFSET = 10;
 
 /**
  * @alpha
