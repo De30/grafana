@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MetricSelect } from './MetricSelect';
 import { PromVisualQuery } from '../types';
 import { LabelFilters } from '../shared/LabelFilters';
@@ -8,8 +8,9 @@ import { PrometheusDatasource } from '../../datasource';
 import { NestedQueryList } from './NestedQueryList';
 import { promQueryModeller } from '../PromQueryModeller';
 import { QueryBuilderLabelFilter } from '../shared/types';
-import { DataSourceApi, SelectableValue } from '@grafana/data';
+import { DataFrame, DataSourceApi, SelectableValue } from '@grafana/data';
 import { OperationsEditorRow } from '../shared/OperationsEditorRow';
+import { Button, Tooltip } from '@grafana/ui';
 
 export interface Props {
   query: PromVisualQuery;
@@ -17,9 +18,33 @@ export interface Props {
   onChange: (update: PromVisualQuery) => void;
   onRunQuery: () => void;
   nested?: boolean;
+  series?: DataFrame[];
 }
 
-export const PromQueryBuilder = React.memo<Props>(({ datasource, query, onChange, onRunQuery }) => {
+export const PromQueryBuilder = React.memo<Props>(({ datasource, query, onChange, onRunQuery, series }) => {
+  const [hints, setHints] = useState<JSX.Element[] | undefined>();
+
+  useEffect(() => {
+    if (!query.operations.length) {
+      const onAddOperation = (value: string) => {
+        const operationDef = promQueryModeller.getOperationDef(value);
+        onChange(operationDef.addOperationHandler(operationDef, query, promQueryModeller));
+      };
+
+      const hints = datasource.getQueryHints({ expr: query.metric, refId: 'A' }, series || []);
+      const hintElements = hints.map((hint) => (
+        <Tooltip content={`${hint.label} ${hint.fix?.label}`} key={hint.type}>
+          <Button onClick={() => onAddOperation(hint.type.split('_')[1].toLowerCase() || '')} variant="secondary">
+            {hint.type?.toLowerCase().replace('_', ' ')}
+          </Button>
+        </Tooltip>
+      ));
+      setHints(hintElements);
+    } else {
+      setHints(undefined);
+    }
+  }, [query, datasource, series, onChange]);
+
   const onChangeLabels = (labels: QueryBuilderLabelFilter[]) => {
     onChange({ ...query, labels });
   };
@@ -102,6 +127,7 @@ export const PromQueryBuilder = React.memo<Props>(({ datasource, query, onChange
           query={query}
           onChange={onChange}
           onRunQuery={onRunQuery}
+          hints={hints}
         />
         {query.binaryQueries && query.binaryQueries.length > 0 && (
           <NestedQueryList query={query} datasource={datasource} onChange={onChange} onRunQuery={onRunQuery} />

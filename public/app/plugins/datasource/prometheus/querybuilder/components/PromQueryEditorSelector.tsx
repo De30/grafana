@@ -96,6 +96,7 @@ export const PromQueryEditorSelector = React.memo<PromQueryEditorProps>((props) 
               datasource={props.datasource}
               onChange={onChangeViewModel}
               onRunQuery={props.onRunQuery}
+              series={data?.series}
             />
             {query.editorPreview && <QueryPreview query={visualQuery} />}
             <PromQueryBuilderOptions query={query} app={props.app} onChange={onChange} onRunQuery={onRunQuery} />

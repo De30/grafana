@@ -14,6 +14,7 @@ export interface Props<T extends QueryWithOperations> {
   onRunQuery: () => void;
   queryModeller: VisualQueryModeller;
   explainMode?: boolean;
+  hints?: JSX.Element[];
 }
 
 export function OperationList<T extends QueryWithOperations>({
@@ -22,6 +23,7 @@ export function OperationList<T extends QueryWithOperations>({
   queryModeller,
   onChange,
   onRunQuery,
+  hints,
 }: Props<T>) {
   const styles = useStyles2(getStyles);
   const { operations } = query;
@@ -104,6 +106,7 @@ export function OperationList<T extends QueryWithOperations>({
             buttonProps={{ 'aria-label': 'Add operation', title: 'Add operation' }}
           />
         </div>
+        {!!hints && hints.map((hint) => hint)}
       </Stack>
     </Stack>
   );
