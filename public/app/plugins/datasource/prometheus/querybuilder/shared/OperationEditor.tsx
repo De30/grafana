@@ -122,7 +122,7 @@ export function OperationEditor({
               queryModeller={queryModeller}
             />
             <FlexItem grow={1} />
-            <div className={`${styles.operationHeaderButtons} operation-header-show-on-hover`}>
+            {/* <div className={`${styles.operationHeaderButtons} operation-header-show-on-hover`}>
               <OperationInfoButton def={def} operation={operation} />
               <Button
                 icon="times"
@@ -132,7 +132,7 @@ export function OperationEditor({
                 variant="secondary"
                 title="Remove operation"
               />
-            </div>
+            </div> */}
           </div>
           <div className={styles.body}>{operationElements}</div>
           {restParam}
@@ -180,18 +180,19 @@ function callParamChangedThenOnChange(
 const getStyles = (theme: GrafanaTheme2) => {
   return {
     card: css({
-      background: theme.colors.background.primary,
-      border: `1px solid ${theme.colors.border.medium}`,
+      background: theme.colors.background.secondary,
+      padding: '2px',
+      //border: `1px solid ${theme.colors.border.medium}`,
       display: 'flex',
-      flexDirection: 'column',
+      //flexDirection: 'column',
       cursor: 'grab',
       borderRadius: theme.shape.borderRadius(1),
-      marginBottom: theme.spacing(1),
+      //marginBottom: theme.spacing(1),
       position: 'relative',
     }),
     header: css({
-      borderBottom: `1px solid ${theme.colors.border.medium}`,
-      padding: theme.spacing(0.5, 0.5, 0.5, 1),
+      //borderBottom: `1px solid ${theme.colors.border.medium}`,
+      //padding: theme.spacing(0.5, 0.5, 0.5, 1),
       gap: theme.spacing(1),
       display: 'flex',
       alignItems: 'center',
@@ -203,8 +204,9 @@ const getStyles = (theme: GrafanaTheme2) => {
       color: theme.colors.text.secondary,
     }),
     body: css({
-      margin: theme.spacing(1, 1, 0.5, 1),
-      display: 'table',
+      //margin: theme.spacing(1, 1, 0.5, 1),
+      display: 'flex',
+      gap: '8px',
     }),
     paramRow: css({
       display: 'table-row',

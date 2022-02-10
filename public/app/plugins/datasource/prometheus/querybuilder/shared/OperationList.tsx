@@ -67,44 +67,42 @@ export function OperationList<T extends QueryWithOperations>({
   };
 
   return (
-    <Stack gap={1} direction="column">
-      <Stack gap={1}>
-        {operations.length > 0 && (
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="sortable-field-mappings" direction="horizontal">
-              {(provided) => (
-                <div className={styles.operationList} ref={provided.innerRef} {...provided.droppableProps}>
-                  {operations.map((op, index) => (
-                    <OperationEditor
-                      key={index}
-                      queryModeller={queryModeller}
-                      index={index}
-                      operation={op}
-                      query={query}
-                      datasource={datasource}
-                      onChange={onOperationChange}
-                      onRemove={onRemove}
-                      onRunQuery={onRunQuery}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        )}
-        <div className={styles.addButton}>
-          <ButtonCascader
-            key="cascader"
-            icon="plus"
-            options={addOptions}
-            onChange={onAddOperation}
-            variant="secondary"
-            hideDownIcon={true}
-            buttonProps={{ 'aria-label': 'Add operation', title: 'Add operation' }}
-          />
-        </div>
-      </Stack>
+    <Stack gap={0.5} direction="column">
+      {operations.length > 0 && (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="sortable-field-mappings" direction="horizontal">
+            {(provided) => (
+              <div className={styles.operationList} ref={provided.innerRef} {...provided.droppableProps}>
+                {operations.map((op, index) => (
+                  <OperationEditor
+                    key={index}
+                    queryModeller={queryModeller}
+                    index={index}
+                    operation={op}
+                    query={query}
+                    datasource={datasource}
+                    onChange={onOperationChange}
+                    onRemove={onRemove}
+                    onRunQuery={onRunQuery}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
+      <div className={styles.addButton}>
+        <ButtonCascader
+          key="cascader"
+          icon="plus"
+          options={addOptions}
+          onChange={onAddOperation}
+          variant="secondary"
+          hideDownIcon={true}
+          buttonProps={{ 'aria-label': 'Add operation', title: 'Add operation' }}
+        />
+      </div>
     </Stack>
   );
 }
@@ -119,7 +117,8 @@ const getStyles = (theme: GrafanaTheme2) => {
     operationList: css({
       display: 'flex',
       flexWrap: 'wrap',
-      gap: theme.spacing(2),
+      flexDirection: 'column',
+      gap: theme.spacing(0.5),
     }),
     addButton: css({
       paddingBottom: theme.spacing(1),
