@@ -72,6 +72,7 @@ type API struct {
 	MultiOrgAlertmanager *notifier.MultiOrgAlertmanager
 	StateManager         *state.Manager
 	SecretsService       secrets.Service
+	ProvisioningStore    store.TransactionalProvisioningStore
 }
 
 // RegisterAPIEndpoints registers API handlers
@@ -90,7 +91,7 @@ func (api *API) RegisterAPIEndpoints(m *metrics.API) {
 	}, m)
 
 	api.RegisterContactPointEndpoints(&ContactPointServer{
-		service: services.NewEmbeddedContactPointService(api.AlertingStore, api.SecretsService),
+		service: services.NewEmbeddedContactPointService(api.AlertingStore, api.SecretsService, api.ProvisioningStore),
 	}, m)
 
 	// Register endpoints for proxying to Alertmanager-compatible backends.

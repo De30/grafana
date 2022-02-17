@@ -28,9 +28,14 @@ type ProvisioningStore interface {
 }
 
 type TransactionalProvisioningStore interface {
+	NewTransaction() UnitOfWork
 	GetProvenance(ctx context.Context, o models.Provisionable) (models.Provenance, error)
 	// TODO: API to query all provenances for a specific type?
 	SetProvenanceTransactional(o models.Provisionable, p models.Provenance, uow UnitOfWork) UnitOfWork
+}
+
+func (st DBstore) NewTransaction() UnitOfWork {
+	return NewTransaction(st.SQLStore)
 }
 
 func (st DBstore) GetProvenance(ctx context.Context, o models.Provisionable) (models.Provenance, error) {

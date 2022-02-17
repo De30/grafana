@@ -13,6 +13,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/ngalert/common"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/notifier/channels"
+	"github.com/grafana/grafana/pkg/services/ngalert/store"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/prometheus/alertmanager/config"
@@ -26,7 +27,7 @@ type EmbeddedContactPoint struct {
 	Type                  string           `json:"type"`
 	DisableResolveMessage bool             `json:"disableResolveMessage"`
 	Settings              *simplejson.Json `json:"settings"`
-	Provenance            string           `json:"provanance"`
+	Provenance            string           `json:"provenance"`
 }
 
 const RedactedValue = "[REDACTED]"
@@ -35,6 +36,7 @@ var (
 	ErrContactPointNoTypeSet           = errors.New("contact point 'type' field should not be empty")
 	ErrContactPointNoSettingsSet       = errors.New("contact point 'settings' field should not be empty")
 	ErrContactPointSettingsNotReadable = errors.New("contact point 'settings' not readable")
+	ErrContactPointProvisioned         = errors.New("contact point is provisioned")
 )
 
 func (e *EmbeddedContactPoint) IsValid() (bool, error) {
@@ -45,6 +47,18 @@ func (e *EmbeddedContactPoint) IsValid() (bool, error) {
 		return false, ErrContactPointNoSettingsSet
 	}
 	return channels.ValidateContactPointReceiver(e.Type, e.Settings)
+}
+
+func (e *EmbeddedContactPoint) ResourceType() string {
+	return "contactPoint"
+}
+
+func (e *EmbeddedContactPoint) ResourceID() string {
+	return e.UID
+}
+
+func (e *EmbeddedContactPoint) ResourceOrgID() int64 {
+	return 1 // TODO
 }
 
 func (e *EmbeddedContactPoint) secretKeys() ([]string, error) {
@@ -112,12 +126,14 @@ type ContactPointService interface {
 
 type EmbeddedContactPointService struct {
 	amStore           AMStore
+	provisioningStore store.TransactionalProvisioningStore
 	encryptionService secrets.Service
 }
 
-func NewEmbeddedContactPointService(store AMStore, encryptionService secrets.Service) *EmbeddedContactPointService {
+func NewEmbeddedContactPointService(store AMStore, encryptionService secrets.Service, provStore store.TransactionalProvisioningStore) *EmbeddedContactPointService {
 	return &EmbeddedContactPointService{
 		amStore:           store,
+		provisioningStore: provStore,
 		encryptionService: encryptionService,
 	}
 }
@@ -137,7 +153,7 @@ func (ecp *EmbeddedContactPointService) GetContactPoints(orgID int64) ([]Embedde
 			Settings:              contactPoint.Settings,
 		}
 		for k, v := range contactPoint.SecureSettings {
-			decryptedValue, err := ecp.decrypteValue(v)
+			decryptedValue, err := ecp.decryptValue(v)
 			if err != nil {
 				// TODO(JP): log a warning
 				continue
@@ -147,6 +163,11 @@ func (ecp *EmbeddedContactPointService) GetContactPoints(orgID int64) ([]Embedde
 			}
 			embeddedContactPoint.Settings.Set(k, RedactedValue)
 		}
+		provenance, err := ecp.provisioningStore.GetProvenance(context.Background(), &embeddedContactPoint)
+		if err != nil {
+			return nil, err
+		}
+		embeddedContactPoint.Provenance = string(provenance)
 		contactPoints = append(contactPoints, embeddedContactPoint)
 	}
 	return contactPoints, nil
@@ -170,7 +191,7 @@ func (ecp *EmbeddedContactPointService) getContactPointUncrypted(orgID int64, ui
 			Settings:              receiver.Settings,
 		}
 		for k, v := range receiver.SecureSettings {
-			decryptedValue, err := ecp.decrypteValue(v)
+			decryptedValue, err := ecp.decryptValue(v)
 			if err != nil {
 				// TODO(JP): log a warning
 				continue
@@ -235,6 +256,15 @@ func (ecp *EmbeddedContactPointService) CreateContactPoint(orgID int64, contactP
 	if err != nil {
 		return EmbeddedContactPoint{}, err
 	}
+	// TODO: UoW-ify
+	// provenance := parseProvenance(contactPoint.Provenance)
+	uow := ecp.provisioningStore.NewTransaction()
+	uow = ecp.provisioningStore.SetProvenanceTransactional(&contactPoint, models.ProvenanceApi, uow)
+	err = uow.Execute(context.Background())
+	if err != nil {
+		return EmbeddedContactPoint{}, err
+	}
+
 	return contactPoint, ecp.amStore.UpdateAlertManagerConfiguration(&models.SaveAlertmanagerConfigurationCmd{
 		AlertmanagerConfiguration:     string(data),
 		AlertmanagerConfigurationHash: fmt.Sprintf("%x", md5.Sum(data)),
@@ -266,6 +296,15 @@ func (ecp *EmbeddedContactPointService) UpdateContactPoint(orgID int64, contactP
 		return fmt.Errorf("contact point is not valid: %w", err)
 	}
 	fmt.Printf("%+v\n", *contactPoint.Settings)
+
+	provenance, err := ecp.provisioningStore.GetProvenance(context.Background(), &contactPoint)
+	if err != nil {
+		return err
+	}
+	if provenance != models.ProvenanceNone && contactPoint.Provenance != string(provenance) {
+		return fmt.Errorf("Object is provisioned via %s; cannot modify", provenance)
+	}
+
 	// transform to internal model
 	extracedSecrets, err := contactPoint.extractSecrtes()
 	if err != nil {
@@ -310,6 +349,16 @@ func (ecp *EmbeddedContactPointService) UpdateContactPoint(orgID int64, contactP
 	if err != nil {
 		return err
 	}
+	if contactPoint.Provenance != "" {
+		// TODO: UoW-ify
+		// provenance := parseProvenance(contactPoint.Provenance)
+		uow := ecp.provisioningStore.NewTransaction()
+		uow = ecp.provisioningStore.SetProvenanceTransactional(&contactPoint, models.ProvenanceApi, uow)
+		err = uow.Execute(context.Background())
+		if err != nil {
+			return err
+		}
+	}
 	return ecp.amStore.UpdateAlertManagerConfiguration(&models.SaveAlertmanagerConfigurationCmd{
 		AlertmanagerConfiguration:     string(data),
 		AlertmanagerConfigurationHash: fmt.Sprintf("%x", md5.Sum(data)),
@@ -339,7 +388,7 @@ func (ecp *EmbeddedContactPointService) getCurrentConfig(orgID int64) (*apimodel
 	return cfg, query.Result.AlertmanagerConfigurationHash, nil
 }
 
-func (ecp *EmbeddedContactPointService) decrypteValue(value string) (string, error) {
+func (ecp *EmbeddedContactPointService) decryptValue(value string) (string, error) {
 	decodeValue, err := base64.StdEncoding.DecodeString(value)
 	if err != nil {
 		return "", err
@@ -359,4 +408,17 @@ func (ecp *EmbeddedContactPointService) encryptValue(value string) (string, erro
 		return "", fmt.Errorf("failed to encrypt secure settings: %w", err)
 	}
 	return base64.StdEncoding.EncodeToString(encryptedData), nil
+}
+
+func parseProvenance(provenance string) models.Provenance {
+	// TODO: EmbeddedContactPoint should use Provenance rather than string
+	// TODO: Have the JSON deserialization layer do this parsing for us. this code should not exist.
+	switch provenance {
+	case string(models.ProvenanceApi):
+		return models.ProvenanceApi
+	case string(models.ProvenanceFile):
+		return models.ProvenanceFile
+	default:
+		return models.ProvenanceNone
+	}
 }

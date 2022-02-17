@@ -18,11 +18,11 @@ func (s *ContactPointServer) RouteGetContactPoint(c *api.ReqContext) response.Re
 	if !c.HasUserRole(api.ROLE_VIEWER) {
 		return ErrResp(http.StatusForbidden, errors.New("permission denied"), "")
 	}
-	templates, err := s.service.GetContactPoints(c.OrgId)
+	points, err := s.service.GetContactPoints(c.OrgId)
 	if err != nil {
 		return ErrResp(http.StatusInternalServerError, err, "")
 	}
-	return response.JSON(http.StatusOK, templates)
+	return response.JSON(http.StatusOK, points)
 }
 
 func (s *ContactPointServer) RouteCreateContactPoint(c *api.ReqContext) response.Response {
@@ -33,6 +33,7 @@ func (s *ContactPointServer) RouteCreateContactPoint(c *api.ReqContext) response
 	if err := web.Bind(c.Req, &contactPoint); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
+	contactPoint.Provenance = Provenance(c.Req)
 	contactPoint, err := s.service.CreateContactPoint(c.OrgId, contactPoint)
 	if err != nil {
 		return ErrResp(http.StatusInternalServerError, err, "")
@@ -48,6 +49,7 @@ func (s *ContactPointServer) RouteUpdateContactPoint(c *api.ReqContext) response
 	if err := web.Bind(c.Req, &contactPoint); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
+	contactPoint.Provenance = Provenance(c.Req)
 	err := s.service.UpdateContactPoint(c.OrgId, contactPoint)
 	if err != nil {
 		return ErrResp(http.StatusInternalServerError, err, "")
