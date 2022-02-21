@@ -16,4 +16,4 @@ To add visualization to a panel:
 1. Click on the Visualization list at the top of the right pane and select a visualization. By default, the Time series visualization is selected.
 {{< figure src="/static/img/docs/panel-editor/select-visualization-8-0.png" max-width="300px" >}}
 1. If necessary, update the visualization properties. For a complete list of visualizations, see 
-1. Save your changes.
+1. Click **APpply** to save your changes.

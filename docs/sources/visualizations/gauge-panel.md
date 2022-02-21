@@ -8,21 +8,18 @@ weight = 400
 
 # Gauge
 
-Gauge is a single-value visualization that can repeat a gauge for every series, column or row.
+Gauge is a single-value visualization that can repeat and create a new gauge for every series, column or row.
 
-{{< figure src="/static/img/docs/v66/gauge_panel_cover.png" max-width="1025px" >}}
+{{< figure src="/static/img/docs/v66/gauge_panel_cover.png" max-width="450px" >}}
+
+For instructions on how to select the Annotations visualization, see [Add visualization to a panel]({{< relref "./add-visualization.md" >}}). You can refine your visualization using the following options.
 
 ## Value options
 
-Use the following options to refine how your visualization displays the value:
+Refine how your visualization displays the value:
 
-### Show
-
-Choose how Grafana displays your data.
-
-#### Calculate
-
-Show a calculated value based on all rows.
+- **Show -** Choose how Grafana displays your data.
+- -**Calculate** Select to display a calculated value based on all rows.
 
 - **Calculation -** Select a reducer function that Grafana will use to reduce many fields to a single value. For a list of available calculations, refer to [List of calculations]({{< relref "../panels/reference-calculation-types.md" >}}).
 - **Fields -** Select the fields display in the panel.
@@ -47,3 +44,5 @@ Adjust the sizes of the gauge text.
 
 - **Title -** Enter a numeric value for the gauge title size.
 - **Value -** Enter a numeric value for the gauge value size.
+
+{{< docs/shared "visualizations/threshold.md" >}}
