@@ -6,9 +6,9 @@ aliases = ["/docs/grafana/latest/features/panels/anotations/", "/docs/grafana/la
 weight = 105
 +++
 
-# Annotations visualization
+# Annotations
 
-The Annotations visualization displays a list of available annotations you can use to view annotated data. For instructions on how to select the Annotations visualization, see [Add visualization to a panel] topic.
+The Annotations panel shows a list of available annotations you can use to view annotated data. Various options are available to filter the list based on tags and on the current dashboard.
 
 ## Annotation query
 

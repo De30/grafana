@@ -5,9 +5,9 @@ aliases = ["/docs/grafana/latest/reference/alertlist/", "/docs/grafana/latest/fe
 weight = 100
 +++
 
-# Reference: Alert list
+# Alert list
 
-The Alert list visualization displays dashboards alerts. You can configure the list to show current state or recent state changes. You can read more about alerts in [Alerts overview]({{< relref "../alerting/_index.md" >}}).
+The Alert list allows you to display your dashboards alerts. You can configure the list to show current state or recent state changes. You can read more about alerts in [Alerts overview]({{< relref "../alerting/_index.md" >}}).
 
 {{< figure src="/static/img/docs/v45/alert-list-panel.png" max-width="850px" >}}
 
