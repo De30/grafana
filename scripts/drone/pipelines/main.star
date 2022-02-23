@@ -153,11 +153,11 @@ def main_pipelines(edition):
     volumes = integration_test_services_volumes()
     trigger = {
         'event': ['push',],
-        'branch': 'main',
+        'branch': 'km/test-grabpl',
     }
     drone_change_trigger = {
         'event': ['push',],
-        'branch': 'main',
+        'branch': 'km/test-grabpl',
         'paths': {
             'include': [
                 '.drone.yml',
