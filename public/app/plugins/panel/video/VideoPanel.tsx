@@ -30,7 +30,7 @@ export class VideoPanel extends PureComponent<Props, State> {
       duration: 0,
       opts: {
         // lookup the options in the docs for more options
-        autoplay: true,
+        autoplay: false,
         controls: true,
         responsive: true,
         fluid: true,
@@ -91,13 +91,13 @@ export class VideoPanel extends PureComponent<Props, State> {
       console.log('progress', v);
     });
 
-    player.on('seeking', (v: any) => {
-      console.log('seeking', v);
-    });
+    // player.on('seeking', (v: any) => {
+    //   console.log('seeking', v);
+    // });
 
-    player.on('seeked', (v: any) => {
-      console.log('seeked', v);
-    });
+    // player.on('seeked', (v: any) => {
+    //   console.log('seeked', v);
+    // });
 
     player.on('ended', (v: any) => {
       console.log('ended', v);
