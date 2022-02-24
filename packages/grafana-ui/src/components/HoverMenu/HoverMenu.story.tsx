@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { HoverMenu } from './HoverMenu';
+import React from 'react';
+import { HoverMenu, HoverMenuItem } from './HoverMenu';
 import { withCenteredStory } from '../../utils/storybook/withCenteredStory';
 import { PanelChrome } from '../PanelChrome';
 import { DashboardStoryCanvas } from '../../utils/storybook/DashboardStoryCanvas';
-import { VerticalGroup } from '../Layout/Layout';
+import { getFocusStyles } from '../../themes/mixins';
+import { css } from '@emotion/css';
+import { useTheme2 } from '../../themes/ThemeContext';
+import { Button } from '../Button';
 
 export default {
   title: 'Buttons/HoverMenu',
@@ -13,26 +16,34 @@ export default {
 };
 
 export const Examples = () => {
-  // const [showMenu, setShowMenu] = useState(false);
-  const [ref, setRef] = useState<HTMLDivElement | null>(null);
+  const theme = useTheme2();
+  const focusStyle = css({
+    '&:focus-visible': getFocusStyles(theme),
+  });
 
   return (
     <DashboardStoryCanvas>
-      <VerticalGroup spacing="lg">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: 300 }}>
         <div>Menu</div>
-        {/* <HoverMenu show={true} /> */}
 
         <div>On hover</div>
 
-        <div ref={setRef} style={{ position: 'relative' }}>
-          <HoverMenu triggerRef={ref} />
+        <div style={{ position: 'relative' }} tabIndex={0} className={focusStyle}>
+          <HoverMenu>
+            <HoverMenuItem icon="eye" name="View panel" />
+            <HoverMenuItem icon="pen" name="Edit panel" />
+            <HoverMenuItem icon="share-alt" name="Share panel" />
+          </HoverMenu>
           <PanelChrome width={300} height={200}>
             {() => {
               return <div>hello</div>;
             }}
           </PanelChrome>
         </div>
-      </VerticalGroup>
+
+        <div>Button</div>
+        <Button>Focus outside test</Button>
+      </div>
     </DashboardStoryCanvas>
   );
 };

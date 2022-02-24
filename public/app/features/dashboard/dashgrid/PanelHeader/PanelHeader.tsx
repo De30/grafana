@@ -58,7 +58,7 @@ export const PanelHeader: FC<Props> = ({ panel, error, isViewing, isEditing, dat
                   />
                 ) : null}
                 <h2 className={styles.titleText}>{title}</h2>
-                <Icon name="angle-down" className="panel-menu-toggle" />
+                {/* <Icon name="angle-down" className="panel-menu-toggle" /> */}
                 <PanelHeaderMenuWrapper panel={panel} dashboard={dashboard} show={panelMenuOpen} onClose={closeMenu} />
                 {data.request && data.request.timeInfo && (
                   <span className="panel-time-info">

@@ -26,6 +26,8 @@
   }
 
   &:hover {
+    border: 1px solid $input-border-color;
+
     .panel-menu-toggle {
       visibility: visible;
       transition: opacity 0.1s ease-in 0.2s;

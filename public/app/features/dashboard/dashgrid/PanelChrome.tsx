@@ -19,7 +19,15 @@ import {
   toDataFrameDTO,
   toUtc,
 } from '@grafana/data';
-import { ErrorBoundary, PanelContext, PanelContextProvider, SeriesVisibilityChangeMode } from '@grafana/ui';
+import {
+  ErrorBoundary,
+  HoverMenu,
+  HoverMenuItem,
+  PanelContext,
+  PanelContextProvider,
+  SeriesVisibilityChangeMode,
+  styleMixins,
+} from '@grafana/ui';
 import { VizLegendOptions } from '@grafana/schema';
 import { selectors } from '@grafana/e2e-selectors';
 
@@ -38,6 +46,7 @@ import { deleteAnnotation, saveAnnotation, updateAnnotation } from '../../annota
 import { getDashboardQueryRunner } from '../../query/state/DashboardQueryRunner/DashboardQueryRunner';
 import { liveTimer } from './liveTimer';
 import { isSoloRoute } from '../../../routes/utils';
+import { css } from '@emotion/css';
 
 const DEFAULT_PLUGIN_ERROR = 'Error in plugin';
 
@@ -453,30 +462,28 @@ export class PanelChrome extends PureComponent<Props, State> {
     this.eventFilter.onlyLocal = dashboard.graphTooltip === 0;
 
     return (
-      <>
-        <div className={panelContentClassNames}>
-          <PanelContextProvider value={this.state.context}>
-            <PanelComponent
-              id={panel.id}
-              data={data}
-              title={panel.title}
-              timeRange={timeRange}
-              timeZone={this.props.dashboard.getTimezone()}
-              options={panelOptions}
-              fieldConfig={panel.fieldConfig}
-              transparent={panel.transparent}
-              width={panelWidth}
-              height={innerPanelHeight}
-              renderCounter={renderCounter}
-              replaceVariables={panel.replaceVariables}
-              onOptionsChange={this.onOptionsChange}
-              onFieldConfigChange={this.onFieldConfigChange}
-              onChangeTimeRange={this.onChangeTimeRange}
-              eventBus={dashboard.events}
-            />
-          </PanelContextProvider>
-        </div>
-      </>
+      <div className={panelContentClassNames}>
+        <PanelContextProvider value={this.state.context}>
+          <PanelComponent
+            id={panel.id}
+            data={data}
+            title={panel.title}
+            timeRange={timeRange}
+            timeZone={this.props.dashboard.getTimezone()}
+            options={panelOptions}
+            fieldConfig={panel.fieldConfig}
+            transparent={panel.transparent}
+            width={panelWidth}
+            height={innerPanelHeight}
+            renderCounter={renderCounter}
+            replaceVariables={panel.replaceVariables}
+            onOptionsChange={this.onOptionsChange}
+            onFieldConfigChange={this.onFieldConfigChange}
+            onChangeTimeRange={this.onChangeTimeRange}
+            eventBus={dashboard.events}
+          />
+        </PanelContextProvider>
+      </div>
     );
   }
 
@@ -493,11 +500,14 @@ export class PanelChrome extends PureComponent<Props, State> {
   }
 
   render() {
-    const { dashboard, panel, isViewing, isEditing, width, height, plugin } = this.props;
-    const { errorMessage, data } = this.state;
+    const { panel, width, height, plugin, dashboard, isEditing, isViewing } = this.props;
+    const { data, errorMessage } = this.state;
     const { transparent } = panel;
 
     const alertState = data.alertState?.state;
+    const focusStyle = css({
+      ['&:focus-visible']: styleMixins.getFocusStyles(config.theme2),
+    });
 
     const containerClassNames = classNames({
       'panel-container': true,
@@ -505,13 +515,25 @@ export class PanelChrome extends PureComponent<Props, State> {
       'panel-container--transparent': transparent,
       'panel-container--no-title': this.hasOverlayHeader(),
       [`panel-alert-state--${alertState}`]: alertState !== undefined,
+      [focusStyle]: true,
     });
+
+    // Push menu down if on the top row
+    const offset = panel.gridPos.y === 0 ? -24 : 2;
 
     return (
       <section
         className={containerClassNames}
         aria-label={selectors.components.Panels.Panel.containerByTitle(panel.title)}
+        tabIndex={0}
       >
+        <HoverMenu offset={offset}>
+          <HoverMenuItem icon="eye" name="View panel" />
+          <HoverMenuItem icon="pen" name="Edit panel" />
+          <HoverMenuItem icon="share-alt" name="Share panel" />
+          <HoverMenuItem icon="ellipsis-v" name="More actions" />
+        </HoverMenu>
+
         <PanelHeader
           panel={panel}
           dashboard={dashboard}
