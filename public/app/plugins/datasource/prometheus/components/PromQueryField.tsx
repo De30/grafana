@@ -1,17 +1,6 @@
 import React, { ReactNode } from 'react';
 
-import { Plugin } from 'slate';
-import {
-  SlatePrism,
-  TypeaheadInput,
-  TypeaheadOutput,
-  BracesPlugin,
-  DOMUtil,
-  SuggestionsState,
-  Icon,
-} from '@grafana/ui';
-
-import { LanguageMap, languages as prismLanguages } from 'prismjs';
+import { Icon } from '@grafana/ui';
 
 // dom also includes Element polyfills
 import { PromQuery, PromOptions } from '../types';
@@ -23,7 +12,6 @@ import { PrometheusMetricsBrowser } from './PrometheusMetricsBrowser';
 import { MonacoQueryFieldWrapper } from './monaco-query-field/MonacoQueryFieldWrapper';
 import { LocalStorageValueProvider } from 'app/core/components/LocalStorageValueProvider';
 
-export const RECORDING_RULES_GROUP = '__recording_rules__';
 const LAST_USED_LABELS_KEY = 'grafana.datasources.prometheus.browser.labels';
 
 function getChooserText(metricsLookupDisabled: boolean, hasSyntax: boolean, hasMetrics: boolean) {
@@ -42,33 +30,6 @@ function getChooserText(metricsLookupDisabled: boolean, hasSyntax: boolean, hasM
   return 'Metrics browser';
 }
 
-export function willApplySuggestion(suggestion: string, { typeaheadContext, typeaheadText }: SuggestionsState): string {
-  // Modify suggestion based on context
-  switch (typeaheadContext) {
-    case 'context-labels': {
-      const nextChar = DOMUtil.getNextCharacter();
-      if (!nextChar || nextChar === '}' || nextChar === ',') {
-        suggestion += '=';
-      }
-      break;
-    }
-
-    case 'context-label-values': {
-      // Always add quotes and remove existing ones instead
-      if (!typeaheadText.match(/^(!?=~?"|")/)) {
-        suggestion = `"${suggestion}`;
-      }
-      if (DOMUtil.getNextCharacter() !== '"') {
-        suggestion = `${suggestion}"`;
-      }
-      break;
-    }
-
-    default:
-  }
-  return suggestion;
-}
-
 interface PromQueryFieldProps extends QueryEditorProps<PrometheusDatasource, PromQuery, PromOptions> {
   ExtraFieldElement?: ReactNode;
   'data-testid'?: string;
@@ -81,22 +42,10 @@ interface PromQueryFieldState {
 }
 
 class PromQueryField extends React.PureComponent<PromQueryFieldProps, PromQueryFieldState> {
-  plugins: Plugin[];
   declare languageProviderInitializationPromise: CancelablePromise<any>;
 
   constructor(props: PromQueryFieldProps, context: React.Context<any>) {
     super(props, context);
-
-    this.plugins = [
-      BracesPlugin(),
-      SlatePrism(
-        {
-          onlyIn: (node: any) => node.type === 'code_block',
-          getSyntax: (node: any) => 'promql',
-        },
-        { ...(prismLanguages as LanguageMap), promql: this.props.datasource.languageProvider.syntax }
-      ),
-    ];
 
     this.state = {
       labelBrowserVisible: false,
@@ -235,26 +184,6 @@ class PromQueryField extends React.PureComponent<PromQueryFieldProps, PromQueryF
     }
 
     this.setState({ syntaxLoaded: true });
-  };
-
-  onTypeahead = async (typeahead: TypeaheadInput): Promise<TypeaheadOutput> => {
-    const {
-      datasource: { languageProvider },
-    } = this.props;
-
-    if (!languageProvider) {
-      return { suggestions: [] };
-    }
-
-    const { history } = this.props;
-    const { prefix, text, value, wrapperClasses, labelKey } = typeahead;
-
-    const result = await languageProvider.provideCompletionItems(
-      { text, value, prefix, wrapperClasses, labelKey },
-      { history }
-    );
-
-    return result;
   };
 
   render() {
