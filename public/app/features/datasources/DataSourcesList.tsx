@@ -3,7 +3,7 @@ import React, { FC } from 'react';
 
 // Types
 import { DataSourceSettings, LayoutMode } from '@grafana/data';
-import { Card, Tag, useStyles } from '@grafana/ui';
+import { Card, Tag, IconButton, useStyles } from '@grafana/ui';
 import { css } from '@emotion/css';
 
 export interface Props {
@@ -19,8 +19,18 @@ export const DataSourcesList: FC<Props> = ({ dataSources, layoutMode }) => {
       {dataSources.map((dataSource) => {
         return (
           <li key={dataSource.id}>
-            <Card href={`datasources/edit/${dataSource.uid}`}>
-              <Card.Heading>{dataSource.name}</Card.Heading>
+            <Card onClick={() => window.location.assign(`datasources/edit/${dataSource.uid}`)}>
+              <Card.Heading onClickOverride={true}>
+                <div>{dataSource.name}</div>
+                <div>
+                  <IconButton
+                    key="compass"
+                    name="compass"
+                    tooltip="Explore this data source"
+                    onClick={() => window.location.assign(`explore`)}
+                  />
+                </div>
+              </Card.Heading>
               <Card.Figure>
                 <img src={dataSource.typeLogoUrl} alt="" height="40px" width="40px" className={styles.logo} />
               </Card.Figure>

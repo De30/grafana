@@ -92,7 +92,12 @@ interface ChildProps {
 }
 
 /** Main heading for the card */
-const Heading = ({ children, className, 'aria-label': ariaLabel }: ChildProps & { 'aria-label'?: string }) => {
+const Heading = ({
+  children,
+  className,
+  'aria-label': ariaLabel,
+  onClickOverride,
+}: ChildProps & { 'aria-label'?: string; onClickOverride?: boolean }) => {
   const context = useContext(CardContext);
   const styles = useStyles2(getHeadingStyles);
 
@@ -104,7 +109,7 @@ const Heading = ({ children, className, 'aria-label': ariaLabel }: ChildProps & 
         <a href={href} className={styles.linkHack} aria-label={ariaLabel}>
           {children}
         </a>
-      ) : onClick ? (
+      ) : onClick && onClickOverride !== true ? (
         <button onClick={onClick} className={styles.linkHack} aria-label={ariaLabel}>
           {children}
         </button>
