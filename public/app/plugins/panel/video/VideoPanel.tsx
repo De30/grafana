@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { EventBus, DataHoverEvent, PanelProps } from '@grafana/data';
+import { debounce } from 'lodash';
 import { Subscription } from 'rxjs';
 import { PanelOptions } from './models.gen';
 import videojs from 'video.js';
@@ -51,6 +52,21 @@ export class VideoPanel extends PureComponent<Props, State> {
     };
   }
 
+  seekVideo = debounce(
+    (offset: number) => {
+      console.log('OTHER HOVER', offset);
+      if (this.player) {
+        this.player.pause(); // do not keep playing
+        this.player.currentTime(offset);
+      }
+    },
+    200,
+    {
+      leading: true,
+      trailing: true,
+    }
+  );
+
   componentDidMount() {
     const { eventBus } = this.props;
 
@@ -66,9 +82,9 @@ export class VideoPanel extends PureComponent<Props, State> {
           const start = this.props.data.timeRange.from.valueOf();
           const offset = (time - start) / 1000; // ms > s
           if (offset <= duration) {
-            console.log('OTHER HOVER', time);
-            this.player.pause(); // do not keep playing
-            this.player.currentTime(offset);
+            this.seekVideo(offset);
+          } else {
+            console.log('SKIP', offset);
           }
         }
       })
