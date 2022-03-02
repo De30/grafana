@@ -17,6 +17,11 @@ export interface Props {
 }
 
 export const PromQueryBuilderOptions = React.memo<Props>(({ query, app, onChange, onRunQuery }) => {
+  // No options for cloud alerting
+  if (app === CoreApp.CloudAlerting) {
+    return null;
+  }
+
   const onChangeFormat = (value: SelectableValue<string>) => {
     onChange({ ...query, format: value.value });
     onRunQuery();

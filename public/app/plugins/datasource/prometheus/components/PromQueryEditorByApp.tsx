@@ -12,6 +12,9 @@ export function PromQueryEditorByApp(props: PromQueryEditorProps) {
 
   switch (app) {
     case CoreApp.CloudAlerting:
+      if (config.featureToggles.promQueryBuilder) {
+        return <PromQueryEditorSelector {...props} />;
+      }
       return <PromQueryEditorForAlerting {...props} />;
     case CoreApp.Explore:
       if (config.featureToggles.promQueryBuilder) {

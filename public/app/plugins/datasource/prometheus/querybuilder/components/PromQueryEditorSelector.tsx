@@ -1,6 +1,6 @@
 import React, { SyntheticEvent, useCallback, useState } from 'react';
 import { css } from '@emotion/css';
-import { GrafanaTheme2, LoadingState } from '@grafana/data';
+import { CoreApp, GrafanaTheme2, LoadingState } from '@grafana/data';
 import { EditorHeader, EditorRows, FlexItem, InlineSelect, Space } from '@grafana/experimental';
 import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
 import { PromQueryEditorProps } from '../../components/types';
@@ -59,17 +59,19 @@ export const PromQueryEditorSelector = React.memo<PromQueryEditorProps>((props) 
       />
       <EditorHeader>
         <FlexItem grow={1} />
-        <Button
-          className={styles.runQuery}
-          variant="secondary"
-          size="sm"
-          fill="outline"
-          onClick={onRunQuery}
-          icon={data?.state === LoadingState.Loading ? 'fa fa-spinner' : undefined}
-          disabled={data?.state === LoadingState.Loading}
-        >
-          Run query
-        </Button>
+        {props.app !== CoreApp.CloudAlerting && (
+          <Button
+            className={styles.runQuery}
+            variant="secondary"
+            size="sm"
+            fill="outline"
+            onClick={onRunQuery}
+            icon={data?.state === LoadingState.Loading ? 'fa fa-spinner' : undefined}
+            disabled={data?.state === LoadingState.Loading}
+          >
+            Run query
+          </Button>
+        )}
         {editorMode === QueryEditorMode.Builder && (
           <>
             <InlineSelect
@@ -88,14 +90,14 @@ export const PromQueryEditorSelector = React.memo<PromQueryEditorProps>((props) 
               }}
               options={promQueryModeller.getQueryPatterns().map((x) => ({ label: x.name, value: x }))}
             />
+            <QueryHeaderSwitch
+              label="Preview"
+              value={query.editorPreview}
+              onChange={onQueryPreviewChange}
+              disabled={editorMode !== QueryEditorMode.Builder}
+            />
           </>
         )}
-        <QueryHeaderSwitch
-          label="Preview"
-          value={query.editorPreview}
-          onChange={onQueryPreviewChange}
-          disabled={editorMode !== QueryEditorMode.Builder}
-        />
         <QueryEditorModeToggle mode={editorMode} onChange={onEditorModeChange} />
       </EditorHeader>
       <Space v={0.5} />
