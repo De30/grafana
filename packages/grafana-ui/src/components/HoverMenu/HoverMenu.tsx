@@ -58,7 +58,7 @@ export function HoverMenu({ children, offset = 1 }: Props) {
       if (e.key === 'Tab' && state.menuHasFocus) {
         const buttons = menuRef.current.getElementsByTagName('button');
         if (document.activeElement === buttons[buttons.length - 1]) {
-          setState({ ...state, menuHasFocus: false, visible: false });
+          setState({ ...state, menuHasFocus: false, visible: undefined });
           (outerRef.current?.nextSibling as HTMLElement).focus();
         }
       }
@@ -111,17 +111,48 @@ export interface ItemProps {
   icon: IconName;
   name: string;
   onClick?: () => void;
+  children?: React.ReactNode;
 }
 
-export function HoverMenuItem({ icon, name, onClick }: ItemProps) {
+export const HoverMenuItem = React.forwardRef<HTMLButtonElement, ItemProps>(
+  ({ icon, name, onClick, children }, ref) => {
+    const styles = useStyles2(getStyles);
+
+    return (
+      <Tooltip content={name} placement="top">
+        <button className={styles.bubbleMenuItem} onClick={onClick} ref={ref}>
+          <Icon name={icon} />
+          {children}
+        </button>
+      </Tooltip>
+    );
+  }
+);
+
+HoverMenuItem.displayName = 'HoverMenuItem';
+export interface HoverMenuItemDropdownProps extends ItemProps {
+  children: React.ReactNode;
+}
+
+export function HoverMenuItemDropdown({ icon, name, children }: HoverMenuItemDropdownProps) {
   const styles = useStyles2(getStyles);
+  const { getTooltipProps, setTooltipRef, setTriggerRef, visible } = usePopperTooltip({
+    // visible: true,
+    placement: 'right-start',
+    interactive: true,
+    trigger: ['click'],
+  });
 
   return (
-    <Tooltip content={name} placement="top">
-      <button className={styles.bubbleMenuItem} onClick={onClick}>
-        <Icon name={icon} />
-      </button>
-    </Tooltip>
+    <button className={styles.bubbleMenuItem} ref={setTriggerRef} style={{ position: 'relative' }}>
+      <Icon name={icon} />
+
+      {visible && (
+        <div ref={setTooltipRef} className={styles.dropdown} {...getTooltipProps()}>
+          {children}
+        </div>
+      )}
+    </button>
   );
 }
 
@@ -156,5 +187,6 @@ const getStyles = (theme: GrafanaTheme2) => {
         color: ${theme.colors.text.primary};
       }
     `,
+    dropdown: css``,
   };
 };

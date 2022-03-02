@@ -20,6 +20,8 @@ export interface MenuItemProps<T = any> {
   ariaChecked?: boolean;
   /** Target of the menu item (i.e. new window)  */
   target?: LinkTarget;
+  /** shortcut */
+  shortcut?: string;
   /** Icon of the menu item */
   icon?: IconName;
   /** Role of the menu item */
@@ -49,6 +51,7 @@ export const MenuItem = React.memo(
       ariaLabel,
       ariaChecked,
       target,
+      shortcut,
       onClick,
       className,
       active,
@@ -131,7 +134,8 @@ export const MenuItem = React.memo(
         tabIndex={tabIndex}
       >
         {icon && <Icon name={icon} className={styles.icon} aria-hidden />}
-        {label}
+        <span className={styles.label}>{label}</span>
+        {shortcut && <span className={styles.shortcut}>{shortcut}</span>}
         {hasSubMenu && (
           <SubMenu
             items={childItems}
@@ -161,6 +165,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       border: none;
       width: 100%;
       position: relative;
+      text-align: left;
 
       &:hover,
       &:focus,
@@ -176,6 +181,15 @@ const getStyles = (theme: GrafanaTheme2) => {
     `,
     activeItem: css`
       background: ${theme.colors.action.selected};
+    `,
+    label: css`
+      flex-grow: 1;
+    `,
+    shortcut: css`
+      border: 1px solid ${theme.colors.border.weak};
+      color: ${theme.colors.text.secondary};
+      margin-left: ${theme.spacing(3)};
+      padding: 0px 6px;
     `,
     icon: css`
       opacity: 0.7;

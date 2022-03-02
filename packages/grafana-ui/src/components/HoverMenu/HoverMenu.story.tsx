@@ -1,5 +1,5 @@
 import React from 'react';
-import { HoverMenu, HoverMenuItem } from './HoverMenu';
+import { HoverMenu, HoverMenuItem, HoverMenuItemDropdown } from './HoverMenu';
 import { withCenteredStory } from '../../utils/storybook/withCenteredStory';
 import { PanelChrome } from '../PanelChrome';
 import { DashboardStoryCanvas } from '../../utils/storybook/DashboardStoryCanvas';
@@ -7,6 +7,8 @@ import { getFocusStyles } from '../../themes/mixins';
 import { css } from '@emotion/css';
 import { useTheme2 } from '../../themes/ThemeContext';
 import { Button } from '../Button';
+import { Menu } from '../Menu/Menu';
+import { MenuItem } from '../Menu/MenuItem';
 
 export default {
   title: 'Buttons/HoverMenu',
@@ -33,6 +35,14 @@ export const Examples = () => {
             <HoverMenuItem icon="eye" name="View panel" />
             <HoverMenuItem icon="pen" name="Edit panel" />
             <HoverMenuItem icon="share-alt" name="Share panel" />
+            <HoverMenuItemDropdown icon="ellipsis-v" name="Share panel">
+              <Menu>
+                <MenuItem label="Inspect" icon="info-circle" shortcut="i" />
+                <MenuItem label="Explore" icon="compass" shortcut="e" />
+                <MenuItem label="Duplicate" icon="bell" shortcut="d" />
+                <MenuItem label="Remove" icon="trash-alt" shortcut="r" />
+              </Menu>
+            </HoverMenuItemDropdown>
           </HoverMenu>
           <PanelChrome width={300} height={200}>
             {() => {

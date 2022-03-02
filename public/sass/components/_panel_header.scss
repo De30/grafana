@@ -2,8 +2,8 @@ $panel-header-no-title-zindex: 1;
 
 .panel-header {
   &:hover {
-    transition: background-color 0.1s ease-in-out;
-    background-color: $panel-header-hover-bg;
+    // transition: background-color 0.1s ease-in-out;
+    // background-color: $panel-header-hover-bg;
   }
 }
 

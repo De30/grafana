@@ -23,6 +23,8 @@ import {
   ErrorBoundary,
   HoverMenu,
   HoverMenuItem,
+  Menu,
+  MenuItem,
   PanelContext,
   PanelContextProvider,
   SeriesVisibilityChangeMode,
@@ -47,6 +49,7 @@ import { getDashboardQueryRunner } from '../../query/state/DashboardQueryRunner/
 import { liveTimer } from './liveTimer';
 import { isSoloRoute } from '../../../routes/utils';
 import { css } from '@emotion/css';
+import { HoverMenuItemDropdown } from '@grafana/ui/src/components/HoverMenu/HoverMenu';
 
 const DEFAULT_PLUGIN_ERROR = 'Error in plugin';
 
@@ -528,10 +531,17 @@ export class PanelChrome extends PureComponent<Props, State> {
         tabIndex={0}
       >
         <HoverMenu offset={offset}>
-          <HoverMenuItem icon="eye" name="View panel" />
-          <HoverMenuItem icon="pen" name="Edit panel" />
-          <HoverMenuItem icon="share-alt" name="Share panel" />
-          <HoverMenuItem icon="ellipsis-v" name="More actions" />
+          <HoverMenuItem icon="eye" name="View panel (v)" />
+          <HoverMenuItem icon="pen" name="Edit panel (e)" />
+          <HoverMenuItem icon="share-alt" name="Share panel (s)" />
+          <HoverMenuItemDropdown icon="ellipsis-v" name="More actions">
+            <Menu>
+              <MenuItem label="Inspect" icon="info-circle" shortcut="i" />
+              <MenuItem label="Explore" icon="compass" shortcut="e" />
+              <MenuItem label="Duplicate" icon="bell" shortcut="d" />
+              <MenuItem label="Remove" icon="trash-alt" shortcut="r" />
+            </Menu>
+          </HoverMenuItemDropdown>
         </HoverMenu>
 
         <PanelHeader

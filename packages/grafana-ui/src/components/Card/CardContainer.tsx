@@ -79,7 +79,6 @@ export const getCardContainerStyles = stylesFactory((theme: GrafanaTheme2, disab
       padding: theme.spacing(2),
       background: theme.colors.background.secondary,
       borderRadius: theme.shape.borderRadius(),
-      marginBottom: '8px',
       pointerEvents: disabled ? 'none' : 'auto',
       transition: theme.transitions.create(['background-color', 'box-shadow', 'border-color', 'color'], {
         duration: theme.transitions.duration.short,
@@ -101,7 +100,6 @@ export const getCardContainerStyles = stylesFactory((theme: GrafanaTheme2, disab
       borderRadius: theme.shape.borderRadius(),
       position: 'relative',
       pointerEvents: disabled ? 'none' : 'auto',
-      marginBottom: theme.spacing(1),
       transition: theme.transitions.create(['background-color', 'box-shadow', 'border-color', 'color'], {
         duration: theme.transitions.duration.short,
       }),
