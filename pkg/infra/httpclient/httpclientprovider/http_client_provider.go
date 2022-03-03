@@ -36,10 +36,6 @@ func New(cfg *setting.Cfg, tracer tracing.Tracer, features featuremgmt.FeatureTo
 
 	setDefaultTimeoutOptions(cfg)
 
-	if features.IsEnabled(featuremgmt.FlagHttpclientproviderAzureAuth) {
-		middlewares = append(middlewares, AzureMiddleware(cfg))
-	}
-
 	return newProviderFunc(sdkhttpclient.ProviderOptions{
 		Middlewares: middlewares,
 		ConfigureTransport: func(opts sdkhttpclient.Options, transport *http.Transport) {

@@ -1,9 +1,13 @@
 package promclient
 
 import (
+	"fmt"
+	"net/url"
+	"path"
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"github.com/grafana/grafana/pkg/grafanaazuresdkgo"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/middleware"
 	"github.com/grafana/grafana/pkg/util/maputil"
 
@@ -44,18 +48,17 @@ func (p *Provider) GetClient(headers map[string]string) (apiv1.API, error) {
 		return nil, err
 	}
 
-	opts.Middlewares = p.middlewares()
+	middlewares, err := p.middlewares()
+	if err != nil {
+		return nil, err
+	}
+
+	opts.Middlewares = middlewares
 	opts.Headers = reqHeaders(headers)
 
 	// Set SigV4 service namespace
 	if opts.SigV4 != nil {
 		opts.SigV4.Service = "aps"
-	}
-
-	// Azure authentication
-	err = p.configureAzureAuthentication(opts)
-	if err != nil {
-		return nil, err
 	}
 
 	roundTripper, err := p.clientProvider.GetTransport(opts)
@@ -76,7 +79,7 @@ func (p *Provider) GetClient(headers map[string]string) (apiv1.API, error) {
 	return apiv1.NewAPI(client), nil
 }
 
-func (p *Provider) middlewares() []sdkhttpclient.Middleware {
+func (p *Provider) middlewares() ([]sdkhttpclient.Middleware, error) {
 	middlewares := []sdkhttpclient.Middleware{
 		middleware.CustomQueryParameters(p.log),
 		sdkhttpclient.CustomHeadersMiddleware(),
@@ -85,7 +88,36 @@ func (p *Provider) middlewares() []sdkhttpclient.Middleware {
 		middlewares = append(middlewares, middleware.ForceHttpGet(p.log))
 	}
 
-	return middlewares
+	azureAuthMiddleware, err := p.createAzureAuthMiddleware()
+	if err != nil {
+		return nil, err
+	}
+
+	if azureAuthMiddleware != nil {
+		middlewares = append(middlewares, azureAuthMiddleware)
+	}
+
+	return middlewares, nil
+}
+
+func (p *Provider) createAzureAuthMiddleware() (sdkhttpclient.Middleware, error) {
+	resourceId, err := maputil.GetStringOptional(p.jsonData, "azureEndpointResourceId")
+	if err != nil {
+		return nil, err
+	}
+
+	if resourceId == "" {
+		return nil, nil
+	}
+
+	resourceIdURL, err := url.Parse(resourceId)
+	if err != nil || resourceIdURL.Scheme == "" || resourceIdURL.Host == "" {
+		return nil, fmt.Errorf("invalid endpoint Resource ID URL '%s'", resourceId)
+	}
+	resourceIdURL.Path = path.Join(resourceIdURL.Path, ".default")
+	scopes := []string{resourceIdURL.String()}
+
+	return grafanaazuresdkgo.NewAzureMiddleware(scopes)
 }
 
 func reqHeaders(headers map[string]string) map[string]string {

@@ -16,6 +16,19 @@ func GetMap(obj map[string]interface{}, key string) (map[string]interface{}, err
 	}
 }
 
+func GetMapOptional(obj map[string]interface{}, key string) (map[string]interface{}, error) {
+	if untypedValue, ok := obj[key]; ok {
+		if value, ok := untypedValue.(map[string]interface{}); ok {
+			return value, nil
+		} else {
+			err := fmt.Errorf("the field '%s' should be an object", key)
+			return nil, err
+		}
+	} else {
+		return nil, nil
+	}
+}
+
 func GetBool(obj map[string]interface{}, key string) (bool, error) {
 	if untypedValue, ok := obj[key]; ok {
 		if value, ok := untypedValue.(bool); ok {

@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,6 +15,7 @@ import (
 	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/components/simplejson"
+	"github.com/grafana/grafana/pkg/grafanaazuresdkgo"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -20,7 +23,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/azcredentials"
 )
 
 type Service struct {
@@ -304,14 +306,25 @@ func (s *Service) httpClientOptions(ds *models.DataSource) (*sdkhttpclient.Optio
 	}
 
 	if ds.JsonData != nil {
-		credentials, err := azcredentials.FromDatasourceData(ds.JsonData.MustMap(), s.DecryptedValues(ds))
-		if err != nil {
-			err = fmt.Errorf("invalid Azure credentials: %s", err)
-			return nil, err
-		}
+		// does this make sense or how do you access scopes here?
+		// Now only for prometheus
+		if resourceId, err := ds.JsonData.Get("azureEndpointResourceId").String(); err != nil {
+			if resourceId != "" {
+				resourceIdURL, err := url.Parse(resourceId)
+				if err != nil || resourceIdURL.Scheme == "" || resourceIdURL.Host == "" {
+					return nil, fmt.Errorf("invalid endpoint Resource ID URL '%s'", resourceId)
+				}
+				resourceIdURL.Path = path.Join(resourceIdURL.Path, ".default")
+				scopes := []string{resourceIdURL.String()}
 
-		if credentials != nil {
-			opts.CustomOptions["_azureCredentials"] = credentials
+				azureAuthMiddleware, err := grafanaazuresdkgo.NewAzureMiddleware(scopes)
+				if err != nil {
+					return nil, err
+				}
+
+				// might need some additional changes to this file to make sure middlewares aren't overwritten.
+				opts.Middlewares = append(opts.Middlewares, azureAuthMiddleware)
+			}
 		}
 	}
 

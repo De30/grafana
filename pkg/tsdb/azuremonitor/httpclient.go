@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+	"github.com/grafana/grafana/pkg/grafanaazuresdkgo"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/aztokenprovider"
+	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/azcredentials"
 	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/deprecated"
 	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/types"
 )
@@ -14,11 +15,25 @@ func getMiddlewares(route types.AzRoute, model types.DatasourceInfo, cfg *settin
 	middlewares := []httpclient.Middleware{}
 
 	if len(route.Scopes) > 0 {
-		tokenProvider, err := aztokenprovider.NewAzureAccessTokenProvider(cfg, model.Credentials)
+		// unsure which one of these can/should use the grafanaazuresdkgo middleware
+		// so just leaving this as an example.
+		customCredentialProvider := func(settings grafanaazuresdkgo.Settings, opts httpclient.Options) (azcredentials.AzureCredentials, error) {
+			return nil, nil
+		}
+		azureAuthMiddleware, err := grafanaazuresdkgo.NewAzureMiddleware(
+			route.Scopes,
+			grafanaazuresdkgo.WithCredentialProvider(customCredentialProvider),
+		)
 		if err != nil {
 			return nil, err
 		}
-		middlewares = append(middlewares, aztokenprovider.AuthMiddleware(tokenProvider, route.Scopes))
+		middlewares = append(middlewares, azureAuthMiddleware)
+
+		// tokenProvider, err := aztokenprovider.NewAzureAccessTokenProvider(cfg, model.Credentials)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// middlewares = append(middlewares, aztokenprovider.AuthMiddleware(tokenProvider, route.Scopes))
 	}
 
 	// Remove with Grafana 9
