@@ -4,7 +4,7 @@ import { UptimeBars, UptimeBarsProps, UptimeDailyStatus, UptimeStatus } from './
 import { addDays, subDays } from 'date-fns';
 
 export default {
-  title: 'Uptime Bars',
+  title: 'Status Page/Uptime Bars',
   component: UptimeBars,
 };
 

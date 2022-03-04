@@ -51,6 +51,11 @@ export const WithOutageAndUpdates: Story<UptimeSummaryProps> = () => {
     startTime: new Date(),
     updates: [
       {
+        timestamp: new Date(Date.now() + 8000),
+        update: 'We are monitoring if we fixed it',
+        type: UpdateType.Monitoring,
+      },
+      {
         timestamp: new Date(Date.now() + 6000),
         type: UpdateType.Investigating,
         update: 'Situation is being investigated',
@@ -81,7 +86,23 @@ export const WithMaintenance: Story<UptimeSummaryProps> = () => {
   );
 };
 
+export const WithMultipleIncidents: Story<UptimeSummaryProps> = () => {
+  const incident: Incident = {
+    title: 'Some service is kinda slow',
+    description: 'We are looking in to it and will keep you updated.',
+    type: IncidentType.Degraded,
+    startTime: new Date(),
+    updates: [],
+  };
+
+  return (
+    <div>
+      <UptimeSummary incidents={[incident, incident]} />
+    </div>
+  );
+};
+
 export default {
-  title: 'Uptime Summary',
+  title: 'Status Page/Uptime Summary',
   component: UptimeSummary,
 };
