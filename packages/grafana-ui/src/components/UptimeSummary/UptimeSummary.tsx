@@ -3,35 +3,7 @@ import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '../../themes';
 import { Icon } from '../Icon/Icon';
-
-export interface Incident {
-  title: string;
-  description?: string;
-  updates: IncidentUpdate[];
-  type: IncidentType;
-  startTime: Date;
-  // in-progress incident will not have an endTime yet
-  endTime?: Date;
-}
-
-export enum IncidentType {
-  Maintenance = 'maintenance',
-  Degraded = 'degraded',
-  Outage = 'outage',
-}
-
-export interface IncidentUpdate {
-  timestamp: Date;
-  type: UpdateType;
-  update: string;
-}
-
-export enum UpdateType {
-  Investigating = 'investigating',
-  Monitoring = 'monitoring',
-  Update = 'update',
-  Resolved = 'resolved',
-}
+import { Incident, IncidentType } from '../../types/uptime';
 
 export interface UptimeSummaryProps {
   incidents: Incident[];

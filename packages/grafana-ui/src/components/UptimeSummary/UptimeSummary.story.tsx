@@ -1,6 +1,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
-import { Incident, IncidentType, UpdateType, UptimeSummary, UptimeSummaryProps } from './UptimeSummary';
+import { UptimeSummary, UptimeSummaryProps } from './UptimeSummary';
+import { Incident, IncidentType, UpdateType } from '../../types/uptime';
 
 export const AllOperational: Story<UptimeSummaryProps> = () => {
   return (
