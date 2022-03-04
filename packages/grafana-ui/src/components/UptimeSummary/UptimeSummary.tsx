@@ -16,7 +16,7 @@ const UptimeSummary: FC<UptimeSummaryProps> = ({ incidents = [] }) => {
 
   if (!hasIncidents) {
     return (
-      <div className={styles.wrapper}>
+      <div className={styles.incident}>
         <Header title="All systems operational" />
       </div>
     );
