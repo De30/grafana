@@ -15,7 +15,7 @@ const node: NavModelItem = {
   subTitle: 'A Raspberry Pi turbo confabulator',
   icon: 'raspberry',
   url: 'manage-platform',
-  img: 'https://images.media-allrecipes.com/userphotos/1051701.jpg',
+  img: 'https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png',
 };
 
 const initialTabs = [
