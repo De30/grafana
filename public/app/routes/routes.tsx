@@ -398,6 +398,12 @@ export function getAppRoutes(): RouteDescriptor[] {
       ),
     },
     {
+      path: '/manage-platform',
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "ManagePlatformPage"*/ 'app/features/manage-platform/page/ManagePlatformPage')
+      ),
+    },
+    {
       path: '/search',
       component: SafeDynamicImport(
         () => import(/* webpackChunkName: "SearchPage"*/ 'app/features/search/page/SearchPage')
