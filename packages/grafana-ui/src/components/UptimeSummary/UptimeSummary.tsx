@@ -8,7 +8,7 @@ export interface Incident {
   title: string;
   description?: string;
   updates?: IncidentUpdate[];
-  type?: IncidentType;
+  type: IncidentType;
   startTime: Date;
   endTime?: Date;
 }
@@ -39,29 +39,13 @@ export interface UptimeSummaryProps {
 const UptimeSummary: FC<UptimeSummaryProps> = ({ incidents = [] }) => {
   const styles = useStyles2(getStyles);
   const hasIncidents = incidents.length > 0;
-  const hasOutages = hasIncidents && incidents.some((incident) => incident.type === IncidentType.Outage);
-  const hasDegraded = hasIncidents && incidents.some((incident) => incident.type === IncidentType.Degraded);
-  const justMaintenance = hasIncidents && incidents.every((incident) => incident.type === IncidentType.Maintenance);
 
   if (!hasIncidents) {
-    <div className={styles.wrapper}>
-      <Header title="All systems operational" />
-    </div>;
-  }
-
-  // the most severe type in the incidents list chooses the entire summary type
-  let summaryType: IncidentType | undefined = undefined;
-
-  if (hasOutages) {
-    summaryType = IncidentType.Outage;
-  }
-
-  if (hasDegraded) {
-    summaryType = IncidentType.Degraded;
-  }
-
-  if (justMaintenance) {
-    summaryType = IncidentType.Maintenance;
+    return (
+      <div className={styles.wrapper}>
+        <Header title="All systems operational" />
+      </div>
+    );
   }
 
   return (
@@ -69,7 +53,7 @@ const UptimeSummary: FC<UptimeSummaryProps> = ({ incidents = [] }) => {
       {incidents.map((incident, index) => (
         <div key={index} className={styles.wrapper}>
           <Header title={incident.title} type={incident.type} />
-          <Summary type={summaryType!} description={incident.description} />
+          <Summary type={incident.type} description={incident.description} />
         </div>
       ))}
     </>
@@ -151,7 +135,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     [IncidentType.Degraded]: css`
       border: solid 1px ${theme.colors.warning.border};
       background: ${theme.colors.warning.main};
-      color: black;
     `,
     [IncidentType.Outage]: css`
       border: solid 1px ${theme.colors.error.border};
