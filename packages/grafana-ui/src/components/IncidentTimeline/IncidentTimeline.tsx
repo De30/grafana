@@ -3,7 +3,6 @@ import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '../../themes';
 import { IncidentUpdate, UpdateType } from '../../types/uptime';
-import { IconName } from '../../types/icon';
 import { Icon } from '../Icon/Icon';
 
 export interface TimelineProps {
@@ -23,7 +22,7 @@ const IncidentTimeline: FC<TimelineProps> = ({ updates = [], className }) => {
             <header className={styles.header}>
               <span className={styles.updateType}>{update.type}</span>&nbsp;&mdash;&nbsp;{update.update}
             </header>
-            <small>{update.timestamp.toLocaleString()}</small>
+            <small className={styles.timestamp}>{update.timestamp.toLocaleString()}</small>
           </div>
         </div>
       ))}
@@ -33,19 +32,9 @@ const IncidentTimeline: FC<TimelineProps> = ({ updates = [], className }) => {
 
 const TypeIcon: FC<{ type: UpdateType }> = ({ type }) => {
   const styles = useStyles2(getStyles);
+  const isResolved = type === UpdateType.Resolved;
 
-  let icon: IconName | undefined = undefined;
-
-  switch (type) {
-    case UpdateType.Update:
-      icon = 'info';
-      break;
-    case UpdateType.Resolved:
-      icon = 'check';
-      break;
-  }
-
-  return <div className={styles.icon}>{icon && <Icon name={icon} />}</div>;
+  return <div className={styles.icon}>{isResolved && <Icon name="check" />}</div>;
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
@@ -70,7 +59,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
       height: calc(100% - 11px);
       background: white;
     }
-
+    /* disable line for last item in the list */
     &:last-child:before {
       width: 0;
     }
@@ -92,6 +81,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
     display: flex;
     align-items: center;
     justify-content: center;
+  `,
+  timestamp: css`
+    color: ${theme.colors.text.disabled};
   `,
 });
 
