@@ -21,7 +21,15 @@ export enum IncidentType {
 
 interface IncidentUpdate {
   timestamp: Date;
+  type: UpdateType;
   update: string;
+}
+
+enum UpdateType {
+  Investigating = 'investigating',
+  Monitoring = 'monitoring',
+  Update = 'update',
+  Resolved = 'resolved',
 }
 
 export interface UptimeSummaryProps {
@@ -34,6 +42,12 @@ const UptimeSummary: FC<UptimeSummaryProps> = ({ incidents = [] }) => {
   const hasOutages = hasIncidents && incidents.some((incident) => incident.type === IncidentType.Outage);
   const hasDegraded = hasIncidents && incidents.some((incident) => incident.type === IncidentType.Degraded);
   const justMaintenance = hasIncidents && incidents.every((incident) => incident.type === IncidentType.Maintenance);
+
+  if (!hasIncidents) {
+    <div className={styles.wrapper}>
+      <Header title="All systems operational" />
+    </div>;
+  }
 
   // the most severe type in the incidents list chooses the entire summary type
   let summaryType: IncidentType | undefined = undefined;
@@ -51,24 +65,29 @@ const UptimeSummary: FC<UptimeSummaryProps> = ({ incidents = [] }) => {
   }
 
   return (
-    <div className={styles.wrapper}>
-      {<Header type={summaryType} />}
-      {hasIncidents && <SummaryItems incidents={incidents} type={summaryType} />}
-    </div>
+    <>
+      {incidents.map((incident, index) => (
+        <div key={index} className={styles.wrapper}>
+          <Header title={incident.title} type={incident.type} />
+          <Summary type={summaryType!} description={incident.description} />
+        </div>
+      ))}
+    </>
   );
 };
 
 interface HeaderProps {
   type?: IncidentType;
+  title: string;
 }
 
-const Header: FC<HeaderProps> = ({ type }) => {
+const Header: FC<HeaderProps> = ({ type, title }) => {
   const styles = useStyles2(getStyles);
 
   if (type === IncidentType.Maintenance) {
     return (
       <div className={cx(styles.header.wrapper, styles.header.maintenance)}>
-        <Icon name="cog" /> Scheduled maintenance
+        <Icon name="cog" /> {title}
       </div>
     );
   }
@@ -76,7 +95,7 @@ const Header: FC<HeaderProps> = ({ type }) => {
   if (type === IncidentType.Degraded) {
     return (
       <div className={cx(styles.header.wrapper, styles.header.degraded)}>
-        <Icon name="exclamation-triangle" /> Degraded service
+        <Icon name="exclamation-triangle" /> {title}
       </div>
     );
   }
@@ -84,33 +103,29 @@ const Header: FC<HeaderProps> = ({ type }) => {
   if (type === IncidentType.Outage) {
     return (
       <div className={cx(styles.header.wrapper, styles.header.outage)}>
-        <Icon name="fire" /> Severe service impact
+        <Icon name="fire" /> {title}
       </div>
     );
   }
 
   return (
     <div className={cx(styles.header.wrapper, styles.header.allOperational)}>
-      <Icon name="check-circle" /> All systems operational
+      <Icon name="check-circle" /> {title}
     </div>
   );
 };
 
-interface SummaryItemsProps {
-  type?: IncidentType;
-  incidents: Incident[];
+interface SummaryProps {
+  type: IncidentType;
+  description?: string;
 }
 
-const SummaryItems: FC<SummaryItemsProps> = ({ type = IncidentType.Degraded, incidents }) => {
+const Summary: FC<SummaryProps> = ({ type = IncidentType.Degraded, description }) => {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={cx(styles.summaryItems.wrapper, styles.summaryItems[type])}>
-      {incidents.map((incident) => (
-        <div key={incident.startTime.toString()}>
-          <div>{incident.title}</div>
-        </div>
-      ))}
+      <div>{description}</div>
     </div>
   );
 };
