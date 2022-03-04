@@ -7,9 +7,10 @@ import { Icon } from '../Icon/Icon';
 export interface Incident {
   title: string;
   description?: string;
-  updates?: IncidentUpdate[];
+  updates: IncidentUpdate[];
   type: IncidentType;
   startTime: Date;
+  // in-progress incident will not have an endTime yet
   endTime?: Date;
 }
 
@@ -19,13 +20,13 @@ export enum IncidentType {
   Outage = 'outage',
 }
 
-interface IncidentUpdate {
+export interface IncidentUpdate {
   timestamp: Date;
   type: UpdateType;
   update: string;
 }
 
-enum UpdateType {
+export enum UpdateType {
   Investigating = 'investigating',
   Monitoring = 'monitoring',
   Update = 'update',

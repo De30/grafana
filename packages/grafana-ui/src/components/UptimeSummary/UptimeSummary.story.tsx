@@ -1,6 +1,6 @@
 import React from 'react';
 import { Story } from '@storybook/react';
-import { Incident, IncidentType, UptimeSummary, UptimeSummaryProps } from './UptimeSummary';
+import { Incident, IncidentType, UpdateType, UptimeSummary, UptimeSummaryProps } from './UptimeSummary';
 
 export const AllOperational: Story<UptimeSummaryProps> = () => {
   return (
@@ -16,6 +16,7 @@ export const WithIncident: Story<UptimeSummaryProps> = () => {
     description: 'We are looking in to it and will keep you updated.',
     type: IncidentType.Degraded,
     startTime: new Date(),
+    updates: [],
   };
 
   return (
@@ -31,6 +32,29 @@ export const WithOutage: Story<UptimeSummaryProps> = () => {
     description: "We don't really know what's going on either, it's total chaos over here.",
     type: IncidentType.Outage,
     startTime: new Date(),
+    updates: [],
+  };
+
+  return (
+    <div>
+      <UptimeSummary incidents={[outage]} />
+    </div>
+  );
+};
+
+export const WithOutageAndUpdates: Story<UptimeSummaryProps> = () => {
+  const outage: Incident = {
+    title: 'Severe outage in US clusters',
+    description: "We don't really know what's going on either, it's total chaos over here.",
+    type: IncidentType.Outage,
+    startTime: new Date(),
+    updates: [
+      {
+        timestamp: new Date(Date.now() + 6000),
+        type: UpdateType.Investigating,
+        update: 'Situation is being investigated',
+      },
+    ],
   };
 
   return (
@@ -46,6 +70,7 @@ export const WithMaintenance: Story<UptimeSummaryProps> = () => {
     description: "No real reason to panic. It's all part of the plan.",
     type: IncidentType.Maintenance,
     startTime: new Date(),
+    updates: [],
   };
 
   return (
