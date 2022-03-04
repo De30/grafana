@@ -57,7 +57,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
       width: 1px;
       /* half height of the icon and size of the border */
       height: calc(100% - 11px);
-      background: white;
+      background: ${theme.colors.border.strong};
     }
     /* disable line for last item in the list */
     &:last-child:before {
@@ -75,7 +75,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     width: 20px;
     height: 20px;
 
-    border: solid 1px white;
+    border: solid 1px ${theme.colors.border.strong};
     border-radius: 100%;
 
     display: flex;
