@@ -82,15 +82,35 @@ export const MonthLongEntries: Story<UptimeBarsProps> = () => (
       { date: new Date(), status: UptimeStatus.Operational },
       { date: new Date(), status: UptimeStatus.Outage, timespan: { hours: 1, minutes: 45 } },
       { date: new Date(), status: UptimeStatus.Operational },
+    ]}
+  />
+);
+
+export const WithUnknownEntries: Story<UptimeBarsProps> = () => (
+  <UptimeBars
+    componentName="Homepage"
+    availability={0.99876}
+    dailyStatuses={[
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
+      { date: new Date(), status: UptimeStatus.Unknown },
       { date: new Date(), status: UptimeStatus.Operational },
       { date: new Date(), status: UptimeStatus.Operational },
-      { date: new Date(), status: UptimeStatus.Degraded, timespan: { hours: 0, minutes: 35 } },
       { date: new Date(), status: UptimeStatus.Operational },
       { date: new Date(), status: UptimeStatus.Operational },
-      { date: new Date(), status: UptimeStatus.Outage, timespan: { hours: 3, minutes: 18 } },
       { date: new Date(), status: UptimeStatus.Operational },
       { date: new Date(), status: UptimeStatus.Operational },
-      { date: new Date(), status: UptimeStatus.Outage, timespan: { hours: 1, minutes: 45 } },
+      { date: new Date(), status: UptimeStatus.Operational },
+      { date: new Date(), status: UptimeStatus.Operational },
       { date: new Date(), status: UptimeStatus.Operational },
     ]}
   />

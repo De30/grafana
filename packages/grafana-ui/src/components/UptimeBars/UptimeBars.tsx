@@ -9,6 +9,7 @@ export enum UptimeStatus {
   Operational = 'operational',
   Degraded = 'degraded',
   Outage = 'outage',
+  Unknown = 'unknown', // no data
 }
 
 interface UptimeTimeSpan {
@@ -88,7 +89,10 @@ const UptimeBar: FC<UptimeBarProps> = ({ status: dailyStatus }) => {
   );
 
   return (
-    <Tooltip content={tooltipContent} placement="top">
+    <Tooltip
+      content={dailyStatus.status === UptimeStatus.Unknown ? 'No data recorded' : tooltipContent}
+      placement="top"
+    >
       <div className={cx(styles.bar, styles[dailyStatus.status])}></div>
     </Tooltip>
   );
@@ -96,7 +100,7 @@ const UptimeBar: FC<UptimeBarProps> = ({ status: dailyStatus }) => {
 
 const getUptimeBarStyles = (theme: GrafanaTheme2) => ({
   bar: css`
-    width: 7px;
+    width: 6px;
     height: 40px;
     background-color: ${theme.colors.success.main};
     border-radius: ${theme.shape.borderRadius(2)};
@@ -109,5 +113,8 @@ const getUptimeBarStyles = (theme: GrafanaTheme2) => ({
   `,
   [UptimeStatus.Outage]: css`
     background-color: ${theme.colors.error.main};
+  `,
+  [UptimeStatus.Unknown]: css`
+    background-color: ${theme.colors.secondary.main};
   `,
 });
