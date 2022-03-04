@@ -51,9 +51,19 @@ export const WithOutageAndUpdates: Story<UptimeSummaryProps> = () => {
     startTime: new Date(),
     updates: [
       {
+        timestamp: new Date(Date.now() + 9000),
+        update: 'Looks like we fixed it',
+        type: UpdateType.Resolved,
+      },
+      {
         timestamp: new Date(Date.now() + 8000),
         update: 'We are monitoring if we fixed it',
         type: UpdateType.Monitoring,
+      },
+      {
+        timestamp: new Date(Date.now() + 7000),
+        update: 'Still not sure...',
+        type: UpdateType.Update,
       },
       {
         timestamp: new Date(Date.now() + 6000),

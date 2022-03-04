@@ -2,7 +2,9 @@ import React, { FC } from 'react';
 import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '../../themes';
-import { IncidentUpdate } from '../../types/uptime';
+import { IncidentUpdate, UpdateType } from '../../types/uptime';
+import { IconName } from '../../types/icon';
+import { Icon } from '../Icon/Icon';
 
 export interface TimelineProps {
   className?: string;
@@ -15,15 +17,35 @@ const IncidentTimeline: FC<TimelineProps> = ({ updates = [], className }) => {
   return (
     <div className={cx(styles.wrapper, className)}>
       {updates.map((update) => (
-        <div key={String(update.timestamp)}>
-          <header className={styles.header}>
-            <span className={styles.updateType}>{update.type}</span>&nbsp;&mdash;&nbsp;{update.update}
-          </header>
-          <small>{update.timestamp.toLocaleString()}</small>
+        <div className={styles.item} key={String(update.timestamp)}>
+          <TypeIcon type={update.type} />
+          <div>
+            <header className={styles.header}>
+              <span className={styles.updateType}>{update.type}</span>&nbsp;&mdash;&nbsp;{update.update}
+            </header>
+            <small>{update.timestamp.toLocaleString()}</small>
+          </div>
         </div>
       ))}
     </div>
   );
+};
+
+const TypeIcon: FC<{ type: UpdateType }> = ({ type }) => {
+  const styles = useStyles2(getStyles);
+
+  let icon: IconName | undefined = undefined;
+
+  switch (type) {
+    case UpdateType.Update:
+      icon = 'info';
+      break;
+    case UpdateType.Resolved:
+      icon = 'check';
+      break;
+  }
+
+  return <div className={styles.icon}>{icon && <Icon name={icon} />}</div>;
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
@@ -32,12 +54,44 @@ const getStyles = (theme: GrafanaTheme2) => ({
     flex-direction: column;
     gap: ${theme.spacing(1)};
   `,
+  item: css`
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: ${theme.spacing(1)};
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 20px;
+      width: 1px;
+      /* half height of the icon and size of the border */
+      height: calc(100% - 11px);
+      background: white;
+    }
+
+    &:last-child:before {
+      width: 0;
+    }
+  `,
   header: css`
     display: flex;
     align-items: center;
   `,
   updateType: css`
     font-weight: bold;
+  `,
+  icon: css`
+    width: 20px;
+    height: 20px;
+
+    border: solid 1px white;
+    border-radius: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
   `,
 });
 
