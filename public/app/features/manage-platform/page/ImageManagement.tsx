@@ -9,8 +9,8 @@ export const ImageManagement = () => {
   const styles = useStyles2(getStyles);
 
   return (
-    <div>
-      <div className={styles.buttonsContainer}>
+    <div className={styles.imageMgmtContainer}>
+      <div className={styles.imageContainer}>
         <Card heading="Raspberry Pi OS Lite">
           <Card.Meta>
             <a key="link2" href="https://www.raspberrypi.com/software/operating-systems/">
@@ -33,18 +33,27 @@ export const ImageManagement = () => {
             <IconButton key="delete" name="trash-alt" tooltip="Delete this image" />
           </Card.SecondaryActions>
         </Card>
-        <div className={styles.buttonsContainer}>
-          <HorizontalGroup spacing="lg">
-            <Button icon="plus">Add</Button>
-          </HorizontalGroup>
-        </div>
+      </div>
+      <div className={styles.buttonsContainer}>
+        <HorizontalGroup spacing="lg">
+          <Button icon="plus">Add</Button>
+        </HorizontalGroup>
       </div>
     </div>
   );
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
+  imageMgmtContainer: css`
+    display: flex;
+    flex-direction: column;
+    height: 50vh;
+  `,
+  imageContainer: css`
+    margin-top: 30px;
+    flex-grow: 1;
+  `,
   buttonsContainer: css`
-    margin-top: 20px;
+    align-self: flex-start;
   `,
 });
