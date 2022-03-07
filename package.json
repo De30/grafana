@@ -257,7 +257,7 @@
     "@opentelemetry/exporter-collector": "0.25.0",
     "@opentelemetry/semantic-conventions": "1.0.1",
     "@popperjs/core": "2.11.2",
-    "@pyroscope/flamegraph": "workspace:*",
+    "@pyroscope/flamegraph": "^0.0.6-926-e2d8f66.0",
     "@pyroscope/models": "workspace:*",
     "@react-aria/button": "3.3.4",
     "@react-aria/dialog": "3.1.4",

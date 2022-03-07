@@ -5237,16 +5237,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pyroscope/flamegraph@workspace:*, @pyroscope/flamegraph@workspace:packages/pyroscope-flamegraph":
-  version: 0.0.0-use.local
-  resolution: "@pyroscope/flamegraph@workspace:packages/pyroscope-flamegraph"
+"@pyroscope/flamegraph@npm:^0.0.6-926-e2d8f66.0":
+  version: 0.0.6
+  resolution: "@pyroscope/flamegraph@npm:0.0.6"
   dependencies:
     "@pyroscope/models": ^0.0.2
     true-myth: ^5.1.2
   peerDependencies:
     react: ">=16.14.0"
-  languageName: unknown
-  linkType: soft
+  checksum: e8b11b304ac74c6c0a4d837a49c030261b407fdb9c60550f53ebef7e67488189195ff3734dcf5b89423eb2896b399e2d68b88cff964ff41d82d7f47f41d450b9
+  languageName: node
+  linkType: hard
 
 "@pyroscope/models@^0.0.2, @pyroscope/models@workspace:*, @pyroscope/models@workspace:packages/pyroscope-models":
   version: 0.0.0-use.local
@@ -18495,7 +18496,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": 1.0.1
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
     "@popperjs/core": 2.11.2
-    "@pyroscope/flamegraph": "workspace:*"
+    "@pyroscope/flamegraph": ^0.0.6-926-e2d8f66.0
     "@pyroscope/models": "workspace:*"
     "@react-aria/button": 3.3.4
     "@react-aria/dialog": 3.1.4

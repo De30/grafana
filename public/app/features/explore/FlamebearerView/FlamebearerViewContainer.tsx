@@ -12,7 +12,7 @@ import {
 import { FlamegraphRenderer } from '@pyroscope/flamegraph';
 import { ExploreId } from 'app/types/explore';
 import React, { RefObject, useCallback, useMemo, useState } from 'react';
-// import '@pyroscope/flamegraph/dist/index.css';
+import '@pyroscope/flamegraph/dist/index.css';
 
 type Props = {
     dataFrames: DataFrame[];
