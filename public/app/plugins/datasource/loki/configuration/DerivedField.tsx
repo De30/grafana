@@ -141,7 +141,7 @@ export const DerivedField = (props: Props) => {
 
         {showInternalLink && (
           <DataSourcePicker
-            tracing={true}
+            tracing={false}
             onChange={(ds) =>
               onChange({
                 ...value,
