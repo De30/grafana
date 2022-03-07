@@ -1,34 +1,22 @@
-import {
-    DataFrame,
-    DataFrameView,
-    DataLink,
-    DataSourceApi,
-    Field,
-    LinkModel,
-    mapInternalLinkToExplore,
-    SplitOpen,
-    TraceSpanRow,
-  } from '@grafana/data';
+import { DataFrame, SplitOpen } from '@grafana/data';
 import { FlamegraphRenderer } from '@pyroscope/flamegraph';
 import { ExploreId } from 'app/types/explore';
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, { RefObject } from 'react';
 import '@pyroscope/flamegraph/dist/index.css';
 
 type Props = {
-    dataFrames: DataFrame[];
-    splitOpenFn: SplitOpen;
-    exploreId: ExploreId;
-    scrollElement?: Element;
-    topOfExploreViewRef?: RefObject<HTMLDivElement>;
-  };
+  dataFrames: DataFrame[];
+  splitOpenFn: SplitOpen;
+  exploreId: ExploreId;
+  scrollElement?: Element;
+  topOfExploreViewRef?: RefObject<HTMLDivElement>;
+};
 
 export function FlamebearerViewContainer(props: Props) {
-  const flamebearer = (
-    props.dataFrames[props.dataFrames.length - 1].fields[0].values as any
-  ).buffer[0];
+  const flamebearer = (props.dataFrames[props.dataFrames.length - 1].fields[0].values as any).buffer[0];
   console.log(flamebearer);
-    return (
-      <div className={`flamegraph-wrapper`}>
+  return (
+    <div className={`flamegraph-wrapper`}>
       <FlamegraphRenderer
         flamebearer={flamebearer}
         ExportData={<div />}
@@ -37,5 +25,5 @@ export function FlamebearerViewContainer(props: Props) {
         showToolbar={true}
       />
     </div>
-    )
+  );
 }
