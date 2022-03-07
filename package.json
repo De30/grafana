@@ -257,6 +257,8 @@
     "@opentelemetry/exporter-collector": "0.25.0",
     "@opentelemetry/semantic-conventions": "1.0.1",
     "@popperjs/core": "2.11.2",
+    "@pyroscope/flamegraph": "workspace:*",
+    "@pyroscope/models": "workspace:*",
     "@react-aria/button": "3.3.4",
     "@react-aria/dialog": "3.1.4",
     "@react-aria/focus": "3.5.0",
@@ -375,7 +377,8 @@
     "uuid": "8.3.2",
     "vendor": "link:./public/vendor",
     "visjs-network": "4.25.0",
-    "whatwg-fetch": "3.6.2"
+    "whatwg-fetch": "3.6.2",
+    "zod": "^3.13.4"
   },
   "resolutions": {
     "underscore": "1.13.2",

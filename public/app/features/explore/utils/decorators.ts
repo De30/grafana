@@ -28,9 +28,19 @@ export const decorateWithFrameTypeMetadata = (data: PanelData): ExplorePanelData
   const logsFrames: DataFrame[] = [];
   const traceFrames: DataFrame[] = [];
   const nodeGraphFrames: DataFrame[] = [];
+  const flamebearerFrames: DataFrame[] = [];
 
   for (const frame of data.series) {
+    if (frame.fields.length > 0) {
+      if (frame.fields[0].name === 'flamebearer' ) {
+        if (frame.meta !== undefined) {
+          frame.meta.preferredVisualisationType = 'flamebearer';
+        }
+      }
+    }
     switch (frame.meta?.preferredVisualisationType) {
+      case 'flamebearer':
+        flamebearerFrames.push(frame);
       case 'logs':
         logsFrames.push(frame);
         break;
@@ -64,6 +74,7 @@ export const decorateWithFrameTypeMetadata = (data: PanelData): ExplorePanelData
     logsFrames,
     traceFrames,
     nodeGraphFrames,
+    flamebearerFrames,
     graphResult: null,
     tableResult: null,
     logsResult: null,

@@ -1,0 +1,17 @@
+0 silly argv {
+0 silly argv   _: [ 'run' ],
+0 silly argv   lernaVersion: '4.0.0',
+0 silly argv   '$0': '.yarn/cache/lerna-npm-4.0.0-1d3a89023c-b8a2791bcf.zip/node_modules/lerna/cli.js',
+0 silly argv   script: 'clean'
+0 silly argv }
+1 notice cli v4.0.0
+2 verbose rootPath /Users/ctovena/go/src/github.com/grafana/grafana
+3 error Error: Unsupported URL Type "workspace:": workspace:@pyroscope/models#0.0.6
+3 error     at unsupportedURLType (/Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/npm-package-arg-npm-8.1.5-02a51cea62-ae76afbceb.zip/node_modules/npm-package-arg/npa.js:246:15)
+3 error     at fromURL (/Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/npm-package-arg-npm-8.1.5-02a51cea62-ae76afbceb.zip/node_modules/npm-package-arg/npa.js:306:13)
+3 error     at Function.resolve (/Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/npm-package-arg-npm-8.1.5-02a51cea62-ae76afbceb.zip/node_modules/npm-package-arg/npa.js:76:12)
+3 error     at /Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/@lerna-package-graph-npm-4.0.0-90d07be76b-fd6f55171a.zip/node_modules/@lerna/package-graph/index.js:66:30
+3 error     at Array.forEach (<anonymous>)
+3 error     at /Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/@lerna-package-graph-npm-4.0.0-90d07be76b-fd6f55171a.zip/node_modules/@lerna/package-graph/index.js:60:38
+3 error     at Map.forEach (<anonymous>)
+3 error     at new PackageGraph (/Users/ctovena/go/src/github.com/grafana/grafana/.yarn/cache/@lerna-package-graph-npm-4.0.0-90d07be76b-fd6f55171a.zip/node_modules/@lerna/package-graph/index.js:49:10)

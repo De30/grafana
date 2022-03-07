@@ -27,6 +27,7 @@ import { FILTER_FOR_OPERATOR, FILTER_OUT_OPERATOR, FilterItem } from '@grafana/u
 import { NodeGraphContainer } from './NodeGraphContainer';
 import { ResponseErrorContainer } from './ResponseErrorContainer';
 import { TraceViewContainer } from './TraceView/TraceViewContainer';
+import { FlamebearerViewContainer } from './FlamebearerView/FlamebearerViewContainer';
 import { ExploreGraph } from './ExploreGraph';
 import { LogsVolumePanel } from './LogsVolumePanel';
 import { ExploreGraphLabel } from './ExploreGraphLabel';
@@ -312,6 +313,22 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
     );
   }
 
+  renderFlamebearerPanel() {
+    const { queryResponse, splitOpen, exploreId } = this.props;
+    const dataFrames = queryResponse.series.filter((series) => series.meta?.preferredVisualisationType === 'flamebearer');
+    return (
+      dataFrames.length && (
+        <FlamebearerViewContainer
+          exploreId={exploreId}
+          dataFrames={dataFrames}
+          splitOpenFn={splitOpen}
+          scrollElement={this.scrollElement}
+          topOfExploreViewRef={this.topOfExploreViewRef}
+        />
+      )
+    )
+  }
+
   render() {
     const {
       datasourceInstance,
@@ -325,6 +342,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       showTable,
       showLogs,
       showTrace,
+      showFlamebearer,
       showNodeGraph,
       timeZone,
     } = this.props;
@@ -381,6 +399,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                           {showLogs && <ErrorBoundaryAlert>{this.renderLogsPanel(width)}</ErrorBoundaryAlert>}
                           {showNodeGraph && <ErrorBoundaryAlert>{this.renderNodeGraphPanel()}</ErrorBoundaryAlert>}
                           {showTrace && <ErrorBoundaryAlert>{this.renderTraceViewPanel()}</ErrorBoundaryAlert>}
+                          {showFlamebearer && <ErrorBoundaryAlert>{this.renderFlamebearerPanel()}</ErrorBoundaryAlert>}
                         </>
                       )}
                       {showRichHistory && (
@@ -427,6 +446,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showMetrics,
     showTable,
     showTrace,
+    showFlamebearer,
     absoluteRange,
     queryResponse,
     showNodeGraph,
@@ -451,6 +471,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showTable,
     showTrace,
     showNodeGraph,
+    showFlamebearer,
     loading,
     graphStyle,
   };

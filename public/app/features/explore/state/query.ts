@@ -838,6 +838,7 @@ export const processQueryResponse = (
     tableResult,
     traceFrames,
     nodeGraphFrames,
+    flamebearerFrames,
   } = response;
 
   if (error) {
@@ -866,7 +867,6 @@ export const processQueryResponse = (
     const legacy = series.map((v) => toLegacyResponseData(v));
     state.eventBridge.emit(PanelEvents.dataReceived, legacy);
   }
-
   return {
     ...state,
     queryResponse: response,
@@ -874,10 +874,11 @@ export const processQueryResponse = (
     tableResult,
     logsResult,
     loading: loadingState === LoadingState.Loading || loadingState === LoadingState.Streaming,
-    showLogs: !!logsResult,
+    showLogs: !!logsResult?.series?.length,
     showMetrics: !!graphResult,
     showTable: !!tableResult,
     showTrace: !!traceFrames.length,
     showNodeGraph: !!nodeGraphFrames.length,
+    showFlamebearer: !!flamebearerFrames.length,
   };
 };

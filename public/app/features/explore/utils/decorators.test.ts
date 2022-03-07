@@ -81,6 +81,7 @@ const createExplorePanelData = (args: Partial<ExplorePanelData>): ExplorePanelDa
     tableFrames: [],
     tableResult: undefined as unknown as null,
     traceFrames: [],
+    flamebearerFrames: [],
     nodeGraphFrames: [],
   };
 
