@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Button, HorizontalGroup, InlineField, Input, useStyles2, InlineSwitch } from '@grafana/ui';
+import { HorizontalGroup, InlineField, Input, useStyles2, InlineSwitch, Icon } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { css } from '@emotion/css';
+
+import { LoadingButton } from '../LoadingButton';
 
 // TODO: state persistence on tab change?
 
@@ -196,9 +198,13 @@ export const SystemManagement = () => {
       </div>
       <div className={styles.buttonsContainer}>
         <HorizontalGroup spacing="lg">
-          <Button icon="history">Reboot</Button>
-          <Button icon="power">Shut down</Button>
+          <LoadingButton icon="history" text="Reboot" />
+          <LoadingButton icon="power" text="Shut down" />
         </HorizontalGroup>
+        <div className={styles.buttonsInfo}>
+          <Icon name="info-circle" size="sm" />
+          Hold down to confirm
+        </div>
       </div>
     </div>
   );
@@ -255,5 +261,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
       justify-content: flex-end;
       background: transparent;
     }
+  `,
+  buttonsInfo: css`
+    margin-top: 15px;
+    color: #626262;
+    font-size: 12px;
   `,
 });
