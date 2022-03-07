@@ -1,1 +1,3 @@
-export interface AlertRulePanelOptions {}
+export interface AlertRulePanelOptions {
+  alertRule: string;
+}

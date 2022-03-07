@@ -66,6 +66,7 @@ import * as welcomeBanner from 'app/plugins/panel/welcome/module';
 import * as nodeGraph from 'app/plugins/panel/nodeGraph/module';
 import * as histogramPanel from 'app/plugins/panel/histogram/module';
 import * as alertGroupsPanel from 'app/plugins/panel/alertGroups/module';
+import * as alertRulePanel from 'app/plugins/panel/alertrule/module';
 
 // Async loaded panels
 const geomapPanel = async () => await import(/* webpackChunkName: "geomapPanel" */ 'app/plugins/panel/geomap/module');
@@ -131,6 +132,7 @@ const builtInPlugins: any = {
   'app/plugins/panel/nodeGraph/module': nodeGraph,
   'app/plugins/panel/histogram/module': histogramPanel,
   'app/plugins/panel/alertGroups/module': alertGroupsPanel,
+  'app/plugins/panel/alertrule/module': alertRulePanel,
 };
 
 export default builtInPlugins;
