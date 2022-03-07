@@ -874,7 +874,7 @@ export const processQueryResponse = (
     tableResult,
     logsResult,
     loading: loadingState === LoadingState.Loading || loadingState === LoadingState.Streaming,
-    showLogs: !!logsResult?.series?.length,
+    showLogs: !!logsResult,
     showMetrics: !!graphResult,
     showTable: !!tableResult,
     showTrace: !!traceFrames.length,

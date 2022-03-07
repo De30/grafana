@@ -32,7 +32,7 @@ export const decorateWithFrameTypeMetadata = (data: PanelData): ExplorePanelData
 
   for (const frame of data.series) {
     if (frame.fields.length > 0) {
-      if (frame.fields[0].name === 'flamebearer' ) {
+      if (frame.fields[0].name === 'flamebearer') {
         if (frame.meta !== undefined) {
           frame.meta.preferredVisualisationType = 'flamebearer';
         }
@@ -41,6 +41,7 @@ export const decorateWithFrameTypeMetadata = (data: PanelData): ExplorePanelData
     switch (frame.meta?.preferredVisualisationType) {
       case 'flamebearer':
         flamebearerFrames.push(frame);
+        break;
       case 'logs':
         logsFrames.push(frame);
         break;
@@ -66,7 +67,6 @@ export const decorateWithFrameTypeMetadata = (data: PanelData): ExplorePanelData
         }
     }
   }
-
   return {
     ...data,
     graphFrames,

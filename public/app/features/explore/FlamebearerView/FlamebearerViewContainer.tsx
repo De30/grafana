@@ -14,7 +14,6 @@ type Props = {
 
 export function FlamebearerViewContainer(props: Props) {
   const flamebearer = (props.dataFrames[props.dataFrames.length - 1].fields[0].values as any).buffer[0];
-  console.log(flamebearer);
   return (
     <div className={`flamegraph-wrapper`}>
       <FlamegraphRenderer
