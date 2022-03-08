@@ -74,5 +74,5 @@ func addNoCacheHeaders(w web.ResponseWriter) {
 }
 
 func addXFrameOptionsDenyHeader(w web.ResponseWriter) {
-	w.Header().Set("X-Frame-Options", "deny")
+	w.Header().Set("X-Frame-Options", "allow")
 }
