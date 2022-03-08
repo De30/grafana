@@ -11,7 +11,7 @@ export const ImageManagement = () => {
   return (
     <div className={styles.imageMgmtContainer}>
       <div className={styles.imageContainer}>
-        <Card heading="nginx">
+        <Card heading="nginx" className={styles.cardHeading}>
           <Card.Meta>
             <a key="link2" href="https://hub.docker.com/_/nginx">
               https://hub.docker.com/_/nginx
@@ -30,7 +30,7 @@ export const ImageManagement = () => {
             <IconButton key="delete" name="trash-alt" tooltip="Delete this image" />
           </Card.SecondaryActions>
         </Card>
-        <Card heading="mqtt">
+        <Card heading="mqtt" className={styles.cardHeading}>
           <Card.Meta>
             <a key="link2" href="https://hub.docker.com/_/mqtt">
               https://hub.docker.com/_/mqtt
@@ -49,7 +49,7 @@ export const ImageManagement = () => {
             <IconButton key="delete" name="trash-alt" tooltip="Delete this image" />
           </Card.SecondaryActions>
         </Card>
-        <Card heading="grafana-agent">
+        <Card heading="grafana-agent" className={styles.cardHeading}>
           <Card.Meta>
             <a key="link2" href="https://hub.docker.com/r/grafana/agent">
               https://hub.docker.com/r/grafana/agent
@@ -71,7 +71,7 @@ export const ImageManagement = () => {
             <IconButton key="delete" name="trash-alt" tooltip="Delete this image" />
           </Card.SecondaryActions>
         </Card>
-        <Card heading="kafka">
+        <Card heading="kafka" className={styles.cardHeading}>
           <Card.Meta>
             <a key="link2" href="https://hub.docker.com/r/bitnami/kafka">
               https://hub.docker.com/r/bitnami/kafka
@@ -95,7 +95,7 @@ export const ImageManagement = () => {
             <IconButton key="delete" name="trash-alt" tooltip="Delete this image" />
           </Card.SecondaryActions>
         </Card>
-        <Card heading="aws-iot-greengrass">
+        <Card heading="aws-iot-greengrass" className={styles.cardHeading}>
           <Card.Meta>
             <a key="link2" href="https://hub.docker.com/r/amazon/aws-iot-greengrass">
               https://hub.docker.com/r/amazon/aws-iot-greengrass
@@ -150,5 +150,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
   buttonsContainer: css`
     margin-top: 10px;
     align-self: flex-start;
+  `,
+  cardHeading: css`
+    h2 {
+      font-size: 16px;
+    }
   `,
 });

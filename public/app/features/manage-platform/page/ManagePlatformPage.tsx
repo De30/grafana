@@ -50,7 +50,7 @@ const ManagePlatformPage = () => {
     <Page navModel={{ node: node, main: node }}>
       <Page.Contents>
         <div className={styles.platformSelection}>
-          <InlineLabel width="auto" tooltip="Choose the platform you wish to manage">
+          <InlineLabel className={styles.inlineLabel} width="auto" tooltip="Choose the platform you wish to manage">
             Target platform
           </InlineLabel>
           <Select
@@ -90,6 +90,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
   platformSelect: css`
     width: 150px !important;
+  `,
+  inlineLabel: css`
+    background: transparent;
   `,
 });
 

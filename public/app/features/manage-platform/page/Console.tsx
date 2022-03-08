@@ -64,7 +64,8 @@ Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent permitted by a
 const getStyles = (theme: GrafanaTheme2) => ({
   consoleContainer: css`
     margin: 40px;
-    width: 600px;
+    width: 800px;
+    height: 415px !important;
   `,
   responseContainer: css`
     border: none;
