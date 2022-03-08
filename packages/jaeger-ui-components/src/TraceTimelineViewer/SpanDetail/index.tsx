@@ -205,7 +205,7 @@ export default function SpanDetail(props: SpanDetailProps) {
       <span> </span>
       {profileLink ? (
         <DataLinkButton
-          link={{ ...profileLink, title: 'Profile for this span' } as any}
+          link={{ ...profileLink, title: 'CPU Profile for this span' } as any}
           buttonProps={{ icon: 'gf-portrait' }}
         />
       ) : null}
