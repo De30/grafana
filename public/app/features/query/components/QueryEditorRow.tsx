@@ -221,7 +221,8 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   }
 
   renderPluginEditor = () => {
-    const { query, onChange, queries, onRunQuery, app = CoreApp.PanelEditor, history } = this.props;
+    const { onChange, queries, onRunQuery, app = CoreApp.PanelEditor, history } = this.props;
+    let query = this.props.query as any;
     const { datasource, data } = this.state;
 
     if (datasource?.components?.QueryCtrl) {
@@ -230,7 +231,15 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
     if (datasource) {
       let QueryEditor = this.getReactQueryEditor(datasource);
-
+      // hack for pyroscope to use correctly the query parameter.
+      // see https://github.com/pyroscope-io/pyroscope/blob/main/packages/pyroscope-datasource-plugin/src/QueryEditor.tsx#L63
+      // the plugin should be fixed instead
+      if (datasource.meta?.id === 'pyroscope-datasource') {
+        query = {
+          ...query,
+          name: query.query || query.name,
+        };
+      }
       if (QueryEditor) {
         return (
           <QueryEditor
