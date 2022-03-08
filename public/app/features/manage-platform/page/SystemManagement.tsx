@@ -202,8 +202,7 @@ export const SystemManagement = () => {
           <LoadingButton icon="power" text="Shut down" />
         </HorizontalGroup>
         <div className={styles.buttonsInfo}>
-          <Icon name="info-circle" size="sm" />
-          Hold down to confirm
+          <Icon name="info-circle" size="sm" /> Hold down to confirm
         </div>
       </div>
     </div>
