@@ -77,7 +77,7 @@ export function createProfileSpanLinkFactory({
   }
   return function SpanLink(span: TraceSpan): SpanLinkDef | undefined {
     // We should be here only if there are some links in the dataframe
-    let profileID = span.tags.find((t) => t.key === 'span_profile_id');
+    let profileID = span.tags.find((t) => t.key === 'profile_id');
     if (!profileID) {
       return undefined;
     }
@@ -85,7 +85,7 @@ export function createProfileSpanLinkFactory({
     if (!containerTag) {
       return undefined;
     }
-    let query = `${containerTag.value}.cpu{span_profile_id="${profileID.value}"}`;
+    let query = `${containerTag.value}.cpu{profile_id="${profileID.value}"}`;
 
     let pyroscopeDS = getDatasourceSrv()
       .getAll()
