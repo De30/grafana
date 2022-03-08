@@ -30,14 +30,15 @@ export class CommentManager extends PureComponent<Props, State> {
   }
 
   async componentDidMount() {
-    const resp = await getBackendSrv().post('/api/comments/get', {
-      objectType: this.props.objectType,
-      objectId: this.props.objectId,
-    });
+    // Temporary disable comments due to permission errors
+    // const resp = await getBackendSrv().post('/api/comments/get', {
+    //   objectType: this.props.objectType,
+    //   objectId: this.props.objectId,
+    // });
     this.packetCounter++;
-    this.setState({
-      messages: resp.comments,
-    });
+    // this.setState({
+    //   messages: resp.comments,
+    // });
     this.updateSubscription();
   }
 
