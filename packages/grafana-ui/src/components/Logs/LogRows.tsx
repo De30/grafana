@@ -131,6 +131,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
       return annotations.map((annotation) => {
         return {
           icon: 'comment-alt',
+          iconColor: annotation.color,
           entryFieldIndex: 0,
           rowIndex: 0,
           dataFrame: new MutableDataFrame(),

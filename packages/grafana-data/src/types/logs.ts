@@ -51,6 +51,7 @@ export interface LogsMetaItem {
 
 export interface LogRowModel {
   icon?: IconName;
+  iconColor?: string;
   // Index of the field from which the entry has been created so that we do not show it later in log row details.
   entryFieldIndex: number;
 

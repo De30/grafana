@@ -180,11 +180,7 @@ class UnThemedLogRow extends PureComponent<Props, State> {
                 <Icon className={style.logIconError} name="exclamation-triangle" size="xs" />
               </Tooltip>
             )}
-            {row.icon && (
-              <Tooltip content="annotation" placement="right" theme="error">
-                <Icon className={style.logIconError} name={row.icon} size="xs" />
-              </Tooltip>
-            )}
+            {row.icon && <Icon style={{ color: row.iconColor! }} name={row.icon} size="xs" />}
           </td>
           {enableLogDetails && (
             <td title={showDetails ? 'Hide log details' : 'See log details'} className={style.logsRowToggleDetails}>
