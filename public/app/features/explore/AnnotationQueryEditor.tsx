@@ -1,7 +1,7 @@
 import React from 'react';
 import { ColorValueEditor, HorizontalGroup } from '@grafana/ui';
 import { AnnotationQuery, DataSourceInstanceSettings } from '@grafana/data';
-import { DataSourcePicker, getDataSourceSrv } from '@grafana/runtime';
+import { getDataSourceSrv } from '@grafana/runtime';
 import { useAsync } from 'react-use';
 import StandardAnnotationQueryEditor from 'app/features/annotations/components/StandardAnnotationQueryEditor';
 import { AngularEditorLoader } from '../dashboard/components/AnnotationSettings/AngularEditorLoader';
@@ -41,13 +41,12 @@ export const AnnotationQueryEditor: React.FC<Props> = ({ updateAnnotation, annot
   };
 
   const renderHeader = (props: QueryOperationRowRenderProps) => {
-    // @ts-ignore
     return (
       <QueryEditorRowHeader
         query={annotation.target || { refId: '' }}
         queries={[]}
         onChangeDataSource={onDataSourceChange}
-        dataSource={ds}
+        dataSource={ds || { name: '' }}
         disabled={false}
         onClick={() => {}}
         onChange={() => {}}
