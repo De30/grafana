@@ -1,10 +1,16 @@
 import React from 'react';
-import { CollapsableSection, ColorValueEditor, Field, HorizontalGroup } from '@grafana/ui';
+import { ColorValueEditor, HorizontalGroup } from '@grafana/ui';
 import { AnnotationQuery, DataSourceInstanceSettings } from '@grafana/data';
 import { DataSourcePicker, getDataSourceSrv } from '@grafana/runtime';
 import { useAsync } from 'react-use';
 import StandardAnnotationQueryEditor from 'app/features/annotations/components/StandardAnnotationQueryEditor';
 import { AngularEditorLoader } from '../dashboard/components/AnnotationSettings/AngularEditorLoader';
+import {
+  QueryOperationRow,
+  QueryOperationRowRenderProps,
+} from 'app/core/components/QueryOperationRow/QueryOperationRow';
+import { QueryEditorRowHeader } from '../query/components/QueryEditorRowHeader';
+import { QueryOperationAction } from '../../core/components/QueryOperationRow/QueryOperationAction';
 
 type Props = {
   annotation: AnnotationQuery;
@@ -34,28 +40,50 @@ export const AnnotationQueryEditor: React.FC<Props> = ({ updateAnnotation, annot
     });
   };
 
+  const renderHeader = (props: QueryOperationRowRenderProps) => {
+    // @ts-ignore
+    return (
+      <QueryEditorRowHeader
+        query={annotation.target || { refId: '' }}
+        queries={[]}
+        onChangeDataSource={onDataSourceChange}
+        dataSource={ds}
+        disabled={false}
+        onClick={() => {}}
+        onChange={() => {}}
+        collapsedText=""
+        renderExtras={undefined}
+        alerting={false}
+      />
+    );
+  };
+
+  const renderActions = (props: QueryOperationRowRenderProps) => {
+    return (
+      <HorizontalGroup width="auto">
+        <ColorValueEditor value={annotation?.iconColor} onChange={onColorChange} />
+        <QueryOperationAction title="Remove query" icon="trash-alt" onClick={() => {}} />
+      </HorizontalGroup>
+    );
+  };
+
   return (
     <div>
-      <Field label="Data source" htmlFor="data-source-picker">
-        <DataSourcePicker
-          width={50}
-          annotations
-          variables
-          current={annotation.datasource}
-          onChange={onDataSourceChange}
-        />
-      </Field>
-      <Field label="Color" description="Color to use for the annotation event markers">
-        <HorizontalGroup>
-          <ColorValueEditor value={annotation?.iconColor} onChange={onColorChange} />
-        </HorizontalGroup>
-      </Field>
-      <CollapsableSection isOpen={true} label="Query">
-        {ds?.annotations && (
-          <StandardAnnotationQueryEditor datasource={ds} annotation={annotation} onChange={onUpdate} />
-        )}
-        {ds && !ds.annotations && <AngularEditorLoader datasource={ds} annotation={annotation} onChange={onUpdate} />}
-      </CollapsableSection>
+      <QueryOperationRow
+        id=""
+        draggable={false}
+        index={0}
+        headerElement={renderHeader}
+        actions={renderActions}
+        onOpen={() => {}}
+      >
+        <div style={{ paddingTop: '20px' }}>
+          {ds?.annotations && (
+            <StandardAnnotationQueryEditor datasource={ds} annotation={annotation} onChange={onUpdate} />
+          )}
+          {ds && !ds.annotations && <AngularEditorLoader datasource={ds} annotation={annotation} onChange={onUpdate} />}
+        </div>
+      </QueryOperationRow>
     </div>
   );
 };

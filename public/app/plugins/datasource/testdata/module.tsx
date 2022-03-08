@@ -7,7 +7,7 @@ import { QueryEditor } from './QueryEditor';
 class TestDataAnnotationsQueryCtrl {
   annotation: any;
   constructor() {}
-  static template = '<h2>Annotation scenario</h2>';
+  static template = '<span>10 random annotations will be generated for the currently selected time range.</span>';
 }
 
 export const plugin = new DataSourcePlugin(TestDataDataSource)

@@ -9,7 +9,7 @@ export interface Props<TQuery extends DataQuery = DataQuery> {
   query: TQuery;
   queries: TQuery[];
   disabled?: boolean;
-  dataSource: DataSourceInstanceSettings;
+  dataSource?: DataSourceInstanceSettings;
   renderExtras?: () => ReactNode;
   onChangeDataSource?: (settings: DataSourceInstanceSettings) => void;
   onChange: (query: TQuery) => void;
@@ -134,12 +134,12 @@ const renderDataSource = <TQuery extends DataQuery>(
   const { alerting, dataSource, onChangeDataSource } = props;
 
   if (!onChangeDataSource) {
-    return <em className={styles.contextInfo}>({dataSource.name})</em>;
+    return <em className={styles.contextInfo}>({dataSource?.name})</em>;
   }
 
   return (
     <div className={styles.itemWrapper}>
-      <DataSourcePicker alerting={alerting} current={dataSource.name} onChange={onChangeDataSource} />
+      <DataSourcePicker alerting={alerting} current={dataSource?.name} onChange={onChangeDataSource} />
     </div>
   );
 };
