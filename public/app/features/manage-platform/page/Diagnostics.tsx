@@ -15,7 +15,6 @@ export const Diagnostics = () => {
                 background: '#111218',
                 left: '0px',
                 top: '0px',
-                zIndex: '999',
                 display: 'block',
                 color: '#fff',
               }}
@@ -28,7 +27,6 @@ export const Diagnostics = () => {
                 background: '#111218',
                 left: '0px',
                 top: '0px',
-                zIndex: '999',
                 display: 'block',
                 color: '#fff',
               }}
