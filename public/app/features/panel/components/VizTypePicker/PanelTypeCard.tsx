@@ -1,9 +1,9 @@
-import React, { MouseEventHandler } from 'react';
-import { GrafanaTheme2, isUnsignedPluginSignature, PanelPluginMeta, PluginState } from '@grafana/data';
-import { Card, IconButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
+import { GrafanaTheme2, isUnsignedPluginSignature, PanelPluginMeta, PluginState } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
+import { Card, IconButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
 import { PluginStateInfo } from 'app/features/plugins/components/PluginStateInfo';
+import React, { MouseEventHandler } from 'react';
 
 interface Props {
   isCurrent: boolean;
@@ -11,6 +11,7 @@ interface Props {
   title: string;
   onClick: () => void;
   onDelete?: () => void;
+  hasInteractiveElement?: boolean;
   disabled?: boolean;
   showBadge?: boolean;
   description?: string;
@@ -22,6 +23,7 @@ export const PanelTypeCard: React.FC<Props> = ({
   plugin,
   onClick,
   onDelete,
+  hasInteractiveElement,
   disabled,
   showBadge,
   description,
