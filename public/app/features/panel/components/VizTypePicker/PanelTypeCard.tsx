@@ -1,6 +1,6 @@
 import React, { MouseEventHandler } from 'react';
 import { GrafanaTheme2, isUnsignedPluginSignature, PanelPluginMeta, PluginState } from '@grafana/data';
-import { IconButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
+import { Card, IconButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
 import { selectors } from '@grafana/e2e-selectors';
 import { PluginStateInfo } from 'app/features/plugins/components/PluginStateInfo';
@@ -9,7 +9,7 @@ interface Props {
   isCurrent: boolean;
   plugin: PanelPluginMeta;
   title: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
+  onClick: () => void;
   onDelete?: () => void;
   disabled?: boolean;
   showBadge?: boolean;
@@ -35,10 +35,11 @@ export const PanelTypeCard: React.FC<Props> = ({
   });
 
   return (
-    <div
+    <Card
       className={cssClass}
       aria-label={selectors.components.PluginVisualization.item(plugin.name)}
-      onClick={disabled ? undefined : onClick}
+      onClick={onClick}
+      disabled={disabled}
       title={isCurrent ? 'Click again to close this section' : plugin.name}
     >
       <img className={styles.img} src={plugin.info.logos.small} alt="" />
@@ -63,7 +64,7 @@ export const PanelTypeCard: React.FC<Props> = ({
           aria-label="Delete button on panel type card"
         />
       )}
-    </div>
+    </Card>
   );
 };
 
