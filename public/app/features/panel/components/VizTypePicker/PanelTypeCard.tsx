@@ -9,7 +9,7 @@ interface Props {
   isCurrent: boolean;
   plugin: PanelPluginMeta;
   title: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
+  onClick: MouseEventHandler<HTMLButtonElement>;
   onDelete?: () => void;
   disabled?: boolean;
   showBadge?: boolean;
@@ -35,7 +35,7 @@ export const PanelTypeCard: React.FC<Props> = ({
   });
 
   return (
-    <div
+    <button
       className={cssClass}
       aria-label={selectors.components.PluginVisualization.item(plugin.name)}
       onClick={disabled ? undefined : onClick}
@@ -63,7 +63,7 @@ export const PanelTypeCard: React.FC<Props> = ({
           aria-label="Delete button on panel type card"
         />
       )}
-    </div>
+    </button>
   );
 };
 
