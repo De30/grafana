@@ -221,8 +221,9 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   }
 
   renderPluginEditor = () => {
-    const { onChange, queries, onRunQuery, app = CoreApp.PanelEditor, history } = this.props;
+    const { queries, onRunQuery, app = CoreApp.PanelEditor, history } = this.props;
     let query = this.props.query as any;
+    let onChange = this.props.onChange;
     const { datasource, data } = this.state;
 
     if (datasource?.components?.QueryCtrl) {
@@ -238,6 +239,14 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
         query = {
           ...query,
           name: query.query || query.name,
+        };
+        let next = onChange;
+        onChange = (newQuery: TQuery) => {
+          let q = newQuery as any;
+          next({
+            ...newQuery,
+            query: q.name,
+          });
         };
       }
       if (QueryEditor) {
