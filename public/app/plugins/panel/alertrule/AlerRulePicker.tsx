@@ -3,16 +3,22 @@ import { Select } from '@grafana/ui';
 import { useDispatch } from 'react-redux';
 import { fetchAllPromAndRulerRulesAction } from 'app/features/alerting/unified/state/actions';
 import { useCombinedRuleNamespaces } from 'app/features/alerting/unified/hooks/useCombinedRuleNamespaces';
-import { SelectableValue } from '@grafana/data';
+import { GRAFANA_RULES_SOURCE_NAME } from 'app/features/alerting/unified/utils/datasource';
+import {
+  isAlertingRulerRule,
+  isGrafanaRulerRule,
+  isRecordingRulerRule,
+} from '../../../features/alerting/unified/utils/rules';
+import { SelectedAlertRule } from './types';
 
 interface Props {
-  value: SelectableValue;
-  onChange: (value: SelectableValue) => void;
+  alertRule: SelectedAlertRule;
+  onChange: (alertRule: SelectedAlertRule) => void;
 }
 
-export const AlertRulePicker: FC<Props> = ({ value, onChange }) => {
+export const AlertRulePicker: FC<Props> = ({ alertRule, onChange }) => {
   const dispatch = useDispatch();
-  const [alertRules, setAlertRules] = useState<SelectableValue[]>([]);
+  const [alertRules, setAlertRules] = useState<SelectedAlertRule[]>([]);
 
   useEffect(() => {
     dispatch(fetchAllPromAndRulerRulesAction());
@@ -24,15 +30,30 @@ export const AlertRulePicker: FC<Props> = ({ value, onChange }) => {
     const rulesAsSelectable = combinedNamespaces.flatMap((namespace) => {
       return namespace.groups.flatMap((group) => {
         return group.rules.map((rule) => {
-          return {
-            value: rule.name,
-            label: rule.name,
-          };
+          if (isGrafanaRulerRule(rule.rulerRule)) {
+            return {
+              value: rule.rulerRule.grafana_alert.uid,
+              label: rule.name,
+              ruleSource: GRAFANA_RULES_SOURCE_NAME,
+              ruleIdentifier: { uid: rule.rulerRule.grafana_alert.uid },
+            };
+          } else if (isAlertingRulerRule(rule.rulerRule)) {
+            return {};
+          } else if (isRecordingRulerRule(rule.rulerRule)) {
+            return {};
+          }
+          return {};
         });
       });
     });
     setAlertRules(rulesAsSelectable);
   }, [combinedNamespaces]);
 
-  return <Select options={alertRules} onChange={onChange} value={alertRules.find((ar) => ar.value === value.value)} />;
+  return (
+    <Select
+      options={alertRules}
+      onChange={(value) => onChange(alertRules.find((ar) => ar.value === value.value)!)}
+      value={alertRules.find((ar) => ar.value === alertRule.value)}
+    />
+  );
 };
