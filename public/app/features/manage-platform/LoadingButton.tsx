@@ -11,7 +11,7 @@ const TIMEOUT = 3000;
 export const LoadingButton = ({ icon, text }: Props) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const loadingTimeout = useRef();
+  const loadingTimeout = useRef<any>();
 
   const onMouseDown = () => {
     setHasStarted(true);
