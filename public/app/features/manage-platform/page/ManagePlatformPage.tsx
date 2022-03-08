@@ -9,10 +9,10 @@ import { Console } from './Console';
 import { Diagnostics } from './Diagnostics';
 import { ImageManagement } from './ImageManagement';
 
-const node: NavModelItem = {
+export const GrafanaPieNode: NavModelItem = {
   id: 'manage-platform',
   text: 'GrafanaPie',
-  subTitle: 'A Raspberry Pi turbo confabulator',
+  subTitle: `Grafana's latest star baker ⭐️`,
   icon: 'raspberry',
   url: 'manage-platform',
   img: 'https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png',
@@ -47,7 +47,7 @@ const ManagePlatformPage = () => {
   const styles = useStyles2(getStyles);
 
   return (
-    <Page navModel={{ node: node, main: node }}>
+    <Page navModel={{ node: GrafanaPieNode, main: GrafanaPieNode }}>
       <Page.Contents>
         <div className={styles.platformSelection}>
           <InlineLabel width="auto" tooltip="Choose the platform you wish to manage">

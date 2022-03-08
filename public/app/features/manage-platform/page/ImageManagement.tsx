@@ -118,6 +118,17 @@ export const ImageManagement = () => {
           </Card.SecondaryActions>
         </Card>
         <Card heading="Iris™">
+          <Card.Meta>
+            <a key="link2" href="https://hub.docker.com/r/iris">
+              https://hub.docker.com/r/iris
+            </a>
+          </Card.Meta>
+          <Card.Figure>
+            <img
+              src={'https://img.favpng.com/23/18/25/eye-logo-icon-png-favpng-6hJpX4kcti1MYtg151r0Em3tA.jpg'}
+              alt="iris Logo"
+            />
+          </Card.Figure>
           <Card.Actions>
             <Button icon="play">Start</Button>
             <Button icon="square-shape" variant="secondary">

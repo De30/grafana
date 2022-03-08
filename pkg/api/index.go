@@ -303,18 +303,6 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		})
 	}
 
-	// TODO Raspberry icon
-	if c.OrgRole == models.ROLE_ADMIN {
-		configNodes = append(configNodes, &dtos.NavLink{
-			Text:         "GrafanaPie",
-			Id:           "grafanapie",
-			Description:  "Manage platform",
-			Icon:         "cog",
-			Url:          hs.Cfg.AppSubURL + "/manage-platform",
-			HideFromTabs: true,
-		})
-	}
-
 	// needs both feature flag and migration to be able to show service accounts
 	if enableServiceAccount(hs, c) {
 		configNodes = append(configNodes, &dtos.NavLink{

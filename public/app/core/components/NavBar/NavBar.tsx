@@ -16,6 +16,7 @@ import NavBarItem from './NavBarItem';
 import { NavBarSection } from './NavBarSection';
 import { NavBarMenu } from './NavBarMenu';
 import { NavBarItemWithoutMenu } from './NavBarItemWithoutMenu';
+import { GrafanaPieNode } from 'app/features/manage-platform/page/ManagePlatformPage';
 
 const homeUrl = config.appSubUrl || '/';
 
@@ -56,7 +57,9 @@ export const NavBarUnconnected = React.memo(({ navBarTree }: Props) => {
     location,
     toggleSwitcherModal
   );
-  const activeItem = isSearchActive(location) ? searchItem : getActiveItem(navTree, location.pathname);
+  let activeItem = isSearchActive(location) ? searchItem : getActiveItem(navTree, location.pathname);
+  console.log(location.pathname);
+  activeItem = location.pathname === '/manage-platform' && !isSearchActive(location) ? GrafanaPieNode : activeItem;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -90,6 +93,13 @@ export const NavBarUnconnected = React.memo(({ navBarTree }: Props) => {
             {link.img && <img src={link.img} alt={`${link.text} logo`} />}
           </NavBarItem>
         ))}
+        <NavBarItem
+          key={`grafanapie-1`}
+          isActive={isMatchOrChildMatch(GrafanaPieNode, activeItem)}
+          link={{ ...GrafanaPieNode }}
+        >
+          <img src={'https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png'} alt={`GrafanaPie`} />
+        </NavBarItem>
       </NavBarSection>
 
       <div className={styles.spacer} />
