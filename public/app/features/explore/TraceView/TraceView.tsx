@@ -27,7 +27,7 @@ import { ExploreId } from 'app/types/explore';
 import React, { RefObject, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { changePanelState } from '../state/explorePane';
-import { createSpanLinkFactory } from './createSpanLink';
+import { createSpanLinkFactory, createProfileSpanLinkFactory } from './createSpanLink';
 import { useChildrenState } from './useChildrenState';
 import { useDetailState } from './useDetailState';
 import { useHoverIndentGuide } from './useHoverIndentGuide';
@@ -112,6 +112,10 @@ export function TraceView(props: Props) {
     () => createSpanLinkFactory({ splitOpenFn: props.splitOpenFn, traceToLogsOptions, dataFrame: frame }),
     [props.splitOpenFn, traceToLogsOptions, frame]
   );
+  const createProfileSpanLink = useMemo(
+    () => createProfileSpanLinkFactory({ splitOpenFn: props.splitOpenFn, traceToLogsOptions, dataFrame: frame }),
+    [props.splitOpenFn, traceToLogsOptions, frame]
+  );
   const onSlimViewClicked = useCallback(() => setSlim(!slim), [slim]);
   const timeZone = useSelector((state: StoreState) => getTimeZone(state.user));
 
@@ -174,6 +178,7 @@ export function TraceView(props: Props) {
         linksGetter={noop as any}
         uiFind={search}
         createSpanLink={createSpanLink}
+        createProfileSpanLink={createProfileSpanLink}
         scrollElement={props.scrollElement}
         focusedSpanId={focusedSpanId}
         createFocusSpanLink={createFocusSpanLink}

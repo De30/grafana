@@ -90,6 +90,7 @@ type SpanDetailRowProps = {
   removeHoverIndentGuideId: (spanID: string) => void;
   theme: GrafanaTheme2;
   createSpanLink?: SpanLinkFunc;
+  createProfileSpanLink?: SpanLinkFunc;
   focusedSpanId?: string;
   createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;
 };
@@ -125,6 +126,7 @@ export class UnthemedSpanDetailRow extends React.PureComponent<SpanDetailRowProp
       removeHoverIndentGuideId,
       theme,
       createSpanLink,
+      createProfileSpanLink,
       focusedSpanId,
       createFocusSpanLink,
     } = this.props;
@@ -167,6 +169,7 @@ export class UnthemedSpanDetailRow extends React.PureComponent<SpanDetailRowProp
               traceStartTime={traceStartTime}
               focusSpan={focusSpan}
               createSpanLink={createSpanLink}
+              createProfileSpanLink={createProfileSpanLink}
               focusedSpanId={focusedSpanId}
               createFocusSpanLink={createFocusSpanLink}
             />

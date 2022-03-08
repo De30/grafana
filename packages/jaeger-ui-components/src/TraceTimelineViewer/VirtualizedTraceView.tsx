@@ -99,6 +99,7 @@ type TVirtualizedTraceViewOwnProps = {
   removeHoverIndentGuideId: (spanID: string) => void;
   theme: GrafanaTheme2;
   createSpanLink?: SpanLinkFunc;
+  createProfileSpanLink?: SpanLinkFunc;
   scrollElement?: Element;
   focusedSpanId?: string;
   createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;
@@ -377,6 +378,7 @@ export class UnthemedVirtualizedTraceView extends React.Component<VirtualizedTra
       removeHoverIndentGuideId,
       theme,
       createSpanLink,
+      createProfileSpanLink,
       focusedSpanId,
     } = this.props;
     // to avert flow error
@@ -443,6 +445,7 @@ export class UnthemedVirtualizedTraceView extends React.Component<VirtualizedTra
           addHoverIndentGuideId={addHoverIndentGuideId}
           removeHoverIndentGuideId={removeHoverIndentGuideId}
           createSpanLink={createSpanLink}
+          createProfileSpanLink={createProfileSpanLink}
         />
       </div>
     );
@@ -471,6 +474,7 @@ export class UnthemedVirtualizedTraceView extends React.Component<VirtualizedTra
       linksGetter,
       theme,
       createSpanLink,
+      createProfileSpanLink,
       focusedSpanId,
       createFocusSpanLink,
     } = this.props;
@@ -503,6 +507,7 @@ export class UnthemedVirtualizedTraceView extends React.Component<VirtualizedTra
           addHoverIndentGuideId={addHoverIndentGuideId}
           removeHoverIndentGuideId={removeHoverIndentGuideId}
           createSpanLink={createSpanLink}
+          createProfileSpanLink={createProfileSpanLink}
           focusedSpanId={focusedSpanId}
           createFocusSpanLink={createFocusSpanLink}
         />

@@ -63,6 +63,71 @@ export function createSpanLinkFactory({
   }
 }
 
+export function createProfileSpanLinkFactory({
+  splitOpenFn,
+  traceToLogsOptions,
+  dataFrame,
+}: {
+  splitOpenFn: SplitOpen;
+  traceToLogsOptions?: TraceToLogsOptions;
+  dataFrame?: DataFrame;
+}): SpanLinkFunc | undefined {
+  if (!dataFrame || dataFrame.fields.length === 1) {
+    return undefined;
+  }
+  return function SpanLink(span: TraceSpan): SpanLinkDef | undefined {
+    // We should be here only if there are some links in the dataframe
+    let profileID = span.tags.find((t) => t.key === 'span_profile_id');
+    if (!profileID) {
+      return undefined;
+    }
+    let containerTag = span.process.tags.find((t) => t.key === 'container');
+    if (!containerTag) {
+      return undefined;
+    }
+    let query = `${containerTag.value}.cpu{span_profile_id="${profileID.value}"}`;
+
+    let pyroscopeDS = getDatasourceSrv()
+      .getAll()
+      .find((ds) => {
+        return ds.type === 'pyroscope-datasource';
+      });
+    if (!pyroscopeDS) {
+      return undefined;
+    }
+    const dataLink: DataLink<any> = {
+      title: pyroscopeDS.name,
+      url: '',
+      internal: {
+        datasourceUid: pyroscopeDS.uid,
+        datasourceName: pyroscopeDS.name,
+        query: {
+          query: query,
+          name: query,
+        },
+      },
+    };
+    const link = mapInternalLinkToExplore({
+      link: dataLink,
+      internalLink: dataLink.internal!,
+      scopedVars: {},
+      range: getTimeRangeFromSpan(span, {
+        startMs: 30000,
+        endMs: 30000,
+      }),
+      field: {} as Field,
+      onClickFn: splitOpenFn,
+      replaceVariables: getTemplateSrv().replace.bind(getTemplateSrv()),
+    });
+
+    return {
+      href: link.href,
+      onClick: link.onClick,
+      content: <Icon name="gf-logs" title="Explore the cpu profile for this in split view" />,
+    };
+  };
+}
+
 function legacyCreateSpanLinkFactory(splitOpenFn: SplitOpen, traceToLogsOptions?: TraceToLogsOptions) {
   // We should return if dataSourceUid is undefined otherwise getInstanceSettings would return testDataSource.
   if (!traceToLogsOptions?.datasourceUid) {

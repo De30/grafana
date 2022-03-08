@@ -103,6 +103,7 @@ type TProps = TExtractUiFindFromStateReturn & {
   linksGetter: (span: TraceSpan, items: TraceKeyValuePair[], itemIndex: number) => TraceLink[];
   theme: GrafanaTheme2;
   createSpanLink?: SpanLinkFunc;
+  createProfileSpanLink?: SpanLinkFunc;
   scrollElement?: Element;
   focusedSpanId?: string;
   createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;

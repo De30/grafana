@@ -329,6 +329,7 @@ type SpanBarRowProps = {
   clippingLeft?: boolean;
   clippingRight?: boolean;
   createSpanLink?: SpanLinkFunc;
+  createProfileSpanLink?: SpanLinkFunc;
 };
 
 /**

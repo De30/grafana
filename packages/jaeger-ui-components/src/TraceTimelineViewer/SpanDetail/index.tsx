@@ -115,6 +115,7 @@ type SpanDetailProps = {
   referencesToggle: (spanID: string) => void;
   focusSpan: (uiFind: string) => void;
   createSpanLink?: SpanLinkFunc;
+  createProfileSpanLink?: SpanLinkFunc;
   focusedSpanId?: string;
   createFocusSpanLink: (traceId: string, spanId: string) => LinkModel;
 };
@@ -135,6 +136,7 @@ export default function SpanDetail(props: SpanDetailProps) {
     referenceItemToggle,
     focusSpan,
     createSpanLink,
+    createProfileSpanLink,
     createFocusSpanLink,
   } = props;
   const {
@@ -186,6 +188,7 @@ export default function SpanDetail(props: SpanDetailProps) {
   ];
   const styles = useStyles2(getStyles);
   const link = createSpanLink?.(span);
+  const profileLink = createProfileSpanLink?.(span);
   const focusSpanLink = createFocusSpanLink(traceID, spanID);
 
   return (
@@ -198,6 +201,13 @@ export default function SpanDetail(props: SpanDetailProps) {
       </div>
       {link ? (
         <DataLinkButton link={{ ...link, title: 'Logs for this span' } as any} buttonProps={{ icon: 'gf-logs' }} />
+      ) : null}
+      <span> </span>
+      {profileLink ? (
+        <DataLinkButton
+          link={{ ...profileLink, title: 'Profile for this span' } as any}
+          buttonProps={{ icon: 'gf-portrait' }}
+        />
       ) : null}
       <Divider className={ubMy1} type={'horizontal'} />
       <div>
