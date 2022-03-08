@@ -58,7 +58,6 @@ export const NavBarUnconnected = React.memo(({ navBarTree }: Props) => {
     toggleSwitcherModal
   );
   let activeItem = isSearchActive(location) ? searchItem : getActiveItem(navTree, location.pathname);
-  console.log(location.pathname);
   activeItem = location.pathname === '/manage-platform' && !isSearchActive(location) ? GrafanaPieNode : activeItem;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
