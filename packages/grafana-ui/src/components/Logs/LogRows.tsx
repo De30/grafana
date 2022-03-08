@@ -1,6 +1,17 @@
 import React, { PureComponent } from 'react';
 import memoizeOne from 'memoize-one';
-import { TimeZone, LogsDedupStrategy, LogRowModel, Field, LinkModel, LogsSortOrder, sortLogRows } from '@grafana/data';
+import {
+  TimeZone,
+  LogsDedupStrategy,
+  LogRowModel,
+  Field,
+  LinkModel,
+  LogsSortOrder,
+  sortLogRows,
+  AnnotationEvent,
+  MutableDataFrame,
+  LogLevel,
+} from '@grafana/data';
 
 import { Themeable2 } from '../../types/theme';
 import { withTheme2 } from '../../themes/index';
@@ -34,6 +45,7 @@ export interface Props extends Themeable2 {
   onClickShowDetectedField?: (key: string) => void;
   onClickHideDetectedField?: (key: string) => void;
   onLogRowHover?: (row?: LogRowModel) => void;
+  annotations: AnnotationEvent[];
 }
 
 interface State {
@@ -101,6 +113,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
       onClickHideDetectedField,
       forceEscape,
       onLogRowHover,
+      annotations,
     } = this.props;
     const { renderAll } = this.state;
     const { logsRowsTable } = getLogRowStyles(theme);
@@ -112,7 +125,36 @@ class UnThemedLogRows extends PureComponent<Props, State> {
     const showDuplicates = dedupStrategy !== LogsDedupStrategy.none && dedupCount > 0;
     // Staged rendering
     const processedRows = dedupedRows ? dedupedRows : [];
-    const orderedRows = logsSortOrder ? this.sortLogs(processedRows, logsSortOrder) : processedRows;
+    console.log('LOOGZ', processedRows, annotations);
+
+    function translateAnnotations(annotations: AnnotationEvent[]): LogRowModel[] {
+      return annotations.map((annotation) => {
+        return {
+          icon: 'comment-alt',
+          entryFieldIndex: 0,
+          rowIndex: 0,
+          dataFrame: new MutableDataFrame(),
+          entry: annotation.text || '',
+          hasAnsi: false,
+          hasUnescapedContent: false,
+          labels: {},
+          logLevel: LogLevel.unknown,
+          raw: annotation.text || '',
+          timeFromNow: '',
+          timeEpochMs: annotation.time || 0,
+          timeEpochNs: (annotation.time || 0).toString() + '000',
+          timeLocal: 'local',
+          timeUtc: 'utc',
+          uid: annotation.id || '',
+        };
+      });
+    }
+
+    const annotationRows = translateAnnotations(annotations);
+
+    const orderedRows = logsSortOrder
+      ? this.sortLogs(processedRows.concat(annotationRows), logsSortOrder)
+      : processedRows;
     const firstRows = orderedRows.slice(0, previewLimit!);
     const lastRows = orderedRows.slice(previewLimit!, orderedRows.length);
 

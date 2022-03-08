@@ -14,6 +14,8 @@ import {
   EventBusExtended,
   DataQueryResponse,
   ExplorePanelsState,
+  AnnotationQuery,
+  AnnotationEvent,
 } from '@grafana/data';
 
 export enum ExploreId {
@@ -92,6 +94,10 @@ export interface ExploreItemState {
    * converted to a query row.
    */
   queries: DataQuery[];
+
+  annotationQueries: AnnotationQuery[];
+  annotations: AnnotationEvent[];
+
   /**
    * True if this Explore area has been initialized.
    * Used to distinguish URL state injection versus split view state injection.

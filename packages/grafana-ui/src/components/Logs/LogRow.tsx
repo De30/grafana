@@ -149,7 +149,7 @@ class UnThemedLogRow extends PureComponent<Props, State> {
     const styles = getStyles(theme);
     const { errorMessage, hasError } = checkLogsError(row);
     const logRowBackground = cx(style.logsRow, {
-      [styles.errorLogRow]: hasError,
+      [styles.errorLogRow]: hasError || !!row.icon,
     });
 
     const processedRow =
@@ -174,10 +174,15 @@ class UnThemedLogRow extends PureComponent<Props, State> {
               {processedRow.duplicates && processedRow.duplicates > 0 ? `${processedRow.duplicates + 1}x` : null}
             </td>
           )}
-          <td className={cx({ [style.logsRowLevel]: !hasError })}>
+          <td className={cx({ [style.logsRowLevel]: !(hasError || row.icon) })}>
             {hasError && (
               <Tooltip content={`Error: ${errorMessage}`} placement="right" theme="error">
                 <Icon className={style.logIconError} name="exclamation-triangle" size="xs" />
+              </Tooltip>
+            )}
+            {row.icon && (
+              <Tooltip content="annotation" placement="right" theme="error">
+                <Icon className={style.logIconError} name={row.icon} size="xs" />
               </Tooltip>
             )}
           </td>

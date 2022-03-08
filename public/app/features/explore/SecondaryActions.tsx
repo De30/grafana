@@ -10,6 +10,7 @@ type Props = {
   queryInspectorButtonActive?: boolean;
 
   onClickAddQueryRowButton: () => void;
+  onClickAddAnnotationQueryRowButton: () => void;
   onClickRichHistoryButton: () => void;
   onClickQueryInspectorButton: () => void;
 };
@@ -38,6 +39,15 @@ export function SecondaryActions(props: Props) {
             Add query
           </Button>
         )}
+        <Button
+          variant="secondary"
+          aria-label="Add annotation row button"
+          onClick={props.onClickAddAnnotationQueryRowButton}
+          icon="plus"
+        >
+          Add annotation query
+        </Button>
+
         <Button
           variant="secondary"
           aria-label="Rich history button"

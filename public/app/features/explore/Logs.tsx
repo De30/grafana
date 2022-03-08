@@ -20,6 +20,7 @@ import {
   DataFrame,
   GrafanaTheme2,
   LoadingState,
+  AnnotationEvent,
 } from '@grafana/data';
 import {
   RadioButtonGroup,
@@ -70,6 +71,7 @@ interface Props extends Themeable2 {
   getFieldLinks: (field: Field, rowIndex: number) => Array<LinkModel<Field>>;
   addResultsToCache: () => void;
   clearCache: () => void;
+  annotations: AnnotationEvent[];
 }
 
 interface State {
@@ -269,6 +271,7 @@ class UnthemedLogs extends PureComponent<Props, State> {
       logsQueries,
       clearCache,
       addResultsToCache,
+      annotations,
     } = this.props;
 
     const {
@@ -402,6 +405,7 @@ class UnthemedLogs extends PureComponent<Props, State> {
         <div className={styles.logsSection}>
           <div className={styles.logRows} data-testid="logRows">
             <LogRows
+              annotations={annotations}
               logRows={logRows}
               deduplicatedRows={dedupedRows}
               dedupStrategy={dedupStrategy}

@@ -4,6 +4,7 @@ import { css } from '@emotion/css';
 import { Collapse } from '@grafana/ui';
 import {
   AbsoluteTimeRange,
+  AnnotationEvent,
   Field,
   hasLogsContextSupport,
   LoadingState,
@@ -32,6 +33,7 @@ interface LogsContainerProps extends PropsFromRedux {
   onClickFilterOutLabel?: (key: string, value: string) => void;
   onStartScanning: () => void;
   onStopScanning: () => void;
+  annotations: AnnotationEvent[];
 }
 
 class LogsContainer extends PureComponent<LogsContainerProps> {
@@ -87,6 +89,7 @@ class LogsContainer extends PureComponent<LogsContainerProps> {
       exploreId,
       addResultsToCache,
       clearCache,
+      annotations,
     } = this.props;
 
     if (!logRows) {
@@ -128,6 +131,7 @@ class LogsContainer extends PureComponent<LogsContainerProps> {
               logsMeta={logsMeta}
               logsSeries={logsSeries}
               logsQueries={logsQueries}
+              annotations={annotations}
               width={width}
               loading={loading}
               loadingState={loadingState}

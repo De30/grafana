@@ -1,6 +1,7 @@
-import { mergeMap, throttleTime } from 'rxjs/operators';
-import { identity, Observable, of, SubscriptionLike, Unsubscribable } from 'rxjs';
+import { catchError, map, mergeAll, mergeMap, reduce, throttleTime } from 'rxjs/operators';
+import { from, identity, merge, Observable, of, SubscriptionLike, Unsubscribable } from 'rxjs';
 import {
+  AnnotationQuery,
   AbsoluteTimeRange,
   DataQuery,
   DataQueryErrorType,
@@ -15,6 +16,7 @@ import {
   PanelEvents,
   QueryFixAction,
   toLegacyResponseData,
+  AnnotationEvent,
 } from '@grafana/data';
 
 import {
@@ -47,6 +49,8 @@ import { updateTime } from './time';
 import { historyUpdatedAction } from './history';
 import { createCacheKey, getResultsFromCache } from './utils';
 import deepEqual from 'fast-deep-equal';
+import { translateQueryResult } from '../../query/state/DashboardQueryRunner/utils';
+import { getDataSourceSrv } from '../../../../../packages/grafana-runtime';
 
 //
 // Actions and Payloads
@@ -62,6 +66,13 @@ export interface AddQueryRowPayload {
 }
 export const addQueryRowAction = createAction<AddQueryRowPayload>('explore/addQueryRow');
 
+export interface AddAnnotationQueryRowPayload {
+  exploreId: ExploreId;
+  index: number;
+  annotationQuery: AnnotationQuery;
+}
+export const addAnnotationQueryRowAction = createAction<AddAnnotationQueryRowPayload>('explore/addAnnotationQueryRow');
+
 /**
  * Query change handler for the query row with the given index.
  * If `override` is reset the query modifications and run the queries. Use this to set queries via a link.
@@ -71,6 +82,13 @@ export interface ChangeQueriesPayload {
   queries: DataQuery[];
 }
 export const changeQueriesAction = createAction<ChangeQueriesPayload>('explore/changeQueries');
+
+export interface ChangeAnnotationQueryPayload {
+  exploreId: ExploreId;
+  queryIndex: number;
+  annotationQuery: AnnotationQuery;
+}
+export const changeAnnotationQueryAction = createAction<ChangeAnnotationQueryPayload>('explore/changeAnnotationQuery');
 
 /**
  * Cancel running queries.
@@ -121,6 +139,9 @@ export interface StoreLogsVolumeDataProvider {
 export const storeLogsVolumeDataProviderAction = createAction<StoreLogsVolumeDataProvider>(
   'explore/storeLogsVolumeDataProviderAction'
 );
+
+export const storeAnnotationsAction =
+  createAction<{ exploreId: ExploreId; annotations: AnnotationEvent[] }>('explore/storeAnnotations');
 
 export const cleanLogsVolumeAction = createAction<{ exploreId: ExploreId }>('explore/cleanLogsVolumeAction');
 
@@ -225,6 +246,19 @@ export function addQueryRow(exploreId: ExploreId, index: number): ThunkResult<vo
   };
 }
 
+export function addAnnotationQueryRow(exploreId: ExploreId, index: number): ThunkResult<any> {
+  return (dispatch) => {
+    const annotationQuery: AnnotationQuery = {
+      name: 'Explore annotation',
+      enable: true,
+      hide: false,
+      datasource: null,
+      iconColor: 'red',
+    };
+    dispatch(addAnnotationQueryRowAction({ exploreId, index, annotationQuery }));
+  };
+}
+
 /**
  * Cancel running queries
  */
@@ -310,6 +344,16 @@ export function modifyQueries(
   };
 }
 
+export function changeAnnotationQuery(
+  exploreId: ExploreId,
+  queryIndex: number,
+  annotationQuery: AnnotationQuery
+): ThunkResult<void> {
+  return (dispatch) => {
+    dispatch(changeAnnotationQueryAction({ exploreId, annotationQuery, queryIndex }));
+  };
+}
+
 async function handleHistory(
   dispatch: ThunkDispatch,
   state: ExploreState,
@@ -374,6 +418,7 @@ export const runQueries = (
       absoluteRange,
       cache,
       logsVolumeDataProvider,
+      annotationQueries,
     } = exploreItemState;
     let newQuerySub;
 
@@ -487,6 +532,57 @@ export const runQueries = (
             }
           },
         });
+
+      // run annotation queries
+      if (annotationQueries && annotationQueries.length) {
+        console.log('running annotation queries');
+
+        const observables = annotationQueries.map((annotation) => {
+          const datasourceObservable = from(getDataSourceSrv().get(annotation.datasource)).pipe(
+            catchError((err) => {
+              console.error('Failed to load annotations', err);
+              return of(undefined);
+            })
+          );
+
+          return datasourceObservable.pipe(
+            // mergeMap subscribes to the observable after mapping
+            mergeMap((datasource?: DataSourceApi) => {
+              return from(
+                datasource!.annotationQuery!({ range, rangeRaw: range.raw, annotation, dashboard: undefined })
+              ).pipe(
+                map((results) => {
+                  console.log('got some annotations', results);
+                  return translateQueryResult(annotation, results);
+                }),
+                catchError((err) => {
+                  console.log('could not get annotations', err);
+                  return of([]);
+                })
+              );
+            })
+          );
+        });
+
+        merge(observables)
+          .pipe(
+            mergeAll(),
+            reduce((acc: AnnotationEvent[], value) => {
+              // should we use scan or reduce here
+              // reduce will only emit when all observables are completed
+              // scan will emit when any observable is completed
+              // choosing reduce to minimize re-renders
+              console.log('acc', acc, value);
+              return acc.concat(value);
+            })
+          )
+          .subscribe({
+            next: (annotations: AnnotationEvent[]) => {
+              dispatch(storeAnnotationsAction({ exploreId, annotations }));
+              console.log('hurray!', annotations);
+            },
+          });
+      }
 
       if (live) {
         dispatch(
@@ -641,12 +737,35 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     };
   }
 
+  if (addAnnotationQueryRowAction.match(action)) {
+    const { annotationQueries } = state;
+    const { annotationQuery } = action.payload;
+
+    const nextAnnotationQueries = [...annotationQueries, annotationQuery];
+    return {
+      ...state,
+      annotationQueries: nextAnnotationQueries,
+    };
+  }
+
   if (changeQueriesAction.match(action)) {
     const { queries } = action.payload;
 
     return {
       ...state,
       queries,
+    };
+  }
+
+  if (changeAnnotationQueryAction.match(action)) {
+    const { queryIndex, annotationQuery } = action.payload;
+
+    const annotationQueries = [...state.annotationQueries];
+    annotationQueries[queryIndex] = annotationQuery;
+
+    return {
+      ...state,
+      annotationQueries,
     };
   }
 
@@ -710,6 +829,14 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     return {
       ...state,
       querySubscription,
+    };
+  }
+
+  if (storeAnnotationsAction.match(action)) {
+    const { annotations } = action.payload;
+    return {
+      ...state,
+      annotations,
     };
   }
 

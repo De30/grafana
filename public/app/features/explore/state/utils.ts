@@ -40,6 +40,8 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   datasourceMissing: false,
   history: [],
   queries: [],
+  annotationQueries: [],
+  annotations: [],
   initialized: false,
   range: {
     from: null,

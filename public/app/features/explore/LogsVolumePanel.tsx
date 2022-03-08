@@ -1,4 +1,12 @@
-import { AbsoluteTimeRange, DataQueryError, DataQueryResponse, LoadingState, SplitOpen, TimeZone } from '@grafana/data';
+import {
+  AbsoluteTimeRange,
+  DataFrame,
+  DataQueryError,
+  DataQueryResponse,
+  LoadingState,
+  SplitOpen,
+  TimeZone,
+} from '@grafana/data';
 import { Alert, Button, Collapse, InlineField, TooltipDisplayMode, useStyles2, useTheme2 } from '@grafana/ui';
 import { ExploreGraph } from './ExploreGraph';
 import React, { useState } from 'react';
@@ -12,6 +20,7 @@ type Props = {
   width: number;
   onUpdateTimeRange: (timeRange: AbsoluteTimeRange) => void;
   onLoadLogsVolume: () => void;
+  annotations: DataFrame[];
 };
 
 const SHORT_ERROR_MESSAGE_LIMIT = 100;
@@ -44,7 +53,16 @@ function ErrorAlert(props: { error: DataQueryError }) {
 }
 
 export function LogsVolumePanel(props: Props) {
-  const { width, logsVolumeData, absoluteRange, timeZone, splitOpen, onUpdateTimeRange, onLoadLogsVolume } = props;
+  const {
+    width,
+    logsVolumeData,
+    absoluteRange,
+    timeZone,
+    splitOpen,
+    onUpdateTimeRange,
+    onLoadLogsVolume,
+    annotations,
+  } = props;
   const theme = useTheme2();
   const styles = useStyles2(getStyles);
   const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
@@ -71,6 +89,7 @@ export function LogsVolumePanel(props: Props) {
           onChangeTime={onUpdateTimeRange}
           timeZone={timeZone}
           splitOpenFn={splitOpen}
+          annotations={annotations}
           tooltipDisplayMode={TooltipDisplayMode.Multi}
         />
       );

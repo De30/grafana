@@ -3,6 +3,7 @@ import { DataFrame } from './dataFrame';
 import { DataQuery } from './query';
 import { AbsoluteTimeRange } from './time';
 import { DataQueryResponse } from './datasource';
+import { IconName } from '../../../grafana-ui';
 
 /**
  * Mapping of log level abbreviation to canonical log level.
@@ -49,6 +50,7 @@ export interface LogsMetaItem {
 }
 
 export interface LogRowModel {
+  icon?: IconName;
   // Index of the field from which the entry has been created so that we do not show it later in log row details.
   entryFieldIndex: number;
 

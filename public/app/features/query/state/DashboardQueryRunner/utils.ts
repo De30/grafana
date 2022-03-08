@@ -7,6 +7,7 @@ import { dispatch } from 'app/store/store';
 import { createErrorNotification } from '../../../../core/copy/appNotification';
 import { notifyApp } from '../../../../core/reducers/appNotification';
 import { DashboardQueryRunnerWorkerResult } from './types';
+import { uuid4 } from '@sentry/utils';
 
 export function handleAnnotationQueryRunnerError(err: any): Observable<AnnotationEvent[]> {
   if (err.cancelled) {
@@ -60,6 +61,7 @@ export function translateQueryResult(annotation: AnnotationQuery, results: Annot
 
   for (const item of results) {
     item.source = annotation;
+    item.id = uuid4();
     item.color = config.theme2.visualization.getColorByName(annotation.iconColor);
     item.type = annotation.name;
     item.isRegion = Boolean(item.timeEnd && item.time !== item.timeEnd);

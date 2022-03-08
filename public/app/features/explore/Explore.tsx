@@ -6,7 +6,15 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import memoizeOne from 'memoize-one';
 import { selectors } from '@grafana/e2e-selectors';
 import { Collapse, CustomScrollbar, ErrorBoundaryAlert, Themeable2, withTheme2 } from '@grafana/ui';
-import { AbsoluteTimeRange, DataQuery, GrafanaTheme2, LoadingState, RawTimeRange } from '@grafana/data';
+import {
+  AbsoluteTimeRange,
+  ArrayDataFrame,
+  DataFrame,
+  DataQuery,
+  GrafanaTheme2,
+  LoadingState,
+  RawTimeRange,
+} from '@grafana/data';
 
 import LogsContainer from './LogsContainer';
 import { QueryRows } from './QueryRows';
@@ -16,7 +24,16 @@ import ExploreQueryInspector from './ExploreQueryInspector';
 import { splitOpen } from './state/main';
 import { changeSize, changeGraphStyle } from './state/explorePane';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';
-import { addQueryRow, loadLogsVolumeData, modifyQueries, scanStart, scanStopAction, setQueries } from './state/query';
+import {
+  addAnnotationQueryRow,
+  addQueryRow,
+  changeAnnotationQuery,
+  loadLogsVolumeData,
+  modifyQueries,
+  scanStart,
+  scanStopAction,
+  setQueries,
+} from './state/query';
 import { ExploreGraphStyle, ExploreId, ExploreItemState } from 'app/types/explore';
 import { StoreState } from 'app/types';
 import { ExploreToolbar } from './ExploreToolbar';
@@ -34,6 +51,7 @@ import appEvents from 'app/core/app_events';
 import { AbsoluteTimeEvent } from 'app/types/events';
 import { Unsubscribable } from 'rxjs';
 import { getNodeGraphDataFrames } from 'app/plugins/panel/nodeGraph/utils';
+import { AnnotationQueryEditor } from './AnnotationQueryEditor';
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
@@ -152,6 +170,11 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
     this.props.addQueryRow(exploreId, queryKeys.length);
   };
 
+  onClickAddAnnotationQueryRowButton = () => {
+    const { exploreId, queryKeys } = this.props;
+    this.props.addAnnotationQueryRow(exploreId, queryKeys.length);
+  };
+
   onMakeAbsoluteTime = () => {
     const { makeAbsoluteTime } = this.props;
     makeAbsoluteTime();
@@ -214,9 +237,14 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   }
 
   renderGraphPanel(width: number) {
-    const { graphResult, absoluteRange, timeZone, splitOpen, queryResponse, loading, theme, graphStyle } = this.props;
+    const { graphResult, absoluteRange, timeZone, splitOpen, queryResponse, loading, theme, graphStyle, annotations } =
+      this.props;
     const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
     const label = <ExploreGraphLabel graphStyle={graphStyle} onChangeGraphStyle={this.onChangeGraphStyle} />;
+
+    console.log('query annotations', queryResponse.annotations);
+    console.log('user annotations', annotations);
+
     return (
       <Collapse label={label} loading={loading} isOpen>
         <ExploreGraph
@@ -227,7 +255,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
           absoluteRange={absoluteRange}
           onChangeTime={this.onUpdateTimeRange}
           timeZone={timeZone}
-          annotations={queryResponse.annotations}
+          annotations={(queryResponse.annotations || []).concat(new ArrayDataFrame(annotations))}
           splitOpenFn={splitOpen}
           loadingState={queryResponse.state}
         />
@@ -236,7 +264,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   }
 
   renderLogsVolume(width: number) {
-    const { logsVolumeData, exploreId, loadLogsVolumeData, absoluteRange, timeZone, splitOpen } = this.props;
+    const { logsVolumeData, exploreId, loadLogsVolumeData, absoluteRange, timeZone, splitOpen, annotations } =
+      this.props;
 
     return (
       <LogsVolumePanel
@@ -246,6 +275,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
         onUpdateTimeRange={this.onUpdateTimeRange}
         timeZone={timeZone}
         splitOpen={splitOpen}
+        annotations={([] as DataFrame[]).concat(new ArrayDataFrame(annotations))}
         onLoadLogsVolume={() => loadLogsVolumeData(exploreId)}
       />
     );
@@ -265,7 +295,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   }
 
   renderLogsPanel(width: number) {
-    const { exploreId, syncedTimes, theme, queryResponse } = this.props;
+    const { exploreId, syncedTimes, theme, queryResponse, annotations } = this.props;
     const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
     return (
       <LogsContainer
@@ -277,6 +307,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
         onClickFilterOutLabel={this.onClickFilterOutLabel}
         onStartScanning={this.onStartScanning}
         onStopScanning={this.onStopScanning}
+        annotations={annotations}
       />
     );
   }
@@ -327,6 +358,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       showTrace,
       showNodeGraph,
       timeZone,
+      annotationQueries,
+      changeAnnotationQuery,
     } = this.props;
     const { openDrawer } = this.state;
     const styles = getStyles(theme);
@@ -349,6 +382,17 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
           <div className="explore-container">
             <div className={cx('panel-container', styles.queryContainer)}>
               <QueryRows exploreId={exploreId} />
+              {annotationQueries.map((query, index) => {
+                return (
+                  <AnnotationQueryEditor
+                    key={index}
+                    annotation={query}
+                    updateAnnotation={(annotation) => {
+                      changeAnnotationQuery(exploreId, index, annotation);
+                    }}
+                  ></AnnotationQueryEditor>
+                );
+              })}
               <SecondaryActions
                 addQueryRowButtonDisabled={isLive}
                 // We cannot show multiple traces at the same time right now so we do not show add query button.
@@ -357,6 +401,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                 richHistoryButtonActive={showRichHistory}
                 queryInspectorButtonActive={showQueryInspector}
                 onClickAddQueryRowButton={this.onClickAddQueryRowButton}
+                onClickAddAnnotationQueryRowButton={this.onClickAddAnnotationQueryRowButton}
                 onClickRichHistoryButton={this.toggleShowRichHistory}
                 onClickQueryInspectorButton={this.toggleShowQueryInspector}
               />
@@ -432,6 +477,8 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showNodeGraph,
     loading,
     graphStyle,
+    annotationQueries,
+    annotations,
   } = item;
 
   return {
@@ -453,6 +500,8 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showNodeGraph,
     loading,
     graphStyle,
+    annotationQueries,
+    annotations,
   };
 }
 
@@ -467,6 +516,8 @@ const mapDispatchToProps = {
   makeAbsoluteTime,
   loadLogsVolumeData,
   addQueryRow,
+  addAnnotationQueryRow,
+  changeAnnotationQuery,
   splitOpen,
 };
 
