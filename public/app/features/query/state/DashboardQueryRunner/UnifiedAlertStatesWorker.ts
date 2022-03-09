@@ -9,7 +9,7 @@ import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
 import { Annotation } from 'app/features/alerting/unified/utils/constants';
 
 export class UnifiedAlertStatesWorker implements DashboardQueryRunnerWorker {
-  // maps dashboard uid to wether it has alert rules.
+  // maps dashboard uid to weather it has alert rules.
   // if it is determined that a dashboard does not have alert rules,
   // further attempts to get alert states for it will not be made
   private hasAlertRules: Record<string, boolean> = {};
@@ -23,11 +23,7 @@ export class UnifiedAlertStatesWorker implements DashboardQueryRunnerWorker {
       return false;
     }
 
-    if (this.hasAlertRules[dashboard.uid] === false) {
-      return false;
-    }
-
-    return true;
+    return this.hasAlertRules[dashboard.uid];
   }
 
   work(options: DashboardQueryRunnerOptions): Observable<DashboardQueryRunnerWorkerResult> {

@@ -53,7 +53,7 @@ export const DynamicTable = <T extends object>({
   testIdGenerator,
 
   // render a cell BEFORE expand icon for header/ each row.
-  // currently use by RuleList to render guidelines
+  // currently used by RuleList to render guidelines
   renderPrefixCell,
   renderPrefixHeader,
 }: DynamicTableProps<T>) => {
