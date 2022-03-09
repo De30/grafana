@@ -1,17 +1,16 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
-import { PanelProps } from '@grafana/data';
-import { LoadingPlaceholder } from '@grafana/ui';
-import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
-import { alertRuleToQueries } from 'app/features/alerting/unified/utils/query';
+import { css } from '@emotion/css';
+import { GrafanaTheme2, PanelProps } from '@grafana/data';
+import { CustomScrollbar, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { RuleState } from 'app/features/alerting/unified/components/rules/RuleState';
-import { RuleDetailsMatchingInstances } from 'app/features/alerting/unified/components/rules/RuleDetailsMatchingInstances';
+import { AlertInstancesTable } from 'app/features/alerting/unified/components/rules/AlertInstancesTable';
 import { AlertingQueryRunner } from 'app/features/alerting/unified/state/AlertingQueryRunner';
+import { alertRuleToQueries } from 'app/features/alerting/unified/utils/query';
+import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
+import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
 import { AlertQuery } from 'app/types/unified-alerting-dto';
 import { AlertRulePanelOptions } from './types';
-import { isAlertingRule } from '../../../features/alerting/unified/utils/rules';
-import { AlertRule } from '../../../types';
-import { AlertInstancesTable } from '../../../features/alerting/unified/components/rules/AlertInstancesTable';
 import { Alert } from 'app/types/unified-alerting';
 
 interface Props extends PanelProps<AlertRulePanelOptions> {}
@@ -23,6 +22,7 @@ export const AlertRulePanel: FC<Props> = ({ id, options, width, height }) => {
   const data = useObservable(runner.get());
   const queries2 = useMemo(() => alertRuleToQueries(rule), [rule]);
   const [queries, setQueries] = useState<AlertQuery[]>([]);
+  const styles = useStyles2(getStyles);
 
   const onRunQueries = useCallback(() => {
     if (queries.length > 0) {
@@ -66,16 +66,24 @@ export const AlertRulePanel: FC<Props> = ({ id, options, width, height }) => {
   }
 
   return (
-    <div style={{ width, height }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div>
-          <RuleState rule={rule} isCreating={false} isDeleting={false} />
-        </div>
-        <div>
-          <div>Instances</div>
-          <AlertInstancesTable instances={alerts} />
+    <CustomScrollbar autoHeightMin="100%" autoHeightMax="100%">
+      <div style={{ width, height }}>
+        <h4>{rule.name}</h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className={styles.ruleState}>
+            <RuleState rule={rule} isCreating={false} isDeleting={false} />
+          </div>
+          <div>
+            <AlertInstancesTable instances={alerts} isExpandable={false} />
+          </div>
         </div>
       </div>
-    </div>
+    </CustomScrollbar>
   );
 };
+
+const getStyles = (theme: GrafanaTheme2) => ({
+  ruleState: css`
+    margin-right: ${theme.spacing(3)};
+  `,
+});

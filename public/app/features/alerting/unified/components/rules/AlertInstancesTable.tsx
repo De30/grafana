@@ -10,12 +10,13 @@ import { DynamicTable, DynamicTableColumnProps, DynamicTableItemProps } from '..
 
 interface Props {
   instances: Alert[];
+  isExpandable?: boolean;
 }
 
 type AlertTableColumnProps = DynamicTableColumnProps<Alert>;
 type AlertTableItemProps = DynamicTableItemProps<Alert>;
 
-export const AlertInstancesTable: FC<Props> = ({ instances }) => {
+export const AlertInstancesTable: FC<Props> = ({ instances, isExpandable = true }) => {
   const items = useMemo(
     (): AlertTableItemProps[] =>
       instances.map((instance) => ({
@@ -25,10 +26,14 @@ export const AlertInstancesTable: FC<Props> = ({ instances }) => {
     [instances]
   );
 
+  if (!isExpandable) {
+    return <DynamicTable cols={columns} isExpandable={isExpandable} items={items} />;
+  }
+
   return (
     <DynamicTable
       cols={columns}
-      isExpandable={true}
+      isExpandable={isExpandable}
       items={items}
       renderExpandedContent={({ data }) => <AlertInstanceDetails instance={data} />}
     />
@@ -62,20 +67,17 @@ const columns: AlertTableColumnProps[] = [
   {
     id: 'state',
     label: 'State',
-    // eslint-disable-next-line react/display-name
     renderCell: ({ data: { state } }) => <AlertStateTag state={state} />,
     size: '80px',
   },
   {
     id: 'labels',
     label: 'Labels',
-    // eslint-disable-next-line react/display-name
     renderCell: ({ data: { labels } }) => <AlertLabels labels={labels} />,
   },
   {
     id: 'created',
     label: 'Created',
-    // eslint-disable-next-line react/display-name
     renderCell: ({ data: { activeAt } }) => (
       <>{activeAt.startsWith('0001') ? '-' : activeAt.substr(0, 19).replace('T', ' ')}</>
     ),
