@@ -159,7 +159,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     flex-grow: 1;
   `,
   buttonsContainer: css`
-    margin-top: 10px;
+    margin-top: 80px;
     align-self: flex-start;
   `,
   cardHeading: css`
