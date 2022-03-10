@@ -1,46 +1,20 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { useObservable } from 'react-use';
+import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2, PanelProps } from '@grafana/data';
 import { CustomScrollbar, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { RuleState } from 'app/features/alerting/unified/components/rules/RuleState';
 import { AlertInstancesTable } from 'app/features/alerting/unified/components/rules/AlertInstancesTable';
-import { AlertingQueryRunner } from 'app/features/alerting/unified/state/AlertingQueryRunner';
-import { alertRuleToQueries } from 'app/features/alerting/unified/utils/query';
 import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
 import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
-import { AlertQuery } from 'app/types/unified-alerting-dto';
 import { AlertRulePanelOptions } from './types';
 import { Alert } from 'app/types/unified-alerting';
 
 interface Props extends PanelProps<AlertRulePanelOptions> {}
 const errorMessage = 'Could not find data source for rule';
-export const AlertRulePanel: FC<Props> = ({ id, options, width, height }) => {
+export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
   const { alertRule } = options;
   const { loading, error, result: rule } = useCombinedRule(alertRule.ruleIdentifier, alertRule.ruleSource);
-  const runner = useMemo(() => new AlertingQueryRunner(), []);
-  const data = useObservable(runner.get());
-  const queries2 = useMemo(() => alertRuleToQueries(rule), [rule]);
-  const [queries, setQueries] = useState<AlertQuery[]>([]);
   const styles = useStyles2(getStyles);
-
-  const onRunQueries = useCallback(() => {
-    if (queries.length > 0) {
-      runner.run(queries);
-    }
-  }, [queries, runner]);
-
-  useEffect(() => {
-    setQueries(queries2);
-  }, [queries2]);
-
-  useEffect(() => {
-    onRunQueries();
-  }, [onRunQueries]);
-
-  useEffect(() => {
-    return () => runner.destroy();
-  }, [runner]);
 
   const alerts = useMemo(
     (): Alert[] => (rule && isAlertingRule(rule.promRule) && rule.promRule.alerts?.length ? rule.promRule.alerts : []),
