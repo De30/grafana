@@ -1,10 +1,11 @@
 import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2, PanelProps } from '@grafana/data';
-import { CustomScrollbar, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
+import { CustomScrollbar, LinkButton, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { RuleState } from 'app/features/alerting/unified/components/rules/RuleState';
 import { AlertInstancesTable } from 'app/features/alerting/unified/components/rules/AlertInstancesTable';
 import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
+import { createViewLink } from 'app/features/alerting/unified/utils/misc';
 import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
 import { AlertRulePanelOptions } from './types';
 import { Alert } from 'app/types/unified-alerting';
@@ -15,6 +16,7 @@ export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
   const { alertRule } = options;
   const { loading, error, result: rule } = useCombinedRule(alertRule.ruleIdentifier, alertRule.ruleSource);
   const styles = useStyles2(getStyles);
+  const returnTo = location.pathname + location.search;
 
   const alerts = useMemo(
     (): Alert[] => (rule && isAlertingRule(rule.promRule) && rule.promRule.alerts?.length ? rule.promRule.alerts : []),
@@ -46,6 +48,17 @@ export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div className={styles.ruleState}>
             <RuleState rule={rule} isCreating={false} isDeleting={false} />
+            <div>
+              <LinkButton
+                className={styles.button}
+                size="xs"
+                key="view"
+                variant="secondary"
+                href={createViewLink(rule.namespace.rulesSource, rule, returnTo)}
+              >
+                View rule
+              </LinkButton>
+            </div>
           </div>
           <div>
             <AlertInstancesTable instances={alerts} isExpandable={false} />
@@ -59,5 +72,11 @@ export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
 const getStyles = (theme: GrafanaTheme2) => ({
   ruleState: css`
     margin-right: ${theme.spacing(3)};
+    height: 24px;
+  `,
+  button: css`
+    height: 24px;
+    margin-top: ${theme.spacing(1)};
+    font-size: ${theme.typography.size.sm};
   `,
 });
