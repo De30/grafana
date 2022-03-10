@@ -3,13 +3,8 @@ import { Select } from '@grafana/ui';
 import { useDispatch } from 'react-redux';
 import { fetchAllPromAndRulerRulesAction } from 'app/features/alerting/unified/state/actions';
 import { useCombinedRuleNamespaces } from 'app/features/alerting/unified/hooks/useCombinedRuleNamespaces';
-import { getRulesSourceName, GRAFANA_RULES_SOURCE_NAME } from 'app/features/alerting/unified/utils/datasource';
-import {
-  isAlertingRule,
-  isAlertingRulerRule,
-  isGrafanaRulerRule,
-  isRecordingRulerRule,
-} from '../../../features/alerting/unified/utils/rules';
+import { getRulesSourceName } from 'app/features/alerting/unified/utils/datasource';
+import { isAlertingRule } from '../../../features/alerting/unified/utils/rules';
 import { SelectedAlertRule } from './types';
 import * as ruleId from '../../../features/alerting/unified/utils/rule-id';
 
