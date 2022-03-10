@@ -49,7 +49,7 @@ export class GrafanaDatasource extends DataSourceWithBackend<GrafanaQuery> {
       prepareQuery(anno: AnnotationQuery<GrafanaAnnotationQuery>): GrafanaQuery {
         let datasource: DataSourceRef | undefined | null = undefined;
         if (isString(anno.datasource)) {
-          const ref = migrateDatasourceNameToRef(anno.datasource);
+          const ref = migrateDatasourceNameToRef(anno.datasource, { returnDefaultAsNull: false });
           if (ref) {
             datasource = ref;
           }
