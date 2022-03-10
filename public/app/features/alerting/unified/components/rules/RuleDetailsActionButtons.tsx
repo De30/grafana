@@ -18,6 +18,7 @@ import { getAlertmanagerByUid } from '../../utils/alertmanager';
 import { useStateHistoryModal } from '../../hooks/useStateHistoryModal';
 import { RulerGrafanaRuleDTO, RulerRuleDTO } from 'app/types/unified-alerting-dto';
 import { isFederatedRuleGroup } from '../../utils/rules';
+import { useAddToDashboardModal } from '../../hooks/useAddToDashboardModal';
 
 interface Props {
   rule: CombinedRule;
@@ -33,6 +34,7 @@ export const RuleDetailsActionButtons: FC<Props> = ({ rule, rulesSource }) => {
   const [ruleToDelete, setRuleToDelete] = useState<CombinedRule>();
   const alertId = isGrafanaRulerRule(rule.rulerRule) ? rule.rulerRule.grafana_alert.id ?? '' : '';
   const { StateHistoryModal, showStateHistoryModal } = useStateHistoryModal(alertId);
+  const { AddToDashboardModal, showAddToDashboardModal } = useAddToDashboardModal(rule);
 
   const alertmanagerSourceName = isGrafanaRulesSource(rulesSource)
     ? rulesSource
@@ -161,6 +163,21 @@ export const RuleDetailsActionButtons: FC<Props> = ({ rule, rulesSource }) => {
       </Fragment>
     );
   }
+
+  rightButtons.push(
+    <Fragment key="create-panel">
+      <Button
+        className={style.button}
+        variant="secondary"
+        size="xs"
+        icon="panel-add"
+        onClick={() => showAddToDashboardModal()}
+      >
+        Create panel
+      </Button>
+      {AddToDashboardModal}
+    </Fragment>
+  );
 
   if (!isViewMode) {
     rightButtons.push(
