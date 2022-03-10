@@ -3,13 +3,15 @@ import { Select } from '@grafana/ui';
 import { useDispatch } from 'react-redux';
 import { fetchAllPromAndRulerRulesAction } from 'app/features/alerting/unified/state/actions';
 import { useCombinedRuleNamespaces } from 'app/features/alerting/unified/hooks/useCombinedRuleNamespaces';
-import { GRAFANA_RULES_SOURCE_NAME } from 'app/features/alerting/unified/utils/datasource';
+import { getRulesSourceName, GRAFANA_RULES_SOURCE_NAME } from 'app/features/alerting/unified/utils/datasource';
 import {
+  isAlertingRule,
   isAlertingRulerRule,
   isGrafanaRulerRule,
   isRecordingRulerRule,
 } from '../../../features/alerting/unified/utils/rules';
 import { SelectedAlertRule } from './types';
+import * as ruleId from '../../../features/alerting/unified/utils/rule-id';
 
 interface Props {
   alertRule: SelectedAlertRule;
@@ -29,21 +31,18 @@ export const AlertRulePicker: FC<Props> = ({ alertRule, onChange }) => {
   useEffect(() => {
     const rulesAsSelectable = combinedNamespaces.flatMap((namespace) => {
       return namespace.groups.flatMap((group) => {
-        return group.rules.map((rule) => {
-          if (isGrafanaRulerRule(rule.rulerRule)) {
+        return group.rules
+          .filter((rule) => isAlertingRule(rule.promRule))
+          .map((rule) => {
+            const sourceName = getRulesSourceName(rule.namespace.rulesSource);
+            const identifier = ruleId.fromCombinedRule(sourceName, rule);
             return {
-              value: rule.rulerRule.grafana_alert.uid,
+              value: rule.name,
               label: rule.name,
-              ruleSource: GRAFANA_RULES_SOURCE_NAME,
-              ruleIdentifier: { uid: rule.rulerRule.grafana_alert.uid },
+              ruleSource: sourceName,
+              ruleIdentifier: identifier,
             };
-          } else if (isAlertingRulerRule(rule.rulerRule)) {
-            return {};
-          } else if (isRecordingRulerRule(rule.rulerRule)) {
-            return {};
-          }
-          return {};
-        });
+          });
       });
     });
     setAlertRules(rulesAsSelectable);
