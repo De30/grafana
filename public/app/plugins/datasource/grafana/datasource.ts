@@ -7,6 +7,7 @@ import {
   StreamingFrameOptions,
 } from '@grafana/runtime';
 import {
+  AnnotationEvent,
   AnnotationQuery,
   AnnotationQueryRequest,
   DataFrameView,
@@ -59,6 +60,55 @@ export class GrafanaDatasource extends DataSourceWithBackend<GrafanaQuery> {
         return { ...anno, refId: anno.name, queryType: GrafanaQueryType.Annotations, datasource };
       },
     };
+  }
+
+  annotationQuery(options: AnnotationQueryRequest<GrafanaQuery>): Promise<AnnotationEvent[]> {
+    const templateSrv = getTemplateSrv();
+    const annotation = options.annotation as unknown as GrafanaAnnotationQuery;
+    const params: any = {
+      from: options.range.from.valueOf(),
+      to: options.range.to.valueOf(),
+      limit: annotation.limit,
+      tags: annotation.target?.tags,
+      matchAny: annotation.matchAny,
+    };
+
+    if (annotation.type === GrafanaAnnotationType.Dashboard) {
+      // if no dashboard id yet return
+      if (!options.dashboard.id) {
+        return Promise.resolve([]);
+      }
+      // filter by dashboard id
+      params.dashboardId = options.dashboard.id;
+      // remove tags filter if any
+      delete params.tags;
+    } else {
+      // require at least one tag
+      if (!Array.isArray(annotation.target?.tags) || annotation.target?.tags.length === 0) {
+        return Promise.resolve([]);
+      }
+      const delimiter = '__delimiter__';
+      const tags = [];
+      for (const t of params.tags) {
+        const renderedValues = templateSrv.replace(t, {}, (value: any) => {
+          if (typeof value === 'string') {
+            return value;
+          }
+
+          return value.join(delimiter);
+        });
+        for (const tt of renderedValues.split(delimiter)) {
+          tags.push(tt);
+        }
+      }
+      params.tags = tags;
+    }
+
+    return getBackendSrv().get(
+      '/api/annotations',
+      params,
+      `grafana-data-source-annotations-${annotation.name}-${options.dashboard?.id}`
+    );
   }
 
   query(request: DataQueryRequest<GrafanaQuery>): Observable<DataQueryResponse> {
