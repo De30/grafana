@@ -125,7 +125,6 @@ class UnThemedLogRows extends PureComponent<Props, State> {
     const showDuplicates = dedupStrategy !== LogsDedupStrategy.none && dedupCount > 0;
     // Staged rendering
     const processedRows = dedupedRows ? dedupedRows : [];
-    console.log('LOOGZ', processedRows, annotations);
 
     function translateAnnotations(annotations: AnnotationEvent[]): LogRowModel[] {
       return annotations.map((annotation) => {

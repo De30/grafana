@@ -242,9 +242,6 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
     const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
     const label = <ExploreGraphLabel graphStyle={graphStyle} onChangeGraphStyle={this.onChangeGraphStyle} />;
 
-    console.log('query annotations', queryResponse.annotations);
-    console.log('user annotations', annotations);
-
     return (
       <Collapse label={label} loading={loading} isOpen>
         <ExploreGraph
