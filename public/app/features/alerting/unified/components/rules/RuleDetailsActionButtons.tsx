@@ -34,7 +34,7 @@ export const RuleDetailsActionButtons: FC<Props> = ({ rule, rulesSource }) => {
   const [ruleToDelete, setRuleToDelete] = useState<CombinedRule>();
   const alertId = isGrafanaRulerRule(rule.rulerRule) ? rule.rulerRule.grafana_alert.id ?? '' : '';
   const { StateHistoryModal, showStateHistoryModal } = useStateHistoryModal(alertId);
-  const { AddToDashboardModal, showAddToDashboardModal } = useAddToDashboardModal(rule);
+  const { AddToDashboardModal, showAddToDashboardModal } = useAddToDashboardModal(rule.name);
 
   const alertmanagerSourceName = isGrafanaRulesSource(rulesSource)
     ? rulesSource
@@ -164,21 +164,6 @@ export const RuleDetailsActionButtons: FC<Props> = ({ rule, rulesSource }) => {
     );
   }
 
-  rightButtons.push(
-    <Fragment key="create-panel">
-      <Button
-        className={style.button}
-        variant="secondary"
-        size="xs"
-        icon="panel-add"
-        onClick={() => showAddToDashboardModal()}
-      >
-        Create panel
-      </Button>
-      {AddToDashboardModal}
-    </Fragment>
-  );
-
   if (!isViewMode) {
     rightButtons.push(
       <LinkButton
@@ -228,6 +213,18 @@ export const RuleDetailsActionButtons: FC<Props> = ({ rule, rulesSource }) => {
       <LinkButton className={style.button} size="xs" key="edit" variant="secondary" icon="pen" href={editURL}>
         Edit
       </LinkButton>,
+      <Fragment key="create-panel">
+        <Button
+          className={style.button}
+          variant="secondary"
+          size="xs"
+          icon="panel-add"
+          onClick={() => showAddToDashboardModal()}
+        >
+          Create panel
+        </Button>
+        {AddToDashboardModal}
+      </Fragment>,
       <Button
         className={style.button}
         size="xs"

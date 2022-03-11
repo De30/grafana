@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { CombinedRule } from 'app/types/unified-alerting';
 import { Modal } from '@grafana/ui';
 import { AddAlertRuleToDashboard } from '../components/rules/AddAlertRuleToDashboard';
 
-function useAddToDashboardModal(rule: CombinedRule) {
+function useAddToDashboardModal(ruleName: string) {
   const [showModal, setShowModal] = useState(false);
 
   const AddToDashboardModal = useMemo(
@@ -15,10 +14,10 @@ function useAddToDashboardModal(rule: CombinedRule) {
         closeOnBackdropClick={true}
         closeOnEscape={true}
       >
-        <AddAlertRuleToDashboard rule={rule} />
+        <AddAlertRuleToDashboard ruleName={ruleName} />
       </Modal>
     ),
-    [rule, showModal]
+    [ruleName, showModal]
   );
 
   return {
