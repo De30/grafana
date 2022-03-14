@@ -1,4 +1,5 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 import { GrafanaTheme2, PanelProps } from '@grafana/data';
 import { CustomScrollbar, LinkButton, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
@@ -6,7 +7,9 @@ import { RuleState } from 'app/features/alerting/unified/components/rules/RuleSt
 import { AlertInstancesTable } from 'app/features/alerting/unified/components/rules/AlertInstancesTable';
 import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
 import { createViewLink } from 'app/features/alerting/unified/utils/misc';
+import { RULE_LIST_POLL_INTERVAL_MS } from 'app/features/alerting/unified/utils/constants';
 import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
+import { fetchAllPromRulesAction } from 'app/features/alerting/unified/state/actions';
 import { AlertRulePanelOptions } from './types';
 import { Alert } from 'app/types/unified-alerting';
 
@@ -17,6 +20,16 @@ export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
   const { loading, error, result: rule } = useCombinedRule(alertRule.ruleIdentifier, alertRule.ruleSource);
   const styles = useStyles2(getStyles);
   const returnTo = location.pathname + location.search;
+  const dispatch = useDispatch();
+
+  //This needs to be replaced by listening to the dashboard refresh settings
+  useEffect(() => {
+    dispatch(fetchAllPromRulesAction());
+    const interval = setInterval(() => dispatch(fetchAllPromRulesAction()), RULE_LIST_POLL_INTERVAL_MS);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [dispatch]);
 
   const alerts = useMemo(
     (): Alert[] => (rule && isAlertingRule(rule.promRule) && rule.promRule.alerts?.length ? rule.promRule.alerts : []),
