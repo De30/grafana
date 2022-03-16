@@ -67,9 +67,10 @@ export function useLayout(
   // Also important note is that right now this works on all the nodes even if they are not visible. This means that
   // the node position is stable even when expanding different parts of graph. It seems like a reasonable thing but
   // implications are that:
-  // - limiting visible nodes count does not have a positive perf effect
+  // - limiting visible nodes count does not have a positive perf effect but we also do this only once in the graph
+  //   lifecycle.
   // - graphs with high node count can seem weird (very sparse or spread out) when we show only some nodes but layout
-  //   is done for thousands of nodes but we also do this only once in the graph lifecycle.
+  //   is done for thousands of nodes.
   // We could re-layout this on visible nodes change but this may need smaller visible node limit to keep the perf
   // (as we would run layout on every click) and also would be very weird without any animation to understand what is
   // happening as already visible nodes would change positions.
