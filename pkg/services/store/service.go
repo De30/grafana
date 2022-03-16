@@ -47,11 +47,13 @@ func ProvideService(sql *sqlstore.SQLStore, features featuremgmt.FeatureToggles,
 			Path: cfg.StaticRootPath,
 			Roots: []string{
 				"/testdata/",
-				// "/img/icons/",
-				// "/img/bg/",
-				"/img/",
+				"/img/icons/",
+				"/img/bg/",
 				"/gazetteer/",
 				"/maps/",
+			},
+			AllowedPaths: []string{
+				"/img/",
 			},
 		}).setReadOnly(true).setBuiltin(true),
 	}

@@ -57,7 +57,7 @@ func newDiskStorage(prefix string, name string, cfg *StorageLocalDiskConfig) *ro
 		} else {
 			s.store = filestorage.NewCdkBlobStorage(grafanaStorageLogger,
 				bucket, "",
-				filestorage.NewPathFilters(cfg.Roots, nil, nil, nil))
+				filestorage.NewPathFilters(cfg.Roots, cfg.AllowedPaths, nil, nil))
 
 			meta.Ready = true // exists!
 		}

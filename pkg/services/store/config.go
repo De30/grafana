@@ -16,6 +16,9 @@ type RootStorageConfig struct {
 type StorageLocalDiskConfig struct {
 	Path  string   `json:"path"`
 	Roots []string `json:"roots,omitempty"` // null is everything
+
+	// TODO rename? or just compute it dynamically based on `root`
+	AllowedPaths []string `json:"allowedPaths,omitempty"` // null is everything
 }
 
 type StorageGitConfig struct {
