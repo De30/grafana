@@ -10,11 +10,12 @@ import (
 //
 // TODO: figure out what fields should be here
 type ThemaSchema struct {
-	lineage        thema.Lineage
-	groupName      string
-	groupVersion   string
-	openapiSchema  apiextensionsv1.JSONSchemaProps
-	runtimeObjects []runtime.Object
+	lineage           thema.Lineage
+	groupName         string
+	groupVersion      string
+	openapiSchema     apiextensionsv1.JSONSchemaProps
+	runtimeObject     runtime.Object
+	runtimeListObject runtime.Object
 }
 
 // NewThemaSchema returns a new ThemaSchema.
@@ -27,11 +28,12 @@ func NewThemaSchema(
 	resource, list runtime.Object,
 ) *ThemaSchema {
 	return &ThemaSchema{
-		lineage:        lineage,
-		groupName:      groupName,
-		groupVersion:   groupVersion,
-		openapiSchema:  openapiSchema,
-		runtimeObjects: []runtime.Object{resource, list},
+		lineage:           lineage,
+		groupName:         groupName,
+		groupVersion:      groupVersion,
+		openapiSchema:     openapiSchema,
+		runtimeObject:     resource,
+		runtimeListObject: list,
 	}
 }
 
@@ -50,9 +52,14 @@ func (ts ThemaSchema) GroupVersion() string {
 	return ts.groupVersion
 }
 
-// RuntimeObjects returns a list of runtime.Object's, which accurately represent schema objects to Kubernetes.
-func (ts ThemaSchema) RuntimeObjects() []runtime.Object {
-	return ts.runtimeObjects
+// RuntimeObject returns the Kubernetes representation of a schema object.
+func (ts ThemaSchema) RuntimeObject() runtime.Object {
+	return ts.runtimeObject
+}
+
+// RuntimeListObject returns the Kubernetes representation of a list of schema objects.
+func (ts ThemaSchema) RuntimeListObject() runtime.Object {
+	return ts.runtimeListObject
 }
 
 // OpenAPISchema returns the openAPI representation of schema.

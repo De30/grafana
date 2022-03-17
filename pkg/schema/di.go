@@ -26,7 +26,8 @@ type ObjectSchema interface {
 	GroupName() string
 	GroupVersion() string
 	OpenAPISchema() apiextensionsv1.JSONSchemaProps
-	RuntimeObjects() []runtime.Object
+	RuntimeObject() runtime.Object
+	RuntimeListObject() runtime.Object
 }
 
 // CoreRegistry is a registry for Grafana core (compile-time-known)

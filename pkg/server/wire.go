@@ -7,8 +7,6 @@ import (
 	"github.com/google/wire"
 	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 	"github.com/grafana/grafana/internal/components"
-	"github.com/grafana/grafana/internal/components/datasource"
-	"github.com/grafana/grafana/internal/components/staticregistry"
 	"github.com/grafana/grafana/internal/cuectx"
 	"github.com/grafana/grafana/internal/intentapi"
 	"github.com/grafana/grafana/internal/k8sbridge"
@@ -237,9 +235,7 @@ var wireIntentAPISet = wire.NewSet(
 	schema.ProvideGoSchemaLoader,
 	schema.ProvideThemaSchemaLoader,
 	schema.ProvideSchemaLoader,
-	sqlstore.SchemaStoreProvidersSet,
-	datasource.ProvideCoremodel,
-	staticregistry.ProvideRegistry,
+	components.ProvideReadonlyRegistry,
 	k8sbridge.ProvideService,
 	intentapi.ProvideApiserverProxy,
 	intentapi.ProvideHTTPServer,

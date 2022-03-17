@@ -6,17 +6,12 @@ import (
 	"github.com/grafana/grafana/pkg/schema"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // Coremodel is an interface that must be implemented by each coremodel.
 type Coremodel interface {
 	// Schema should return coremodel's schema.
 	Schema() schema.ObjectSchema
-
-	// RegisterController should optionally register coremodel's controller to the manager.
-	// If no controller is needed for the coremodel, it's safe to simply return nil from this method.
-	RegisterController(ctrl.Manager) error
 }
 
 // SchemaLoader is a generic schema loader, that can load different schema types.
@@ -37,8 +32,8 @@ type Store interface {
 	// Delete deletes the coremodel with specified namespaced name from the store.
 	Delete(context.Context, types.NamespacedName) error
 
-	// Insert inserts the coremodel object into the store.
-	Insert(context.Context, runtime.Object) error
+	// Create creates a new coremodel object in the store.
+	Create(context.Context, runtime.Object) error
 
 	// Update updates the coremodel object in the store.
 	Update(context.Context, runtime.Object) error

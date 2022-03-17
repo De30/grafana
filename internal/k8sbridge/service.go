@@ -14,17 +14,31 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 
 	"github.com/grafana/grafana/internal/components"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
+)
+
+var (
+	// ErrInvalidObjectType is returned when a coremodel has a reconciler,
+	// but its schema does not support reconciliation.
+	ErrInvalidObjectType = errors.New("coremodel object is not a kind of client.Object")
 )
 
 // CoremodelLister provides a list of coremodels to be registered to Service.
 type CoremodelLister interface {
 	List() []components.Coremodel
+}
+
+// StoreInjector allows for injecting store from outside.
+type StoreInjector interface {
+	InjectStore(store *sqlstore.SQLStore) error
 }
 
 // Service is the service that registers all schemas, CRDs and clients to Kubernetes.
@@ -33,13 +47,18 @@ type Service struct {
 	enabled   bool
 	config    *rest.Config
 	clientset *Clientset
+	storeset  *sqlstore.SQLStore
 	manager   ctrl.Manager
 	logger    log.Logger
 }
 
 // ProvideService returns a new Service which registers models from list.
 // It is disabled if the intentapi flag is disabled in the feature toggles.
-func ProvideService(cfg *setting.Cfg, feat featuremgmt.FeatureToggles, list CoremodelLister) (*Service, error) {
+//
+// TODO: this currently accepts concrete implementation of store, instead this should take a generic storeset.
+func ProvideService(
+	cfg *setting.Cfg, feat featuremgmt.FeatureToggles, store *sqlstore.SQLStore, list CoremodelLister,
+) (*Service, error) {
 	enabled := feat.IsEnabled(featuremgmt.FlagIntentapi)
 	if !enabled {
 		return &Service{
@@ -103,12 +122,33 @@ func (s *Service) Run(ctx context.Context) error {
 // RegisterModels registers models to clientset and controller manager.
 func (s *Service) RegisterModels(ctx context.Context, models ...components.Coremodel) error {
 	for _, m := range models {
-		if err := s.clientset.RegisterSchema(ctx, m.Schema()); err != nil {
+		sc := m.Schema()
+
+		if err := s.clientset.RegisterSchema(ctx, sc); err != nil {
 			return err
 		}
 
-		if err := m.RegisterController(s.manager); err != nil {
-			return err
+		// Check if we need to inject the store.
+		if str, ok := m.(StoreInjector); ok {
+			if err := str.InjectStore(s.storeset); err != nil {
+				return err
+			}
+		}
+
+		// Check if the model has a reconciler.
+		// If yes, make sure we register it to controller manager.
+		if rec, ok := m.(reconcile.Reconciler); ok {
+			// TODO: this is currently done so that we don't have to return client.Object from the Schema.
+			// I think that it might make sense to simply do that instead of casting it here,
+			// because the only difference is that client.Object includes metadata methods (which we should anyway have).
+			obj, ok := sc.RuntimeObject().(client.Object)
+			if !ok {
+				return ErrInvalidObjectType
+			}
+
+			if err := ctrl.NewControllerManagedBy(s.manager).For(obj).Complete(rec); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -151,7 +191,7 @@ func GenerateScheme(models []components.Coremodel) (*runtime.Scheme, error) {
 				Version: s.GroupVersion(),
 			},
 		}
-		schemaBuilder.Register(s.RuntimeObjects()...)
+		schemaBuilder.Register(s.RuntimeObject(), s.RuntimeListObject())
 
 		if err := schemaBuilder.AddToScheme(res); err != nil {
 			return nil, err

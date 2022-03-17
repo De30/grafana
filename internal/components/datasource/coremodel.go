@@ -3,10 +3,10 @@ package datasource
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -14,7 +14,33 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/schema"
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
+
+func init() {
+	fmt.Println("regging datasource model")
+	panic("regging datasource model")
+
+	components.RegisterCoremodel(
+		components.SchemaOpts{
+			Type: schema.SchemaTypeThema,
+			ThemaOpts: schema.ThemaLoaderOpts{
+				SchemaFS:         cueFS,
+				SchemaPath:       cuePath,
+				SchemaVersion:    schemaVersion,
+				GroupName:        groupName,
+				GroupVersion:     groupVersion,
+				SchemaOpenapi:    schemaOpenapi,
+				SchemaType:       &DatasourceSpec{},
+				SchemaObject:     &Datasource{},
+				SchemaListObject: &DatasourceList{},
+			},
+		},
+		func(s schema.ObjectSchema, l log.Logger) components.Coremodel {
+			return NewCoremodel(s, l)
+		},
+	)
+}
 
 // Coremodel is the coremodel for Datasource component.
 type Coremodel struct {
@@ -24,32 +50,12 @@ type Coremodel struct {
 	logger log.Logger
 }
 
-// ProvideCoremodel provides a new Coremodel with store and schema loaded from loader.
-//
-// TODO: this is currently done manually and is statically enumerated in the registry.
-// We should figure out a way to dynamically register this to registry and automate schema loading too,
-// since the loading process will be exactly the same for all components (except for schema options).
-func ProvideCoremodel(store components.Store, loader components.SchemaLoader) (*Coremodel, error) {
-	schema, err := loader.LoadSchema(context.TODO(), schema.SchemaTypeThema, schema.ThemaLoaderOpts{
-		SchemaFS:         cueFS,
-		SchemaPath:       cuePath,
-		SchemaVersion:    schemaVersion,
-		GroupName:        groupName,
-		GroupVersion:     groupVersion,
-		SchemaOpenapi:    schemaOpenapi,
-		SchemaType:       &DatasourceSpec{},
-		SchemaObject:     &Datasource{},
-		SchemaListObject: &DatasourceList{},
-	}, schema.GoLoaderOpts{})
-	if err != nil {
-		return nil, err
-	}
-
+// NewCoremodel
+func NewCoremodel(s schema.ObjectSchema, l log.Logger) *Coremodel {
 	return &Coremodel{
-		store:  store,
-		schema: schema,
-		logger: log.New("components.datasource.coremodel"),
-	}, nil
+		schema: s,
+		logger: log.New("datasource"),
+	}
 }
 
 // Schema returns the object schema for this Coremodel.
@@ -57,15 +63,20 @@ func (m *Coremodel) Schema() schema.ObjectSchema {
 	return m.schema
 }
 
-// RegisterController registers the controller for this coremodel.
-// Not all coremodels are required to have controllers,
-// so if we don't need to register anything, we can just return immediately.
-func (m *Coremodel) RegisterController(mgr ctrl.Manager) error {
-	m.client = mgr.GetClient()
+// InjectStore
+//
+// TODO: currently this injects the sqlstore, but we need to inject a generic component store.
+// We should do that with a storeset (a component similar to client set), in a separate PR.
+func (m *Coremodel) InjectStore(store *sqlstore.SQLStore) error {
+	m.store = NewStore(store, m.logger)
+	return nil
+}
 
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&Datasource{}).
-		Complete(m)
+// InjectClient is called when this coremodel is registered to controller manager.
+// It will receive the client for the object kind controlled by coremodel, which can be used in reconciliation.
+func (m *Coremodel) InjectClient(client client.Client) error {
+	m.client = client
+	return nil
 }
 
 // Reconcile implements Kubernetes controller reconciliation logic.
@@ -119,7 +130,7 @@ func (m *Coremodel) Reconcile(ctx context.Context, req reconcile.Request) (recon
 		)
 
 		// Since the object cannot be found in local storage, it means we need to create it.
-		if err := m.store.Insert(ctx, &kubeVal); err != nil {
+		if err := m.store.Create(ctx, &kubeVal); err != nil {
 			m.logger.Error(
 				"error inserting resource to local store",
 				"request", req.String(),

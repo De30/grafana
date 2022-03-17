@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package sqlstore
+package datasource
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/grafana/grafana/internal/components"
-	"github.com/grafana/grafana/internal/components/datasource"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
 func TestStoreDSStoreCRUD(t *testing.T) {
 	ctx := context.Background()
-	sqlStore := InitTestDB(t)
+	sqlStore := sqlstore.InitTestDB(t)
 	dsStore := components.Store(ProvideDataSourceSchemaStore(sqlStore))
 
 	uid := types.UID("MySpecialUIDisDEARtoMe")
@@ -30,8 +30,8 @@ func TestStoreDSStoreCRUD(t *testing.T) {
 	}
 
 	t.Run("should insert the datasource into store", func(t *testing.T) {
-		modelToInsert := datasource.Datasource{
-			Spec: datasource.DatasourceSpec{
+		modelToInsert := Datasource{
+			Spec: DatasourceSpec{
 				JsonData: jd,
 			},
 		}
@@ -39,11 +39,11 @@ func TestStoreDSStoreCRUD(t *testing.T) {
 		modelToInsert.UID = uid
 		assert.NoError(t, dsStore.Insert(ctx, &modelToInsert))
 
-		var fetchedDS datasource.Datasource
+		var fetchedDS Datasource
 		assert.NoError(t, dsStore.Get(ctx, nsName, &fetchedDS))
 
-		modelToInsertWithVersionBumped := datasource.Datasource{
-			Spec: datasource.DatasourceSpec{
+		modelToInsertWithVersionBumped := Datasource{
+			Spec: DatasourceSpec{
 				JsonData: jd,
 			},
 		}
@@ -55,11 +55,11 @@ func TestStoreDSStoreCRUD(t *testing.T) {
 	})
 
 	t.Run("should update the datasource in store", func(t *testing.T) {
-		var fetchedDS datasource.Datasource
+		var fetchedDS Datasource
 		assert.NoError(t, dsStore.Get(ctx, nsName, &fetchedDS))
 
-		modelForUpdate := datasource.Datasource{
-			Spec: datasource.DatasourceSpec{
+		modelForUpdate := Datasource{
+			Spec: DatasourceSpec{
 				JsonData: jd,
 				Type:     "slothFactory",
 			},
@@ -70,8 +70,8 @@ func TestStoreDSStoreCRUD(t *testing.T) {
 
 		assert.NoError(t, dsStore.Update(ctx, &modelForUpdate))
 
-		modelForUpdateWithVersionBump := datasource.Datasource{
-			Spec: datasource.DatasourceSpec{
+		modelForUpdateWithVersionBump := Datasource{
+			Spec: DatasourceSpec{
 				JsonData: jd,
 				Type:     "slothFactory",
 			},
@@ -82,13 +82,13 @@ func TestStoreDSStoreCRUD(t *testing.T) {
 		assert.NoError(t, err)
 		modelForUpdateWithVersionBump.ResourceVersion = strconv.Itoa(rv + 1) // We are manually setting version
 
-		var fetchedUpdatedDS datasource.Datasource
+		var fetchedUpdatedDS Datasource
 		assert.NoError(t, dsStore.Get(ctx, nsName, &fetchedUpdatedDS))
 		assert.Equal(t, modelForUpdateWithVersionBump, fetchedUpdatedDS)
 	})
 
 	t.Run("should delete the datasource from store", func(t *testing.T) {
-		var fetchedDS datasource.Datasource
+		var fetchedDS Datasource
 		assert.NoError(t, dsStore.Delete(ctx, nsName))
 		assert.ErrorIs(t, dsStore.Get(ctx, nsName, &fetchedDS), models.ErrDataSourceNotFound)
 	})

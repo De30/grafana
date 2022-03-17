@@ -11,11 +11,12 @@ import (
 //
 // TODO figure out what fields should be here
 type GoSchema struct {
-	objectName     string
-	groupName      string
-	groupVersion   string
-	openapiSchema  apiextensionsv1.JSONSchemaProps
-	runtimeObjects []runtime.Object
+	objectName        string
+	groupName         string
+	groupVersion      string
+	openapiSchema     apiextensionsv1.JSONSchemaProps
+	runtimeObject     runtime.Object
+	runtimeListObject runtime.Object
 }
 
 // NewGoSchema returns a new GoSchema.
@@ -27,11 +28,12 @@ func NewGoSchema(
 	resource, list runtime.Object,
 ) GoSchema {
 	return GoSchema{
-		objectName:     objectKind,
-		groupName:      groupName,
-		groupVersion:   groupVersion,
-		openapiSchema:  openapiSchema,
-		runtimeObjects: []runtime.Object{resource, list},
+		objectName:        objectKind,
+		groupName:         groupName,
+		groupVersion:      groupVersion,
+		openapiSchema:     openapiSchema,
+		runtimeObject:     resource,
+		runtimeListObject: list,
 	}
 }
 
@@ -50,9 +52,14 @@ func (gs GoSchema) GroupVersion() string {
 	return gs.groupVersion
 }
 
-// RuntimeObjects returns a list of runtime.Object's, which accurately represent schema objects to Kubernetes.
-func (gs GoSchema) RuntimeObjects() []runtime.Object {
-	return gs.runtimeObjects
+// RuntimeObject returns the Kubernetes representation of a schema object.
+func (gs GoSchema) RuntimeObject() runtime.Object {
+	return gs.runtimeObject
+}
+
+// RuntimeListObject returns the Kubernetes representation of a list of schema objects.
+func (gs GoSchema) RuntimeListObject() runtime.Object {
+	return gs.runtimeListObject
 }
 
 // OpenAPISchema returns the openAPI representation of schema.
