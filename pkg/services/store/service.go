@@ -75,6 +75,7 @@ func ProvideService(sql *sqlstore.SQLStore, features featuremgmt.FeatureToggles,
 			},
 		}).setReadOnly(true).setBuiltin(true),
 	}
+
 	storage := filepath.Join(cfg.DataPath, "storage")
 	_ = os.MkdirAll(storage, 0700)
 
