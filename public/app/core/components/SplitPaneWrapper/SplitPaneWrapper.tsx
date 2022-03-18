@@ -13,7 +13,7 @@ enum Pane {
 interface Props {
   leftPaneComponents: ReactNode[] | ReactNode;
   rightPaneComponents: ReactNode;
-  uiState: { topPaneSize: number; rightPaneSize: number };
+  uiState: { topPaneSize?: number; rightPaneSize?: number };
   rightPaneVisible?: boolean;
   updateUiState: (uiState: { topPaneSize?: number; rightPaneSize?: number }) => void;
 }
@@ -68,7 +68,8 @@ export class SplitPaneWrapper extends PureComponent<Props> {
   renderHorizontalSplit() {
     const { leftPaneComponents, uiState } = this.props;
     const styles = getStyles(config.theme);
-    const topPaneSize = uiState.topPaneSize >= 1 ? uiState.topPaneSize : uiState.topPaneSize * window.innerHeight;
+    const topPaneSizeIn = uiState.topPaneSize || 0;
+    const topPaneSize = topPaneSizeIn >= 1 ? uiState.topPaneSize : topPaneSizeIn * window.innerHeight;
 
     /*
       Guesstimate the height of the browser window minus
@@ -102,8 +103,8 @@ export class SplitPaneWrapper extends PureComponent<Props> {
     const styles = getStyles(config.theme);
 
     // Need to handle when width is relative. ie a percentage of the viewport
-    const rightPaneSize =
-      uiState.rightPaneSize <= 1 ? uiState.rightPaneSize * window.innerWidth : uiState.rightPaneSize;
+    const rightPaneSizeIn = uiState.rightPaneSize || 0.5;
+    const rightPaneSize = rightPaneSizeIn <= 1 ? rightPaneSizeIn * window.innerWidth : rightPaneSizeIn;
 
     if (!rightPaneVisible) {
       return this.renderHorizontalSplit();
