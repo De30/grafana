@@ -40,6 +40,7 @@ type AccessControlDashboardGuardian struct {
 	log                log.Logger
 	dashboardID        int64
 	dashboard          *models.Dashboard
+	parentFolder       *models.Dashboard
 	user               *models.SignedInUser
 	store              *sqlstore.SQLStore
 	ac                 accesscontrol.AccessControl
@@ -257,6 +258,13 @@ func (a *AccessControlDashboardGuardian) loadDashboard() error {
 		query := &models.GetDashboardQuery{Id: a.dashboardID, OrgId: a.user.OrgId}
 		if err := a.store.GetDashboard(a.ctx, query); err != nil {
 			return err
+		}
+		if !query.Result.IsFolder {
+			folderQuery := &models.GetDashboardQuery{Id: query.Result.FolderId, OrgId: a.user.OrgId}
+			if err := a.store.GetDashboard(a.ctx, query); err != nil {
+				return err
+			}
+			a.parentFolder = folderQuery.Result
 		}
 		a.dashboard = query.Result
 	}
