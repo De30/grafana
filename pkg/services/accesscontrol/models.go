@@ -245,7 +245,7 @@ const (
 
 	// Scope attributes
 	ScopeAttributeID  = "id"
-	ScopeAttributeUID = "Uid"
+	ScopeAttributeUID = "uid"
 
 	// Permission actions
 
