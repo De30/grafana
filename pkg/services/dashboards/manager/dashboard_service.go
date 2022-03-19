@@ -134,7 +134,7 @@ func (dr *DashboardServiceImpl) BuildSaveDashboardCommand(ctx context.Context, d
 
 	guard := guardian.New(ctx, dash.GetDashboardIdForSavePermissionCheck(), dto.OrgId, dto.User)
 	if dash.Id == 0 {
-		if canCreate, err := guard.CanCreate(dash.FolderId, dash.IsFolder); err != nil || !canCreate {
+		if canCreate, err := guard.CanCreate(dto.Dashboard.Uid, dash.IsFolder); err != nil || !canCreate {
 			if err != nil {
 				return nil, err
 			}
@@ -305,7 +305,6 @@ func (dr *DashboardServiceImpl) SaveDashboard(ctx context.Context, dto *m.SaveDa
 			setting.MinRefreshInterval)
 		dto.Dashboard.Data.Set("refresh", setting.MinRefreshInterval)
 	}
-
 	cmd, err := dr.BuildSaveDashboardCommand(ctx, dto, true, !allowUiUpdate)
 	if err != nil {
 		return nil, err
