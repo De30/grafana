@@ -56,7 +56,7 @@ var folderPermissionTranslation = map[models.PermissionType][]string{
 
 func AddDashboardPermissionsMigrator(mg *migrator.Migrator) {
 	mg.AddMigration("dashboard permissions", &dashboardPermissionsMigrator{})
-	// TODO add migrator
+	mg.AddMigration("dashboard permissions uid scopes", &dashboardUidPermissionMigrator{})
 }
 
 var _ migrator.CodeMigration = new(dashboardPermissionsMigrator)
