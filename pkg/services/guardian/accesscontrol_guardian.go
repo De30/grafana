@@ -264,7 +264,7 @@ func (a *AccessControlDashboardGuardian) loadDashboard() error {
 				a.parentFolder = &models.Dashboard{Uid: "general"}
 			} else {
 				folderQuery := &models.GetDashboardQuery{Id: query.Result.FolderId, OrgId: a.user.OrgId}
-				if err := a.store.GetDashboard(a.ctx, query); err != nil {
+				if err := a.store.GetDashboard(a.ctx, folderQuery); err != nil {
 					return err
 				}
 				a.parentFolder = folderQuery.Result
