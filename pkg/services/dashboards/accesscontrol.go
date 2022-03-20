@@ -55,6 +55,9 @@ func NewIDScopeResolver(db Store) (string, ac.AttributeScopeResolveFunc) {
 		if err != nil {
 			return "", ac.ErrInvalidScope
 		}
+		if id == 0 {
+			return ScopeFoldersProvider.GetResourceScopeUID("general"), nil
+		}
 		folder, err := db.GetFolderByID(ctx, orgID, id)
 		if err != nil {
 			return "", err

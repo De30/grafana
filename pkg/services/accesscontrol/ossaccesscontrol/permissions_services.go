@@ -147,11 +147,7 @@ func ProvideDashboardPermissions(
 	ac accesscontrol.AccessControl, store resourcepermissions.Store,
 ) (*resourcepermissions.Service, error) {
 	getDashboard := func(ctx context.Context, orgID int64, resourceID string) (*models.Dashboard, error) {
-		id, err := strconv.ParseInt(resourceID, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		query := &models.GetDashboardQuery{Id: id, OrgId: orgID}
+		query := &models.GetDashboardQuery{Uid: resourceID, OrgId: orgID}
 		if err := sql.GetDashboard(ctx, query); err != nil {
 			return nil, err
 		}
@@ -213,11 +209,7 @@ func ProvideFolderPermissions(
 		Resource:          "folders",
 		ResourceAttribute: "uid",
 		ResourceValidator: func(ctx context.Context, orgID int64, resourceID string) error {
-			id, err := strconv.ParseInt(resourceID, 10, 64)
-			if err != nil {
-				return err
-			}
-			query := &models.GetDashboardQuery{Id: id, OrgId: orgID}
+			query := &models.GetDashboardQuery{Uid: resourceID, OrgId: orgID}
 			if err := sql.GetDashboard(ctx, query); err != nil {
 				return err
 			}
