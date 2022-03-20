@@ -21,7 +21,6 @@ var dashboardPermissionTranslation = map[models.PermissionType][]string{
 	models.PERMISSION_EDIT: {
 		ac.ActionDashboardsRead,
 		ac.ActionDashboardsWrite,
-		ac.ActionDashboardsCreate,
 		ac.ActionDashboardsDelete,
 	},
 	models.PERMISSION_ADMIN: {
@@ -39,6 +38,7 @@ var folderPermissionTranslation = map[models.PermissionType][]string{
 		dashboards.ActionFoldersRead,
 	}...),
 	models.PERMISSION_EDIT: append(dashboardPermissionTranslation[models.PERMISSION_EDIT], []string{
+		ac.ActionDashboardsCreate,
 		dashboards.ActionFoldersRead,
 		dashboards.ActionFoldersWrite,
 		dashboards.ActionFoldersCreate,
