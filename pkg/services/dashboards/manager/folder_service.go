@@ -33,7 +33,7 @@ func ProvideFolderService(
 	ac accesscontrol.AccessControl,
 ) *FolderServiceImpl {
 	ac.RegisterAttributeScopeResolver(dashboards.NewNameScopeResolver(dashboardStore))
-	ac.RegisterAttributeScopeResolver(dashboards.NewUidScopeResolver(dashboardStore))
+	ac.RegisterAttributeScopeResolver(dashboards.NewIDScopeResolver(dashboardStore))
 
 	return &FolderServiceImpl{
 		cfg:              cfg,

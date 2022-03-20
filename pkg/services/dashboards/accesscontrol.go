@@ -24,7 +24,7 @@ var (
 	ScopeFoldersProvider = ac.NewScopeProvider(ScopeFoldersRoot)
 )
 
-// NewNameScopeResolver provides an AttributeScopeResolver that is able to convert a scope prefixed with "folders:name:" into an id based scope.
+// NewNameScopeResolver provides an AttributeScopeResolver that is able to convert a scope prefixed with "folders:name:" into an uid based scope.
 func NewNameScopeResolver(db Store) (string, ac.AttributeScopeResolveFunc) {
 	prefix := ScopeFoldersProvider.GetResourceScopeName("")
 	resolver := func(ctx context.Context, orgID int64, scope string) (string, error) {
@@ -39,27 +39,27 @@ func NewNameScopeResolver(db Store) (string, ac.AttributeScopeResolveFunc) {
 		if err != nil {
 			return "", err
 		}
-		return ScopeFoldersProvider.GetResourceScope(strconv.FormatInt(folder.Id, 10)), nil
+		return ScopeFoldersProvider.GetResourceScopeUID(folder.Uid), nil
 	}
 	return prefix, resolver
 }
 
-// NewUidScopeResolver provides an AttributeScopeResolver that is able to convert a scope prefixed with "folders:uid:" into an id based scope.
-func NewUidScopeResolver(db Store) (string, ac.AttributeScopeResolveFunc) {
-	prefix := ScopeFoldersProvider.GetResourceScopeUID("")
+// NewIDScopeResolver provides an AttributeScopeResolver that is able to convert a scope prefixed with "folders:id:" into an uid based scope.
+func NewIDScopeResolver(db Store) (string, ac.AttributeScopeResolveFunc) {
+	prefix := ScopeFoldersProvider.GetResourceScope("")
 	resolver := func(ctx context.Context, orgID int64, scope string) (string, error) {
 		if !strings.HasPrefix(scope, prefix) {
 			return "", ac.ErrInvalidScope
 		}
-		uid := scope[len(prefix):]
-		if len(uid) == 0 {
+		id, err := strconv.ParseInt(scope[len(prefix):], 10, 64)
+		if err != nil {
 			return "", ac.ErrInvalidScope
 		}
-		folder, err := db.GetFolderByUID(ctx, orgID, uid)
+		folder, err := db.GetFolderByID(ctx, orgID, id)
 		if err != nil {
 			return "", err
 		}
-		return ScopeFoldersProvider.GetResourceScope(strconv.FormatInt(folder.Id, 10)), nil
+		return ScopeFoldersProvider.GetResourceScopeUID(folder.Uid), nil
 	}
 	return prefix, resolver
 }
