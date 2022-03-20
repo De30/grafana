@@ -114,14 +114,10 @@ func (f AccessControlDashboardPermissionFilter) Where() (string, []interface{}) 
 		builder.WriteString(dashFilter.Where)
 		args = append(args, dashFilter.Args...)
 
-		builder.WriteString(" OR ")
-
-		// TODO figure out how to solve this!!
-		//temp := "(SELECT uid FROM dashboard d2 WHERE d2.id = dashboard.folder_id)"
-
-		dashFolderFilter, _ := accesscontrol.Filter(f.User, "dashboard.folder_id", "folders", accesscontrol.ScopeAttributeID, f.dashboardActions...)
+		builder.WriteString(" OR dashboard.folder_id IN(SELECT id FROM dashboard WHERE ")
+		dashFolderFilter, _ := accesscontrol.Filter(f.User, "dashboard.folder_id", "folders", accesscontrol.ScopeAttributeUID, f.dashboardActions...)
 		builder.WriteString(dashFolderFilter.Where)
-		builder.WriteString(") AND NOT dashboard.is_folder)")
+		builder.WriteString(")) AND NOT dashboard.is_folder)")
 		args = append(args, dashFolderFilter.Args...)
 	}
 
