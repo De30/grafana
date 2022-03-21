@@ -17,7 +17,7 @@ var (
 type RoleType string
 
 const (
-	ROLE_EMPTY  RoleType = ""
+	ROLE_EMPTY  RoleType = "Empty"
 	ROLE_VIEWER RoleType = "Viewer"
 	ROLE_EDITOR RoleType = "Editor"
 	ROLE_ADMIN  RoleType = "Admin"
@@ -63,12 +63,11 @@ func (r *RoleType) UnmarshalJSON(data []byte) error {
 	*r = RoleType(str)
 
 	if !r.IsValid() {
-		// TODO Restore this if we end up having ROLE_EMPTY != ""
-		// if (*r) != "" {
-		return fmt.Errorf("JSON validation error: invalid role value: %s", *r)
-		// }
+		if (*r) != "" {
+			return fmt.Errorf("JSON validation error: invalid role value: %s", *r)
+		}
 
-		// *r = ROLE_VIEWER
+		*r = ROLE_VIEWER
 	}
 
 	return nil
