@@ -63,7 +63,12 @@ func (r *RoleType) UnmarshalJSON(data []byte) error {
 	*r = RoleType(str)
 
 	if !r.IsValid() {
+		// TODO Restore this if we end up having ROLE_EMPTY != ""
+		// if (*r) != "" {
 		return fmt.Errorf("JSON validation error: invalid role value: %s", *r)
+		// }
+
+		// *r = ROLE_VIEWER
 	}
 
 	return nil
