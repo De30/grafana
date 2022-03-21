@@ -110,12 +110,14 @@ func (f AccessControlDashboardPermissionFilter) Where() (string, []interface{}) 
 
 	if len(f.dashboardActions) > 0 {
 		builder.WriteString("((")
-		dashFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", "dashboards", accesscontrol.ScopeAttributeUID, f.dashboardActions...)
+
+		dashFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", dashboards.ScopeDashboardsPrefix, f.dashboardActions...)
 		builder.WriteString(dashFilter.Where)
 		args = append(args, dashFilter.Args...)
 
 		builder.WriteString(" OR dashboard.folder_id IN(SELECT id FROM dashboard WHERE ")
-		dashFolderFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", "folders", accesscontrol.ScopeAttributeUID, f.dashboardActions...)
+		dashFolderFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", dashboards.ScopeFoldersPrefix, f.dashboardActions...)
+
 		builder.WriteString(dashFolderFilter.Where)
 		builder.WriteString(")) AND NOT dashboard.is_folder)")
 		args = append(args, dashFolderFilter.Args...)
@@ -126,7 +128,7 @@ func (f AccessControlDashboardPermissionFilter) Where() (string, []interface{}) 
 			builder.WriteString(" OR ")
 		}
 		builder.WriteString("(")
-		folderFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", "folders", accesscontrol.ScopeAttributeUID, f.folderActions...)
+		folderFilter, _ := accesscontrol.Filter(f.User, "dashboard.uid", dashboards.ScopeFoldersPrefix, f.folderActions...)
 		builder.WriteString(folderFilter.Where)
 		builder.WriteString(" AND dashboard.is_folder)")
 		args = append(args, folderFilter.Args...)

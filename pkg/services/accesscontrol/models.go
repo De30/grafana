@@ -243,10 +243,6 @@ type SetResourcePermissionCommand struct {
 const (
 	GlobalOrgID = 0
 
-	// Scope attributes
-	ScopeAttributeID  = "id"
-	ScopeAttributeUID = "uid"
-
 	// Permission actions
 
 	ActionAPIKeyRead   = "apikeys:read"

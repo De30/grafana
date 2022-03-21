@@ -9,6 +9,9 @@ import (
 )
 
 const (
+	ScopeFoldersRoot   = "folders"
+	ScopeFoldersPrefix = "folders:uid:"
+
 	ActionFoldersCreate           = "folders:create"
 	ActionFoldersRead             = "folders:read"
 	ActionFoldersWrite            = "folders:write"
@@ -16,7 +19,8 @@ const (
 	ActionFoldersPermissionsRead  = "folders.permissions:read"
 	ActionFoldersPermissionsWrite = "folders.permissions:write"
 
-	ScopeFoldersRoot = "folders"
+	ScopeDashboardsRoot   = "dashboards"
+	ScopeDashboardsPrefix = "dashboards:uid:"
 )
 
 var (
