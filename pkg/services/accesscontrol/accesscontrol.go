@@ -174,7 +174,7 @@ func GetResourcesMetadata(ctx context.Context, permissions map[string][]string, 
 	allAttributeScope := Scope(strings.TrimSuffix(attributePrefix, ":"), "*")
 
 	// index of the attribute in the scope
-	attributeIndex := len(attributePrefix) + 1
+	attributeIndex := len(attributePrefix)
 
 	// Loop through permissions once
 	result := map[string]Metadata{}
@@ -216,6 +216,7 @@ func extractPrefixes(prefix string) (string, string, bool) {
 		return "", "", false
 	}
 	rootPrefix := parts[0] + ":"
-	attributePredix := rootPrefix + parts[1] + ":"
-	return rootPrefix, attributePredix, true
+
+	attributePrefix := rootPrefix + parts[1] + ":"
+	return rootPrefix, attributePrefix, true
 }
