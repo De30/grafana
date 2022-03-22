@@ -14,8 +14,8 @@ var (
 		ReqSignedIn:     true,
 		ReqGrafanaAdmin: true,
 	})
-	ReqSignedIn            = Auth(&AuthOptions{ReqSignedIn: true})
-	ReqSignedInNoAnonymous = Auth(&AuthOptions{ReqSignedIn: true, ReqNoAnonynmous: true})
+	ReqSignedIn            = Auth(&AuthOptions{ReqSignedIn: true, ReqHasRole: true})
+	ReqSignedInNoAnonymous = Auth(&AuthOptions{ReqSignedIn: true, ReqNoAnonynmous: true, ReqHasRole: true})
 	ReqEditorRole          = RoleAuth(models.ROLE_EDITOR, models.ROLE_ADMIN)
 	ReqOrgAdmin            = RoleAuth(models.ROLE_ADMIN)
 )

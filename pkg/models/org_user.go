@@ -17,14 +17,14 @@ var (
 type RoleType string
 
 const (
-	ROLE_EMPTY  RoleType = "Empty"
+	ROLE_NONE   RoleType = "None"
 	ROLE_VIEWER RoleType = "Viewer"
 	ROLE_EDITOR RoleType = "Editor"
 	ROLE_ADMIN  RoleType = "Admin"
 )
 
 func (r RoleType) IsValid() bool {
-	return r == ROLE_VIEWER || r == ROLE_ADMIN || r == ROLE_EDITOR || r == ROLE_EMPTY
+	return r == ROLE_VIEWER || r == ROLE_ADMIN || r == ROLE_EDITOR || r == ROLE_NONE
 }
 
 func (r RoleType) Includes(other RoleType) bool {
@@ -34,7 +34,7 @@ func (r RoleType) Includes(other RoleType) bool {
 	case ROLE_EDITOR:
 		return other != ROLE_ADMIN
 	case ROLE_VIEWER:
-		return other == ROLE_EMPTY || r == other
+		return other == ROLE_NONE || r == other
 	default:
 		return r == other
 	}
@@ -43,11 +43,11 @@ func (r RoleType) Includes(other RoleType) bool {
 func (r RoleType) Children() []RoleType {
 	switch r {
 	case ROLE_ADMIN:
-		return []RoleType{ROLE_EDITOR, ROLE_VIEWER, ROLE_EMPTY}
+		return []RoleType{ROLE_EDITOR, ROLE_VIEWER, ROLE_NONE}
 	case ROLE_EDITOR:
-		return []RoleType{ROLE_VIEWER, ROLE_EMPTY}
+		return []RoleType{ROLE_VIEWER, ROLE_NONE}
 	case ROLE_VIEWER:
-		return []RoleType{ROLE_EMPTY}
+		return []RoleType{ROLE_NONE}
 	default:
 		return nil
 	}
