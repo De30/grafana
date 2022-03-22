@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/metrics"
+	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/snapshot"
+	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
 	"net/http"
 	"time"
@@ -16,21 +18,24 @@ import (
 var logger = log.New("snapshot")
 
 type Service struct {
-	Cfg *setting.Cfg
+	Secrets secrets.Service
 
 	store             Store
 	createExternalURL string
 }
 
-func ProvideService(Cfg *setting.Cfg) (Service, error) {
-	return Service{
-		Cfg: Cfg,
-	}, nil
+// FIXME: Use StoreDBSession
+func ProvideService(
+	secretsService secrets.Service,
+	storeDBSession sqlstore.Store,
+) *Service {
+	return &Service{
+		Secrets: secretsService,
+		store:   &storeSQL{SQLStore: storeDBSession},
+	}
 }
 
 func (s *Service) Create(ctx context.Context, cmd *snapshot.CreateCmd) (*snapshot.CreateResult, error) {
-	var url string
-
 	err := cmd.Validate()
 	if err != nil {
 		return nil, err
@@ -46,18 +51,32 @@ func (s *Service) Create(ctx context.Context, cmd *snapshot.CreateCmd) (*snapsho
 			return nil, fmt.Errorf("failed to create external snapshot: %w", err)
 		}
 
-		url = res.URL
 		cmd.Key = res.Key
-		cmd.ExternalURL = url
+		cmd.ExternalURL = res.URL
 		cmd.DeleteKey = res.DeleteKey
 		cmd.ExternalDeleteURL = res.DeleteURL
-		cmd.Dashboard = make(map[string]interface{})
 
 		metrics.MApiDashboardSnapshotExternal.Inc()
 	} else {
-		url = setting.ToAbsUrl("dashboard/snapshot/" + cmd.Key)
+		marshalledData, err := json.Marshal(cmd.Dashboard)
+		if err != nil {
+			return nil, err
+		}
+
+		encryptedDashboard, err := s.Secrets.Encrypt(ctx, marshalledData, secrets.WithoutScope())
+		if err != nil {
+			return nil, err
+		}
+
+		cmd.DashboardEncrypted = encryptedDashboard
+
 		metrics.MApiDashboardSnapshotCreate.Inc()
 	}
+
+	// The dashboard is either shipped of to an external snapshot server
+	// or encrypted here. Either way, we don't want the original payload
+	// anymore.
+	cmd.Dashboard = make(map[string]interface{})
 
 	model, err := cmd.Skel(time.Now())
 	if err != nil {
@@ -69,17 +88,13 @@ func (s *Service) Create(ctx context.Context, cmd *snapshot.CreateCmd) (*snapsho
 		return nil, fmt.Errorf("failed to save snapshot: %w", err)
 	}
 
-	stored, err := s.store.Read(ctx, cmd.Key)
+	stored, err := s.store.Read(ctx, model.Key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save snapshot: %w", err)
 	}
 
 	return &snapshot.CreateResult{
-		Key:       cmd.Key,
-		DeleteKey: cmd.DeleteKey,
-		URL:       url,
-		DeleteURL: setting.ToAbsUrl("api/snapshots-delete/" + cmd.DeleteKey),
-		ID:        stored.ID,
+		Snapshot: stored,
 	}, nil
 }
 
@@ -108,7 +123,7 @@ func (s *Service) GetByKey(ctx context.Context, query *snapshot.GetByKeyQuery) (
 	if query.DeleteKey != "" {
 		key, err := s.store.LookupByDeleteKey(ctx, query.DeleteKey)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to look up key by delete key: %w", err)
 		}
 
 		if query.Key != "" && key != query.Key {
@@ -122,8 +137,20 @@ func (s *Service) GetByKey(ctx context.Context, query *snapshot.GetByKeyQuery) (
 		return nil, fmt.Errorf("error while loading snapshot: %w", err)
 	}
 
-	if query.SignedInUser != nil && query.SignedInUser.UserId != snap.UserID {
+	if !query.IncludeSecrets {
 		snap.Redact()
+	}
+
+	if snap.DashboardEncrypted != nil {
+		decryptedDashboard, err := s.Secrets.Decrypt(ctx, snap.DashboardEncrypted)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(decryptedDashboard, &snap.Dashboard)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &snapshot.GetResult{Snapshot: snap}, nil

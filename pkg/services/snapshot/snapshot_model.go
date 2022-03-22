@@ -1,7 +1,9 @@
 package snapshot
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/util"
 	"time"
@@ -38,6 +40,35 @@ type DashboardSnapshot struct {
 func (s *DashboardSnapshot) Redact() {
 	s.DeleteKey = ""
 	s.ExternalDeleteURL = ""
+}
+
+func (s *DashboardSnapshot) ModelsDashboardSnapshot() (*models.DashboardSnapshot, error) {
+	// FIXME: Don't unmarshal and then re-marshal JSON.
+	marshaledDashboard, err := json.Marshal(s.Dashboard)
+	if err != nil {
+		return nil, err
+	}
+	j, err := simplejson.NewJson(marshaledDashboard)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.DashboardSnapshot{
+		Id:                 s.ID,
+		Name:               s.Name,
+		Key:                s.Key,
+		DeleteKey:          s.DeleteKey,
+		OrgId:              s.OrgID,
+		UserId:             s.UserID,
+		External:           s.External,
+		ExternalUrl:        s.ExternalURL,
+		ExternalDeleteUrl:  s.ExternalDeleteURL,
+		Expires:            s.Expires,
+		Created:            s.Created,
+		Updated:            s.Updated,
+		Dashboard:          j,
+		DashboardEncrypted: s.DashboardEncrypted,
+	}, nil
 }
 
 // DashboardSnapshotList contains a list of metadata related to a
@@ -151,15 +182,7 @@ type DeleteCmd struct {
 }
 
 type CreateResult struct {
-	// Unique key
-	Key string `json:"key"`
-	// Unique key used to delete the snapshot. It is different from the
-	// key so that only the creator can delete the snapshot.
-	DeleteKey string `json:"deleteKey"`
-	URL       string `json:"url"`
-	DeleteURL string `json:"deleteUrl"`
-	// Snapshot id
-	ID int64 `json:"id"`
+	Snapshot *DashboardSnapshot
 }
 
 type DeleteExpiredResult struct {
@@ -167,10 +190,9 @@ type DeleteExpiredResult struct {
 }
 
 type GetByKeyQuery struct {
-	Key       string
-	DeleteKey string
-
-	SignedInUser *models.SignedInUser
+	Key            string
+	DeleteKey      string
+	IncludeSecrets bool
 }
 
 type GetResult struct {

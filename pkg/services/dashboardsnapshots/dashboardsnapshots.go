@@ -2,77 +2,78 @@ package dashboardsnapshots
 
 import (
 	"context"
+	"github.com/grafana/grafana/pkg/services/snapshot"
 
 	"github.com/grafana/grafana/pkg/bus"
-	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
 type Service struct {
-	Bus            bus.Bus
-	SQLStore       sqlstore.Store
-	SecretsService secrets.Service
+	Bus             bus.Bus
+	SQLStore        sqlstore.Store
+	SecretsService  secrets.Service
+	SnapshotService snapshot.Service
 }
 
-func ProvideService(bus bus.Bus, store sqlstore.Store, secretsService secrets.Service) *Service {
-	s := &Service{
-		Bus:            bus,
-		SQLStore:       store,
-		SecretsService: secretsService,
+func ProvideService(
+	bus bus.Bus,
+	store sqlstore.Store,
+	secretsService secrets.Service,
+	snapshotService snapshot.Service,
+) *Service {
+	return &Service{
+		Bus:             bus,
+		SQLStore:        store,
+		SecretsService:  secretsService,
+		SnapshotService: snapshotService,
 	}
-
-	s.Bus.AddHandler(s.CreateDashboardSnapshot)
-	s.Bus.AddHandler(s.GetDashboardSnapshot)
-	s.Bus.AddHandler(s.DeleteDashboardSnapshot)
-	s.Bus.AddHandler(s.SearchDashboardSnapshots)
-	s.Bus.AddHandler(s.DeleteExpiredSnapshots)
-
-	return s
 }
 
 func (s *Service) CreateDashboardSnapshot(ctx context.Context, cmd *models.CreateDashboardSnapshotCommand) error {
-	marshalledData, err := cmd.Dashboard.Encode()
+	m, err := cmd.Dashboard.Map()
 	if err != nil {
 		return err
 	}
 
-	encryptedDashboard, err := s.SecretsService.Encrypt(ctx, marshalledData, secrets.WithoutScope())
+	res, err := s.SnapshotService.Create(ctx, &snapshot.CreateCmd{
+		Dashboard:          m,
+		Name:               cmd.Name,
+		Expires:            cmd.Expires,
+		External:           cmd.External,
+		ExternalURL:        cmd.ExternalUrl,
+		ExternalDeleteURL:  cmd.ExternalDeleteUrl,
+		Key:                cmd.Key,
+		DeleteKey:          cmd.DeleteKey,
+		OrgID:              cmd.OrgId,
+		UserID:             cmd.UserId,
+		DashboardEncrypted: cmd.DashboardEncrypted,
+	})
 	if err != nil {
 		return err
 	}
 
-	cmd.DashboardEncrypted = encryptedDashboard
-
-	return s.SQLStore.CreateDashboardSnapshot(ctx, cmd)
+	cmd.Result, err = res.Snapshot.ModelsDashboardSnapshot()
+	return err
 }
 
 func (s *Service) GetDashboardSnapshot(ctx context.Context, query *models.GetDashboardSnapshotQuery) error {
-	err := s.SQLStore.GetDashboardSnapshot(query)
+	r, err := s.SnapshotService.GetByKey(ctx, &snapshot.GetByKeyQuery{
+		Key:            query.Key,
+		DeleteKey:      query.DeleteKey,
+		IncludeSecrets: true,
+	})
 	if err != nil {
 		return err
 	}
 
-	if query.Result.DashboardEncrypted != nil {
-		decryptedDashboard, err := s.SecretsService.Decrypt(ctx, query.Result.DashboardEncrypted)
-		if err != nil {
-			return err
-		}
-
-		dashboard, err := simplejson.NewJson(decryptedDashboard)
-		if err != nil {
-			return err
-		}
-
-		query.Result.Dashboard = dashboard
-	}
-
+	query.Result, err = r.Snapshot.ModelsDashboardSnapshot()
 	return err
 }
 
 func (s *Service) DeleteDashboardSnapshot(ctx context.Context, cmd *models.DeleteDashboardSnapshotCommand) error {
-	return s.SQLStore.DeleteDashboardSnapshot(ctx, cmd)
+	return s.SnapshotService.Delete(ctx, &snapshot.DeleteCmd{DeleteKey: cmd.DeleteKey})
 }
 
 func (s *Service) SearchDashboardSnapshots(_ context.Context, query *models.GetDashboardSnapshotsQuery) error {
