@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-// DashboardSnapshotMetadata contains information about a dashboard
-// snapshot suitable for use in lists and search results.
-type DashboardSnapshotMetadata struct {
+// DashboardSnapshot contains information about a dashboard at a
+// specific point in time.
+type DashboardSnapshot struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Key         string `json:"key"`
@@ -26,15 +26,9 @@ type DashboardSnapshotMetadata struct {
 	Expires time.Time `json:"expires"`
 	Created time.Time `json:"created"`
 	Updated time.Time `json:"updated"`
-}
 
-// DashboardSnapshot extends the information in
-// DashboardSnapshotMetadata with the raw dashboard itself.
-type DashboardSnapshot struct {
-	DashboardSnapshotMetadata
-
-	Dashboard          map[string]interface{}
-	DashboardEncrypted []byte
+	Dashboard          map[string]interface{} `json:"dashboard,omitempty"`
+	DashboardEncrypted []byte                 `json:"dashboardEncrypted,omitempty"`
 }
 
 func (s *DashboardSnapshot) Redact() {
@@ -73,40 +67,24 @@ func (s *DashboardSnapshot) ModelsDashboardSnapshot() (*models.DashboardSnapshot
 
 // DashboardSnapshotList contains a list of metadata related to a
 // dashboard snapshot
-type DashboardSnapshotList []*DashboardSnapshotMetadata
+type DashboardSnapshotList []*DashboardSnapshot
 
-//swagger:model
 type CreateCmd struct {
-	// The complete dashboard model.
-	// required:true
-	Dashboard map[string]interface{} `json:"dashboard" binding:"Required"`
-	// Snapshot name
-	// required:false
-	Name string `json:"name"`
-	// When the snapshot should expire in seconds in seconds. Default is never to expire.
-	// required:false
-	// default:0
-	Expires int64 `json:"expires"`
+	Name    string `json:"name"`
+	Expires int64  `json:"expires"`
 
-	// these are passed when storing an external snapshot ref
-	// Save the snapshot on an external server rather than locally.
-	// required:false
-	// default: false
 	External          bool   `json:"external"`
 	ExternalURL       string `json:"-"`
 	ExternalDeleteURL string `json:"-"`
 
-	// Define the unique key. Required if `external` is `true`.
-	// required:false
-	Key string `json:"key"`
-	// Unique key used to delete the snapshot. It is different from the `key` so that only the creator can delete the snapshot. Required if `external` is `true`.
-	// required:false
+	Key       string `json:"key"`
 	DeleteKey string `json:"deleteKey"`
 
 	OrgID  int64 `json:"-"`
 	UserID int64 `json:"-"`
 
-	DashboardEncrypted []byte `json:"-"`
+	Dashboard          map[string]interface{} `json:"dashboard"`
+	DashboardEncrypted []byte                 `json:"-"`
 }
 
 func (c CreateCmd) Validate() error {
@@ -156,20 +134,18 @@ func (c CreateCmd) Skel(now time.Time) (*DashboardSnapshot, error) {
 	}
 
 	s := DashboardSnapshot{
-		DashboardSnapshotMetadata: DashboardSnapshotMetadata{
-			ID:                0,
-			Name:              c.Name,
-			Key:               c.Key,
-			OrgID:             c.OrgID,
-			UserID:            c.UserID,
-			External:          c.External,
-			ExternalURL:       c.ExternalURL,
-			DeleteKey:         c.DeleteKey,
-			ExternalDeleteURL: c.ExternalDeleteURL,
-			Expires:           expires,
-			Created:           now,
-			Updated:           now,
-		},
+		ID:                 0,
+		Name:               c.Name,
+		Key:                c.Key,
+		OrgID:              c.OrgID,
+		UserID:             c.UserID,
+		External:           c.External,
+		ExternalURL:        c.ExternalURL,
+		DeleteKey:          c.DeleteKey,
+		ExternalDeleteURL:  c.ExternalDeleteURL,
+		Expires:            expires,
+		Created:            now,
+		Updated:            now,
 		Dashboard:          c.Dashboard,
 		DashboardEncrypted: c.DashboardEncrypted,
 	}

@@ -28,15 +28,11 @@ func (f *Fake) Create(_ context.Context, cmd *snapshot.CreateCmd) (*snapshot.Cre
 		return nil, err
 	}
 
-	f.store[cmd.Key] = &s
+	f.store[cmd.Key] = s
 	f.deleteKeyIndex[cmd.DeleteKey] = cmd.Key
 
 	return &snapshot.CreateResult{
-		Key:       s.Key,
-		DeleteKey: s.DeleteKey,
-		URL:       s.ExternalURL,
-		DeleteURL: s.ExternalDeleteURL,
-		ID:        s.ID,
+		Snapshot: s,
 	}, nil
 }
 
@@ -68,7 +64,7 @@ func (f *Fake) GetByKey(_ context.Context, query *snapshot.GetByKeyQuery) (*snap
 		return nil, fmt.Errorf("no snapshot found with key %s", query.Key)
 	}
 
-	return &snapshot.GetResult{Snapshot: *s}, nil
+	return &snapshot.GetResult{Snapshot: s}, nil
 }
 
 func (f *Fake) List(ctx context.Context, query *snapshot.ListQuery) (*snapshot.ListResult, error) {
@@ -95,7 +91,7 @@ func (f *Fake) List(ctx context.Context, query *snapshot.ListQuery) (*snapshot.L
 			continue
 		}
 
-		snapshots = append(snapshots, &v.DashboardSnapshotMetadata)
+		snapshots = append(snapshots, v)
 
 		if query.Limit != 0 && len(snapshots) == query.Limit {
 			break

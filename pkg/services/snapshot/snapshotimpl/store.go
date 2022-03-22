@@ -79,20 +79,18 @@ func (s *storeSQL) Read(ctx context.Context, key string) (*snapshot.DashboardSna
 		}
 
 		snap = &snapshot.DashboardSnapshot{
-			DashboardSnapshotMetadata: snapshot.DashboardSnapshotMetadata{
-				ID:                res.ID,
-				Name:              res.Name,
-				Key:               res.Key,
-				OrgID:             res.OrgID,
-				UserID:            res.UserID,
-				External:          res.External,
-				ExternalURL:       res.ExternalURL,
-				DeleteKey:         res.DeleteKey,
-				ExternalDeleteURL: res.ExternalDeleteURL,
-				Expires:           res.Expires,
-				Created:           res.Created,
-				Updated:           res.Updated,
-			},
+			ID:                 res.ID,
+			Name:               res.Name,
+			Key:                res.Key,
+			OrgID:              res.OrgID,
+			UserID:             res.UserID,
+			External:           res.External,
+			ExternalURL:        res.ExternalURL,
+			DeleteKey:          res.DeleteKey,
+			ExternalDeleteURL:  res.ExternalDeleteURL,
+			Expires:            res.Expires,
+			Created:            res.Created,
+			Updated:            res.Updated,
 			Dashboard:          res.Dashboard,
 			DashboardEncrypted: res.DashboardEncrypted,
 		}
