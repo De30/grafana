@@ -14,8 +14,8 @@ import {
   useTheme,
   withTheme,
 } from '@grafana/ui';
-import { GrafanaTheme, GrafanaTheme2 } from '@grafana/data';
-import { AccessControlAction, Organization, OrgRole, UserDTO, UserOrg } from 'app/types';
+import { GrafanaTheme, GrafanaTheme2, OrgRole } from '@grafana/data';
+import { AccessControlAction, Organization, UserDTO, UserOrg } from 'app/types';
 import { OrgPicker, OrgSelectItem } from 'app/core/components/Select/OrgPicker';
 import { OrgRolePicker } from './OrgRolePicker';
 import { contextSrv } from 'app/core/core';

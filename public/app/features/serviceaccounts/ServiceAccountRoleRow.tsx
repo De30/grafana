@@ -1,9 +1,10 @@
 import React, { PureComponent } from 'react';
 import { css, cx } from '@emotion/css';
-import { AccessControlAction, OrgRole, Role, ServiceAccountDTO } from 'app/types';
+import { AccessControlAction, Role, ServiceAccountDTO } from 'app/types';
 import { OrgRolePicker } from '../admin/OrgRolePicker';
 import { contextSrv } from 'app/core/core';
 import { UserRolePicker } from 'app/core/components/RolePicker/UserRolePicker';
+import { OrgRole } from '@grafana/data';
 
 interface Props {
   label: string;

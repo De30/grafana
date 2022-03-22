@@ -12,9 +12,9 @@ import {
   useStyles2,
   useTheme2,
 } from '@grafana/ui';
-import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { GrafanaTheme2, SelectableValue, OrgRole } from '@grafana/data';
 import { getSelectStyles } from '@grafana/ui/src/components/Select/getSelectStyles';
-import { OrgRole, Role } from 'app/types';
+import { Role } from 'app/types';
 
 type BuiltInRoles = Record<string, Role[]>;
 

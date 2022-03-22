@@ -4,7 +4,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { OrgSwitcher } from '../components/OrgSwitcher';
 import { api } from '../../features/profile/api';
 import userEvent from '@testing-library/user-event';
-import { OrgRole } from '../../types';
+import { OrgRole } from '@grafana/data';
 
 jest.mock('@grafana/runtime', () => ({
   config: {
