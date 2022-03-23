@@ -43,6 +43,7 @@ const (
 	rawFrameQuery                     queryType = "raw_frame"
 	csvFileQueryType                  queryType = "csv_file"
 	csvContentQueryType               queryType = "csv_content"
+	mockDSQueryType                   queryType = "mock_ds"
 )
 
 type queryType string
@@ -196,6 +197,11 @@ Timestamps will line up evenly on timeStepSeconds (For example, 60 seconds means
 	s.registerScenario(&Scenario{
 		ID:   string(rawFrameQuery),
 		Name: "Raw Frames",
+	})
+
+	s.registerScenario(&Scenario{
+		ID:   string(mockDSQueryType),
+		Name: "Mock datasource",
 	})
 
 	s.registerScenario(&Scenario{

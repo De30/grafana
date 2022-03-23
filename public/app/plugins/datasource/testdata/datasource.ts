@@ -16,7 +16,14 @@ import {
   toDataFrame,
 } from '@grafana/data';
 import { Scenario, TestDataQuery } from './types';
-import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
+import {
+  DataSourceWithBackend,
+  getBackendSrv,
+  getDataSourceSrv,
+  getGrafanaLiveSrv,
+  getTemplateSrv,
+  TemplateSrv,
+} from '@grafana/runtime';
 import { queryMetricTree } from './metricTree';
 import { runStream } from './runStreams';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
@@ -68,6 +75,10 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> {
         case 'raw_frame':
           streams.push(this.rawFrameQuery(target, options));
           break;
+        case 'mock_ds':
+          streams.push(this.rawFrameQuery(target, options));
+          break;
+
         // Unusable since 7, removed in 8
         case 'manual_entry': {
           let csvContent = 'Time,Value\n';
@@ -192,6 +203,26 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> {
 
   rawFrameQuery(target: TestDataQuery, options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {
     try {
+      const data = JSON.parse(target.rawFrameContent ?? '[]').map((v: any) => {
+        const f = toDataFrame(v);
+        f.refId = target.refId;
+        return f;
+      });
+      return of({ data, state: LoadingState.Done }).pipe(delay(100));
+    } catch (ex) {
+      return of({ data: [], error: ex }).pipe(delay(100));
+    }
+  }
+
+  doMockQuery(target: TestDataQuery, options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {
+    const dsid = target.mockDS?.ds;
+    if (!dsid) {
+      return of({ data: [], error: { message: 'missing datasource' }, state: LoadingState.Error }).pipe(delay(100));
+    }
+
+    try {
+      getDataSourceSrv().get(dsid).then();
+
       const data = JSON.parse(target.rawFrameContent ?? '[]').map((v: any) => {
         const f = toDataFrame(v);
         f.refId = target.refId;

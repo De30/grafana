@@ -22,6 +22,7 @@ export interface TestDataQuery extends DataQuery {
   csvContent?: string;
   rawFrameContent?: string;
   usa?: USAQuery;
+  mockDS?: MockDatasourceRequest;
 }
 
 export interface NodesQuery {
@@ -57,4 +58,11 @@ export interface USAQuery {
   period?: string;
   fields?: string[]; // foo, bar, baz
   states?: string[];
+}
+
+/** This allows sending  */
+export interface MockDatasourceRequest {
+  ds?: string; // uid
+  request?: string; // Request as STRING
+  server?: string; // Response as STRING
 }
