@@ -73,6 +73,17 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
     });
   }
 
+  // Show dashboards
+  if (config.featureToggles.panelTitleSearch) {
+    navModel.children!.push({
+      active: false,
+      icon: 'info-circle',
+      id: `datasource-usage-${dataSource.uid}`,
+      text: 'Usage',
+      url: `datasources/edit/${dataSource.uid}/usage`,
+    });
+  }
+
   const analytics = {
     active: false,
     icon: 'info-circle',
