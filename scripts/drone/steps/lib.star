@@ -1015,7 +1015,7 @@ def store_packages_step(edition, ver_mode, is_downstream=False):
 def import_packages_to_artifacts_repo_step(ver_mode):
     if ver_mode != 'release':
         return {}
-    cmd = './bin/grabpl import-packages'
+    cmd = './bin/grabpl import-packages --repo-location=us-central1'
     return {
         'name': 'import-packages',
         'image': publish_image,
