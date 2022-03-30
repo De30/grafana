@@ -10,7 +10,7 @@ import {
 } from './fetch';
 
 jest.mock('@grafana/data', () => ({
-  ...(jest.requireActual('@grafana/data') as unknown as object),
+  ...jest.requireActual('@grafana/data'),
   deprecationWarning: () => {},
 }));
 
@@ -135,7 +135,7 @@ describe('parseCredentials', () => {
 });
 
 describe('parseResponseBody', () => {
-  const rsp = {} as unknown as Response;
+  const rsp = new Response();
   it('parses json', async () => {
     const value = { hello: 'world' };
     const body = await parseResponseBody(

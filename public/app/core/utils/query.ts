@@ -10,15 +10,17 @@ export const getNextRefIdChar = (queries: DataQuery[]): string => {
 };
 
 export function addQuery(queries: DataQuery[], query?: Partial<DataQuery>, datasource?: DataSourceRef): DataQuery[] {
-  const q = query || {};
-  q.refId = getNextRefIdChar(queries);
-  q.hide = false;
+  const q: DataQuery = {
+    ...query,
+    refId: getNextRefIdChar(queries),
+    hide: false,
+  };
 
   if (!q.datasource && datasource) {
     q.datasource = datasource;
   }
 
-  return [...queries, q as DataQuery];
+  return [...queries, q];
 }
 
 export function isDataQuery(url: string): boolean {
