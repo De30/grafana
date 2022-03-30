@@ -23,7 +23,7 @@ const kbn = {
     m: 60,
     s: 1,
     ms: 0.001,
-  } as { [index: string]: number },
+  },
   regexEscape: (value: string) => value.replace(/[\\^$*+?.()|[\]{}\/]/g, '\\$&'),
 
   /** @deprecated since 7.2, use grafana/data */
