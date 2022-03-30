@@ -4,8 +4,8 @@ export function processAclItems(items: DashboardAclDTO[]): DashboardAcl[] {
   return items.map(processAclItem).sort((a, b) => b.sortRank! - a.sortRank! || a.name!.localeCompare(b.name!));
 }
 
-function processAclItem(dto: DashboardAclDTO): DashboardAcl {
-  const item = dto as DashboardAcl;
+function processAclItem(dto: DashboardAcl): DashboardAcl {
+  const item = dto;
 
   item.sortRank = 0;
 
