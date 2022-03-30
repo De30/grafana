@@ -3012,41 +3012,14 @@ steps:
   image: byrnedo/alpine-curl:0.1.8
   name: grabpl
 - commands:
-  - ./bin/grabpl store-packages --edition oss --packages-bucket grafana-downloads
-    --gcp-key /tmp/gcpkey.json ${DRONE_TAG}
+  - ./bin/grabpl import-packages
   depends_on:
   - grabpl
   environment:
     GCP_KEY:
       from_secret: gcp_key
-    GPG_KEY_PASSWORD:
-      from_secret: gpg_key_password
-    GPG_PRIV_KEY:
-      from_secret: gpg_priv_key
-    GPG_PUB_KEY:
-      from_secret: gpg_pub_key
-    GRAFANA_COM_API_KEY:
-      from_secret: grafana_api_key
   image: grafana/grafana-ci-deploy:1.3.1
-  name: store-packages-oss
-- commands:
-  - ./bin/grabpl store-packages --edition enterprise --packages-bucket grafana-downloads
-    --gcp-key /tmp/gcpkey.json ${DRONE_TAG}
-  depends_on:
-  - grabpl
-  environment:
-    GCP_KEY:
-      from_secret: gcp_key
-    GPG_KEY_PASSWORD:
-      from_secret: gpg_key_password
-    GPG_PRIV_KEY:
-      from_secret: gpg_priv_key
-    GPG_PUB_KEY:
-      from_secret: gpg_pub_key
-    GRAFANA_COM_API_KEY:
-      from_secret: grafana_api_key
-  image: grafana/grafana-ci-deploy:1.3.1
-  name: store-packages-enterprise
+  name: import-packages
 trigger:
   event:
   - promote
@@ -4386,8 +4359,3 @@ get:
   path: infra/data/ci/grafana/releng/artifacts-uploader-service-account
 kind: secret
 name: gcp_upload_artifacts_key
----
-kind: signature
-hmac: 15995eff6e5351403469b2bedcd93aa4e645d43a94f10eda77a9ee4df17eb53b
-
-...

@@ -1012,6 +1012,24 @@ def store_packages_step(edition, ver_mode, is_downstream=False):
         ],
     }
 
+def import_packages_to_artifacts_repo_step(ver_mode):
+    if ver_mode != 'release':
+        return {}
+    cmd = './bin/grabpl import-packages'
+    return {
+        'name': 'import-packages',
+        'image': publish_image,
+        'depends_on': [
+             'grabpl',
+        ],
+        'environment': {
+            'GCP_KEY': from_secret('gcp_key'),
+        },
+        'commands': [
+            cmd,
+        ],
+    }
+
 
 def get_windows_steps(edition, ver_mode, is_downstream=False):
     if not is_downstream:
