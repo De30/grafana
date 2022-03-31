@@ -62,57 +62,59 @@ export const NavBarNext = React.memo(() => {
 
   return (
     <div className={styles.navWrapper}>
-      <nav className={cx(styles.sidemenu, 'sidemenu')} data-testid="sidemenu" aria-label="Main menu">
-        <div className={styles.mobileSidemenuLogo} onClick={() => setMenuOpen(!menuOpen)} key="hamburger">
-          <Icon name="bars" size="xl" />
-        </div>
+      {!menuOpen && (
+        <nav className={cx(styles.sidemenu, 'sidemenu')} data-testid="sidemenu" aria-label="Main menu">
+          <div className={styles.mobileSidemenuLogo} onClick={() => setMenuOpen(!menuOpen)} key="hamburger">
+            <Icon name="bars" size="xl" />
+          </div>
 
-        <ul className={styles.itemList}>
-          <NavBarItemWithoutMenu
-            isActive={isMatchOrChildMatch(homeItem, activeItem)}
-            label="Home"
-            className={styles.grafanaLogo}
-            url={homeItem.url}
-          >
-            <Icon name="grafana" size="xl" />
-          </NavBarItemWithoutMenu>
-          <NavBarItem className={styles.search} isActive={activeItem === searchItem} link={searchItem}>
-            <Icon name="search" size="xl" />
-          </NavBarItem>
-
-          {coreItems.map((link, index) => (
-            <NavBarItem
-              key={`${link.id}-${index}`}
-              isActive={isMatchOrChildMatch(link, activeItem)}
-              link={{ ...link, subTitle: undefined, onClick: undefined }}
+          <ul className={styles.itemList}>
+            <NavBarItemWithoutMenu
+              isActive={isMatchOrChildMatch(homeItem, activeItem)}
+              label="Home"
+              className={styles.grafanaLogo}
+              url={homeItem.url}
             >
-              {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-              {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+              <Icon name="grafana" size="xl" />
+            </NavBarItemWithoutMenu>
+            <NavBarItem className={styles.search} isActive={activeItem === searchItem} link={searchItem}>
+              <Icon name="search" size="xl" />
             </NavBarItem>
-          ))}
 
-          {pluginItems.length > 0 &&
-            pluginItems.map((link, index) => (
-              <NavBarItem key={`${link.id}-${index}`} isActive={isMatchOrChildMatch(link, activeItem)} link={link}>
+            {coreItems.map((link, index) => (
+              <NavBarItem
+                key={`${link.id}-${index}`}
+                isActive={isMatchOrChildMatch(link, activeItem)}
+                link={{ ...link, subTitle: undefined, onClick: undefined }}
+              >
                 {link.icon && <Icon name={link.icon as IconName} size="xl" />}
                 {link.img && <img src={link.img} alt={`${link.text} logo`} />}
               </NavBarItem>
             ))}
 
-          {configItems.map((link, index) => (
-            <NavBarItem
-              key={`${link.id}-${index}`}
-              isActive={isMatchOrChildMatch(link, activeItem)}
-              reverseMenuDirection
-              link={link}
-              className={cx({ [styles.verticalSpacer]: index === 0 })}
-            >
-              {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-              {link.img && <img src={link.img} alt={`${link.text} logo`} />}
-            </NavBarItem>
-          ))}
-        </ul>
-      </nav>
+            {pluginItems.length > 0 &&
+              pluginItems.map((link, index) => (
+                <NavBarItem key={`${link.id}-${index}`} isActive={isMatchOrChildMatch(link, activeItem)} link={link}>
+                  {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+                  {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+                </NavBarItem>
+              ))}
+
+            {configItems.map((link, index) => (
+              <NavBarItem
+                key={`${link.id}-${index}`}
+                isActive={isMatchOrChildMatch(link, activeItem)}
+                reverseMenuDirection
+                link={link}
+                className={cx({ [styles.verticalSpacer]: index === 0 })}
+              >
+                {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+                {link.img && <img src={link.img} alt={`${link.text} logo`} />}
+              </NavBarItem>
+            ))}
+          </ul>
+        </nav>
+      )}
       {showSwitcherModal && <OrgSwitcher onDismiss={toggleSwitcherModal} />}
       <div className={styles.menuWrapper}>
         {menuOpen && (
@@ -213,7 +215,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     },
   }),
   menuWrapper: css({
-    position: 'fixed',
     display: 'grid',
     gridAutoFlow: 'column',
     height: '100%',
@@ -225,7 +226,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     top: '43px',
     right: '0px',
     zIndex: theme.zIndex.sidemenu,
-    transform: `translateX(calc(${theme.spacing(7)} + 50%))`,
+    transform: `translateX(50%)`,
     background: 'gray',
     borderRadius: '50%',
 

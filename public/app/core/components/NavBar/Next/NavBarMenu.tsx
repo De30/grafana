@@ -2,8 +2,6 @@ import React, { useRef } from 'react';
 import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 import { CollapsableSection, CustomScrollbar, Icon, IconName, useStyles2 } from '@grafana/ui';
 import { FocusScope } from '@react-aria/focus';
-import { useDialog } from '@react-aria/dialog';
-import { useOverlay } from '@react-aria/overlays';
 import { css, cx, keyframes } from '@emotion/css';
 import { NavBarMenuItem } from './NavBarMenuItem';
 import { NavBarItemWithoutMenu } from './NavBarItemWithoutMenu';
@@ -17,31 +15,19 @@ export interface Props {
 
 export function NavBarMenu({ activeItem, navItems, onClose }: Props) {
   const styles = useStyles2(getStyles);
-  const ref = useRef(null);
-  const { dialogProps } = useDialog({}, ref);
-  const { overlayProps } = useOverlay(
-    {
-      isDismissable: true,
-      isOpen: true,
-      onClose,
-    },
-    ref
-  );
 
   return (
-    <FocusScope contain restoreFocus autoFocus>
-      <div data-testid="navbarmenu" className={styles.container} ref={ref} {...overlayProps} {...dialogProps}>
-        <nav className={styles.content}>
-          <CustomScrollbar hideHorizontalTrack>
-            <ul className={styles.itemList}>
-              {navItems.map((link) => (
-                <NavItem link={link} onClose={onClose} activeItem={activeItem} key={link.text} />
-              ))}
-            </ul>
-          </CustomScrollbar>
-        </nav>
-      </div>
-    </FocusScope>
+    <div data-testid="navbarmenu" className={styles.container}>
+      <nav className={styles.content}>
+        <CustomScrollbar hideHorizontalTrack>
+          <ul className={styles.itemList}>
+            {navItems.map((link) => (
+              <NavItem link={link} onClose={onClose} activeItem={activeItem} key={link.text} />
+            ))}
+          </ul>
+        </CustomScrollbar>
+      </nav>
+    </div>
   );
 }
 
