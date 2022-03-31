@@ -48,8 +48,14 @@ func exportDashboards(ctx context.Context, orgID int64, sql *sqlstore.SQLStore, 
 	}
 
 	// key will allow name or uid
-	lookup := func(key string) *extract.DatasourceInfo {
-		return nil // TODO!
+	lookup := func(ref *extract.DataSourceRef) *extract.DataSourceRef {
+		if ref == nil || ref.UID == "" {
+			return &extract.DataSourceRef{
+				UID:  "default.uid",
+				Type: "default.type",
+			}
+		}
+		return ref
 	}
 
 	err := sql.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
@@ -174,8 +180,14 @@ func exportToRepo(ctx context.Context, orgID int64, sql *sqlstore.SQLStore, targ
 	w, _ := r.Worktree()
 
 	// key will allow name or uid
-	lookup := func(key string) *extract.DatasourceInfo {
-		return nil // TODO!
+	lookup := func(ref *extract.DataSourceRef) *extract.DataSourceRef {
+		if ref == nil || ref.UID == "" {
+			return &extract.DataSourceRef{
+				UID:  "default.uid",
+				Type: "default.type",
+			}
+		}
+		return ref
 	}
 
 	oldest := time.Now()
