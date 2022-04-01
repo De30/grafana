@@ -25,7 +25,7 @@ export const StateTimelineTooltip: React.FC<StateTimelineTooltipProps> = ({
 
   const field = alignedData.fields[seriesIdx!];
 
-  const dataFrameFieldIndex = field.state?.origin;
+  const dataFrameFieldIndex = field.state?.origin?.[0];
   const fieldFmt = field.display || getDisplayProcessor({ field, timeZone, theme });
   const value = field.values.get(datapointIdx!);
   const display = fieldFmt(value);

@@ -253,8 +253,8 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<{
         indexByName = getNamesToFieldIndex(frame, allFrames);
       }
 
-      const originFrame = allFrames[field.state.origin.frameIndex];
-      const originField = originFrame?.fields[field.state.origin.fieldIndex];
+      const originFrame = allFrames[field.state.origin?.[0].frameIndex];
+      const originField = originFrame?.fields[field.state.origin?.[0].fieldIndex];
 
       const dispName = getFieldDisplayName(originField ?? field, originFrame, allFrames);
 
@@ -461,7 +461,7 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<{
 export function getNamesToFieldIndex(frame: DataFrame, allFrames: DataFrame[]): Map<string, number> {
   const originNames = new Map<string, number>();
   frame.fields.forEach((field, i) => {
-    const origin = field.state?.origin;
+    const origin = field.state?.origin?.[0];
     if (origin) {
       const origField = allFrames[origin.frameIndex]?.fields[origin.fieldIndex];
       if (origField) {

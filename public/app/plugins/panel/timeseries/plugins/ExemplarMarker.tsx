@@ -131,7 +131,7 @@ export const ExemplarMarker: React.FC<ExemplarMarkerProps> = ({
 
   const seriesColor = config
     .getSeries()
-    .find((s) => s.props.dataFrameFieldIndex?.frameIndex === dataFrameFieldIndex.frameIndex)?.props.lineColor;
+    .find((s) => s.props.dataFrameFieldIndex?.[0].frameIndex === dataFrameFieldIndex.frameIndex)?.props.lineColor;
 
   return (
     <>

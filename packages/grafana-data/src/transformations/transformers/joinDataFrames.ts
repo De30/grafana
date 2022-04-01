@@ -86,10 +86,12 @@ export function outerJoinDataFrames(options: JoinOptions): DataFrame | undefined
         ...frame,
         fields: frame.fields.map((f, fieldIndex) => {
           const copy = { ...f };
-          const origin = {
-            frameIndex: 0,
-            fieldIndex,
-          };
+          const origin = [
+            {
+              frameIndex: 0,
+              fieldIndex,
+            },
+          ];
           if (copy.state) {
             copy.state.origin = origin;
           } else {
@@ -179,10 +181,12 @@ export function outerJoinDataFrames(options: JoinOptions): DataFrame | undefined
       }
 
       if (options.keepOriginIndices) {
-        field.state.origin = {
-          frameIndex,
-          fieldIndex,
-        };
+        field.state.origin = [
+          {
+            frameIndex,
+            fieldIndex,
+          },
+        ];
       }
     }
 

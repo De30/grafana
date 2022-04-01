@@ -190,14 +190,16 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<BarChartOptionsEX> = ({
 
       // The following properties are not used in the uPlot config, but are utilized as transport for legend config
       // PlotLegend currently gets unfiltered DataFrame[], so index must be into that field array, not the prepped frame's which we're iterating here
-      dataFrameFieldIndex: {
-        fieldIndex: legendOrdered
-          ? i
-          : allFrames[0].fields.findIndex(
-              (f) => f.type === FieldType.number && f.state?.seriesIndex === seriesIndex - 1
-            ),
-        frameIndex: 0,
-      },
+      dataFrameFieldIndex: [
+        {
+          fieldIndex: legendOrdered
+            ? i
+            : allFrames[0].fields.findIndex(
+                (f) => f.type === FieldType.number && f.state?.seriesIndex === seriesIndex - 1
+              ),
+          frameIndex: 0,
+        },
+      ],
     });
 
     // The builder will manage unique scaleKeys and combine where appropriate

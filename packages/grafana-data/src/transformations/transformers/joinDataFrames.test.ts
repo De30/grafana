@@ -107,10 +107,12 @@ describe('align frames', () => {
         Object {
           "name": "TheTime",
           "state": Object {
-            "origin": Object {
-              "fieldIndex": 0,
-              "frameIndex": 0,
-            },
+            "origin": Array [
+              Object {
+                "fieldIndex": 0,
+                "frameIndex": 0,
+              },
+            ],
           },
           "values": Array [
             1000,
@@ -121,10 +123,12 @@ describe('align frames', () => {
         Object {
           "name": "A1",
           "state": Object {
-            "origin": Object {
-              "fieldIndex": 1,
-              "frameIndex": 0,
-            },
+            "origin": Array [
+              Object {
+                "fieldIndex": 1,
+                "frameIndex": 0,
+              },
+            ],
           },
           "values": Array [
             1,
@@ -135,10 +139,12 @@ describe('align frames', () => {
         Object {
           "name": "A2",
           "state": Object {
-            "origin": Object {
-              "fieldIndex": 1,
-              "frameIndex": 1,
-            },
+            "origin": Array [
+              Object {
+                "fieldIndex": 1,
+                "frameIndex": 1,
+              },
+            ],
           },
           "values": Array [
             1,
@@ -161,19 +167,23 @@ describe('align frames', () => {
         Object {
           "name": "TheTime",
           "state": Object {
-            "origin": Object {
-              "fieldIndex": 0,
-              "frameIndex": 0,
-            },
+            "origin": Array [
+              Object {
+                "fieldIndex": 0,
+                "frameIndex": 0,
+              },
+            ],
           },
         },
         Object {
           "name": "A1",
           "state": Object {
-            "origin": Object {
-              "fieldIndex": 1,
-              "frameIndex": 0,
-            },
+            "origin": Array [
+              Object {
+                "fieldIndex": 1,
+                "frameIndex": 0,
+              },
+            ],
           },
         },
       ]

@@ -34,7 +34,7 @@ export const PlotLegend: React.FC<PlotLegendProps> = ({
     .getSeries()
     .map<VizLegendItem | undefined>((s) => {
       const seriesConfig = s.props;
-      const fieldIndex = seriesConfig.dataFrameFieldIndex;
+      const fieldIndex = seriesConfig.dataFrameFieldIndex?.[0];
       const axisPlacement = config.getAxisPlacement(s.props.scaleKey);
 
       if (!fieldIndex) {

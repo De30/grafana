@@ -75,11 +75,11 @@ export const preparePlotConfigBuilder: UPlotConfigPrepFn<TimelineOptions> = ({
     const field = frame.fields[seriesIdx];
 
     if (
-      field.state?.origin?.fieldIndex !== undefined &&
-      field.state?.origin?.frameIndex !== undefined &&
+      field.state?.origin?.[0].fieldIndex !== undefined &&
+      field.state?.origin?.[0].frameIndex !== undefined &&
       getValueColor
     ) {
-      return getValueColor(field.state?.origin?.frameIndex, field.state?.origin?.fieldIndex, value);
+      return getValueColor(field.state?.origin[0].frameIndex, field.state?.origin[0].fieldIndex, value);
     }
 
     return FALLBACK_COLOR;

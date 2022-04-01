@@ -235,10 +235,12 @@ export function prepareCandlestickFields(
       // time is unused (-1), y series enumerate from 0
       seriesIndex: i - 1,
 
-      origin: {
-        fieldIndex: i,
-        frameIndex: 0,
-      },
+      origin: [
+        {
+          fieldIndex: i,
+          frameIndex: 0,
+        },
+      ],
     };
   }
 

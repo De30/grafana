@@ -42,7 +42,7 @@ export interface SeriesProps extends LineConfig, BarConfig, FillConfig, PointsCo
   pointsFilter?: Series.Points.Filter | null;
   pointsBuilder?: Series.Points.Show | null;
   show?: boolean;
-  dataFrameFieldIndex?: DataFrameFieldIndex;
+  dataFrameFieldIndex?: DataFrameFieldIndex[];
   theme: GrafanaTheme2;
   value?: uPlot.Series.Value;
 }

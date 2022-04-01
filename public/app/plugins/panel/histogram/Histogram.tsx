@@ -209,10 +209,12 @@ const prepConfig = (frame: DataFrame, theme: GrafanaTheme2) => {
       softMax: customConfig.axisSoftMax,
 
       // The following properties are not used in the uPlot config, but are utilized as transport for legend config
-      dataFrameFieldIndex: {
-        fieldIndex: i,
-        frameIndex: 0,
-      },
+      dataFrameFieldIndex: [
+        {
+          fieldIndex: i,
+          frameIndex: 0,
+        },
+      ],
     });
   }
 
