@@ -20,6 +20,8 @@ import {
   TimeRange,
   DataFrame,
   dateTime,
+  dataFrameFromJSON,
+  DataFrameJSON,
 } from '@grafana/data';
 import {
   BackendSrvRequest,
@@ -343,6 +345,23 @@ export class PrometheusDatasource
   query(request: DataQueryRequest<PromQuery>): Observable<DataQueryResponse> {
     if (this.access === 'proxy') {
       const targets = request.targets.map((target) => this.processTargetV2(target, request));
+
+      if (request.targets[0].mockResponse !== '') {
+        let rawFrames = JSON.parse(request.targets[0].mockResponse!);
+
+        let response: DataQueryResponse = {
+          state: LoadingState.Done,
+          data: rawFrames.map((rawFrame: DataFrameJSON) => dataFrameFromJSON(rawFrame)),
+        };
+
+        let resp = transformV2(response, request, { exemplarTraceIdDestinations: this.exemplarTraceIdDestinations });
+
+        return new Observable<DataQueryResponse>((observer) => {
+          observer.next(resp);
+          observer.complete();
+        });
+      }
+
       return super
         .query({ ...request, targets })
         .pipe(
