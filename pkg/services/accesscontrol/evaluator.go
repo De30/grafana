@@ -14,7 +14,7 @@ type Evaluator interface {
 	// Evaluate permissions that are grouped by action
 	Evaluate(permissions map[string][]string) (bool, error)
 	// MutateScopes executes a sequence of ScopeModifier functions on all embedded scopes of an evaluator and returns a new Evaluator
-	MutateScopes(context.Context, ...ScopeMutator) (Evaluator, error)
+	MutateScopes(context.Context, ...ScopeAttributeMutator) (Evaluator, error)
 	// String returns a string representation of permission required by the evaluator
 	fmt.Stringer
 	fmt.GoStringer
@@ -89,7 +89,7 @@ func match(scope, target string) (bool, error) {
 	return scope == target, nil
 }
 
-func (p permissionEvaluator) MutateScopes(ctx context.Context, modifiers ...ScopeMutator) (Evaluator, error) {
+func (p permissionEvaluator) MutateScopes(ctx context.Context, mutators ...ScopeAttributeMutator) (Evaluator, error) {
 	var err error
 	if p.Scopes == nil {
 		return EvalPermission(p.Action), nil
@@ -98,8 +98,8 @@ func (p permissionEvaluator) MutateScopes(ctx context.Context, modifiers ...Scop
 	scopes := make([]string, 0, len(p.Scopes))
 	for _, scope := range p.Scopes {
 		modified := scope
-		for _, modifier := range modifiers {
-			modified, err = modifier(ctx, modified)
+		for _, m := range mutators {
+			modified, err = m(ctx, modified)
 			if err != nil {
 				return nil, err
 			}

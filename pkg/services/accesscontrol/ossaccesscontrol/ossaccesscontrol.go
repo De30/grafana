@@ -32,22 +32,22 @@ func ProvideService(features featuremgmt.FeatureToggles, usageStats usagestats.S
 // ProvideOSSAccessControl creates an oss implementation of access control without usage stats registration
 func ProvideOSSAccessControl(features featuremgmt.FeatureToggles, usageStats usagestats.Service, provider accesscontrol.PermissionsProvider) *OSSAccessControlService {
 	return &OSSAccessControlService{
-		features:      features,
-		provider:      provider,
-		usageStats:    usageStats,
-		log:           log.New("accesscontrol"),
-		scopeResolver: accesscontrol.NewScopeResolver(),
+		features:       features,
+		provider:       provider,
+		usageStats:     usageStats,
+		log:            log.New("accesscontrol"),
+		scopeResolvers: accesscontrol.NewScopeResolvers(),
 	}
 }
 
 // OSSAccessControlService is the service implementing role based access control.
 type OSSAccessControlService struct {
-	log           log.Logger
-	usageStats    usagestats.Service
-	features      featuremgmt.FeatureToggles
-	scopeResolver accesscontrol.ScopeResolver
-	provider      accesscontrol.PermissionsProvider
-	registrations accesscontrol.RegistrationList
+	log            log.Logger
+	usageStats     usagestats.Service
+	features       featuremgmt.FeatureToggles
+	scopeResolvers accesscontrol.ScopeResolvers
+	provider       accesscontrol.PermissionsProvider
+	registrations  accesscontrol.RegistrationList
 }
 
 func (ac *OSSAccessControlService) IsDisabled() bool {
@@ -91,7 +91,7 @@ func (ac *OSSAccessControlService) Evaluate(ctx context.Context, user *models.Si
 		user.Permissions[user.OrgId] = accesscontrol.GroupScopesByAction(permissions)
 	}
 
-	attributeMutator := ac.scopeResolver.GetResolveAttributeScopeMutator(user.OrgId)
+	attributeMutator := ac.scopeResolvers.GetScopeAttributeMutator(user.OrgId)
 	resolvedEvaluator, err := evaluator.MutateScopes(ctx, attributeMutator)
 	if err != nil {
 		return false, err
@@ -123,7 +123,7 @@ func (ac *OSSAccessControlService) GetUserPermissions(ctx context.Context, user 
 
 	permissions = append(permissions, dbPermissions...)
 	resolved := make([]*accesscontrol.Permission, 0, len(permissions))
-	keywordMutator := ac.scopeResolver.GetResolveKeywordScopeMutator(user)
+	keywordMutator := ac.scopeResolvers.GetScopeKeywordMutator(user)
 	for _, p := range permissions {
 		// if the permission has a keyword in its scope it will be resolved
 		p.Scope, err = keywordMutator(ctx, p.Scope)
