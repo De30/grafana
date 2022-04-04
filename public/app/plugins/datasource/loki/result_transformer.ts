@@ -290,12 +290,9 @@ export function createMetricLabel(labelData: { [key: string]: string }, options?
 }
 
 function getOriginalMetricName(labelData: { [key: string]: string }) {
-  // we do not want to mutate the origianl labels-structure,
-  // so we make a copy
-  const labels = { ...labelData };
-  const metricName = labels.__name__ || '';
-  delete labels.__name__;
-  const labelPart = Object.entries(labels)
+  const metricName = labelData.__name__ || '';
+  delete labelData.__name__;
+  const labelPart = Object.entries(labelData)
     .map((label) => `${label[0]}="${label[1]}"`)
     .join(',');
   return `${metricName}{${labelPart}}`;
