@@ -90,7 +90,12 @@ export const TypeaheadItem: React.FC<Props> = (props: Props) => {
           highlightParts={item.highlightParts}
         ></PartialHighlighter>
       ) : (
-        <Highlighter textToHighlight={label} searchWords={[prefix ?? '']} highlightClassName={highlightClassName} />
+        <Highlighter
+          textToHighlight={label}
+          searchWords={[prefix ?? '']}
+          autoEscape={true}
+          highlightClassName={highlightClassName}
+        />
       )}
     </li>
   );

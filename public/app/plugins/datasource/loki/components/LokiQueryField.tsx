@@ -15,7 +15,12 @@ import { QueryEditorProps } from '@grafana/data';
 import { LokiQuery, LokiOptions } from '../types';
 import { LanguageMap, languages as prismLanguages } from 'prismjs';
 import LokiLanguageProvider from '../language_provider';
-import { shouldRefreshLabels } from '../language_utils';
+import {
+  escapeLabelValueInExactSelector,
+  escapeLabelValueInRegexSelector,
+  isRegexSelector,
+  shouldRefreshLabels,
+} from '../language_utils';
 import { LokiDatasource } from '../datasource';
 import { LocalStorageValueProvider } from 'app/core/components/LocalStorageValueProvider';
 
@@ -45,10 +50,19 @@ function willApplySuggestion(suggestion: string, { typeaheadContext, typeaheadTe
     case 'context-label-values': {
       // Always add quotes and remove existing ones instead
       if (!typeaheadText.match(/^(!?=~?"|")/)) {
-        suggestion = `"${suggestion}`;
+        if (isRegexSelector(typeaheadText)) {
+          suggestion = `"${escapeLabelValueInRegexSelector(suggestion)}`;
+        } else {
+          suggestion = `"${escapeLabelValueInExactSelector(suggestion)}`;
+        }
       }
+
       if (DOMUtil.getNextCharacter() !== '"') {
-        suggestion = `${suggestion}"`;
+        if (isRegexSelector(typeaheadText)) {
+          suggestion = `${escapeLabelValueInRegexSelector(suggestion)}"`;
+        } else {
+          suggestion = `${escapeLabelValueInExactSelector(suggestion)}"`;
+        }
       }
       break;
     }

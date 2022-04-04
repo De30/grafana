@@ -65,6 +65,7 @@ import { DEFAULT_RESOLUTION } from './components/LokiOptionFields';
 import { queryLogsVolume } from 'app/core/logs_model';
 import { doLokiChannelStream } from './streaming';
 import { renderLegendFormat } from '../prometheus/legend';
+import { escapeLabelValueInExactSelector, escapeLabelValueInRegexSelector, isRegexSelector } from './language_utils';
 
 export type RangeQueryOptions = DataQueryRequest<LokiQuery> | AnnotationQueryRequest<LokiQuery>;
 export const DEFAULT_MAX_LINES = 1000;
@@ -737,10 +738,6 @@ export class LokiDatasource
     expr = adhocFilters.reduce((acc: string, filter: { key?: any; operator?: any; value?: any }) => {
       const { key, operator } = filter;
       let { value } = filter;
-      if (operator === '=~' || operator === '!~') {
-        value = lokiRegularEscape(value);
-      }
-
       return this.addLabelToQuery(acc, key, value, operator, true);
     }, expr);
 
@@ -755,11 +752,19 @@ export class LokiDatasource
     // Override to make sure that we use label as actual label and not parsed label
     notParsedLabelOverride?: boolean
   ) {
+    let escapedValue;
+
+    if (isRegexSelector(operator)) {
+      escapedValue = escapeLabelValueInRegexSelector(value.toString());
+    } else {
+      escapedValue = escapeLabelValueInExactSelector(value.toString());
+    }
+
     if (queryHasPipeParser(queryExpr) && !isMetricsQuery(queryExpr) && !notParsedLabelOverride) {
       // If query has parser, we treat all labels as parsed and use | key="value" syntax
-      return addParsedLabelToQuery(queryExpr, key, value, operator);
+      return addParsedLabelToQuery(queryExpr, key, escapedValue, operator);
     } else {
-      return addLabelToQuery(queryExpr, key, value, operator, true);
+      return addLabelToQuery(queryExpr, key, escapedValue, operator, true);
     }
   }
 
@@ -794,7 +799,7 @@ export class LokiDatasource
 
 export function lokiRegularEscape(value: any) {
   if (typeof value === 'string') {
-    return value.replace(/'/g, "\\\\'");
+    return value.replace(/\\/g, '\\\\').replace(/'/g, "\\\\'");
   }
   return value;
 }
