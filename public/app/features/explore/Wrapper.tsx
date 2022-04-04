@@ -11,6 +11,7 @@ import { Branding } from '../../core/components/Branding/Branding';
 import { getNavModel } from '../../core/selectors/navModel';
 import { StoreState } from 'app/types';
 import { locationService } from '@grafana/runtime';
+import { ScratchpadProvider } from '../scratchpad';
 
 interface RouteProps extends GrafanaRouteComponentProps<{}, ExploreQueryParams> {}
 interface OwnProps {}
@@ -73,18 +74,20 @@ class WrapperUnconnected extends PureComponent<Props> {
     const hasSplit = Boolean(left) && Boolean(right);
 
     return (
-      <div className="page-scrollbar-wrapper">
-        <div className="explore-wrapper">
-          <ErrorBoundaryAlert style="page">
-            <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={left} />
-          </ErrorBoundaryAlert>
-          {hasSplit && (
+      <ScratchpadProvider type={['query']}>
+        <div className="page-scrollbar-wrapper">
+          <div className="explore-wrapper">
             <ErrorBoundaryAlert style="page">
-              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlQuery={right} />
+              <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={left} />
             </ErrorBoundaryAlert>
-          )}
+            {hasSplit && (
+              <ErrorBoundaryAlert style="page">
+                <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.right} urlQuery={right} />
+              </ErrorBoundaryAlert>
+            )}
+          </div>
         </div>
-      </div>
+      </ScratchpadProvider>
     );
   }
 }

@@ -288,6 +288,7 @@ export class QueryGroup extends PureComponent<Props, State> {
     return (
       <div aria-label={selectors.components.QueryTab.content}>
         <QueryEditorRows
+          id="panel-edit"
           queries={queries}
           dsSettings={dsSettings}
           onQueriesChange={this.onQueriesChange}

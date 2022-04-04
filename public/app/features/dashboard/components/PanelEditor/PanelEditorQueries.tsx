@@ -5,6 +5,7 @@ import { locationService } from '@grafana/runtime';
 import { QueryGroupDataSource, QueryGroupOptions } from 'app/types';
 import { DataQuery, getDataSourceRef } from '@grafana/data';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
+import { ScratchpadProvider } from 'app/features/scratchpad';
 
 interface Props {
   /** Current panel */
@@ -89,13 +90,15 @@ export class PanelEditorQueries extends PureComponent<Props> {
     const options = this.buildQueryOptions(panel);
 
     return (
-      <QueryGroup
-        options={options}
-        queryRunner={panel.getQueryRunner()}
-        onRunQueries={this.onRunQueries}
-        onOpenQueryInspector={this.onOpenQueryInspector}
-        onOptionsChange={this.onOptionsChange}
-      />
+      <ScratchpadProvider>
+        <QueryGroup
+          options={options}
+          queryRunner={panel.getQueryRunner()}
+          onRunQueries={this.onRunQueries}
+          onOpenQueryInspector={this.onOpenQueryInspector}
+          onOptionsChange={this.onOptionsChange}
+        />
+      </ScratchpadProvider>
     );
   }
 }

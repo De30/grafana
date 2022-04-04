@@ -65,6 +65,7 @@ export const QueryRows = ({ exploreId }: Props) => {
 
   return (
     <QueryEditorRows
+      id={`explore-${exploreId}`}
       dsSettings={dsSettings}
       queries={queries}
       onQueriesChange={onChange}
