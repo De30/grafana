@@ -24,15 +24,16 @@ export const ConfigEditor = (props: Props) => {
   return (
     <>
       {options.access === 'direct' && (
-        <Alert title="Deprecation Notice" severity="warning">
-          Browser access mode in the Prometheus datasource is deprecated and will be removed in a future release.
-        </Alert>
-      )}
+          <Alert title="Deprecation Notice" severity="info">
+            Brower access mode has been removed from this datasource
+          </Alert>
+        ) &&
+        onOptionsChange({ ...options, access: 'proxy' })}
 
       <DataSourceHttpSettings
         defaultUrl="http://localhost:9090"
         dataSourceConfig={options}
-        showAccessOptions={true}
+        showAccessOptions={false}
         onChange={onOptionsChange}
         sigV4AuthToggleEnabled={config.sigV4AuthEnabled}
         azureAuthSettings={azureAuthSettings}
