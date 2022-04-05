@@ -7,6 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/grafana/grafana/pkg/infra/log/level"
+	"github.com/grafana/grafana/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
@@ -245,12 +248,13 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 		}
 
 		tests := []struct {
-			Name              string
-			ResponseBody      interface{}
-			OAuth2Extra       interface{}
-			RoleAttributePath string
-			ExpectedEmail     string
-			ExpectedRole      string
+			Name                   string
+			ResponseBody           interface{}
+			OAuth2Extra            interface{}
+			RoleAttributePath      string
+			ExpectedEmail          string
+			ExpectedRole           string
+			ExpectedOrgMemberships map[int64]models.RoleType
 		}{
 			{
 				Name: "Given a valid id_token, a valid role path, no API response, use id_token",
@@ -260,7 +264,9 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "Admin",
+				ExpectedOrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_ADMIN,
+				},
 			},
 			{
 				Name: "Given a valid id_token, no role path, no API response, use id_token",
@@ -270,7 +276,6 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "",
 			},
 			{
 				Name: "Given a valid id_token, an invalid role path, no API response, use id_token",
@@ -280,7 +285,6 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "invalid_path",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "",
 			},
 			{
 				Name: "Given no id_token, a valid role path, a valid API response, use API response",
@@ -290,7 +294,9 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "Admin",
+				ExpectedOrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_ADMIN,
+				},
 			},
 			{
 				Name: "Given no id_token, no role path, a valid API response, use API response",
@@ -299,7 +305,6 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "",
 			},
 			{
 				Name: "Given no id_token, a role path, a valid API response without a role, use API response",
@@ -308,13 +313,11 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "",
 			},
 			{
 				Name:              "Given no id_token, a valid role path, no API response, no data",
 				RoleAttributePath: "role",
 				ExpectedEmail:     "",
-				ExpectedRole:      "",
 			},
 			{
 				Name: "Given a valid id_token, a valid role path, a valid API response, prefer id_token",
@@ -328,7 +331,9 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "Admin",
+				ExpectedOrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_ADMIN,
+				},
 			},
 			{
 				Name: "Given a valid id_token, an invalid role path, a valid API response, prefer id_token",
@@ -342,7 +347,6 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "invalid_path",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "",
 			},
 			{
 				Name: "Given a valid id_token with no email, a valid role path, a valid API response with no role, merge",
@@ -355,7 +359,9 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "from_response@example.com",
-				ExpectedRole:      "Admin",
+				ExpectedOrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_ADMIN,
+				},
 			},
 			{
 				Name: "Given a valid id_token with no role, a valid role path, a valid API response with no email, merge",
@@ -368,7 +374,6 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 				},
 				RoleAttributePath: "role",
 				ExpectedEmail:     "john.doe@example.com",
-				ExpectedRole:      "FromResponse",
 			},
 			{
 				Name: "Given a valid id_token, a valid advanced JMESPath role path, derive the role",
@@ -433,16 +438,266 @@ func TestUserInfoSearchesForEmailAndRole(t *testing.T) {
 					Expiry:       time.Now(),
 				}
 
+				if test.ExpectedOrgMemberships == nil {
+					test.ExpectedOrgMemberships = map[int64]models.RoleType{}
+				}
+
 				token := staticToken.WithExtra(test.OAuth2Extra)
 				actualResult, err := provider.UserInfo(ts.Client(), token)
 				require.NoError(t, err)
 				require.Equal(t, test.ExpectedEmail, actualResult.Email)
 				require.Equal(t, test.ExpectedEmail, actualResult.Login)
-				require.Equal(t, test.ExpectedRole, actualResult.Role)
+				require.Equal(t, test.ExpectedOrgMemberships, actualResult.OrgMemberships)
 			})
 		}
 	})
 }
+
+func TestGenericOAuth_GroupMapping(t *testing.T) {
+	var apiResponse map[string]interface{}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		response, err := json.Marshal(apiResponse)
+		require.NoError(t, err)
+		_, err = w.Write(response)
+		require.NoError(t, err)
+	}))
+
+	t.Run("Users are mapped to organizations according to group mapping filters", func(t *testing.T) {
+		groupMappings, err := readGroupMappings("testdata/full.toml")
+		require.NoError(t, err)
+		logger := log.New("logger", "generic_oauth_test")
+		logger.SetHandler(log15.LvlFilterHandler(log15.LvlDebug, log15.StreamHandler(os.Stdout, log15.LogfmtFormat())))
+		provider := SocialGenericOAuth{
+			SocialBase: &SocialBase{
+				log: logger,
+			},
+			apiUrl:        ts.URL,
+			groupMappings: groupMappings,
+		}
+		staticToken := oauth2.Token{
+			AccessToken:  "",
+			TokenType:    "",
+			RefreshToken: "",
+			Expiry:       time.Now(),
+		}
+		token := staticToken.WithExtra(map[string]interface{}{
+			"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+		})
+
+		userInfos := []*BasicUserInfo{}
+		for _, group := range []string{"admin", "editor", ""} {
+			apiResponse = map[string]interface{}{}
+			if group != "" {
+				apiResponse["groups"] = []string{group}
+			}
+			userInfo, err := provider.UserInfo(ts.Client(), token)
+			require.NoError(t, err)
+			userInfos = append(userInfos, userInfo)
+		}
+
+		isAdmin := true
+		diff := cmp.Diff([]*BasicUserInfo{
+			{
+				Email: "john.doe@example.com",
+				Login: "john.doe@example.com",
+				OrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_ADMIN,
+					2: models.ROLE_ADMIN,
+				},
+				IsGrafanaAdmin: &isAdmin,
+			},
+			{
+				Email: "john.doe@example.com",
+				Login: "john.doe@example.com",
+				OrgMemberships: map[int64]models.RoleType{
+					2: models.ROLE_EDITOR,
+				},
+			},
+			{
+				Email: "john.doe@example.com",
+				Login: "john.doe@example.com",
+				OrgMemberships: map[int64]models.RoleType{
+					1: models.ROLE_VIEWER,
+				},
+			},
+		}, userInfos)
+		assert.Equal(t, "", diff)
+	})
+}
+
+/*
+func TestSearchJSONForGroupMapping(t *testing.T) {
+	t.Run("Given a generic OAuth provider", func(t *testing.T) {
+		provider := SocialGenericOAuth{
+			SocialBase: &SocialBase{
+				log: log.New("generic_oauth_test"),
+			},
+		}
+
+		grafanaAdminTrue := true
+		groupMappings := []setting.OAuthGroupMapping{
+			{
+				Filter:         "contains(groups[*], 'admin') && 'Admin'",
+				Role:           "admin",
+				OrgID:          1,
+				IsGrafanaAdmin: &grafanaAdminTrue,
+			},
+			{
+				Filter: "contains(groups[*], 'editor')",
+				Role:   "editor",
+				OrgID:  1,
+			},
+			{
+				Filter: "contains(groups[*], 'admin') && 'Admin' || 'Viewer'",
+				OrgID:  2,
+			},
+		}
+		roleMappings := []setting.OAuthGroupMapping{
+			{
+				Filter: "role",
+				OrgID:  1,
+			},
+			{
+				Role:  "viewer",
+				OrgID: 2,
+			},
+		}
+
+		tests := []struct {
+			Name           string
+			APIURLReponse  interface{}
+			OAuth2Extra    interface{}
+			GroupMappings  []setting.OAuthGroupMapping
+			ExpectedResult []setting.OAuthGroupMapping
+		}{
+			{
+				Name:          "Given an empty user info JSON response and empty JMES path",
+				APIURLReponse: map[string]interface{}{},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings:  nil,
+				ExpectedResult: nil,
+			},
+			{
+				Name:          "Given an empty user info JSON response and valid JMES path",
+				APIURLReponse: map[string]interface{}{},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings:  groupMappings,
+				ExpectedResult: nil,
+			},
+			{
+				Name: "Given a simple user info JSON response and simple role mapping",
+				APIURLReponse: map[string]interface{}{
+					"role": "Admin",
+				},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings: roleMappings,
+				ExpectedResult: []setting.OAuthGroupMapping{
+					{
+						Role:  "Admin",
+						OrgID: 1,
+					},
+					{
+						Role:  "Viewer",
+						OrgID: 2,
+					},
+				},
+			},
+			{
+				Name: "Given a simple user info JSON response and valid group mappings for editor",
+				APIURLReponse: map[string]interface{}{
+					"groups": []string{"editor"},
+				},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings: groupMappings,
+				ExpectedResult: []setting.OAuthGroupMapping{
+					{
+						Role:  "Editor",
+						OrgID: 1,
+					},
+					{
+						Role:  "Viewer",
+						OrgID: 2,
+					},
+				},
+			},
+			{
+				Name: "Given a simple user info JSON response and valid group mappings for admin",
+				APIURLReponse: map[string]interface{}{
+					"groups": []string{"admin"},
+				},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings: groupMappings,
+				ExpectedResult: []setting.OAuthGroupMapping{
+					{
+						Role:  "Admin",
+						OrgID: 1,
+					},
+					{
+						Role:  "Admin",
+						OrgID: 2,
+					},
+				},
+			},
+			{
+				Name: "Given a simple user info JSON response and valid group mappings for undefined group",
+				APIURLReponse: map[string]interface{}{
+					"groups": []string{"dne"},
+				},
+				OAuth2Extra: map[string]interface{}{
+					"id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.9PtHcCaXxZa2HDlASyKIaFGfOKlw2ILQo32xlvhvhRg",
+				},
+				GroupMappings: groupMappings,
+				ExpectedResult: []setting.OAuthGroupMapping{
+					{
+						Role:  "Viewer",
+						OrgID: 2,
+					},
+				},
+			},
+		}
+
+		for _, test := range tests {
+			t.Run(test.Name, func(t *testing.T) {
+				provider.groupMappings = test.GroupMappings
+
+				response, err := json.Marshal(test.APIURLReponse)
+				require.NoError(t, err)
+				ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusOK)
+					w.Header().Set("Content-Type", "application/json")
+					_, err := w.Write(response)
+					require.NoError(t, err)
+				}))
+				provider.apiUrl = ts.URL
+				staticToken := oauth2.Token{
+					AccessToken:  "",
+					TokenType:    "",
+					RefreshToken: "",
+					Expiry:       time.Now(),
+				}
+
+				token := staticToken.WithExtra(test.OAuth2Extra)
+				actualResult, err := provider.UserInfo(ts.Client(), token)
+				require.NoError(t, err)
+
+				assert.Equal(t, test.ExpectedResult, actualResult.GroupMappings)
+			})
+		}
+	})
+}
+*/
 
 func TestUserInfoSearchesForLogin(t *testing.T) {
 	t.Run("Given a generic OAuth provider", func(t *testing.T) {

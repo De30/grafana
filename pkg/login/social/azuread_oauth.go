@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util/errutil"
 
 	"golang.org/x/oauth2"
@@ -57,43 +58,80 @@ func (s *SocialAzureAD) UserInfo(client *http.Client, token *oauth2.Token) (*Bas
 
 	parsedToken, err := jwt.ParseSigned(idToken.(string))
 	if err != nil {
-		return nil, errutil.Wrapf(err, "error parsing id token")
+		return nil, errutil.Wrapf(err, "error parsing ID token")
 	}
 
 	var claims azureClaims
 	if err := parsedToken.UnsafeClaimsWithoutVerification(&claims); err != nil {
-		return nil, errutil.Wrapf(err, "error getting claims from id token")
+		return nil, errutil.Wrapf(err, "error getting claims from ID token")
 	}
 
 	email := extractEmail(claims)
 	if email == "" {
 		return nil, errors.New("error getting user info: no email found in access token")
 	}
-
-	role := extractRole(claims, s.autoAssignOrgRole, s.roleAttributeStrict)
-	if role == "" {
-		return nil, errors.New("user does not have a valid role")
-	}
-	logger.Debug("AzureAD OAuth: extracted role", "email", email, "role", role)
-
-	groups, err := extractGroups(client, claims, token)
-	if err != nil {
-		return nil, fmt.Errorf("failed to extract groups: %w", err)
-	}
-
-	logger.Debug("AzureAD OAuth: extracted groups", "email", email, "groups", groups)
+	groups := extractGroups(claims)
 	if !s.IsGroupMember(groups) {
 		return nil, errMissingGroupMembership
 	}
 
-	return &BasicUserInfo{
+	userInfo := &BasicUserInfo{
 		Id:     claims.ID,
 		Name:   claims.Name,
 		Email:  email,
 		Login:  email,
-		Role:   string(role),
 		Groups: groups,
-	}, nil
+	}
+
+	if err := s.extractOrgMemberships(claims, userInfo); err != nil {
+		return nil, err
+	}
+
+	return userInfo, nil
+}
+
+func (s *SocialAzureAD) extractOrgMemberships(claims azureClaims, userInfo *BasicUserInfo) error {
+	userInfo.OrgMemberships = map[int64]models.RoleType{}
+
+	role := models.ROLE_VIEWER
+	if len(claims.Roles) > 0 {
+		roleOrder := []models.RoleType{
+			models.ROLE_ADMIN,
+			models.ROLE_EDITOR,
+			models.ROLE_VIEWER,
+		}
+		for _, r := range roleOrder {
+			found := false
+			for _, item := range claims.Roles {
+				if strings.EqualFold(item, string(r)) {
+					s.log.Debug("The user has a role", "role", r)
+					role = r
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+
+	var orgID int64
+	if setting.AutoAssignOrg && setting.AutoAssignOrgId > 0 {
+		orgID = int64(setting.AutoAssignOrgId)
+		s.log.Debug("The user has a role assignment and organization membership is auto-assigned",
+			"role", role, "orgId", orgID)
+	} else {
+		orgID = int64(1)
+		s.log.Debug("The user has a role assignment and organization membership is not auto-assigned",
+			"role", role, "orgId", orgID)
+	}
+	if _, ok := userInfo.OrgMemberships[orgID]; !ok {
+		s.log.Debug("Assigning user role in organization", "role", role, "orgID", orgID)
+		userInfo.OrgMemberships[orgID] = role
+	}
+
+	return nil
 }
 
 func (s *SocialAzureAD) IsGroupMember(groups []string) bool {
@@ -120,39 +158,6 @@ func extractEmail(claims azureClaims) string {
 	}
 
 	return claims.Email
-}
-
-func extractRole(claims azureClaims, autoAssignRole string, strictMode bool) models.RoleType {
-	if len(claims.Roles) == 0 {
-		return models.RoleType(autoAssignRole)
-	}
-
-	roleOrder := []models.RoleType{
-		models.ROLE_ADMIN,
-		models.ROLE_EDITOR,
-		models.ROLE_VIEWER,
-	}
-
-	for _, role := range roleOrder {
-		if found := hasRole(claims.Roles, role); found {
-			return role
-		}
-	}
-
-	if strictMode {
-		return models.RoleType("")
-	}
-
-	return models.ROLE_VIEWER
-}
-
-func hasRole(roles []string, role models.RoleType) bool {
-	for _, item := range roles {
-		if strings.EqualFold(item, string(role)) {
-			return true
-		}
-	}
-	return false
 }
 
 type getAzureGroupRequest struct {

@@ -234,13 +234,19 @@ allowed_organizations =
 
 To ease configuration of a proper JMESPath expression, you can test/evaluate expressions with custom payloads at http://jmespath.org/.
 
-### Role mapping
+### Role and organization mapping
 
-If  the`role_attribute_path` property does not return a role, then the user is assigned the `Viewer` role by default. You can disable the role assignment by setting `role_attribute_strict = true`. It denies user access if no role or an invalid role is returned.
+Defining role and organization mapping is handled by setting a path to TOML mapping file via `group_mappings_file`, example:
+
+```bash
+[auth.generic_oauth]
+...
+group_mappings_file = /etc/grafana/oauth-mappings.toml
+```
 
 **Basic example:**
 
-In the following example user will get `Editor` as role when authenticating. The value of the property `role` will be the resulting role if the role is a proper Grafana role, i.e. `Viewer`, `Editor` or `Admin`.
+In the following example, the user will get `Editor` as role in OrgID `2` when authenticating. The value of the property `role` will be the resulting role if the role is a proper Grafana role, i.e. `Viewer`, `Editor` or `Admin`.
 
 Payload:
 
@@ -255,12 +261,14 @@ Payload:
 Config:
 
 ```bash
-role_attribute_path = role
+[[group_mappings]]
+role_attribute_path = "role"
+org_id = 2
 ```
 
 **Advanced example:**
 
-In the following example user will get `Admin` as role when authenticating since it has a role `admin`. If a user has a role `editor` it will get `Editor` as role, otherwise `Viewer`.
+In the following example, the user will get `Admin` as role in Orgs `1` and `2` when authenticating since it has a group `admin`. If a user has a group `editor` it will get `Editor` as role for Org `1`, otherwise `Viewer` in Org `2`.
 
 Payload:
 
@@ -282,38 +290,14 @@ Payload:
 Config:
 
 ```bash
-role_attribute_path = contains(info.roles[*], 'admin') && 'Admin' || contains(info.roles[*], 'editor') && 'Editor' || 'Viewer'
-```
-
-### Groups mapping
-
-> Available in Grafana Enterprise v8.1 and later versions.
-
-With Team Sync you can map your Generic OAuth groups to teams in Grafana so that the users are automatically added to the correct teams.
-
-Generic OAuth groups can be referenced by group ID, like `8bab1c86-8fba-33e5-2089-1d1c80ec267d` or `myteam`.
-
-[Learn more about Team Sync]({{< relref "team-sync.md" >}})
-
-Config:
-
-```bash
-groups_attribute_path = info.groups
-```
-
-Payload:
-
-```json
-{
-    ...
-    "info": {
-        ...
-        "groups": [
-            "engineers",
-            "analysts",
-        ],
-        ...
-    },
-    ...
-}
+[[group_mappings]]
+role_attribute_path = "contains(info.groups[*], 'admin') && 'Admin'"
+org_id = 1
+grafana_admin = true
+[[group_mappings]]
+role_attribute_path = "contains(info.groups[*], 'editor') && 'Editor'"
+org_id = 1
+[[group_mappings]]
+role_attribute_path = "contains(info.groups[*], 'admin') && 'Admin' || 'Viewer'"
+org_id = 2
 ```
