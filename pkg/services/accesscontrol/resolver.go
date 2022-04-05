@@ -31,8 +31,9 @@ type ScopeResolvers struct {
 
 func (s *ScopeResolvers) GetScopeAttributeMutator(orgID int64) ScopeAttributeMutator {
 	return func(ctx context.Context, scope string) ([]string, error) {
+		key := getScopeCacheKey(orgID, scope)
 		// Check cache before computing the scope
-		if cachedScope, ok := s.cache.Get(getCacheKey(orgID, scope)); ok {
+		if cachedScope, ok := s.cache.Get(key); ok {
 			scopes := cachedScope.([]string)
 			s.log.Debug("used cache to resolve '%v' to '%v'", scope, scopes)
 			return scopes, nil
@@ -45,7 +46,7 @@ func (s *ScopeResolvers) GetScopeAttributeMutator(orgID int64) ScopeAttributeMut
 				return nil, fmt.Errorf("could not resolve %v: %w", scope, err)
 			}
 			// Cache result
-			s.cache.Set(getCacheKey(orgID, scope), scopes, ttl)
+			s.cache.Set(key, scopes, ttl)
 			s.log.Debug("resolved '%v' to '%v'", scope, scopes)
 			return scopes, nil
 		}
@@ -107,8 +108,8 @@ func (f ScopeKeywordResolverFunc) Resolve(ctx context.Context, user *models.Sign
 
 type ScopeKeywordMutator func(context.Context, string) (string, error)
 
-// getCacheKey creates an identifier to fetch and store resolution of scopes in the cache
-func getCacheKey(orgID int64, scope string) string {
+// getScopeCacheKey creates an identifier to fetch and store resolution of scopes in the cache
+func getScopeCacheKey(orgID int64, scope string) string {
 	return fmt.Sprintf("%s-%v", scope, orgID)
 }
 

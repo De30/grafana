@@ -247,8 +247,8 @@ func (ac *OSSAccessControlService) DeclareFixedRoles(registrations ...accesscont
 	return nil
 }
 
-// RegisterAttributeScopeResolver allows the caller to register scope resolvers for a
+// RegisterScopeAttributeResolver allows the caller to register scope resolvers for a
 // specific scope prefix (ex: datasources:name:)
-func (ac *OSSAccessControlService) RegisterAttributeScopeResolver(scopePrefix string, resolver accesscontrol.AttributeScopeResolveFunc) {
-	ac.scopeResolver.AddAttributeResolver(scopePrefix, resolver)
+func (ac *OSSAccessControlService) RegisterScopeAttributeResolver(scopePrefix string, resolver accesscontrol.ScopeAttributeResolver) {
+	ac.scopeResolvers.AddScopeAttributeResolver(scopePrefix, resolver)
 }
