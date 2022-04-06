@@ -85,6 +85,7 @@ type ScopeAttributeResolver interface {
 	Resolve(ctx context.Context, orgID int64, scope string) ([]string, error)
 }
 
+// ScopeAttributeResolverFunc is an adapter to allow functions to implement ScopeAttributeResolver interface
 type ScopeAttributeResolverFunc func(ctx context.Context, orgID int64, scope string) ([]string, error)
 
 func (f ScopeAttributeResolverFunc) Resolve(ctx context.Context, orgID int64, scope string) ([]string, error) {
