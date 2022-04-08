@@ -1,5 +1,15 @@
 import MiniSearch from 'minisearch';
-import { ArrayVector, DataFrame, DataSourceRef, Field, FieldType, getDisplayProcessor, Vector } from '@grafana/data';
+import {
+  ArrayVector,
+  DataFrame,
+  DataFrameType,
+  DataSourceRef,
+  Field,
+  FieldType,
+  getDisplayProcessor,
+  toDataFrame,
+  Vector,
+} from '@grafana/data';
 import { config } from '@grafana/runtime';
 
 import { GrafanaSearcher, QueryFilters, QueryResponse } from './types';
@@ -37,9 +47,26 @@ export class MiniSearcher implements GrafanaSearcher {
   lookup = new Map<SearchResultKind, InputDoc>();
   data: RawIndexData = {};
   index?: MiniSearch<InputDoc>;
+  stubFolderData: any;
 
   constructor(private supplier: rawIndexSupplier = getRawIndexData) {
     // waits for first request to load data
+    this.stubFolderData = toDataFrame({
+      fields: [
+        { name: 'name', type: FieldType.string, values: ['Folder', 'File A', 'File B'], config: {} },
+        { name: 'path', type: FieldType.string, values: ['root', 'root/FileA', 'root/FileB'], config: {} },
+        { name: 'url', type: FieldType.string, values: ['root', 'root/FileA', 'root/FileB'], config: {} },
+        { name: 'kind', type: FieldType.string, values: ['folder', 'dashboard', 'dashboard'], config: {} },
+        { name: 'info', type: FieldType.string, values: ['a', 'b', 'c'], config: {} },
+      ],
+      meta: {
+        type: DataFrameType.DirectoryListing,
+      },
+    });
+
+    for (const field of this.stubFolderData.fields) {
+      field.display = getDisplayProcessor({ field, theme: config.theme2 });
+    }
   }
 
   private async initIndex() {
@@ -163,6 +190,12 @@ export class MiniSearcher implements GrafanaSearcher {
 
     // empty query can return everything
     if (!query && this.data.dashboard) {
+      if (!filter) {
+        return {
+          body: this.stubFolderData,
+        };
+      }
+
       return {
         body: filterFrame(this.data.dashboard, filter),
       };
