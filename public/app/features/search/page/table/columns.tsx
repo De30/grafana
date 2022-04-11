@@ -64,12 +64,12 @@ export const generateColumns = (
         return (
           <div className={styles.folderNameContainer} style={{ marginLeft }}>
             <IconButton
-              name="angle-right"
+              name="angle-down"
               size={'xl'}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                alert('open folder');
+                alert('close folder');
               }}
             />
             {name}
