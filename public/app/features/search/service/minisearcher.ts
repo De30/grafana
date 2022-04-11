@@ -358,6 +358,23 @@ function buildFlatIndex(folderIDToIndex: Map<number, number>, folders: DataFrame
       urls.push(row.name);
       kind.push('dashboard');
       info.push('??');
+
+      if (i === 3) {
+        const path = row.uid + '/subsub' + i;
+        names.push('Subsub folder: ' + i);
+        paths.push(path);
+        urls.push(row.name);
+        kind.push('folder');
+        info.push('??');
+
+        for (let j = 0; j < 4; j++) {
+          names.push('sub child: ' + j);
+          paths.push(path + '/' + j);
+          urls.push(row.name);
+          kind.push('dashboard');
+          info.push('??');
+        }
+      }
     }
   });
 
