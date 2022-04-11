@@ -3,37 +3,39 @@ package store
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/grafana/grafana-plugin-sdk-go/data"
+	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 	"github.com/grafana/grafana/pkg/infra/filestorage"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
+
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 )
 
 var grafanaStorageLogger = log.New("grafanaStorageLogger")
 
 const RootPublicStatic = "public-static"
-const MAX_UPLOAD_SIZE = 1024 * 1024 // 1MB
+
+const MaxUploadSize = 1024 * 1024 // 1MB
+
 type StorageService interface {
 	registry.BackgroundService
 
-	// List folder contents
+	// List folder contents.
 	List(ctx context.Context, user *models.SignedInUser, path string) (*data.Frame, error)
 
-	// Read raw file contents out of the store
-	Read(ctx context.Context, user *models.SignedInUser, path string) (*filestorage.File, error)
+	// Read raw file contents out of the store.
+	Read(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error)
 
-	Upload(ctx context.Context, user *models.SignedInUser, form *multipart.Form) (*Response, error)
+	// Upload file.
+	Upload(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error)
 }
 
 type standardStorageService struct {
@@ -64,13 +66,21 @@ func ProvideService(sql *sqlstore.SQLStore, features featuremgmt.FeatureToggles,
 		}).setReadOnly(true).setBuiltin(true),
 	}
 
-	storage := filepath.Join(cfg.DataPath, "storage")
-	_ = os.MkdirAll(storage, 0700)
-
 	if features.IsEnabled(featuremgmt.FlagStorageLocalUpload) {
+		storage := filepath.Join(cfg.DataPath, "storage")
+		err := os.MkdirAll(storage, 0700)
+		if err != nil {
+			logger.Error("error", err)
+			os.Exit(1)
+		}
+
 		upload := filepath.Join(storage, "upload")
 		grafanaStorageLogger.Info("inside provide service", "flag", true)
-		_ = os.MkdirAll(upload, 0700)
+		err = os.MkdirAll(upload, 0700)
+		if err != nil {
+			logger.Error("error", err)
+			os.Exit(1)
+		}
 		roots = append(roots, newDiskStorage("upload", "Local file upload", &StorageLocalDiskConfig{
 			Path: upload,
 			Roots: []string{
@@ -103,64 +113,40 @@ func (s *standardStorageService) List(ctx context.Context, user *models.SignedIn
 	return s.tree.ListFolder(ctx, path)
 }
 
-func (s *standardStorageService) Read(ctx context.Context, user *models.SignedInUser, path string) (*filestorage.File, error) {
-	// TODO: permission check!
-	return s.tree.GetFile(ctx, path)
+func (s *standardStorageService) Read(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error) {
+	// TODO: permission check based on user and ctx.
+	fmt.Println(request.Ref.Grn)
+	file, err := s.tree.GetFile(ctx, request.Ref.Grn)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: check nil file.
+	return &pluginextensionv2.GetResponse{
+		Code: 0, // TODO: codes.
+		Object: &pluginextensionv2.Object{
+			Ref:         request.Ref,
+			ContentType: file.FileMetadata.MimeType,
+			Created:     file.FileMetadata.Created.Unix(),  // TODO: decide on time format.
+			Updated:     file.FileMetadata.Modified.Unix(), // TODO: decide on time format.
+			Body:        file.Contents,
+		},
+	}, nil
 }
 
-func (s *standardStorageService) Upload(ctx context.Context, user *models.SignedInUser, form *multipart.Form) (*Response, error) {
-	response := Response{
-		path:       "upload",
-		statusCode: 200,
-		message:    "Uploaded successfully",
-		err:        false,
+func (s *standardStorageService) Upload(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error) {
+	storage, path := s.tree.getRoot(request.Ref.Grn)
+	if storage == nil {
+		return nil, fmt.Errorf("storage not found")
 	}
-	upload, _ := s.tree.getRoot("upload")
-	if upload == nil {
-		return &response, fmt.Errorf("upload feature is not enabled")
+	// TODO: permissions check here based on ctx and user.
+	err := storage.Upsert(ctx, &filestorage.UpsertFileCommand{
+		Path:     path,
+		Contents: &request.Body,
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	files := form.File["file"]
-	for _, fileHeader := range files {
-		// Restrict the size of each uploaded file to 1MB.
-		if fileHeader.Size > MAX_UPLOAD_SIZE {
-			response.statusCode = 400
-			response.message = "The uploaded image is too big"
-			response.err = true
-			return &response, nil
-		}
-
-		// open each file to copy contents
-		file, err := fileHeader.Open()
-		if err != nil {
-			return nil, err
-		}
-		err = file.Close()
-		if err != nil {
-			return nil, err
-		}
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			return nil, err
-		}
-		filetype := http.DetectContentType(data)
-		// only allow images to be uploaded
-		if (filetype != "image/jpeg") && (filetype != "image/jpg") && (filetype != "image/gif") && (filetype != "image/png") && (filetype != "image/svg+xml") && (filetype != "image/webp") && !strings.HasSuffix(fileHeader.Filename, ".svg") {
-			return &Response{
-				statusCode: 400,
-				message:    "unsupported file type uploaded",
-				err:        true,
-			}, nil
-		}
-		err = upload.Upsert(ctx, &filestorage.UpsertFileCommand{
-			Path:     "/" + fileHeader.Filename,
-			Contents: &data,
-		})
-		if err != nil {
-			return nil, err
-		}
-		response.fileName = fileHeader.Filename
-		response.path = "upload/" + fileHeader.Filename
-	}
-	return &response, nil
+	return &pluginextensionv2.WriteResponse{
+		Code: 0, // TODO: codes.
+	}, nil
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/components/simplejson"
@@ -131,13 +133,18 @@ func (s *Service) doReadQuery(ctx context.Context, query backend.DataQuery) back
 	}
 
 	path := store.RootPublicStatic + "/" + q.Path
-	file, err := s.store.Read(ctx, nil, path)
+	file, err := s.store.Read(ctx, nil, &pluginextensionv2.GetRequest{
+		Ref: &pluginextensionv2.EntityReference{
+			Kind: "?",
+			Grn:  path,
+		},
+	})
 	if err != nil {
 		response.Error = err
 		return response
 	}
 
-	frame, err := testdatasource.LoadCsvContent(bytes.NewReader(file.Contents), filepath.Base(path))
+	frame, err := testdatasource.LoadCsvContent(bytes.NewReader(file.Object.Body), filepath.Base(path))
 	if err != nil {
 		response.Error = err
 		return response

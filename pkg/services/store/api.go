@@ -3,11 +3,14 @@ package store
 import (
 	"context"
 
+	"github.com/grafana/grafana/pkg/models"
+
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 )
 
 type API struct {
 	pluginextensionv2.UnimplementedStoreServer
+	store StorageService
 }
 
 func (api *API) ListStore(ctx context.Context, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error) {
@@ -16,13 +19,13 @@ func (api *API) ListStore(ctx context.Context, request *pluginextensionv2.ListRe
 }
 
 func (api *API) GetEntity(ctx context.Context, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	user := &models.SignedInUser{} // TODO: extract user.
+	return api.store.Read(ctx, user, request)
 }
 
 func (api *API) WriteEntity(ctx context.Context, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	user := &models.SignedInUser{} // TODO: extract user.
+	return api.store.Upload(ctx, user, request)
 }
 
 func (api *API) DeleteEntity(ctx context.Context, request *pluginextensionv2.DeleteRequest) (*pluginextensionv2.DeleteResponse, error) {
