@@ -67,25 +67,8 @@ export const generateColumns = (
   const LOCATION_COLUMN_WIDTH = 200;
   const TAGS_COLUMN_WIDTH = 200;
 
-  width = TYPE_COLUMN_WIDTH;
-  if (isDashboardList) {
-    columns.push({
-      Cell: DefaultCell,
-      id: `column-type`,
-      field: access.name!,
-      Header: 'Type',
-      accessor: (row: any, i: number) => {
-        return (
-          <div className={styles.typeText}>
-            <Icon name={'apps'} className={styles.typeIcon} />
-            Dashboard
-          </div>
-        );
-      },
-      width,
-    });
-    availableWidth -= width;
-  } else {
+  if (true) {
+    width = TYPE_COLUMN_WIDTH;
     columns.push(makeTypeColumn(access.kind, access.type, width, styles.typeText, styles.typeIcon));
     availableWidth -= width;
   }

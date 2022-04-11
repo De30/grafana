@@ -3,6 +3,7 @@ import {
   ArrayVector,
   DataFrame,
   DataFrameType,
+  DataFrameView,
   DataSourceRef,
   Field,
   FieldType,
@@ -47,27 +48,9 @@ export class MiniSearcher implements GrafanaSearcher {
   lookup = new Map<SearchResultKind, InputDoc>();
   data: RawIndexData = {};
   index?: MiniSearch<InputDoc>;
-  stubFolderData: any;
+  flat?: DataFrame; // should come from raw query!
 
-  constructor(private supplier: rawIndexSupplier = getRawIndexData) {
-    // waits for first request to load data
-    this.stubFolderData = toDataFrame({
-      fields: [
-        { name: 'name', type: FieldType.string, values: ['Folder', 'File A', 'File B'], config: {} },
-        { name: 'path', type: FieldType.string, values: ['root', 'root/FileA', 'root/FileB'], config: {} },
-        { name: 'url', type: FieldType.string, values: ['root', 'root/FileA', 'root/FileB'], config: {} },
-        { name: 'kind', type: FieldType.string, values: ['folder', 'dashboard', 'dashboard'], config: {} },
-        { name: 'info', type: FieldType.string, values: ['a', 'b', 'c'], config: {} },
-      ],
-      meta: {
-        type: DataFrameType.DirectoryListing,
-      },
-    });
-
-    for (const field of this.stubFolderData.fields) {
-      field.display = getDisplayProcessor({ field, theme: config.theme2 });
-    }
-  }
+  constructor(private supplier: rawIndexSupplier = getRawIndexData) {}
 
   private async initIndex() {
     const data = await this.supplier();
@@ -181,6 +164,7 @@ export class MiniSearcher implements GrafanaSearcher {
     this.index = searcher;
     this.data = data;
     this.lookup = lookup;
+    this.flat = buildFlatIndex(folderIDToIndex, data.folder!, data.dashboard!);
   }
 
   async search(query: string, filter?: QueryFilters): Promise<QueryResponse> {
@@ -190,9 +174,9 @@ export class MiniSearcher implements GrafanaSearcher {
 
     // empty query can return everything
     if (!query && this.data.dashboard) {
-      if (!filter) {
+      if (!filter && this.flat) {
         return {
-          body: this.stubFolderData,
+          body: this.flat, // for now
         };
       }
 
@@ -345,4 +329,54 @@ function getInputDoc(kind: SearchResultKind, frame: DataFrame): InputDoc {
     }
   }
   return input;
+}
+
+interface FolderFrame {
+  uid: string;
+  name: string;
+}
+
+function buildFlatIndex(folderIDToIndex: Map<number, number>, folders: DataFrame, dashboards: DataFrame): DataFrame {
+  const names: string[] = [];
+  const paths: string[] = [];
+  const urls: string[] = [];
+  const kind: string[] = [];
+  const info: string[] = [];
+
+  const folderView = new DataFrameView<FolderFrame>(folders);
+
+  folderView.forEach((row) => {
+    names.push(row.name);
+    paths.push(row.uid);
+    urls.push(row.name);
+    kind.push('folder');
+    info.push('??');
+
+    for (let i = 0; i < 10; i++) {
+      names.push('Child: ' + i);
+      paths.push(row.uid + '/sub' + i);
+      urls.push(row.name);
+      kind.push('dashboard');
+      info.push('??');
+    }
+  });
+
+  const flat = toDataFrame({
+    fields: [
+      { name: 'name', type: FieldType.string, values: names, config: {} },
+      { name: 'path', type: FieldType.string, values: paths, config: {} },
+      { name: 'url', type: FieldType.string, values: urls, config: {} },
+      { name: 'kind', type: FieldType.string, values: kind, config: {} },
+      { name: 'info', type: FieldType.string, values: info, config: {} },
+    ],
+    meta: {
+      type: DataFrameType.DirectoryListing,
+    },
+  });
+
+  for (const field of flat.fields) {
+    field.display = getDisplayProcessor({ field, theme: config.theme2 });
+  }
+
+  return flat;
 }
