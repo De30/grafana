@@ -1,0 +1,171 @@
+syntax = "proto3";
+package pluginextensionv2;
+
+option go_package = "./;pluginextensionv2";
+
+message EntityReference {
+  string kind = 1; // dashboard | alert | datasource | panel (library) | ...
+  string grn = 2; // includes folder pattern -- may include git branch info
+}
+
+//-----------------------------------------------
+// GET
+//-----------------------------------------------
+
+message GetRequest {
+  EntityReference ref = 2;
+}
+
+message Object {
+  EntityReference ref = 1;
+
+  //  string name = 4;
+  //  string description = 5;
+  //  string schemaVersion = 6; // [scumata version?]
+  //  repeated string tags = 7;
+  //
+  //  // ??? linked essential entities?
+  //  // what about variable datasources?
+  //  // library panels?
+  //  repeated EntityReference references = 8;
+
+  // lineage
+  int64 created = 9;
+  int64 updated = 10;
+  //  repeated string author = 11; // everyone who touched it?
+
+  // ????? current secureJSON???
+  //  map<string,string> decryptedSecureProps = 11;
+
+  string contentType = 12; // json | csv | image/png | ...
+  bytes body = 16;
+}
+
+message GetResponse {
+  int32 code = 1;
+  Object object = 2;
+}
+
+//-----------------------------------------------
+// Write
+//-----------------------------------------------
+
+message WriteRequest {
+//  PluginContext pluginContext = 1;
+  EntityReference ref = 2;
+//  string name = 4;
+//  string description = 5;
+//  string schemaVersion = 7; // [scumata version?]
+//  repeated string tags = 6;
+
+  string contentType = 7; // json | csv | image/png | ...
+  bytes body = 8;
+}
+
+message WriteResponse {
+  int32 code = 1;
+}
+
+//-----------------------------------------------
+// DELETE
+//-----------------------------------------------
+
+message DeleteRequest {
+//  PluginContext pluginContext = 1;
+  EntityReference ref = 2;
+}
+
+message DeleteResponse {
+  int32 code = 1;
+}
+
+//-----------------------------------------------
+// WATCH
+//-----------------------------------------------
+
+message WatchRequest {
+//  PluginContext pluginContext = 1;
+  string kind_filter = 2; // filter to a specific kind of entity (ie, only dashboards).
+  string grn_filter = 3; // the entity ID or folder prefix
+  bool recursive = 4; // when true, all changes to this + any substrings will be sent to the caller
+  bool details = 5;
+}
+
+message WatchResponse {
+  int64 timestamp = 1;
+  EntityReference ref = 2;
+  string action = 3; // CREATE + UPDATE + DELETE, TODO: enum.
+  // when details = true, send the whole object.
+  Object object = 4;
+}
+
+//-----------------------------------------------
+// LIST
+//-----------------------------------------------
+
+message ListRequest {
+  string kind_filter = 2; // filter to a specific kind of entity (ie, only dashboards).
+  string grn_filter = 3; // the entity ID or folder prefix
+  bool recursive = 4; // when true, all changes to this + any substrings will be sent to the caller
+  bool details = 5;
+  uint32 limit = 6;
+  string after_grn = 7;
+  string before_grn = 8;
+}
+
+message ListResponse {
+  repeated Object objects = 2;
+}
+
+//-----------------------------------------------
+// Service
+//-----------------------------------------------
+
+service Store {
+  rpc ListStore(ListRequest) returns (ListResponse);
+  rpc GetEntity(GetRequest) returns (GetResponse);
+  rpc WriteEntity(WriteRequest) returns (WriteResponse);
+  rpc DeleteEntity(DeleteRequest) returns (DeleteResponse);
+  rpc WatchStore(WatchRequest) returns (stream WatchResponse);
+}
+
+//// NOTE: list and search will be handled by another service!
+//// This is JUST for getting the images once you know where they are
+//
+//message SearchObject {
+//  EntityReference ref = 1;
+//
+//  // lineage
+//  int64 created = 9;
+//  int64 updated = 10;
+//  //  repeated string author = 11; // everyone who touched it?
+//
+//  // ????? current secureJSON???
+//  //  map<string,string> decryptedSecureProps = 11;
+//
+//  // The raw values
+//  string contentType = 12; // json | csv | image/png | ..
+//
+//  bytes listMetadata = 13;
+//}
+//
+//message SearchRequest {
+//  string kind = 2; // filter to a specific kind of entity (ie, only dashboards). TODO: do we need multiple kinds?
+//  string grn_filter = 3; // the entity ID or folder prefix
+//  bool recursive = 4; // when true, all changes to this + any substrings will be sent to the caller
+//  bool include_content = 5;
+//  uint32 limit = 6;
+//  string after_grn = 7;
+//}
+//
+//message SearchResponse {
+//  // Or create separate object type?
+//  repeated Object objects = 2;
+//}
+//
+//service Search {
+//  rpc SearchEntities(SearchRequest) returns (SearchResponse);
+//  // TODO: Do we need different types of search requests, like for example to return
+//  // a single number (how many dashboards are available to me).
+//  // Are complex operations like various aggregations are possible to achieve in generic way?
+//}
