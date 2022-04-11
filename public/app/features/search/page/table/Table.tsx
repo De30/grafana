@@ -28,6 +28,7 @@ export interface FieldAccess {
   description: string;
   url: string; // link to value (unique)
   type: string; // graph
+  path?: string; // file path
   tags: string[];
   location: LocationInfo[]; // the folder name
   score: number;
@@ -224,6 +225,14 @@ const getStyles = (theme: GrafanaTheme2) => {
     tagList: css`
       justify-content: flex-start;
       flex-wrap: nowrap;
+    `,
+    folderNameContainer: css`
+      display: flex;
+      align-items: center;
+
+      button {
+        margin-right: 10px;
+      }
     `,
   };
 };
