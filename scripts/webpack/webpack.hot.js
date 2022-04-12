@@ -76,7 +76,7 @@ module.exports = merge(common, {
 
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'grafana.[name].[fullhash].css',
+      filename: 'grafana.[name].[contenthash].css',
     }),
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, '../../public/views/index.html'),
