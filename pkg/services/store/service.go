@@ -23,14 +23,10 @@ const RootPublicStatic = "public-static"
 
 const MaxUploadSize = 1024 * 1024 // 1MB
 
-type StorageMetaGetter interface {
-	Meta() RootStorageMeta
-}
-
 type StorageService interface {
 	registry.BackgroundService
 
-	Storages(ctx context.Context, user *models.SignedInUser) ([]StorageMetaGetter, error)
+	Storages(ctx context.Context, user *models.SignedInUser) ([]RootStorageMeta, error)
 
 	// List contents.
 	List(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error)
@@ -115,13 +111,13 @@ func (s *standardStorageService) Run(ctx context.Context) error {
 	return nil
 }
 
-func (s *standardStorageService) Storages(ctx context.Context, user *models.SignedInUser) ([]StorageMetaGetter, error) {
+func (s *standardStorageService) Storages(ctx context.Context, user *models.SignedInUser) ([]RootStorageMeta, error) {
 	// TODO: permission check based on user and ctx.
-	var storageMetaGetters []StorageMetaGetter
+	var result []RootStorageMeta
 	for _, r := range s.tree.roots {
-		storageMetaGetters = append(storageMetaGetters, r)
+		result = append(result, r.Meta())
 	}
-	return storageMetaGetters, nil
+	return result, nil
 }
 
 func (s *standardStorageService) List(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error) {

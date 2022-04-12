@@ -146,21 +146,21 @@ func (s *httpStorage) Delete(c *models.ReqContext) response.Response {
 }
 
 func (s *httpStorage) Storages(c *models.ReqContext) response.Response {
-	roots, err := s.store.Storages(c.Req.Context(), c.SignedInUser)
+	rootsMeta, err := s.store.Storages(c.Req.Context(), c.SignedInUser)
 	if err != nil {
 		return response.Error(400, "error reading path", err)
 	}
 
-	count := len(roots)
+	count := len(rootsMeta)
 	title := data.NewFieldFromFieldType(data.FieldTypeString, count)
 	names := data.NewFieldFromFieldType(data.FieldTypeString, count)
 	mtype := data.NewFieldFromFieldType(data.FieldTypeString, count)
 	title.Name = "title"
 	names.Name = "name"
 	mtype.Name = "mediaType"
-	for i, f := range roots {
-		names.Set(i, f.Meta().Config.Prefix)
-		title.Set(i, f.Meta().Config.Name)
+	for i, meta := range rootsMeta {
+		names.Set(i, meta.Config.Prefix)
+		title.Set(i, meta.Config.Name)
 		mtype.Set(i, "directory")
 	}
 	frame := data.NewFrame("", names, title, mtype)
