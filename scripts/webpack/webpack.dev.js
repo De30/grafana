@@ -8,6 +8,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HTMLWebpackCSSChunks = require('./plugins/HTMLWebpackCSSChunks');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = (env = {}) =>
@@ -50,7 +51,6 @@ module.exports = (env = {}) =>
     // https://webpack.js.org/guides/build-performance/#output-without-path-info
     output: {
       pathinfo: false,
-      filename: '[name].js',
     },
 
     // https://webpack.js.org/guides/build-performance/#avoid-extra-optimization-steps
@@ -103,11 +103,11 @@ module.exports = (env = {}) =>
       new HtmlWebpackPlugin({
         filename: path.resolve(__dirname, '../../public/views/index.html'),
         template: path.resolve(__dirname, '../../public/views/index-template.html'),
-        hash: true,
         inject: false,
         chunksSortMode: 'none',
         excludeChunks: ['dark', 'light'],
       }),
+      new HTMLWebpackCSSChunks(),
       new DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify('development'),

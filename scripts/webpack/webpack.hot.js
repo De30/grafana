@@ -7,6 +7,7 @@ const { DefinePlugin } = require('webpack');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HTMLWebpackCSSChunks = require('./plugins/HTMLWebpackCSSChunks');
 
 module.exports = merge(common, {
   devtool: 'inline-source-map',
@@ -81,11 +82,11 @@ module.exports = merge(common, {
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, '../../public/views/index.html'),
       template: path.resolve(__dirname, '../../public/views/index-template.html'),
-      hash: true,
       inject: false,
       chunksSortMode: 'none',
       excludeChunks: ['dark', 'light'],
     }),
+    new HTMLWebpackCSSChunks(),
     new ReactRefreshWebpackPlugin(),
     new DefinePlugin({
       'process.env': {

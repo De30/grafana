@@ -7,6 +7,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const HTMLWebpackCSSChunks = require('./plugins/HTMLWebpackCSSChunks');
 
 module.exports = (env = {}) =>
   merge(common, {
@@ -78,6 +79,7 @@ module.exports = (env = {}) =>
         excludeChunks: ['manifest', 'dark', 'light'],
         chunksSortMode: 'none',
       }),
+      new HTMLWebpackCSSChunks(),
       function () {
         this.hooks.done.tap('Done', function (stats) {
           if (stats.compilation.errors && stats.compilation.errors.length) {
