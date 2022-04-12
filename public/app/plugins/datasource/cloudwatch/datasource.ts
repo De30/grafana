@@ -102,13 +102,13 @@ export class CloudWatchDatasource
 
   // This will support annotation queries for 7.2+
   annotations = {
-    prepareAnnotation: (json: any) => {
-      if (!json.target) {
-        return json;
-      }
-      console.log({ json });
-      return json;
-    },
+    // prepareAnnotation: (json: any) => {
+    //   console.log({ json });
+    //   if (!json.target) {
+    //     return json;
+    //   }
+    //   return json;
+    // },
 
     QueryEditor: AnnotationQueryEditor,
   };
