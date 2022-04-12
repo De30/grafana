@@ -2,7 +2,7 @@ import React from 'react';
 import { DataFrameView, DataSourceRef, Field } from '@grafana/data';
 import { config, getDataSourceSrv } from '@grafana/runtime';
 import SVG from 'react-inlinesvg';
-import { Checkbox, Icon, IconName, TagList } from '@grafana/ui';
+import { Checkbox, Icon, IconButton, IconName, TagList } from '@grafana/ui';
 import { DefaultCell } from '@grafana/ui/src/components/Table/DefaultCell';
 
 import { FieldAccess, TableColumn } from './Table';
@@ -55,7 +55,29 @@ export const generateColumns = (
     Header: 'Name',
     accessor: (row: any, i: number) => {
       const name = access.name!.values.get(i);
-      return name;
+      const path = access.path!.values.get(i);
+      const matches = path ? [...path.matchAll(new RegExp('/', 'g'))] : [];
+      const depth = matches.length;
+      const marginLeft = depth * 35;
+
+      if (access.kind!.values.get(i) === 'folder') {
+        return (
+          <div className={styles.folderNameContainer} style={{ marginLeft }}>
+            <IconButton
+              name="angle-down"
+              size={'xl'}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('close folder');
+              }}
+            />
+            {name}
+          </div>
+        );
+      }
+
+      return <div style={{ marginLeft }}>{name}</div>;
     },
     width,
   });
