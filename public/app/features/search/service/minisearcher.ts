@@ -375,6 +375,15 @@ function buildFlatIndex(folderIDToIndex: Map<number, number>, folders: DataFrame
           info.push('??');
         }
       }
+
+      if (i === 6) {
+        const path = row.uid + '/closed' + i;
+        names.push('Closed folder: ' + i);
+        paths.push(path);
+        urls.push(row.name);
+        kind.push('folder');
+        info.push('??');
+      }
     }
   });
 
