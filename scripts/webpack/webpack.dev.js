@@ -55,6 +55,7 @@ module.exports = (env = {}) =>
 
     // https://webpack.js.org/guides/build-performance/#avoid-extra-optimization-steps
     optimization: {
+      moduleIds: 'named',
       runtimeChunk: true,
       removeAvailableModules: false,
       removeEmptyChunks: false,
