@@ -19,7 +19,7 @@ message GetRequest {
 message Object {
   EntityReference ref = 1;
 
-  //  string name = 4;
+  string name = 4;
   //  string description = 5;
   //  string schemaVersion = 6; // [scumata version?]
   //  repeated string tags = 7;
@@ -38,6 +38,7 @@ message Object {
   //  map<string,string> decryptedSecureProps = 11;
 
   string contentType = 12; // json | csv | image/png | ...
+  int64 size = 13;
   bytes body = 16;
 }
 
@@ -115,6 +116,7 @@ message ListRequest {
 
 message ListResponse {
   repeated Object objects = 2;
+  bool has_more = 3;
 }
 
 //-----------------------------------------------

@@ -61,7 +61,7 @@ func TestUpload(t *testing.T) {
 		Value: map[string][]string{},
 		File:  map[string][]*multipart.FileHeader{},
 	}
-	res, err := s.Upload(context.Background(), nil, testForm)
+	res, err := s.Write(context.Background(), nil, testForm)
 	require.NoError(t, err)
 	assert.Equal(t, res.statusCode, 200)
 }

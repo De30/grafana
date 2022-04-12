@@ -2,21 +2,24 @@ package store
 
 import (
 	"context"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
 	"strings"
 
-	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/web"
 )
 
 // HTTPStorageService passes raw HTTP requests to a well typed storage service
 type HTTPStorageService interface {
+	Storages(c *models.ReqContext) response.Response
 	List(c *models.ReqContext) response.Response
 	Read(c *models.ReqContext) response.Response
 	Delete(c *models.ReqContext) response.Response
@@ -61,12 +64,11 @@ func (s *httpStorage) upload(ctx context.Context, user *models.SignedInUser, for
 			return nil, err
 		}
 
-		// TODO: use https://pkg.go.dev/io#LimitedReader ?
-		data, err := ioutil.ReadAll(file)
+		fileData, err := ioutil.ReadAll(io.LimitReader(file, MaxUploadSize))
 		if err != nil {
 			return nil, err
 		}
-		filetype := http.DetectContentType(data)
+		filetype := http.DetectContentType(fileData)
 		// only allow images to be uploaded
 		if (filetype != "image/jpeg") && (filetype != "image/jpg") && (filetype != "image/gif") && (filetype != "image/png") && (filetype != "image/svg+xml") && (filetype != "image/webp") && !strings.HasSuffix(fileHeader.Filename, ".svg") {
 			return &Response{
@@ -76,13 +78,13 @@ func (s *httpStorage) upload(ctx context.Context, user *models.SignedInUser, for
 			}, nil
 		}
 		grn := filepath.Join("upload", fileHeader.Filename)
-		_, err = s.store.Upload(ctx, user, &pluginextensionv2.WriteRequest{
+		_, err = s.store.Write(ctx, user, &pluginextensionv2.WriteRequest{
 			Ref: &pluginextensionv2.EntityReference{
-				Kind: "image",
+				Kind: "image", // TODO: which kind?
 				Grn:  grn,
 			},
 			ContentType: filetype,
-			Body:        data,
+			Body:        fileData,
 		})
 		if err != nil {
 			return nil, err
@@ -143,13 +145,68 @@ func (s *httpStorage) Delete(c *models.ReqContext) response.Response {
 	})
 }
 
-func (s *httpStorage) List(c *models.ReqContext) response.Response {
-	params := web.Params(c.Req)
-	path := params["*"]
-	frame, err := s.store.List(c.Req.Context(), c.SignedInUser, path)
+func (s *httpStorage) Storages(c *models.ReqContext) response.Response {
+	roots, err := s.store.Storages(c.Req.Context(), c.SignedInUser)
 	if err != nil {
 		return response.Error(400, "error reading path", err)
 	}
+
+	count := len(roots)
+	title := data.NewFieldFromFieldType(data.FieldTypeString, count)
+	names := data.NewFieldFromFieldType(data.FieldTypeString, count)
+	mtype := data.NewFieldFromFieldType(data.FieldTypeString, count)
+	title.Name = "title"
+	names.Name = "name"
+	mtype.Name = "mediaType"
+	for i, f := range roots {
+		names.Set(i, f.Meta().Config.Prefix)
+		title.Set(i, f.Meta().Config.Name)
+		mtype.Set(i, "directory")
+	}
+	frame := data.NewFrame("", names, title, mtype)
+	frame.SetMeta(&data.FrameMeta{
+		Type: data.FrameTypeDirectoryListing,
+	})
+
+	if frame == nil {
+		return response.Error(404, "not found", nil)
+	}
+	return response.JSONStreaming(200, frame)
+}
+
+func (s *httpStorage) List(c *models.ReqContext) response.Response {
+	params := web.Params(c.Req)
+	path := params["*"]
+	listResponse, err := s.store.List(c.Req.Context(), c.SignedInUser, &pluginextensionv2.ListRequest{
+		GrnFilter: path,
+	})
+	if err != nil {
+		return response.Error(400, "error reading path", err)
+	}
+
+	count := len(listResponse.Objects)
+	names := data.NewFieldFromFieldType(data.FieldTypeString, count)
+	mtype := data.NewFieldFromFieldType(data.FieldTypeString, count)
+	fsize := data.NewFieldFromFieldType(data.FieldTypeInt64, count)
+	names.Name = "name"
+	mtype.Name = "mediaType"
+	fsize.Name = "size"
+	fsize.Config = &data.FieldConfig{
+		Unit: "bytes",
+	}
+	for i, f := range listResponse.Objects {
+		names.Set(i, f.Name)
+		mtype.Set(i, f.ContentType)
+		fsize.Set(i, f.Size)
+	}
+	frame := data.NewFrame("", names, mtype, fsize)
+	frame.SetMeta(&data.FrameMeta{
+		Type: data.FrameTypeDirectoryListing,
+		Custom: map[string]interface{}{
+			"HasMore": listResponse.HasMore,
+		},
+	})
+
 	if frame == nil {
 		return response.Error(404, "not found", nil)
 	}

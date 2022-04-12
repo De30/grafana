@@ -213,7 +213,7 @@ func (hs *HTTPServer) registerRoutes() {
 
 		if hs.Features.IsEnabled(featuremgmt.FlagStorage) {
 			apiRoute.Group("/storage", func(orgRoute routing.RouteRegister) {
-				orgRoute.Get("/list/", routing.Wrap(hs.StorageService.List))
+				orgRoute.Get("/storages/", routing.Wrap(hs.StorageService.Storages))
 				orgRoute.Get("/list/*", routing.Wrap(hs.StorageService.List))
 				orgRoute.Get("/read/*", routing.Wrap(hs.StorageService.Read))
 

@@ -8,14 +8,16 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 )
 
+// API is not used yet – but we added it to make sure interface we are creating
+// will be nice to work with from the outside of Grafana.
 type API struct {
 	pluginextensionv2.UnimplementedStoreServer
 	store StorageService
 }
 
 func (api *API) ListStore(ctx context.Context, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	user := &models.SignedInUser{} // TODO: extract user.
+	return api.store.List(ctx, user, request)
 }
 
 func (api *API) GetEntity(ctx context.Context, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error) {
@@ -25,12 +27,12 @@ func (api *API) GetEntity(ctx context.Context, request *pluginextensionv2.GetReq
 
 func (api *API) WriteEntity(ctx context.Context, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error) {
 	user := &models.SignedInUser{} // TODO: extract user.
-	return api.store.Upload(ctx, user, request)
+	return api.store.Write(ctx, user, request)
 }
 
 func (api *API) DeleteEntity(ctx context.Context, request *pluginextensionv2.DeleteRequest) (*pluginextensionv2.DeleteResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	user := &models.SignedInUser{} // TODO: extract user.
+	return api.store.Delete(ctx, user, request)
 }
 
 // WatchStore ...

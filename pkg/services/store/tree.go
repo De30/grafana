@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 
-	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/infra/filestorage"
 )
 
@@ -24,10 +23,6 @@ func (t *nestedTree) init() {
 }
 
 func (t *nestedTree) getRoot(path string) (filestorage.FileStorage, string) {
-	if path == "" {
-		return nil, ""
-	}
-
 	rootKey, path := splitFirstSegment(path)
 	root, ok := t.lookup[rootKey]
 	if !ok || root == nil {
@@ -40,7 +35,6 @@ func (t *nestedTree) GetFile(ctx context.Context, path string) (*filestorage.Fil
 	if path == "" {
 		return nil, nil // not found
 	}
-
 	root, path := t.getRoot(path)
 	if root == nil {
 		return nil, nil // not found (or not ready)
@@ -48,59 +42,25 @@ func (t *nestedTree) GetFile(ctx context.Context, path string) (*filestorage.Fil
 	return root.Get(ctx, path)
 }
 
-func (t *nestedTree) ListFolder(ctx context.Context, path string) (*data.Frame, error) {
-	if path == "" || path == "/" {
-		count := len(t.roots)
-		title := data.NewFieldFromFieldType(data.FieldTypeString, count)
-		names := data.NewFieldFromFieldType(data.FieldTypeString, count)
-		mtype := data.NewFieldFromFieldType(data.FieldTypeString, count)
-		title.Name = "title"
-		names.Name = "name"
-		mtype.Name = "mediaType"
-		for i, f := range t.roots {
-			names.Set(i, f.Meta().Config.Prefix)
-			title.Set(i, f.Meta().Config.Name)
-			mtype.Set(i, "directory")
-		}
-		frame := data.NewFrame("", names, title, mtype)
-		frame.SetMeta(&data.FrameMeta{
-			Type: data.FrameTypeDirectoryListing,
-		})
-		return frame, nil
+func (t *nestedTree) ListFolder(ctx context.Context, path string) (*filestorage.ListResponse, error) {
+	if path == "" {
+		return nil, nil // not found
 	}
-
 	root, path := t.getRoot(path)
 	if root == nil {
 		return nil, nil // not found (or not ready)
 	}
+	return root.List(ctx, path, nil, &filestorage.ListOptions{Recursive: false, WithFolders: true, WithFiles: true})
+}
 
-	listResponse, err := root.List(ctx, path, nil, &filestorage.ListOptions{Recursive: false, WithFolders: true, WithFiles: true})
-
-	if err != nil {
-		return nil, err
+func (t *nestedTree) Delete(ctx context.Context, path string) error {
+	if path == "" {
+		return nil // nothing to delete
 	}
-
-	count := len(listResponse.Files)
-	names := data.NewFieldFromFieldType(data.FieldTypeString, count)
-	mtype := data.NewFieldFromFieldType(data.FieldTypeString, count)
-	fsize := data.NewFieldFromFieldType(data.FieldTypeInt64, count)
-	names.Name = "name"
-	mtype.Name = "mediaType"
-	fsize.Name = "size"
-	fsize.Config = &data.FieldConfig{
-		Unit: "bytes",
+	root, path := t.getRoot(path)
+	if root == nil {
+		return nil // nothing to delete
 	}
-	for i, f := range listResponse.Files {
-		names.Set(i, f.Name)
-		mtype.Set(i, f.MimeType)
-		fsize.Set(i, f.Size)
-	}
-	frame := data.NewFrame("", names, mtype, fsize)
-	frame.SetMeta(&data.FrameMeta{
-		Type: data.FrameTypeDirectoryListing,
-		Custom: map[string]interface{}{
-			"HasMore": listResponse.HasMore,
-		},
-	})
-	return frame, nil
+	// TODO: there is also DeleteFolder method, should we somehow distinguish?
+	return root.Delete(ctx, path)
 }

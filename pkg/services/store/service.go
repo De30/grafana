@@ -15,8 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
-
-	"github.com/grafana/grafana-plugin-sdk-go/data"
 )
 
 var grafanaStorageLogger = log.New("grafanaStorageLogger")
@@ -25,17 +23,26 @@ const RootPublicStatic = "public-static"
 
 const MaxUploadSize = 1024 * 1024 // 1MB
 
+type StorageMetaGetter interface {
+	Meta() RootStorageMeta
+}
+
 type StorageService interface {
 	registry.BackgroundService
 
-	// List folder contents.
-	List(ctx context.Context, user *models.SignedInUser, path string) (*data.Frame, error)
+	Storages(ctx context.Context, user *models.SignedInUser) ([]StorageMetaGetter, error)
 
-	// Read raw file contents out of the store.
+	// List contents.
+	List(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error)
+
+	// Read raw entity contents out of the store.
 	Read(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error)
 
-	// Upload file.
-	Upload(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error)
+	// Write entity.
+	Write(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error)
+
+	// Delete entity.
+	Delete(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.DeleteRequest) (*pluginextensionv2.DeleteResponse, error)
 }
 
 type standardStorageService struct {
@@ -108,14 +115,47 @@ func (s *standardStorageService) Run(ctx context.Context) error {
 	return nil
 }
 
-func (s *standardStorageService) List(ctx context.Context, user *models.SignedInUser, path string) (*data.Frame, error) {
-	// apply access control here
-	return s.tree.ListFolder(ctx, path)
+func (s *standardStorageService) Storages(ctx context.Context, user *models.SignedInUser) ([]StorageMetaGetter, error) {
+	// TODO: permission check based on user and ctx.
+	var storageMetaGetters []StorageMetaGetter
+	for _, r := range s.tree.roots {
+		storageMetaGetters = append(storageMetaGetters, r)
+	}
+	return storageMetaGetters, nil
+}
+
+func (s *standardStorageService) List(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.ListRequest) (*pluginextensionv2.ListResponse, error) {
+	// TODO: permission check based on user and ctx.
+	listResponse, err := s.tree.ListFolder(ctx, request.GrnFilter)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: handle nil listResponse.
+
+	var objects []*pluginextensionv2.Object
+
+	for _, f := range listResponse.Files {
+		objects = append(objects, &pluginextensionv2.Object{
+			Ref: &pluginextensionv2.EntityReference{
+				Kind: "file",     // TODO: don't actually have kind here.
+				Grn:  f.FullPath, // TODO: construct GRN from full path
+			},
+			Name:        f.Name,
+			Created:     f.FileMetadata.Created.Unix(),
+			Updated:     f.FileMetadata.Modified.Unix(),
+			ContentType: f.MimeType,
+			Size:        f.Size,
+		})
+	}
+
+	return &pluginextensionv2.ListResponse{
+		Objects: objects,
+		HasMore: listResponse.HasMore,
+	}, nil
 }
 
 func (s *standardStorageService) Read(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.GetRequest) (*pluginextensionv2.GetResponse, error) {
 	// TODO: permission check based on user and ctx.
-	fmt.Println(request.Ref.Grn)
 	file, err := s.tree.GetFile(ctx, request.Ref.Grn)
 	if err != nil {
 		return nil, err
@@ -125,15 +165,17 @@ func (s *standardStorageService) Read(ctx context.Context, user *models.SignedIn
 		Code: 0, // TODO: codes.
 		Object: &pluginextensionv2.Object{
 			Ref:         request.Ref,
+			Name:        file.Name,
 			ContentType: file.FileMetadata.MimeType,
 			Created:     file.FileMetadata.Created.Unix(),  // TODO: decide on time format.
 			Updated:     file.FileMetadata.Modified.Unix(), // TODO: decide on time format.
+			Size:        file.Size,
 			Body:        file.Contents,
 		},
 	}, nil
 }
 
-func (s *standardStorageService) Upload(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error) {
+func (s *standardStorageService) Write(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.WriteRequest) (*pluginextensionv2.WriteResponse, error) {
 	storage, path := s.tree.getRoot(request.Ref.Grn)
 	if storage == nil {
 		return nil, fmt.Errorf("storage not found")
@@ -147,6 +189,18 @@ func (s *standardStorageService) Upload(ctx context.Context, user *models.Signed
 		return nil, err
 	}
 	return &pluginextensionv2.WriteResponse{
+		Code: 0, // TODO: codes.
+	}, nil
+}
+
+func (s *standardStorageService) Delete(ctx context.Context, user *models.SignedInUser, request *pluginextensionv2.DeleteRequest) (*pluginextensionv2.DeleteResponse, error) {
+	// TODO: permission check based on user and ctx.
+	err := s.tree.Delete(ctx, request.Ref.Grn)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: check nil file.
+	return &pluginextensionv2.DeleteResponse{
 		Code: 0, // TODO: codes.
 	}, nil
 }
