@@ -27,6 +27,8 @@ export interface DataRequestInfo extends Partial<DashboardInfo> {
   duration: number;
   error?: string;
   dataSize?: number;
+  queryCount?: number;
+  cachedQueryCount?: number;
 }
 
 /**

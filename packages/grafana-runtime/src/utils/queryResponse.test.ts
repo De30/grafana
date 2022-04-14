@@ -298,6 +298,14 @@ describe('Query Response parser', () => {
       };
     });
 
+    test('adds number of queries to response', () => {
+      const queries: DataQuery[] = [{ refId: 'A' }];
+      resp.headers.set('X-Cache', 'HIT');
+      let dtResp = toDataQueryResponse(resp, queries);
+      console.log(dtResp.data[0]);
+      expect(dtResp.data[0].meta.isCachedResponse).toEqual(true);
+    });
+
     test('adds notice for responses with X-Cache: HIT header', () => {
       const queries: DataQuery[] = [{ refId: 'A' }];
       resp.headers.set('X-Cache', 'HIT');

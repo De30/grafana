@@ -1,5 +1,5 @@
 import { getDashboardSrv } from '../../dashboard/services/DashboardSrv';
-import { PanelData, LoadingState, DataSourceApi, CoreApp, urlUtil } from '@grafana/data';
+import { PanelData, LoadingState, DataSourceApi, CoreApp, urlUtil, DataFrame } from '@grafana/data';
 import { reportMetaAnalytics, MetaAnalyticsEventName, DataRequestEventPayload } from '@grafana/runtime';
 
 export function emitDataRequestEvent(datasource: DataSourceApi) {
@@ -19,6 +19,8 @@ export function emitDataRequestEvent(datasource: DataSourceApi) {
       return;
     }
 
+    const { queryCount, cachedQueryCount } = countCachedQueries(data.series);
+
     const eventData: DataRequestEventPayload = {
       eventName: MetaAnalyticsEventName.DataRequest,
       datasourceName: datasource.name,
@@ -28,6 +30,8 @@ export function emitDataRequestEvent(datasource: DataSourceApi) {
       dashboardId: data.request.dashboardId,
       dataSize: 0,
       duration: data.request.endTime! - data.request.startTime,
+      queryCount,
+      cachedQueryCount,
     };
 
     // enrich with dashboard info
@@ -54,4 +58,22 @@ export function emitDataRequestEvent(datasource: DataSourceApi) {
     // there are multiple responses with done state
     done = true;
   };
+}
+
+export function countCachedQueries(series: DataFrame[]): { queryCount: number; cachedQueryCount: number } {
+  // get unique count of all refId's
+  let queries = new Map();
+
+  series.forEach((frame: DataFrame) => {
+    queries.set(frame.refId, frame.meta?.isCachedResponse ?? false);
+  });
+
+  let cachedQueryCount = 0;
+  queries.forEach((isCached) => {
+    if (isCached) {
+      cachedQueryCount += 1;
+    }
+  });
+
+  return { queryCount: queries.size, cachedQueryCount };
 }

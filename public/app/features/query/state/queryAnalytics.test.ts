@@ -1,6 +1,6 @@
 import { MetaAnalyticsEventName, reportMetaAnalytics } from '@grafana/runtime';
-import { CoreApp, DataQueryRequest, DataSourceApi, dateTime, LoadingState, PanelData } from '@grafana/data';
-import { emitDataRequestEvent } from './queryAnalytics';
+import { CoreApp, DataQueryRequest, DataSourceApi, DataFrame, dateTime, LoadingState, PanelData } from '@grafana/data';
+import { emitDataRequestEvent, countCachedQueries } from './queryAnalytics';
 import { DashboardModel } from '../../dashboard/state/DashboardModel';
 
 beforeEach(() => {
@@ -60,6 +60,37 @@ function getTestData(requestApp: string): PanelData {
   };
 }
 
+function getDataFrame(isCachedResponse = false, refId: string): DataFrame {
+  return {
+    fields: [],
+    meta: { isCachedResponse, notices: [] },
+    length: 1,
+    refId,
+  };
+}
+
+describe('countCachedQueries', () => {
+  it('should count cached queries', () => {
+    let frames = [getDataFrame(true, 'A'), getDataFrame(false, 'B')];
+
+    let resp = countCachedQueries(frames);
+    expect(resp.queryCount).toEqual(2);
+    expect(resp.cachedQueryCount).toEqual(1);
+  });
+
+  // TODO:
+  //
+  // 1. do a few more tests on countCachedQueries
+  //  a. queryCount
+  //    1. duplicate refId's don't get counted
+  //  b. cachedQueryCount
+  //    1. if duplicate refId cache value, ignore second value
+  //
+  // 2. do acceptance tests on emitDataRequestEvent
+  //   a. no cache
+  //   b. cache
+});
+
 describe('emitDataRequestEvent - from a dashboard panel', () => {
   const data = getTestData(CoreApp.Dashboard);
   const fn = emitDataRequestEvent(datasource);
@@ -77,8 +108,10 @@ describe('emitDataRequestEvent - from a dashboard panel', () => {
         dashboardName: 'Test Dashboard',
         dashboardUid: 'test',
         folderName: 'Test Folder',
-        dataSize: 0,
+        dataSize: 1,
         duration: 1,
+        queryCount: 1,
+        cachedQueryCount: 1,
       })
     );
   });
