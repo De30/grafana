@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 	"github.com/prometheus/client_golang/prometheus"
@@ -52,11 +51,9 @@ func (ctx *ReqContext) IsApiRequest() bool {
 
 func (ctx *ReqContext) JsonApiErr(status int, message string, err error) {
 	resp := make(map[string]interface{})
-	traceID := tracing.TraceIDFromContext(ctx.Req.Context(), false)
 
 	if err != nil {
-		resp["traceID"] = traceID
-		ctx.Logger.Error(message, "error", err, "traceID", traceID)
+		ctx.Logger.Error(message, "error", err)
 		if setting.Env != setting.Prod {
 			resp["error"] = err.Error()
 		}

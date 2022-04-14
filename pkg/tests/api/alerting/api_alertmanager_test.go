@@ -437,10 +437,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 		b, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
-
-		var res map[string]interface{}
-		require.NoError(t, json.Unmarshal(b, &res))
-		require.Equal(t, "invalid username or password", res["message"])
+		require.JSONEq(t, `{"message": "invalid username or password"}`, string(b))
 	}
 
 	// When there are no alerts available, it returns an empty list.
@@ -900,7 +897,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						Data:  []ngmodels.AlertQuery{},
 					},
 				},
-				expectedResponse: `{"message": "invalid rule specification at index [0]: invalid alert rule: no queries or expressions are found", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "invalid rule specification at index [0]: invalid alert rule: no queries or expressions are found"}`,
 			},
 			{
 				desc:      "alert rule with empty title",
@@ -930,7 +927,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "invalid rule specification at index [0]: alert rule title cannot be empty", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "invalid rule specification at index [0]: alert rule title cannot be empty"}`,
 			},
 			{
 				desc:      "alert rule with too long name",
@@ -960,7 +957,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "invalid rule specification at index [0]: alert rule title is too long. Max length is 190", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "invalid rule specification at index [0]: alert rule title is too long. Max length is 190"}`,
 			},
 			{
 				desc:      "alert rule with too long rulegroup",
@@ -990,7 +987,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "rule group name is too long. Max length is 190", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "rule group name is too long. Max length is 190"}`,
 			},
 			{
 				desc:      "alert rule with invalid interval",
@@ -1021,8 +1018,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "rule evaluation interval (1 second) should be positive ` +
-					`number that is multiple of the base interval of 10 seconds", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "rule evaluation interval (1 second) should be positive number that is multiple of the base interval of 10 seconds"}`,
 			},
 			{
 				desc:      "alert rule with unknown datasource",
@@ -1052,8 +1048,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring:` +
-					` invalid query A: data source not found: unknown", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: invalid query A: data source not found: unknown"}`,
 			},
 			{
 				desc:      "alert rule with invalid condition",
@@ -1083,8 +1078,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedResponse: `{"message": "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: ` +
-					`condition B not found in any query or expression: it should be one of: [A]", "traceID":"00000000000000000000000000000000"}`,
+				expectedResponse: `{"message": "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: condition B not found in any query or expression: it should be one of: [A]"}`,
 			},
 		}
 
@@ -1374,9 +1368,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-		var res map[string]interface{}
-		assert.NoError(t, json.Unmarshal(b, &res))
-		require.Equal(t, "failed to update rule group: failed to update rule with UID unknown because could not find alert rule", res["message"])
+		require.JSONEq(t, `{"message": "failed to update rule group: failed to update rule with UID unknown because could not find alert rule"}`, string(b))
 
 		// let's make sure that rule definitions are not affected by the failed POST request.
 		u = fmt.Sprintf("http://grafana:password@%s/api/ruler/grafana/api/v1/rules/default", grafanaListedAddr)
@@ -1495,9 +1487,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-		var res map[string]interface{}
-		require.NoError(t, json.Unmarshal(b, &res))
-		require.Equal(t, fmt.Sprintf("rule [1] has UID %s that is already assigned to another rule at index 0", ruleUID), res["message"])
+		require.JSONEq(t, fmt.Sprintf(`{"message": "rule [1] has UID %s that is already assigned to another rule at index 0"}`, ruleUID), string(b))
 
 		// let's make sure that rule definitions are not affected by the failed POST request.
 		u = fmt.Sprintf("http://grafana:password@%s/api/ruler/grafana/api/v1/rules/default", grafanaListedAddr)
@@ -1903,9 +1893,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, http.StatusAccepted, resp.StatusCode)
-			var res map[string]interface{}
-			require.NoError(t, json.Unmarshal(b, &res))
-			require.Equal(t, "rules deleted", res["message"])
+			require.JSONEq(t, `{"message":"rules deleted"}`, string(b))
 		})
 
 		t.Run("succeed if the rule group name does exist", func(t *testing.T) {
@@ -2115,9 +2103,7 @@ func TestQuota(t *testing.T) {
 		b, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusForbidden, resp.StatusCode)
-		var res map[string]interface{}
-		require.NoError(t, json.Unmarshal(b, &res))
-		require.Equal(t, "quota has been exceeded", res["message"])
+		require.JSONEq(t, `{"message": "quota has been exceeded"}`, string(b))
 	})
 
 	t.Run("when quota limit exceed updating existing rule should succeed", func(t *testing.T) {
@@ -2414,8 +2400,7 @@ func TestEval(t *testing.T) {
 			}
 			`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: `{"message": "invalid condition: condition B not found in any query or expression: it should be one of: [A]",` +
-				`"traceID": "00000000000000000000000000000000"}`,
+			expectedResponse:   `{"message": "invalid condition: condition B not found in any query or expression: it should be one of: [A]"}`,
 		},
 		{
 			desc: "unknown query datasource",
@@ -2440,7 +2425,7 @@ func TestEval(t *testing.T) {
 			}
 			`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse:   `{"message": "invalid condition: invalid query A: data source not found: unknown", "traceID": "00000000000000000000000000000000"}`,
+			expectedResponse:   `{"message": "invalid condition: invalid query A: data source not found: unknown"}`,
 		},
 	}
 
@@ -2596,8 +2581,7 @@ func TestEval(t *testing.T) {
 			}
 			`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedResponse: `{"message": "invalid queries or expressions: invalid query A: data source not found: unknown",` +
-				`"traceID": "00000000000000000000000000000000"}`,
+			expectedResponse:   `{"message": "invalid queries or expressions: invalid query A: data source not found: unknown"}`,
 		},
 	}
 

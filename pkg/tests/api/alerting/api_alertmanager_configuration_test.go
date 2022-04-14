@@ -3,7 +3,6 @@ package alerting
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"testing"
@@ -90,13 +89,9 @@ func TestAlertmanagerConfigurationIsTransactional(t *testing.T) {
 }
 `
 		resp := postRequest(t, alertConfigURL, payload, http.StatusBadRequest) // nolint
-		b, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		var res map[string]interface{}
-		require.NoError(t, json.Unmarshal(b, &res))
-		require.Equal(t, `failed to save and apply Alertmanager configuration: failed to build integration map: the receiver is invalid: failed to validate receiver "slack.receiver" of type "slack": token must be specified when using the Slack chat API`, res["message"])
-		resp = getRequest(t, alertConfigURL, http.StatusOK) // nolint
+		require.JSONEq(t, `{"message": "failed to save and apply Alertmanager configuration: failed to build integration map: the receiver is invalid: failed to validate receiver \"slack.receiver\" of type \"slack\": token must be specified when using the Slack chat API"}`, getBody(t, resp.Body))
 
+		resp = getRequest(t, alertConfigURL, http.StatusOK) // nolint
 		require.JSONEq(t, defaultAlertmanagerConfigJSON, getBody(t, resp.Body))
 	}
 
@@ -215,10 +210,7 @@ func TestAlertmanagerConfigurationPersistSecrets(t *testing.T) {
 	`
 
 		resp := postRequest(t, alertConfigURL, payload, http.StatusBadRequest) // nolint
-		s := getBody(t, resp.Body)
-		var res map[string]interface{}
-		require.NoError(t, json.Unmarshal([]byte(s), &res))
-		require.Equal(t, "unknown receiver: invalid", res["message"])
+		require.JSONEq(t, `{"message": "unknown receiver: invalid"}`, getBody(t, resp.Body))
 	}
 
 	// The secure settings must be present

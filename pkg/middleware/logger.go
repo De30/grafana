@@ -19,10 +19,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
+	cw "github.com/weaveworks/common/tracing"
 )
 
 func Logger(cfg *setting.Cfg) web.Handler {
@@ -58,8 +58,8 @@ func Logger(cfg *setting.Cfg) web.Handler {
 				"referer", req.Referer(),
 			}
 
-			traceID := tracing.TraceIDFromContext(ctx.Req.Context(), false)
-			if traceID != "" {
+			traceID, exist := cw.ExtractTraceID(ctx.Req.Context())
+			if exist {
 				logParams = append(logParams, "traceID", traceID)
 			}
 
