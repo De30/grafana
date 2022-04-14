@@ -303,8 +303,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 			Url:         hs.Cfg.AppSubURL + "/org/apikeys",
 		})
 	}
-	// needs both feature flag and migration to be able to show service accounts
-	if enableServiceAccount(hs, c) && hasAccess(ac.ReqOrgAdmin, serviceAccountAccessEvaluator) {
+	if enableServiceAccount(hs, c) {
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Service accounts",
 			Id:          "serviceaccounts",
