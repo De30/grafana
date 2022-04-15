@@ -26,13 +26,15 @@ import appEvents from 'app/core/app_events';
 import { getNavModel } from 'app/core/selectors/navModel';
 import { StoreState } from 'app/types';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
-import { cleanUpAction } from '../../core/actions/cleanUp';
+import { useAsyncState } from 'app/store/store';
+import { importDashboardReducer } from './state/reducers';
 
 type DashboardImportPageRouteSearchParams = {
   gcomDashboardId?: string;
 };
 
-type OwnProps = Themeable2 & GrafanaRouteComponentProps<{}, DashboardImportPageRouteSearchParams>;
+type RouteProps = GrafanaRouteComponentProps<{}, DashboardImportPageRouteSearchParams>;
+type OwnProps = Themeable2 & RouteProps;
 
 const IMPORT_STARTED_EVENT_NAME = 'dashboard_import_loaded';
 
@@ -44,7 +46,6 @@ const mapStateToProps = (state: StoreState) => ({
 const mapDispatchToProps = {
   fetchGcomDashboard,
   importDashboardJson,
-  cleanUpAction,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
@@ -59,10 +60,6 @@ class UnthemedDashboardImport extends PureComponent<Props> {
       this.getGcomDashboard({ gcomDashboard: gcomDashboardId });
       return;
     }
-  }
-
-  componentWillUnmount() {
-    this.props.cleanUpAction({ stateSelector: (state: StoreState) => state.importDashboard });
   }
 
   onFileUpload = (event: FormEvent<HTMLInputElement>) => {
@@ -207,7 +204,6 @@ class UnthemedDashboardImport extends PureComponent<Props> {
 const DashboardImportUnConnected = withTheme2(UnthemedDashboardImport);
 const DashboardImport = connector(DashboardImportUnConnected);
 DashboardImport.displayName = 'DashboardImport';
-export default DashboardImport;
 
 const importStyles = stylesFactory((theme: GrafanaTheme2) => {
   return {
@@ -216,3 +212,15 @@ const importStyles = stylesFactory((theme: GrafanaTheme2) => {
     `,
   };
 });
+
+const DashboardImportWrapper = (props: RouteProps) => {
+  const ready = useAsyncState('importDashboard', importDashboardReducer);
+
+  if (!ready) {
+    return null;
+  }
+
+  return <DashboardImport {...props} />;
+};
+
+export default DashboardImportWrapper;

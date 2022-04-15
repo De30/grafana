@@ -1,7 +1,8 @@
-import { Store } from 'redux';
+import { Reducer, Store } from 'redux';
 
 import { initialKeyedVariablesState } from 'app/features/variables/state/keyedVariablesReducer';
 import { StoreState } from 'app/types';
+import { useEffect, useState } from 'react';
 
 interface InjectableStore<T> extends Store<T> {
   injectReducer: any;
@@ -29,3 +30,17 @@ export function dispatch(action: any) {
 
   return store.dispatch(action);
 }
+
+export const useAsyncState = (key: string, reducer: Reducer) => {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    setDone(true);
+    store.injectReducer(key, reducer);
+
+    return () => {
+      store.removeReducer(key);
+    };
+  }, [key, reducer]);
+
+  return done;
+};

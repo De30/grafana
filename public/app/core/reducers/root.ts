@@ -12,7 +12,6 @@ import invitesReducers from 'app/features/invites/state/reducers';
 import userReducers from 'app/features/profile/state/reducers';
 import organizationReducers from 'app/features/org/state/reducers';
 import ldapReducers from 'app/features/admin/state/reducers';
-import importDashboardReducers from 'app/features/manage-dashboards/state/reducers';
 import panelEditorReducers from 'app/features/dashboard/components/PanelEditor/state/reducers';
 import panelsReducers from 'app/features/panel/state/reducers';
 import serviceAccountsReducer from 'app/features/serviceaccounts/state/reducers';
@@ -32,7 +31,6 @@ export const staticReducers = {
   ...invitesReducers,
   ...organizationReducers,
   ...ldapReducers,
-  ...importDashboardReducers,
   ...panelEditorReducers,
   ...panelsReducers,
   ...templatingReducers,
