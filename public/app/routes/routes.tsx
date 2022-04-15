@@ -163,7 +163,7 @@ export function getAppRoutes(): RouteDescriptor[] {
         ),
       component: SafeDynamicImport(() =>
         config.exploreEnabled
-          ? import(/* webpackChunkName: "explore" */ 'app/features/explore/Wrapper')
+          ? import(/* webpackChunkName: "explore" */ 'app/features/explore')
           : import(/* webpackChunkName: "explore-feature-toggle-page" */ 'app/features/explore/FeatureTogglePage')
       ),
     },

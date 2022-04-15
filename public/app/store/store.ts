@@ -3,9 +3,14 @@ import { Store } from 'redux';
 import { initialKeyedVariablesState } from 'app/features/variables/state/keyedVariablesReducer';
 import { StoreState } from 'app/types';
 
-export let store: Store<StoreState>;
+interface InjectableStore<T> extends Store<T> {
+  injectReducer: any;
+  removeReducer: any;
+}
 
-export function setStore(newStore: Store<StoreState>) {
+export let store: InjectableStore<StoreState>;
+
+export function setStore(newStore: InjectableStore<StoreState>) {
   store = newStore;
 }
 

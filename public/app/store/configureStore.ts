@@ -1,23 +1,22 @@
 import { configureStore as reduxConfigureStore, MiddlewareArray } from '@reduxjs/toolkit';
 import { setStore } from './store';
 import { StoreState } from 'app/types/store';
-import { addReducer, createRootReducer } from '../core/reducers/root';
 import { buildInitialState } from '../core/reducers/navModel';
-import { AnyAction } from 'redux';
+import { AnyAction, combineReducers, Reducer } from 'redux';
+
+import { cleanupMiddleware } from './cleanupMiddleware';
+import { createRootReducer, staticReducers } from 'app/core/reducers/root';
 import { ThunkMiddleware } from 'redux-thunk';
 
-export function addRootReducer(reducers: any) {
-  // this is ok now because we add reducers before configureStore is called
-  // in the future if we want to add reducers during runtime
-  // we'll have to solve this in a more dynamic way
-  addReducer(reducers);
-}
-
 export function configureStore(initialState?: Partial<StoreState>) {
-  const store = reduxConfigureStore<StoreState, AnyAction, MiddlewareArray<[ThunkMiddleware<StoreState, AnyAction>]>>({
+  const store = reduxConfigureStore<
+    StoreState,
+    AnyAction,
+    MiddlewareArray<[ThunkMiddleware<StoreState, AnyAction>, typeof cleanupMiddleware]>
+  >({
     reducer: createRootReducer(),
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({ thunk: true, serializableCheck: false, immutableCheck: false }),
+      getDefaultMiddleware({ thunk: true, serializableCheck: false, immutableCheck: false }).concat(cleanupMiddleware),
     devTools: process.env.NODE_ENV !== 'production',
     preloadedState: {
       navIndex: buildInitialState(),
@@ -25,44 +24,28 @@ export function configureStore(initialState?: Partial<StoreState>) {
     },
   });
 
-  setStore(store);
-  return store;
+  const asyncReducers: Record<string, Reducer> = {};
+
+  // Create an inject reducer function
+  // This function adds the async reducer, and creates a new combined reducer
+  const injectReducer = (key: string, asyncReducer: Reducer) => {
+    asyncReducers[key] = asyncReducer;
+    store.replaceReducer(createReducer(asyncReducers) as any);
+  };
+
+  const removeReducer = (key: string) => {
+    delete asyncReducers[key];
+    store.replaceReducer(createReducer(asyncReducers) as any);
+  };
+
+  const injectableStore = { ...store, injectReducer, removeReducer };
+  setStore(injectableStore);
+  return injectableStore;
 }
 
-/*
-function getActionsToIgnoreSerializableCheckOn() {
-  return [
-    'dashboard/setPanelAngularComponent',
-    'dashboard/panelModelAndPluginReady',
-    'dashboard/dashboardInitCompleted',
-    'plugins/panelPluginLoaded',
-    'explore/initializeExplore',
-    'explore/changeRange',
-    'explore/updateDatasourceInstance',
-    'explore/queryStoreSubscription',
-    'explore/queryStreamUpdated',
-  ];
+function createReducer(asyncReducers: Record<string, Reducer>) {
+  return combineReducers({
+    ...staticReducers,
+    ...asyncReducers,
+  });
 }
-
-function getPathsToIgnoreMutationAndSerializableCheckOn() {
-  return [
-    'plugins.panels',
-    'dashboard.panels',
-    'dashboard.getModel',
-    'payload.plugin',
-    'panelEditorNew.getPanel',
-    'panelEditorNew.getSourcePanel',
-    'panelEditorNew.getData',
-    'explore.left.queryResponse',
-    'explore.right.queryResponse',
-    'explore.left.datasourceInstance',
-    'explore.right.datasourceInstance',
-    'explore.left.range',
-    'explore.left.eventBridge',
-    'explore.right.eventBridge',
-    'explore.right.range',
-    'explore.left.querySubscription',
-    'explore.right.querySubscription',
-  ];
-}
-*/
