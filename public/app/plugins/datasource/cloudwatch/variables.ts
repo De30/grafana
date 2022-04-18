@@ -117,15 +117,15 @@ export class CloudWatchVariableSupport extends CustomVariableSupport<CloudWatchD
     }));
   }
 
-  async handleEc2InstanceAttributeQuery({ region, attributeName, ec2Filters }: VariableQuery) {
+  async handleEc2InstanceAttributeQuery({ region, attributeName, ec2Filters, ec2Filters2 }: VariableQuery) {
     if (!attributeName) {
       return [];
     }
-    let filterJson = {};
-    if (ec2Filters) {
-      filterJson = JSON.parse(ec2Filters);
-    }
-    const values = await this.datasource.getEc2InstanceAttribute(region, attributeName, filterJson);
+    // let filterJson = {};
+    // if (ec2Filters) {
+    //   filterJson = JSON.parse(ec2Filters);
+    // }
+    const values = await this.datasource.getEc2InstanceAttribute(region, attributeName, ec2Filters2 ?? {});
     return values.map((s: { label: string; value: string }) => ({
       text: s.label,
       value: s.value,

@@ -9,6 +9,7 @@ import { migrateVariableQuery } from '../../migrations';
 import { VariableQueryField } from './VariableQueryField';
 import { Dimensions } from '..';
 import { InlineField } from '@grafana/ui';
+import { MultiFilter } from './MultiFilter';
 
 export type Props = QueryEditorProps<CloudWatchDatasource, CloudWatchQuery, CloudWatchJsonData, VariableQuery>;
 
@@ -158,12 +159,28 @@ export const VariableQueryEditor = ({ query, datasource, onChange }: Props) => {
       )}
       {parsedQuery.queryType === VariableQueryType.EC2InstanceAttributes && (
         <>
-          <VariableTextField
+          <VariableQueryField
             value={parsedQuery.attributeName}
-            placeholder="attribute name"
-            onBlur={(value: string) => onQueryChange({ ...parsedQuery, attributeName: value })}
+            options={ec2Attributes}
+            onChange={(value: string) => onQueryChange({ ...parsedQuery, attributeName: value })}
             label="Attribute Name"
+            inputId={`variable-query-attribute-name-${query.refId}`}
+            allowCustomValue
+            tooltip='Create a "Tags.<name>" value to select a tag'
           />
+          <InlineField
+            label="Filters"
+            labelWidth={20}
+            tooltip='Dimensions and tags to filter the returned values on. Tags should be formatted "tag:<name>" '
+          >
+            <MultiFilter
+              filters={parsedQuery.ec2Filters2}
+              onChange={(filters) => {
+                onChange({ ...parsedQuery, ec2Filters2: filters });
+              }}
+              dimensionKeys={[]}
+            />
+          </InlineField>
           <VariableTextField
             value={parsedQuery.ec2Filters}
             tooltip='A JSON object representing dimensions/tags and the values to filter on. Ex. { "filter_name": [ "filter_value" ], "tag:name": [ "*" ] }'
@@ -192,3 +209,36 @@ export const VariableQueryEditor = ({ query, datasource, onChange }: Props) => {
     </>
   );
 };
+
+const ec2Attributes = [
+  'AmiLaunchIndex',
+  'Architecture',
+  'ClientToken',
+  'EbsOptimized',
+  'EnaSupport',
+  'Hypervisor',
+  'IamInstanceProfile',
+  'ImageId',
+  'InstanceId',
+  'InstanceLifecycle',
+  'InstanceType',
+  'KernelId',
+  'KeyName',
+  'LaunchTime',
+  'Platform',
+  'PrivateDnsName',
+  'PrivateIpAddress',
+  'PublicDnsName',
+  'PublicIpAddress',
+  'RamdiskId',
+  'RootDeviceName',
+  'RootDeviceType',
+  'SourceDestCheck',
+  'SpotInstanceRequestId',
+  'SriovNetSupport',
+  'SubnetId',
+  'VirtualizationType',
+  'VpcId',
+].map((v) => {
+  return { label: v, value: v };
+});

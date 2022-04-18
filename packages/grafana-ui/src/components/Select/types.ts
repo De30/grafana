@@ -28,6 +28,8 @@ export interface SelectCommonProps<T> {
   formatCreateLabel?: (input: string) => string;
   getOptionLabel?: (item: SelectableValue<T>) => React.ReactNode;
   getOptionValue?: (item: SelectableValue<T>) => string;
+  hideIndicator?: boolean;
+  hideNoOptionsMessage?: boolean;
   inputValue?: string;
   invalid?: boolean;
   isClearable?: boolean;
