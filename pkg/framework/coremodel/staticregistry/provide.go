@@ -3,6 +3,7 @@ package staticregistry
 import (
 	"github.com/google/wire"
 	"github.com/grafana/grafana/pkg/coremodel/dashboard"
+	"github.com/grafana/grafana/pkg/coremodel/datasource"
 	"github.com/grafana/grafana/pkg/framework/coremodel"
 )
 
@@ -11,6 +12,7 @@ import (
 var WireSet = wire.NewSet(
 	ProvideRegistry,
 	dashboard.ProvideCoremodel,
+	datasource.ProvideCoremodel,
 )
 
 // ProvideRegistry provides a simple static Registry for coremodels.
@@ -18,8 +20,10 @@ var WireSet = wire.NewSet(
 // TODO dynamism
 func ProvideRegistry(
 	dashboard *dashboard.Coremodel,
+	datasource *datasource.Coremodel,
 ) (*coremodel.Registry, error) {
 	return coremodel.NewRegistry(
 		dashboard,
+		datasource,
 	)
 }
