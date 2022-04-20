@@ -1,8 +1,8 @@
-import { Select, FormatOptionLabelMeta, useStyles2 } from '@grafana/ui';
+import { Select, FormatOptionLabelMeta, useStyles2, Field } from '@grafana/ui';
 import React, { useCallback, useState } from 'react';
 import { PromVisualQuery } from '../types';
 import { SelectableValue, toOption, GrafanaTheme2 } from '@grafana/data';
-import { EditorField, EditorFieldGroup } from '@grafana/experimental';
+import { EditorFieldGroup } from '@grafana/experimental';
 import { css } from '@emotion/css';
 import Highlighter from 'react-highlight-words';
 
@@ -51,7 +51,7 @@ export function MetricSelect({ query, onChange, onGetMetrics }: Props) {
 
   return (
     <EditorFieldGroup>
-      <EditorField label="Metric">
+      <Field label="Metric">
         <Select
           inputId="prometheus-metric-select"
           className={styles.select}
@@ -73,7 +73,7 @@ export function MetricSelect({ query, onChange, onGetMetrics }: Props) {
             }
           }}
         />
-      </EditorField>
+      </Field>
     </EditorFieldGroup>
   );
 }
