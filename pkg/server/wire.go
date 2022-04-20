@@ -12,7 +12,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/avatar"
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/bus"
-	"github.com/grafana/grafana/pkg/coremodel/dashboard"
 	"github.com/grafana/grafana/pkg/cuectx"
 	"github.com/grafana/grafana/pkg/expr"
 	cmreg "github.com/grafana/grafana/pkg/framework/coremodel/staticregistry"
@@ -243,8 +242,7 @@ var wireBasicSet = wire.NewSet(
 	avatar.ProvideAvatarCacheServer,
 	authproxy.ProvideAuthProxy,
 	statscollector.ProvideService,
-	dashboard.ProvideCoremodel,
-	cmreg.ProvideRegistry,
+	cmreg.WireSet,
 	cuectx.ProvideCUEContext,
 	cuectx.ProvideThemaLibrary,
 )
