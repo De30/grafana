@@ -17,7 +17,7 @@ describe('LokiQueryBuilder', () => {
     datasource.languageProvider.fetchSeriesLabels = jest.fn().mockReturnValue({ job: ['a'], instance: ['b'] });
     userEvent.click(screen.getByLabelText('Add'));
     const labels = screen.getByText(/Labels/);
-    const selects = getAllByRole(labels.parentElement!.parentElement!.parentElement!, 'combobox');
+    const selects = getAllByRole(labels.parentElement!, 'combobox');
     userEvent.click(selects[3]);
     await waitFor(() => expect(screen.getByText('job')).toBeInTheDocument());
   });
