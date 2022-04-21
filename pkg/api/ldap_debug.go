@@ -273,18 +273,18 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	// Need to iterate based on the config groups as only the first match for an org is used
 	// We are showing all matches as that should help in understanding why one match wins out
 	// over another.
-	defaultOrgRoles := []LDAPRoleDTO{}
+	defaultOrgRoles := map[int64]models.RoleType{}
 	for _, configGroup := range serverConfig.Groups {
 		// Config has a wildcard group then we have the associated org role for all
 		// groups that did not match
 		if configGroup.GroupDN == "*" {
-			// if configGroup.OrgRole.Includes(defaultOrgRole) {
-			// 	foundWildcard = true
-			// 	defaultOrgRole = configGroup.OrgRole
-			// }
-			defaultOrgRoles = append(defaultOrgRoles,
-				LDAPRoleDTO{OrgId: configGroup.OrgId, OrgRole: configGroup.OrgRole},
-			)
+			if role, ok := defaultOrgRoles[configGroup.OrgId]; ok {
+				if configGroup.OrgRole.Includes(role) {
+					defaultOrgRoles[configGroup.OrgId] = configGroup.OrgRole
+				}
+			} else {
+				defaultOrgRoles[configGroup.OrgId] = configGroup.OrgRole
+			}
 		}
 
 		// Check if the user is a member of this group and add the associated role
@@ -301,8 +301,8 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	for _, userGroup := range user.Groups {
 		if !groupMapped(orgRoles, userGroup) {
 			if len(defaultOrgRoles) != 0 {
-				for _, defaultRole := range defaultOrgRoles {
-					r := &LDAPRoleDTO{GroupDN: userGroup, OrgId: defaultRole.OrgId, OrgRole: defaultRole.OrgRole}
+				for orgID, defaultRole := range defaultOrgRoles {
+					r := &LDAPRoleDTO{GroupDN: userGroup, OrgId: orgID, OrgRole: defaultRole}
 					orgRoles = append(orgRoles, *r)
 				}
 			} else {
