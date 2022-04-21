@@ -241,7 +241,7 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "Failed to obtain the LDAP configuration", err)
 	}
 
-	ldap := newLDAP(ldapConfig.Servers)
+	multiLDAP := newLDAP(ldapConfig.Servers)
 
 	username := web.Params(c.Req)[":username"]
 
@@ -249,7 +249,7 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "Validation error. You must specify an username", nil)
 	}
 
-	user, serverConfig, err := ldap.User(username)
+	user, serverConfig, err := multiLDAP.User(username)
 
 	if user == nil {
 		return response.Error(http.StatusNotFound, "No user was found in the LDAP server(s) with that username", err)
@@ -273,32 +273,42 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	// Need to iterate based on the config groups as only the first match for an org is used
 	// We are showing all matches as that should help in understanding why one match wins out
 	// over another.
+	defaultOrgRoles := []LDAPRoleDTO{}
 	for _, configGroup := range serverConfig.Groups {
+		// Config has a wildcard group then we have the associated org role for all
+		// groups that did not match
+		if configGroup.GroupDN == "*" {
+			// if configGroup.OrgRole.Includes(defaultOrgRole) {
+			// 	foundWildcard = true
+			// 	defaultOrgRole = configGroup.OrgRole
+			// }
+			defaultOrgRoles = append(defaultOrgRoles,
+				LDAPRoleDTO{OrgId: configGroup.OrgId, OrgRole: configGroup.OrgRole},
+			)
+		}
+
+		// Check if the user is a member of this group and add the associated role
 		for _, userGroup := range user.Groups {
 			if strings.EqualFold(configGroup.GroupDN, userGroup) {
 				r := &LDAPRoleDTO{GroupDN: configGroup.GroupDN, OrgId: configGroup.OrgId, OrgRole: configGroup.OrgRole}
 				orgRoles = append(orgRoles, *r)
-				break
 			}
 		}
-		//}
 	}
 
 	// Then, we find what we did not match by inspecting the list of groups returned from
 	// LDAP against what we have already matched above.
 	for _, userGroup := range user.Groups {
-		var matched bool
-
-		for _, orgRole := range orgRoles {
-			if strings.EqualFold(orgRole.GroupDN, userGroup) { // we already matched it
-				matched = true
-				break
+		if !groupMapped(orgRoles, userGroup) {
+			if len(defaultOrgRoles) != 0 {
+				for _, defaultRole := range defaultOrgRoles {
+					r := &LDAPRoleDTO{GroupDN: userGroup, OrgId: defaultRole.OrgId, OrgRole: defaultRole.OrgRole}
+					orgRoles = append(orgRoles, *r)
+				}
+			} else {
+				r := &LDAPRoleDTO{GroupDN: userGroup}
+				orgRoles = append(orgRoles, *r)
 			}
-		}
-
-		if !matched {
-			r := &LDAPRoleDTO{GroupDN: userGroup}
-			orgRoles = append(orgRoles, *r)
 		}
 	}
 
@@ -316,6 +326,15 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	}
 
 	return response.JSON(http.StatusOK, u)
+}
+
+func groupMapped(orgRoles []LDAPRoleDTO, userGroup string) bool {
+	for _, orgRole := range orgRoles {
+		if strings.EqualFold(orgRole.GroupDN, userGroup) {
+			return true
+		}
+	}
+	return false
 }
 
 // splitName receives the full name of a user and splits it into two parts: A name and a surname.
