@@ -3,10 +3,10 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExploreId, ExploreQueryParams } from 'app/types/explore';
 import { ErrorBoundaryAlert } from '@grafana/ui';
 import { lastSavedUrl, resetExploreAction, richHistoryUpdatedAction } from './state/main';
-import { getRichHistory } from '../../core/utils/richHistory';
 import { ExplorePaneContainer } from './ExplorePaneContainer';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { Branding } from '../../core/components/Branding/Branding';
+import { ExploreActions } from './ExploreActions';
 
 import { getNavModel } from '../../core/selectors/navModel';
 import { StoreState } from 'app/types';
@@ -52,10 +52,6 @@ class WrapperUnconnected extends PureComponent<Props> {
     if (searchParams.from || searchParams.to) {
       locationService.partial({ from: undefined, to: undefined }, true);
     }
-
-    getRichHistory().then((richHistory) => {
-      this.props.richHistoryUpdatedAction({ richHistory });
-    });
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -74,6 +70,7 @@ class WrapperUnconnected extends PureComponent<Props> {
 
     return (
       <div className="page-scrollbar-wrapper">
+        <ExploreActions exploreIdLeft={ExploreId.left} exploreIdRight={ExploreId.right} />
         <div className="explore-wrapper">
           <ErrorBoundaryAlert style="page">
             <ExplorePaneContainer split={hasSplit} exploreId={ExploreId.left} urlQuery={left} />

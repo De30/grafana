@@ -24,7 +24,7 @@ var (
 			State:       FeatureStateBeta,
 		},
 		{
-			Name:        "service-accounts",
+			Name:        "serviceAccounts",
 			Description: "support service accounts",
 			State:       FeatureStateBeta,
 		},
@@ -144,6 +144,12 @@ var (
 			RequiresDevMode: true,
 		},
 		{
+			Name:            "publicDashboards",
+			Description:     "enables public access to dashboards",
+			State:           FeatureStateAlpha,
+			RequiresDevMode: true,
+		},
+		{
 			Name:        "lokiLive",
 			Description: "support websocket streaming for loki (early prototype)",
 			State:       FeatureStateAlpha,
@@ -200,6 +206,23 @@ var (
 			State:           FeatureStateAlpha,
 			RequiresDevMode: true,
 			FrontendOnly:    true,
+		},
+		{
+			Name:         "explore2Dashboard",
+			Description:  "Experimental Explore to Dashboard workflow",
+			State:        FeatureStateBeta,
+			FrontendOnly: true,
+		},
+		{
+			Name:         "persistNotifications",
+			Description:  "PoC Notifications page",
+			State:        FeatureStateAlpha,
+			FrontendOnly: true,
+		},
+		{
+			Name:        "commandPalette",
+			Description: "Enable command palette",
+			State:       FeatureStateAlpha,
 		},
 	}
 )

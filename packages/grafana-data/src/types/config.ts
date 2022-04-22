@@ -42,6 +42,7 @@ export interface LicenseInfo {
   stateInfo: string;
   edition: GrafanaEdition;
   enabledFeatures: { [key: string]: boolean };
+  trialExpiry?: number;
 }
 
 /**
@@ -93,6 +94,7 @@ export type OAuthSettings = Partial<Record<OAuth, { name: string; icon?: string 
 export interface CurrentUserDTO {
   isSignedIn: boolean;
   id: number;
+  externalUserId: string;
   login: string;
   email: string;
   name: string;
@@ -179,4 +181,5 @@ export interface GrafanaConfig {
   geomapDisableCustomBaseLayer?: boolean;
   unifiedAlertingEnabled: boolean;
   angularSupportEnabled: boolean;
+  feedbackLinksEnabled: boolean;
 }

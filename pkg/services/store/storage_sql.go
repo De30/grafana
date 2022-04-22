@@ -48,8 +48,8 @@ func newSQLStorage(prefix string, name string, cfg *StorageSQLConfig, sql *sqlst
 	ctx := context.Background()
 	if devenv != nil {
 		resp, err := devenv.store.List(ctx, "/", nil, &filestorage.ListOptions{
-			Recursive:   true,
-			PathFilters: filestorage.NewPathFilters([]string{"/panel-"}, nil, nil, nil),
+			Recursive: true,
+			Filter:    filestorage.NewPathFilter([]string{"/panel-"}, nil, nil, nil),
 		})
 		if err != nil {
 			grafanaStorageLogger.Error("Failed to load files from devenv", "err", err)
@@ -68,7 +68,7 @@ func newSQLStorage(prefix string, name string, cfg *StorageSQLConfig, sql *sqlst
 				if err := s.store.Upsert(ctx, &filestorage.UpsertFileCommand{
 					Path:       metadata.FullPath,
 					MimeType:   metadata.MimeType,
-					Contents:   &f.Contents,
+					Contents:   f.Contents,
 					Properties: metadata.Properties,
 				}); err != nil {
 					grafanaStorageLogger.Error("Failed to write file to SQL storage files from devenv", "err", err, "path", metadata.FullPath)
@@ -92,7 +92,7 @@ func (s *rootStorageSQL) Write(ctx context.Context, cmd *WriteValueRequest) (*Wr
 	}
 	err := s.store.Upsert(ctx, &filestorage.UpsertFileCommand{
 		Path:     path,
-		Contents: &byteAray,
+		Contents: byteAray,
 	})
 	if err != nil {
 		return nil, err
