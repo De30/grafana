@@ -21,7 +21,13 @@ export const TopBar = React.memo(() => {
         <Icon name="grafana" size="xl" />
       </div>
       <div className={styles.searchWrapper}>
-        <FilterInput width={50} placeholder="Search grafana" value={''} onChange={() => {}} />
+        <FilterInput
+          width={50}
+          placeholder="Search grafana"
+          value={''}
+          onChange={() => {}}
+          className={styles.searchInput}
+        />
       </div>
       <div className={styles.actions}>
         <button className={styles.actionItem}>
@@ -52,13 +58,20 @@ const getStyles = (theme: GrafanaTheme2) => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: theme.spacing(0, 2),
-    boxShadow: 'inset 0 0 2px #000000',
+    borderBottom: `1px solid ${theme.colors.border.weak}`,
+    // boxShadow: 'inset 0 0 2px #000000',
     zIndex: 1,
   }),
   logo: css({
     display: 'flex',
   }),
   searchWrapper: css({}),
+  searchInput: css({
+    height: '39px',
+    '& input': {
+      border: 'none',
+    },
+  }),
   actions: css({
     display: 'flex',
     flexGrow: 0,

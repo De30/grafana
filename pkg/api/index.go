@@ -351,7 +351,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 	if len(configNodes) > 0 {
 		configNode := &dtos.NavLink{
 			Id:         dtos.NavIDCfg,
-			Text:       "Configuration",
+			Text:       "Administration",
 			SubTitle:   "Organization: " + c.OrgName,
 			Icon:       "cog",
 			Url:        configNodes[0].Url,
@@ -364,17 +364,17 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 			configNode.Section = dtos.NavSectionCore
 		}
 		navTree = append(navTree, configNode)
-	}
 
-	adminNavLinks := hs.buildAdminNavLinks(c)
+		adminNavLinks := hs.buildAdminNavLinks(c)
 
-	if len(adminNavLinks) > 0 {
-		navSection := dtos.NavSectionCore
-		if hs.Features.IsEnabled(featuremgmt.FlagNewNavigation) {
-			navSection = dtos.NavSectionConfig
+		if len(adminNavLinks) > 0 {
+			navSection := dtos.NavSectionCore
+			if hs.Features.IsEnabled(featuremgmt.FlagNewNavigation) {
+				navSection = dtos.NavSectionConfig
+			}
+			serverAdminNode := navlinks.GetServerAdminNode(adminNavLinks, navSection)
+			configNode.Children = append(configNode.Children, serverAdminNode)
 		}
-		serverAdminNode := navlinks.GetServerAdminNode(adminNavLinks, navSection)
-		navTree = append(navTree, serverAdminNode)
 	}
 
 	navTree = hs.addHelpLinks(navTree, c)
