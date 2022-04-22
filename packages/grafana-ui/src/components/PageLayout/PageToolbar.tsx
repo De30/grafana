@@ -148,10 +148,21 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      padding: ${theme.spacing(0.5, 2)};
+      padding: ${theme.spacing(0, 2)};
+      height: 40px;
       box-shadow: 0 0 10px ${theme.isDark ? '#040404' : '#666'};
       border-bottom: 1px solid ${theme.colors.border.weak};
-      z-index: ${theme.zIndex.sidemenu + 1};
+      position: relative;
+      z-index: ${theme.zIndex.sidemenu};
+
+      .toolbar-button {
+        height: 40px;
+        padding: ${theme.spacing(0, 2)};
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+        border-radius: 0;
+      }
     `,
     spacer: css`
       flex-grow: 1;
@@ -202,7 +213,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       }
     `,
     actionWrapper: css`
-      padding: ${spacing(0.5, 0, 0.5, 1)};
+      // padding: ${spacing(0.5, 0, 0.5, 1)};
     `,
     leftActionItem: css`
       display: none;

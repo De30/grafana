@@ -11,6 +11,7 @@ import { NavBarItemWithoutMenu } from './NavBarItemWithoutMenu';
 import { isMatchOrChildMatch } from '../utils';
 import { NavBarToggle } from './NavBarToggle';
 import { useLocalStorage } from 'react-use';
+import { Branding } from '../../Branding/Branding';
 
 export interface Props {
   activeItem?: NavModelItem;
@@ -91,12 +92,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
     bottom: 0,
     flexDirection: 'column',
     left: 0,
-    paddingTop: theme.spacing(1),
-    marginRight: theme.spacing(1.5),
     right: 0,
     zIndex: theme.zIndex.sidemenu,
     position: 'fixed',
-    top: '89px',
+    top: '81px',
     boxSizing: 'content-box',
     [theme.breakpoints.up('md')]: {
       borderRight: `1px solid ${theme.colors.border.weak}`,
@@ -236,12 +235,7 @@ function NavItem({
     );
   } else if (link.id === 'saved-items') {
     return (
-      <CollapsibleNavItem
-        onClose={onClose}
-        link={link}
-        isActive={isMatchOrChildMatch(link, activeItem)}
-        className={styles.savedItems}
-      >
+      <CollapsibleNavItem onClose={onClose} link={link} isActive={isMatchOrChildMatch(link, activeItem)}>
         <em className={styles.savedItemsText}>No saved items</em>
       </CollapsibleNavItem>
     );
@@ -261,12 +255,7 @@ function NavItem({
           isActive={link === activeItem}
         >
           <div className={styles.savedItemsMenuItemWrapper}>
-            <div className={styles.iconContainer}>
-              {link.icon && <Icon name={link.icon as IconName} size="xl" />}
-              {link.img && (
-                <img src={link.img} alt={`${link.text} logo`} height="24" width="24" style={{ borderRadius: '50%' }} />
-              )}
-            </div>
+            <div className={styles.iconContainer}>{getLinkIcon(link)}</div>
             <span className={styles.linkText}>{link.text}</span>
           </div>
         </NavBarItemWithoutMenu>
@@ -357,10 +346,7 @@ function CollapsibleNavItem({
         className={styles.collapsibleMenuItem}
         elClassName={styles.collapsibleIcon}
       >
-        {link.img && (
-          <img src={link.img} alt={`${link.text} logo`} height="24" width="24" style={{ borderRadius: '50%' }} />
-        )}
-        {link.icon && <Icon name={link.icon as IconName} size="xl" />}
+        {getLinkIcon(link)}
       </NavBarItemWithoutMenu>
       <div className={styles.collapsibleSectionWrapper}>
         <CollapsableSection
@@ -386,7 +372,7 @@ const getCollapsibleStyles = (theme: GrafanaTheme2) => ({
     position: 'relative',
     display: 'grid',
     gridAutoFlow: 'column',
-    gridTemplateColumns: '56px auto',
+    gridTemplateColumns: `${theme.spacing(7)} auto`,
   }),
   collapsibleMenuItem: css({
     height: theme.spacing(6),
@@ -438,4 +424,16 @@ const getCollapsibleStyles = (theme: GrafanaTheme2) => ({
 
 function linkHasChildren(link: NavModelItem): link is NavModelItem & { children: NavModelItem[] } {
   return Boolean(link.children && link.children.length > 0);
+}
+
+function getLinkIcon(link: NavModelItem) {
+  if (link.id === 'home') {
+    return <Branding.MenuLogo />;
+  } else if (link.icon) {
+    return <Icon name={link.icon as IconName} size="xl" />;
+  } else if (link.img) {
+    return <img src={link.img} alt={`${link.text} logo`} height="24" width="24" style={{ borderRadius: '50%' }} />;
+  } else {
+    return null;
+  }
 }
