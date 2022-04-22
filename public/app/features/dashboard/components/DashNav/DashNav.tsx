@@ -21,6 +21,8 @@ import { locationService } from '@grafana/runtime';
 import { toggleKioskMode } from 'app/core/navigation/kiosk';
 import { getDashboardSrv } from '../../services/DashboardSrv';
 import config from 'app/core/config';
+import appEvents from 'app/core/app_events';
+import { ToggleMegaMenu } from 'app/core/components/NavBar/Next/MegaMenu';
 
 const mapDispatchToProps = {
   updateTimeZoneForSession,
@@ -282,6 +284,7 @@ export const DashNav = React.memo<Props>((props) => {
       parentHref={parentHref}
       onGoBack={onGoBack}
       leftItems={renderLeftActionsButton()}
+      onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
     >
       {renderRightActionsButton()}
     </PageToolbar>

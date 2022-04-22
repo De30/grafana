@@ -10,7 +10,6 @@ import { ConfigContext, ThemeProvider } from './core/utils/ConfigProvider';
 import { RouteDescriptor } from './core/navigation/types';
 import { contextSrv } from './core/services/context_srv';
 import { NavBar } from './core/components/NavBar/NavBar';
-import { NavBarNext } from './core/components/NavBar/Next/NavBarNext';
 import { GrafanaRoute } from './core/navigation/GrafanaRoute';
 import { AppNotificationList } from './core/components/AppNotifications/AppNotificationList';
 import { SearchWrapper } from 'app/features/search';
@@ -18,6 +17,8 @@ import { LiveConnectionWarning } from './features/live/LiveConnectionWarning';
 import { I18nProvider } from './core/localisation';
 import { AngularRoot } from './angular/AngularRoot';
 import { loadAndInitAngularIfEnabled } from './angular/loadAndInitAngularIfEnabled';
+import { TopBar } from './core/components/NavBar/Next/TopBar';
+import { MegaMenu } from './core/components/NavBar/Next/MegaMenu';
 
 interface AppWrapperProps {
   app: GrafanaApp;
@@ -95,7 +96,8 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
                   <GlobalStyles />
                   <div className="grafana-app">
                     <Router history={locationService.getHistory()}>
-                      {newNavigationEnabled ? <NavBarNext /> : <NavBar />}
+                      {newNavigationEnabled ? <TopBar /> : <NavBar />}
+                      <MegaMenu />
                       <main className="main-view">
                         {pageBanners.map((Banner, index) => (
                           <Banner key={index.toString()} />

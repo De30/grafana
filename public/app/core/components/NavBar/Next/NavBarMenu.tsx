@@ -27,7 +27,7 @@ export function NavBarMenu({ activeItem, isOpen, navItems, onClose, setMenuAnima
   const animStyles = getAnimStyles(theme, ANIMATION_DURATION);
   const ref = useRef(null);
   const { dialogProps } = useDialog({}, ref);
-  const { overlayProps, underlayProps } = useOverlay(
+  const { overlayProps } = useOverlay(
     {
       isDismissable: true,
       isOpen,
@@ -37,44 +37,39 @@ export function NavBarMenu({ activeItem, isOpen, navItems, onClose, setMenuAnima
   );
 
   return (
-    <OverlayContainer>
-      <FocusScope contain restoreFocus autoFocus>
-        <CSSTransition
-          onEnter={() => setMenuAnimationInProgress(true)}
-          onExited={() => setMenuAnimationInProgress(false)}
-          appear={isOpen}
-          in={isOpen}
-          classNames={animStyles.overlay}
-          timeout={ANIMATION_DURATION}
-        >
-          <div data-testid="navbarmenu" ref={ref} {...overlayProps} {...dialogProps} className={styles.container}>
-            <div className={styles.mobileHeader}>
-              <Icon name="bars" size="xl" />
-              <IconButton
-                aria-label="Close navigation menu"
-                name="times"
-                onClick={onClose}
-                size="xl"
-                variant="secondary"
-              />
-            </div>
-            <NavBarToggle className={styles.menuCollapseIcon} isExpanded={isOpen} onClick={onClose} />
-            <nav className={styles.content}>
-              <CustomScrollbar hideHorizontalTrack>
-                <ul className={styles.itemList}>
-                  {navItems.map((link) => (
-                    <NavItem link={link} onClose={onClose} activeItem={activeItem} key={link.text} />
-                  ))}
-                </ul>
-              </CustomScrollbar>
-            </nav>
+    <FocusScope contain restoreFocus autoFocus>
+      <CSSTransition
+        onEnter={() => setMenuAnimationInProgress(true)}
+        onExited={() => setMenuAnimationInProgress(false)}
+        appear={isOpen}
+        in={isOpen}
+        classNames={animStyles.overlay}
+        timeout={ANIMATION_DURATION}
+      >
+        <div data-testid="navbarmenu" ref={ref} {...overlayProps} {...dialogProps} className={styles.container}>
+          <div className={styles.mobileHeader}>
+            <Icon name="bars" size="xl" />
+            <IconButton
+              aria-label="Close navigation menu"
+              name="times"
+              onClick={onClose}
+              size="xl"
+              variant="secondary"
+            />
           </div>
-        </CSSTransition>
-      </FocusScope>
-      <CSSTransition appear={isOpen} in={isOpen} classNames={animStyles.backdrop} timeout={ANIMATION_DURATION}>
-        <div className={styles.backdrop} {...underlayProps} />
+          <NavBarToggle className={styles.menuCollapseIcon} isExpanded={isOpen} onClick={onClose} />
+          <nav className={styles.content}>
+            <CustomScrollbar hideHorizontalTrack>
+              <ul className={styles.itemList}>
+                {navItems.map((link) => (
+                  <NavItem link={link} onClose={onClose} activeItem={activeItem} key={link.text} />
+                ))}
+              </ul>
+            </CustomScrollbar>
+          </nav>
+        </div>
       </CSSTransition>
-    </OverlayContainer>
+    </FocusScope>
   );
 }
 
@@ -101,7 +96,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     right: 0,
     zIndex: theme.zIndex.modal,
     position: 'fixed',
-    top: 0,
+    top: '89px',
     boxSizing: 'content-box',
     [theme.breakpoints.up('md')]: {
       borderRight: `1px solid ${theme.colors.border.weak}`,
@@ -129,8 +124,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
   }),
   menuCollapseIcon: css({
     position: 'absolute',
-    top: '43px',
-    right: '0px',
+    top: '16px',
+    right: '24px',
     transform: `translateX(50%)`,
   }),
 });
@@ -159,7 +154,7 @@ const getAnimStyles = (theme: GrafanaTheme2, animationDuration: number) => {
   };
 
   const overlayOpen = {
-    backgroundColor: theme.colors.background.canvas,
+    backgroundColor: theme.colors.background.primary,
     boxShadow: theme.shadows.z3,
     width: '100%',
     [theme.breakpoints.up('md')]: {
@@ -416,7 +411,7 @@ const getCollapsibleStyles = (theme: GrafanaTheme2) => ({
     alignItems: 'center',
     color: theme.colors.text.secondary,
     '&:hover, &:focus-within': {
-      backgroundColor: theme.colors.action.hover,
+      backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
       color: theme.colors.text.primary,
     },
     '&:focus-within': {

@@ -100,7 +100,7 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive'], hasIcon: b
     padding: !hasIcon ? `${theme.spacing(0.5, 2)}` : '5px 12px 5px 10px',
     textAlign: 'left',
     '&:hover, &:focus-visible': {
-      backgroundColor: theme.colors.action.hover,
+      backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
       color: theme.colors.text.primary,
     },
     '&:focus-visible': {
@@ -130,7 +130,7 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive'], hasIcon: b
       color: theme.colors.text.primary,
 
       '> *:first-child::after': {
-        backgroundColor: theme.colors.action.hover,
+        backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
       },
     },
   }),

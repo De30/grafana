@@ -73,7 +73,7 @@ export function getNavBarItemWithoutMenuStyles(theme: GrafanaTheme2, isActive?: 
       display: 'grid',
 
       '&:hover': {
-        backgroundColor: theme.colors.action.hover,
+        backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
         color: theme.colors.text.primary,
       },
     }),

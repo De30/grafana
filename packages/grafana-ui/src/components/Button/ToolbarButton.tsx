@@ -170,11 +170,11 @@ const getStyles = (theme: GrafanaTheme2) => {
     `,
     default: css`
       color: ${theme.colors.text.secondary};
-      background-color: ${theme.colors.background.primary};
+      background-color: ${theme.colors.background.secondary};
 
       &:hover {
         color: ${theme.colors.text.primary};
-        background: ${theme.colors.background.secondary};
+        background: ${theme.colors.emphasize(theme.colors.background.secondary, 0.05)};
       }
     `,
     active: css`

@@ -3,17 +3,15 @@ import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '../../themes/ThemeContext';
 import { IconName } from '../../types';
-import { Icon } from '../Icon/Icon';
 import { styleMixins } from '../../themes';
-import { IconButton } from '../IconButton/IconButton';
-import { selectors } from '@grafana/e2e-selectors';
-import { Link } from '..';
+import { IconButton, Link } from '..';
 import { getFocusStyles } from '../../themes/mixins';
 
 export interface Props {
   pageIcon?: IconName;
   title?: string;
   parent?: string;
+  onOpenMenu?: () => void;
   onGoBack?: () => void;
   titleHref?: string;
   parentHref?: string;
@@ -31,6 +29,7 @@ export const PageToolbar: FC<Props> = React.memo(
     parent,
     pageIcon,
     onGoBack,
+    onOpenMenu,
     children,
     titleHref,
     parentHref,
@@ -59,24 +58,16 @@ export const PageToolbar: FC<Props> = React.memo(
 
     return (
       <nav className={mainStyle} aria-label={ariaLabel}>
-        {pageIcon && !onGoBack && (
-          <div className={styles.pageIcon}>
-            <Icon name={pageIcon} size="lg" aria-hidden />
-          </div>
-        )}
-        {onGoBack && (
-          <div className={styles.pageIcon}>
-            <IconButton
-              name="arrow-left"
-              tooltip="Go back (Esc)"
-              tooltipPlacement="bottom"
-              size="xxl"
-              surface="dashboard"
-              aria-label={selectors.components.BackButton.backArrow}
-              onClick={onGoBack}
-            />
-          </div>
-        )}
+        <div className={styles.menuButton}>
+          <IconButton
+            name="bars"
+            tooltip="Toggle menu"
+            tooltipPlacement="bottom"
+            size="xl"
+            surface="dashboard"
+            onClick={onOpenMenu}
+          />
+        </div>
         <nav aria-label="Search links" className={styles.navElement}>
           {parent && parentHref && (
             <>
@@ -136,7 +127,8 @@ const getStyles = (theme: GrafanaTheme2) => {
 
   const focusStyle = getFocusStyles(theme);
   const titleStyles = css`
-    font-size: ${typography.size.lg};
+    font-size: ${typography.body.fontSize};
+    font-weight: ${typography.fontWeightMedium};
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -152,15 +144,24 @@ const getStyles = (theme: GrafanaTheme2) => {
   return {
     toolbar: css`
       align-items: center;
-      background: ${theme.colors.background.canvas};
+      background: ${theme.colors.background.primary};
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      padding: ${theme.spacing(1.5, 2)};
+      padding: ${theme.spacing(0.5, 2)};
+      box-shadow: ${theme.shadows.z2};
+      border-bottom: 1px solid ${theme.colors.border.weak};
+      postition: relative;
+      z-index: ${theme.zIndex.sidemenu + 1};
     `,
     spacer: css`
       flex-grow: 1;
     `,
+    menuButton: css({
+      display: 'flex',
+      alignItems: 'center',
+      paddingRight: '4px',
+    }),
     pageIcon: css`
       display: none;
       @media ${styleMixins.mediaUp(theme.v1.breakpoints.md)} {
