@@ -150,6 +150,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       justify-content: flex-end;
       padding: ${theme.spacing(0, 2)};
       height: 40px;
+      flex-shrink: 0;
       box-shadow: 0 0 10px ${theme.isDark ? '#040404' : '#666'};
       border-bottom: 1px solid ${theme.colors.border.weak};
       position: relative;

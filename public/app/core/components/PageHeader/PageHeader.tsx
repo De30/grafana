@@ -82,6 +82,7 @@ export const PageHeader: FC<Props> = ({ model }) => {
 
   const main = model.main;
   const children = main.children;
+
   return (
     <div className={styles.headerCanvas}>
       <div className="page-container">

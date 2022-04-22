@@ -6,11 +6,13 @@ import { getTitleFromNavModel } from 'app/core/selectors/navModel';
 import PageHeader from '../PageHeader/PageHeader';
 import { Footer } from '../Footer/Footer';
 import { PageContents } from './PageContents';
-import { CustomScrollbar, useStyles2 } from '@grafana/ui';
+import { CustomScrollbar, PageToolbar, useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2, NavModel } from '@grafana/data';
 import { Branding } from '../Branding/Branding';
 import { css, cx } from '@emotion/css';
-import { PageHeader2 } from '../PageHeader/PageHeader2';
+import { PageHeader2, PageSubNav } from './PageSubNav';
+import appEvents from 'app/core/app_events';
+import { ToggleMegaMenu } from '../NavBar/Next/MegaMenu';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -34,12 +36,28 @@ export const Page: PageType = ({ navModel, children, className, ...otherProps })
     }
   }, [navModel]);
 
+  if (!navModel) {
+    return null;
+  }
+
   return (
     <div {...otherProps} className={cx(styles.wrapper, className)}>
-      {navModel && <PageHeader2 model={navModel} />}
+      <PageToolbar
+        parent={navModel.main.text}
+        title={navModel.node.text}
+        onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
+      />
       <div className={styles.scroll}>
         <CustomScrollbar autoHeightMin={'100%'}>
-          {children}
+          <div className={styles.panes}>
+            <PageSubNav model={navModel} />
+            <div className={styles.pageContent}>
+              <div className={styles.pageInner}>
+                <h1 className={styles.pageTitle}>{navModel.node.text}</h1>
+                {children}
+              </div>
+            </div>
+          </div>
           <Footer />
         </CustomScrollbar>
       </div>
@@ -66,4 +84,23 @@ const getStyles = (theme: GrafanaTheme2) => ({
     min-height: 0;
     display: flex;
   `,
+  panes: css({
+    display: 'flex',
+  }),
+  subNav: css({
+    display: 'flex',
+    width: '300px',
+    flexShrink: 0,
+  }),
+  pageTitle: css({}),
+  pageContent: css({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    background: theme.colors.background.primary,
+    // display: 'flex',
+    // flexDirection: 'column',
+  }),
+  pageInner: css({
+    // maxWidth: '1200px',
+  }),
 });
