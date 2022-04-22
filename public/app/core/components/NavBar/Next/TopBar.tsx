@@ -5,13 +5,19 @@ import { getKioskMode } from 'app/core/navigation/kiosk';
 import { KioskMode } from 'app/types';
 import { FilterInput, Icon, useTheme2 } from '@grafana/ui';
 import { contextSrv } from 'app/core/core';
+import { useLocation } from 'react-router-dom';
 
 export const TopBar = React.memo(() => {
   const theme = useTheme2();
   const styles = getStyles(theme);
   const kiosk = getKioskMode();
+  const location = useLocation();
 
   if (kiosk !== KioskMode.Off) {
+    return null;
+  }
+
+  if (location.search.indexOf('editPanel') !== -1) {
     return null;
   }
 
@@ -60,7 +66,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     padding: theme.spacing(0, 2),
     borderBottom: `1px solid ${theme.colors.border.weak}`,
     // boxShadow: 'inset 0 0 2px #000000',
-    zIndex: 1,
+    zIndex: theme.zIndex.sidemenu + 2,
   }),
   logo: css({
     display: 'flex',

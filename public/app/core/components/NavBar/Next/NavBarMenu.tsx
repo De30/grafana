@@ -4,7 +4,7 @@ import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 import { CollapsableSection, CustomScrollbar, Icon, IconButton, IconName, useStyles2, useTheme2 } from '@grafana/ui';
 import { FocusScope } from '@react-aria/focus';
 import { useDialog } from '@react-aria/dialog';
-import { OverlayContainer, useOverlay } from '@react-aria/overlays';
+import { useOverlay } from '@react-aria/overlays';
 import { css, cx } from '@emotion/css';
 import { NavBarMenuItem } from './NavBarMenuItem';
 import { NavBarItemWithoutMenu } from './NavBarItemWithoutMenu';
@@ -94,7 +94,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     paddingTop: theme.spacing(1),
     marginRight: theme.spacing(1.5),
     right: 0,
-    zIndex: theme.zIndex.modal,
+    zIndex: theme.zIndex.sidemenu,
     position: 'fixed',
     top: '89px',
     boxSizing: 'content-box',

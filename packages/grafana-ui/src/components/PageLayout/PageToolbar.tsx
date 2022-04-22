@@ -149,9 +149,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       flex-wrap: wrap;
       justify-content: flex-end;
       padding: ${theme.spacing(0.5, 2)};
-      box-shadow: ${theme.shadows.z2};
+      box-shadow: 0 0 10px ${theme.isDark ? '#040404' : '#666'};
       border-bottom: 1px solid ${theme.colors.border.weak};
-      postition: relative;
       z-index: ${theme.zIndex.sidemenu + 1};
     `,
     spacer: css`

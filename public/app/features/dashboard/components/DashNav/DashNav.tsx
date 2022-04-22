@@ -15,7 +15,7 @@ import { updateTimeZoneForSession } from 'app/features/profile/state/reducers';
 import { DashboardModel } from '../../state';
 import { KioskMode } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
-import { SaveDashboardProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardProxy';
+import { SaveDashboardDrawer } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardDrawer';
 import { DashboardCommentsModal } from 'app/features/dashboard/components/DashboardComments/DashboardCommentsModal';
 import { locationService } from '@grafana/runtime';
 import { toggleKioskMode } from 'app/core/navigation/kiosk';
@@ -229,7 +229,7 @@ export const DashNav = React.memo<Props>((props) => {
               tooltip="Save dashboard"
               icon="save"
               onClick={() => {
-                showModal(SaveDashboardProxy, {
+                showModal(SaveDashboardDrawer, {
                   dashboard,
                   onDismiss: hideModal,
                 });
@@ -282,9 +282,9 @@ export const DashNav = React.memo<Props>((props) => {
       parent={folderTitle}
       titleHref={titleHref}
       parentHref={parentHref}
+      onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
       onGoBack={onGoBack}
       leftItems={renderLeftActionsButton()}
-      onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
     >
       {renderRightActionsButton()}
     </PageToolbar>

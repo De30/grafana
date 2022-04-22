@@ -35,7 +35,7 @@ export interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export type ToolbarButtonVariant = 'default' | 'primary' | 'destructive' | 'active';
 
-export const ToolbarButton = forwardRef<HTMLButtonElement, Props>(
+export const ToolbarButton2 = forwardRef<HTMLButtonElement, Props>(
   (
     {
       tooltip,
@@ -101,7 +101,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, Props>(
   }
 );
 
-ToolbarButton.displayName = 'ToolbarButton';
+ToolbarButton2.displayName = 'ToolbarButton';
 
 function getButtonAriaLabel(ariaLabel: string | undefined, tooltip: string | undefined) {
   return ariaLabel ? ariaLabel : tooltip ? selectors.components.PageToolbar.item(tooltip) : undefined;
@@ -129,16 +129,23 @@ const getStyles = (theme: GrafanaTheme2) => {
       position: relative;
       display: flex;
       align-items: center;
-      height: ${theme.spacing(theme.components.height.md)};
+      height: ${theme.spacing(5)};
       padding: ${theme.spacing(0, 1)};
-      border-radius: ${theme.shape.borderRadius()};
       line-height: ${theme.components.height.md * theme.spacing.gridSize - 2}px;
       font-weight: ${theme.typography.fontWeightMedium};
-      border: 1px solid ${theme.colors.border.weak};
       white-space: nowrap;
       transition: ${theme.transitions.create(['background', 'box-shadow', 'border-color', 'color'], {
         duration: theme.transitions.duration.short,
       })};
+
+      border: none;
+
+      &:first-child {
+        border-left: 1px solid ${theme.colors.border.weak};
+      }
+      &:last-child {
+        border-right: 1px solid ${theme.colors.border.weak};
+      }
 
       &:focus,
       &:focus-visible {

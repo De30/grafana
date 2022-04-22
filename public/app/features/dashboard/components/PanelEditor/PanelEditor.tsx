@@ -495,6 +495,7 @@ export const getStyles = stylesFactory((theme: GrafanaTheme, props: Props) => {
     `,
     verticalSplitPanesWrapper: css`
       display: flex;
+      padding-top: 16px;
       flex-direction: column;
       height: 100%;
       width: 100%;
