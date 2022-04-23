@@ -14,11 +14,11 @@ export function PageSubNav(props: Props) {
 
   return (
     <nav className={styles.nav}>
-      <h1 className={styles.sectionName}>
-        {main.icon && <Icon name={main.icon as IconName} size="xl" />}
+      <h2 className={styles.sectionName}>
+        {main.icon && <Icon name={main.icon as IconName} size="lg" />}
         {main.img && <img className="page-header__img" src={main.img} alt={`logo of ${main.text}`} />}
         {props.model.main.text}
-      </h1>
+      </h2>
       {props.model.main.children?.map((child, index) => {
         return (
           !child.hideFromTabs && (
@@ -42,8 +42,13 @@ const getStyles = (theme: GrafanaTheme2) => ({
     display: 'flex',
     flexDirection: 'column',
     background: theme.colors.background.secondary,
-    padding: theme.spacing(3),
+    padding: theme.spacing(3, 2),
     width: '250px',
+  }),
+  sectionName: css({
+    display: 'flex',
+    gap: theme.spacing(1),
+    fontSize: theme.typography.h3.fontSize,
   }),
   subNav: css``,
 });

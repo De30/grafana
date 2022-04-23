@@ -73,7 +73,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   }),
   searchWrapper: css({}),
   searchInput: css({
-    height: '39px',
+    height: '40px',
     '& input': {
       border: 'none',
     },
