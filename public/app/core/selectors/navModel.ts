@@ -17,7 +17,7 @@ const getNotFoundModel = (): NavModel => {
 
 export const getNavModel = (navIndex: NavIndex, id: string, fallback?: NavModel, onlyChild = false): NavModel => {
   if (navIndex[id]) {
-    const node = navIndex[id];
+    const node = { ...navIndex[id], active: true };
 
     let main: NavModelItem;
     if (!onlyChild && node.parentItem) {

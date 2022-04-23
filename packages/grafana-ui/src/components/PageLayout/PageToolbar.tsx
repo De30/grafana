@@ -1,11 +1,14 @@
-import React, { FC, ReactNode } from 'react';
 import { css, cx } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
-import { useStyles2 } from '../../themes/ThemeContext';
-import { IconName } from '../../types';
+import React, { FC, ReactNode } from 'react';
+
+import { GrafanaTheme2, NavModelItem } from '@grafana/data';
+
+import { Link } from '..';
 import { styleMixins } from '../../themes';
-import { IconButton, Link } from '..';
+import { useStyles2 } from '../../themes/ThemeContext';
 import { getFocusStyles } from '../../themes/mixins';
+import { IconName } from '../../types';
+import { IconButton } from '../IconButton/IconButton';
 
 export interface Props {
   pageIcon?: IconName;
@@ -13,6 +16,7 @@ export interface Props {
   parent?: string;
   onOpenMenu?: () => void;
   onGoBack?: () => void;
+  navModel?: NavModelItem;
   titleHref?: string;
   parentHref?: string;
   leftItems?: ReactNode[];
@@ -28,6 +32,7 @@ export const PageToolbar: FC<Props> = React.memo(
     title,
     parent,
     pageIcon,
+    navModel,
     onGoBack,
     onOpenMenu,
     children,
@@ -56,6 +61,29 @@ export const PageToolbar: FC<Props> = React.memo(
       className
     );
 
+    function renderBreadcrumbs(node: NavModelItem, list: React.ReactNode[]) {
+      if (node.parentItem) {
+        renderBreadcrumbs(node.parentItem, list);
+      }
+
+      list.push(
+        <li className={styles.breadcrumb}>
+          {node.url && (
+            <a className={cx(styles.breadcrumbLink, node.active && styles.breadcrumbLinkActive)} href={node.url}>
+              {node.text}
+            </a>
+          )}
+          {!node.url && (
+            <span className={cx(styles.breadcrumbLink, node.active && styles.breadcrumbLinkActive)}>{node.text}</span>
+          )}
+        </li>
+      );
+
+      return list;
+    }
+
+    const breadcrumbs = navModel ? renderBreadcrumbs(navModel, []) : null;
+
     return (
       <nav className={mainStyle} aria-label={ariaLabel}>
         <div className={styles.menuButton}>
@@ -68,6 +96,11 @@ export const PageToolbar: FC<Props> = React.memo(
             onClick={onOpenMenu}
           />
         </div>
+        {breadcrumbs && (
+          <ol aria-label="Search links" className={styles.breadcrumbList}>
+            {breadcrumbs}
+          </ol>
+        )}
         <nav aria-label="Search links" className={styles.navElement}>
           {parent && parentHref && (
             <>
@@ -85,7 +118,6 @@ export const PageToolbar: FC<Props> = React.memo(
               )}
             </>
           )}
-
           {title && titleHref && (
             <h1 className={styles.h1Styles}>
               <Link
@@ -190,6 +222,51 @@ const getStyles = (theme: GrafanaTheme2) => {
     navElement: css`
       display: flex;
     `,
+    breadcrumbList: css`
+      display: flex;
+      font-size: ${theme.typography.bodySmall.fontSize};
+      align-items: center;
+      padding: ${theme.spacing(0, 1)};
+    `,
+    breadcrumb: css`
+      display: flex;
+      align-items: center;
+
+      // &:first-child {
+      //   > a,
+      //   > span {
+      //     clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+      //     border-radius: 4px;
+      //   }
+      // }
+
+      // &:last-child {
+      //   > a,
+      //   > span {
+      //     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%);
+      //     border-radius: 4px;
+      //   }
+      // }
+    `,
+    breadcrumbLink: css`
+      background-color: #374054;
+      padding: ${theme.spacing(0.5, 2)};
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    `,
+    breadcrumbLinkActive: css`
+      background-color: ${theme.colors.secondary.main};
+      padding: ${theme.spacing(0.5, 2)};
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    `,
+
     h1Styles: css`
       margin: 0;
       line-height: inherit;

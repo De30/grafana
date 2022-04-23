@@ -1,12 +1,14 @@
+import { css, cx } from '@emotion/css';
 import React, { HTMLProps } from 'react';
+
 import { GrafanaTheme } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
-import { Icon } from '../Icon/Icon';
-import { IconName } from '../../types';
 import { stylesFactory, useTheme } from '../../themes';
+import { IconName } from '../../types';
+import { Icon } from '../Icon/Icon';
+
 import { Counter } from './Counter';
-import { css, cx } from '@emotion/css';
 
 export interface TabProps extends HTMLProps<HTMLLIElement> {
   label: string;
@@ -74,6 +76,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
         display: block;
         height: 100%;
       }
+
       &:hover,
       &:focus {
         color: ${colors.linkHover};
@@ -85,7 +88,6 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
     `,
     activeStyle: css`
       label: activeTabStyle;
-      background: linear-gradient(90deg, #ff790040, #8eff0000);
       color: ${colors.link};
       overflow: hidden;
 
@@ -94,11 +96,11 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
         content: ' ';
         position: absolute;
         left: 0;
-        width: 2px;
+        width: 4px;
         bottom: 0;
         top: 0;
+        border-radius: 2px;
         background-image: linear-gradient(0deg, #f05a28 30%, #fbca0a 99%);
-        box-shadow: 0 0 5px orange;
       }
     `,
   };

@@ -1,28 +1,25 @@
-// Libaries
 import React, { FC, ReactNode } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-// Utils & Services
-import { playlistSrv } from 'app/features/playlist/PlaylistSrv';
-// Components
-import { DashNavButton } from './DashNavButton';
-import { DashNavTimeControls } from './DashNavTimeControls';
-import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate } from '@grafana/ui';
-import { locationUtil, textUtil } from '@grafana/data';
-// State
-import { updateTimeZoneForSession } from 'app/features/profile/state/reducers';
-// Types
-import { DashboardModel } from '../../state';
-import { KioskMode } from 'app/types';
-import { ShareModal } from 'app/features/dashboard/components/ShareModal';
-import { SaveDashboardDrawer } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardDrawer';
-import { DashboardCommentsModal } from 'app/features/dashboard/components/DashboardComments/DashboardCommentsModal';
+
+import { NavModelItem, textUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { toggleKioskMode } from 'app/core/navigation/kiosk';
-import { getDashboardSrv } from '../../services/DashboardSrv';
-import config from 'app/core/config';
+import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { ToggleMegaMenu } from 'app/core/components/NavBar/Next/MegaMenu';
+import config from 'app/core/config';
+import { toggleKioskMode } from 'app/core/navigation/kiosk';
+import { DashboardCommentsModal } from 'app/features/dashboard/components/DashboardComments/DashboardCommentsModal';
+import { ShareModal } from 'app/features/dashboard/components/ShareModal';
+import { playlistSrv } from 'app/features/playlist/PlaylistSrv';
+import { updateTimeZoneForSession } from 'app/features/profile/state/reducers';
+import { KioskMode } from 'app/types';
+
+import { getDashboardSrv } from '../../services/DashboardSrv';
+import { DashboardModel } from '../../state';
+import { SaveDashboardDrawer } from '../SaveDashboard/SaveDashboardDrawer';
+
+import { DashNavButton } from './DashNavButton';
+import { DashNavTimeControls } from './DashNavTimeControls';
 
 const mapDispatchToProps = {
   updateTimeZoneForSession,
@@ -270,18 +267,32 @@ export const DashNav = React.memo<Props>((props) => {
 
   const { isFullscreen, title, folderTitle } = props;
   // this ensures the component rerenders when the location changes
-  const location = useLocation();
-  const titleHref = locationUtil.getUrlForPartial(location, { search: 'open' });
-  const parentHref = locationUtil.getUrlForPartial(location, { search: 'open', folder: 'current' });
+  // const location = useLocation();
+  // const titleHref = locationUtil.getUrlForPartial(location, { search: 'open' });
+  // const parentHref = locationUtil.getUrlForPartial(location, { search: 'open', folder: 'current' });
   const onGoBack = isFullscreen ? onClose : undefined;
+  const model: NavModelItem = {
+    id: 'dashboard',
+    text: title,
+    active: true,
+    parentItem: {
+      id: 'dashboard',
+      text: 'Dashbords',
+    },
+  };
+
+  if (folderTitle) {
+    model.parentItem = {
+      id: 'folder',
+      text: folderTitle,
+      url: `/dashboards/f/${props.dashboard.meta.folderUid}`,
+      parentItem: model.parentItem,
+    };
+  }
 
   return (
     <PageToolbar
-      pageIcon={isFullscreen ? undefined : 'apps'}
-      title={title}
-      parent={folderTitle}
-      titleHref={titleHref}
-      parentHref={parentHref}
+      navModel={model}
       onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
       onGoBack={onGoBack}
       leftItems={renderLeftActionsButton()}

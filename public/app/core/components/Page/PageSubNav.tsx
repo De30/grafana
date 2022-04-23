@@ -1,7 +1,8 @@
-import React from 'react';
 import { css } from '@emotion/css';
-import { IconName, useStyles2, Icon, VerticalTab } from '@grafana/ui';
+import React from 'react';
+
 import { NavModel, GrafanaTheme2 } from '@grafana/data';
+import { IconName, useStyles2, Icon, VerticalTab } from '@grafana/ui';
 
 export interface Props {
   model: NavModel;
@@ -19,20 +20,22 @@ export function PageSubNav(props: Props) {
         {main.img && <img className="page-header__img" src={main.img} alt={`logo of ${main.text}`} />}
         {props.model.main.text}
       </h2>
-      {props.model.main.children?.map((child, index) => {
-        return (
-          !child.hideFromTabs && (
-            <VerticalTab
-              label={child.text}
-              active={child.active}
-              key={`${child.url}-${index}`}
-              icon={child.icon as IconName}
-              href={child.url}
-              onChangeTab={undefined}
-            />
-          )
-        );
-      })}
+      <div className={styles.items}>
+        {props.model.main.children?.map((child, index) => {
+          return (
+            !child.hideFromTabs && (
+              <VerticalTab
+                label={child.text}
+                active={child.active}
+                key={`${child.url}-${index}`}
+                // icon={child.icon as IconName}
+                href={child.url}
+                onChangeTab={undefined}
+              />
+            )
+          );
+        })}
+      </div>
     </nav>
   );
 }
@@ -48,7 +51,12 @@ const getStyles = (theme: GrafanaTheme2) => ({
   sectionName: css({
     display: 'flex',
     gap: theme.spacing(1),
+    padding: theme.spacing(0, 0, 3, 0.25),
     fontSize: theme.typography.h3.fontSize,
+    margin: 0,
+  }),
+  items: css({
+    paddingLeft: '9px',
   }),
   subNav: css``,
 });
