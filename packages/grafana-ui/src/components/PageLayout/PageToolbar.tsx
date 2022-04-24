@@ -67,7 +67,7 @@ export const PageToolbar: FC<Props> = React.memo(
       }
 
       list.push(
-        <li className={styles.breadcrumb}>
+        <li className={styles.breadcrumb} key={node.text}>
           {node.url && (
             <a className={cx(styles.breadcrumbLink, node.active && styles.breadcrumbLinkActive)} href={node.url}>
               {node.text}
@@ -85,7 +85,7 @@ export const PageToolbar: FC<Props> = React.memo(
     const breadcrumbs = navModel ? renderBreadcrumbs(navModel, []) : [];
     if (navModel) {
       breadcrumbs.unshift(
-        <li className={styles.breadcrumb}>
+        <li className={styles.breadcrumb} key="home">
           <a href="/" className={cx(styles.breadcrumbLink, styles.breadcrumbLinkHome)}>
             <Icon name="home-alt" size="sm" />
           </a>

@@ -3,7 +3,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { FilterInput, Icon, useTheme2 } from '@grafana/ui';
+import { FilterInput, Icon, Tooltip, useTheme2 } from '@grafana/ui';
 import { contextSrv } from 'app/core/core';
 import { getKioskMode } from 'app/core/navigation/kiosk';
 import { KioskMode } from 'app/types';
@@ -37,15 +37,21 @@ export const TopBar = React.memo(() => {
         />
       </div>
       <div className={styles.actions}>
-        <button className={styles.actionItem}>
-          <Icon name="question-circle" size="lg" />
-        </button>
-        <button className={styles.actionItem}>
-          <Icon name="rss" size="lg" />
-        </button>
-        <button className={styles.actionItem}>
-          <img src={contextSrv.user.gravatarUrl} />
-        </button>
+        <Tooltip placement="bottom" content="Help menu (todo)">
+          <button className={styles.actionItem}>
+            <Icon name="question-circle" size="lg" />
+          </button>
+        </Tooltip>
+        <Tooltip placement="bottom" content="Grafana news (todo)">
+          <button className={styles.actionItem}>
+            <Icon name="rss" size="lg" />
+          </button>
+        </Tooltip>
+        <Tooltip placement="bottom" content="User profile (todo)">
+          <button className={styles.actionItem}>
+            <img src={contextSrv.user.gravatarUrl} />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );
@@ -93,6 +99,9 @@ const getStyles = (theme: GrafanaTheme2) => {
       background: 'none',
       alignItems: 'center',
       color: theme.colors.text.secondary,
+      '&:hover': {
+        background: theme.colors.background.secondary,
+      },
       img: {
         borderRadius: '50%',
         width: '24px',
