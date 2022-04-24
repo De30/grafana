@@ -3,7 +3,7 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import { NavModel, textUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate } from '@grafana/ui';
+import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate, Button } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { ToggleMegaMenu } from 'app/core/components/NavBar/Next/MegaMenu';
 import config from 'app/core/config';
@@ -81,6 +81,10 @@ export const DashNav = React.memo<Props>((props) => {
 
   const onOpenSettings = () => {
     locationService.partial({ editview: 'settings' });
+  };
+
+  const onCloseSettings = () => {
+    locationService.partial({ editview: null, editIndex: null });
   };
 
   const onPlaylistPrev = () => {
@@ -220,7 +224,7 @@ export const DashNav = React.memo<Props>((props) => {
       buttons.push(<ToolbarButton tooltip="Add panel" icon="panel-add" onClick={onAddPanel} key="button-panel-add" />);
     }
 
-    if (canSave && !isFullscreen) {
+    if (canSave && !isFullscreen && !editview) {
       buttons.push(
         <ModalsController key="button-save">
           {({ showModal, hideModal }) => (
@@ -253,14 +257,44 @@ export const DashNav = React.memo<Props>((props) => {
     if (!editview) {
       if (showSettings) {
         buttons.push(
-          <ToolbarButton tooltip="Dashboard settings" icon="cog" onClick={onOpenSettings} key="button-settings" />
+          <ToolbarButton
+            tooltip="Dashboard settings"
+            icon="cog"
+            onClick={onOpenSettings}
+            key="button-settings"
+            variant={editview ? 'active' : 'default'}
+          />
         );
       }
 
       addCustomContent(customRightActions, buttons);
       buttons.push(renderTimeControls());
       buttons.push(tvButton);
+    } else {
+      buttons.push(
+        <Button icon="arrow-left" onClick={onCloseSettings} key="button-back" variant="secondary" size="sm">
+          Exit settings
+        </Button>
+      );
+      buttons.push(
+        <ModalsController key="button-save">
+          {({ showModal, hideModal }) => (
+            <Button
+              size="sm"
+              onClick={() => {
+                showModal(SaveDashboardDrawer, {
+                  dashboard,
+                  onDismiss: hideModal,
+                });
+              }}
+            >
+              Save dashboard
+            </Button>
+          )}
+        </ModalsController>
+      );
     }
+
     return buttons;
   };
 

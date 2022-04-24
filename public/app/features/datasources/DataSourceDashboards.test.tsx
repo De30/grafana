@@ -16,6 +16,7 @@ const setup = (propOverrides?: object) => {
     dataSourceId: 'x',
     importDashboard: jest.fn(),
     loadDataSource: jest.fn(),
+    initDataSourceSettings: jest.fn(),
     loadPluginDashboards: jest.fn(),
     removeDashboard: jest.fn(),
     isLoading: false,

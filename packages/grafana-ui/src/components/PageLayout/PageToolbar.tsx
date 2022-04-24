@@ -3,7 +3,7 @@ import React, { FC, ReactNode } from 'react';
 
 import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 
-import { Link } from '..';
+import { Icon, Link } from '..';
 import { styleMixins } from '../../themes';
 import { useStyles2 } from '../../themes/ThemeContext';
 import { getFocusStyles } from '../../themes/mixins';
@@ -82,7 +82,14 @@ export const PageToolbar: FC<Props> = React.memo(
       return list;
     }
 
-    const breadcrumbs = navModel ? renderBreadcrumbs(navModel, []) : null;
+    const breadcrumbs = navModel ? renderBreadcrumbs(navModel, []) : [];
+    breadcrumbs.unshift(
+      <li className={styles.breadcrumb}>
+        <a href="/" className={cx(styles.breadcrumbLink, styles.breadcrumbLinkHome)}>
+          <Icon name="home-alt" size="sm" />
+        </a>
+      </li>
+    );
 
     return (
       <nav className={mainStyle} aria-label={ariaLabel}>
@@ -255,6 +262,11 @@ const getStyles = (theme: GrafanaTheme2) => {
       //     border-radius: 4px;
       //   }
       // }
+    `,
+    breadcrumbLinkHome: css`
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+      padding: ${theme.spacing(0.5, 2, 0.5, 1.5)};
+      border-radius: 4px;
     `,
     breadcrumbLink: css`
       background-color: ${theme.isDark ? '#374054' : '#ccddfe'};

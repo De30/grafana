@@ -256,51 +256,51 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 
 	if hasAccess(ac.ReqOrgAdmin, datasources.ConfigurationPageAccess) {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Data sources",
-			Icon:        "database",
-			Description: "Add and manage your data sources. Data sources allow you to query, visualize and alert on data.",
-			Id:          "datasources",
-			Url:         hs.Cfg.AppSubURL + "/datasources",
+			Text:     "Data sources",
+			Icon:     "database",
+			SubTitle: "Add and manage your data sources. Data sources allow you to query, visualize and alert on data.",
+			Id:       "datasources",
+			Url:      hs.Cfg.AppSubURL + "/datasources",
 		})
 	}
 
 	if hasAccess(ac.ReqOrgAdmin, ac.EvalPermission(ac.ActionOrgUsersRead)) {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Users",
-			Id:          "users",
-			Description: "Manage org members",
-			Icon:        "user",
-			Url:         hs.Cfg.AppSubURL + "/org/users",
+			Text:     "Users",
+			Id:       "users",
+			SubTitle: "Manage organization users, change user permissions, and invite new users.",
+			Icon:     "user",
+			Url:      hs.Cfg.AppSubURL + "/org/users",
 		})
 	}
 
 	if hasAccess(hs.ReqCanAdminTeams, teamsAccessEvaluator) {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Teams",
-			Id:          "teams",
-			Description: "Manage org groups",
-			Icon:        "users-alt",
-			Url:         hs.Cfg.AppSubURL + "/org/teams",
+			Text:     "Teams",
+			Id:       "teams",
+			SubTitle: "Manage user teams. User teams can be used when setting permissions.",
+			Icon:     "users-alt",
+			Url:      hs.Cfg.AppSubURL + "/org/teams",
 		})
 	}
 
 	if c.OrgRole == models.ROLE_ADMIN {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Plugins",
-			Id:          "plugins",
-			Description: "View and configure plugins",
-			Icon:        "plug",
-			Url:         hs.Cfg.AppSubURL + "/plugins",
+			Text:     "Plugins",
+			Id:       "plugins",
+			SubTitle: "View and configure plugins",
+			Icon:     "plug",
+			Url:      hs.Cfg.AppSubURL + "/plugins",
 		})
 	}
 
 	if hasAccess(ac.ReqOrgAdmin, orgPreferencesAccessEvaluator) {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "Preferences",
-			Id:          "org-settings",
-			Description: "Organization preferences",
-			Icon:        "sliders-v-alt",
-			Url:         hs.Cfg.AppSubURL + "/org",
+			Text:     "Preferences",
+			Id:       "org-settings",
+			SubTitle: "Manage organization details and preferences",
+			Icon:     "sliders-v-alt",
+			Url:      hs.Cfg.AppSubURL + "/org",
 		})
 	}
 

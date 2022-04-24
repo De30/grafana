@@ -24,7 +24,7 @@ export const TeamSettings: FC<Props> = ({ team, updateTeam }) => {
 
   return (
     <VerticalGroup>
-      <FieldSet label="Team settings">
+      <FieldSet>
         <Form
           defaultValues={{ ...team }}
           onSubmit={(formTeam: Team) => {
@@ -40,7 +40,7 @@ export const TeamSettings: FC<Props> = ({ team, updateTeam }) => {
 
               <Field
                 label="Email"
-                description="This is optional and is primarily used to set the team profile avatar (via gravatar service)."
+                description="This is optional, used to define team profile avatar (via gravatar service)."
                 disabled={!canWriteTeamSettings}
               >
                 <Input {...register('email')} placeholder="team@email.com" type="email" id="email-input" />
@@ -52,6 +52,7 @@ export const TeamSettings: FC<Props> = ({ team, updateTeam }) => {
           )}
         </Form>
       </FieldSet>
+      <p>&nbsp;</p>
       <SharedPreferences resourceUri={`teams/${team.id}`} disabled={!canWriteTeamSettings} />
     </VerticalGroup>
   );

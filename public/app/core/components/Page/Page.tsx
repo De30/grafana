@@ -70,7 +70,7 @@ export function PagePanes({ navModel, children }: PagePanesProps) {
               )}
               {navModel.node.text}
             </h1>
-            {navModel.node.description && <div className={styles.pageDescription}>{navModel.node.description}</div>}
+            {navModel.node.subTitle && <div className={styles.pageSubTitle}>{navModel.node.subTitle}</div>}
             {navModel.node.children && (
               <>
                 <TabsBar>
@@ -130,8 +130,11 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: 'flex',
       marginBottom: theme.spacing(3),
     }),
-    pageDescription: css({
-      marginBottom: theme.spacing(3),
+    pageSubTitle: css({
+      marginBottom: theme.spacing(2),
+      position: 'relative',
+      top: theme.spacing(-1),
+      color: theme.colors.text.secondary,
     }),
     pageImg: css({
       width: '32px',
@@ -146,7 +149,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     pageInner: css({
       padding: theme.spacing(3),
       marginBottom: theme.spacing(2),
-      minHeight: '100% - 80px',
+      minHeight: 'calc(100% - 80px)',
     }),
     tabContent: css({
       paddingTop: theme.spacing(3),

@@ -46,6 +46,7 @@ type DashboardPageRouteSearchParams = {
   editPanel?: string;
   viewPanel?: string;
   editview?: string;
+  editIndex?: string;
   inspect?: string;
   from?: string;
   to?: string;
@@ -328,7 +329,8 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
     });
 
     const showSubMenu = !editPanel && kioskMode === KioskMode.Off && !this.props.queryParams.editview;
-    const navModel = buildDashboardNavModel(dashboard, queryParams.editview, this.props.history.location);
+    const editIndex = queryParams.editIndex ? parseInt(queryParams.editIndex, 10) : undefined;
+    const navModel = buildDashboardNavModel(dashboard, queryParams.editview, editIndex, this.props.history.location);
 
     return (
       <div className={containerClassNames}>
@@ -374,7 +376,12 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
         {inspectPanel && <PanelInspector dashboard={dashboard} panel={inspectPanel} />}
         {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} tab={this.props.queryParams.tab} />}
         {queryParams.editview && (
-          <DashboardSettings dashboard={dashboard} editview={queryParams.editview} navModel={navModel} />
+          <DashboardSettings
+            dashboard={dashboard}
+            editview={queryParams.editview}
+            editIndex={editIndex}
+            navModel={navModel}
+          />
         )}
       </div>
     );

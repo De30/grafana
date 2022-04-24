@@ -4,7 +4,6 @@ import { DashboardModel } from '../../state/DashboardModel';
 import { LinkSettingsEdit, LinkSettingsList } from '../LinksSettings';
 import { newLink } from '../LinksSettings/LinkSettingsEdit';
 
-import { DashboardSettingsHeader } from './DashboardSettingsHeader';
 interface Props {
   dashboard: DashboardModel;
 }
@@ -31,7 +30,6 @@ export const LinksSettings: React.FC<Props> = ({ dashboard }) => {
 
   return (
     <>
-      <DashboardSettingsHeader onGoBack={onGoBack} title="Dashboard links" isEditing={isEditing} />
       {!isEditing && <LinkSettingsList dashboard={dashboard} onNew={onNew} onEdit={onEdit} />}
       {isEditing && <LinkSettingsEdit dashboard={dashboard} editLinkIdx={editIdx!} onGoBack={onGoBack} />}
     </>

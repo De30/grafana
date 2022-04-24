@@ -2,9 +2,8 @@ import { useDialog } from '@react-aria/dialog';
 import { FocusScope } from '@react-aria/focus';
 import { useOverlay } from '@react-aria/overlays';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 
-import { locationUtil, NavModel } from '@grafana/data';
+import { NavModel } from '@grafana/data';
 import { Button, IconName, useForceUpdate } from '@grafana/ui';
 import { PagePanes } from 'app/core/components/Page/Page';
 import config from 'app/core/config';
@@ -25,6 +24,7 @@ import { VersionsSettings } from './VersionsSettings';
 export interface Props {
   dashboard: DashboardModel;
   editview: string;
+  editIndex?: number;
   navModel: NavModel;
 }
 
@@ -44,7 +44,7 @@ const MakeEditable = (props: { onMakeEditable: () => any }) => (
   </div>
 );
 
-export function DashboardSettings({ dashboard, editview, navModel }: Props) {
+export function DashboardSettings({ dashboard, editview, editIndex, navModel }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const { overlayProps } = useOverlay({}, ref);
   const { dialogProps } = useDialog(
@@ -77,7 +77,7 @@ export function DashboardSettings({ dashboard, editview, navModel }: Props) {
         title: 'Annotations',
         id: 'annotations',
         icon: 'comment-alt',
-        component: <AnnotationsSettings dashboard={dashboard} />,
+        component: <AnnotationsSettings dashboard={dashboard} editIndex={editIndex} />,
       });
 
       pages.push({
@@ -139,7 +139,7 @@ export function DashboardSettings({ dashboard, editview, navModel }: Props) {
     });
 
     return pages;
-  }, [dashboard, onMakeEditable]);
+  }, [dashboard, onMakeEditable, editIndex]);
 
   const currentPage = pages.find((page) => page.id === editview) ?? pages[0];
   // Temp hack, dashboard title is good for breadcrumb but not for section name in side sub nav

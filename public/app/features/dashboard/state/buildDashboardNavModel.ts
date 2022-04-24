@@ -10,6 +10,7 @@ import { DashboardModel } from './DashboardModel';
 export function buildDashboardNavModel(
   dashboard: DashboardModel,
   editview: string | undefined,
+  editIndex: number | undefined,
   location: Location<any>
 ): NavModel {
   let node: NavModelItem = {
@@ -17,10 +18,11 @@ export function buildDashboardNavModel(
     text: dashboard.title,
     icon: 'apps',
     active: true,
-    url: locationUtil.getUrlForPartial(location, { editview: null }),
+    url: locationUtil.getUrlForPartial(location, { editview: null, editIndex: null }),
     parentItem: {
       id: 'dashboard',
       text: 'Dashbords',
+      url: '/dashboards',
     },
     children: [],
   };
@@ -111,12 +113,25 @@ export function buildDashboardNavModel(
     main.children = children;
 
     for (const child of main.children) {
-      child.url = locationUtil.getUrlForPartial(location, { editview: child.id });
+      child.url = locationUtil.getUrlForPartial(location, { editview: child.id, editIndex: null });
       if (child.id === editview) {
         child.active = child.id === editview;
         node = child;
         node.parentItem = main;
         main.active = false;
+
+        if (editIndex != null) {
+          // node.active = false;
+
+          node = {
+            text: 'Annotation',
+            active: true,
+            parentItem: {
+              ...node,
+              active: false,
+            },
+          };
+        }
       }
     }
   }
