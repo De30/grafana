@@ -40,23 +40,25 @@ export function PageSubNav(props: Props) {
   );
 }
 
-const getStyles = (theme: GrafanaTheme2) => ({
-  nav: css({
-    display: 'flex',
-    flexDirection: 'column',
-    background: theme.colors.background.secondary,
-    padding: theme.spacing(3, 2),
-    width: '250px',
-  }),
-  sectionName: css({
-    display: 'flex',
-    gap: theme.spacing(1),
-    padding: theme.spacing(0, 0, 3, 0.25),
-    fontSize: theme.typography.h3.fontSize,
-    margin: 0,
-  }),
-  items: css({
-    paddingLeft: '9px',
-  }),
-  subNav: css``,
-});
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    nav: css({
+      display: 'flex',
+      flexDirection: 'column',
+      background: theme.colors.background.secondary,
+      padding: theme.spacing(3, 2),
+      width: '250px',
+    }),
+    sectionName: css({
+      display: 'flex',
+      gap: theme.spacing(1),
+      padding: theme.spacing(0, 0, 3, 0.25),
+      fontSize: theme.typography.h3.fontSize,
+      margin: 0,
+    }),
+    items: css({
+      paddingLeft: '9px',
+    }),
+    subNav: css``,
+  };
+};

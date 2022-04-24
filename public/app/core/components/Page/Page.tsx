@@ -79,45 +79,38 @@ Page.Contents = PageContents;
 
 export default Page;
 
-const getStyles = (theme: GrafanaTheme2) => ({
-  wrapper: css`
-    height: 100%;
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    min-height: 0;
-  `,
-  // scroll: css`
-  //   width: 100%;
-  //   flex-grow: 1;
-  //   min-height: 0;
-  //   display: flex;
-  // `,
-  panes: css({
-    display: 'flex',
-    height: '100%',
-    width: '100%',
-    flexGrow: 1,
-    minHeight: 0,
-  }),
-  subNav: css({
-    display: 'flex',
-    width: '300px',
-    flexShrink: 0,
-  }),
-  pageTitle: css({
-    marginBottom: theme.spacing(3),
-  }),
-  pageContent: css({
-    flexGrow: 1,
-    background: theme.colors.background.primary,
-    minHeight: '100% - 80px',
-    // display: 'flex',
-    // flexDirection: 'column',
-  }),
-  pageInner: css({
-    padding: theme.spacing(3),
-    marginBottom: theme.spacing(2),
-    // maxWidth: '1200px',
-  }),
-});
+const getStyles = (theme: GrafanaTheme2) => {
+  const shadow = theme.isDark
+    ? `0 0.6px 1.5px -1px rgb(0 0 0),0 2px 4px -1px rgb(0 0 0 / 40%),0 5px 10px -1px rgb(0 0 0 / 23%)`
+    : '0 0.6px 1.5px -1px rgb(0 0 0 / 8%),0 2px 4px rgb(0 0 0 / 6%),0 5px 10px -1px rgb(0 0 0 / 5%)';
+
+  return {
+    wrapper: css`
+      height: 100%;
+      display: flex;
+      flex: 1 1 0;
+      flex-direction: column;
+      min-height: 0;
+    `,
+    panes: css({
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+      flexGrow: 1,
+      minHeight: 0,
+    }),
+    pageTitle: css({
+      marginBottom: theme.spacing(3),
+    }),
+    pageContent: css({
+      flexGrow: 1,
+      background: theme.colors.background.primary,
+      boxShadow: shadow,
+    }),
+    pageInner: css({
+      padding: theme.spacing(3),
+      marginBottom: theme.spacing(2),
+      minHeight: '100% - 80px',
+    }),
+  };
+};
