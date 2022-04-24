@@ -70,7 +70,9 @@ const getStyles = (theme: GrafanaTheme2) => {
       flexDirection: 'column',
       background: theme.colors.background.secondary,
       padding: theme.spacing(3, 2),
-      width: '250px',
+      [theme.breakpoints.up('md')]: {
+        width: '250px',
+      },
     }),
     sectionName: css({
       display: 'flex',

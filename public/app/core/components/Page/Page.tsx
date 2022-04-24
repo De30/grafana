@@ -125,6 +125,10 @@ const getStyles = (theme: GrafanaTheme2) => {
       width: '100%',
       flexGrow: 1,
       minHeight: 0,
+      flexDirection: 'column',
+      [theme.breakpoints.up('md')]: {
+        flexDirection: 'row',
+      },
     }),
     pageTitle: css({
       display: 'flex',
