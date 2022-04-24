@@ -3,11 +3,12 @@ import { useDialog } from '@react-aria/dialog';
 import { FocusScope } from '@react-aria/focus';
 import { useOverlay } from '@react-aria/overlays';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
-import { GrafanaTheme2, locationUtil } from '@grafana/data';
+import { GrafanaTheme2, locationUtil, NavModel } from '@grafana/data';
 import { locationService, reportInteraction } from '@grafana/runtime';
 import { Button, CustomScrollbar, Icon, IconName, stylesFactory, useForceUpdate } from '@grafana/ui';
+import { PagePanes } from 'app/core/components/Page/Page';
 import config from 'app/core/config';
 import { contextSrv } from 'app/core/services/context_srv';
 import { AccessControlAction } from 'app/types';
@@ -151,37 +152,34 @@ export function DashboardSettings({ dashboard, editview }: Props) {
   const canSaveAs = contextSrv.hasEditPermissionInFolders;
   const canSave = dashboard.meta.canSave;
   const styles = getStyles(config.theme2);
+  const location = useLocation();
+  const navModel: NavModel = {
+    main: {
+      id: 'settings',
+      icon: 'apps',
+      text: 'Settings',
+      children: pages.map((page) => ({
+        id: page.id,
+        text: page.title,
+        active: page.id === editview,
+        url: locationUtil.getUrlForPartial(location, { editview: page.id }),
+      })),
+    },
+    node: {
+      text: currentPage.title,
+      id: currentPage.id,
+    },
+  };
 
   return (
     <FocusScope contain autoFocus restoreFocus>
       <div className="dashboard-settings" ref={ref} {...overlayProps} {...dialogProps}>
-        {/* <PageToolbar title={`${dashboard.title} / Settings`} parent={folderTitle} onGoBack={onClose} /> */}
-        <CustomScrollbar>
-          <div className={styles.scrollInner}>
-            <div className={styles.settingsWrapper}>
-              <aside className="dashboard-settings__aside">
-                {pages.map((page) => (
-                  <Link
-                    onClick={() => reportInteraction(`Dashboard settings navigation to ${page.id}`)}
-                    to={(loc) => locationUtil.getUrlForPartial(loc, { editview: page.id })}
-                    className={cx('dashboard-settings__nav-item', { active: page.id === editview })}
-                    key={page.id}
-                  >
-                    <Icon name={page.icon} style={{ marginRight: '4px' }} />
-                    {page.title}
-                  </Link>
-                ))}
-                <div className="dashboard-settings__aside-actions">
+        <PagePanes navModel={navModel}>{currentPage.component}</PagePanes>
+        {/* <CustomScrollbar>
                   {canSave && <SaveDashboardButton dashboard={dashboard} onSaveSuccess={onPostSave} />}
                   {canSaveAs && (
                     <SaveDashboardAsButton dashboard={dashboard} onSaveSuccess={onPostSave} variant="secondary" />
-                  )}
-                </div>
-              </aside>
-              <div className={styles.settingsContent}>{currentPage.component}</div>
-            </div>
-          </div>
-        </CustomScrollbar>
+        </CustomScrollbar> */}
       </div>
     </FocusScope>
   );

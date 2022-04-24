@@ -45,21 +45,34 @@ export const Page: PageType = ({ navModel, children, className, ...otherProps })
   return (
     <div {...otherProps} className={cx(styles.wrapper, className)}>
       <PageToolbar navModel={navModel.node} onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())} />
-      <div className={styles.panes}>
-        <PageSubNav model={navModel} />
-        <div className={styles.pageContent}>
-          <CustomScrollbar autoHeightMin={'100%'}>
-            <div className={styles.pageInner}>
-              <h1 className={styles.pageTitle}>{navModel.node.text}</h1>
-              {children}
-            </div>
-            <Footer />
-          </CustomScrollbar>
-        </div>
-      </div>
+      <PagePanes navModel={navModel}>{children}</PagePanes>
     </div>
   );
 };
+
+export interface PagePanesProps {
+  navModel: NavModel;
+  children: React.ReactNode;
+}
+
+export function PagePanes({ navModel, children }: PagePanesProps) {
+  const styles = useStyles2(getStyles);
+
+  return (
+    <div className={styles.panes}>
+      <PageSubNav model={navModel} />
+      <div className={styles.pageContent}>
+        <CustomScrollbar autoHeightMin={'100%'}>
+          <div className={styles.pageInner}>
+            <h1 className={styles.pageTitle}>{navModel.node.text}</h1>
+            {children}
+          </div>
+          <Footer />
+        </CustomScrollbar>
+      </div>
+    </div>
+  );
+}
 
 Page.Header = PageHeader;
 Page.Contents = PageContents;

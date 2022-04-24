@@ -338,6 +338,7 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
               isFullscreen={!!viewPanel}
               onAddPanel={this.onAddPanel}
               kioskMode={kioskMode}
+              editview={queryParams.editview}
               hideTimePicker={dashboard.timepicker.hidden}
             />
           </header>

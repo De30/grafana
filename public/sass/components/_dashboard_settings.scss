@@ -2,11 +2,11 @@
   position: fixed;
   height: 100%;
   width: 100%;
-  top: 100px;
+  top: 80px;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: $zindex-sidemenu;
+  z-index: 1;
   background: $dashboard-bg;
   display: flex;
   flex-direction: column;

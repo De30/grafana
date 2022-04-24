@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { NavModelItem, textUtil } from '@grafana/data';
+import { NavModel, NavModelItem, textUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
@@ -32,7 +32,7 @@ export interface OwnProps {
   isFullscreen: boolean;
   kioskMode: KioskMode;
   hideTimePicker: boolean;
-  settingsOpen?: boolean;
+  editview?: string;
   folderTitle?: string;
   title: string;
   onAddPanel: () => void;
@@ -198,7 +198,7 @@ export const DashNav = React.memo<Props>((props) => {
   };
 
   const renderRightActionsButton = () => {
-    const { dashboard, onAddPanel, isFullscreen, kioskMode, settingsOpen } = props;
+    const { dashboard, onAddPanel, isFullscreen, kioskMode, editview } = props;
     const { canSave, canEdit, showSettings } = dashboard.meta;
     const { snapshot } = dashboard;
     const snapshotUrl = snapshot && snapshot.originalUrl;
@@ -215,7 +215,7 @@ export const DashNav = React.memo<Props>((props) => {
       return [renderTimeControls(), tvButton];
     }
 
-    if (canEdit && !isFullscreen && !settingsOpen) {
+    if (canEdit && !isFullscreen && !editview) {
       buttons.push(<ToolbarButton tooltip="Add panel" icon="panel-add" onClick={onAddPanel} key="button-panel-add" />);
     }
 
@@ -249,7 +249,7 @@ export const DashNav = React.memo<Props>((props) => {
       );
     }
 
-    if (!settingsOpen) {
+    if (!editview) {
       if (showSettings) {
         buttons.push(
           <ToolbarButton tooltip="Dashboard settings" icon="cog" onClick={onOpenSettings} key="button-settings" />
@@ -267,34 +267,17 @@ export const DashNav = React.memo<Props>((props) => {
     window.location.href = textUtil.sanitizeUrl(snapshotUrl);
   };
 
-  const { isFullscreen, title, folderTitle } = props;
+  const { isFullscreen } = props;
   // this ensures the component rerenders when the location changes
   // const location = useLocation();
   // const titleHref = locationUtil.getUrlForPartial(location, { search: 'open' });
   // const parentHref = locationUtil.getUrlForPartial(location, { search: 'open', folder: 'current' });
   const onGoBack = isFullscreen ? onClose : undefined;
-  const model: NavModelItem = {
-    id: 'dashboard',
-    text: title,
-    active: true,
-    parentItem: {
-      id: 'dashboard',
-      text: 'Dashbords',
-    },
-  };
-
-  if (folderTitle) {
-    model.parentItem = {
-      id: 'folder',
-      text: folderTitle,
-      url: `/dashboards/f/${props.dashboard.meta.folderUid}`,
-      parentItem: model.parentItem,
-    };
-  }
+  const navModel = buildDashboardNavModel(props.dashboard, props.editview);
 
   return (
     <PageToolbar
-      navModel={model}
+      navModel={navModel.node}
       onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
       onGoBack={onGoBack}
       leftItems={renderLeftActionsButton()}
@@ -307,3 +290,29 @@ export const DashNav = React.memo<Props>((props) => {
 DashNav.displayName = 'DashNav';
 
 export default connector(DashNav);
+
+function buildDashboardNavModel(dashboard: DashboardModel, editview: string | undefined): NavModel {
+  let node: NavModelItem = {
+    id: 'dashboard',
+    text: dashboard.title,
+    active: true,
+    parentItem: {
+      id: 'dashboard',
+      text: 'Dashbords',
+    },
+  };
+
+  if (dashboard.meta.folderTitle) {
+    node.parentItem = {
+      id: 'folder',
+      text: dashboard.meta.folderTitle,
+      url: `/dashboards/f/${dashboard.meta.folderUid}`,
+      parentItem: node.parentItem,
+    };
+  }
+
+  return {
+    main: node,
+    node,
+  };
+}
