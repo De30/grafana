@@ -1,10 +1,10 @@
 import { css, cx } from '@emotion/css';
 import React, { HTMLProps } from 'react';
 
-import { GrafanaTheme } from '@grafana/data';
+import { GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
-import { stylesFactory, useTheme } from '../../themes';
+import { useStyles2 } from '../../themes/ThemeContext';
 import { IconName } from '../../types';
 import { Icon } from '../Icon/Icon';
 
@@ -23,8 +23,7 @@ export interface TabProps extends HTMLProps<HTMLLIElement> {
 
 export const VerticalTab = React.forwardRef<HTMLLIElement, TabProps>(
   ({ label, active, icon, onChangeTab, counter, className, href, ...otherProps }, ref) => {
-    const theme = useTheme();
-    const tabsStyles = getTabStyles(theme);
+    const tabsStyles = useStyles2(getTabStyles);
     const content = () => (
       <>
         {icon && <Icon name={icon} />}
@@ -55,21 +54,19 @@ export const VerticalTab = React.forwardRef<HTMLLIElement, TabProps>(
 
 VerticalTab.displayName = 'Tab';
 
-const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
-  const colors = theme.colors;
-
+const getTabStyles = (theme: GrafanaTheme2) => {
   return {
     tabItem: css`
       list-style: none;
-      margin-right: ${theme.spacing.md};
+      margin-right: ${theme.spacing(2)};
       position: relative;
       display: block;
-      color: ${colors.text};
+      color: ${theme.colors.text.primary};
       cursor: pointer;
       margin-bottom: 4px;
 
       svg {
-        margin-right: ${theme.spacing.sm};
+        margin-right: ${theme.spacing(1)};
       }
 
       a {
@@ -79,9 +76,6 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
 
       &:hover,
       &:focus {
-        color: ${colors.linkHover};
-        background: linear-gradient(90deg, ff790029, #8eff0000);
-
         a {
           text-decoration: underline;
         }
@@ -92,7 +86,7 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
     `,
     activeStyle: css`
       label: activeTabStyle;
-      color: ${colors.link};
+      color: ${theme.colors.text.maxContrast};
       overflow: hidden;
 
       &::before {
@@ -108,4 +102,4 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       }
     `,
   };
-});
+};

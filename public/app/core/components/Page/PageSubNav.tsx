@@ -80,12 +80,12 @@ const getStyles = (theme: GrafanaTheme2) => {
       margin: 0,
     }),
     items: css({
-      paddingLeft: '9px',
+      // paddingLeft: '9px',
     }),
     subSection: css({
-      paddingTop: theme.spacing(3),
+      padding: theme.spacing(3, 0, 1, 1),
       fontWeight: 500,
-      color: theme.colors.text.secondary,
+      fontSize: '16px',
     }),
   };
 };
