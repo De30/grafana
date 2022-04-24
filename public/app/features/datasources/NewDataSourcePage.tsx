@@ -2,10 +2,11 @@ import { css, cx } from '@emotion/css';
 import React, { FC, PureComponent } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DataSourcePluginMeta, GrafanaTheme2, NavModel } from '@grafana/data';
+import { DataSourcePluginMeta, GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { Card, LinkButton, List, PluginSignatureBadge, FilterInput, useStyles2 } from '@grafana/ui';
 import Page from 'app/core/components/Page/Page';
+import { getNavModel } from 'app/core/selectors/navModel';
 import { StoreState } from 'app/types';
 
 import { PluginsErrorsInfo } from '../plugins/components/PluginsErrorsInfo';
@@ -15,8 +16,20 @@ import { setDataSourceTypeSearchQuery } from './state/reducers';
 import { getDataSourcePlugins } from './state/selectors';
 
 function mapStateToProps(state: StoreState) {
+  const navModel = getNavModel(state.navIndex, 'datasources');
+  navModel.node.active = false;
+
+  navModel.node = {
+    id: 'datasource-new',
+    text: 'Add data source',
+    url: 'datasources/new',
+    parentItem: navModel.node,
+    active: true,
+    subTitle: 'Choose a data source type',
+  };
+
   return {
-    navModel: getNavModel(),
+    navModel: navModel,
     plugins: getDataSourcePlugins(state.dataSources),
     searchQuery: state.dataSources.dataSourceTypeSearchQuery,
     categories: state.dataSources.categories,
@@ -223,21 +236,6 @@ function getStyles(theme: GrafanaTheme2) {
       width: theme.spacing(7),
       maxHeight: theme.spacing(7),
     }),
-  };
-}
-
-export function getNavModel(): NavModel {
-  const main = {
-    icon: 'database',
-    id: 'datasource-new',
-    text: 'Add data source',
-    href: 'datasources/new',
-    subTitle: 'Choose a data source type',
-  };
-
-  return {
-    main: main,
-    node: main,
   };
 }
 
