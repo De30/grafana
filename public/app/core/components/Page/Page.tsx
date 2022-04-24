@@ -60,7 +60,7 @@ export function PagePanes({ navModel, children }: PagePanesProps) {
 
   return (
     <div className={styles.panes}>
-      <PageSubNav model={navModel} />
+      {navModel.main.children && <PageSubNav model={navModel} />}
       <div className={styles.pageContent}>
         <CustomScrollbar autoHeightMin={'100%'}>
           <div className={styles.pageInner}>
