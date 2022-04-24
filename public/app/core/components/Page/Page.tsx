@@ -153,7 +153,9 @@ const getStyles = (theme: GrafanaTheme2) => {
     pageInner: css({
       padding: theme.spacing(3),
       marginBottom: theme.spacing(2),
-      minHeight: 'calc(100% - 80px)',
+      display: 'flex',
+      flexDirection: 'column',
+      flexGrow: 1,
     }),
     tabContent: css({
       paddingTop: theme.spacing(3),

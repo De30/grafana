@@ -27,7 +27,7 @@ export function buildDashboardNavModel(
     children: [],
   };
 
-  if (dashboard.meta.folderTitle) {
+  if (dashboard.meta.folderTitle && dashboard.meta.folderUid) {
     node.parentItem = {
       id: 'folder',
       text: dashboard.meta.folderTitle,
