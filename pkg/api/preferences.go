@@ -7,7 +7,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
-	pref "github.com/grafana/grafana/pkg/services/preference"
 	"github.com/grafana/grafana/pkg/web"
 )
 
@@ -19,14 +18,14 @@ const (
 
 // POST /api/preferences/set-home-dash
 func (hs *HTTPServer) SetHomeDashboard(c *models.ReqContext) response.Response {
-	cmd := pref.SavePreferenceCommand{}
+	cmd := models.SavePreferencesCommand{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
-	cmd.UserID = c.UserId
-	cmd.OrgID = c.OrgId
+	cmd.UserId = c.UserId
+	cmd.OrgId = c.OrgId
 
-	if err := hs.preferenceService.Save(c.Req.Context(), &cmd); err != nil {
+	if err := hs.SQLStore.SavePreferences(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to set home dashboard", err)
 	}
 
@@ -39,23 +38,22 @@ func (hs *HTTPServer) GetUserPreferences(c *models.ReqContext) response.Response
 }
 
 func (hs *HTTPServer) getPreferencesFor(ctx context.Context, orgID, userID, teamID int64) response.Response {
-	prefsQuery := pref.GetPreferenceQuery{UserID: userID, OrgID: orgID, TeamID: teamID}
+	prefsQuery := models.GetPreferencesQuery{UserId: userID, OrgId: orgID, TeamId: teamID}
 
-	preference, err := hs.preferenceService.Get(ctx, &prefsQuery)
-	if err != nil {
+	if err := hs.SQLStore.GetPreferences(ctx, &prefsQuery); err != nil {
 		return response.Error(500, "Failed to get preferences", err)
 	}
 
 	dto := dtos.Prefs{
-		Theme:           preference.Theme,
-		HomeDashboardID: preference.HomeDashboardID,
-		Timezone:        preference.Timezone,
-		WeekStart:       preference.WeekStart,
+		Theme:           prefsQuery.Result.Theme,
+		HomeDashboardID: prefsQuery.Result.HomeDashboardId,
+		Timezone:        prefsQuery.Result.Timezone,
+		WeekStart:       prefsQuery.Result.WeekStart,
 	}
 
-	if preference.JSONData != nil {
-		dto.Navbar = preference.JSONData.Navbar
-		dto.QueryHistory = preference.JSONData.QueryHistory
+	if prefsQuery.Result.JsonData != nil {
+		dto.Navbar = prefsQuery.Result.JsonData.Navbar
+		dto.QueryHistory = prefsQuery.Result.JsonData.QueryHistory
 	}
 
 	return response.JSON(http.StatusOK, &dto)
@@ -74,17 +72,17 @@ func (hs *HTTPServer) updatePreferencesFor(ctx context.Context, orgID, userID, t
 	if dtoCmd.Theme != lightTheme && dtoCmd.Theme != darkTheme && dtoCmd.Theme != defaultTheme {
 		return response.Error(400, "Invalid theme", nil)
 	}
-	saveCmd := pref.SavePreferenceCommand{
-		UserID:          userID,
-		OrgID:           orgID,
-		TeamID:          teamId,
+	saveCmd := models.SavePreferencesCommand{
+		UserId:          userID,
+		OrgId:           orgID,
+		TeamId:          teamId,
 		Theme:           dtoCmd.Theme,
 		Timezone:        dtoCmd.Timezone,
 		WeekStart:       dtoCmd.WeekStart,
-		HomeDashboardID: dtoCmd.HomeDashboardID,
+		HomeDashboardId: dtoCmd.HomeDashboardID,
 	}
 
-	if err := hs.preferenceService.Save(ctx, &saveCmd); err != nil {
+	if err := hs.SQLStore.SavePreferences(ctx, &saveCmd); err != nil {
 		return response.Error(500, "Failed to save preferences", err)
 	}
 
@@ -104,19 +102,19 @@ func (hs *HTTPServer) patchPreferencesFor(ctx context.Context, orgID, userID, te
 	if dtoCmd.Theme != nil && *dtoCmd.Theme != lightTheme && *dtoCmd.Theme != darkTheme && *dtoCmd.Theme != defaultTheme {
 		return response.Error(400, "Invalid theme", nil)
 	}
-	patchCmd := pref.PatchPreferenceCommand{
-		UserID:          userID,
-		OrgID:           orgID,
-		TeamID:          teamId,
+	patchCmd := models.PatchPreferencesCommand{
+		UserId:          userID,
+		OrgId:           orgID,
+		TeamId:          teamId,
 		Theme:           dtoCmd.Theme,
 		Timezone:        dtoCmd.Timezone,
 		WeekStart:       dtoCmd.WeekStart,
-		HomeDashboardID: dtoCmd.HomeDashboardID,
+		HomeDashboardId: dtoCmd.HomeDashboardID,
 		Navbar:          dtoCmd.Navbar,
 		QueryHistory:    dtoCmd.QueryHistory,
 	}
 
-	if err := hs.preferenceService.Patch(ctx, &patchCmd); err != nil {
+	if err := hs.SQLStore.PatchPreferences(ctx, &patchCmd); err != nil {
 		return response.Error(500, "Failed to save preferences", err)
 	}
 

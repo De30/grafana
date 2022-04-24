@@ -15,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
-	pref "github.com/grafana/grafana/pkg/services/preference"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -415,17 +414,16 @@ func (hs *HTTPServer) buildSavedItemsNavLinks(c *models.ReqContext) ([]*dtos.Nav
 	savedItemsChildNavs := []*dtos.NavLink{}
 
 	// query preferences table for any saved items
-	prefsQuery := pref.GetPreferenceWithDefaultsQuery{UserID: c.SignedInUser.UserId}
-	preference, err := hs.preferenceService.GetWithDefaults(c.Req.Context(), &prefsQuery)
-	if err != nil {
+	prefsQuery := models.GetPreferencesWithDefaultsQuery{User: c.SignedInUser}
+	if err := hs.SQLStore.GetPreferencesWithDefaults(c.Req.Context(), &prefsQuery); err != nil {
 		return nil, err
 	}
-	savedItems := preference.JSONData.Navbar.SavedItems
+	savedItems := prefsQuery.Result.JsonData.Navbar.SavedItems
 
 	if len(savedItems) > 0 {
 		for _, savedItem := range savedItems {
 			savedItemsChildNavs = append(savedItemsChildNavs, &dtos.NavLink{
-				Id:     savedItem.ID,
+				Id:     savedItem.Id,
 				Text:   savedItem.Text,
 				Url:    savedItem.Url,
 				Target: savedItem.Target,
@@ -665,11 +663,11 @@ func (hs *HTTPServer) setIndexViewData(c *models.ReqContext) (*dtos.IndexViewDat
 
 	settings["dateFormats"] = hs.Cfg.DateFormats
 
-	prefsQuery := pref.GetPreferenceWithDefaultsQuery{UserID: c.SignedInUser.UserId}
-	prefs, err := hs.preferenceService.GetWithDefaults(c.Req.Context(), &prefsQuery)
-	if err != nil {
+	prefsQuery := models.GetPreferencesWithDefaultsQuery{User: c.SignedInUser}
+	if err := hs.SQLStore.GetPreferencesWithDefaults(c.Req.Context(), &prefsQuery); err != nil {
 		return nil, err
 	}
+	prefs := prefsQuery.Result
 
 	// Read locale from accept-language
 	acceptLang := c.Req.Header.Get("Accept-Language")

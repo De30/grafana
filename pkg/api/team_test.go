@@ -11,8 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	pref "github.com/grafana/grafana/pkg/services/preference"
-	"github.com/grafana/grafana/pkg/services/preference/preftest"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/setting"
@@ -377,10 +375,6 @@ func TestTeamAPIEndpoint_GetTeamPreferences_RBAC(t *testing.T) {
 	sc.db = sqlstore.InitTestDB(t)
 	_, err := sc.db.CreateTeam("team1", "", 1)
 
-	prefService := preftest.NewPreferenceServiceFake()
-	prefService.ExpectedPreference = &pref.Preference{}
-	sc.hs.preferenceService = prefService
-
 	require.NoError(t, err)
 
 	setInitCtxSignedInViewer(sc.initCtx)
@@ -404,13 +398,7 @@ func TestTeamAPIEndpoint_GetTeamPreferences_RBAC(t *testing.T) {
 // else return 403
 func TestTeamAPIEndpoint_UpdateTeamPreferences_RBAC(t *testing.T) {
 	sc := setupHTTPServer(t, true, true)
-	sqlStore := sqlstore.InitTestDB(t)
-	sc.db = sqlStore
-
-	prefService := preftest.NewPreferenceServiceFake()
-	prefService.ExpectedPreference = &pref.Preference{Theme: "dark"}
-	sc.hs.preferenceService = prefService
-
+	sc.db = sqlstore.InitTestDB(t)
 	_, err := sc.db.CreateTeam("team1", "", 1)
 
 	require.NoError(t, err)
@@ -423,10 +411,10 @@ func TestTeamAPIEndpoint_UpdateTeamPreferences_RBAC(t *testing.T) {
 		response := callAPI(sc.server, http.MethodPut, fmt.Sprintf(detailTeamPreferenceURL, 1), input, t)
 		assert.Equal(t, http.StatusOK, response.Code)
 
-		prefQuery := &pref.GetPreferenceQuery{OrgID: 1, TeamID: 1}
-		preference, err := prefService.Get(context.Background(), prefQuery)
+		prefQuery := &models.GetPreferencesQuery{OrgId: 1, TeamId: 1, Result: &models.Preferences{}}
+		err := sc.db.GetPreferences(context.Background(), prefQuery)
 		require.NoError(t, err)
-		assert.Equal(t, "dark", preference.Theme)
+		assert.Equal(t, "dark", prefQuery.Result.Theme)
 	})
 
 	input = strings.NewReader(teamPreferenceCmdLight)
@@ -435,9 +423,9 @@ func TestTeamAPIEndpoint_UpdateTeamPreferences_RBAC(t *testing.T) {
 		response := callAPI(sc.server, http.MethodPut, fmt.Sprintf(detailTeamPreferenceURL, 1), input, t)
 		assert.Equal(t, http.StatusForbidden, response.Code)
 
-		prefQuery := &pref.GetPreferenceQuery{OrgID: 1, TeamID: 1}
-		preference, err := prefService.Get(context.Background(), prefQuery)
+		prefQuery := &models.GetPreferencesQuery{OrgId: 1, TeamId: 1, Result: &models.Preferences{}}
+		err := sc.db.GetPreferences(context.Background(), prefQuery)
 		assert.NoError(t, err)
-		assert.Equal(t, "dark", preference.Theme)
+		assert.Equal(t, "dark", prefQuery.Result.Theme)
 	})
 }

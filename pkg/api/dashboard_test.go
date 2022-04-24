@@ -28,8 +28,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/guardian"
 	"github.com/grafana/grafana/pkg/services/libraryelements"
 	"github.com/grafana/grafana/pkg/services/live"
-	pref "github.com/grafana/grafana/pkg/services/preference"
-	"github.com/grafana/grafana/pkg/services/preference/preftest"
 	"github.com/grafana/grafana/pkg/services/provisioning"
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -45,13 +43,11 @@ func TestGetHomeDashboard(t *testing.T) {
 	req := &models.ReqContext{SignedInUser: &models.SignedInUser{}, Context: &web.Context{Req: httpReq}}
 	cfg := setting.NewCfg()
 	cfg.StaticRootPath = "../../public/"
-	prefService := preftest.NewPreferenceServiceFake()
 
 	hs := &HTTPServer{
-		Cfg:               cfg,
-		pluginStore:       &fakePluginStore{},
-		SQLStore:          mockstore.NewSQLStoreMock(),
-		preferenceService: prefService,
+		Cfg:         cfg,
+		pluginStore: &fakePluginStore{},
+		SQLStore:    mockstore.NewSQLStoreMock(),
 	}
 
 	tests := []struct {
@@ -74,8 +70,6 @@ func TestGetHomeDashboard(t *testing.T) {
 			hs.Cfg.DefaultHomeDashboardPath = tc.defaultSetting
 			bytes, err := simplejson.NewJson(homeDashJSON)
 			require.NoError(t, err, "must be able to encode file as JSON")
-
-			prefService.ExpectedPreference = &pref.Preference{}
 
 			dash.Dashboard = bytes
 

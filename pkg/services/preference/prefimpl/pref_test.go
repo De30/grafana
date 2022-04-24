@@ -73,42 +73,30 @@ func TestPreferencesService(t *testing.T) {
 		Navbar: team1NavbarPreferences,
 	}
 
-	t.Run("Get should return nothing", func(t *testing.T) {
-		prefStoreFake.ExpectedGetError = pref.ErrPrefNotFound
-		preference, err := prefService.Get(context.Background(), &pref.GetPreferenceQuery{})
-		require.NoError(t, err)
-		expected := &pref.Preference{}
-		if diff := cmp.Diff(expected, preference); diff != "" {
-			t.Fatalf("Result mismatch (-want +got):\n%s", diff)
-		}
-		prefStoreFake.ExpectedError = nil
-	})
-
 	t.Run("GetDefaults should return defaults", func(t *testing.T) {
 		prefService.cfg = setting.NewCfg()
 		prefService.cfg.DefaultTheme = "light"
 		prefService.cfg.DateFormats.DefaultTimezone = "UTC"
 
-		preference := prefService.GetDefaults()
+		preferences := prefService.GetDefaults()
 		expected := &pref.Preference{
 			Theme:           "light",
 			Timezone:        "UTC",
 			HomeDashboardID: 0,
 			JSONData:        &pref.PreferenceJSONData{},
 		}
-		if diff := cmp.Diff(expected, preference); diff != "" {
+		if diff := cmp.Diff(expected, preferences); diff != "" {
 			t.Fatalf("Result mismatch (-want +got):\n%s", diff)
 		}
 	})
 
 	t.Run("GetDefaults with no saved preferences should return defaults", func(t *testing.T) {
-		prefStoreFake.ExpectedError = nil
 		prefStoreFake.ExpectedPreference = &pref.Preference{
 			Theme:    "light",
 			Timezone: "UTC",
 		}
 		query := &pref.GetPreferenceWithDefaultsQuery{}
-		preference, err := prefService.GetWithDefaults(context.Background(), query)
+		preferences, err := prefService.GetWithDefaults(context.Background(), query)
 		require.NoError(t, err)
 		expected := &pref.Preference{
 			Theme:           "light",
@@ -116,7 +104,7 @@ func TestPreferencesService(t *testing.T) {
 			HomeDashboardID: 0,
 			JSONData:        &emptyPreferencesJsonData,
 		}
-		if diff := cmp.Diff(expected, preference); diff != "" {
+		if diff := cmp.Diff(expected, preferences); diff != "" {
 			t.Fatalf("Result mismatch (-want +got):\n%s", diff)
 		}
 	})
@@ -139,7 +127,7 @@ func TestPreferencesService(t *testing.T) {
 			},
 		}
 		query := &pref.GetPreferenceWithDefaultsQuery{OrgID: 1, UserID: 1}
-		preference, err := prefService.GetWithDefaults(context.Background(), query)
+		preferences, err := prefService.GetWithDefaults(context.Background(), query)
 		require.NoError(t, err)
 		expected := &pref.Preference{
 			Theme:           "light",
@@ -148,7 +136,7 @@ func TestPreferencesService(t *testing.T) {
 			HomeDashboardID: 4,
 			JSONData:        &pref.PreferenceJSONData{},
 		}
-		if diff := cmp.Diff(expected, preference); diff != "" {
+		if diff := cmp.Diff(expected, preferences); diff != "" {
 			t.Fatalf("Result mismatch (-want +got):\n%s", diff)
 		}
 	})
@@ -174,7 +162,7 @@ func TestPreferencesService(t *testing.T) {
 		}
 		prefService.GetDefaults().HomeDashboardID = 1
 		query := &pref.GetPreferenceWithDefaultsQuery{OrgID: 1, UserID: 2}
-		preference, err := prefService.GetWithDefaults(context.Background(), query)
+		preferences, err := prefService.GetWithDefaults(context.Background(), query)
 		require.NoError(t, err)
 		expected := &pref.Preference{
 			Theme:           "light",
@@ -183,7 +171,7 @@ func TestPreferencesService(t *testing.T) {
 			HomeDashboardID: 4,
 			JSONData:        &pref.PreferenceJSONData{},
 		}
-		if diff := cmp.Diff(expected, preference); diff != "" {
+		if diff := cmp.Diff(expected, preferences); diff != "" {
 			t.Fatalf("Result mismatch (-want +got):\n%s", diff)
 		}
 	})
