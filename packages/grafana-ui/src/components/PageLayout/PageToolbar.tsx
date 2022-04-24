@@ -156,8 +156,11 @@ PageToolbar.displayName = 'PageToolbar';
 
 const getStyles = (theme: GrafanaTheme2) => {
   const { spacing, typography } = theme;
-
+  const shadow = theme.isDark
+    ? `0 0.6px 1.5px rgb(0 0 0), 0 2px 4px rgb(0 0 0 / 40%), 0 5px 10px rgb(0 0 0 / 23%)`
+    : '0 0.6px 1.5px rgb(0 0 0 / 8%), 0 2px 4px rgb(0 0 0 / 6%), 0 5px 10px rgb(0 0 0 / 5%)';
   const focusStyle = getFocusStyles(theme);
+
   const titleStyles = css`
     font-size: ${typography.body.fontSize};
     font-weight: ${typography.fontWeightMedium};
@@ -183,18 +186,23 @@ const getStyles = (theme: GrafanaTheme2) => {
       padding: ${theme.spacing(0, 2)};
       height: 40px;
       flex-shrink: 0;
-      box-shadow: 0 0 10px ${theme.isDark ? '#040404' : '#666'};
+      box-shadow: ${shadow};
       border-bottom: 1px solid ${theme.colors.border.weak};
       position: relative;
       z-index: ${theme.zIndex.sidemenu};
 
+      // .toolbar-button {
+      //   height: 40px;
+      //   padding: ${theme.spacing(0, 2)};
+      //   border-top: none;
+      //   border-right: none;
+      //   border-bottom: none;
+      //   border-radius: 0;
+      // }
+
       .toolbar-button {
-        height: 40px;
-        padding: ${theme.spacing(0, 2)};
-        border-top: none;
-        border-right: none;
-        border-bottom: none;
-        border-radius: 0;
+        border: none;
+        background: transparent;
       }
     `,
     spacer: css`
@@ -249,8 +257,10 @@ const getStyles = (theme: GrafanaTheme2) => {
       // }
     `,
     breadcrumbLink: css`
-      background-color: #374054;
+      background-color: ${theme.isDark ? '#374054' : '#ccddfe'};
       padding: ${theme.spacing(0.5, 2)};
+      font-weight: 500;
+      color: ${theme.isDark ? theme.colors.text : '#41587f'};
       clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
 
       &:hover {
@@ -259,6 +269,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     `,
     breadcrumbLinkActive: css`
       background-color: ${theme.colors.secondary.main};
+      color: ${theme.colors.text.secondary};
       padding: ${theme.spacing(0.5, 2)};
       clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
 
@@ -291,7 +302,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       }
     `,
     actionWrapper: css`
-      // padding: ${spacing(0.5, 0, 0.5, 1)};
+      padding: ${spacing(0.5, 0, 0.5, 1)};
     `,
     leftActionItem: css`
       display: none;

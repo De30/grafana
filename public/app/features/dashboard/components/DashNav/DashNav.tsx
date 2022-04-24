@@ -32,6 +32,7 @@ export interface OwnProps {
   isFullscreen: boolean;
   kioskMode: KioskMode;
   hideTimePicker: boolean;
+  settingsOpen?: boolean;
   folderTitle?: string;
   title: string;
   onAddPanel: () => void;
@@ -197,7 +198,7 @@ export const DashNav = React.memo<Props>((props) => {
   };
 
   const renderRightActionsButton = () => {
-    const { dashboard, onAddPanel, isFullscreen, kioskMode } = props;
+    const { dashboard, onAddPanel, isFullscreen, kioskMode, settingsOpen } = props;
     const { canSave, canEdit, showSettings } = dashboard.meta;
     const { snapshot } = dashboard;
     const snapshotUrl = snapshot && snapshot.originalUrl;
@@ -214,7 +215,7 @@ export const DashNav = React.memo<Props>((props) => {
       return [renderTimeControls(), tvButton];
     }
 
-    if (canEdit && !isFullscreen) {
+    if (canEdit && !isFullscreen && !settingsOpen) {
       buttons.push(<ToolbarButton tooltip="Add panel" icon="panel-add" onClick={onAddPanel} key="button-panel-add" />);
     }
 
@@ -248,16 +249,17 @@ export const DashNav = React.memo<Props>((props) => {
       );
     }
 
-    if (showSettings) {
-      buttons.push(
-        <ToolbarButton tooltip="Dashboard settings" icon="cog" onClick={onOpenSettings} key="button-settings" />
-      );
+    if (!settingsOpen) {
+      if (showSettings) {
+        buttons.push(
+          <ToolbarButton tooltip="Dashboard settings" icon="cog" onClick={onOpenSettings} key="button-settings" />
+        );
+      }
+
+      addCustomContent(customRightActions, buttons);
+      buttons.push(renderTimeControls());
+      buttons.push(tvButton);
     }
-
-    addCustomContent(customRightActions, buttons);
-
-    buttons.push(renderTimeControls());
-    buttons.push(tvButton);
     return buttons;
   };
 

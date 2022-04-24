@@ -98,6 +98,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   pageContent: css({
     flexGrow: 1,
     background: theme.colors.background.primary,
+    minHeight: '100% - 80px',
     // display: 'flex',
     // flexDirection: 'column',
   }),

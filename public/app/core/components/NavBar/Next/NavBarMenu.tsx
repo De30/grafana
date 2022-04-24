@@ -27,7 +27,7 @@ export interface Props {
 export function NavBarMenu({ activeItem, isOpen, navItems, onClose, setMenuAnimationInProgress }: Props) {
   const theme = useTheme2();
   const styles = getStyles(theme);
-  const ANIMATION_DURATION = theme.transitions.duration.standard;
+  const ANIMATION_DURATION = theme.transitions.duration.shortest;
   const animStyles = getAnimStyles(theme, ANIMATION_DURATION);
   const ref = useRef(null);
   const { dialogProps } = useDialog({}, ref);

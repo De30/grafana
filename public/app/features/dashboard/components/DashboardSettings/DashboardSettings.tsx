@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 import { GrafanaTheme2, locationUtil } from '@grafana/data';
 import { locationService, reportInteraction } from '@grafana/runtime';
-import { Button, CustomScrollbar, Icon, IconName, PageToolbar, stylesFactory, useForceUpdate } from '@grafana/ui';
+import { Button, CustomScrollbar, Icon, IconName, stylesFactory, useForceUpdate } from '@grafana/ui';
 import config from 'app/core/config';
 import { contextSrv } from 'app/core/services/context_srv';
 import { AccessControlAction } from 'app/types';
@@ -146,7 +146,7 @@ export function DashboardSettings({ dashboard, editview }: Props) {
     dashboard.meta.hasUnsavedFolderChange = false;
   };
 
-  const folderTitle = dashboard.meta.folderTitle;
+  // const folderTitle = dashboard.meta.folderTitle;
   const currentPage = pages.find((page) => page.id === editview) ?? pages[0];
   const canSaveAs = contextSrv.hasEditPermissionInFolders;
   const canSave = dashboard.meta.canSave;
@@ -155,7 +155,7 @@ export function DashboardSettings({ dashboard, editview }: Props) {
   return (
     <FocusScope contain autoFocus restoreFocus>
       <div className="dashboard-settings" ref={ref} {...overlayProps} {...dialogProps}>
-        <PageToolbar title={`${dashboard.title} / Settings`} parent={folderTitle} onGoBack={onClose} />
+        {/* <PageToolbar title={`${dashboard.title} / Settings`} parent={folderTitle} onGoBack={onClose} /> */}
         <CustomScrollbar>
           <div className={styles.scrollInner}>
             <div className={styles.settingsWrapper}>
