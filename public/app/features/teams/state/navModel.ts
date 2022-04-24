@@ -19,7 +19,7 @@ export function buildNavModel(team: Team): NavModelItem {
   const navModel: NavModelItem = {
     img: team.avatarUrl,
     id: 'team-' + team.id,
-    subTitle: 'Manage team members and settings',
+    subTitle: 'Manage team members and team perferences. Team preferences work as defaults for team members.',
     url: '',
     text: team.name,
     children: [

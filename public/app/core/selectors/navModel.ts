@@ -31,6 +31,19 @@ export const getNavModel = (navIndex: NavIndex, id: string, fallback?: NavModel,
             active: item.url === node.url,
           };
         });
+
+      if (main.parentItem) {
+        main.parentItem = {
+          ...main.parentItem,
+          children: main.parentItem.children!.map((x) => {
+            if (x.id === main.id) {
+              return main;
+            }
+            return x;
+          }),
+        };
+        main = { ...main.parentItem };
+      }
     } else {
       main = node;
     }

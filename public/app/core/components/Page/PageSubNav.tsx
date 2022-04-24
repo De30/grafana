@@ -12,6 +12,8 @@ export function PageSubNav(props: Props) {
   const styles = useStyles2(getStyles);
 
   const main = props.model.main;
+  const directChildren = props.model.main.children!.filter((x) => !x.hideFromTabs && !x.children);
+  const nestedItems = props.model.main.children!.filter((x) => x.children && x.children.length);
 
   return (
     <nav className={styles.nav}>
@@ -21,9 +23,10 @@ export function PageSubNav(props: Props) {
         {props.model.main.text}
       </h2>
       <div className={styles.items}>
-        {props.model.main.children?.map((child, index) => {
+        {directChildren.map((child, index) => {
           return (
-            !child.hideFromTabs && (
+            !child.hideFromTabs &&
+            !child.children && (
               <VerticalTab
                 label={child.text}
                 active={child.active}
@@ -35,6 +38,26 @@ export function PageSubNav(props: Props) {
             )
           );
         })}
+        {nestedItems.map((child) => (
+          <>
+            <div className={styles.subSection}>{child.text}</div>
+            {child.children!.map((child, index) => {
+              return (
+                !child.hideFromTabs &&
+                !child.children && (
+                  <VerticalTab
+                    label={child.text}
+                    active={child.active}
+                    key={`${child.url}-${index}`}
+                    // icon={child.icon as IconName}
+                    href={child.url}
+                    onChangeTab={undefined}
+                  />
+                )
+              );
+            })}
+          </>
+        ))}
       </div>
     </nav>
   );
@@ -59,6 +82,10 @@ const getStyles = (theme: GrafanaTheme2) => {
     items: css({
       paddingLeft: '9px',
     }),
-    subNav: css``,
+    subSection: css({
+      paddingTop: theme.spacing(3),
+      fontWeight: 500,
+      color: theme.colors.text.secondary,
+    }),
   };
 };

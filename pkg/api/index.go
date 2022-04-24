@@ -288,7 +288,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:     "Plugins",
 			Id:       "plugins",
-			SubTitle: "View and configure plugins",
+			SubTitle: "Discover, install and configure plugins.",
 			Icon:     "plug",
 			Url:      hs.Cfg.AppSubURL + "/plugins",
 		})
@@ -298,7 +298,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:     "Preferences",
 			Id:       "org-settings",
-			SubTitle: "Manage organization details and preferences",
+			SubTitle: "Manage organization details and preferences.",
 			Icon:     "sliders-v-alt",
 			Url:      hs.Cfg.AppSubURL + "/org",
 		})
@@ -308,7 +308,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "API keys",
 			Id:          "apikeys",
-			Description: "Create & manage API keys",
+			Description: "Create & manage API keys that can be used to access Grafana's API.",
 			Icon:        "key-skeleton-alt",
 			Url:         hs.Cfg.AppSubURL + "/org/apikeys",
 		})

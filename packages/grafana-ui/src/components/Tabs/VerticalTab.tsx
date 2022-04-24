@@ -81,6 +81,10 @@ const getTabStyles = stylesFactory((theme: GrafanaTheme) => {
       &:focus {
         color: ${colors.linkHover};
         background: linear-gradient(90deg, ff790029, #8eff0000);
+
+        a {
+          text-decoration: underline;
+        }
       }
     `,
     padding: css`

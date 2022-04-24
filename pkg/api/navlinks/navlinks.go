@@ -8,7 +8,7 @@ func GetServerAdminNode(children []*dtos.NavLink, navSection string) *dtos.NavLi
 		url = children[0].Url
 	}
 	return &dtos.NavLink{
-		Text:         "Server Admin",
+		Text:         "Server admin",
 		SubTitle:     "Manage all users and orgs",
 		HideFromTabs: false,
 		Id:           "admin",
