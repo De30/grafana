@@ -3,10 +3,12 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { FilterInput, Icon, Tooltip, useTheme2 } from '@grafana/ui';
+import { FilterInput, Icon, ModalsController, Tooltip, useTheme2 } from '@grafana/ui';
 import { contextSrv } from 'app/core/core';
 import { getKioskMode } from 'app/core/navigation/kiosk';
 import { KioskMode } from 'app/types';
+
+import { ProfileDrawer } from './ProfileDrawer';
 
 export const TopBar = React.memo(() => {
   const theme = useTheme2();
@@ -47,11 +49,15 @@ export const TopBar = React.memo(() => {
             <Icon name="rss" size="lg" />
           </button>
         </Tooltip>
-        <Tooltip placement="bottom" content="User profile (todo)">
-          <button className={styles.actionItem}>
-            <img src={contextSrv.user.gravatarUrl} />
-          </button>
-        </Tooltip>
+        <ModalsController key="button-save">
+          {({ showModal, hideModal }) => (
+            <Tooltip placement="bottom" content="User profile (todo)">
+              <button className={styles.actionItem} onClick={() => showModal(ProfileDrawer, { onClose: hideModal })}>
+                <img src={contextSrv.user.gravatarUrl} />
+              </button>
+            </Tooltip>
+          )}
+        </ModalsController>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { useDialog } from '@react-aria/dialog';
 import { FocusScope } from '@react-aria/focus';
 import { useOverlay } from '@react-aria/overlays';
@@ -32,6 +32,7 @@ export interface Props {
   scrollableContent?: boolean;
   /** Callback for closing the drawer */
   onClose: () => void;
+  className?: string;
 }
 
 export function Drawer({
@@ -43,6 +44,7 @@ export function Drawer({
   title,
   subtitle,
   width = '40%',
+  className,
   expandable = false,
   tabs,
 }: Props) {
@@ -77,7 +79,7 @@ export function Drawer({
       width={currentWidth}
       getContainer={inline ? undefined : 'body'}
       style={{ position: `${inline && 'absolute'}` } as CSSProperties}
-      className={drawerStyles.drawer}
+      className={cx(drawerStyles.drawer, className)}
       aria-label={
         typeof title === 'string'
           ? selectors.components.Drawer.General.title(title)
