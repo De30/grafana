@@ -31,6 +31,7 @@ import { DashboardGrid } from '../dashgrid/DashboardGrid';
 import { liveTimer } from '../dashgrid/liveTimer';
 import { getTimeSrv } from '../services/TimeSrv';
 import { cleanUpDashboardAndVariables } from '../state/actions';
+import { buildDashboardNavModel } from '../state/buildDashboardNavModel';
 import { initDashboard } from '../state/initDashboard';
 
 export interface DashboardPageRouteParams {
@@ -325,7 +326,9 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
     const containerClassNames = classnames(styles.dashboardContainer, {
       'panel-in-fullscreen': viewPanel,
     });
+
     const showSubMenu = !editPanel && kioskMode === KioskMode.Off && !this.props.queryParams.editview;
+    const navModel = buildDashboardNavModel(dashboard, queryParams.editview, this.props.history.location);
 
     return (
       <div className={containerClassNames}>
@@ -333,6 +336,7 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
           <header data-testid={selectors.pages.Dashboard.DashNav.navV2}>
             <DashNav
               dashboard={dashboard}
+              navModel={navModel}
               title={dashboard.title}
               folderTitle={dashboard.meta.folderTitle}
               isFullscreen={!!viewPanel}
@@ -369,7 +373,9 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
 
         {inspectPanel && <PanelInspector dashboard={dashboard} panel={inspectPanel} />}
         {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} tab={this.props.queryParams.tab} />}
-        {queryParams.editview && <DashboardSettings dashboard={dashboard} editview={queryParams.editview} />}
+        {queryParams.editview && (
+          <DashboardSettings dashboard={dashboard} editview={queryParams.editview} navModel={navModel} />
+        )}
       </div>
     );
   }

@@ -6,8 +6,6 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { DashboardModel } from '../../state/DashboardModel';
 import { AnnotationSettingsEdit, AnnotationSettingsList, newAnnotationName } from '../AnnotationSettings';
 
-import { DashboardSettingsHeader } from './DashboardSettingsHeader';
-
 interface Props {
   dashboard: DashboardModel;
 }
@@ -39,7 +37,6 @@ export const AnnotationsSettings: React.FC<Props> = ({ dashboard }) => {
 
   return (
     <>
-      <DashboardSettingsHeader title="Annotations" onGoBack={onGoBack} isEditing={isEditing} />
       {!isEditing && <AnnotationSettingsList dashboard={dashboard} onNew={onNew} onEdit={onEdit} />}
       {isEditing && <AnnotationSettingsEdit dashboard={dashboard} editIdx={editIdx!} />}
     </>

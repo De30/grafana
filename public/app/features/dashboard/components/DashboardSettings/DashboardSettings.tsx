@@ -25,6 +25,7 @@ import { VersionsSettings } from './VersionsSettings';
 export interface Props {
   dashboard: DashboardModel;
   editview: string;
+  navModel: NavModel;
 }
 
 export interface SettingsPage {
@@ -43,7 +44,7 @@ const MakeEditable = (props: { onMakeEditable: () => any }) => (
   </div>
 );
 
-export function DashboardSettings({ dashboard, editview }: Props) {
+export function DashboardSettings({ dashboard, editview, navModel }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const { overlayProps } = useOverlay({}, ref);
   const { dialogProps } = useDialog(
@@ -140,30 +141,9 @@ export function DashboardSettings({ dashboard, editview }: Props) {
     return pages;
   }, [dashboard, onMakeEditable]);
 
-  // const onPostSave = () => {
-  //   dashboard.meta.hasUnsavedFolderChange = false;
-  // };
-
-  // const folderTitle = dashboard.meta.folderTitle;
   const currentPage = pages.find((page) => page.id === editview) ?? pages[0];
-  const location = useLocation();
-  const navModel: NavModel = {
-    main: {
-      id: 'settings',
-      icon: 'apps',
-      text: 'Settings',
-      children: pages.map((page) => ({
-        id: page.id,
-        text: page.title,
-        active: page.id === editview,
-        url: locationUtil.getUrlForPartial(location, { editview: page.id }),
-      })),
-    },
-    node: {
-      text: currentPage.title,
-      id: currentPage.id,
-    },
-  };
+  // Temp hack, dashboard title is good for breadcrumb but not for section name in side sub nav
+  navModel.main.text = 'Dashboard';
 
   return (
     <FocusScope contain autoFocus restoreFocus>

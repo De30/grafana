@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { NavModel, NavModelItem, textUtil } from '@grafana/data';
+import { NavModel, textUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { ButtonGroup, ModalsController, ToolbarButton, PageToolbar, useForceUpdate } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
@@ -33,6 +33,7 @@ export interface OwnProps {
   kioskMode: KioskMode;
   hideTimePicker: boolean;
   editview?: string;
+  navModel: NavModel;
   folderTitle?: string;
   title: string;
   onAddPanel: () => void;
@@ -273,11 +274,10 @@ export const DashNav = React.memo<Props>((props) => {
   // const titleHref = locationUtil.getUrlForPartial(location, { search: 'open' });
   // const parentHref = locationUtil.getUrlForPartial(location, { search: 'open', folder: 'current' });
   const onGoBack = isFullscreen ? onClose : undefined;
-  const navModel = buildDashboardNavModel(props.dashboard, props.editview);
 
   return (
     <PageToolbar
-      navModel={navModel.node}
+      navModel={props.navModel.node}
       onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
       onGoBack={onGoBack}
       leftItems={renderLeftActionsButton()}
@@ -290,29 +290,3 @@ export const DashNav = React.memo<Props>((props) => {
 DashNav.displayName = 'DashNav';
 
 export default connector(DashNav);
-
-function buildDashboardNavModel(dashboard: DashboardModel, editview: string | undefined): NavModel {
-  let node: NavModelItem = {
-    id: 'dashboard',
-    text: dashboard.title,
-    active: true,
-    parentItem: {
-      id: 'dashboard',
-      text: 'Dashbords',
-    },
-  };
-
-  if (dashboard.meta.folderTitle) {
-    node.parentItem = {
-      id: 'folder',
-      text: dashboard.meta.folderTitle,
-      url: `/dashboards/f/${dashboard.meta.folderUid}`,
-      parentItem: node.parentItem,
-    };
-  }
-
-  return {
-    main: node,
-    node,
-  };
-}
