@@ -1,7 +1,7 @@
 import React, { lazy, PureComponent, RefObject, Suspense } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
+import { DataSourceInstanceSettings, NavModelItem, RawTimeRange } from '@grafana/data';
 import { config, DataSourcePicker } from '@grafana/runtime';
 import { PageToolbar, SetInterval, ToolbarButton, ToolbarButtonRow } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
@@ -85,14 +85,17 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
 
     const showSmallDataSourcePicker = (splitted ? containerWidth < 700 : containerWidth < 800) || false;
     const showSmallTimePicker = splitted || containerWidth < 1210;
+    const navModel: NavModelItem = {
+      text: 'Explore',
+      url: '/explore',
+    };
 
     return (
       <div ref={topOfExploreViewRef}>
         <PageToolbar
           onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
           aria-label="Explore toolbar"
-          title={exploreId === ExploreId.left ? 'Explore' : undefined}
-          pageIcon={exploreId === ExploreId.left ? 'compass' : undefined}
+          navModel={exploreId === ExploreId.left ? navModel : undefined}
           leftItems={[
             exploreId === ExploreId.left && (
               <DashNavButton

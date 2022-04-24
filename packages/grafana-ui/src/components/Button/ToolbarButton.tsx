@@ -36,7 +36,7 @@ export interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   isHighlighted?: boolean;
 }
 
-export type ToolbarButtonVariant = 'default' | 'primary' | 'destructive' | 'active';
+export type ToolbarButtonVariant = 'default' | 'primary' | 'destructive' | 'active' | 'outside';
 
 export const ToolbarButton = forwardRef<HTMLButtonElement, Props>(
   (
@@ -137,7 +137,6 @@ const getStyles = (theme: GrafanaTheme2) => {
       border-radius: ${theme.shape.borderRadius()};
       line-height: ${theme.components.height.md * theme.spacing.gridSize - 2}px;
       font-weight: ${theme.typography.fontWeightMedium};
-      border: 1px solid ${theme.colors.border.weak};
       white-space: nowrap;
       transition: ${theme.transitions.create(['background', 'box-shadow', 'border-color', 'color'], {
         duration: theme.transitions.duration.short,
@@ -173,6 +172,17 @@ const getStyles = (theme: GrafanaTheme2) => {
     `,
     default: css`
       color: ${theme.colors.text.secondary};
+      background-color: transparent;
+      border: none;
+
+      &:hover {
+        color: ${theme.colors.text.primary};
+        background: ${theme.colors.background.secondary};
+      }
+    `,
+    outside: css`
+      color: ${theme.colors.text.secondary};
+      border: 1px solid ${theme.colors.border.weak};
       background-color: ${theme.colors.background.primary};
 
       &:hover {

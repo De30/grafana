@@ -31,9 +31,7 @@ export const PageToolbar: FC<Props> = React.memo(
   ({
     title,
     parent,
-    pageIcon,
     navModel,
-    onGoBack,
     onOpenMenu,
     children,
     titleHref,
@@ -199,20 +197,6 @@ const getStyles = (theme: GrafanaTheme2) => {
       border-bottom: 1px solid ${theme.colors.border.weak};
       position: relative;
       z-index: ${theme.zIndex.sidemenu};
-
-      // .toolbar-button {
-      //   height: 40px;
-      //   padding: ${theme.spacing(0, 2)};
-      //   border-top: none;
-      //   border-right: none;
-      //   border-bottom: none;
-      //   border-radius: 0;
-      // }
-
-      .toolbar-button {
-        border: none;
-        background: transparent;
-      }
     `,
     spacer: css`
       flex-grow: 1;
