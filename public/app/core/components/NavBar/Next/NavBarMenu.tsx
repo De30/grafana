@@ -398,7 +398,7 @@ const getCollapsibleStyles = (theme: GrafanaTheme2) => ({
     minHeight: theme.spacing(6),
     overflowWrap: 'anywhere',
     alignItems: 'center',
-    color: theme.colors.text.secondary,
+    color: theme.colors.text.primary,
     '&:hover, &:focus-within': {
       backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
       color: theme.colors.text.primary,

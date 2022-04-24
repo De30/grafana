@@ -76,7 +76,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: 'flex',
       gap: theme.spacing(1),
       padding: theme.spacing(0.5, 0, 3, 0.25),
-      fontSize: theme.typography.h3.fontSize,
+      fontSize: theme.typography.h4.fontSize,
       margin: 0,
     }),
     items: css({

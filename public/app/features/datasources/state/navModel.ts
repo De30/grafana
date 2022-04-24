@@ -21,7 +21,7 @@ export function buildNavModel(
     parentItem,
     img: pluginMeta.info.logos.large,
     id: 'datasource-' + dataSource.uid,
-    description: `Configure and manage your ${pluginMeta.name} data source.`,
+    subTitle: `Configure and manage your ${pluginMeta.name} data source.`,
     url: '',
     text: dataSource.name,
     active: true,

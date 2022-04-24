@@ -71,7 +71,7 @@ export function getNavBarItemWithoutMenuStyles(theme: GrafanaTheme2, isActive?: 
   return {
     container: css({
       position: 'relative',
-      color: isActive ? theme.colors.text.primary : theme.colors.text.secondary,
+      color: theme.colors.text.primary,
       display: 'grid',
 
       '&:hover': {

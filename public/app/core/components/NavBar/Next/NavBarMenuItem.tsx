@@ -92,7 +92,7 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive'], hasIcon: b
     alignItems: 'center',
     background: 'none',
     border: 'none',
-    color: isActive ? theme.colors.text.primary : theme.colors.text.secondary,
+    color: theme.colors.text.primary,
     display: 'flex',
     flex: 1,
     fontSize: 'inherit',
@@ -104,6 +104,7 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive'], hasIcon: b
     '&:hover, &:focus-visible': {
       backgroundColor: theme.colors.emphasize(theme.colors.background.primary, 0.05),
       color: theme.colors.text.primary,
+      textDecoration: 'underline',
     },
     '&:focus-visible': {
       boxShadow: 'none',

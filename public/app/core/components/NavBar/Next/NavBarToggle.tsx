@@ -20,7 +20,7 @@ export const NavBarToggle = ({ className, isExpanded, onClick }: Props) => {
       aria-label={isExpanded ? 'Close navigation menu' : 'Open navigation menu'}
       name={isExpanded ? 'times' : 'angle-right'}
       className={classnames(className, styles.icon)}
-      size="xl"
+      size="lg"
       onClick={onClick}
     />
   );
@@ -31,6 +31,7 @@ NavBarToggle.displayName = 'NavBarToggle';
 const getStyles = (theme: GrafanaTheme2) => ({
   icon: css({
     zIndex: theme.zIndex.sidemenu,
+    color: theme.colors.text.secondary,
 
     [theme.breakpoints.down('md')]: {
       display: 'none',

@@ -4,6 +4,8 @@ import { connect, ConnectedProps } from 'react-redux';
 import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
 import { config, DataSourcePicker } from '@grafana/runtime';
 import { PageToolbar, SetInterval, ToolbarButton, ToolbarButtonRow } from '@grafana/ui';
+import appEvents from 'app/core/app_events';
+import { ToggleMegaMenu } from 'app/core/components/NavBar/Next/MegaMenu';
 import { createAndCopyShortLink } from 'app/core/utils/shortLinks';
 import { ExploreId } from 'app/types/explore';
 import { StoreState } from 'app/types/store';
@@ -87,6 +89,7 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
     return (
       <div ref={topOfExploreViewRef}>
         <PageToolbar
+          onOpenMenu={() => appEvents.publish(new ToggleMegaMenu())}
           aria-label="Explore toolbar"
           title={exploreId === ExploreId.left ? 'Explore' : undefined}
           pageIcon={exploreId === ExploreId.left ? 'compass' : undefined}

@@ -83,13 +83,15 @@ export const PageToolbar: FC<Props> = React.memo(
     }
 
     const breadcrumbs = navModel ? renderBreadcrumbs(navModel, []) : [];
-    breadcrumbs.unshift(
-      <li className={styles.breadcrumb}>
-        <a href="/" className={cx(styles.breadcrumbLink, styles.breadcrumbLinkHome)}>
-          <Icon name="home-alt" size="sm" />
-        </a>
-      </li>
-    );
+    if (navModel) {
+      breadcrumbs.unshift(
+        <li className={styles.breadcrumb}>
+          <a href="/" className={cx(styles.breadcrumbLink, styles.breadcrumbLinkHome)}>
+            <Icon name="home-alt" size="sm" />
+          </a>
+        </li>
+      );
+    }
 
     return (
       <nav className={mainStyle} aria-label={ariaLabel}>
@@ -191,7 +193,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       flex-wrap: wrap;
       justify-content: flex-end;
       padding: ${theme.spacing(0, 2)};
-      height: 40px;
+      min-height: 40px;
       flex-shrink: 0;
       box-shadow: ${shadow};
       border-bottom: 1px solid ${theme.colors.border.weak};
