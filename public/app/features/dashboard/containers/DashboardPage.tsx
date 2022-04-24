@@ -328,9 +328,16 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
       'panel-in-fullscreen': viewPanel,
     });
 
-    const showSubMenu = !editPanel && kioskMode === KioskMode.Off && !this.props.queryParams.editview;
+    const showSubMenu = !(editPanel || viewPanel) && kioskMode === KioskMode.Off && !this.props.queryParams.editview;
     const editIndex = queryParams.editIndex ? parseInt(queryParams.editIndex, 10) : undefined;
-    const navModel = buildDashboardNavModel(dashboard, queryParams.editview, editIndex, this.props.history.location);
+    const navModel = buildDashboardNavModel(
+      dashboard,
+      queryParams.editview,
+      editIndex,
+      editPanel,
+      viewPanel,
+      this.props.history.location
+    );
 
     return (
       <div className={containerClassNames}>
@@ -374,7 +381,14 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
         </div>
 
         {inspectPanel && <PanelInspector dashboard={dashboard} panel={inspectPanel} />}
-        {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} tab={this.props.queryParams.tab} />}
+        {editPanel && (
+          <PanelEditor
+            dashboard={dashboard}
+            sourcePanel={editPanel}
+            tab={this.props.queryParams.tab}
+            navModel={navModel}
+          />
+        )}
         {queryParams.editview && (
           <DashboardSettings
             dashboard={dashboard}

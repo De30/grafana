@@ -4,7 +4,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Subscription } from 'rxjs';
 
-import { FieldConfigSource, GrafanaTheme } from '@grafana/data';
+import { FieldConfigSource, GrafanaTheme, NavModel } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { locationService } from '@grafana/runtime';
 import {
@@ -56,6 +56,7 @@ interface OwnProps {
   dashboard: DashboardModel;
   sourcePanel: PanelModel;
   tab?: string;
+  navModel: NavModel;
 }
 
 const mapStateToProps = (state: StoreState, ownProps: OwnProps) => {
@@ -431,7 +432,7 @@ export class PanelEditorUnconnected extends PureComponent<Props> {
   };
 
   render() {
-    const { dashboard, initDone, updatePanelEditorUIState, uiState } = this.props;
+    const { navModel, initDone, updatePanelEditorUIState, uiState } = this.props;
     const styles = getStyles(config.theme, this.props);
 
     if (!initDone) {
@@ -440,9 +441,7 @@ export class PanelEditorUnconnected extends PureComponent<Props> {
 
     return (
       <div className={styles.wrapper} aria-label={selectors.components.PanelEditor.General.content}>
-        <PageToolbar title={`${dashboard.title} / Edit Panel`} onGoBack={this.onGoBackToDashboard}>
-          {this.renderEditorActions()}
-        </PageToolbar>
+        <PageToolbar navModel={navModel.node}>{this.renderEditorActions()}</PageToolbar>
         <div className={styles.verticalSplitPanesWrapper}>
           <SplitPaneWrapper
             leftPaneComponents={this.renderPanelAndEditor(styles)}

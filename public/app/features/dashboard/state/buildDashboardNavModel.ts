@@ -1,6 +1,6 @@
 import { Location } from 'history';
 
-import { locationUtil, NavModel, NavModelItem } from '@grafana/data';
+import { locationUtil, NavModel, NavModelItem, PanelModel } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { contextSrv } from 'app/core/core';
 import { AccessControlAction } from 'app/types';
@@ -11,6 +11,8 @@ export function buildDashboardNavModel(
   dashboard: DashboardModel,
   editview: string | undefined,
   editIndex: number | undefined,
+  editPanel: PanelModel | null,
+  viewPanel: PanelModel | null,
   location: Location<any>
 ): NavModel {
   let node: NavModelItem = {
@@ -18,7 +20,7 @@ export function buildDashboardNavModel(
     text: dashboard.title,
     icon: 'apps',
     active: true,
-    url: locationUtil.getUrlForPartial(location, { editview: null, editIndex: null }),
+    url: locationUtil.getUrlForPartial(location, { editview: null, editIndex: null, editPanel: null, viewPanel: null }),
     parentItem: {
       id: 'dashboard',
       text: 'Dashbords',
@@ -137,6 +139,28 @@ export function buildDashboardNavModel(
           };
         }
       }
+    }
+  } else {
+    if (editPanel) {
+      node = {
+        text: 'Edit panel',
+        active: true,
+        parentItem: {
+          ...node,
+          active: false,
+        },
+      };
+    }
+
+    if (viewPanel) {
+      node = {
+        text: 'View panel',
+        active: true,
+        parentItem: {
+          ...node,
+          active: false,
+        },
+      };
     }
   }
 

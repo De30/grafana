@@ -87,6 +87,7 @@ const getTabStyles = (theme: GrafanaTheme2) => {
     activeStyle: css`
       label: activeTabStyle;
       color: ${theme.colors.text.maxContrast};
+      font-weight: 500;
       overflow: hidden;
 
       &::before {

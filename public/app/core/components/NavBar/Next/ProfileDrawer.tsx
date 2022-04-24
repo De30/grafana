@@ -80,6 +80,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     color: theme.colors.text.secondary,
     paddingTop: theme.spacing(2),
     alignItems: 'center',
+    height: '100%',
   }),
   logo: css({
     width: 100,
