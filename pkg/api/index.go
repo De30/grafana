@@ -447,7 +447,7 @@ func (hs *HTTPServer) buildDashboardNavLinks(c *models.ReqContext, hasEditPerm b
 		})
 	}
 	dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-		Text: "Browse", Id: "manage-dashboards", Url: hs.Cfg.AppSubURL + "/dashboards", Icon: "sitemap",
+		Text: "Browse", SubTitle: "Disover, import and create and dashboards and panels", Id: "manage-dashboards", Url: hs.Cfg.AppSubURL + "/dashboards", Icon: "sitemap",
 	})
 	dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
 		Text: "Playlists", Id: "playlists", Url: hs.Cfg.AppSubURL + "/playlists", Icon: "presentation-play",

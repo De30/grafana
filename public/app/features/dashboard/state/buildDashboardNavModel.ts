@@ -50,11 +50,14 @@ export function buildDashboardNavModel(
       children.push({
         text: 'Annotations',
         id: 'annotations',
+        subTitle:
+          'Here you manage annotation queries that return events. These can be visualized in all Graphs as discrete events.',
         // icon: 'comment-alt',
       });
 
       children.push({
         text: 'Variables',
+        subTitle: 'Variables can be used as dynamic filters to make your dashboard more generic and re-usable.',
         id: 'templating',
         // icon: 'calculator-alt',
       });
