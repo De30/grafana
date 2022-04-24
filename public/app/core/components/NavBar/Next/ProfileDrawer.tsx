@@ -94,5 +94,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
   details: css({}),
   tabContent: css({
     width: '100%',
+    height: '60%',
   }),
 });

@@ -124,10 +124,11 @@ export function buildDashboardNavModel(
         main.active = false;
 
         if (editIndex != null) {
+          const name = editview.substring(0, editview.length - 1);
           // node.active = false;
 
           node = {
-            text: 'Annotation',
+            text: 'Edit ' + name,
             active: true,
             parentItem: {
               ...node,
