@@ -258,7 +258,7 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool) ([]*dto
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Data sources",
 			Icon:        "database",
-			Description: "Add and configure data sources",
+			Description: "Add and manage your data sources. Data sources allow you to query, visualize and alert on data.",
 			Id:          "datasources",
 			Url:         hs.Cfg.AppSubURL + "/datasources",
 		})

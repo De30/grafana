@@ -10,16 +10,26 @@ import { importDashboard, removeDashboard } from '../dashboard/state/actions';
 import { loadPluginDashboards } from '../plugins/admin/state/actions';
 
 import DashboardTable from './DashboardsTable';
-import { loadDataSource } from './state/actions';
+import { initDataSourceSettings, loadDataSource } from './state/actions';
+import { buildNavModel, getDataSourceLoadingNav } from './state/navModel';
 import { getDataSource } from './state/selectors';
 
 export interface OwnProps extends GrafanaRouteComponentProps<{ uid: string }> {}
 
 function mapStateToProps(state: StoreState, props: OwnProps) {
   const dataSourceId = props.match.params.uid;
+  const { plugin } = state.dataSourceSettings;
+
+  const dataSource = getDataSource(state.dataSources, dataSourceId);
+  const navModel = getNavModel(state.navIndex, 'datasources');
+  navModel.node.active = false;
+
+  navModel.node = plugin
+    ? buildNavModel(dataSource, plugin, 'datasource-dashboards', navModel.node)
+    : getDataSourceLoadingNav('datasource-dashboards', navModel.node);
 
   return {
-    navModel: getNavModel(state.navIndex, `datasource-dashboards-${dataSourceId}`),
+    navModel,
     dashboards: state.plugins.dashboards,
     dataSource: getDataSource(state.dataSources, dataSourceId),
     isLoading: state.plugins.isLoadingPluginDashboards,
@@ -30,6 +40,7 @@ function mapStateToProps(state: StoreState, props: OwnProps) {
 const mapDispatchToProps = {
   importDashboard,
   loadDataSource,
+  initDataSourceSettings,
   loadPluginDashboards,
   removeDashboard,
 };
@@ -40,8 +51,9 @@ export type Props = OwnProps & ConnectedProps<typeof connector>;
 
 export class DataSourceDashboards extends PureComponent<Props> {
   async componentDidMount() {
-    const { loadDataSource, dataSourceId } = this.props;
+    const { loadDataSource, dataSourceId, initDataSourceSettings } = this.props;
     await loadDataSource(dataSourceId);
+    await initDataSourceSettings(dataSourceId);
     this.props.loadPluginDashboards();
   }
 

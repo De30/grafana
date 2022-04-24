@@ -3,7 +3,7 @@ import { css, cx } from '@emotion/css';
 import React, { FC, HTMLAttributes, useEffect } from 'react';
 
 import { GrafanaTheme2, NavModel } from '@grafana/data';
-import { CustomScrollbar, PageToolbar, useStyles2 } from '@grafana/ui';
+import { CustomScrollbar, IconName, PageToolbar, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { getTitleFromNavModel } from 'app/core/selectors/navModel';
 
@@ -64,8 +64,35 @@ export function PagePanes({ navModel, children }: PagePanesProps) {
       <div className={styles.pageContent}>
         <CustomScrollbar autoHeightMin={'100%'}>
           <div className={styles.pageInner}>
-            <h1 className={styles.pageTitle}>{navModel.node.text}</h1>
-            {children}
+            <h1 className={styles.pageTitle}>
+              {navModel.node.img && (
+                <img className={styles.pageImg} src={navModel.node.img} alt={`logo for ${navModel.node.text}`} />
+              )}
+              {navModel.node.text}
+            </h1>
+            {navModel.node.description && <div className={styles.pageDescription}>{navModel.node.description}</div>}
+            {navModel.node.children && (
+              <>
+                <TabsBar>
+                  {navModel.node.children.map((child, index) => {
+                    return (
+                      !child.hideFromTabs && (
+                        <Tab
+                          label={child.text}
+                          active={child.active}
+                          key={`${child.url}-${index}`}
+                          icon={child.icon as IconName}
+                          href={child.url}
+                          suffix={child.tabSuffix}
+                        />
+                      )
+                    );
+                  })}
+                </TabsBar>
+                <div className={styles.tabContent}>{children}</div>
+              </>
+            )}
+            {!navModel.node.children && children}
           </div>
           <Footer />
         </CustomScrollbar>
@@ -100,7 +127,16 @@ const getStyles = (theme: GrafanaTheme2) => {
       minHeight: 0,
     }),
     pageTitle: css({
+      display: 'flex',
       marginBottom: theme.spacing(3),
+    }),
+    pageDescription: css({
+      marginBottom: theme.spacing(3),
+    }),
+    pageImg: css({
+      width: '32px',
+      height: '32px',
+      marginRight: theme.spacing(2),
     }),
     pageContent: css({
       flexGrow: 1,
@@ -111,6 +147,9 @@ const getStyles = (theme: GrafanaTheme2) => {
       padding: theme.spacing(3),
       marginBottom: theme.spacing(2),
       minHeight: '100% - 80px',
+    }),
+    tabContent: css({
+      paddingTop: theme.spacing(3),
     }),
   };
 };

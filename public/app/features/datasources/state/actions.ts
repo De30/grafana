@@ -2,7 +2,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { DataSourcePluginMeta, DataSourceSettings, locationUtil } from '@grafana/data';
 import { DataSourceWithBackend, getDataSourceSrv, locationService } from '@grafana/runtime';
-import { updateNavIndex } from 'app/core/actions';
+// import { updateNavIndex } from 'app/core/actions';
 import { getBackendSrv } from 'app/core/services/backend_srv';
 import { accessControlQueryParam } from 'app/core/utils/accessControl';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
@@ -13,7 +13,7 @@ import { DataSourcePluginCategory, ThunkDispatch, ThunkResult } from 'app/types'
 import { contextSrv } from '../../../core/services/context_srv';
 
 import { buildCategories } from './buildCategories';
-import { buildNavModel } from './navModel';
+// import { buildNavModel } from './navModel';
 import {
   dataSourceLoaded,
   dataSourceMetaLoaded,
@@ -143,7 +143,7 @@ export function loadDataSourceMeta(dataSource: DataSourceSettings): ThunkResult<
     dispatch(dataSourceMetaLoaded(meta));
 
     plugin.meta = meta;
-    dispatch(updateNavIndex(buildNavModel(dataSource, plugin)));
+    // dispatch(updateNavIndex(buildNavModel(dataSource, plugin)));
   };
 }
 

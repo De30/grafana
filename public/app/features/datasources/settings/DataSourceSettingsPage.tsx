@@ -21,7 +21,7 @@ import {
   testDataSource,
   updateDataSource,
 } from '../state/actions';
-import { getDataSourceLoadingNav, buildNavModel, getDataSourceNav } from '../state/navModel';
+import { getDataSourceLoadingNav, buildNavModel } from '../state/navModel';
 import { dataSourceLoaded, setDataSourceName, setIsDefault } from '../state/reducers';
 import { getDataSource, getDataSourceMeta } from '../state/selectors';
 
@@ -38,16 +38,11 @@ function mapStateToProps(state: StoreState, props: OwnProps) {
   const dataSource = getDataSource(state.dataSources, dataSourceId);
   const { plugin, loadError, loading, testingStatus } = state.dataSourceSettings;
   const page = params.get('page');
-
-  const nav = plugin
-    ? getDataSourceNav(buildNavModel(dataSource, plugin), page || 'settings')
-    : getDataSourceLoadingNav('settings');
-
-  const navModel = getNavModel(
-    state.navIndex,
-    page ? `datasource-page-${page}` : `datasource-settings-${dataSourceId}`,
-    nav
-  );
+  const navModel = getNavModel(state.navIndex, 'datasources');
+  navModel.node.active = false;
+  navModel.node = plugin
+    ? buildNavModel(dataSource, plugin, page ?? 'settings', navModel.node)
+    : getDataSourceLoadingNav(page ?? 'settings', navModel.node);
 
   return {
     dataSource: getDataSource(state.dataSources, dataSourceId),

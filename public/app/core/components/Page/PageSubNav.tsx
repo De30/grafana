@@ -52,7 +52,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     sectionName: css({
       display: 'flex',
       gap: theme.spacing(1),
-      padding: theme.spacing(0, 0, 3, 0.25),
+      padding: theme.spacing(0.5, 0, 3, 0.25),
       fontSize: theme.typography.h3.fontSize,
       margin: 0,
     }),

@@ -5,24 +5,29 @@ import config from 'app/core/config';
 import { contextSrv } from 'app/core/core';
 import { AccessControlAction } from 'app/types';
 
-import { highlightTrial } from '../../admin/utils';
 import { GenericDataSourcePlugin } from '../settings/PluginSettings';
 
 const loadingDSType = 'Loading';
 
-export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDataSourcePlugin): NavModelItem {
+export function buildNavModel(
+  dataSource: DataSourceSettings,
+  plugin: GenericDataSourcePlugin,
+  page: string,
+  parentItem: NavModelItem
+): NavModelItem {
   const pluginMeta = plugin.meta;
   const highlightsEnabled = config.featureToggles.featureHighlights;
   const navModel: NavModelItem = {
+    parentItem,
     img: pluginMeta.info.logos.large,
     id: 'datasource-' + dataSource.uid,
-    subTitle: `Type: ${pluginMeta.name}`,
+    description: `Configure and manage your ${pluginMeta.name} data source.`,
     url: '',
     text: dataSource.name,
-    breadcrumbs: [{ title: 'Data Sources', url: 'datasources' }],
+    active: true,
     children: [
       {
-        active: false,
+        active: page === 'settings',
         icon: 'sliders-v-alt',
         id: `datasource-settings-${dataSource.uid}`,
         text: 'Settings',
@@ -45,7 +50,7 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
 
   if (pluginMeta.includes && hasDashboards(pluginMeta.includes) && contextSrv.hasRole('Admin')) {
     navModel.children!.push({
-      active: false,
+      active: page === 'datasource-dashboards',
       icon: 'apps',
       id: `datasource-dashboards-${dataSource.uid}`,
       text: 'Dashboards',
@@ -55,18 +60,13 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
 
   const isLoadingNav = dataSource.type === loadingDSType;
 
-  const permissionsExperimentId = 'feature-highlights-data-source-permissions-badge';
-  const dsPermissions: NavModelItem = {
+  const dsPermissions = {
     active: false,
     icon: 'lock',
     id: `datasource-permissions-${dataSource.uid}`,
     text: 'Permissions',
     url: `datasources/edit/${dataSource.uid}/permissions`,
   };
-
-  if (highlightTrial() && !isLoadingNav) {
-    dsPermissions.tabSuffix = () => ProBadge({ experimentId: permissionsExperimentId, eventVariant: 'trial' });
-  }
 
   if (featureEnabled('dspermissions')) {
     if (contextSrv.hasPermission(AccessControlAction.DataSourcesPermissionsRead)) {
@@ -76,12 +76,11 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
     navModel.children!.push({
       ...dsPermissions,
       url: dsPermissions.url + '/upgrade',
-      tabSuffix: () => ProBadge({ experimentId: permissionsExperimentId }),
+      tabSuffix: () => ProBadge({ experimentId: 'feature-highlights-data-source-permissions-badge' }),
     });
   }
 
-  const analyticsExperimentId = 'feature-highlights-data-source-insights-badge';
-  const analytics: NavModelItem = {
+  const analytics = {
     active: false,
     icon: 'info-circle',
     id: `datasource-insights-${dataSource.uid}`,
@@ -89,23 +88,17 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
     url: `datasources/edit/${dataSource.uid}/insights`,
   };
 
-  if (highlightTrial() && !isLoadingNav) {
-    analytics.tabSuffix = () => ProBadge({ experimentId: analyticsExperimentId, eventVariant: 'trial' });
-  }
-
   if (featureEnabled('analytics')) {
     navModel.children!.push(analytics);
   } else if (highlightsEnabled && !isLoadingNav) {
     navModel.children!.push({
       ...analytics,
       url: analytics.url + '/upgrade',
-      tabSuffix: () => ProBadge({ experimentId: analyticsExperimentId }),
+      tabSuffix: () => ProBadge({ experimentId: 'feature-highlights-data-source-insights-badge' }),
     });
   }
 
-  const cachingExperimentId = 'feature-highlights-query-caching-badge';
-
-  const caching: NavModelItem = {
+  const caching = {
     active: false,
     icon: 'database',
     id: `datasource-cache-${dataSource.uid}`,
@@ -114,17 +107,13 @@ export function buildNavModel(dataSource: DataSourceSettings, plugin: GenericDat
     hideFromTabs: !pluginMeta.isBackend || !config.caching.enabled,
   };
 
-  if (highlightTrial() && !isLoadingNav) {
-    caching.tabSuffix = () => ProBadge({ experimentId: cachingExperimentId, eventVariant: 'trial' });
-  }
-
   if (featureEnabled('caching')) {
     navModel.children!.push(caching);
   } else if (highlightsEnabled && !isLoadingNav) {
     navModel.children!.push({
       ...caching,
       url: caching.url + '/upgrade',
-      tabSuffix: () => ProBadge({ experimentId: cachingExperimentId }),
+      tabSuffix: () => ProBadge({ experimentId: 'feature-highlights-query-caching-badge' }),
     });
   }
 
@@ -148,8 +137,21 @@ export function getDataSourceNav(main: NavModelItem, pageName: string): NavModel
     node: node!,
   };
 }
-export function getDataSourceLoadingNav(pageName: string): NavModel {
-  const main = buildNavModel(
+
+export function setActiveDataSourcePage(main: NavModelItem, pageName: string): NavModelItem {
+  // find active page
+  for (const child of main.children!) {
+    if (child.id!.indexOf(pageName) > 0) {
+      child.active = true;
+      break;
+    }
+  }
+
+  return main;
+}
+
+export function getDataSourceLoadingNav(pageName: string, parentItem: NavModelItem): NavModelItem {
+  return buildNavModel(
     {
       access: '',
       basicAuth: false,
@@ -196,10 +198,10 @@ export function getDataSourceLoadingNav(pageName: string): NavModel {
         module: '',
         baseUrl: '',
       },
-    } as any
+    } as any,
+    pageName,
+    parentItem
   );
-
-  return getDataSourceNav(main, pageName);
 }
 
 function hasDashboards(includes: PluginInclude[]): boolean {
