@@ -1,13 +1,11 @@
-import { css, cx } from '@emotion/css';
 import { useDialog } from '@react-aria/dialog';
 import { FocusScope } from '@react-aria/focus';
 import { useOverlay } from '@react-aria/overlays';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-import { GrafanaTheme2, locationUtil, NavModel } from '@grafana/data';
-import { locationService, reportInteraction } from '@grafana/runtime';
-import { Button, CustomScrollbar, Icon, IconName, stylesFactory, useForceUpdate } from '@grafana/ui';
+import { locationUtil, NavModel } from '@grafana/data';
+import { Button, IconName, useForceUpdate } from '@grafana/ui';
 import { PagePanes } from 'app/core/components/Page/Page';
 import config from 'app/core/config';
 import { contextSrv } from 'app/core/services/context_srv';
@@ -17,7 +15,6 @@ import { VariableEditorContainer } from '../../../variables/editor/VariableEdito
 import { DashboardModel } from '../../state/DashboardModel';
 import { AccessControlDashboardPermissions } from '../DashboardPermissions/AccessControlDashboardPermissions';
 import { DashboardPermissions } from '../DashboardPermissions/DashboardPermissions';
-import { SaveDashboardAsButton, SaveDashboardButton } from '../SaveDashboard/SaveDashboardButton';
 
 import { AnnotationsSettings } from './AnnotationsSettings';
 import { GeneralSettings } from './GeneralSettings';
@@ -37,7 +34,7 @@ export interface SettingsPage {
   component: React.ReactNode;
 }
 
-const onClose = () => locationService.partial({ editview: null });
+// const onClose = () => locationService.partial({ editview: null });
 
 const MakeEditable = (props: { onMakeEditable: () => any }) => (
   <div>
@@ -143,15 +140,12 @@ export function DashboardSettings({ dashboard, editview }: Props) {
     return pages;
   }, [dashboard, onMakeEditable]);
 
-  const onPostSave = () => {
-    dashboard.meta.hasUnsavedFolderChange = false;
-  };
+  // const onPostSave = () => {
+  //   dashboard.meta.hasUnsavedFolderChange = false;
+  // };
 
   // const folderTitle = dashboard.meta.folderTitle;
   const currentPage = pages.find((page) => page.id === editview) ?? pages[0];
-  const canSaveAs = contextSrv.hasEditPermissionInFolders;
-  const canSave = dashboard.meta.canSave;
-  const styles = getStyles(config.theme2);
   const location = useLocation();
   const navModel: NavModel = {
     main: {
@@ -175,32 +169,7 @@ export function DashboardSettings({ dashboard, editview }: Props) {
     <FocusScope contain autoFocus restoreFocus>
       <div className="dashboard-settings" ref={ref} {...overlayProps} {...dialogProps}>
         <PagePanes navModel={navModel}>{currentPage.component}</PagePanes>
-        {/* <CustomScrollbar>
-                  {canSave && <SaveDashboardButton dashboard={dashboard} onSaveSuccess={onPostSave} />}
-                  {canSaveAs && (
-                    <SaveDashboardAsButton dashboard={dashboard} onSaveSuccess={onPostSave} variant="secondary" />
-        </CustomScrollbar> */}
       </div>
     </FocusScope>
   );
 }
-
-const getStyles = stylesFactory((theme: GrafanaTheme2) => ({
-  scrollInner: css`
-    min-width: 100%;
-    display: flex;
-  `,
-  settingsWrapper: css`
-    margin: ${theme.spacing(0, 2, 2)};
-    display: flex;
-    flex-grow: 1;
-  `,
-  settingsContent: css`
-    flex-grow: 1;
-    height: 100%;
-    padding: 32px;
-    border: 1px solid ${theme.colors.border.weak};
-    background: ${theme.colors.background.primary};
-    border-radius: ${theme.shape.borderRadius()};
-  `,
-}));
