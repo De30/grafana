@@ -42,7 +42,7 @@ func newSQLStorage(prefix string, name string, cfg *StorageSQLConfig, sql *sqlst
 	s := &rootStorageSQL{}
 	s.store = filestorage.NewDbStorage(
 		grafanaStorageLogger,
-		sql, nil, getDbRootFolder(prefix))
+		sql, nil, "/upload-2/")
 
 	meta.Ready = true // exists!
 	s.meta = meta
