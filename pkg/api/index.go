@@ -306,11 +306,11 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool, prefs *
 
 	if hasAccess(ac.ReqOrgAdmin, apiKeyAccessEvaluator) {
 		configNodes = append(configNodes, &dtos.NavLink{
-			Text:        "API keys",
-			Id:          "apikeys",
-			Description: "Create & manage API keys that can be used to access Grafana's API.",
-			Icon:        "key-skeleton-alt",
-			Url:         hs.Cfg.AppSubURL + "/org/apikeys",
+			Text:     "API keys",
+			Id:       "apikeys",
+			SubTitle: "Create & manage API keys that can be used to access Grafana's API.",
+			Icon:     "key-skeleton-alt",
+			Url:      hs.Cfg.AppSubURL + "/org/apikeys",
 		})
 	}
 	// needs both feature flag and migration to be able to show service accounts
