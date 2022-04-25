@@ -93,16 +93,18 @@ export const PageToolbar: FC<Props> = React.memo(
 
     return (
       <nav className={mainStyle} aria-label={ariaLabel}>
-        <div className={styles.menuButton}>
-          <IconButton
-            name="bars"
-            tooltip="Toggle menu"
-            tooltipPlacement="bottom"
-            size="xl"
-            surface="dashboard"
-            onClick={onOpenMenu}
-          />
-        </div>
+        {navModel && (
+          <div className={styles.menuButton}>
+            <IconButton
+              name="bars"
+              tooltip="Toggle menu"
+              tooltipPlacement="bottom"
+              size="xl"
+              surface="dashboard"
+              onClick={onOpenMenu}
+            />
+          </div>
+        )}
         {breadcrumbs && (
           <ol aria-label="Search links" className={styles.breadcrumbList}>
             {breadcrumbs}
@@ -154,6 +156,7 @@ export const PageToolbar: FC<Props> = React.memo(
               </div>
             );
           })}
+        <div className={styles.actionWrapper}></div>
       </nav>
     );
   }

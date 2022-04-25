@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { FilterInput, Icon, ModalsController, Tooltip, useTheme2 } from '@grafana/ui';
@@ -14,13 +13,8 @@ export const TopBar = React.memo(() => {
   const theme = useTheme2();
   const styles = getStyles(theme);
   const kiosk = getKioskMode();
-  const location = useLocation();
 
   if (kiosk !== KioskMode.Off) {
-    return null;
-  }
-
-  if (location.search.indexOf('editPanel') !== -1) {
     return null;
   }
 
@@ -96,6 +90,9 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: 'flex',
       flexGrow: 0,
       gap: theme.spacing(1),
+      width: 25,
+      position: 'relative',
+      left: -94,
     }),
     actionItem: css({
       display: 'flex',

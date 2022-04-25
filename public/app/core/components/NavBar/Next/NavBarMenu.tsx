@@ -100,10 +100,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     position: 'fixed',
     top: '81px',
     boxSizing: 'content-box',
-    [theme.breakpoints.up('md')]: {
-      borderRight: `1px solid ${theme.colors.border.weak}`,
-      right: 'unset',
-    },
   }),
   content: css({
     display: 'flex',
@@ -394,7 +390,7 @@ const getCollapsibleStyles = (theme: GrafanaTheme2) => ({
   }),
   collapseWrapper: css({
     paddingLeft: theme.spacing(0.5),
-    paddingRight: theme.spacing(4.25),
+    paddingRight: 19,
     minHeight: theme.spacing(6),
     overflowWrap: 'anywhere',
     alignItems: 'center',

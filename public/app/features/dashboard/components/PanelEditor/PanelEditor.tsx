@@ -477,10 +477,10 @@ export const getStyles = stylesFactory((theme: GrafanaTheme, props: Props) => {
   return {
     wrapper: css`
       width: 100%;
-      height: 100%;
+      height: calc(100% - 40px);
       position: fixed;
       z-index: ${theme.zIndex.sidemenu};
-      top: 0;
+      top: 40px;
       left: 0;
       right: 0;
       bottom: 0;
