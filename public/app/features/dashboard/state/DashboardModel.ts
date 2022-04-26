@@ -1163,6 +1163,14 @@ export class DashboardModel implements TimeModel {
     for (const panel of this.panels) {
       if (panel.collapsed) {
         for (const rowPanel of panel.panels) {
+          if (rowPanel.isRepeatPanel) {
+            const repeatedPanels = this.expandRepeatedPanels(rowPanel);
+            for (const repeatedPanel of repeatedPanels) {
+              if (repeatedPanel.id === panelId) {
+                return repeatedPanel;
+              }
+            }
+          }
           if (rowPanel.id === panelId) {
             this.toggleRow(panel);
             break;
