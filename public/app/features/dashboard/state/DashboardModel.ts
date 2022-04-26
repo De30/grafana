@@ -650,9 +650,6 @@ export class DashboardModel implements TimeModel {
     m.id = this.getNextPanelId();
     const clone = new PanelModel(m);
 
-    // insert after source panel + value index
-    this.panels.splice(sourcePanelIndex + valueIndex, 0, clone);
-
     clone.repeatIteration = this.iteration;
     clone.repeatPanelId = sourcePanel.id;
     clone.repeat = undefined;
@@ -698,12 +695,7 @@ export class DashboardModel implements TimeModel {
   enumerateRepeats(panel: PanelModel, panelIndex: number) {
     const variable = this.getPanelRepeatVariable(panel);
     if (!variable) {
-      return;
-    }
-
-    if (panel.type === 'row') {
-      this.repeatRow(panel, panelIndex, variable);
-      return;
+      return [];
     }
 
     const selectedOptions = this.getSelectedVariableOptions(variable);
@@ -712,7 +704,7 @@ export class DashboardModel implements TimeModel {
     // let xPos = 0;
     // let yPos = panel.gridPos.y;
 
-    const repeats = selectedOptions.map((option, i) => {
+    return selectedOptions.map((option, i) => {
       const copy = this.getPanelRepeatClone(panel, i, panelIndex);
       copy.scopedVars = copy.scopedVars || {};
       copy.scopedVars[variable.name] = option;
@@ -732,18 +724,14 @@ export class DashboardModel implements TimeModel {
     }
 
     const selectedOptions = this.getSelectedVariableOptions(variable);
+    const repeatPanels = this.enumerateRepeats(panel, panelIndex);
 
     const maxPerRow = panel.maxPerRow || 4;
     let xPos = 0;
     let yPos = panel.gridPos.y;
 
-    for (let index = 0; index < selectedOptions.length; index++) {
-      const option = selectedOptions[index];
-      let copy;
-
-      copy = this.getPanelRepeatClone(panel, index, panelIndex);
-      copy.scopedVars = copy.scopedVars || {};
-      copy.scopedVars[variable.name] = option;
+    for (let index = 0; index < repeatPanels.length; index++) {
+      const copy = repeatPanels[index];
 
       if (panel.repeatDirection === REPEAT_DIR_VERTICAL) {
         if (index > 0) {
@@ -765,6 +753,8 @@ export class DashboardModel implements TimeModel {
           yPos += copy.gridPos.h;
         }
       }
+
+      this.panels.splice(panelIndex + index, 0, copy);
     }
 
     // Update gridPos for panels below
