@@ -695,6 +695,31 @@ export class DashboardModel implements TimeModel {
     return clone;
   }
 
+  enumerateRepeats(panel: PanelModel, panelIndex: number) {
+    const variable = this.getPanelRepeatVariable(panel);
+    if (!variable) {
+      return;
+    }
+
+    if (panel.type === 'row') {
+      this.repeatRow(panel, panelIndex, variable);
+      return;
+    }
+
+    const selectedOptions = this.getSelectedVariableOptions(variable);
+
+    // const maxPerRow = panel.maxPerRow || 4;
+    // let xPos = 0;
+    // let yPos = panel.gridPos.y;
+
+    const repeats = selectedOptions.map((option, i) => {
+      const copy = this.getPanelRepeatClone(panel, i, panelIndex);
+      copy.scopedVars = copy.scopedVars || {};
+      copy.scopedVars[variable.name] = option;
+      return copy;
+    });
+  }
+
   repeatPanel(panel: PanelModel, panelIndex: number) {
     const variable: any = this.getPanelRepeatVariable(panel);
     if (!variable) {
@@ -1156,10 +1181,12 @@ export class DashboardModel implements TimeModel {
     this.events.emit(CoreEvents.templateVariableValueUpdated);
   }
 
+  expandRepeatedPanels(panel: PanelModel): PanelModel[] {}
+
   getPanelByUrlId(panelUrlId: string) {
     const panelId = parseInt(panelUrlId ?? '0', 10);
 
-    // First try to find it in a collapsed row and exand it
+    // First try to find it in a collapsed row and expand it
     for (const panel of this.panels) {
       if (panel.collapsed) {
         for (const rowPanel of panel.panels) {
