@@ -19,7 +19,7 @@ import (
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/usagestats"
 	"github.com/grafana/grafana/pkg/models"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/alerting"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -101,7 +101,7 @@ func newTestLive(t *testing.T, store *sqlstore.SQLStore) *live.GrafanaLive {
 		nil,
 		&usagestats.UsageStatsMock{T: t},
 		nil,
-		features, accesscontrolmock.New())
+		features, actest.New())
 	require.NoError(t, err)
 	return gLive
 }
@@ -126,7 +126,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			Cfg:           setting.NewCfg(),
 			pluginStore:   &fakePluginStore{},
 			SQLStore:      mockSQLStore,
-			AccessControl: accesscontrolmock.New(),
+			AccessControl: actest.New(),
 			Features:      featuremgmt.WithFeatures(),
 		}
 		hs.SQLStore = mockSQLStore
@@ -230,9 +230,9 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			LibraryPanelService:   &mockLibraryPanelService{},
 			LibraryElementService: &mockLibraryElementService{},
 			SQLStore:              mockSQLStore,
-			AccessControl:         accesscontrolmock.New(),
+			AccessControl:         actest.New(),
 			dashboardService: service.ProvideDashboardService(
-				cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(),
+				cfg, dashboardStore, nil, features, actest.NewPermissionsServicesMock(),
 			),
 		}
 		hs.SQLStore = mockSQLStore
@@ -897,7 +897,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 				LibraryElementService:        &mockLibraryElementService{},
 				dashboardProvisioningService: mockDashboardProvisioningService{},
 				SQLStore:                     mockSQLStore,
-				AccessControl:                accesscontrolmock.New(),
+				AccessControl:                actest.New(),
 			}
 			hs.callGetDashboard(sc)
 
@@ -935,9 +935,9 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 		LibraryElementService: &libraryElementsService,
 		SQLStore:              sc.sqlStore,
 		ProvisioningService:   provisioningService,
-		AccessControl:         accesscontrolmock.New(),
+		AccessControl:         actest.New(),
 		dashboardProvisioningService: service.ProvideDashboardService(
-			cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(),
+			cfg, dashboardStore, nil, features, actest.NewPermissionsServicesMock(),
 		),
 	}
 

@@ -10,8 +10,8 @@ import (
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -222,7 +222,7 @@ func setupTestEnvironment(t *testing.T, permissions []*accesscontrol.Permission,
 	store := database.ProvideService(sql)
 	cfg := setting.NewCfg()
 	cfg.IsEnterprise = true
-	service, err := New(ops, cfg, routing.NewRouteRegister(), accesscontrolmock.New().WithPermissions(permissions), store, sql)
+	service, err := New(ops, cfg, routing.NewRouteRegister(), actest.New().WithPermissions(permissions), store, sql)
 	require.NoError(t, err)
 
 	return service, sql

@@ -12,8 +12,8 @@ import (
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/ossaccesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	dashdb "github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -559,7 +559,7 @@ func TestAccessControlDashboardGuardian_GetHiddenACL(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			guardian, _ := setupAccessControlGuardianTest(t, "1", nil)
 
-			mocked := accesscontrolmock.NewPermissionsServicesMock()
+			mocked := actest.NewPermissionsServicesMock()
 			guardian.permissionServices = mocked
 			mocked.Dashboards.On("MapActions", mock.Anything).Return("View")
 			mocked.Dashboards.On("GetPermissions", mock.Anything, mock.Anything, mock.Anything).Return(tt.permissions, nil)
@@ -594,7 +594,7 @@ func setupAccessControlGuardianTest(t *testing.T, uid string, permissions []*acc
 		FolderId:  0,
 	})
 	require.NoError(t, err)
-	ac := accesscontrolmock.New().WithPermissions(permissions)
+	ac := actest.New().WithPermissions(permissions)
 	services, err := ossaccesscontrol.ProvidePermissionsServices(setting.NewCfg(), routing.NewRouteRegister(), store, ac, database.ProvideService(store))
 	require.NoError(t, err)
 

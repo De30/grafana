@@ -9,7 +9,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/alerting"
 	dashbboardservice "github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -860,7 +860,7 @@ func callSaveWithResult(t *testing.T, cmd models.SaveDashboardCommand, sqlStore 
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	service := ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, &dummyDashAlertExtractor{},
-		featuremgmt.WithFeatures(), accesscontrolmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 	)
 	res, err := service.SaveDashboard(context.Background(), &dto, false)
 	require.NoError(t, err)
@@ -873,7 +873,7 @@ func callSaveWithError(cmd models.SaveDashboardCommand, sqlStore *sqlstore.SQLSt
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	service := ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, &dummyDashAlertExtractor{},
-		featuremgmt.WithFeatures(), accesscontrolmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 	)
 	_, err := service.SaveDashboard(context.Background(), &dto, false)
 	return err
@@ -904,7 +904,7 @@ func saveTestDashboard(t *testing.T, title string, orgID, folderID int64, sqlSto
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	service := ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, &dummyDashAlertExtractor{},
-		featuremgmt.WithFeatures(), accesscontrolmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 	)
 	res, err := service.SaveDashboard(context.Background(), &dto, false)
 	require.NoError(t, err)
@@ -936,7 +936,7 @@ func saveTestFolder(t *testing.T, title string, orgID int64, sqlStore *sqlstore.
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	service := ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, &dummyDashAlertExtractor{},
-		featuremgmt.WithFeatures(), accesscontrolmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 	)
 	res, err := service.SaveDashboard(context.Background(), &dto, false)
 	require.NoError(t, err)

@@ -14,7 +14,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
@@ -31,9 +31,9 @@ func TestProvideFolderService(t *testing.T) {
 		store := &dashboards.FakeDashboardStore{}
 		cfg := setting.NewCfg()
 		features := featuremgmt.WithFeatures()
-		permissionsServices := acmock.NewPermissionsServicesMock()
+		permissionsServices := actest.NewPermissionsServicesMock()
 		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices)
-		ac := acmock.New()
+		ac := actest.New()
 
 		ProvideFolderService(
 			cfg, &dashboards.FakeDashboardService{DashboardService: dashboardService},
@@ -49,7 +49,7 @@ func TestFolderService(t *testing.T) {
 		store := &dashboards.FakeDashboardStore{}
 		cfg := setting.NewCfg()
 		features := featuremgmt.WithFeatures()
-		permissionsServices := acmock.NewPermissionsServicesMock()
+		permissionsServices := actest.NewPermissionsServicesMock()
 		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices)
 		mockStore := mockstore.NewSQLStoreMock()
 

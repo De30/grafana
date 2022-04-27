@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -16,6 +14,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	service "github.com/grafana/grafana/pkg/services/dashboards/manager"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -34,7 +33,7 @@ func TestFolderPermissionAPIEndpoint(t *testing.T) {
 	defer dashboardStore.AssertExpectations(t)
 
 	features := featuremgmt.WithFeatures()
-	permissionsServices := accesscontrolmock.NewPermissionsServicesMock()
+	permissionsServices := actest.NewPermissionsServicesMock()
 
 	hs := &HTTPServer{
 		Cfg:                settings,
@@ -44,7 +43,7 @@ func TestFolderPermissionAPIEndpoint(t *testing.T) {
 		dashboardService: service.ProvideDashboardService(
 			settings, dashboardStore, nil, features, permissionsServices,
 		),
-		AccessControl: accesscontrolmock.New().WithDisabled(),
+		AccessControl: actest.New().WithDisabled(),
 	}
 
 	t.Run("Given folder not exists", func(t *testing.T) {

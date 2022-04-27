@@ -6,7 +6,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/stretchr/testify/require"
@@ -56,9 +56,9 @@ func (s *ServiceAccountMock) Migrated(ctx context.Context, orgID int64) bool {
 
 func SetupMockAccesscontrol(t *testing.T,
 	userpermissionsfunc func(c context.Context, siu *models.SignedInUser, opt accesscontrol.Options) ([]*accesscontrol.Permission, error),
-	disableAccessControl bool) *accesscontrolmock.Mock {
+	disableAccessControl bool) *actest.Mock {
 	t.Helper()
-	acmock := accesscontrolmock.New()
+	acmock := actest.New()
 	if disableAccessControl {
 		acmock = acmock.WithDisabled()
 	}

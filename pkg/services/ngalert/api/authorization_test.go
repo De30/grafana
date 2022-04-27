@@ -13,7 +13,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/expr"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
@@ -49,7 +49,7 @@ func TestAuthorize(t *testing.T) {
 	}
 	require.Len(t, paths, 34)
 
-	ac := acmock.New()
+	ac := actest.New()
 	api := &API{AccessControl: ac}
 
 	t.Run("should not panic on known routes", func(t *testing.T) {

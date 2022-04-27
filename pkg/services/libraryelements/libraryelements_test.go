@@ -15,7 +15,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/alerting"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -204,7 +204,7 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user models.Sign
 	dashAlertExtractor := alerting.ProvideDashAlertExtractorService(nil, nil, nil)
 	service := dashboardservice.ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, dashAlertExtractor,
-		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 	)
 	dashboard, err := service.SaveDashboard(context.Background(), dashItem, true)
 	require.NoError(t, err)
@@ -218,14 +218,14 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 
 	cfg := setting.NewCfg()
 	features := featuremgmt.WithFeatures()
-	permissionsServices := acmock.NewPermissionsServicesMock()
+	permissionsServices := actest.NewPermissionsServicesMock()
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 
 	d := dashboardservice.ProvideDashboardService(
 		cfg, dashboardStore, nil,
 		features, permissionsServices,
 	)
-	ac := acmock.New()
+	ac := actest.New()
 	s := dashboardservice.ProvideFolderService(
 		cfg, d, dashboardStore, nil,
 		features, permissionsServices, ac, nil,
@@ -319,15 +319,15 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 		dashboardStore := database.ProvideDashboardStore(sqlStore)
 		dashboardService := dashboardservice.ProvideDashboardService(
 			setting.NewCfg(), dashboardStore, nil,
-			featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(),
+			featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 		)
-		ac := acmock.New()
+		ac := actest.New()
 		service := LibraryElementService{
 			Cfg:      setting.NewCfg(),
 			SQLStore: sqlStore,
 			folderService: dashboardservice.ProvideFolderService(
 				setting.NewCfg(), dashboardService, dashboardStore, nil,
-				featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), ac, nil,
+				featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(), ac, nil,
 			),
 		}
 
