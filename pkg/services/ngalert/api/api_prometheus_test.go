@@ -458,7 +458,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 	})
 }
 
-func setupAPI(t *testing.T) (*store.FakeRuleStore, *fakeAlertInstanceManager, *actest.Mock, PrometheusSrv) {
+func setupAPI(t *testing.T) (*store.FakeRuleStore, *fakeAlertInstanceManager, *actest.AccesscontrolMock, PrometheusSrv) {
 	fakeStore := store.NewFakeRuleStore(t)
 	fakeAIM := NewFakeAlertInstanceManager(t)
 	acMock := actest.New().WithDisabled()

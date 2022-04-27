@@ -56,7 +56,7 @@ func (s *ServiceAccountMock) Migrated(ctx context.Context, orgID int64) bool {
 
 func SetupMockAccesscontrol(t *testing.T,
 	userpermissionsfunc func(c context.Context, siu *models.SignedInUser, opt accesscontrol.Options) ([]*accesscontrol.Permission, error),
-	disableAccessControl bool) *actest.Mock {
+	disableAccessControl bool) *actest.AccesscontrolMock {
 	t.Helper()
 	acmock := actest.New()
 	if disableAccessControl {
@@ -67,7 +67,7 @@ func SetupMockAccesscontrol(t *testing.T,
 }
 
 // this is a way to see
-// that the Mock implements the store interface
+// that the AccesscontrolMock implements the store interface
 var _ serviceaccounts.Store = new(ServiceAccountsStoreMock)
 var _ serviceaccounts.Service = new(ServiceAccountMock)
 

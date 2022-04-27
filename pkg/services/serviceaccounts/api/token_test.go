@@ -56,7 +56,7 @@ func TestServiceAccountsAPI_CreateToken(t *testing.T) {
 		desc         string
 		expectedCode int
 		body         map[string]interface{}
-		acmock       *actest.Mock
+		acmock       *actest.AccesscontrolMock
 	}
 
 	testCases := []testCreateSAToken{
@@ -163,7 +163,7 @@ func TestServiceAccountsAPI_DeleteToken(t *testing.T) {
 		desc         string
 		keyName      string
 		expectedCode int
-		acmock       *actest.Mock
+		acmock       *actest.AccesscontrolMock
 	}
 
 	testCases := []testCreateSAToken{
@@ -260,7 +260,7 @@ func TestServiceAccountsAPI_ListTokens(t *testing.T) {
 		expectedHasExpired        bool
 		expectedResponseBodyField string
 		expectedCode              int
-		acmock                    *actest.Mock
+		acmock                    *actest.AccesscontrolMock
 	}
 
 	var saId int64 = 1

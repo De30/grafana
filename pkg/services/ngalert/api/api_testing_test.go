@@ -266,7 +266,7 @@ func TestRouteEvalQueries(t *testing.T) {
 	})
 }
 
-func createTestingApiSrv(ds *fakes.FakeCacheService, ac *actest.Mock, evaluator *eval.FakeEvaluator) *TestingApiSrv {
+func createTestingApiSrv(ds *fakes.FakeCacheService, ac *actest.AccesscontrolMock, evaluator *eval.FakeEvaluator) *TestingApiSrv {
 	if ac == nil {
 		ac = actest.New().WithDisabled()
 	}

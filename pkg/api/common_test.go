@@ -272,7 +272,7 @@ type accessControlScenarioContext struct {
 	hs *HTTPServer
 
 	// acmock is an accesscontrol mock used to fake users rights.
-	acmock *actest.Mock
+	acmock *actest.AccesscontrolMock
 
 	// db is a test database initialized with InitTestDB
 	db sqlstore.Store
@@ -283,7 +283,7 @@ type accessControlScenarioContext struct {
 	dashboardsStore dashboards.Store
 }
 
-func setAccessControlPermissions(acmock *actest.Mock, perms []*accesscontrol.Permission, org int64) {
+func setAccessControlPermissions(acmock *actest.AccesscontrolMock, perms []*accesscontrol.Permission, org int64) {
 	acmock.GetUserPermissionsFunc =
 		func(_ context.Context, u *models.SignedInUser, _ accesscontrol.Options) ([]*accesscontrol.Permission, error) {
 			if u.OrgId == org {
@@ -364,7 +364,7 @@ func setupHTTPServerWithCfgDb(t *testing.T, useFakeAccessControl, enableAccessCo
 	features := featuremgmt.WithFeatures("accesscontrol", enableAccessControl)
 	cfg.IsFeatureToggleEnabled = features.IsEnabled
 
-	var acmock *actest.Mock
+	var acmock *actest.AccesscontrolMock
 
 	dashboardsStore := dashboardsstore.ProvideDashboardStore(db)
 

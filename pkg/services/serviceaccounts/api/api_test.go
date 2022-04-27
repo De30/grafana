@@ -51,7 +51,7 @@ func TestServiceAccountsAPI_CreateServiceAccount(t *testing.T) {
 		expectedCode int
 		wantID       string
 		wantError    string
-		acmock       *actest.Mock
+		acmock       *actest.AccesscontrolMock
 	}
 	testCases := []testCreateSATestCase{
 		{
@@ -163,7 +163,7 @@ func TestServiceAccountsAPI_DeleteServiceAccount(t *testing.T) {
 	t.Run("should be able to delete serviceaccount for with permissions", func(t *testing.T) {
 		testcase := struct {
 			user         tests.TestUser
-			acmock       *actest.Mock
+			acmock       *actest.AccesscontrolMock
 			expectedCode int
 		}{
 
@@ -188,7 +188,7 @@ func TestServiceAccountsAPI_DeleteServiceAccount(t *testing.T) {
 	t.Run("should be forbidden to delete serviceaccount via accesscontrol on endpoint", func(t *testing.T) {
 		testcase := struct {
 			user         tests.TestUser
-			acmock       *actest.Mock
+			acmock       *actest.AccesscontrolMock
 			expectedCode int
 		}{
 			user: tests.TestUser{Login: "servicetest2@admin", IsServiceAccount: true},
@@ -217,7 +217,7 @@ func serviceAccountRequestScenario(t *testing.T, httpMethod string, endpoint str
 
 func setupTestServer(t *testing.T, svc *tests.ServiceAccountMock,
 	routerRegister routing.RouteRegister,
-	acmock *actest.Mock,
+	acmock *actest.AccesscontrolMock,
 	sqlStore *sqlstore.SQLStore, saStore serviceaccounts.Store) (*web.Mux, *ServiceAccountsAPI) {
 	a := NewServiceAccountsAPI(setting.NewCfg(), svc, acmock, routerRegister, saStore)
 	a.RegisterAPIEndpoints(featuremgmt.WithFeatures(featuremgmt.FlagServiceAccounts))
@@ -250,7 +250,7 @@ func TestServiceAccountsAPI_RetrieveServiceAccount(t *testing.T) {
 		desc         string
 		user         *tests.TestUser
 		expectedCode int
-		acmock       *actest.Mock
+		acmock       *actest.AccesscontrolMock
 		Id           int
 	}
 	testCases := []testRetrieveSATestCase{
@@ -339,7 +339,7 @@ func TestServiceAccountsAPI_UpdateServiceAccount(t *testing.T) {
 		desc         string
 		user         *tests.TestUser
 		expectedCode int
-		acmock       *actest.Mock
+		acmock       *actest.AccesscontrolMock
 		body         *serviceaccounts.UpdateServiceAccountForm
 		Id           int
 	}

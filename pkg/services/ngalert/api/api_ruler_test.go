@@ -595,7 +595,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 	})
 }
 
-func createService(ac *actest.Mock, store *store.FakeRuleStore, scheduler schedule.ScheduleService) *RulerSrv {
+func createService(ac *actest.AccesscontrolMock, store *store.FakeRuleStore, scheduler schedule.ScheduleService) *RulerSrv {
 	return &RulerSrv{
 		xactManager:     store,
 		store:           store,

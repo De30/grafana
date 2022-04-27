@@ -24,7 +24,7 @@ type Calls struct {
 	RegisterAttributeScopeResolver []interface{}
 }
 
-type Mock struct {
+type AccesscontrolMock struct {
 	// Unless an override is provided, permissions will be returned by GetUserPermissions
 	permissions []*accesscontrol.Permission
 	// Unless an override is provided, roles will be returned by GetUserRoles
@@ -53,8 +53,8 @@ type Mock struct {
 // Ensure the mock stays in line with the interface
 var _ fullAccessControl = New()
 
-func New() *Mock {
-	mock := &Mock{
+func New() *AccesscontrolMock {
+	mock := &AccesscontrolMock{
 		Calls:         Calls{},
 		disabled:      false,
 		permissions:   []*accesscontrol.Permission{},
@@ -65,28 +65,28 @@ func New() *Mock {
 	return mock
 }
 
-func (m Mock) GetUsageStats(ctx context.Context) map[string]interface{} {
+func (m AccesscontrolMock) GetUsageStats(ctx context.Context) map[string]interface{} {
 	return make(map[string]interface{})
 }
 
-func (m Mock) WithPermissions(permissions []*accesscontrol.Permission) *Mock {
+func (m AccesscontrolMock) WithPermissions(permissions []*accesscontrol.Permission) *AccesscontrolMock {
 	m.permissions = permissions
 	return &m
 }
 
-func (m Mock) WithDisabled() *Mock {
+func (m AccesscontrolMock) WithDisabled() *AccesscontrolMock {
 	m.disabled = true
 	return &m
 }
 
-func (m Mock) WithBuiltInRoles(builtInRoles []string) *Mock {
+func (m AccesscontrolMock) WithBuiltInRoles(builtInRoles []string) *AccesscontrolMock {
 	m.builtInRoles = builtInRoles
 	return &m
 }
 
 // Evaluate evaluates access to the given resource.
 // This mock uses GetUserPermissions to then call the evaluator Evaluate function.
-func (m *Mock) Evaluate(ctx context.Context, user *models.SignedInUser, evaluator accesscontrol.Evaluator) (bool, error) {
+func (m *AccesscontrolMock) Evaluate(ctx context.Context, user *models.SignedInUser, evaluator accesscontrol.Evaluator) (bool, error) {
 	m.Calls.Evaluate = append(m.Calls.Evaluate, []interface{}{ctx, user, evaluator})
 	// Use override if provided
 	if m.EvaluateFunc != nil {
@@ -108,7 +108,7 @@ func (m *Mock) Evaluate(ctx context.Context, user *models.SignedInUser, evaluato
 
 // GetUserPermissions returns user permissions.
 // This mock return m.permissions unless an override is provided.
-func (m *Mock) GetUserPermissions(ctx context.Context, user *models.SignedInUser, opts accesscontrol.Options) ([]*accesscontrol.Permission, error) {
+func (m *AccesscontrolMock) GetUserPermissions(ctx context.Context, user *models.SignedInUser, opts accesscontrol.Options) ([]*accesscontrol.Permission, error) {
 	m.Calls.GetUserPermissions = append(m.Calls.GetUserPermissions, []interface{}{ctx, user, opts})
 	// Use override if provided
 	if m.GetUserPermissionsFunc != nil {
@@ -118,7 +118,7 @@ func (m *Mock) GetUserPermissions(ctx context.Context, user *models.SignedInUser
 	return m.permissions, nil
 }
 
-func (m *Mock) GetUserRoles(ctx context.Context, user *models.SignedInUser) ([]*accesscontrol.RoleDTO, error) {
+func (m *AccesscontrolMock) GetUserRoles(ctx context.Context, user *models.SignedInUser) ([]*accesscontrol.RoleDTO, error) {
 	m.Calls.GetUserRoles = append(m.Calls.GetUserRoles, []interface{}{ctx, user})
 	// Use override if provided
 	if m.GetUserRolesFunc != nil {
@@ -130,7 +130,7 @@ func (m *Mock) GetUserRoles(ctx context.Context, user *models.SignedInUser) ([]*
 
 // Middleware checks if service disabled or not to switch to fallback authorization.
 // This mock return m.disabled unless an override is provided.
-func (m *Mock) IsDisabled() bool {
+func (m *AccesscontrolMock) IsDisabled() bool {
 	m.Calls.IsDisabled = append(m.Calls.IsDisabled, struct{}{})
 	// Use override if provided
 	if m.IsDisabledFunc != nil {
@@ -143,7 +143,7 @@ func (m *Mock) IsDisabled() bool {
 // DeclareFixedRoles allow the caller to declare, to the service, fixed roles and their
 // assignments to organization roles ("Viewer", "Editor", "Admin") or "Grafana Admin"
 // This mock returns no error unless an override is provided.
-func (m *Mock) DeclareFixedRoles(registrations ...accesscontrol.RoleRegistration) error {
+func (m *AccesscontrolMock) DeclareFixedRoles(registrations ...accesscontrol.RoleRegistration) error {
 	m.Calls.DeclareFixedRoles = append(m.Calls.DeclareFixedRoles, []interface{}{registrations})
 	// Use override if provided
 	if m.DeclareFixedRolesFunc != nil {
@@ -155,7 +155,7 @@ func (m *Mock) DeclareFixedRoles(registrations ...accesscontrol.RoleRegistration
 // GetUserBuiltInRoles returns the list of organizational roles ("Viewer", "Editor", "Admin")
 // or "Grafana Admin" associated to a user
 // This mock returns m.builtInRoles unless an override is provided.
-func (m *Mock) GetUserBuiltInRoles(user *models.SignedInUser) []string {
+func (m *AccesscontrolMock) GetUserBuiltInRoles(user *models.SignedInUser) []string {
 	m.Calls.GetUserBuiltInRoles = append(m.Calls.GetUserBuiltInRoles, []interface{}{user})
 
 	// Use override if provided
@@ -169,7 +169,7 @@ func (m *Mock) GetUserBuiltInRoles(user *models.SignedInUser) []string {
 
 // RegisterFixedRoles registers all roles declared to AccessControl
 // This mock returns no error unless an override is provided.
-func (m *Mock) RegisterFixedRoles(ctx context.Context) error {
+func (m *AccesscontrolMock) RegisterFixedRoles(ctx context.Context) error {
 	m.Calls.RegisterFixedRoles = append(m.Calls.RegisterFixedRoles, []struct{}{})
 	// Use override if provided
 	if m.RegisterFixedRolesFunc != nil {
@@ -180,7 +180,7 @@ func (m *Mock) RegisterFixedRoles(ctx context.Context) error {
 
 // RegisterAttributeScopeResolver allows the caller to register a scope resolver for a
 // specific scope prefix (ex: datasources:name:)
-func (m *Mock) RegisterAttributeScopeResolver(scopePrefix string, resolver accesscontrol.AttributeScopeResolveFunc) {
+func (m *AccesscontrolMock) RegisterAttributeScopeResolver(scopePrefix string, resolver accesscontrol.AttributeScopeResolveFunc) {
 	m.scopeResolver.AddAttributeResolver(scopePrefix, resolver)
 	m.Calls.RegisterAttributeScopeResolver = append(m.Calls.RegisterAttributeScopeResolver, []struct{}{})
 	// Use override if provided
