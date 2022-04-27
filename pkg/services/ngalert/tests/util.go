@@ -49,7 +49,7 @@ func SetupTestEnv(t *testing.T, baseInterval time.Duration) (*ngalert.AlertNG, *
 	secretsService := secretsManager.SetupTestService(t, database.ProvideSecretsStore(sqlStore))
 	dashboardStore := databasestore.ProvideDashboardStore(sqlStore)
 
-	ac := actest.New()
+	ac := actest.NewAccesscontrol()
 	features := featuremgmt.WithFeatures()
 	permissionsServices := actest.NewPermissionsServicesMock()
 

@@ -594,7 +594,7 @@ func setupAccessControlGuardianTest(t *testing.T, uid string, permissions []*acc
 		FolderId:  0,
 	})
 	require.NoError(t, err)
-	ac := actest.New().WithPermissions(permissions)
+	ac := actest.NewAccesscontrol().WithPermissions(permissions)
 	services, err := ossaccesscontrol.ProvidePermissionsServices(setting.NewCfg(), routing.NewRouteRegister(), store, ac, database.ProvideService(store))
 	require.NoError(t, err)
 

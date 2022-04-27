@@ -428,7 +428,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 			ruleStore.PutRule(context.Background(), rules...)
 			ruleStore.PutRule(context.Background(), ngmodels.GenerateAlertRules(rand.Intn(4)+2, ngmodels.AlertRuleGen(withOrgID(orgID)))...)
 
-			acMock := actest.New().WithPermissions(createPermissionsForRules(rules))
+			acMock := actest.NewAccesscontrol().WithPermissions(createPermissionsForRules(rules))
 
 			api := PrometheusSrv{
 				log:     log.NewNopLogger(),
@@ -461,7 +461,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 func setupAPI(t *testing.T) (*store.FakeRuleStore, *fakeAlertInstanceManager, *actest.AccesscontrolMock, PrometheusSrv) {
 	fakeStore := store.NewFakeRuleStore(t)
 	fakeAIM := NewFakeAlertInstanceManager(t)
-	acMock := actest.New().WithDisabled()
+	acMock := actest.NewAccesscontrol().WithDisabled()
 
 	api := PrometheusSrv{
 		log:     log.NewNopLogger(),

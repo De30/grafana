@@ -1387,7 +1387,7 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	permissionsServices := actest.NewPermissionsServicesMock()
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	d := dashboardservice.ProvideDashboardService(cfg, dashboardStore, nil, features, permissionsServices)
-	ac := actest.New()
+	ac := actest.NewAccesscontrol()
 	s := dashboardservice.ProvideFolderService(cfg, d, dashboardStore, nil, features, permissionsServices, ac, nil)
 
 	t.Logf("Creating folder with title and UID %q", title)
@@ -1487,7 +1487,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 			cfg, dashboardStore, &alerting.DashAlertExtractorService{},
 			features, permissionsServices,
 		)
-		ac := actest.New()
+		ac := actest.NewAccesscontrol()
 
 		folderService := dashboardservice.ProvideFolderService(
 			cfg, dashboardService, dashboardStore, nil,

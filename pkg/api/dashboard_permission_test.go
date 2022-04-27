@@ -38,7 +38,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 			dashboardService: dashboardservice.ProvideDashboardService(
 				settings, dashboardStore, nil, features, actest.NewPermissionsServicesMock(),
 			),
-			AccessControl: actest.New().WithDisabled(),
+			AccessControl: actest.NewAccesscontrol().WithDisabled(),
 		}
 
 		t.Run("Given user has no admin permissions", func(t *testing.T) {

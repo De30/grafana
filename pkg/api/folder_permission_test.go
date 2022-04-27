@@ -43,7 +43,7 @@ func TestFolderPermissionAPIEndpoint(t *testing.T) {
 		dashboardService: service.ProvideDashboardService(
 			settings, dashboardStore, nil, features, permissionsServices,
 		),
-		AccessControl: actest.New().WithDisabled(),
+		AccessControl: actest.NewAccesscontrol().WithDisabled(),
 	}
 
 	t.Run("Given folder not exists", func(t *testing.T) {

@@ -33,7 +33,7 @@ func TestProvideFolderService(t *testing.T) {
 		features := featuremgmt.WithFeatures()
 		permissionsServices := actest.NewPermissionsServicesMock()
 		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices)
-		ac := actest.New()
+		ac := actest.NewAccesscontrol()
 
 		ProvideFolderService(
 			cfg, &dashboards.FakeDashboardService{DashboardService: dashboardService},

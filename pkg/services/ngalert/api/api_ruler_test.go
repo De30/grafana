@@ -321,7 +321,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything).Panic("should not be called")
 
-			ac := actest.New().WithDisabled()
+			ac := actest.NewAccesscontrol().WithDisabled()
 			request := createRequestContext(orgID, models2.ROLE_VIEWER, map[string]string{
 				":Namespace": folder.Title,
 			})
@@ -343,7 +343,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything)
 
-			ac := actest.New().WithDisabled()
+			ac := actest.NewAccesscontrol().WithDisabled()
 			request := createRequestContext(orgID, models2.ROLE_EDITOR, map[string]string{
 				":Namespace": folder.Title,
 			})
@@ -367,7 +367,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything)
 
-			ac := actest.New().WithDisabled()
+			ac := actest.NewAccesscontrol().WithDisabled()
 			request := createRequestContext(orgID, models2.ROLE_EDITOR, map[string]string{
 				":Namespace": folder.Title,
 				":Groupname": groupName,
@@ -389,7 +389,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything).Panic("should not be called")
 
-			ac := actest.New()
+			ac := actest.NewAccesscontrol()
 			request := createRequestContext(orgID, "None", map[string]string{
 				":Namespace": folder.Title,
 			})
@@ -412,7 +412,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := actest.New().WithPermissions(createPermissionsForRules(rulesInFolder))
+				ac := actest.NewAccesscontrol().WithPermissions(createPermissionsForRules(rulesInFolder))
 				request := createRequestContext(orgID, "None", map[string]string{
 					":Namespace": folder.Title,
 				})
@@ -437,7 +437,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := actest.New().WithPermissions(createPermissionsForRules(authorizedRulesInFolder))
+				ac := actest.NewAccesscontrol().WithPermissions(createPermissionsForRules(authorizedRulesInFolder))
 				request := createRequestContext(orgID, "None", map[string]string{
 					":Namespace": folder.Title,
 				})
@@ -464,7 +464,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := actest.New().WithPermissions(createPermissionsForRules(authorizedRulesInGroup))
+				ac := actest.NewAccesscontrol().WithPermissions(createPermissionsForRules(authorizedRulesInGroup))
 				request := createRequestContext(orgID, "None", map[string]string{
 					":Namespace": folder.Title,
 					":Groupname": groupName,
@@ -487,7 +487,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 			expectedRules := models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))
 			ruleStore.PutRule(context.Background(), expectedRules...)
 			ruleStore.PutRule(context.Background(), models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))...)
-			ac := actest.New().WithPermissions(createPermissionsForRules(expectedRules))
+			ac := actest.NewAccesscontrol().WithPermissions(createPermissionsForRules(expectedRules))
 
 			response := createService(ac, ruleStore, nil).RouteGetNamespaceRulesConfig(createRequestContext(orgID, "", map[string]string{
 				":Namespace": folder.Title,
@@ -523,7 +523,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 			ruleStore.Folders[orgID] = append(ruleStore.Folders[orgID], folder)
 			expectedRules := models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))
 			ruleStore.PutRule(context.Background(), expectedRules...)
-			ac := actest.New().WithDisabled()
+			ac := actest.NewAccesscontrol().WithDisabled()
 
 			response := createService(ac, ruleStore, nil).RouteGetNamespaceRulesConfig(createRequestContext(orgID, "", map[string]string{
 				":Namespace": folder.Title,

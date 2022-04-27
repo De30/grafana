@@ -101,7 +101,7 @@ func newTestLive(t *testing.T, store *sqlstore.SQLStore) *live.GrafanaLive {
 		nil,
 		&usagestats.UsageStatsMock{T: t},
 		nil,
-		features, actest.New())
+		features, actest.NewAccesscontrol())
 	require.NoError(t, err)
 	return gLive
 }
@@ -126,7 +126,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			Cfg:           setting.NewCfg(),
 			pluginStore:   &fakePluginStore{},
 			SQLStore:      mockSQLStore,
-			AccessControl: actest.New(),
+			AccessControl: actest.NewAccesscontrol(),
 			Features:      featuremgmt.WithFeatures(),
 		}
 		hs.SQLStore = mockSQLStore
@@ -230,7 +230,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			LibraryPanelService:   &mockLibraryPanelService{},
 			LibraryElementService: &mockLibraryElementService{},
 			SQLStore:              mockSQLStore,
-			AccessControl:         actest.New(),
+			AccessControl:         actest.NewAccesscontrol(),
 			dashboardService: service.ProvideDashboardService(
 				cfg, dashboardStore, nil, features, actest.NewPermissionsServicesMock(),
 			),
@@ -897,7 +897,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 				LibraryElementService:        &mockLibraryElementService{},
 				dashboardProvisioningService: mockDashboardProvisioningService{},
 				SQLStore:                     mockSQLStore,
-				AccessControl:                actest.New(),
+				AccessControl:                actest.NewAccesscontrol(),
 			}
 			hs.callGetDashboard(sc)
 
@@ -935,7 +935,7 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 		LibraryElementService: &libraryElementsService,
 		SQLStore:              sc.sqlStore,
 		ProvisioningService:   provisioningService,
-		AccessControl:         actest.New(),
+		AccessControl:         actest.NewAccesscontrol(),
 		dashboardProvisioningService: service.ProvideDashboardService(
 			cfg, dashboardStore, nil, features, actest.NewPermissionsServicesMock(),
 		),

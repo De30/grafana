@@ -153,7 +153,7 @@ func TestIntegratedDashboardService(t *testing.T) {
 						OrgId: testOrgID,
 						Dashboard: simplejson.NewFromAny(map[string]interface{}{
 							"uid":   sc.savedDashInFolder.Uid,
-							"title": "New dash",
+							"title": "NewAccesscontrol dash",
 						}),
 						FolderId:  sc.savedFolder.Id,
 						UserId:    10000,

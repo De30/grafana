@@ -225,7 +225,7 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 		cfg, dashboardStore, nil,
 		features, permissionsServices,
 	)
-	ac := actest.New()
+	ac := actest.NewAccesscontrol()
 	s := dashboardservice.ProvideFolderService(
 		cfg, d, dashboardStore, nil,
 		features, permissionsServices, ac, nil,
@@ -321,7 +321,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 			setting.NewCfg(), dashboardStore, nil,
 			featuremgmt.WithFeatures(), actest.NewPermissionsServicesMock(),
 		)
-		ac := actest.New()
+		ac := actest.NewAccesscontrol()
 		service := LibraryElementService{
 			Cfg:      setting.NewCfg(),
 			SQLStore: sqlStore,

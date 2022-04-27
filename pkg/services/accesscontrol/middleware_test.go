@@ -26,13 +26,13 @@ func TestMiddleware(t *testing.T) {
 	tests := []middlewareTestCase{
 		{
 			desc:           "should use fallback if access control is disabled",
-			ac:             actest.New().WithDisabled(),
+			ac:             actest.NewAccesscontrol().WithDisabled(),
 			expectFallback: true,
 			expectEndpoint: true,
 		},
 		{
 			desc: "should pass middleware for correct permissions",
-			ac: actest.New().WithPermissions(
+			ac: actest.NewAccesscontrol().WithPermissions(
 				[]*accesscontrol.Permission{{Action: "users:read", Scope: "users:*"}},
 			),
 			evaluator:      accesscontrol.EvalPermission("users:read", "users:*"),
@@ -41,7 +41,7 @@ func TestMiddleware(t *testing.T) {
 		},
 		{
 			desc: "should not reach endpoint when missing permissions",
-			ac: actest.New().WithPermissions(
+			ac: actest.NewAccesscontrol().WithPermissions(
 				[]*accesscontrol.Permission{{Action: "users:read", Scope: "users:1"}},
 			),
 			evaluator:      accesscontrol.EvalPermission("users:read", "users:*"),

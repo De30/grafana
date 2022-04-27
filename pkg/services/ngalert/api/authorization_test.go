@@ -49,7 +49,7 @@ func TestAuthorize(t *testing.T) {
 	}
 	require.Len(t, paths, 34)
 
-	ac := actest.New()
+	ac := actest.NewAccesscontrol()
 	api := &API{AccessControl: ac}
 
 	t.Run("should not panic on known routes", func(t *testing.T) {

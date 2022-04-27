@@ -13,7 +13,7 @@ type fullAccessControl interface {
 	RegisterFixedRoles(context.Context) error
 }
 
-type Calls struct {
+type calls struct {
 	Evaluate                       []interface{}
 	GetUserPermissions             []interface{}
 	GetUserRoles                   []interface{}
@@ -35,7 +35,7 @@ type AccesscontrolMock struct {
 	builtInRoles []string
 
 	// Track the list of calls
-	Calls Calls
+	Calls calls
 
 	// Override functions
 	EvaluateFunc                       func(context.Context, *models.SignedInUser, accesscontrol.Evaluator) (bool, error)
@@ -51,11 +51,11 @@ type AccesscontrolMock struct {
 }
 
 // Ensure the mock stays in line with the interface
-var _ fullAccessControl = New()
+var _ fullAccessControl = NewAccesscontrol()
 
-func New() *AccesscontrolMock {
+func NewAccesscontrol() *AccesscontrolMock {
 	mock := &AccesscontrolMock{
-		Calls:         Calls{},
+		Calls:         calls{},
 		disabled:      false,
 		permissions:   []*accesscontrol.Permission{},
 		builtInRoles:  []string{},

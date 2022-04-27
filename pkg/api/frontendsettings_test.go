@@ -53,7 +53,7 @@ func setupTestEnvironment(t *testing.T, cfg *setting.Cfg, features *featuremgmt.
 		SettingsProvider:     setting.ProvideProvider(cfg),
 		pluginStore:          &fakePluginStore{},
 		grafanaUpdateChecker: &updatechecker.GrafanaService{},
-		AccessControl:        actest.New().WithDisabled(),
+		AccessControl:        actest.NewAccesscontrol().WithDisabled(),
 		PluginSettings:       pluginSettings.ProvideService(sqlStore, secretsService),
 	}
 

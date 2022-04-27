@@ -154,7 +154,7 @@ var (
 		},
 		"timepicker": {},
 		"timezone": "",
-		"title": "New dashboard",
+		"title": "NewAccesscontrol dashboard",
 		"version": 0,
 		"weekStart": ""
 	}`
@@ -199,7 +199,7 @@ func TestAPIEndpoint_Metrics_QueryMetricsFromDashboard(t *testing.T) {
 
 	secretsStore := kvstore.SetupTestService(t)
 	secretsService := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
-	ds := datasources.ProvideService(nil, secretsService, secretsStore, nil, featuremgmt.WithFeatures(), actest.New(), actest.NewPermissionsServicesMock())
+	ds := datasources.ProvideService(nil, secretsService, secretsStore, nil, featuremgmt.WithFeatures(), actest.NewAccesscontrol(), actest.NewPermissionsServicesMock())
 
 	setInitCtxSignedInViewer(sc.initCtx)
 	sc.hs.queryDataService = query.ProvideService(

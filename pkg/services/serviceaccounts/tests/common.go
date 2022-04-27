@@ -58,7 +58,7 @@ func SetupMockAccesscontrol(t *testing.T,
 	userpermissionsfunc func(c context.Context, siu *models.SignedInUser, opt accesscontrol.Options) ([]*accesscontrol.Permission, error),
 	disableAccessControl bool) *actest.AccesscontrolMock {
 	t.Helper()
-	acmock := actest.New()
+	acmock := actest.NewAccesscontrol()
 	if disableAccessControl {
 		acmock = acmock.WithDisabled()
 	}

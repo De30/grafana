@@ -222,7 +222,7 @@ func setupTestEnvironment(t *testing.T, permissions []*accesscontrol.Permission,
 	store := database.ProvideService(sql)
 	cfg := setting.NewCfg()
 	cfg.IsEnterprise = true
-	service, err := New(ops, cfg, routing.NewRouteRegister(), actest.New().WithPermissions(permissions), store, sql)
+	service, err := New(ops, cfg, routing.NewRouteRegister(), actest.NewAccesscontrol().WithPermissions(permissions), store, sql)
 	require.NoError(t, err)
 
 	return service, sql

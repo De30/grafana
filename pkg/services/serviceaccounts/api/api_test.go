@@ -56,7 +56,7 @@ func TestServiceAccountsAPI_CreateServiceAccount(t *testing.T) {
 	testCases := []testCreateSATestCase{
 		{
 			desc:   "should be ok to create serviceaccount with permissions",
-			body:   map[string]interface{}{"name": "New SA"},
+			body:   map[string]interface{}{"name": "NewAccesscontrol SA"},
 			wantID: "sa-new-sa",
 			acmock: tests.SetupMockAccesscontrol(
 				t,
@@ -69,7 +69,7 @@ func TestServiceAccountsAPI_CreateServiceAccount(t *testing.T) {
 		},
 		{
 			desc:      "not ok - duplicate name",
-			body:      map[string]interface{}{"name": "New SA"},
+			body:      map[string]interface{}{"name": "NewAccesscontrol SA"},
 			wantError: "service account name already in use",
 			acmock: tests.SetupMockAccesscontrol(
 				t,
@@ -351,7 +351,7 @@ func TestServiceAccountsAPI_UpdateServiceAccount(t *testing.T) {
 		{
 			desc: "should be ok to update serviceaccount with permissions",
 			user: &tests.TestUser{Login: "servicetest1@admin", IsServiceAccount: true, Role: "Viewer", Name: "Unaltered"},
-			body: &serviceaccounts.UpdateServiceAccountForm{Name: newString("New Name"), Role: &viewerRole},
+			body: &serviceaccounts.UpdateServiceAccountForm{Name: newString("NewAccesscontrol Name"), Role: &viewerRole},
 			acmock: tests.SetupMockAccesscontrol(
 				t,
 				func(c context.Context, siu *models.SignedInUser, _ accesscontrol.Options) ([]*accesscontrol.Permission, error) {
@@ -364,7 +364,7 @@ func TestServiceAccountsAPI_UpdateServiceAccount(t *testing.T) {
 		{
 			desc: "should be forbidden to set role higher than user's role",
 			user: &tests.TestUser{Login: "servicetest2@admin", IsServiceAccount: true, Role: "Viewer", Name: "Unaltered 2"},
-			body: &serviceaccounts.UpdateServiceAccountForm{Name: newString("New Name 2"), Role: &editorRole},
+			body: &serviceaccounts.UpdateServiceAccountForm{Name: newString("NewAccesscontrol Name 2"), Role: &editorRole},
 			acmock: tests.SetupMockAccesscontrol(
 				t,
 				func(c context.Context, siu *models.SignedInUser, _ accesscontrol.Options) ([]*accesscontrol.Permission, error) {

@@ -33,7 +33,7 @@ func TestUserAPIEndpoint_userLoggedIn(t *testing.T) {
 	hs := &HTTPServer{
 		Cfg:           settings,
 		SQLStore:      sqlStore,
-		AccessControl: actest.New(),
+		AccessControl: actest.NewAccesscontrol(),
 	}
 
 	mockResult := models.SearchUserQueryResult{

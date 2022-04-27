@@ -35,7 +35,7 @@ func TestRouteTestGrafanaRuleConfig(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
 			data2 := models.GenerateAlertQuery()
 
-			ac := actest.New().WithPermissions([]*accesscontrol.Permission{
+			ac := actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data1.DatasourceUID)},
 			})
 
@@ -57,7 +57,7 @@ func TestRouteTestGrafanaRuleConfig(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
 			data2 := models.GenerateAlertQuery()
 
-			ac := actest.New().WithPermissions([]*accesscontrol.Permission{
+			ac := actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data1.DatasourceUID)},
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data2.DatasourceUID)},
 			})
@@ -98,7 +98,7 @@ func TestRouteTestGrafanaRuleConfig(t *testing.T) {
 				OrgId: 1,
 			},
 		}
-		ac := actest.New().WithDisabled()
+		ac := actest.NewAccesscontrol().WithDisabled()
 
 		t.Run("should require user to be signed in", func(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
@@ -158,7 +158,7 @@ func TestRouteEvalQueries(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
 			data2 := models.GenerateAlertQuery()
 
-			ac := actest.New().WithPermissions([]*accesscontrol.Permission{
+			ac := actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data1.DatasourceUID)},
 			})
 
@@ -178,7 +178,7 @@ func TestRouteEvalQueries(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
 			data2 := models.GenerateAlertQuery()
 
-			ac := actest.New().WithPermissions([]*accesscontrol.Permission{
+			ac := actest.NewAccesscontrol().WithPermissions([]*accesscontrol.Permission{
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data1.DatasourceUID)},
 				{Action: datasources.ActionQuery, Scope: datasources.ScopeProvider.GetResourceScopeUID(data2.DatasourceUID)},
 			})
@@ -222,7 +222,7 @@ func TestRouteEvalQueries(t *testing.T) {
 				OrgId: 1,
 			},
 		}
-		ac := actest.New().WithDisabled()
+		ac := actest.NewAccesscontrol().WithDisabled()
 
 		t.Run("should require user to be signed in", func(t *testing.T) {
 			data1 := models.GenerateAlertQuery()
@@ -268,7 +268,7 @@ func TestRouteEvalQueries(t *testing.T) {
 
 func createTestingApiSrv(ds *fakes.FakeCacheService, ac *actest.AccesscontrolMock, evaluator *eval.FakeEvaluator) *TestingApiSrv {
 	if ac == nil {
-		ac = actest.New().WithDisabled()
+		ac = actest.NewAccesscontrol().WithDisabled()
 	}
 
 	return &TestingApiSrv{
