@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+
 import { BusEventBase, NavModelItem, NavSection } from '@grafana/data';
 import { config } from '@grafana/runtime';
-import { StoreState } from 'app/types';
-import { enrichConfigItems, getActiveItem } from '../utils';
-import { NavBarMenu } from './NavBarMenu';
-import { useSelector } from 'react-redux';
 import appEvents from 'app/core/app_events';
+import { StoreState } from 'app/types';
+
+import { enrichConfigItems, getActiveItem } from '../utils';
+
+import { NavBarMenu } from './NavBarMenu';
 
 const homeItem: NavModelItem = {
   id: 'home',
   text: 'Home',
   url: config.appSubUrl || '/',
-  icon: 'grafana',
+  icon: 'home',
 };
 
 export class ToggleMegaMenu extends BusEventBase {

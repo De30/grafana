@@ -426,9 +426,7 @@ function linkHasChildren(link: NavModelItem): link is NavModelItem & { children:
 }
 
 function getLinkIcon(link: NavModelItem) {
-  if (link.id === 'home') {
-    return <Branding.MenuLogo />;
-  } else if (link.icon) {
+  if (link.icon) {
     return <Icon name={link.icon as IconName} size="xl" />;
   } else if (link.img) {
     return <img src={link.img} alt={`${link.text} logo`} height="24" width="24" style={{ borderRadius: '50%' }} />;
