@@ -193,7 +193,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      padding: ${theme.spacing(0, 2)};
+      padding: ${theme.spacing(0, 1.5, 0, 2)};
       min-height: 40px;
       flex-shrink: 0;
       box-shadow: ${shadow};

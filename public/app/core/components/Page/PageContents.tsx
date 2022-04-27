@@ -11,5 +11,5 @@ interface Props {
 }
 
 export const PageContents: FC<Props> = ({ isLoading, children, className }) => {
-  return <div>{isLoading ? <PageLoader /> : children}</div>;
+  return <>{isLoading ? <PageLoader /> : children}</>;
 };

@@ -17,7 +17,7 @@ const getNotFoundModel = (): NavModel => {
 
 export const getNavModel = (navIndex: NavIndex, id: string, fallback?: NavModel, onlyChild = false): NavModel => {
   if (navIndex[id]) {
-    const node = { ...navIndex[id], active: true };
+    let node = { ...navIndex[id], active: true };
 
     let main: NavModelItem;
     if (!onlyChild && node.parentItem) {
@@ -33,6 +33,11 @@ export const getNavModel = (navIndex: NavIndex, id: string, fallback?: NavModel,
         });
 
       if (main.parentItem) {
+        if (!node.children || (node.children.length === 0 && node.parentItem)) {
+          //@ts-ignore
+          node = main;
+        }
+
         main.parentItem = {
           ...main.parentItem,
           children: main.parentItem.children!.map((x) => {

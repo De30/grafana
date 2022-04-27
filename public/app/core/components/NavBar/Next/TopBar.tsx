@@ -20,9 +20,9 @@ export const TopBar = React.memo(() => {
 
   return (
     <div className={styles.topBar}>
-      <div className={styles.logo}>
+      <a className={styles.logo} href="/" title="Go to home">
         <Icon name="grafana" size="xl" />
-      </div>
+      </a>
       <div className={styles.searchWrapper}>
         <FilterInput
           width={50}
@@ -71,7 +71,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       height: '40px',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(0, 1.5, 0, 2),
       borderBottom: `1px solid ${theme.colors.border.weak}`,
       zIndex: theme.zIndex.sidemenu + 2,
     }),
@@ -92,7 +92,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       gap: theme.spacing(1),
       width: 25,
       position: 'relative',
-      left: -94,
+      left: -91,
     }),
     actionItem: css({
       display: 'flex',

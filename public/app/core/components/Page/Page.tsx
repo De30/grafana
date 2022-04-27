@@ -159,6 +159,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     tabContent: css({
       paddingTop: theme.spacing(3),
+      flexGrow: 1,
     }),
   };
 };

@@ -5,6 +5,7 @@ import { getBackendSrv, locationService } from '@grafana/runtime';
 import { notifyApp, updateNavIndex } from 'app/core/actions';
 import { createSuccessNotification, createWarningNotification } from 'app/core/copy/appNotification';
 import { contextSrv } from 'app/core/core';
+import { getNavModel } from 'app/core/selectors/navModel';
 import { backendSrv } from 'app/core/services/backend_srv';
 import { FolderState, ThunkResult } from 'app/types';
 import { DashboardAcl, DashboardAclUpdateDTO, NewDashboardAclItem, PermissionLevel } from 'app/types/acl';
@@ -13,10 +14,14 @@ import { buildNavModel } from './navModel';
 import { loadFolder, loadFolderPermissions, setCanViewFolderPermissions } from './reducers';
 
 export function getFolderByUid(uid: string): ThunkResult<void> {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     const folder = await backendSrv.getFolderByUid(uid);
     dispatch(loadFolder(folder));
-    dispatch(updateNavIndex(buildNavModel(folder)));
+    const folderNav = buildNavModel(folder);
+    const sectionNav = getNavModel(getState().navIndex, 'manage-dashboards');
+    folderNav.parentItem = sectionNav.main;
+
+    dispatch(updateNavIndex(folderNav));
   };
 }
 

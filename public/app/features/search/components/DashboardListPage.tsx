@@ -38,7 +38,9 @@ export const DashboardListPage: FC<Props> = memo(({ navModel, match, location })
         locationService.push(path);
       }
 
-      return { folder, pageNavModel: { ...navModel, main: folderNav } };
+      folderNav.parentItem = navModel.main;
+
+      return { folder, pageNavModel: { ...navModel, node: folderNav } };
     });
   }, [match.params.uid]);
 

@@ -7,9 +7,8 @@ export function buildNavModel(folder: FolderDTO): NavModelItem {
     icon: 'folder',
     id: 'manage-folder',
     subTitle: 'Manage folder dashboards and permissions',
-    url: '',
+    url: folder.url,
     text: folder.title,
-    breadcrumbs: [{ title: 'Dashboards', url: 'dashboards' }],
     children: [
       {
         active: false,
