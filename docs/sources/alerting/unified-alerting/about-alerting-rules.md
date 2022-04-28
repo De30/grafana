@@ -11,7 +11,11 @@ aliases = [
 
 # About alert rules
 
-Alert rules are templates that determine if one or more alert instances should be created and what state they should be in.
+An alerting rule is a set of evaluation criteria that determines whether an alert instance will fire. The rule consists of one or more queries and expressions, a condition, the frequency of evaluation, and optionally, the duration over which the condition is met.
+
+While queries and expressions select the data set to evaluate, a condition sets the threshold that an alert must meet or exceed to create an alert.
+
+An interval specifies how frequently an alerting rule is evaluated. Duration, when configured, indicates how long a condition must be met. The alert rules can also define alerting behavior in the absence of data.
 
 ## Alert rule types
 
@@ -27,7 +31,7 @@ In additional to supporting any datasource you can also add additional [expressi
 
 To create Mimir, Loki or Cortex alerts you must have a compatible Prometheus datasource. You can check if your datasource is compatible by testing the datasource and checking the details if the ruler API is supported.
 
-![SCREENSHOT HERE]()
+![@TODO: SCREENSHOT HERE]()
 
 ### Recording rules
 
@@ -51,9 +55,9 @@ sum by(cpu) (
 
 A rule using this expression will create as many alert instances as the amount of CPUs we are observing after the first evaluation, allowing a single rule to report the status of each individual CPU.
 
-![SCREENSHOT HERE]()
+![@TODO: SCREENSHOT HERE]()
 
-## State and health of alert rules
+## Alert states and health
 
 The state and health of alerting rules help you understand several key status indicators about your alerts. There are three key components: alerting rule state, alert instance state, and alerting rule health. Although related, each component conveys subtly different information.
 
@@ -67,6 +71,8 @@ An alert rule can be in either of the following states:
 | Pending   | At least one time series returned by the evaluation engine is Pending.                     |
 | Firing    | At least one time series returned by the evaluation engine is Firing.                      |
 
+> **Note:** Alerts will transition first to `pending` and then `firing`, thus it will take at least two evaluation cycles before an alert is fired.
+
 ### Alert instance state
 
 An alert instance can be in either of the following states:
@@ -77,9 +83,7 @@ An alert instance can be in either of the following states:
 | Pending   | The state of an alert that has been active for less than the configured threshold duration.   |
 | Alerting  | The state of an alert that has been active for longer than the configured threshold duration. |
 | NoData    | No data has been received for the configured time window.                                     |
-| Error     | Error when attempting to evaluate an alerting rule.                                           |
-
-> **Note:** Alerts will transition first to `pending` and then `firing`, thus it will take at least two evaluation cycles before an alert is fired.
+| Error     | The error that occurred when attempting to evaluate an alerting rule.                         |
 
 ### Alert rule health
 
@@ -96,9 +100,30 @@ When evaluation of an alerting rule produces state NoData or Error, Grafana aler
 | **Label**      | **Description**                                                        |
 | -------------- | ---------------------------------------------------------------------- |
 | alertname      | Either `DatasourceNoData` or `DatasourceError` depending on the state. |
-| datasource_uid | the UID of the data source that caused the state.                      |
+| datasource_uid | The UID of the data source that caused the state.                      |
 
 You can handle these alerts the same way as regular alerts by adding a silence, route to a contact point, and so on.
+
+@TODO: VALIDATE THIS STATE TRANSITION DIAGRAM
+
+```
+┌────────┐    ┌─────────┐    ┌──────────┐
+│ Normal │───▶│ Pending │───▶│ Alerting │
+└────────┘    └─────────┘    └──────────┘
+     ▲                             │
+     │                             │
+     └─────────────────────────────┘
+```
+
+## Annotations and labels
+
+Annotations and labels might seem at first glance to be similar concepts; both allow you to add additional metadata to your alert rule definition but serve difference purposes.
+
+**Annotations** are used to add a summary, description or other metadata to include in custom [message templates]().
+
+**Labels** on the other hand are used to **determine which notification policy** will handle the alert instances the alert rule generates.
+
+These labels can also be used by other third-party services when you choose to configure a webhook contact point.
 
 ## Organising alerts
 
@@ -114,4 +139,4 @@ All rules within a group are evaluated at the same **interval**.
 
 Alert rules and recording rules within a group will always be evaluated **sequentially**, meaning no rules will be evaluated at the same time and in order of appearance.
 
-If you want rules to be evaluated concurrenty and with difference intervals, consider storing them in different groups.
+> If you want rules to be evaluated concurrenty and with difference intervals, consider storing them in different groups.

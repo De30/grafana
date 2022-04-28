@@ -2,7 +2,7 @@
 title = "About Grafana alerting"
 description = "Learn about the basic concepts of Grafana alerting"
 keywords = ["grafana", "alerting", "concepts", "basics"]
-weight = 1
+weight = 100
 +++
 
 # About Grafana alerting
