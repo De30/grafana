@@ -21,6 +21,7 @@ export enum HorizontalConstraint {
   LeftRight = 'leftright',
   Center = 'center',
   Scale = 'scale',
+  Mixed = 'mixed',
 }
 
 export enum VerticalConstraint {
@@ -29,6 +30,7 @@ export enum VerticalConstraint {
   TopBottom = 'topbottom',
   Center = 'center',
   Scale = 'scale',
+  Mixed = 'mixed',
 }
 
 export enum BackgroundImageSize {

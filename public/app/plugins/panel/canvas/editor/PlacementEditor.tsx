@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { SelectableValue, StandardEditorProps } from '@grafana/data';
 import { Field, InlineField, InlineFieldRow, Select, VerticalGroup } from '@grafana/ui';
 import { HorizontalConstraint, Placement, VerticalConstraint } from 'app/features/canvas';
+import { ElementState } from 'app/features/canvas/runtime/element';
 import { NumberInput } from 'app/features/dimensions/editors/NumberInput';
 
 import { PanelOptions } from '../models.gen';
@@ -19,6 +20,7 @@ const horizontalOptions: Array<SelectableValue<HorizontalConstraint>> = [
   { label: 'Left and right', value: HorizontalConstraint.LeftRight },
   { label: 'Center', value: HorizontalConstraint.Center },
   { label: 'Scale', value: HorizontalConstraint.Scale },
+  { label: 'Mixed', value: HorizontalConstraint.Mixed },
 ];
 
 const verticalOptions: Array<SelectableValue<VerticalConstraint>> = [
@@ -27,6 +29,7 @@ const verticalOptions: Array<SelectableValue<VerticalConstraint>> = [
   { label: 'Top and bottom', value: VerticalConstraint.TopBottom },
   { label: 'Center', value: VerticalConstraint.Center },
   { label: 'Scale', value: VerticalConstraint.Scale },
+  { label: 'Mixed', value: VerticalConstraint.Mixed },
 ];
 
 export const PlacementEditor: FC<StandardEditorProps<any, CanvasEditorOptions, PanelOptions>> = ({ item }) => {
@@ -39,46 +42,49 @@ export const PlacementEditor: FC<StandardEditorProps<any, CanvasEditorOptions, P
     return <div>Loading...</div>;
   }
 
-  const element = settings.element;
-  if (!element) {
-    return <div>???</div>;
+  let elements: ElementState[] = [];
+  if (settings.selectedElements) {
+    elements = settings.selectedElements;
+  } else {
+    elements = [settings.element];
   }
-  const { options } = element;
-  const { placement, constraint: layout } = options;
 
   const onHorizontalConstraintChange = (h: SelectableValue<HorizontalConstraint>) => {
-    element.options.constraint!.horizontal = h.value;
-    element.setPlacementFromConstraint();
-    settings.scene.revId++;
-    settings.scene.save(true);
+    elements.map((element) => {
+      element.options.constraint!.horizontal = h.value;
+      element.setPlacementFromConstraint();
+      settings.scene.revId++;
+      settings.scene.save(true);
+    });
   };
 
   const onVerticalConstraintChange = (v: SelectableValue<VerticalConstraint>) => {
-    element.options.constraint!.vertical = v.value;
-    element.setPlacementFromConstraint();
-    settings.scene.revId++;
-    settings.scene.save(true);
+    elements.map((element) => {
+      element.options.constraint!.vertical = v.value;
+      element.setPlacementFromConstraint();
+      settings.scene.revId++;
+      settings.scene.save(true);
+    });
   };
 
-  const onPositionChange = (value: number | undefined, placement: keyof Placement) => {
-    element.options.placement![placement] = value ?? element.options.placement![placement];
-    element.applyLayoutStylesToDiv();
-    settings.scene.clearCurrentSelection();
-  };
+  // const onPositionChange = (value: number | undefined, placement: keyof Placement) => {
+  //   element.options.placement![placement] = value ?? element.options.placement![placement];
+  //   element.applyLayoutStylesToDiv();
+  //   settings.scene.clearCurrentSelection();
+  // };
+
+  const vConstraint = calculateVerticalConstraint(elements);
+  const hConstraint = calculateHorizontalConstraint(elements);
 
   return (
     <div>
       <VerticalGroup>
-        <Select options={verticalOptions} onChange={onVerticalConstraintChange} value={layout?.vertical} />
-        <Select
-          options={horizontalOptions}
-          onChange={onHorizontalConstraintChange}
-          value={options.constraint?.horizontal}
-        />
+        <Select options={verticalOptions} onChange={onVerticalConstraintChange} value={vConstraint} />
+        <Select options={horizontalOptions} onChange={onHorizontalConstraintChange} value={hConstraint} />
       </VerticalGroup>
       <br />
 
-      <Field label="Position">
+      {/* <Field label="Position">
         <>
           {places.map((p) => {
             const v = placement![p];
@@ -94,7 +100,31 @@ export const PlacementEditor: FC<StandardEditorProps<any, CanvasEditorOptions, P
             );
           })}
         </>
-      </Field>
+      </Field> */}
     </div>
   );
+};
+
+const calculateVerticalConstraint = (elements: ElementState[]): VerticalConstraint => {
+  let vConstraint = elements[0].options.constraint?.vertical ?? VerticalConstraint.Mixed;
+
+  elements.map((element) => {
+    if (element.options.constraint?.vertical !== vConstraint) {
+      vConstraint = VerticalConstraint.Mixed;
+    }
+  });
+
+  return vConstraint;
+};
+
+const calculateHorizontalConstraint = (elements: ElementState[]): HorizontalConstraint => {
+  let hConstraint = elements[0].options.constraint?.horizontal ?? HorizontalConstraint.Mixed;
+
+  elements.map((element) => {
+    if (element.options.constraint?.horizontal !== hConstraint) {
+      hConstraint = HorizontalConstraint.Mixed;
+    }
+  });
+
+  return hConstraint;
 };

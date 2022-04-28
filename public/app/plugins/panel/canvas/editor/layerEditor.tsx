@@ -79,7 +79,7 @@ export function getLayerEditor(opts: InstanceState): NestedPanelOptions<LayerEdi
       optionBuilder.addBackground(builder as any, ctx);
       optionBuilder.addBorder(builder as any, ctx);
 
-      if (currentLayer && !currentLayer.isRoot()) {
+      if ((currentLayer && !currentLayer.isRoot()) || selected?.length > 1) {
         builder.addCustomEditor({
           category: ['Layout'],
           id: 'content',
@@ -89,6 +89,7 @@ export function getLayerEditor(opts: InstanceState): NestedPanelOptions<LayerEdi
           settings: {
             scene: opts.scene,
             element: currentLayer,
+            selectedElements: selected,
           },
         });
       }

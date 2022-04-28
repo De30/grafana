@@ -12,6 +12,7 @@ import { optionBuilder } from './options';
 export interface CanvasEditorOptions {
   element: ElementState;
   scene: Scene;
+  selectedElements?: ElementState[];
   category?: string[];
 }
 
