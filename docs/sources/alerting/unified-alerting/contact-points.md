@@ -2,7 +2,7 @@
 title = "Contact points"
 description = "Create or edit contact point"
 keywords = ["grafana", "alerting", "guide", "contact point", "notification channel", "create"]
-weight = 430
+weight = 3
 +++
 
 # Contact points
