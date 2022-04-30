@@ -11,6 +11,8 @@ import {
   ToolbarButton,
   ToolbarButtonRow,
 } from '@grafana/ui';
+import appEvents from 'app/core/app_events';
+import { ToggleMegaMenu } from 'app/core/components/NavBar/Next/MegaMenu';
 import { createAndCopyShortLink } from 'app/core/utils/shortLinks';
 import { ExploreId } from 'app/types/explore';
 import { StoreState } from 'app/types/store';
@@ -28,7 +30,6 @@ import { cancelQueries, runQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { syncTimes, changeRefreshInterval } from './state/time';
 import { LiveTailControls } from './useLiveTailControls';
-import appEvents from 'app/core/app_events';
 
 const AddToDashboard = lazy(() =>
   import('./AddToDashboard').then(({ AddToDashboard }) => ({ default: AddToDashboard }))

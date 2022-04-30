@@ -9,7 +9,6 @@ import { useLocalStorage } from 'react-use';
 import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 import { CollapsableSection, CustomScrollbar, Icon, IconButton, IconName, useStyles2, useTheme2 } from '@grafana/ui';
 
-import { Branding } from '../../Branding/Branding';
 import { isMatchOrChildMatch } from '../utils';
 
 import { NavBarItemWithoutMenu } from './NavBarItemWithoutMenu';

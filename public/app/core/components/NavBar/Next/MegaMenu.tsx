@@ -24,6 +24,30 @@ export class ToggleMegaMenu extends BusEventBase {
 }
 
 export const MegaMenu = React.memo(() => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const sub = appEvents.subscribe(ToggleMegaMenu, (evt) => {
+      setMenuOpen(!menuOpen);
+    });
+
+    return () => sub.unsubscribe();
+  }, [menuOpen, setMenuOpen]);
+
+  if (!menuOpen) {
+    return null;
+  }
+
+  return <MegaMenuOpen onClose={() => setMenuOpen(false)} />;
+});
+
+MegaMenu.displayName = 'MegaMenu';
+
+export interface Props {
+  onClose: () => void;
+}
+
+export const MegaMenuOpen = React.memo<Props>(({ onClose }) => {
   const navBarTree = useSelector((state: StoreState) => state.navBarTree);
   const location = useLocation();
   const [showSwitcherModal, setShowSwitcherModal] = useState(false);
@@ -42,29 +66,16 @@ export const MegaMenu = React.memo(() => {
   );
 
   const activeItem = getActiveItem(navTree, location.pathname);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const sub = appEvents.subscribe(ToggleMegaMenu, (evt) => {
-      setMenuOpen(!menuOpen);
-    });
-
-    return () => sub.unsubscribe();
-  }, [menuOpen, setMenuOpen]);
-
-  if (!menuOpen) {
-    return null;
-  }
 
   return (
     <NavBarMenu
       activeItem={activeItem}
-      isOpen={menuOpen}
+      isOpen={true}
       setMenuAnimationInProgress={() => {}}
       navItems={[homeItem, ...coreItems, ...pluginItems, ...configItems]}
-      onClose={() => setMenuOpen(false)}
+      onClose={onClose}
     />
   );
 });
 
-MegaMenu.displayName = 'MegaMenu';
+MegaMenuOpen.displayName = 'MegaMenuOpen';
