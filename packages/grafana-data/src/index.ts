@@ -28,6 +28,3 @@ export type { SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/Pa
 export { createFieldConfigRegistry } from './panel/registryFactories';
 export type { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
 export type { GroupingToMatrixTransformerOptions } from './transformations/transformers/groupingToMatrix';
-
-// Moved to `@grafana/schema`, in Grafana 9, this will be removed
-export * from './schema';
