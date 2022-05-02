@@ -2,7 +2,8 @@
   "compilerOptions": {
     "rootDirs": ["."]
   },
-  "exclude": ["dist", "node_modules", "**/*.test.ts*"],
+  "exclude": ["dist", "**/*.test.ts*"],
   "extends": "@grafana/tsconfig",
-  "include": ["src/**/*.ts*", "typings/jest", "../../public/app/types/jquery/*.ts", "../../public/app/types/*.d.ts"]
+  "include": ["src/**/*"],
+  "typeRoots": ["./typings"]
 }

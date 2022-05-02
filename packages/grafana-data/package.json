@@ -17,7 +17,7 @@
   "module": "dist/module.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "parcel build --no-cache",
+    "build": "parcel build",
     "bundle": "rollup -c rollup.config.ts",
     "clean": "rimraf ./dist ./compiled",
     "docsExtract": "mkdir -p ../../reports/docs && api-extractor run 2>&1 | tee ../../reports/docs/$(basename $(pwd)).log",
@@ -27,7 +27,6 @@
   "dependencies": {
     "@braintree/sanitize-url": "6.0.0",
     "@grafana/schema": "9.0.0-pre",
-    "@types/d3-interpolate": "^1.4.0",
     "d3-interpolate": "1.4.0",
     "date-fns": "2.28.0",
     "eventemitter3": "4.0.7",
@@ -57,6 +56,7 @@
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "7.0.2",
     "@testing-library/user-event": "14.1.1",
+    "@types/d3-interpolate": "^1.4.0",
     "@types/history": "4.7.11",
     "@types/jest": "27.4.1",
     "@types/jquery": "3.5.14",

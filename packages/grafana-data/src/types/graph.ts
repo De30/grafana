@@ -27,5 +27,5 @@ export interface GraphSeriesXY {
 }
 
 export interface CreatePlotOverlay {
-  (element: JQuery, event: any, plot: { getOptions: () => { events: { manager: any } } }): any;
+  (element: any, event: any, plot: { getOptions: () => { events: { manager: any } } }): any;
 }
