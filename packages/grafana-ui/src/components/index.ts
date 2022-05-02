@@ -7,54 +7,62 @@ import { Switch } from './Forms/Legacy/Switch/Switch';
 import { SecretFormField } from './SecretFormField/SecretFormField';
 
 export { Icon } from './Icon/Icon';
-export { IconButton, IconButtonVariant } from './IconButton/IconButton';
+export { IconButton } from './IconButton/IconButton';
+export type { IconButtonVariant } from './IconButton/IconButton';
 export { ConfirmButton } from './ConfirmButton/ConfirmButton';
 export { DeleteButton } from './ConfirmButton/DeleteButton';
 export { Tooltip } from './Tooltip/Tooltip';
-export { PopoverContent } from './Tooltip/types';
+export type { PopoverContent } from './Tooltip/types';
 export { PopoverController } from './Tooltip/PopoverController';
 export { Popover } from './Tooltip/Popover';
 export { Portal, getPortalContainer, PortalContainer } from './Portal/Portal';
-export { CustomScrollbar, ScrollbarPosition } from './CustomScrollbar/CustomScrollbar';
-export { TabbedContainer, TabConfig } from './TabbedContainer/TabbedContainer';
+export { CustomScrollbar } from './CustomScrollbar/CustomScrollbar';
+export type { ScrollbarPosition } from './CustomScrollbar/CustomScrollbar';
+export { TabbedContainer } from './TabbedContainer/TabbedContainer';
+export type { TabConfig } from './TabbedContainer/TabbedContainer';
 
 export { ClipboardButton } from './ClipboardButton/ClipboardButton';
-export { Cascader, CascaderOption } from './Cascader/Cascader';
+export { Cascader } from './Cascader/Cascader';
+export type { CascaderOption } from './Cascader/Cascader';
 export { ButtonCascader } from './ButtonCascader/ButtonCascader';
 
-export { LoadingPlaceholder, LoadingPlaceholderProps } from './LoadingPlaceholder/LoadingPlaceholder';
+export { LoadingPlaceholder } from './LoadingPlaceholder/LoadingPlaceholder';
+export type { LoadingPlaceholderProps } from './LoadingPlaceholder/LoadingPlaceholder';
 export { ColorPicker, SeriesColorPicker } from './ColorPicker/ColorPicker';
-export { ColorValueEditor, ColorValueEditorProps } from './OptionsUI/color';
+export { ColorValueEditor } from './OptionsUI/color';
+export type { ColorValueEditorProps } from './OptionsUI/color';
 export { SeriesColorPickerPopover, SeriesColorPickerPopoverWithTheme } from './ColorPicker/SeriesColorPickerPopover';
 export { EmptySearchResult } from './EmptySearchResult/EmptySearchResult';
 export { UnitPicker } from './UnitPicker/UnitPicker';
 export { StatsPicker } from './StatsPicker/StatsPicker';
 export { RefreshPicker, defaultIntervals } from './RefreshPicker/RefreshPicker';
-export { TimeRangePicker, TimeRangePickerProps } from './DateTimePickers/TimeRangePicker';
+export { TimeRangePicker } from './DateTimePickers/TimeRangePicker';
+export type { TimeRangePickerProps } from './DateTimePickers/TimeRangePicker';
 export { TimeOfDayPicker } from './DateTimePickers/TimeOfDayPicker';
 export { TimeZonePicker } from './DateTimePickers/TimeZonePicker';
 export { WeekStartPicker } from './DateTimePickers/WeekStartPicker';
-export { DatePicker, DatePickerProps } from './DateTimePickers/DatePicker/DatePicker';
-export {
-  DatePickerWithInput,
-  DatePickerWithInputProps,
-} from './DateTimePickers/DatePickerWithInput/DatePickerWithInput';
+export { DatePicker } from './DateTimePickers/DatePicker/DatePicker';
+export type { DatePickerProps } from './DateTimePickers/DatePicker/DatePicker';
+export { DatePickerWithInput } from './DateTimePickers/DatePickerWithInput/DatePickerWithInput';
+export type { DatePickerWithInputProps } from './DateTimePickers/DatePickerWithInput/DatePickerWithInput';
 export { DateTimePicker } from './DateTimePickers/DateTimePicker/DateTimePicker';
 export { List } from './List/List';
 export { TagsInput } from './TagsInput/TagsInput';
 export { Pagination } from './Pagination/Pagination';
-export { Tag, OnTagClick } from './Tags/Tag';
+export { Tag } from './Tags/Tag';
+export type { OnTagClick } from './Tags/Tag';
 export { TagList } from './Tags/TagList';
 export { FilterPill } from './FilterPill/FilterPill';
 
-export { ConfirmModal, ConfirmModalProps } from './ConfirmModal/ConfirmModal';
+export { ConfirmModal } from './ConfirmModal/ConfirmModal';
+export type { ConfirmModalProps } from './ConfirmModal/ConfirmModal';
 export { QueryField } from './QueryField/QueryField';
 
 export { CodeEditor } from './Monaco/CodeEditor';
 
 export { ReactMonacoEditorLazy as ReactMonacoEditor } from './Monaco/ReactMonacoEditorLazy';
 
-export {
+export type {
   Monaco,
   monacoTypes,
   MonacoEditor,
@@ -76,7 +84,8 @@ export { PageToolbar } from './PageLayout/PageToolbar';
 export { SetInterval } from './SetInterval/SetInterval';
 
 export { Table } from './Table/Table';
-export { TableCellDisplayMode, TableSortByFieldState } from './Table/types';
+export { TableCellDisplayMode } from './Table/types';
+export type { TableSortByFieldState } from './Table/types';
 export { TableInputCSV } from './TableInputCSV/TableInputCSV';
 export { TabsBar } from './Tabs/TabsBar';
 export { Tab } from './Tabs/Tab';
@@ -98,37 +107,39 @@ export { Graph } from './Graph/Graph';
 export { GraphWithLegend } from './Graph/GraphWithLegend';
 export { GraphContextMenu, GraphContextMenuHeader } from './Graph/GraphContextMenu';
 export { BarGauge, BarGaugeDisplayMode } from './BarGauge/BarGauge';
-export {
-  VizTooltip,
-  VizTooltipContainer,
-  SeriesTable,
-  SeriesTableProps,
-  SeriesTableRow,
-  SeriesTableRowProps,
-} from './VizTooltip';
-export { VizRepeater, VizRepeaterRenderValueProps } from './VizRepeater/VizRepeater';
+export { VizTooltip, VizTooltipContainer, SeriesTable, SeriesTableRow } from './VizTooltip';
+export type { SeriesTableProps, SeriesTableRowProps } from './VizTooltip';
+export { VizRepeater } from './VizRepeater/VizRepeater';
+export type { VizRepeaterRenderValueProps } from './VizRepeater/VizRepeater';
 export { graphTimeFormat, graphTickFormatter } from './Graph/utils';
 export {
   PanelChrome,
-  PanelChromeProps,
-  PanelPadding,
-  PanelChromeType,
   PanelChromeLoadingIndicator,
-  PanelChromeLoadingIndicatorProps,
   PanelChromeErrorIndicator,
-  PanelChromeErrorIndicatorProps,
   PanelContextProvider,
-  PanelContext,
   PanelContextRoot,
   usePanelContext,
 } from './PanelChrome';
-export { VizLayout, VizLayoutComponentType, VizLayoutLegendProps, VizLayoutProps } from './VizLayout/VizLayout';
-export { VizLegendItem, SeriesVisibilityChangeBehavior } from './VizLegend/types';
+export type {
+  PanelChromeProps,
+  PanelPadding,
+  PanelChromeType,
+  PanelChromeLoadingIndicatorProps,
+  PanelChromeErrorIndicatorProps,
+  PanelContext,
+} from './PanelChrome';
+export { VizLayout } from './VizLayout/VizLayout';
+export type { VizLayoutComponentType, VizLayoutLegendProps, VizLayoutProps } from './VizLayout/VizLayout';
+export { SeriesVisibilityChangeBehavior } from './VizLegend/types';
+export type { VizLegendItem } from './VizLegend/types';
 export { VizLegend } from './VizLegend/VizLegend';
 export { VizLegendListItem } from './VizLegend/VizLegendListItem';
 
-export { Alert, AlertVariant } from './Alert/Alert';
-export { GraphSeriesToggler, GraphSeriesTogglerAPI } from './Graph/GraphSeriesToggler';
+export { Alert } from './Alert/Alert';
+export type { AlertVariant } from './Alert/Alert';
+
+export { GraphSeriesToggler } from './Graph/GraphSeriesToggler';
+export type { GraphSeriesTogglerAPI } from './Graph/GraphSeriesToggler';
 export { Collapse, ControlledCollapse } from './Collapse/Collapse';
 export { CollapsableSection } from './Collapse/CollapsableSection';
 export { LogLabels } from './Logs/LogLabels';
@@ -142,10 +153,15 @@ export { FullWidthButtonContainer } from './Button/FullWidthButtonContainer';
 export { ClickOutsideWrapper } from './ClickOutsideWrapper/ClickOutsideWrapper';
 export * from './SingleStatShared/index';
 export { CallToActionCard } from './CallToActionCard/CallToActionCard';
-export { ContextMenu, ContextMenuProps } from './ContextMenu/ContextMenu';
-export { Menu, MenuProps } from './Menu/Menu';
-export { MenuGroup, MenuItemsGroup, MenuGroupProps } from './Menu/MenuGroup';
-export { MenuItem, MenuItemProps } from './Menu/MenuItem';
+export { ContextMenu } from './ContextMenu/ContextMenu';
+export type { ContextMenuProps } from './ContextMenu/ContextMenu';
+export { Menu } from './Menu/Menu';
+export type { MenuProps } from './Menu/Menu';
+export { MenuGroup } from './Menu/MenuGroup';
+export type { MenuItemsGroup, MenuGroupProps } from './Menu/MenuGroup';
+export { MenuItem } from './Menu/MenuItem';
+export type { MenuItemProps } from './Menu/MenuItem';
+
 export { WithContextMenu } from './ContextMenu/WithContextMenu';
 export { DataLinksInlineEditor } from './DataLinks/DataLinksInlineEditor/DataLinksInlineEditor';
 export { DataLinkInput } from './DataLinks/DataLinkInput';
@@ -156,12 +172,8 @@ export { FeatureBadge, FeatureInfoBox } from './InfoBox/FeatureInfoBox';
 
 export { JSONFormatter } from './JSONFormatter/JSONFormatter';
 export { JsonExplorer } from './JSONFormatter/json_explorer/json_explorer';
-export {
-  ErrorBoundary,
-  ErrorBoundaryAlert,
-  ErrorBoundaryAlertProps,
-  withErrorBoundary,
-} from './ErrorBoundary/ErrorBoundary';
+export { ErrorBoundary, ErrorBoundaryAlert, withErrorBoundary } from './ErrorBoundary/ErrorBoundary';
+export type { ErrorBoundaryAlertProps } from './ErrorBoundary/ErrorBoundary';
 export { ErrorWithStack } from './ErrorBoundary/ErrorWithStack';
 export { DataSourceHttpSettings } from './DataSourceSettings/DataSourceHttpSettings';
 export { AlertingSettings } from './DataSourceSettings/AlertingSettings';
@@ -187,7 +199,8 @@ export { MultiSelectValueEditor } from './OptionsUI/multiSelect';
 export { Form } from './Forms/Form';
 export { sharedInputStyle } from './Forms/commonStyles';
 export { InputControl } from './InputControl';
-export { Button, LinkButton, ButtonVariant, ToolbarButton, ButtonGroup, ToolbarButtonRow, ButtonProps } from './Button';
+export { Button, LinkButton, ToolbarButton, ButtonGroup, ToolbarButtonRow } from './Button';
+export type { ButtonVariant, ButtonProps } from './Button';
 export { ValuePicker } from './ValuePicker/ValuePicker';
 export { fieldMatchersUI } from './MatchersUI/fieldMatchersUI';
 export { getFormStyles } from './Forms/getFormStyles';
@@ -213,12 +226,13 @@ export { getSelectStyles } from './Select/getSelectStyles';
 export * from './Select/types';
 
 export { HorizontalGroup, VerticalGroup, Container } from './Layout/Layout';
-export { Badge, BadgeColor, BadgeProps } from './Badge/Badge';
+export { Badge } from './Badge/Badge';
+export type { BadgeColor, BadgeProps } from './Badge/Badge';
 export { RadioButtonGroup } from './Forms/RadioButtonGroup/RadioButtonGroup';
 
 export { Input, getInputStyles } from './Input/Input';
 export { FilterInput } from './FilterInput/FilterInput';
-export { FormInputSize } from './Forms/types';
+export type { FormInputSize } from './Forms/types';
 
 export { Switch, InlineSwitch } from './Switch/Switch';
 export { Checkbox } from './Forms/Checkbox';
@@ -228,11 +242,14 @@ export { FileUpload } from './FileUpload/FileUpload';
 export * from './FileDropzone';
 export { TimeRangeInput } from './DateTimePickers/TimeRangeInput';
 export { RelativeTimeRangePicker } from './DateTimePickers/RelativeTimeRangePicker/RelativeTimeRangePicker';
-export { Card, Props as CardProps, getCardStyles } from './Card/Card';
-export { CardContainer, CardContainerProps } from './Card/CardContainer';
+export { Card, getCardStyles } from './Card/Card';
+export type { Props as CardProps } from './Card/Card';
+export { CardContainer } from './Card/CardContainer';
+export type { CardContainerProps } from './Card/CardContainer';
 export { FormattedValueDisplay } from './FormattedValueDisplay/FormattedValueDisplay';
 export { ButtonSelect } from './Dropdown/ButtonSelect';
-export { PluginSignatureBadge, PluginSignatureBadgeProps } from './PluginSignatureBadge/PluginSignatureBadge';
+export { PluginSignatureBadge } from './PluginSignatureBadge/PluginSignatureBadge';
+export type { PluginSignatureBadgeProps } from './PluginSignatureBadge/PluginSignatureBadge';
 
 // Export this until we've figured out a good approach to inline form styles.
 export { InlineFormLabel } from './FormLabel/FormLabel';
@@ -258,13 +275,14 @@ export { UPlotChart } from './uPlot/Plot';
 export { PlotLegend } from './uPlot/PlotLegend';
 export * from './uPlot/geometries';
 export * from './uPlot/plugins';
-export { PlotTooltipInterpolator, PlotSelection } from './uPlot/types';
-export { UPlotConfigPrepFn } from './uPlot/config/UPlotConfigBuilder';
-export { GraphNG, GraphNGProps, FIXED_UNIT } from './GraphNG/GraphNG';
+export type { PlotTooltipInterpolator, PlotSelection } from './uPlot/types';
+export type { UPlotConfigPrepFn } from './uPlot/config/UPlotConfigBuilder';
+export { GraphNG, FIXED_UNIT } from './GraphNG/GraphNG';
+export type { GraphNGProps } from './GraphNG/GraphNG';
 export { TimeSeries } from './TimeSeries/TimeSeries';
 export { useGraphNGContext } from './GraphNG/hooks';
 export { preparePlotFrame, buildScaleKey } from './GraphNG/utils';
-export { GraphNGLegendEvent } from './GraphNG/types';
+export type { GraphNGLegendEvent } from './GraphNG/types';
 export * from './PanelChrome/types';
 export { EmotionPerfTest } from './ThemeDemos/EmotionPerfTest';
 export { Label as BrowserLabel } from './BrowserLabel/Label';
