@@ -1,4 +1,4 @@
-import { E2ESelectors } from '../types';
+import type { E2ESelectors } from '../types';
 
 import { Components } from './components';
 import { Pages } from './pages';
