@@ -19,6 +19,7 @@ import { DashboardPermissions } from '../DashboardPermissions/DashboardPermissio
 import { SaveDashboardAsButton, SaveDashboardButton } from '../SaveDashboard/SaveDashboardButton';
 
 import { AnnotationsSettings } from './AnnotationsSettings';
+import { DrilldownSettings } from './DrilldownSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { JsonEditorSettings } from './JsonEditorSettings';
 import { LinksSettings } from './LinksSettings';
@@ -86,6 +87,13 @@ export function DashboardSettings({ dashboard, editview }: Props) {
         id: 'templating',
         icon: 'calculator-alt',
         component: <VariableEditorContainer dashboard={dashboard} />,
+      });
+
+      pages.push({
+        title: 'Drilldown',
+        id: 'drilldown',
+        icon: 'exclamation-triangle',
+        component: <DrilldownSettings dashboard={dashboard} />,
       });
 
       pages.push({
