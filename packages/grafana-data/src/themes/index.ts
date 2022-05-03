@@ -11,5 +11,5 @@ export type { ThemeZIndices } from './zIndex';
 export type { ThemeVisualizationColors, ThemeVizColor, ThemeVizHue } from './createVisualizationColors';
 
 /** Exporting the module like this to be able to generate docs properly. */
-import * as colorManipulator from './colorManipulator';
-export { colorManipulator };
+import * as colorManipulator2 from './colorManipulator';
+export const colorManipulator = { ...colorManipulator2 };

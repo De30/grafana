@@ -349,7 +349,7 @@ export function lighten(color: string, coefficient: number) {
   return recomposeColor(parts);
 }
 
-interface DecomposeColor {
+export interface DecomposeColor {
   type: string;
   values: any;
   colorSpace?: string;

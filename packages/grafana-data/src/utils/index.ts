@@ -1,4 +1,4 @@
-import * as arrayUtils from './arrayUtils';
+import * as arrayUtils2 from './arrayUtils';
 
 export * from './Registry';
 export * from './datasource';
@@ -14,7 +14,7 @@ export * from './binaryOperators';
 export * from './nodeGraph';
 export * from './selectUtils';
 export { PanelOptionsEditorBuilder, FieldConfigEditorBuilder } from './OptionsUIBuilders';
-export { arrayUtils };
+export const arrayUtils = { ...arrayUtils2 };
 export { getFlotPairs, getFlotPairsConstant } from './flotPairs';
 export { locationUtil } from './location';
 export { urlUtil, serializeStateToUrlParam } from './url';
