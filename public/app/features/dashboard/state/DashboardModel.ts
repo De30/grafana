@@ -1178,23 +1178,27 @@ export class DashboardModel implements TimeModel {
     const panelId = parseInt(panelUrlId ?? '0', 10);
 
     // First try to find it in a collapsed row and expand it
-    for (const panel of this.panels) {
+    outerloop: for (const panel of this.panels) {
+
       if (panel.collapsed) {
         for (const rowPanel of panel.panels) {
-          const test = new PanelModel(rowPanel);
+
+          if (rowPanel.id === panelId) {
+            this.toggleRow(panel);
+            break outerloop;
+          }
+
           if (rowPanel.repeat) {
-            const repeatedPanels = this.enumerateRepeats(test);
+            // Generate the repeat panels without inserting them into the model
+            // and check if its a match
+            const repeatedPanels = this.enumerateRepeats(new PanelModel(rowPanel));
 
             for (const repeatedPanel of repeatedPanels) {
               if (repeatedPanel.id === panelId) {
                 this.toggleRow(panel);
-                break;
+                break outerloop;
               }
             }
-          }
-          if (rowPanel.id === panelId) {
-            this.toggleRow(panel);
-            break;
           }
         }
       }
