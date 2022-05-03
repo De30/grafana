@@ -754,7 +754,10 @@ export class DashboardModel implements TimeModel {
         }
       }
 
-      this.panels.splice(panelIndex + index, 0, copy);
+      // The first repeat is the original panel and doesn't need inserting
+      if (index > 0) {
+        this.panels.splice(panelIndex + index, 0, copy);
+      }
     }
 
     // Update gridPos for panels below
@@ -1171,8 +1174,6 @@ export class DashboardModel implements TimeModel {
     this.events.emit(CoreEvents.templateVariableValueUpdated);
   }
 
-  expandRepeatedPanels(panel: PanelModel): PanelModel[] {}
-
   getPanelByUrlId(panelUrlId: string) {
     const panelId = parseInt(panelUrlId ?? '0', 10);
 
@@ -1180,14 +1181,15 @@ export class DashboardModel implements TimeModel {
     for (const panel of this.panels) {
       if (panel.collapsed) {
         for (const rowPanel of panel.panels) {
-          if (rowPanel.isRepeatPanel) {
-            const repeatedPanels = this.expandRepeatedPanels(rowPanel);
-            for (const repeatedPanel of repeatedPanels) {
-              if (repeatedPanel.id === panelId) {
-                return repeatedPanel;
-              }
-            }
-          }
+          // if (rowPanel.isRepeatPanel) {
+          //   const repeatedPanels = this.enumerateRepeats(rowPanel);
+
+          //   for (const repeatedPanel of repeatedPanels) {
+          //     if (repeatedPanel.id === panelId) {
+          //       return repeatedPanel;
+          //     }
+          //   }
+          // }
           if (rowPanel.id === panelId) {
             this.toggleRow(panel);
             break;
