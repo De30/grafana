@@ -640,7 +640,7 @@ export class DashboardModel implements TimeModel {
     }
   }
 
-  getPanelRepeatClone(sourcePanel: PanelModel, valueIndex: number, sourcePanelIndex: number) {
+  getPanelRepeatClone(sourcePanel: PanelModel, valueIndex: number) {
     // if first clone return source
     if (valueIndex === 0) {
       return sourcePanel;
@@ -692,7 +692,7 @@ export class DashboardModel implements TimeModel {
     return clone;
   }
 
-  enumerateRepeats(panel: PanelModel, panelIndex: number) {
+  enumerateRepeats(panel: PanelModel) {
     const variable = this.getPanelRepeatVariable(panel);
     if (!variable) {
       return [];
@@ -705,7 +705,7 @@ export class DashboardModel implements TimeModel {
     // let yPos = panel.gridPos.y;
 
     return selectedOptions.map((option, i) => {
-      const copy = this.getPanelRepeatClone(panel, i, panelIndex);
+      const copy = this.getPanelRepeatClone(panel, i);
       copy.scopedVars = copy.scopedVars || {};
       copy.scopedVars[variable.name] = option;
       return copy;
@@ -724,7 +724,7 @@ export class DashboardModel implements TimeModel {
     }
 
     const selectedOptions = this.getSelectedVariableOptions(variable);
-    const repeatPanels = this.enumerateRepeats(panel, panelIndex);
+    const repeatPanels = this.enumerateRepeats(panel);
 
     const maxPerRow = panel.maxPerRow || 4;
     let xPos = 0;
@@ -1181,15 +1181,15 @@ export class DashboardModel implements TimeModel {
     for (const panel of this.panels) {
       if (panel.collapsed) {
         for (const rowPanel of panel.panels) {
-          // if (rowPanel.isRepeatPanel) {
-          //   const repeatedPanels = this.enumerateRepeats(rowPanel);
+          if (rowPanel.isRepeatPanel) {
+            const repeatedPanels = this.enumerateRepeats(rowPanel);
 
-          //   for (const repeatedPanel of repeatedPanels) {
-          //     if (repeatedPanel.id === panelId) {
-          //       return repeatedPanel;
-          //     }
-          //   }
-          // }
+            for (const repeatedPanel of repeatedPanels) {
+              if (repeatedPanel.id === panelId) {
+                return repeatedPanel;
+              }
+            }
+          }
           if (rowPanel.id === panelId) {
             this.toggleRow(panel);
             break;
