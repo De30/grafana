@@ -13,8 +13,8 @@ import {
   getColorForTheme,
   FieldColorModeId,
   FALLBACK_COLOR,
-  TextDisplayOptions,
 } from '@grafana/data';
+import { VizTextDisplayOptions } from '@grafana/schema';
 
 import { Themeable } from '../../types';
 import { calculateFontSize } from '../../utils/measureText';
@@ -26,7 +26,7 @@ export interface Props extends Themeable {
   showThresholdLabels: boolean;
   width: number;
   value: DisplayValue;
-  text?: TextDisplayOptions;
+  text?: VizTextDisplayOptions;
   onClick?: React.MouseEventHandler<HTMLElement>;
   className?: string;
 }

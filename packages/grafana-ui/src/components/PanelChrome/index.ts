@@ -7,7 +7,7 @@ import { PanelChrome as PanelChromeComponent, PanelChromeProps } from './PanelCh
 /**
  * @internal
  */
-export { PanelChromeProps, PanelPadding } from './PanelChrome';
+export type { PanelChromeProps, PanelPadding } from './PanelChrome';
 
 /**
  * @internal
@@ -28,16 +28,13 @@ PanelChrome.ErrorIndicator = ErrorIndicator;
  * Exporting the components for extensibility and since it is a good practice
  * according to the api-extractor.
  */
-export {
-  LoadingIndicator as PanelChromeLoadingIndicator,
-  LoadingIndicatorProps as PanelChromeLoadingIndicatorProps,
-} from './LoadingIndicator';
+export { LoadingIndicator as PanelChromeLoadingIndicator } from './LoadingIndicator';
+export type { LoadingIndicatorProps as PanelChromeLoadingIndicatorProps } from './LoadingIndicator';
 
-export {
-  ErrorIndicator as PanelChromeErrorIndicator,
-  ErrorIndicatorProps as PanelChromeErrorIndicatorProps,
-} from './ErrorIndicator';
+export { ErrorIndicator as PanelChromeErrorIndicator } from './ErrorIndicator';
+export type { ErrorIndicatorProps as PanelChromeErrorIndicatorProps } from './ErrorIndicator';
 
-export { usePanelContext, PanelContextProvider, PanelContext, PanelContextRoot } from './PanelContext';
+export { usePanelContext, PanelContextProvider, PanelContextRoot } from './PanelContext';
+export type { PanelContext } from './PanelContext';
 
 export * from './types';
