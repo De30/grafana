@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { DashboardModel } from '../../state/DashboardModel';
+import { DashboardModel, DrilldownDimension } from '../../state/DashboardModel';
 import { DrilldownSettingsEdit, DrilldownSettingsList, newDimensionName } from '../DrilldownSettings';
 
 import { DashboardSettingsHeader } from './DashboardSettingsHeader';
@@ -17,12 +17,13 @@ export const DrilldownSettings: React.FC<Props> = ({ dashboard }) => {
   };
 
   const onNew = () => {
-    const newDimension: any = {
+    const newDimension: DrilldownDimension = {
       name: newDimensionName,
     };
 
-    dashboard.drilldownHierarchy.list = [...dashboard.drilldownHierarchy.list, { ...newDimension }];
-    setEditIdx(dashboard.drilldownHierarchy.list.length - 1);
+    console.log(dashboard.drilldownHierarchy);
+    dashboard.drilldownHierarchy = [...dashboard.drilldownHierarchy, newDimension];
+    setEditIdx(dashboard.drilldownHierarchy.length - 1);
   };
 
   const onEdit = (idx: number) => {

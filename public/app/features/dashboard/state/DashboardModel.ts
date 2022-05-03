@@ -79,6 +79,10 @@ export interface DashboardLink {
   includeVars: boolean;
 }
 
+export interface DrilldownDimension {
+  name: string;
+}
+
 export class DashboardModel implements TimeModel {
   id: any;
   uid: string;
@@ -96,7 +100,7 @@ export class DashboardModel implements TimeModel {
   private originalTime: any;
   timepicker: any;
   templating: { list: any[] };
-  drilldownHierarchy: { list: any[] };
+  drilldownHierarchy: DrilldownDimension[];
   private originalTemplating: any;
   annotations: { list: AnnotationQuery[] };
   refresh: any;
@@ -163,7 +167,7 @@ export class DashboardModel implements TimeModel {
     this.liveNow = Boolean(data.liveNow);
     this.templating = this.ensureListExist(data.templating);
     this.annotations = this.ensureListExist(data.annotations);
-    this.drilldownHierarchy = data.drilldownHierarchy || { list: [] };
+    this.drilldownHierarchy = data.drilldownHierarchy ?? [];
     this.refresh = data.refresh;
     this.snapshot = data.snapshot;
     this.schemaVersion = data.schemaVersion ?? 0;

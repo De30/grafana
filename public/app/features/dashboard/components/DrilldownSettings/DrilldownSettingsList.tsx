@@ -14,16 +14,16 @@ type Props = {
 };
 
 export const DrilldownSettingsList: React.FC<Props> = ({ dashboard, onNew, onEdit }) => {
-  const [dimensions, updateDimensions] = useState(dashboard.drilldownHierarchy.list);
+  const [dimensions, updateDimensions] = useState(dashboard.drilldownHierarchy);
 
   const onMove = (idx: number, direction: number) => {
-    dashboard.drilldownHierarchy.list = arrayUtils.moveItemImmutably(dimensions, idx, idx + direction);
+    dashboard.drilldownHierarchy = arrayUtils.moveItemImmutably(dimensions, idx, idx + direction);
     updateDimensions(dashboard.annotations.list);
   };
 
   const onDelete = (idx: number) => {
-    dashboard.drilldownHierarchy.list = [...dimensions.slice(0, idx), ...dimensions.slice(idx + 1)];
-    updateDimensions(dashboard.drilldownHierarchy.list);
+    dashboard.drilldownHierarchy = [...dimensions.slice(0, idx), ...dimensions.slice(idx + 1)];
+    updateDimensions(dashboard.drilldownHierarchy);
   };
 
   const showEmptyListCTA = dimensions.length === 0;
@@ -39,7 +39,7 @@ export const DrilldownSettingsList: React.FC<Props> = ({ dashboard, onNew, onEdi
             </tr>
           </thead>
           <tbody>
-            {dashboard.drilldownHierarchy.list.map((dimension, idx) => (
+            {dashboard.drilldownHierarchy.map((dimension, idx) => (
               <tr key={`${dimension.name}-${idx}`}>
                 <td className="pointer" onClick={() => onEdit(idx)}>
                   {dimension.name}
@@ -55,8 +55,7 @@ export const DrilldownSettingsList: React.FC<Props> = ({ dashboard, onNew, onEdi
                   )}
                 </td>
                 <td style={{ width: '1%' }}>
-                  {dashboard.drilldownHierarchy.list.length > 1 &&
-                  idx !== dashboard.drilldownHierarchy.list.length - 1 ? (
+                  {dashboard.drilldownHierarchy.length > 1 && idx !== dashboard.drilldownHierarchy.length - 1 ? (
                     <IconButton
                       surface="header"
                       name="arrow-down"

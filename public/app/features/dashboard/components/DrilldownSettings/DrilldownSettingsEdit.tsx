@@ -13,13 +13,13 @@ type Props = {
 export const newDimensionName = 'New dimension';
 
 export const DrilldownSettingsEdit: React.FC<Props> = ({ editIdx, dashboard }) => {
-  const [dimension, setDimension] = useState(dashboard.drilldownHierarchy.list[editIdx]);
+  const [dimension, setDimension] = useState(dashboard.drilldownHierarchy[editIdx]);
 
   const onUpdate = (dimension: any) => {
-    const list = [...dashboard.drilldownHierarchy.list];
+    const list = [...dashboard.drilldownHierarchy];
     list.splice(editIdx, 1, dimension);
     setDimension(dimension);
-    dashboard.drilldownHierarchy.list = list;
+    dashboard.drilldownHierarchy = list;
   };
 
   const onNameChange = (ev: React.FocusEvent<HTMLInputElement>) => {
