@@ -31,9 +31,10 @@ import { QueryGroupOptionsEditor } from './QueryGroupOptions';
 interface Props {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
-  onOpenQueryInspector?: () => void;
   onRunQueries: () => void;
   onOptionsChange: (options: QueryGroupOptions) => void;
+  onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
+  onOpenQueryInspector?: () => void;
 }
 
 interface State {
@@ -264,7 +265,7 @@ export class QueryGroup extends PureComponent<Props, State> {
   };
 
   renderQueries(dsSettings: DataSourceInstanceSettings) {
-    const { onRunQueries } = this.props;
+    const { onRunQueries, onDrillDownQueriesChange, options } = this.props;
     const { data, queries } = this.state;
 
     if (isSharedDashboardQuery(dsSettings.name)) {
@@ -282,10 +283,12 @@ export class QueryGroup extends PureComponent<Props, State> {
       <div aria-label={selectors.components.QueryTab.content}>
         <QueryEditorRows
           queries={queries}
+          drillDownQueries={options.drillDownQueries}
           dsSettings={dsSettings}
           onQueriesChange={this.onQueriesChange}
           onAddQuery={this.onAddQuery}
           onRunQueries={onRunQueries}
+          onDrillDownQueriesChange={onDrillDownQueriesChange}
           data={data}
         />
       </div>

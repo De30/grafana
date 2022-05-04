@@ -20,7 +20,7 @@ import {
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { AngularComponent, getAngularLoader } from '@grafana/runtime';
-import { ErrorBoundaryAlert, HorizontalGroup } from '@grafana/ui';
+import { Button, ErrorBoundaryAlert, HorizontalGroup } from '@grafana/ui';
 import { OperationRowHelp } from 'app/core/components/QueryOperationRow/OperationRowHelp';
 import { QueryOperationAction } from 'app/core/components/QueryOperationRow/QueryOperationAction';
 import {
@@ -39,16 +39,20 @@ import { QueryErrorAlert } from './QueryErrorAlert';
 interface Props<TQuery extends DataQuery> {
   data: PanelData;
   query: TQuery;
+  drillDownQueries?: Array<Omit<TQuery, keyof DataQuery>>;
   queries: TQuery[];
   id: string;
   index: number;
   dataSource: DataSourceInstanceSettings;
+
   onChangeDataSource?: (dsSettings: DataSourceInstanceSettings) => void;
   renderHeaderExtras?: () => ReactNode;
   onAddQuery: (query: TQuery) => void;
   onRemoveQuery: (query: TQuery) => void;
   onChange: (query: TQuery) => void;
   onRunQuery: () => void;
+  onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
+
   visualization?: ReactNode;
   hideDisableQuery?: boolean;
   app?: CoreApp;
@@ -255,6 +259,44 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     return <div>Data source plugin does not export any Query Editor component</div>;
   };
 
+  renderDrilldownEditor = (refId: string, query: any, i: number) => {
+    const { app = CoreApp.PanelEditor, history, onDrillDownQueriesChange, drillDownQueries } = this.props;
+    const { datasource, data } = this.state;
+
+    // TODO angular support
+    // if (datasource?.components?.QueryCtrl) {
+    //   return <div ref={(element) => (this.element = element)} />;
+    // }
+
+    if (datasource) {
+      let QueryEditor = this.getReactQueryEditor(datasource);
+
+      if (QueryEditor) {
+        return (
+          <QueryEditor
+            key={datasource?.name}
+            query={query}
+            datasource={datasource}
+            onChange={(q) => {
+              if (drillDownQueries) {
+                const newQueries = [...drillDownQueries];
+                newQueries[i] = q;
+                onDrillDownQueriesChange(refId, newQueries);
+              }
+            }}
+            onRunQuery={() => {}}
+            data={data}
+            range={getTimeSrv().timeRange()}
+            app={app}
+            history={history}
+          />
+        );
+      }
+    }
+
+    return null;
+  };
+
   onToggleEditMode = (e: React.MouseEvent, props: QueryOperationRowRenderProps) => {
     e.stopPropagation();
     if (this.angularScope && this.angularScope.toggleEditorMode) {
@@ -384,7 +426,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   render() {
-    const { query, id, index, visualization } = this.props;
+    const { query, id, index, visualization, onDrillDownQueriesChange, drillDownQueries } = this.props;
     const { datasource, showingHelp, data } = this.state;
     const isDisabled = query.hide;
 
@@ -422,6 +464,23 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                 </OperationRowHelp>
               )}
               {editor}
+              {/* Render drill down queries here */}
+              {drillDownQueries ? (
+                <div>
+                  {drillDownQueries.map((q, i) => {
+                    return this.renderDrilldownEditor(id, q, i);
+                  })}
+                </div>
+              ) : null}
+              <Button
+                variant="link"
+                icon="plus"
+                onClick={() => {
+                  onDrillDownQueriesChange(id, drillDownQueries ? [...drillDownQueries, {}] : [{}]);
+                }}
+              >
+                Add drill down query
+              </Button>
             </ErrorBoundaryAlert>
             {data?.error && data.error.refId === query.refId && <QueryErrorAlert error={data.error} />}
             {visualization}

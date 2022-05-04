@@ -141,6 +141,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
 
   panels?: any;
   declare targets: DataQuery[];
+  declare drilldownQueries: Record<string, object[]>;
   transformations?: DataTransformerConfig[];
   datasource: DataSourceRef | null = null;
   thresholds?: any;
@@ -297,9 +298,31 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   }
 
   runAllPanelQueries(dashboardId: number, dashboardTimezone: string, timeData: TimeOverrideResult, width: number) {
+    const queriesToRun: DataQuery[] = [];
+    let hasDrilldown = false;
+    if (Object.keys(this.drilldownQueries).length > 0) {
+      for (const query of this.targets) {
+        const refId = query.refId;
+
+        if (this.drilldownQueries[refId]) {
+          hasDrilldown = true;
+          queriesToRun.push({
+            refId: refId,
+            hide: query.hide,
+            key: query.key,
+            queryType: query.queryType,
+            datasource: query.datasource,
+            ...this.drilldownQueries[refId][0],
+          });
+        } else {
+          queriesToRun.push(query);
+        }
+      }
+    }
+
     this.getQueryRunner().run({
       datasource: this.datasource,
-      queries: this.targets,
+      queries: queriesToRun,
       panelId: this.id,
       dashboardId: dashboardId,
       timezone: dashboardTimezone,
@@ -309,7 +332,9 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       minInterval: this.interval,
       scopedVars: this.scopedVars,
       cacheTimeout: this.cacheTimeout,
-      transformations: this.transformations,
+
+      // if there are any drill down queries executed, we skip applying the transformations
+      transformations: !hasDrilldown ? this.transformations : undefined,
     });
   }
 
@@ -588,6 +613,15 @@ export class PanelModel implements DataConfigSource, IPanelModel {
    * */
   getDisplayTitle(): string {
     return this.replaceVariables(this.title, undefined, 'text');
+  }
+
+  updateDrillDownQueries(refId: string, drillDownQueries: object[]) {
+    this.drilldownQueries = {
+      ...this.drilldownQueries,
+      [refId]: drillDownQueries,
+    };
+    console.log('updateDrillDownQueries', this.drilldownQueries);
+    this.events.publish(new PanelQueriesChangedEvent());
   }
 }
 

@@ -16,12 +16,14 @@ import { QueryEditorRow } from './QueryEditorRow';
 interface Props {
   // The query configuration
   queries: DataQuery[];
+  drillDownQueries?: Record<string, object[]>;
   dsSettings: DataSourceInstanceSettings;
 
   // Query editing
   onQueriesChange: (queries: DataQuery[]) => void;
   onAddQuery: (query: DataQuery) => void;
   onRunQueries: () => void;
+  onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
 
   // Query Response Data
   data: PanelData;
@@ -122,8 +124,11 @@ export class QueryEditorRows extends PureComponent<Props> {
     });
   };
 
+  onDrillDownCreate = () => {};
+
   render() {
-    const { dsSettings, data, queries, app, history, eventBus } = this.props;
+    const { dsSettings, data, queries, app, history, eventBus, onDrillDownQueriesChange, drillDownQueries } =
+      this.props;
 
     return (
       <DragDropContext onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
@@ -138,23 +143,27 @@ export class QueryEditorRows extends PureComponent<Props> {
                     : undefined;
 
                   return (
-                    <QueryEditorRow
-                      id={query.refId}
-                      index={index}
-                      key={query.refId}
-                      data={data}
-                      query={query}
-                      dataSource={dataSourceSettings}
-                      onChangeDataSource={onChangeDataSourceSettings}
-                      onChange={(query) => this.onChangeQuery(query, index)}
-                      onRemoveQuery={this.onRemoveQuery}
-                      onAddQuery={this.props.onAddQuery}
-                      onRunQuery={this.props.onRunQueries}
-                      queries={queries}
-                      app={app}
-                      history={history}
-                      eventBus={eventBus}
-                    />
+                    <>
+                      <QueryEditorRow
+                        id={query.refId}
+                        index={index}
+                        key={query.refId}
+                        data={data}
+                        query={query}
+                        drillDownQueries={drillDownQueries ? drillDownQueries[query.refId] : undefined}
+                        dataSource={dataSourceSettings}
+                        onChangeDataSource={onChangeDataSourceSettings}
+                        onChange={(query) => this.onChangeQuery(query, index)}
+                        onRemoveQuery={this.onRemoveQuery}
+                        onAddQuery={this.props.onAddQuery}
+                        onRunQuery={this.props.onRunQueries}
+                        onDrillDownQueriesChange={onDrillDownQueriesChange}
+                        queries={queries}
+                        app={app}
+                        history={history}
+                        eventBus={eventBus}
+                      />
+                    </>
                   );
                 })}
                 {provided.placeholder}

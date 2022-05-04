@@ -13,6 +13,7 @@ interface Props {
   panel: PanelModel;
   /** Added here to make component re-render when queries change from outside */
   queries: DataQuery[];
+  drillDownQueries: Record<string, object[]>;
 }
 
 export class PanelEditorQueries extends PureComponent<Props> {
@@ -34,6 +35,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
         uid: datasourceSettings?.uid,
       },
       queries: panel.targets,
+      drillDownQueries: panel.drilldownQueries,
       maxDataPoints: panel.maxDataPoints,
       minInterval: panel.interval,
       timeRange: {
@@ -80,9 +82,15 @@ export class PanelEditorQueries extends PureComponent<Props> {
     this.forceUpdate();
   };
 
+  // TODO: move this to a panel context instead to avoid props drilling
+  onDrillDownQueriesChange = (refId: string, drillDownQueries: object[]) => {
+    this.props.panel.updateDrillDownQueries(refId, drillDownQueries);
+  };
+
   render() {
     const { panel } = this.props;
 
+    console.log('PanelEditorQueries.render()', panel);
     // If no panel data soruce set, wait with render. Will be set to default in componentDidMount
     if (!panel.datasource) {
       return null;
@@ -97,6 +105,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
         onRunQueries={this.onRunQueries}
         onOpenQueryInspector={this.onOpenQueryInspector}
         onOptionsChange={this.onOptionsChange}
+        onDrillDownQueriesChange={this.onDrillDownQueriesChange}
       />
     );
   }

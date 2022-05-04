@@ -93,6 +93,8 @@ export const TestStuffPage: FC = () => {
             queryRunner={queryRunner}
             onRunQueries={onRunQueries}
             onOptionsChange={onOptionsChange}
+            // TODO: fix this empty callback, not necessary in this context!
+            onDrillDownQueriesChange={() => {}}
           />
         </div>
         <div style={{ display: 'flex', gap: '1em' }}>

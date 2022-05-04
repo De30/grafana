@@ -2,6 +2,7 @@ import { DataQuery, DataSourceRef } from '@grafana/data';
 
 export interface QueryGroupOptions {
   queries: DataQuery[];
+  drillDownQueries?: Record<string, object[]>;
   dataSource: QueryGroupDataSource;
   maxDataPoints?: number | null;
   minInterval?: string | null;

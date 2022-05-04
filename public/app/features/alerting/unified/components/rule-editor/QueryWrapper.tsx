@@ -101,6 +101,8 @@ export const QueryWrapper: FC<Props> = ({
           ) : null
         }
         hideDisableQuery={true}
+        // TODO: fix this empty callback, not necessary in this context!
+        onDrillDownQueriesChange={() => {}}
       />
     </div>
   );

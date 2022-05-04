@@ -77,6 +77,8 @@ export const QueryRows = ({ exploreId }: Props) => {
       app={CoreApp.Explore}
       history={history}
       eventBus={eventBridge}
+      // TODO: fix this empty callback, not necessary in this context!
+      onDrillDownQueriesChange={() => {}}
     />
   );
 };

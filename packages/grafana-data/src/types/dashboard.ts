@@ -35,6 +35,19 @@ export interface PanelModel<TOptions = any, TCustomFieldConfig = any> {
   /** The queries in a panel */
   targets?: DataQuery[];
 
+  // Drilldown queries are query alternatives defined for a given dimension. Those are executed internchangibly
+  // with the panel original targets when drill down is clicked.
+  drilldownQueries?: Record<string, object[]>;
+  /** drilldownQueries?: Record<string, Array<Record<string, any>>>; */
+
   /** alerting v1 object */
   alert?: any;
 }
+
+// Query A, refId: 'A'
+// Query B, refId: 'B'
+
+//drilldownQueries: {
+// 'A': [{ refId: 'A' }, {}, {} ...] }
+// 'A': [{ refId: 'A' }] }
+// }
