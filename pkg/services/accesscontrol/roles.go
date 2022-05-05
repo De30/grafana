@@ -1,6 +1,7 @@
 package accesscontrol
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -10,7 +11,7 @@ import (
 
 type RoleRegistry interface {
 	// RegisterFixedRoles registers all roles declared to AccessControl
-	RegisterFixedRoles() error
+	RegisterFixedRoles(ctx context.Context) error
 }
 
 // Roles definition
@@ -274,5 +275,54 @@ func (m *RegistrationList) Range(f func(registration RoleRegistration) bool) {
 		if ok := f(registration); !ok {
 			return
 		}
+	}
+}
+
+func BuildBasicRoleDefinitions() map[string]*RoleDTO {
+	return map[string]*RoleDTO{
+		string(models.ROLE_ADMIN): {
+			Name:        BasicRolePrefix + "admin",
+			UID:         BasicRoleUIDPrefix + "admin",
+			OrgID:       GlobalOrgID,
+			Version:     1,
+			DisplayName: string(models.ROLE_ADMIN),
+			Description: "Admin role",
+			Group:       "Basic",
+			Permissions: []Permission{},
+			Hidden:      true,
+		},
+		string(models.ROLE_EDITOR): {
+			Name:        BasicRolePrefix + "editor",
+			UID:         BasicRoleUIDPrefix + "editor",
+			OrgID:       GlobalOrgID,
+			Version:     1,
+			DisplayName: string(models.ROLE_EDITOR),
+			Description: "Editor role",
+			Group:       "Basic",
+			Permissions: []Permission{},
+			Hidden:      true,
+		},
+		string(models.ROLE_VIEWER): {
+			Name:        BasicRolePrefix + "viewer",
+			UID:         BasicRoleUIDPrefix + "viewer",
+			OrgID:       GlobalOrgID,
+			Version:     1,
+			DisplayName: string(models.ROLE_VIEWER),
+			Description: "Viewer role",
+			Group:       "Basic",
+			Permissions: []Permission{},
+			Hidden:      true,
+		},
+		RoleGrafanaAdmin: {
+			Name:        BasicRolePrefix + "grafana_admin",
+			UID:         BasicRoleUIDPrefix + "grafana_admin",
+			OrgID:       GlobalOrgID,
+			Version:     1,
+			DisplayName: RoleGrafanaAdmin,
+			Description: "Grafana Admin role",
+			Group:       "Basic",
+			Permissions: []Permission{},
+			Hidden:      true,
+		},
 	}
 }

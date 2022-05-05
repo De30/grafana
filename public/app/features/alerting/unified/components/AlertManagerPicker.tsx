@@ -1,9 +1,11 @@
-import { SelectableValue, GrafanaTheme2 } from '@grafana/data';
-import { DataSourceType, GRAFANA_RULES_SOURCE_NAME } from '../utils/datasource';
-import React, { FC, useMemo } from 'react';
-import { Field, Select, useStyles2 } from '@grafana/ui';
-import { getAllDataSources } from '../utils/config';
 import { css } from '@emotion/css';
+import React, { FC, useMemo } from 'react';
+
+import { SelectableValue, GrafanaTheme2 } from '@grafana/data';
+import { Field, Select, useStyles2 } from '@grafana/ui';
+
+import { getAllDataSources } from '../utils/config';
+import { DataSourceType, GRAFANA_RULES_SOURCE_NAME } from '../utils/datasource';
 
 interface Props {
   onChange: (alertManagerSourceName: string) => void;
@@ -42,7 +44,6 @@ export const AlertManagerPicker: FC<Props> = ({ onChange, current, disabled = fa
     >
       <Select
         aria-label={disabled ? 'Alertmanager' : 'Choose Alertmanager'}
-        menuShouldPortal
         width={29}
         className="ds-picker select-container"
         backspaceRemovesValue={false}
