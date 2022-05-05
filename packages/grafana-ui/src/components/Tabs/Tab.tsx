@@ -6,7 +6,7 @@ import { selectors } from '@grafana/e2e-selectors';
 
 import { stylesFactory, useTheme2 } from '../../themes';
 import { getFocusStyles } from '../../themes/mixins';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 import { Icon } from '../Icon/Icon';
 
 import { Counter } from './Counter';

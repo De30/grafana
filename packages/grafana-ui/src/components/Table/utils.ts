@@ -10,6 +10,7 @@ import {
   getFieldDisplayName,
   SelectableValue,
 } from '@grafana/data';
+import { TableCellDisplayMode, TableFieldOptions } from '@grafana/schema';
 
 import { BarGaugeCell } from './BarGaugeCell';
 import { DefaultCell } from './DefaultCell';
@@ -17,7 +18,7 @@ import { getFooterValue } from './FooterRow';
 import { GeoCell } from './GeoCell';
 import { ImageCell } from './ImageCell';
 import { JSONViewCell } from './JSONViewCell';
-import { CellComponent, TableCellDisplayMode, TableFieldOptions, FooterItem, GrafanaTableColumn } from './types';
+import { CellComponent, FooterItem, GrafanaTableColumn } from './types';
 
 export function getTextAlign(field?: Field): Property.JustifyContent {
   if (!field) {

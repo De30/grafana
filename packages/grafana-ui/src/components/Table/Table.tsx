@@ -13,6 +13,7 @@ import {
 import { FixedSizeList } from 'react-window';
 
 import { DataFrame, getFieldDisplayName } from '@grafana/data';
+import { TableSortByFieldState } from '@grafana/schema';
 
 import { useStyles2 } from '../../themes';
 import { CustomScrollbar } from '../CustomScrollbar/CustomScrollbar';
@@ -27,7 +28,6 @@ import {
   TableFilterActionCallback,
   FooterItem,
   TableSortByActionCallback,
-  TableSortByFieldState,
 } from './types';
 import { getColumns, sortCaseInsensitive, sortNumber } from './utils';
 

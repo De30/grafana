@@ -3,7 +3,7 @@ import * as ReactUtils from './reactUtils';
 
 export * from './colors';
 export * from './validate';
-export * from './slate';
+export * from './slateUtils';
 export * from './dataLinks';
 export * from './tags';
 export * from './scrollbar';

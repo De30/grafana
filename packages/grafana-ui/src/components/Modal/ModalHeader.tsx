@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useStyles2 } from '../../themes';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 
 import { getModalStyles } from './getModalStyles';
 

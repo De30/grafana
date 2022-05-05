@@ -5,7 +5,7 @@ import { OverlayContainer, useOverlay } from '@react-aria/overlays';
 import React, { PropsWithChildren, useRef } from 'react';
 
 import { useTheme2 } from '../../themes';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 import { IconButton } from '../IconButton/IconButton';
 import { HorizontalGroup } from '../Layout/Layout';
 

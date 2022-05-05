@@ -12,7 +12,7 @@ import { Editor } from '@grafana/slate-react';
 import { makeValue } from '../../index';
 import { SlatePrism } from '../../slate-plugins';
 import { useStyles2 } from '../../themes';
-import { SCHEMA } from '../../utils/slate';
+import { SCHEMA } from '../../utils/slateUtils';
 import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 import { getInputStyles } from '../Input/Input';
 import { Portal } from '../index';

@@ -6,7 +6,7 @@ import { getColorForTheme, GrafanaTheme } from '@grafana/data';
 
 import { useTheme } from '../../themes/ThemeContext';
 import { stylesFactory } from '../../themes/stylesFactory';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 import { Icon } from '../Icon/Icon';
 import { HorizontalGroup } from '../Layout/Layout';
 import { Tooltip } from '../Tooltip/Tooltip';

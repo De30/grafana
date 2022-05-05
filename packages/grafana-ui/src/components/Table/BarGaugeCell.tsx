@@ -2,11 +2,12 @@ import { isFunction } from 'lodash';
 import React, { FC } from 'react';
 
 import { ThresholdsConfig, ThresholdsMode, VizOrientation, getFieldConfigWithMinMax, LinkModel } from '@grafana/data';
+import { TableCellDisplayMode } from '@grafana/schema';
 
 import { BarGauge, BarGaugeDisplayMode } from '../BarGauge/BarGauge';
 import { DataLinksContextMenu, DataLinksContextMenuApi } from '../DataLinks/DataLinksContextMenu';
 
-import { TableCellProps, TableCellDisplayMode } from './types';
+import { TableCellProps } from './types';
 
 const defaultScale: ThresholdsConfig = {
   mode: ThresholdsMode.Absolute,

@@ -14,6 +14,7 @@ function initMonaco() {
 
   monacoEditorLoader.config({
     paths: {
+      //@ts-ignore
       vs: (window.__grafana_public_path__ ?? 'public/') + 'lib/monaco/min/vs',
     },
   });

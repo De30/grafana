@@ -4,7 +4,7 @@ import { SelectableValue } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
 import { useTheme2 } from '../../themes';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 import { ComponentSize } from '../../types/size';
 import { Button, ButtonVariant } from '../Button';
 import { Select } from '../Select/Select';

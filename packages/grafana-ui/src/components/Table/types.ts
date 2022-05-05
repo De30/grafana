@@ -3,11 +3,9 @@ import { FC } from 'react';
 import { CellProps, Column, Row } from 'react-table';
 
 import { Field, KeyValue, SelectableValue } from '@grafana/data';
+import { TableSortByFieldState } from '@grafana/schema';
 
 import { TableStyles } from './styles';
-
-export { TableCellDisplayMode } from '@grafana/schema';
-export type { TableFieldOptions, FieldTextAlignment } from '@grafana/schema';
 
 export interface TableRow {
   [x: string]: any;
@@ -20,11 +18,6 @@ export type FilterItem = { key: string; value: string; operator: FilterOperator 
 export type TableFilterActionCallback = (item: FilterItem) => void;
 export type TableColumnResizeActionCallback = (fieldDisplayName: string, width: number) => void;
 export type TableSortByActionCallback = (state: TableSortByFieldState[]) => void;
-
-export interface TableSortByFieldState {
-  displayName: string;
-  desc?: boolean;
-}
 
 export interface TableCellProps extends CellProps<any> {
   tableStyles: TableStyles;

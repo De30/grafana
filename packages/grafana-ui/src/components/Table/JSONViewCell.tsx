@@ -2,10 +2,12 @@ import { css, cx } from '@emotion/css';
 import { isString } from 'lodash';
 import React from 'react';
 
+import { TableFieldOptions } from '@grafana/schema';
+
 import { getCellLinks } from '../../utils';
 
 import { CellActions } from './CellActions';
-import { TableCellProps, TableFieldOptions } from './types';
+import { TableCellProps } from './types';
 
 export function JSONViewCell(props: TableCellProps): JSX.Element {
   const { cell, tableStyles, cellProps, field, row } = props;

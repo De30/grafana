@@ -8,7 +8,14 @@ import {
 } from '@grafana/data';
 import { GraphFieldConfig, StackingConfig, StackingMode } from '@grafana/schema';
 
-import { graphFieldOptions, HorizontalGroup, IconButton, Input, RadioButtonGroup, Tooltip } from '../..';
+// import { HorizontalGroup, RadioButtonGroup, Input, Tooltip, IconButton, graphFieldOptions } from 'src';
+
+import { RadioButtonGroup } from '../../components/Forms/RadioButtonGroup/RadioButtonGroup';
+import { IconButton } from '../../components/IconButton/IconButton';
+import { Input } from '../../components/Input/Input';
+import { HorizontalGroup } from '../../components/Layout/Layout';
+import { Tooltip } from '../../components/Tooltip/Tooltip';
+import { graphFieldOptions } from '../../components/uPlot/config';
 
 export const StackingEditor: React.FC<FieldOverrideEditorProps<StackingConfig, any>> = ({
   value,

@@ -4,7 +4,7 @@ import React from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 
 import { useStyles2 } from '../../themes';
-import { IconName } from '../../types';
+import { IconName } from '../../types/icon';
 import { Icon } from '../Icon/Icon';
 
 export interface FilterPillProps {

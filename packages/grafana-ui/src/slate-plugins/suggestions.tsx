@@ -5,7 +5,7 @@ import { Editor as CoreEditor } from 'slate';
 import { Plugin as SlatePlugin } from '@grafana/slate-react';
 
 import { Typeahead } from '../components/Typeahead/Typeahead';
-import { CompletionItem, SuggestionsState, TypeaheadInput, TypeaheadOutput } from '../types';
+import { CompletionItem, SuggestionsState, TypeaheadInput, TypeaheadOutput } from '../types/completion';
 import { makeFragment, SearchFunctionType } from '../utils';
 import { SearchFunctionMap } from '../utils/searchFunctions';
 

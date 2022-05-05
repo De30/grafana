@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "isolatedModules": true,
     "rootDirs": [".", "stories"]
   },
