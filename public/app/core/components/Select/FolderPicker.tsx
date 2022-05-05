@@ -5,7 +5,12 @@ import { AppEvents, SelectableValue } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { AsyncSelect } from '@grafana/ui';
 import { contextSrv } from 'app/core/services/context_srv';
-import { createFolder, getFolderById, searchFolders } from 'app/features/manage-dashboards/state/actions';
+import {
+  createFolder,
+  getFolderById,
+  searchFolders as defaultSearchFolders,
+} from 'app/features/manage-dashboards/state/actions';
+import { DashboardSearchHit } from 'app/features/search/types';
 
 import { AccessControlAction, PermissionLevelString } from '../../../types';
 import appEvents from '../../app_events';
@@ -30,6 +35,11 @@ export interface Props {
   skipInitialLoad?: boolean;
   /** The id of the search input. Use this to set a matching label with htmlFor */
   inputId?: string;
+
+  /**
+   * Customise the action used to search folders
+   */
+  searchFolders?: (query: any, permission?: PermissionLevelString) => Promise<DashboardSearchHit[]>;
 }
 
 interface State {
@@ -77,7 +87,15 @@ export class FolderPicker extends PureComponent<Props, State> {
   };
 
   getOptions = async (query: string) => {
-    const { rootName, enableReset, initialTitle, permissionLevel, initialFolderId, showRoot } = this.props;
+    const {
+      rootName,
+      enableReset,
+      initialTitle,
+      permissionLevel,
+      initialFolderId,
+      showRoot,
+      searchFolders = defaultSearchFolders,
+    } = this.props;
 
     const searchHits = await searchFolders(query, permissionLevel);
 

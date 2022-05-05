@@ -1,6 +1,9 @@
 import { ValidateResult } from 'react-hook-form';
 
 import { isExpressionQuery } from 'app/features/expressions/guards';
+import { searchFoldersByType } from 'app/features/manage-dashboards/state/actions';
+import { DashboardSearchHit } from 'app/features/search/types';
+import { PermissionLevelString } from 'app/types';
 import { AlertQuery } from 'app/types/unified-alerting-dto';
 
 export function queriesWithUpdatedReferences(
@@ -78,4 +81,8 @@ export function checkForPathSeparator(value: string): ValidateResult {
   }
 
   return true;
+}
+
+export function searchAlertingFolders(query: any, permission?: PermissionLevelString): Promise<DashboardSearchHit[]> {
+  return searchFoldersByType(query, 'dash-folder-alerting', permission);
 }

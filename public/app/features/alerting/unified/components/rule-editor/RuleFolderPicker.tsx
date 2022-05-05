@@ -3,6 +3,8 @@ import React, { FC } from 'react';
 import { FolderPicker, Props as FolderPickerProps } from 'app/core/components/Select/FolderPicker';
 import { PermissionLevelString } from 'app/types';
 
+import { searchAlertingFolders } from './util';
+
 export interface Folder {
   title: string;
   id: number;
@@ -19,6 +21,7 @@ export const RuleFolderPicker: FC<Props> = ({ value, ...props }) => (
     initialTitle={value?.title}
     initialFolderId={value?.id}
     {...props}
+    searchFolders={searchAlertingFolders}
     permissionLevel={PermissionLevelString.View}
   />
 );
