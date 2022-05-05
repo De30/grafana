@@ -78,13 +78,24 @@ export const generateColumns = (
 
       const matches = path ? [...path.matchAll(new RegExp('/', 'g'))] : [];
       const depth = matches.length;
-      const marginLeft = depth * 35;
+      const subItemMarginLeft = depth === 1 ? 35 : depth * 28;
+      const subFolderMarginLeft = depth * 22;
 
       if (access.kind!.values.get(i) === 'folder') {
+        const numberOfPaths = access.path!.values.length;
+        const isEndOfList = numberOfPaths - 1 === i;
+        const nextItemPath = access.path!.values.get(i + 1);
+        let isFolderOpen = false;
+
+        if (!isEndOfList) {
+          const nextItemMatches = nextItemPath ? [...nextItemPath.matchAll(new RegExp('/', 'g'))] : [];
+          isFolderOpen = nextItemMatches.length > depth;
+        }
+
         return (
-          <div className={styles.folderNameContainer} style={{ marginLeft }}>
+          <div className={styles.folderNameContainer} style={{ marginLeft: subFolderMarginLeft }}>
             <IconButton
-              name="angle-down"
+              name={isFolderOpen || isEndOfList ? 'angle-down' : 'angle-right'}
               size={'xl'}
               onClick={(e) => {
                 e.preventDefault();
@@ -97,7 +108,7 @@ export const generateColumns = (
         );
       }
 
-      return <div style={{ marginLeft }}>{name}</div>;
+      return <div style={{ marginLeft: subItemMarginLeft }}>{name}</div>;
     },
     width,
   });
