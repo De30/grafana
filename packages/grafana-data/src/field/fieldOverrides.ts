@@ -10,6 +10,7 @@ import {
   DataLink,
   DisplayProcessor,
   DisplayValue,
+  DrilldownDimension,
   DynamicConfigValue,
   Field,
   FieldColorModeId,
@@ -199,7 +200,8 @@ export function applyFieldOverrides(options: ApplyFieldOverrideOptions): DataFra
         field,
         field.state!.scopedVars,
         context.replaceVariables,
-        options.timeZone
+        options.timeZone,
+        options.drilldownDimensions
       );
     }
 
@@ -346,112 +348,160 @@ export const getLinksSupplier =
     field: Field,
     fieldScopedVars: ScopedVars,
     replaceVariables: InterpolateFunction,
-    timeZone?: TimeZone
+    timeZone?: TimeZone,
+    drilldownDimensions?: DrilldownDimension[]
   ) =>
   (config: ValueLinkConfig): Array<LinkModel<Field>> => {
+    const links: Array<LinkModel<Field>> = [];
+
+    if (drilldownDimensions) {
+      for (let i = 0; i < drilldownDimensions.length; i++) {
+        const dimension = drilldownDimensions[i];
+        const dimIdx = i;
+        if (dimension.name === field.name) {
+          links.push({
+            onClick: () => {
+              let dimmensionsToApply = [
+                {
+                  dimension: dimension.name,
+                  value: config.valueRowIndex !== undefined ? field.values.get(config.valueRowIndex) : undefined,
+                },
+              ];
+
+              if (dimIdx > 0) {
+                const upwardDrilldownDimensions = drilldownDimensions.slice(0, dimIdx);
+                let upwardValues: any[] = [];
+
+                for (let j = 0; j < upwardDrilldownDimensions.length; j++) {
+                  frame.fields.forEach((field) => {
+                    if (field.name === upwardDrilldownDimensions[j].name) {
+                      upwardValues.push({
+                        dimension: upwardDrilldownDimensions[j].name,
+                        value: config.valueRowIndex !== undefined ? field.values.get(config.valueRowIndex) : undefined,
+                      });
+                    }
+                  });
+                }
+
+                dimmensionsToApply = [...upwardValues, ...dimmensionsToApply];
+              }
+
+              console.log('Drill down', dimmensionsToApply.map((d) => d.dimension + '=' + d.value).join(';'));
+            },
+            origin: field,
+            title: 'Drill-down',
+            // not necessary
+            href: '',
+            target: undefined,
+          });
+        }
+      }
+    }
     if (!field.config.links || field.config.links.length === 0) {
-      return [];
+      return links;
     }
     const timeRangeUrl = locationUtil.getTimeRangeUrlParams();
     const { timeField } = getTimeField(frame);
 
-    return field.config.links.map((link: DataLink) => {
-      const variablesQuery = locationUtil.getVariablesUrlParams();
-      let dataFrameVars = {};
-      let valueVars = {};
+    return links.concat(
+      field.config.links.map((link: DataLink) => {
+        const variablesQuery = locationUtil.getVariablesUrlParams();
+        let dataFrameVars = {};
+        let valueVars = {};
 
-      // We are not displaying reduction result
-      if (config.valueRowIndex !== undefined && !isNaN(config.valueRowIndex)) {
-        const fieldsProxy = getFieldDisplayValuesProxy({
-          frame,
-          rowIndex: config.valueRowIndex,
-          timeZone: timeZone,
-        });
+        // We are not displaying reduction result
+        if (config.valueRowIndex !== undefined && !isNaN(config.valueRowIndex)) {
+          const fieldsProxy = getFieldDisplayValuesProxy({
+            frame,
+            rowIndex: config.valueRowIndex,
+            timeZone: timeZone,
+          });
 
-        valueVars = {
-          raw: field.values.get(config.valueRowIndex),
-          numeric: fieldsProxy[field.name].numeric,
-          text: fieldsProxy[field.name].text,
-          time: timeField ? timeField.values.get(config.valueRowIndex) : undefined,
-        };
+          valueVars = {
+            raw: field.values.get(config.valueRowIndex),
+            numeric: fieldsProxy[field.name].numeric,
+            text: fieldsProxy[field.name].text,
+            time: timeField ? timeField.values.get(config.valueRowIndex) : undefined,
+          };
 
-        dataFrameVars = {
-          __data: {
-            value: {
-              name: frame.name,
-              refId: frame.refId,
-              fields: fieldsProxy,
+          dataFrameVars = {
+            __data: {
+              value: {
+                name: frame.name,
+                refId: frame.refId,
+                fields: fieldsProxy,
+              },
+              text: 'Data',
             },
-            text: 'Data',
+          };
+        } else {
+          if (config.calculatedValue) {
+            valueVars = {
+              raw: config.calculatedValue.numeric,
+              numeric: config.calculatedValue.numeric,
+              text: formattedValueToString(config.calculatedValue),
+            };
+          }
+        }
+
+        const variables = {
+          ...fieldScopedVars,
+          __value: {
+            text: 'Value',
+            value: valueVars,
+          },
+          ...dataFrameVars,
+          [DataLinkBuiltInVars.keepTime]: {
+            text: timeRangeUrl,
+            value: timeRangeUrl,
+          },
+          [DataLinkBuiltInVars.includeVars]: {
+            text: variablesQuery,
+            value: variablesQuery,
           },
         };
-      } else {
-        if (config.calculatedValue) {
-          valueVars = {
-            raw: config.calculatedValue.numeric,
-            numeric: config.calculatedValue.numeric,
-            text: formattedValueToString(config.calculatedValue),
+
+        if (link.onClick) {
+          return {
+            href: link.url,
+            title: replaceVariables(link.title || '', variables),
+            target: link.targetBlank ? '_blank' : undefined,
+            onClick: (evt, origin) => {
+              link.onClick!({
+                origin: origin ?? field,
+                e: evt,
+                replaceVariables: (v) => replaceVariables(v, variables),
+              });
+            },
+            origin: field,
           };
         }
-      }
 
-      const variables = {
-        ...fieldScopedVars,
-        __value: {
-          text: 'Value',
-          value: valueVars,
-        },
-        ...dataFrameVars,
-        [DataLinkBuiltInVars.keepTime]: {
-          text: timeRangeUrl,
-          value: timeRangeUrl,
-        },
-        [DataLinkBuiltInVars.includeVars]: {
-          text: variablesQuery,
-          value: variablesQuery,
-        },
-      };
+        if (link.internal) {
+          // For internal links at the moment only destination is Explore.
+          return mapInternalLinkToExplore({
+            link,
+            internalLink: link.internal,
+            scopedVars: variables,
+            field,
+            range: {} as any,
+            replaceVariables,
+          });
+        }
 
-      if (link.onClick) {
-        return {
-          href: link.url,
+        let href = locationUtil.assureBaseUrl(link.url.replace(/\n/g, ''));
+        href = replaceVariables(href, variables);
+        href = locationUtil.processUrl(href);
+
+        const info: LinkModel<Field> = {
+          href,
           title: replaceVariables(link.title || '', variables),
           target: link.targetBlank ? '_blank' : undefined,
-          onClick: (evt, origin) => {
-            link.onClick!({
-              origin: origin ?? field,
-              e: evt,
-              replaceVariables: (v) => replaceVariables(v, variables),
-            });
-          },
           origin: field,
         };
-      }
-
-      if (link.internal) {
-        // For internal links at the moment only destination is Explore.
-        return mapInternalLinkToExplore({
-          link,
-          internalLink: link.internal,
-          scopedVars: variables,
-          field,
-          range: {} as any,
-          replaceVariables,
-        });
-      }
-
-      let href = locationUtil.assureBaseUrl(link.url.replace(/\n/g, ''));
-      href = replaceVariables(href, variables);
-      href = locationUtil.processUrl(href);
-
-      const info: LinkModel<Field> = {
-        href,
-        title: replaceVariables(link.title || '', variables),
-        target: link.targetBlank ? '_blank' : undefined,
-        origin: field,
-      };
-      return info;
-    });
+        return info;
+      })
+    );
   };
 
 /**

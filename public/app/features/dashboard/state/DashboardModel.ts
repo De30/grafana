@@ -22,6 +22,7 @@ import {
   dateTimeFormat,
   dateTimeFormatTimeAgo,
   DateTimeInput,
+  DrilldownDimension,
   EventBusExtended,
   EventBusSrv,
   PanelModel as IPanelModel,
@@ -77,10 +78,6 @@ export interface DashboardLink {
   targetBlank: boolean;
   keepTime: boolean;
   includeVars: boolean;
-}
-
-export interface DrilldownDimension {
-  name: string;
 }
 
 export class DashboardModel implements TimeModel {
@@ -175,7 +172,11 @@ export class DashboardModel implements TimeModel {
     this.version = data.version ?? 0;
     this.links = data.links ?? [];
     this.gnetId = data.gnetId || null;
-    this.panels = map(data.panels ?? [], (panelData: any) => new PanelModel(panelData));
+    this.panels = map(data.panels ?? [], (panelData: any) => {
+      const model = new PanelModel(panelData);
+      model.setDrilldownDimensions(this.getDrilldownDimensions);
+      return model;
+    });
     this.ensurePanelsHaveIds();
     this.formatDate = this.formatDate.bind(this);
 
@@ -199,6 +200,7 @@ export class DashboardModel implements TimeModel {
     );
   }
 
+  getDrilldownDimensions = () => this.drilldownHierarchy;
   addBuiltInAnnotationQuery() {
     let found = false;
     for (const item of this.annotations.list) {
@@ -428,6 +430,7 @@ export class DashboardModel implements TimeModel {
   initEditPanel(sourcePanel: PanelModel): PanelModel {
     getTimeSrv().pauseAutoRefresh();
     this.panelInEdit = sourcePanel.getEditClone();
+    this.panelInEdit.setDrilldownDimensions(this.getDrilldownDimensions);
     return this.panelInEdit;
   }
 

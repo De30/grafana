@@ -16,6 +16,7 @@ import {
   urlUtil,
   PanelModel as IPanelModel,
   DataSourceRef,
+  DrilldownDimension,
 } from '@grafana/data';
 import { getTemplateSrv, RefreshEvent } from '@grafana/runtime';
 import config from 'app/core/config';
@@ -187,6 +188,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   events: EventBusSrv;
 
   private queryRunner?: PanelQueryRunner;
+  private drilldownDimensionsConfig?: () => DrilldownDimension[];
 
   constructor(model: any) {
     this.events = new EventBusSrv();
@@ -298,9 +300,10 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   }
 
   runAllPanelQueries(dashboardId: number, dashboardTimezone: string, timeData: TimeOverrideResult, width: number) {
-    const queriesToRun: DataQuery[] = [];
+    let queriesToRun: DataQuery[] = [];
     let hasDrilldown = false;
-    if (Object.keys(this.drilldownQueries).length > 0) {
+
+    if (this.drilldownQueries && Object.keys(this.drilldownQueries).length > 0) {
       for (const query of this.targets) {
         const refId = query.refId;
 
@@ -318,7 +321,11 @@ export class PanelModel implements DataConfigSource, IPanelModel {
           queriesToRun.push(query);
         }
       }
+    } else {
+      queriesToRun = this.targets;
     }
+
+    console.log(hasDrilldown, this.drilldownQueries);
 
     this.getQueryRunner().run({
       datasource: this.datasource,
@@ -530,6 +537,18 @@ export class PanelModel implements DataConfigSource, IPanelModel {
 
   getDataSupport(): PanelPluginDataSupport {
     return this.plugin?.dataSupport ?? { annotations: false, alertStates: false };
+  }
+
+  setDrilldownDimensions(config: () => DrilldownDimension[]) {
+    this.drilldownDimensionsConfig = config;
+  }
+
+  getDrilldownDimensions() {
+    if (this.drilldownDimensionsConfig) {
+      return this.drilldownDimensionsConfig();
+    }
+
+    return [];
   }
 
   getQueryRunner(): PanelQueryRunner {

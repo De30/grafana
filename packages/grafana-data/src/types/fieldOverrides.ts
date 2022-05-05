@@ -2,7 +2,7 @@ import { ComponentType } from 'react';
 
 import { StandardEditorProps, FieldConfigOptionsRegistry, StandardEditorContext } from '../field';
 import { GrafanaTheme2 } from '../themes';
-import { MatcherConfig, FieldConfig, Field, DataFrame, TimeZone } from '../types';
+import { MatcherConfig, FieldConfig, Field, DataFrame, TimeZone, DrilldownDimension } from '../types';
 
 import { OptionsEditorItem } from './OptionsUIRegistryBuilder';
 import { OptionEditorConfig } from './options';
@@ -119,6 +119,7 @@ export interface ApplyFieldOverrideOptions {
   replaceVariables: InterpolateFunction;
   theme: GrafanaTheme2;
   timeZone?: TimeZone;
+  drilldownDimensions?: DrilldownDimension[];
 }
 
 export enum FieldConfigProperty {

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
-import { DashboardModel, DrilldownDimension } from '../../state/DashboardModel';
+import { DrilldownDimension } from '@grafana/data';
+
+import { DashboardModel } from '../../state/DashboardModel';
 import { DrilldownSettingsEdit, DrilldownSettingsList, newDimensionName } from '../DrilldownSettings';
 
 import { DashboardSettingsHeader } from './DashboardSettingsHeader';

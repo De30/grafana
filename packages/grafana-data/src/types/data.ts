@@ -4,7 +4,7 @@ import { ApplyFieldOverrideOptions } from './fieldOverrides';
 import { DataTopic } from './query';
 import { DataTransformerConfig } from './transformations';
 
-import { PanelPluginDataSupport } from '.';
+import { DrilldownDimension, PanelPluginDataSupport } from '.';
 
 export type KeyValue<T = any> = Record<string, T>;
 
@@ -176,5 +176,6 @@ export interface DataConfigSource {
   getDataSupport: () => PanelPluginDataSupport;
   getTransformations: () => DataTransformerConfig[] | undefined;
   getFieldOverrideOptions: () => ApplyFieldOverrideOptions | undefined;
+  getDrilldownDimensions?: () => DrilldownDimension[];
   snapshotData?: DataFrameDTO[];
 }

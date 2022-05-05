@@ -43,11 +43,6 @@ export interface PanelModel<TOptions = any, TCustomFieldConfig = any> {
   /** alerting v1 object */
   alert?: any;
 }
-
-// Query A, refId: 'A'
-// Query B, refId: 'B'
-
-//drilldownQueries: {
-// 'A': [{ refId: 'A' }, {}, {} ...] }
-// 'A': [{ refId: 'A' }] }
-// }
+export interface DrilldownDimension {
+  name: string;
+}

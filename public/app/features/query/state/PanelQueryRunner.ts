@@ -142,11 +142,20 @@ export class PanelQueryRunner {
 
           if (fieldConfig != null && (isFirstPacket || !streamingPacketWithSameSchema)) {
             lastConfigRev = this.dataConfigSource.configRev!;
+
+            let drilldownDimensions = this.dataConfigSource.getDrilldownDimensions
+              ? this.dataConfigSource.getDrilldownDimensions()
+              : undefined;
+            if (drilldownDimensions?.length === 0) {
+              drilldownDimensions = undefined;
+            }
+
             processedData = {
               ...processedData,
               series: applyFieldOverrides({
                 timeZone: data.request?.timezone ?? 'browser',
                 data: processedData.series,
+                drilldownDimensions,
                 ...fieldConfig!,
               }),
             };
