@@ -7,9 +7,9 @@ export {
   getFieldColorModeForField,
   getFieldColorMode,
   fieldColorModeRegistry,
-  FieldColorMode,
   getFieldSeriesColor,
 } from './fieldColor';
+export type { FieldColorMode } from './fieldColor';
 export { FieldConfigOptionsRegistry } from './FieldConfigOptionsRegistry';
 export { sortThresholds, getActiveThreshold } from './thresholds';
 export { applyFieldOverrides, validateFieldConfig, applyRawFieldOverrides } from './fieldOverrides';

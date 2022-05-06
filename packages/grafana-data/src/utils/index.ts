@@ -17,10 +17,12 @@ export { PanelOptionsEditorBuilder, FieldConfigEditorBuilder } from './OptionsUI
 export { arrayUtils };
 export { getFlotPairs, getFlotPairsConstant } from './flotPairs';
 export { locationUtil } from './location';
-export { urlUtil, UrlQueryMap, UrlQueryValue, serializeStateToUrlParam } from './url';
+export { urlUtil, serializeStateToUrlParam } from './url';
+export type { UrlQueryMap, UrlQueryValue } from './url';
 export { DataLinkBuiltInVars, mapInternalLinkToExplore } from './dataLinks';
 export { DocsId } from './docs';
 export { makeClassES5Compatible } from './makeClassES5Compatible';
 export { anyToNumber } from './anyToNumber';
-export { withLoadingIndicator, WithLoadingIndicatorOptions } from './withLoadingIndicator';
+export { withLoadingIndicator } from './withLoadingIndicator';
+export type { WithLoadingIndicatorOptions } from './withLoadingIndicator';
 export { convertOldAngularValueMappings, LegacyMappingType } from './valueMappings';

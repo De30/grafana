@@ -16,13 +16,15 @@ export * from './events';
 export * from './themes';
 export * from './monaco';
 export * from './geo/layer';
-export {
+export type {
   ValueMatcherOptions,
   BasicValueMatcherOptions,
   RangeValueMatcherOptions,
 } from './transformations/matchers/valueMatchers/types';
-export { LayoutModes, LayoutMode } from './types/layout';
-export { PanelPlugin, SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
+export { LayoutModes } from './types/layout';
+export type { LayoutMode } from './types/layout';
+export { PanelPlugin } from './panel/PanelPlugin';
+export type { SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
 export { createFieldConfigRegistry } from './panel/registryFactories';
-export { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
-export { GroupingToMatrixTransformerOptions } from './transformations/transformers/groupingToMatrix';
+export type { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
+export type { GroupingToMatrixTransformerOptions } from './transformations/transformers/groupingToMatrix';
