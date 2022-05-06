@@ -1,4 +1,4 @@
-import type { E2ESelectors } from '../types';
+import { E2ESelectors } from '../types';
 
 import { Components } from './components';
 import { Pages } from './pages';
@@ -18,4 +18,5 @@ export const selectors: { pages: E2ESelectors<typeof Pages>; components: E2ESele
  *
  * @alpha
  */
-export { Pages, Components, E2ESelectors };
+export { Pages, Components };
+export type { E2ESelectors } from '../types';
