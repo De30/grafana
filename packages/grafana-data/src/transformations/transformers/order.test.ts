@@ -1,12 +1,5 @@
-import {
-  ArrayVector,
-  DataTransformerConfig,
-  DataTransformerID,
-  FieldType,
-  toDataFrame,
-  transformDataFrame,
-} from '@grafana/data';
-
+import { DataTransformerID, transformDataFrame } from '..';
+import { toDataFrame, FieldType, DataTransformerConfig, ArrayVector } from '../..';
 import { mockTransformationsRegistry } from '../../utils/tests/mockTransformationsRegistry';
 
 import { orderFieldsTransformer, OrderFieldsTransformerOptions } from './order';
