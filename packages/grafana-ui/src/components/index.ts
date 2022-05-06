@@ -59,7 +59,7 @@ export { CodeEditor } from './Monaco/CodeEditor';
 
 export { ReactMonacoEditorLazy as ReactMonacoEditor } from './Monaco/ReactMonacoEditorLazy';
 
-export { monacoTypes } from './Monaco/types';
+export type { monacoTypes } from './Monaco/types';
 export type {
   Monaco,
   MonacoEditor,
@@ -206,7 +206,8 @@ export { InlineFieldRow } from './Forms/InlineFieldRow';
 export { FieldArray } from './Forms/FieldArray';
 
 // Select
-export { default as resetSelectStyles } from './Select/resetSelectStyles';
+// TODO: discuss this export - it dumps the entire CSSObjectWithLabel type (~1800 lines) into index.d.ts
+// export { default as resetSelectStyles } from './Select/resetSelectStyles';
 export * from './Select/Select';
 export { DropdownIndicator } from './Select/DropdownIndicator';
 export { getSelectStyles } from './Select/getSelectStyles';
