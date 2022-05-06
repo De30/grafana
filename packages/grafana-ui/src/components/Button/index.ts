@@ -1,4 +1,5 @@
 export * from './Button';
 export { ButtonGroup } from './ButtonGroup';
-export { ToolbarButton, ToolbarButtonVariant } from './ToolbarButton';
+export { ToolbarButton } from './ToolbarButton';
+export type { ToolbarButtonVariant } from './ToolbarButton';
 export { ToolbarButtonRow } from './ToolbarButtonRow';
