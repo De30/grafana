@@ -3,9 +3,7 @@
     "declarationDir": "dist",
     "outDir": "compiled",
     "rootDirs": ["."],
-    "paths": {
-      "@grafana/data": ["."]
-    }
+    "isolatedModules": true
   },
   "exclude": ["dist", "node_modules"],
   "extends": "@grafana/tsconfig",
