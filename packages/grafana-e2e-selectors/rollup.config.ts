@@ -1,25 +1,36 @@
 import resolve from '@rollup/plugin-node-resolve';
-import sourceMaps from 'rollup-plugin-sourcemaps';
-import { terser } from 'rollup-plugin-terser';
+import dts from 'rollup-plugin-dts';
+import esbuild from 'rollup-plugin-esbuild';
 
-const pkg = require('./package.json');
+const name = require('./package.json').main.replace(/\.js$/, '');
 
-const libraryName = pkg.name;
+const bundle = (config) => ({
+  ...config,
+  input: 'src/index.ts',
+  external: (id) => !/^[./]/.test(id),
+});
 
-const buildCjsPackage = ({ env }) => {
-  return {
-    input: `compiled/index.js`,
+export default [
+  bundle({
+    plugins: [resolve(), esbuild()],
     output: [
       {
-        file: `dist/index.${env}.js`,
-        name: libraryName,
+        file: `${name}.js`,
         format: 'cjs',
         sourcemap: true,
-        exports: 'named',
-        globals: {},
+      },
+      {
+        file: `${name}.mjs`,
+        format: 'es',
+        sourcemap: true,
       },
     ],
-    plugins: [resolve(), sourceMaps(), env === 'production' && terser()],
-  };
-};
-export default [buildCjsPackage({ env: 'development' }), buildCjsPackage({ env: 'production' })];
+  }),
+  bundle({
+    plugins: [dts()],
+    output: {
+      file: `${name}.d.ts`,
+      format: 'es',
+    },
+  }),
+];
