@@ -1,13 +1,5 @@
-import {
-  ArrayVector,
-  DataTransformerConfig,
-  DataTransformerID,
-  Field,
-  FieldType,
-  toDataFrame,
-  transformDataFrame,
-} from '@grafana/data';
-
+import { DataTransformerID, transformDataFrame } from '..';
+import { DataTransformerConfig, toDataFrame, FieldType, Field, ArrayVector } from '../..';
 import { mockTransformationsRegistry } from '../../utils/tests/mockTransformationsRegistry';
 
 import { GroupingToMatrixTransformerOptions, groupingToMatrixTransformer } from './groupingToMatrix';

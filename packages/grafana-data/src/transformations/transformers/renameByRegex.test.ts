@@ -1,5 +1,5 @@
-import { DataTransformerConfig, DataTransformerID, FieldType, toDataFrame, transformDataFrame } from '@grafana/data';
-
+import { DataTransformerID, transformDataFrame } from '..';
+import { toDataFrame, FieldType, DataTransformerConfig } from '../..';
 import { mockTransformationsRegistry } from '../../utils/tests/mockTransformationsRegistry';
 
 import { renameByRegexTransformer, RenameByRegexTransformerOptions } from './renameByRegex';
