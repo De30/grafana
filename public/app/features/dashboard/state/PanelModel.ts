@@ -304,6 +304,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     let hasDrilldown = false;
 
     if (this.drilldownQueries && Object.keys(this.drilldownQueries).length > 0) {
+      // TODO:  Given the drilldown template variable value select which query to run.
       for (const query of this.targets) {
         const refId = query.refId;
 

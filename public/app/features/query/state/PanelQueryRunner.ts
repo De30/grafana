@@ -29,6 +29,8 @@ import { getTemplateSrv } from '@grafana/runtime';
 import { StreamingDataFrame } from 'app/features/live/data/StreamingDataFrame';
 import { isStreamingDataFrame } from 'app/features/live/data/utils';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
+import { applyDrillDownDimensions } from 'app/features/variables/drilldown/actions';
+import { dispatch } from 'app/store/store';
 
 import { isSharedDashboardQuery, runSharedRequest } from '../../../plugins/datasource/dashboard';
 import { PanelModel } from '../../dashboard/state';
@@ -156,6 +158,9 @@ export class PanelQueryRunner {
                 timeZone: data.request?.timezone ?? 'browser',
                 data: processedData.series,
                 drilldownDimensions,
+                onApplyDrilldown: (dimensions) => {
+                  dispatch(applyDrillDownDimensions(dimensions));
+                },
                 ...fieldConfig!,
               }),
             };

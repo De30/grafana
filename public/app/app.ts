@@ -67,6 +67,7 @@ import { createAdHocVariableAdapter } from './features/variables/adhoc/adapter';
 import { createConstantVariableAdapter } from './features/variables/constant/adapter';
 import { createCustomVariableAdapter } from './features/variables/custom/adapter';
 import { createDataSourceVariableAdapter } from './features/variables/datasource/adapter';
+import { createDrilldownVariableAdapter } from './features/variables/drilldown/adapter';
 import { getVariablesUrlParams } from './features/variables/getAllVariableValuesForUrl';
 import { createIntervalVariableAdapter } from './features/variables/interval/adapter';
 import { setVariableQueryRunner, VariableQueryRunner } from './features/variables/query/VariableQueryRunner';
@@ -118,6 +119,7 @@ export class GrafanaApp {
         createIntervalVariableAdapter(),
         createAdHocVariableAdapter(),
         createSystemVariableAdapter(),
+        createDrilldownVariableAdapter(),
       ]);
       monacoLanguageRegistry.setInit(getDefaultMonacoLanguages);
 

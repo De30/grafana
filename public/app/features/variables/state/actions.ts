@@ -41,6 +41,7 @@ import { cleanPickerState } from '../pickers/OptionsPicker/reducer';
 import { alignCurrentWithMulti } from '../shared/multiOptions';
 import {
   DashboardVariableModel,
+  DrilldownVariable,
   initialVariableModelState,
   OrgVariableModel,
   QueryVariableModel,
@@ -175,7 +176,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       id: '__dashboard',
       name: '__dashboard',
       type: 'system',
-      index: -3,
+      index: -4,
       skipUrlSync: true,
       hide: VariableHide.hideVariable,
       current: {
@@ -205,7 +206,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       id: '__org',
       name: '__org',
       type: 'system',
-      index: -2,
+      index: -3,
       skipUrlSync: true,
       hide: VariableHide.hideVariable,
       current: {
@@ -229,7 +230,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       id: '__user',
       name: '__user',
       type: 'system',
-      index: -1,
+      index: -2,
       skipUrlSync: true,
       hide: VariableHide.hideVariable,
       current: {
@@ -247,6 +248,34 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
         key,
         addVariable(
           toVariablePayload(userModel, { global: userModel.global, index: userModel.index, model: userModel })
+        )
+      )
+    );
+
+    // TODO: Move to the drilldown variable reducer
+    const dimensionHierarchy = dashboard.getDrilldownDimensions();
+
+    const dimensions = dimensionHierarchy.map((dim) => {
+      return { dimension: dim.name, value: '' };
+    });
+
+    const drilldownModel: DrilldownVariable = {
+      ...initialVariableModelState,
+      id: '__drilldown',
+      name: '__drilldown',
+      type: 'drilldown',
+      index: -1,
+      skipUrlSync: false,
+      hide: VariableHide.dontHide,
+      current: dimensions,
+      rootStateKey: key,
+    };
+
+    dispatch(
+      toKeyedAction(
+        key,
+        addVariable(
+          toVariablePayload(drilldownModel, { global: true, index: drilldownModel.index, model: drilldownModel })
         )
       )
     );
@@ -753,6 +782,7 @@ export const initVariablesTransaction =
       const uid = toStateKey(urlUid);
       const state = getState();
       const lastKey = getIfExistsLastKey(state);
+      console.log('lastKey', lastKey);
       if (lastKey) {
         const transactionState = getVariablesState(lastKey, state).transaction;
         if (transactionState.status === TransactionStatus.Fetching) {

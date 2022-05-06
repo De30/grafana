@@ -130,6 +130,11 @@ export interface SystemVariable<TProps extends { toString: () => string }> exten
   current: { value: TProps };
 }
 
+export interface DrilldownVariable extends VariableModel {
+  // TODO: Expose the interface below
+  current: Array<{ dimension: string; value: string }>;
+}
+
 export interface VariableModel extends BaseVariableModel {
   id: string;
   rootStateKey: string | null;

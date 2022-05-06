@@ -201,7 +201,8 @@ export function applyFieldOverrides(options: ApplyFieldOverrideOptions): DataFra
         field.state!.scopedVars,
         context.replaceVariables,
         options.timeZone,
-        options.drilldownDimensions
+        options.drilldownDimensions,
+        options.onApplyDrilldown
       );
     }
 
@@ -349,15 +350,18 @@ export const getLinksSupplier =
     fieldScopedVars: ScopedVars,
     replaceVariables: InterpolateFunction,
     timeZone?: TimeZone,
-    drilldownDimensions?: DrilldownDimension[]
+    drilldownDimensions?: DrilldownDimension[],
+    onApplyDrilldown?: (dimensions: Array<{ dimension: string; value: any }>) => void
   ) =>
   (config: ValueLinkConfig): Array<LinkModel<Field>> => {
     const links: Array<LinkModel<Field>> = [];
 
-    if (drilldownDimensions) {
+    if (drilldownDimensions && onApplyDrilldown) {
       for (let i = 0; i < drilldownDimensions.length; i++) {
         const dimension = drilldownDimensions[i];
         const dimIdx = i;
+
+        // Should we use field.name or field display name instead?
         if (dimension.name === field.name) {
           links.push({
             onClick: () => {
@@ -386,7 +390,7 @@ export const getLinksSupplier =
                 dimmensionsToApply = [...upwardValues, ...dimmensionsToApply];
               }
 
-              console.log('Drill down', dimmensionsToApply.map((d) => d.dimension + '=' + d.value).join(';'));
+              onApplyDrilldown(dimmensionsToApply);
             },
             origin: field,
             title: 'Drill-down',
