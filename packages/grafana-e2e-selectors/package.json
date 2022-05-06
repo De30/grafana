@@ -16,7 +16,7 @@
     "directory": "packages/grafana-e2e-selectors"
   },
   "main": "dist/index.js",
-  "module": "dist/module.mjs",
+  "module": "dist/esm/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.ts",

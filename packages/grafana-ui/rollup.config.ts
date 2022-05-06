@@ -27,11 +27,11 @@ export default [
         },
       },
       {
-        dir: './dist',
+        dir: './dist/esm',
         format: 'es',
         sourcemap: true,
-        entryFileNames: `module.mjs`,
-        chunkFileNames: `[name].mjs`,
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
         globals: {
           react: 'React',
           'prop-types': 'PropTypes',

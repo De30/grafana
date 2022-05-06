@@ -15,14 +15,18 @@ export default [
     plugins: [resolve(), esbuild()],
     output: [
       {
-        file: `${name}.js`,
+        dir: './dist',
         format: 'cjs',
         sourcemap: true,
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
       },
       {
-        file: `${name}.mjs`,
+        dir: './dist/esm',
         format: 'es',
         sourcemap: true,
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
       },
     ],
   }),
