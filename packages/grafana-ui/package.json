@@ -16,11 +16,11 @@
     "directory": "packages/grafana-ui"
   },
   "main": "dist/index.js",
-  "module": "dist/module.mjs",
+  "module": "dist/esm/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.ts",
-    "bundle": "rollup -c rollup.config.ts",
+    "watch": "rollup -w -c rollup.config.ts",
     "clean": "rimraf ./dist ./compiled",
     "docsExtract": "mkdir -p ../../reports/docs && api-extractor run 2>&1 | tee ../../reports/docs/$(basename $(pwd)).log",
     "storybook": "start-storybook -p 9001 -c .storybook",
