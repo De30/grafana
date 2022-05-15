@@ -18,10 +18,8 @@ func TestTrie(t *testing.T) {
 		trie.Insert("folder:id:121")
 		// Root should no longer be a leaf
 		assert.False(t, trie.nodes[0].isLeaf)
-		trie.Walk(func(n node) {
-			fmt.Println("Node")
-			fmt.Println(n.prefix)
-			fmt.Println(n.key)
+		trie.WalkPath("dashboards:id:100", func(key string) {
+			fmt.Println("Node: ", key)
 		})
 	})
 
