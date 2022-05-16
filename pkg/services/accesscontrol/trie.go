@@ -99,6 +99,46 @@ func (t *Trie) Insert(key string) {
 
 }
 
+func (t *Trie) insert(index int, key string, search string) {
+	if len(search) == 0 {
+		return
+	}
+
+	edgeIndex := t.nodes[index].getEdge(search[0])
+	if edgeIndex == 0 {
+		t.addNode(index, node{isLeaf: true, key: key, prefix: search}, false)
+		return
+	}
+
+	commonPrefix := longestPrefix(search, t.nodes[edgeIndex].prefix)
+	if commonPrefix == len(t.nodes[edgeIndex].prefix) {
+		t.insert(edgeIndex, key, search[commonPrefix:])
+		return
+	}
+
+	t.addNode(index, node{prefix: search[:commonPrefix]}, true)
+	childIndex := len(t.nodes) - 1
+	// add edge from new child to old node
+	t.nodes[childIndex].addEdge(t.nodes[edgeIndex].prefix[commonPrefix], edgeIndex)
+	// update prefix of old node
+	t.nodes[edgeIndex].prefix = t.nodes[edgeIndex].prefix[commonPrefix:]
+
+	search = search[commonPrefix:]
+	// check if child match is full key then mark it as leaf and set key
+	if len(search) == 0 {
+		t.nodes[childIndex].key = key
+		t.nodes[childIndex].isLeaf = true
+		return
+	}
+
+	// add new node to child
+	t.addNode(childIndex, node{
+		isLeaf: true,
+		key:    key,
+		prefix: search,
+	}, false)
+}
+
 // addNode ads a new node and creates edge from index to the node
 func (t *Trie) addNode(index int, node node, update bool) {
 	t.size++
