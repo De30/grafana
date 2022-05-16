@@ -2,7 +2,6 @@ package searchV2
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,7 +11,6 @@ import (
 	"github.com/blugelabs/bluge/search"
 	"github.com/blugelabs/bluge/search/aggregations"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/infra/log"
 )
 
@@ -30,7 +28,9 @@ const (
 	documentFieldInternalID  = "__internal_id" // only for migrations! (indexed as a string)
 )
 
-func initIndex(dashboards []dashboard, logger log.Logger) (*bluge.Reader, *bluge.Writer, error) {
+func initIndex(dashboards []dashboard, extender DashboardIndexExtender, logger log.Logger) (*bluge.Reader, *bluge.Writer, error) {
+	docExtender := extender.GetDocumentExtender()
+
 	writer, err := bluge.OpenWriter(bluge.InMemoryOnlyConfig())
 	if err != nil {
 		return nil, nil, fmt.Errorf("error opening writer: %v", err)
@@ -49,6 +49,10 @@ func initIndex(dashboards []dashboard, logger log.Logger) (*bluge.Reader, *bluge
 			continue
 		}
 		doc := getFolderDashboardDoc(dash)
+		err = docExtender.ExtendDocument(EntityKindFolder, dash.id, doc)
+		if err != nil {
+			return nil, nil, err
+		}
 		batch.Insert(doc)
 		uid := dash.uid
 		if uid == "" {
@@ -65,11 +69,18 @@ func initIndex(dashboards []dashboard, logger log.Logger) (*bluge.Reader, *bluge
 		folderUID := folderIdLookup[dash.folderID]
 		location := folderUID
 		doc := getNonFolderDashboardDoc(dash, location)
+		err = docExtender.ExtendDocument(EntityKindDashboard, dash.id, doc)
+		if err != nil {
+			return nil, nil, err
+		}
 		batch.Insert(doc)
 
 		// Index each panel in dashboard.
 		location += "/" + dash.uid
-		docs := getDashboardPanelDocs(dash, location)
+		docs, err := getDashboardPanelDocs(dash, location, docExtender)
+		if err != nil {
+			return nil, nil, err
+		}
 		for _, panelDoc := range docs {
 			batch.Insert(panelDoc)
 		}
@@ -103,7 +114,7 @@ func getFolderDashboardDoc(dash dashboard) *bluge.Document {
 	}
 
 	return bluge.NewDocument(uid).
-		AddField(bluge.NewKeywordField(documentFieldKind, string(entityKindFolder)).Aggregatable().StoreValue()).
+		AddField(bluge.NewKeywordField(documentFieldKind, string(EntityKindFolder)).Aggregatable().StoreValue()).
 		AddField(bluge.NewKeywordField(documentFieldURL, url).StoreValue()).
 		AddField(bluge.NewTextField(documentFieldName, dash.info.Title).StoreValue().SearchTermPositions()).
 		AddField(bluge.NewTextField(documentFieldDescription, dash.info.Description).SearchTermPositions()).
@@ -116,7 +127,7 @@ func getNonFolderDashboardDoc(dash dashboard, location string) *bluge.Document {
 
 	// Dashboard document
 	doc := bluge.NewDocument(dash.uid).
-		AddField(bluge.NewKeywordField(documentFieldKind, string(entityKindDashboard)).Aggregatable().StoreValue()).
+		AddField(bluge.NewKeywordField(documentFieldKind, string(EntityKindDashboard)).Aggregatable().StoreValue()).
 		AddField(bluge.NewKeywordField(documentFieldURL, url).StoreValue()).
 		AddField(bluge.NewKeywordField(documentFieldLocation, location).Aggregatable().StoreValue()).
 		AddField(bluge.NewTextField(documentFieldName, dash.info.Title).StoreValue().SearchTermPositions()).
@@ -152,7 +163,7 @@ func getNonFolderDashboardDoc(dash dashboard, location string) *bluge.Document {
 	return doc
 }
 
-func getDashboardPanelDocs(dash dashboard, location string) []*bluge.Document {
+func getDashboardPanelDocs(dash dashboard, location string, docExtender DocumentExtender) ([]*bluge.Document, error) {
 	var docs []*bluge.Document
 	url := fmt.Sprintf("/d/%s/%s", dash.uid, dash.slug)
 	for _, panel := range dash.info.Panels {
@@ -169,17 +180,21 @@ func getDashboardPanelDocs(dash dashboard, location string) []*bluge.Document {
 			AddField(bluge.NewTextField(documentFieldDescription, panel.Description).SearchTermPositions()).
 			AddField(bluge.NewKeywordField(documentFieldPanelType, panel.Type).Aggregatable().StoreValue()).
 			AddField(bluge.NewKeywordField(documentFieldLocation, location).Aggregatable().StoreValue()).
-			AddField(bluge.NewKeywordField(documentFieldKind, string(entityKindPanel)).Aggregatable().StoreValue()) // likely want independent index for this
+			AddField(bluge.NewKeywordField(documentFieldKind, string(EntityKindPanel)).Aggregatable().StoreValue()) // likely want independent index for this
 
+		err := docExtender.ExtendDocument(EntityKindPanel, 0, doc)
+		if err != nil {
+			return nil, err
+		}
 		docs = append(docs, doc)
 	}
-	return docs
+	return docs, nil
 }
 
 func getDashboardFolderUID(reader *bluge.Reader, folderID int64) (string, error) {
 	fullQuery := bluge.NewBooleanQuery()
 	fullQuery.AddMust(bluge.NewTermQuery(strconv.FormatInt(folderID, 10)).SetField(documentFieldInternalID))
-	fullQuery.AddMust(bluge.NewTermQuery(string(entityKindFolder)).SetField(documentFieldKind))
+	fullQuery.AddMust(bluge.NewTermQuery(string(EntityKindFolder)).SetField(documentFieldKind))
 	req := bluge.NewAllMatches(fullQuery)
 	req.WithStandardAggregations()
 	documentMatchIterator, err := reader.Search(context.Background(), req)
@@ -209,7 +224,7 @@ func getDashboardPanelIDs(reader *bluge.Reader, dashboardUID string) ([]string, 
 	var panelIDs []string
 	fullQuery := bluge.NewBooleanQuery()
 	fullQuery.AddMust(bluge.NewTermQuery(dashboardUID).SetField(documentFieldDSUID))
-	fullQuery.AddMust(bluge.NewTermQuery(string(entityKindPanel)).SetField(documentFieldKind))
+	fullQuery.AddMust(bluge.NewTermQuery(string(EntityKindPanel)).SetField(documentFieldKind))
 	req := bluge.NewAllMatches(fullQuery)
 	req.WithStandardAggregations()
 	documentMatchIterator, err := reader.Search(context.Background(), req)
@@ -235,7 +250,7 @@ func getDashboardPanelIDs(reader *bluge.Reader, dashboardUID string) ([]string, 
 }
 
 //nolint: gocyclo
-func doSearchQuery(ctx context.Context, logger log.Logger, reader *bluge.Reader, filter ResourceFilter, q DashboardQuery) *backend.DataResponse {
+func doSearchQuery(ctx context.Context, logger log.Logger, extender DashboardIndexExtender, reader *bluge.Reader, filter ResourceFilter, q DashboardQuery) *backend.DataResponse {
 	response := &backend.DataResponse{}
 
 	// Folder listing structure
@@ -251,10 +266,10 @@ func doSearchQuery(ctx context.Context, logger log.Logger, reader *bluge.Reader,
 			q.SkipLocation = true
 			q.Facet = nil
 			if val == "root" || val == "" {
-				q.Kind = []string{string(entityKindFolder)}
+				q.Kind = []string{string(EntityKindFolder)}
 			} else {
 				q.Location = val
-				q.Kind = []string{string(entityKindDashboard)}
+				q.Kind = []string{string(EntityKindDashboard)}
 			}
 		}
 	}
@@ -357,6 +372,9 @@ func doSearchQuery(ctx context.Context, logger log.Logger, reader *bluge.Reader,
 		req.AddAggregation(t.Field, aggregations.NewTermsAggregation(search.Field(t.Field), lim))
 	}
 
+	queryExtender := extender.GetQueryExtender()
+	_ = queryExtender.ModifyTopN(q, req)
+
 	// execute this search on the reader
 	documentMatchIterator, err := reader.Search(ctx, req)
 	if err != nil {
@@ -365,181 +383,14 @@ func doSearchQuery(ctx context.Context, logger log.Logger, reader *bluge.Reader,
 		return response
 	}
 
-	dvfieldNames := []string{"type"}
-	sctx := search.NewSearchContext(0, 0)
-
-	// numericFields := map[string]bool{"schemaVersion": true, "panelCount": true}
-
-	fScore := data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
-	fUID := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fKind := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fPType := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fName := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fURL := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fLocation := data.NewFieldFromFieldType(data.FieldTypeString, 0)
-	fTags := data.NewFieldFromFieldType(data.FieldTypeNullableJSON, 0)
-	fDSUIDs := data.NewFieldFromFieldType(data.FieldTypeNullableJSON, 0)
-	fExplain := data.NewFieldFromFieldType(data.FieldTypeNullableJSON, 0)
-
-	fScore.Name = "score"
-	fUID.Name = "uid"
-	fKind.Name = "kind"
-	fName.Name = "name"
-	fLocation.Name = "location"
-	fURL.Name = "url"
-	fURL.Config = &data.FieldConfig{
-		Links: []data.DataLink{
-			{Title: "link", URL: "${__value.text}"},
-		},
-	}
-	fPType.Name = "panel_type"
-	fDSUIDs.Name = "ds_uid"
-	fTags.Name = "tags"
-	fExplain.Name = "explain"
-
-	frame := data.NewFrame("Query results", fScore, fKind, fUID, fName, fPType, fURL, fTags, fDSUIDs, fLocation)
-	if q.Explain {
-		frame.Fields = append(frame.Fields, fExplain)
+	frames, err := queryExtender.BuildSearchResults(ctx, reader, q, documentMatchIterator)
+	if err != nil {
+		logger.Error("error building search results: %w", err)
+		response.Error = err
+		return response
 	}
 
-	locationItems := make(map[string]bool, 50)
-
-	// iterate through the document matches
-	match, err := documentMatchIterator.Next()
-	for err == nil && match != nil {
-		err = match.LoadDocumentValues(sctx, dvfieldNames)
-		if err != nil {
-			continue
-		}
-
-		uid := ""
-		kind := ""
-		ptype := ""
-		name := ""
-		url := ""
-		loc := ""
-		var ds_uids []string
-		var tags []string
-
-		err = match.VisitStoredFields(func(field string, value []byte) bool {
-			// if numericFields[field] {
-			// 	num, err2 := bluge.DecodeNumericFloat64(value)
-			// 	if err2 != nil {
-			// 		vals[field] = num
-			// 	}
-			// } else {
-			// 	vals[field] = string(value)
-			// }
-
-			switch field {
-			case documentFieldUID:
-				uid = string(value)
-			case documentFieldKind:
-				kind = string(value)
-			case documentFieldPanelType:
-				ptype = string(value)
-			case documentFieldName:
-				name = string(value)
-			case documentFieldURL:
-				url = string(value)
-			case documentFieldLocation:
-				loc = string(value)
-			case documentFieldDSUID:
-				ds_uids = append(ds_uids, string(value))
-			case documentFieldTag:
-				tags = append(tags, string(value))
-			}
-			return true
-		})
-		if err != nil {
-			logger.Error("error loading stored fields: %v", err)
-			response.Error = err
-			return response
-		}
-
-		fScore.Append(match.Score)
-		fKind.Append(kind)
-		fUID.Append(uid)
-		fPType.Append(ptype)
-		fName.Append(name)
-		fURL.Append(url)
-		fLocation.Append(loc)
-
-		// set a key for all path parts we return
-		if !q.SkipLocation {
-			for _, v := range strings.Split(loc, "/") {
-				locationItems[v] = true
-			}
-		}
-
-		if len(tags) > 0 {
-			js, _ := json.Marshal(tags)
-			jsb := json.RawMessage(js)
-			fTags.Append(&jsb)
-		} else {
-			fTags.Append(nil)
-		}
-
-		if len(ds_uids) > 0 {
-			js, _ := json.Marshal(ds_uids)
-			jsb := json.RawMessage(js)
-			fDSUIDs.Append(&jsb)
-		} else {
-			fDSUIDs.Append(nil)
-		}
-
-		if q.Explain {
-			if match.Explanation != nil {
-				js, _ := json.Marshal(&match.Explanation)
-				jsb := json.RawMessage(js)
-				fExplain.Append(&jsb)
-			} else {
-				fExplain.Append(nil)
-			}
-		}
-
-		// load the next document match
-		match, err = documentMatchIterator.Next()
-	}
-
-	// Must call after iterating :)
-	aggs := documentMatchIterator.Aggregations()
-
-	header := &customMeta{
-		Count:    aggs.Count(), // Total cound
-		MaxScore: aggs.Metric("max_score"),
-	}
-	if len(locationItems) > 0 && !q.SkipLocation {
-		header.Locations = getLocationLookupInfo(ctx, reader, locationItems)
-	}
-
-	frame.SetMeta(&data.FrameMeta{
-		Type:   "search-results",
-		Custom: header,
-	})
-
-	response.Frames = append(response.Frames, frame)
-
-	for _, t := range q.Facet {
-		bbb := aggs.Buckets(t.Field)
-		if bbb != nil {
-			size := len(bbb)
-
-			fName := data.NewFieldFromFieldType(data.FieldTypeString, size)
-			fName.Name = t.Field
-
-			fCount := data.NewFieldFromFieldType(data.FieldTypeUint64, size)
-			fCount.Name = "Count"
-
-			for i, v := range bbb {
-				fName.Set(i, v.Name())
-				fCount.Set(i, v.Count())
-			}
-
-			response.Frames = append(response.Frames, data.NewFrame("Facet: "+t.Field, fName, fCount))
-		}
-	}
-
+	response.Frames = append(response.Frames, frames...)
 	return response
 }
 

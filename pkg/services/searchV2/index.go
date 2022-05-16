@@ -50,9 +50,10 @@ type dashboardIndex struct {
 	eventStore   eventStore
 	logger       log.Logger
 	buildSignals chan int64
+	extender     DashboardIndexExtender
 }
 
-func newDashboardIndex(dashLoader dashboardLoader, evStore eventStore) *dashboardIndex {
+func newDashboardIndex(dashLoader dashboardLoader, evStore eventStore, extender DashboardIndexExtender) *dashboardIndex {
 	return &dashboardIndex{
 		loader:       dashLoader,
 		eventStore:   evStore,
@@ -60,6 +61,7 @@ func newDashboardIndex(dashLoader dashboardLoader, evStore eventStore) *dashboar
 		perOrgWriter: map[int64]*bluge.Writer{},
 		logger:       log.New("dashboardIndex"),
 		buildSignals: make(chan int64),
+		extender:     extender,
 	}
 }
 
@@ -124,7 +126,7 @@ func (i *dashboardIndex) buildOrgIndex(ctx context.Context, orgID int64) (int, e
 	orgSearchIndexLoadTime := time.Since(started)
 	i.logger.Info("Finish loading org dashboards", "elapsed", orgSearchIndexLoadTime, "orgId", orgID)
 
-	reader, writer, err := initIndex(dashboards, i.logger)
+	reader, writer, err := initIndex(dashboards, i.extender, i.logger)
 	if err != nil {
 		return 0, fmt.Errorf("error initializing index: %w", err)
 	}
@@ -309,7 +311,10 @@ func (i *dashboardIndex) updateDashboard(writer *bluge.Writer, reader *bluge.Rea
 		var actualPanelIDs []string
 
 		location += "/" + dash.uid
-		panelDocs := getDashboardPanelDocs(dash, location)
+		panelDocs, err := getDashboardPanelDocs(dash, location, i.extender.GetDocumentExtender())
+		if err != nil {
+			return err
+		}
 		for _, panelDoc := range panelDocs {
 			actualPanelIDs = append(actualPanelIDs, string(panelDoc.ID().Term()))
 			batch.Update(panelDoc.ID(), panelDoc)

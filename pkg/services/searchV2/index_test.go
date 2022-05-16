@@ -40,7 +40,7 @@ func initTestIndexFromDashes(t *testing.T, dashboards []dashboard) *bluge.Reader
 	dashboardLoader := &testDashboardLoader{
 		dashboards: dashboards,
 	}
-	index := newDashboardIndex(dashboardLoader, &store.MockEntityEventsService{})
+	index := newDashboardIndex(dashboardLoader, &store.MockEntityEventsService{}, &OSSIndexExtender{})
 	require.NotNil(t, index)
 	numDashboards, err := index.buildOrgIndex(context.Background(), 1)
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func initTestIndexFromDashes(t *testing.T, dashboards []dashboard) *bluge.Reader
 
 func checkSearchResponse(t *testing.T, fileName string, reader *bluge.Reader, filter ResourceFilter, query DashboardQuery) {
 	t.Helper()
-	resp := doSearchQuery(context.Background(), testLogger, reader, filter, query)
+	resp := doSearchQuery(context.Background(), testLogger, &OSSIndexExtender{}, reader, filter, query)
 	goldenFile := filepath.Join("testdata", fileName)
 	err := experimental.CheckGoldenDataResponse(goldenFile, resp, *update)
 	require.NoError(t, err)

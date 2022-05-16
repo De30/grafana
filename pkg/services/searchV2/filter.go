@@ -15,20 +15,20 @@ type PermissionFilter struct {
 	filter ResourceFilter
 }
 
-type entityKind string
+type EntityKind string
 
 const (
-	entityKindPanel     entityKind = "panel"
-	entityKindDashboard entityKind = "dashboard"
-	entityKindFolder    entityKind = "folder"
+	EntityKindPanel     EntityKind = "panel"
+	EntityKindDashboard EntityKind = "dashboard"
+	EntityKindFolder    EntityKind = "folder"
 )
 
-func (r entityKind) IsValid() bool {
-	return r == entityKindPanel || r == entityKindDashboard || r == entityKindFolder
+func (r EntityKind) IsValid() bool {
+	return r == EntityKindPanel || r == EntityKindDashboard || r == EntityKindFolder
 }
 
-func (r entityKind) supportsAuthzCheck() bool {
-	return r == entityKindPanel || r == entityKindDashboard || r == entityKindFolder
+func (r EntityKind) supportsAuthzCheck() bool {
+	return r == EntityKindPanel || r == EntityKindDashboard || r == EntityKindFolder
 }
 
 var (
@@ -61,7 +61,7 @@ func (q *PermissionFilter) logAccessDecision(decision bool, kind interface{}, id
 	}
 }
 
-func (q *PermissionFilter) canAccess(kind entityKind, id string) bool {
+func (q *PermissionFilter) canAccess(kind EntityKind, id string) bool {
 	if !kind.supportsAuthzCheck() {
 		q.logAccessDecision(false, kind, id, "entityDoesNotSupportAuthz")
 		return false
@@ -70,17 +70,17 @@ func (q *PermissionFilter) canAccess(kind entityKind, id string) bool {
 	// TODO add `kind` to the `ResourceFilter` interface so that we can move the switch out of here
 	//
 	switch kind {
-	case entityKindFolder:
+	case EntityKindFolder:
 		if id == "" {
 			q.logAccessDecision(true, kind, id, "generalFolder")
 			return true
 		}
 		fallthrough
-	case entityKindDashboard:
+	case EntityKindDashboard:
 		decision := q.filter(id)
 		q.logAccessDecision(decision, kind, id, "resourceFilter")
 		return decision
-	case entityKindPanel:
+	case EntityKindPanel:
 		matches := panelIdFieldRegex.FindStringSubmatch(id)
 
 		submatchCount := len(matches)
@@ -121,7 +121,7 @@ func (q *PermissionFilter) Searcher(i search.Reader, options search.SearcherOpti
 			return false
 		}
 
-		e := entityKind(kind)
+		e := EntityKind(kind)
 		if !e.IsValid() {
 			q.logAccessDecision(false, kind, id, "invalidEntityKind")
 			return false

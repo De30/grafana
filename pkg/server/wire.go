@@ -175,6 +175,7 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(loginpkg.Authenticator), new(*loginpkg.AuthenticatorService)),
 	datasourceproxy.ProvideService,
 	search.ProvideService,
+	searchV2.ProvideDashboardIndexExtender,
 	searchV2.ProvideService,
 	store.ProvideService,
 	store.ProvideHTTPService,

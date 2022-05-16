@@ -26,9 +26,10 @@ type StandardSearchService struct {
 
 	logger         log.Logger
 	dashboardIndex *dashboardIndex
+	extender       DashboardIndexExtender
 }
 
-func ProvideService(cfg *setting.Cfg, sql *sqlstore.SQLStore, entityEventStore store.EntityEventsService, ac accesscontrol.AccessControl) SearchService {
+func ProvideService(cfg *setting.Cfg, sql *sqlstore.SQLStore, entityEventStore store.EntityEventsService, ac accesscontrol.AccessControl, extender DashboardIndexExtender) SearchService {
 	return &StandardSearchService{
 		cfg: cfg,
 		sql: sql,
@@ -37,8 +38,9 @@ func ProvideService(cfg *setting.Cfg, sql *sqlstore.SQLStore, entityEventStore s
 			sql: sql,
 			ac:  ac,
 		},
-		dashboardIndex: newDashboardIndex(newSQLDashboardLoader(sql), entityEventStore),
+		dashboardIndex: newDashboardIndex(newSQLDashboardLoader(sql), entityEventStore, extender),
 		logger:         log.New("searchV2"),
+		extender:       extender,
 	}
 }
 
@@ -123,5 +125,5 @@ func (s *StandardSearchService) DoDashboardQuery(ctx context.Context, user *back
 		return rsp
 	}
 
-	return doSearchQuery(ctx, s.logger, reader, filter, q)
+	return doSearchQuery(ctx, s.logger, s.extender, reader, filter, q)
 }
