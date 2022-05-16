@@ -1,6 +1,8 @@
 package accesscontrol
 
-import "strings"
+import (
+	"strings"
+)
 
 type Trie struct {
 	nodes []node
@@ -14,35 +16,44 @@ func NewTrie() *Trie {
 type node struct {
 	isLeaf bool
 	prefix string
-	edges  map[byte]int
-}
-
-func (n *node) setEdge(label byte, index int) {
-	if n.edges == nil {
-		n.edges = make(map[byte]int, 1)
-	}
-	n.edges[label] = index
-}
-
-func (n *node) getEdge(label byte) int {
-	return n.edges[label]
+	key    string
+	edges  []edge
 }
 
 type edge struct {
-	label byte // Maybe next char
-	idx   int  // index for child node
-	str   string
+	label byte
+	index int
 }
 
-type WalkFn = func(key string)
+func (n *node) addEdge(label byte, index int) {
+	n.edges = append(n.edges, edge{label, index})
+}
 
-func (t *Trie) Insert(search string) {
+func (n *node) updateEdge(label byte, index int) {
+	for i, e := range n.edges {
+		if e.label == label {
+			n.edges[i].index = index
+		}
+	}
+}
+
+func (n *node) getEdge(label byte) int {
+	for _, e := range n.edges {
+		if e.label == label {
+			return e.index
+		}
+	}
+	return 0
+}
+
+func (t *Trie) Insert(key string) {
 	// no root node exists so create it
 	if len(t.nodes) == 0 {
 		t.nodes = append(t.nodes, node{isLeaf: false})
 		t.size++
 	}
 
+	search := key
 	idx := 0
 	for {
 		if len(search) == 0 {
@@ -51,7 +62,7 @@ func (t *Trie) Insert(search string) {
 
 		edgeIndex := t.nodes[idx].getEdge(search[0])
 		if edgeIndex == 0 {
-			t.addNode(idx, node{isLeaf: true, prefix: search})
+			t.addNode(idx, node{isLeaf: true, key: key, prefix: search}, false)
 			return
 		}
 
@@ -62,16 +73,17 @@ func (t *Trie) Insert(search string) {
 			continue
 		}
 
-		t.addNode(idx, node{prefix: search[:commonPrefix]})
+		t.addNode(idx, node{prefix: search[:commonPrefix]}, true)
 		childIndex := len(t.nodes) - 1
 		// add edge from new child to old node
-		t.nodes[childIndex].setEdge(t.nodes[edgeIndex].prefix[commonPrefix], edgeIndex)
+		t.nodes[childIndex].addEdge(t.nodes[edgeIndex].prefix[commonPrefix], edgeIndex)
 		// update prefix of old node
 		t.nodes[edgeIndex].prefix = t.nodes[edgeIndex].prefix[commonPrefix:]
 
 		search = search[commonPrefix:]
 		// check if child match is full key then mark it as leaf and set key
 		if len(search) == 0 {
+			t.nodes[childIndex].key = key
 			t.nodes[childIndex].isLeaf = true
 			return
 		}
@@ -79,35 +91,41 @@ func (t *Trie) Insert(search string) {
 		// add new node to child
 		t.addNode(childIndex, node{
 			isLeaf: true,
+			key:    key,
 			prefix: search,
-		})
+		}, false)
 		return
 	}
 
 }
 
 // addNode ads a new node and creates edge from index to the node
-func (t *Trie) addNode(index int, node node) {
+func (t *Trie) addNode(index int, node node, update bool) {
 	t.size++
 	t.nodes = append(t.nodes, node)
-	t.nodes[index].setEdge(node.prefix[0], len(t.nodes)-1)
+	if !update {
+		t.nodes[index].addEdge(node.prefix[0], len(t.nodes)-1)
+	} else {
+		t.nodes[index].updateEdge(node.prefix[0], len(t.nodes)-1)
+	}
 }
+
+type WalkFn = func(key string)
 
 func (t *Trie) Walk(fn WalkFn) {
 	if len(t.nodes) == 0 {
 		return
 	}
 	// start from root
-	walk(t.nodes[0], t.nodes, "", fn)
+	t.walk(0, fn)
 }
 
-func walk(node node, nodes []node, key string, fn WalkFn) {
-	if node.isLeaf {
-		key += node.prefix
-		fn(key)
+func (t *Trie) walk(index int, fn WalkFn) {
+	if t.nodes[index].isLeaf {
+		fn(t.nodes[index].key)
 	}
-	for _, index := range node.edges {
-		walk(nodes[index], nodes, key, fn)
+	for _, e := range t.nodes[index].edges {
+		t.walk(e.index, fn)
 	}
 }
 
@@ -119,22 +137,21 @@ func (t *Trie) WalkPath(path string, fn WalkFn) {
 		return
 	}
 
-	walkPath(path, t.nodes[0], t.nodes, "", fn)
+	t.walkPath(path, 0, fn)
 }
 
-func walkPath(path string, node node, nodes []node, key string, fn WalkFn) {
-	if node.isLeaf {
-		key += node.prefix
-		fn(key)
+func (t *Trie) walkPath(path string, index int, fn WalkFn) {
+	if t.nodes[index].isLeaf {
+		fn(t.nodes[index].key)
 	}
 
 	if len(path) == 0 {
 		return
 	}
 
-	e := node.getEdge(path[0])
-	if e != 0 && strings.HasPrefix(path, nodes[e].prefix) {
-		walkPath(strings.TrimPrefix(path, nodes[e].prefix), nodes[e], nodes, key, fn)
+	edge := t.nodes[index].getEdge(path[0])
+	if edge != 0 && strings.HasPrefix(path, t.nodes[edge].prefix) {
+		t.walkPath(strings.TrimPrefix(path, t.nodes[edge].prefix), edge, fn)
 	}
 }
 
