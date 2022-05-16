@@ -13,6 +13,14 @@ func NewTrie() *Trie {
 	return &Trie{nodes: []node{{}}}
 }
 
+func NewTrieFromMap(m map[string]interface{}) *Trie {
+	t := NewTrie()
+	for key, _ := range m {
+		t.Insert(key)
+	}
+	return t
+}
+
 type node struct {
 	isLeaf bool
 	prefix string
@@ -53,50 +61,7 @@ func (t *Trie) Insert(key string) {
 		t.size++
 	}
 
-	search := key
-	idx := 0
-	for {
-		if len(search) == 0 {
-			return
-		}
-
-		edgeIndex := t.nodes[idx].getEdge(search[0])
-		if edgeIndex == 0 {
-			t.addNode(idx, node{isLeaf: true, key: key, prefix: search}, false)
-			return
-		}
-
-		commonPrefix := longestPrefix(search, t.nodes[edgeIndex].prefix)
-		if commonPrefix == len(t.nodes[edgeIndex].prefix) {
-			idx = edgeIndex
-			search = search[commonPrefix:]
-			continue
-		}
-
-		t.addNode(idx, node{prefix: search[:commonPrefix]}, true)
-		childIndex := len(t.nodes) - 1
-		// add edge from new child to old node
-		t.nodes[childIndex].addEdge(t.nodes[edgeIndex].prefix[commonPrefix], edgeIndex)
-		// update prefix of old node
-		t.nodes[edgeIndex].prefix = t.nodes[edgeIndex].prefix[commonPrefix:]
-
-		search = search[commonPrefix:]
-		// check if child match is full key then mark it as leaf and set key
-		if len(search) == 0 {
-			t.nodes[childIndex].key = key
-			t.nodes[childIndex].isLeaf = true
-			return
-		}
-
-		// add new node to child
-		t.addNode(childIndex, node{
-			isLeaf: true,
-			key:    key,
-			prefix: search,
-		}, false)
-		return
-	}
-
+	t.insert(0, key, key)
 }
 
 func (t *Trie) insert(index int, key string, search string) {
@@ -126,6 +91,7 @@ func (t *Trie) insert(index int, key string, search string) {
 	search = search[commonPrefix:]
 	// check if child match is full key then mark it as leaf and set key
 	if len(search) == 0 {
+		t.size++
 		t.nodes[childIndex].key = key
 		t.nodes[childIndex].isLeaf = true
 		return
@@ -140,14 +106,35 @@ func (t *Trie) insert(index int, key string, search string) {
 }
 
 // addNode ads a new node and creates edge from index to the node
+// TODO fix update flag
 func (t *Trie) addNode(index int, node node, update bool) {
-	t.size++
+	if node.isLeaf {
+		t.size++
+	}
 	t.nodes = append(t.nodes, node)
 	if !update {
 		t.nodes[index].addEdge(node.prefix[0], len(t.nodes)-1)
 	} else {
 		t.nodes[index].updateEdge(node.prefix[0], len(t.nodes)-1)
 	}
+}
+
+func (t *Trie) Get(key string) (string, bool) {
+	if len(t.nodes) == 0 {
+		return "", false
+	}
+	return t.get(0, key)
+}
+
+func (t *Trie) get(index int, key string) (string, bool) {
+	if len(key) == 0 && t.nodes[index].isLeaf {
+		return t.nodes[index].key, true
+	}
+	edge := t.nodes[index].getEdge(key[0])
+	if edge == 0 {
+		return "", false
+	}
+	return t.get(edge, strings.TrimPrefix(key, t.nodes[edge].prefix))
 }
 
 type WalkFn = func(key string)
@@ -176,7 +163,6 @@ func (t *Trie) WalkPath(path string, fn WalkFn) {
 	if len(path) == 0 {
 		return
 	}
-
 	t.walkPath(path, 0, fn)
 }
 
@@ -193,6 +179,10 @@ func (t *Trie) walkPath(path string, index int, fn WalkFn) {
 	if edge != 0 && strings.HasPrefix(path, t.nodes[edge].prefix) {
 		t.walkPath(strings.TrimPrefix(path, t.nodes[edge].prefix), edge, fn)
 	}
+}
+
+func (t *Trie) Len() int {
+	return t.size
 }
 
 func longestPrefix(k1, k2 string) int {
