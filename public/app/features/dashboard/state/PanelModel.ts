@@ -140,7 +140,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   maxPerRow?: number;
   collapsed?: boolean;
 
-  panels?: any;
+  panels?: PanelModel[];
   declare targets: DataQuery[];
   declare drilldownQueries: Record<string, object[]>;
   transformations?: DataTransformerConfig[];
