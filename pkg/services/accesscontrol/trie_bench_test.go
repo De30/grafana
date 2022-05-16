@@ -95,7 +95,9 @@ func benchRadixTrieWalk(b *testing.B, numScopes int) {
 	}
 }
 
-func BenchmarkTrieWalk_100(b *testing.B)       { benchTrieWalk(b, 100) }
-func BenchmarkTrieWalk_1000(b *testing.B)      { benchTrieWalk(b, 1000) }
-func BenchmarkTrieRadixWalk_100(b *testing.B)  { benchRadixTrieWalk(b, 100) }
-func BenchmarkTrieRadixWalk_1000(b *testing.B) { benchRadixTrieWalk(b, 1000) }
+func BenchmarkTrieWalk_100(b *testing.B)        { benchTrieWalk(b, 100) }
+func BenchmarkTrieWalk_1000(b *testing.B)       { benchTrieWalk(b, 1000) }
+func BenchmarkTrieWalk_10000(b *testing.B)      { benchTrieWalk(b, 10000) }
+func BenchmarkTrieRadixWalk_100(b *testing.B)   { benchRadixTrieWalk(b, 100) }
+func BenchmarkTrieRadixWalk_1000(b *testing.B)  { benchRadixTrieWalk(b, 1000) }
+func BenchmarkTrieRadixWalk_10000(b *testing.B) { benchRadixTrieWalk(b, 10000) }
