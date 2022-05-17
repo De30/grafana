@@ -8,7 +8,7 @@ export const initialDrilldownVariableModelState: DrilldownVariable = {
   ...initialVariableModelState,
   type: 'drilldown',
   hide: VariableHide.dontHide,
-  current: [],
+  current: { value: [] },
 };
 
 export const drilldownVariableSlice = createSlice({
@@ -20,7 +20,7 @@ export const drilldownVariableSlice = createSlice({
       action: PayloadAction<VariablePayload<Array<{ dimension: string; value: string }>>>
     ) => {
       const instanceState = getInstanceState<DrilldownVariable>(state, action.payload.id);
-      instanceState.current = action.payload.data;
+      instanceState.current = { value: action.payload.data };
     },
   },
 });

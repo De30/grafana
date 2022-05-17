@@ -242,6 +242,14 @@ export class TemplateSrv implements BaseTemplateSrv {
   }
 
   private getVariableValue(variableName: string, fieldPath: string | undefined, scopedVars: ScopedVars) {
+    if (variableName === '__drilldown') {
+      const scopedVar = scopedVars[variableName];
+      const result = scopedVar?.value?.find((item: any) => item.dimension === fieldPath);
+      if (result) {
+        return result.value;
+      }
+    }
+
     const scopedVar = scopedVars[variableName];
     if (!scopedVar) {
       return null;
@@ -321,6 +329,7 @@ export class TemplateSrv implements BaseTemplateSrv {
         const fieldValue = this.getVariableValue(variableName, fieldPath, {
           [variableName]: { value, text },
         });
+
         if (fieldValue !== null && fieldValue !== undefined) {
           return this.formatValue(fieldValue, fmt, variable, text);
         }

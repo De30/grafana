@@ -2,9 +2,9 @@ import { ComponentType } from 'react';
 
 import { VariableAdapter } from '../adapters';
 import { VariableEditorProps } from '../editor/types';
-import { VariablePickerProps } from '../pickers/types';
 import { DrilldownVariable, initialVariableModelState, VariableHide } from '../types';
 
+import { DrilldownPicker } from './DrilldownPicker';
 import { drilldownVariableReducer } from './reducer';
 
 export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVariable> => {
@@ -17,10 +17,10 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       type: 'drilldown',
       hide: VariableHide.dontHide,
       skipUrlSync: false,
-      current: [],
+      current: { value: [] },
     },
     reducer: drilldownVariableReducer,
-    picker: null as unknown as ComponentType<VariablePickerProps<DrilldownVariable>>,
+    picker: DrilldownPicker,
     editor: null as unknown as ComponentType<VariableEditorProps<DrilldownVariable>>,
     dependsOn: () => {
       return false;

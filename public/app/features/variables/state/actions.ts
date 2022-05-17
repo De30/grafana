@@ -252,13 +252,6 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       )
     );
 
-    // TODO: Move to the drilldown variable reducer
-    const dimensionHierarchy = dashboard.getDrilldownDimensions();
-
-    const dimensions = dimensionHierarchy.map((dim) => {
-      return { dimension: dim.name, value: '' };
-    });
-
     const drilldownModel: DrilldownVariable = {
       ...initialVariableModelState,
       id: '__drilldown',
@@ -267,7 +260,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       index: -1,
       skipUrlSync: false,
       hide: VariableHide.dontHide,
-      current: dimensions,
+      current: { value: [] },
       rootStateKey: key,
     };
 
