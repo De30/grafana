@@ -77,7 +77,7 @@ func (q *PermissionFilter) canAccess(kind entityKind, id string) bool {
 		}
 		fallthrough
 	case entityKindDashboard:
-		decision := q.filter(id)
+		decision := q.filter(createUid(entityKindDashboard, id))
 		q.logAccessDecision(decision, kind, id, "resourceFilter")
 		return decision
 	case entityKindPanel:
@@ -90,7 +90,7 @@ func (q *PermissionFilter) canAccess(kind entityKind, id string) bool {
 		}
 
 		dashboardUid := matches[panelIdFieldDashboardUidSubmatchIndex]
-		decision := q.filter(dashboardUid)
+		decision := q.filter(createUid(entityKindDashboard, dashboardUid))
 
 		q.logAccessDecision(decision, kind, id, "resourceFilter", "dashboardUid", dashboardUid, "panelId", matches[panelIdFieldPanelIdSubmatchIndex])
 		return decision

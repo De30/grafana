@@ -2,6 +2,8 @@ package searchV2
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -43,6 +45,25 @@ func (a *simpleSQLAuthService) getDashboardTableAuthFilter(user *models.SignedIn
 	return permissions.NewAccessControlDashboardPermissionFilter(user, models.PERMISSION_VIEW, searchstore.TypeDashboard)
 }
 
+func createUid(kind entityKind, entityId string) string {
+	return string(kind) + "/" + entityId
+}
+
+func extractKind(uid string) (entityKind, string, error) {
+	separatorIndex := strings.Index(uid, "/")
+	if separatorIndex <= 0 || separatorIndex >= len(uid)-1 {
+		return "", "", errors.New("invalid uid " + uid)
+	}
+
+	parsedKind := entityKind(uid[:separatorIndex])
+	rest := uid[separatorIndex+1:]
+
+	if !parsedKind.IsValid() {
+		return parsedKind, "", errors.New("invalid kind " + uid)
+	}
+	return parsedKind, rest, nil
+}
+
 func (a *simpleSQLAuthService) GetDashboardReadFilter(user *models.SignedInUser) (ResourceFilter, error) {
 	filter := a.getDashboardTableAuthFilter(user)
 	rows := make([]*dashIdQueryResult, 0)
@@ -72,6 +93,14 @@ func (a *simpleSQLAuthService) GetDashboardReadFilter(user *models.SignedInUser)
 	}
 
 	return func(uid string) bool {
-		return uids[uid]
+		kind, rest, err := extractKind(uid)
+		if err != nil {
+			return false
+		}
+
+		if kind != entityKindDashboard {
+			return false
+		}
+		return uids[rest]
 	}, err
 }
