@@ -10,8 +10,8 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
 )
 
-// ResourceFilter checks if a given a uid (resource identifier) check if we have the requested permission
-type ResourceFilter func(uid string) bool
+// ResourceFilter checks if a given a uid (resource identifier)  check if we have the requested permission
+type ResourceFilter func(uid string, kind entityKind) bool
 
 // FutureAuthService eventually implemented by the security service
 type FutureAuthService interface {
@@ -71,7 +71,10 @@ func (a *simpleSQLAuthService) GetDashboardReadFilter(user *models.SignedInUser)
 		uids[rows[i].UID] = true
 	}
 
-	return func(uid string) bool {
+	return func(uid string, kind entityKind) bool {
+		if kind != entityKindDashboard {
+			return false
+		}
 		return uids[uid]
 	}, err
 }
