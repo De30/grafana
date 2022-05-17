@@ -1,10 +1,13 @@
 import { ComponentType } from 'react';
 
+import { dispatch } from 'app/store/store';
+
 import { VariableAdapter } from '../adapters';
 import { VariableEditorProps } from '../editor/types';
 import { DrilldownVariable, initialVariableModelState, VariableHide } from '../types';
 
 import { DrilldownPicker } from './DrilldownPicker';
+import { applyDrillDownDimensions } from './actions';
 import { drilldownVariableReducer } from './reducer';
 
 export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVariable> => {
@@ -29,7 +32,9 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       return;
     },
     setValueFromUrl: async (variable, urlValue) => {
-      return;
+      //TODO Decide on a better base64 encoder
+      const appliedDrilldownDimensions = JSON.parse(atob(urlValue as string));
+      await dispatch(applyDrillDownDimensions(appliedDrilldownDimensions.value));
     },
     updateOptions: async (variable) => {
       return;
@@ -38,7 +43,8 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       return {};
     },
     getValueForUrl: (variable) => {
-      return '';
+      //TODO Decide on a better base64 encoder
+      return btoa(JSON.stringify(variable.current));
     },
   };
 };

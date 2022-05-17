@@ -23,7 +23,6 @@ export const DrilldownSettings: React.FC<Props> = ({ dashboard }) => {
       name: newDimensionName,
     };
 
-    console.log(dashboard.drilldownHierarchy);
     dashboard.drilldownHierarchy = [...dashboard.drilldownHierarchy, newDimension];
     setEditIdx(dashboard.drilldownHierarchy.length - 1);
   };
