@@ -259,7 +259,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       type: 'drilldown',
       index: -1,
       skipUrlSync: false,
-      hide: VariableHide.dontHide,
+      hide: VariableHide.hideLabel,
       current: { value: [] },
       rootStateKey: key,
     };

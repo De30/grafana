@@ -18,7 +18,7 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
     initialState: {
       ...initialVariableModelState,
       type: 'drilldown',
-      hide: VariableHide.dontHide,
+      hide: VariableHide.hideLabel,
       skipUrlSync: false,
       current: { value: [] },
     },
