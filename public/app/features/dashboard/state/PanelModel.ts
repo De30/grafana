@@ -21,6 +21,7 @@ import {
 import { getTemplateSrv, RefreshEvent } from '@grafana/runtime';
 import config from 'app/core/config';
 import { getNextRefIdChar } from 'app/core/utils/query';
+import { DrilldownVariable } from 'app/features/variables/types';
 import { QueryGroupOptions } from 'app/types';
 import {
   PanelOptionsChangedEvent,
@@ -303,12 +304,21 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     let queriesToRun: DataQuery[] = [];
     let hasDrilldown = false;
 
-    if (this.drilldownQueries && Object.keys(this.drilldownQueries).length > 0) {
-      // figure out a query based on spacfied hierarchy.
+    const appliedDrilldownDimensions: DrilldownVariable = getTemplateSrv()
+      .getVariables()
+      .find((val) => val.name === '__drilldown') as DrilldownVariable;
+
+    if (
+      this.drilldownQueries &&
+      Object.keys(this.drilldownQueries).length > 0 &&
+      appliedDrilldownDimensions.current.value.length > 0
+    ) {
+      // TODO:  Given the drilldown template variable value select which query to run.
       for (const query of this.targets) {
         const refId = query.refId;
+        const index = appliedDrilldownDimensions.current.value.length - 1;
 
-        if (this.drilldownQueries[refId]) {
+        if (this.drilldownQueries[refId][index]) {
           hasDrilldown = true;
           queriesToRun.push({
             refId: refId,
@@ -316,7 +326,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
             key: query.key,
             queryType: query.queryType,
             datasource: query.datasource,
-            ...this.drilldownQueries[refId][0],
+            ...this.drilldownQueries[refId][index],
           });
         } else {
           queriesToRun.push(query);
@@ -325,8 +335,6 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     } else {
       queriesToRun = this.targets;
     }
-
-    console.log(hasDrilldown, this.drilldownQueries);
 
     this.getQueryRunner().run({
       datasource: this.datasource,
