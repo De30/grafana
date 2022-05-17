@@ -95,6 +95,7 @@ class VariableEditorContainerUnconnected extends PureComponent<Props> {
 
   render() {
     const variableToEdit = this.props.variables.find((s) => s.id === this.props.idInEditor) ?? null;
+    const variables = this.props.variables.filter((variable) => variable.type !== 'drilldown');
 
     return (
       <div>
@@ -131,7 +132,7 @@ class VariableEditorContainerUnconnected extends PureComponent<Props> {
 
         {!variableToEdit && (
           <VariableEditorList
-            variables={this.props.variables}
+            variables={variables}
             onAdd={this.onNewVariable}
             onEdit={this.onEditVariable}
             onChangeOrder={this.onChangeVariableOrder}
