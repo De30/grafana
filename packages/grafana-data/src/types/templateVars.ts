@@ -12,5 +12,5 @@ export type VariableType =
 export interface VariableModel {
   type: VariableType;
   name: string;
-  label: string | null;
+  label?: string;
 }
