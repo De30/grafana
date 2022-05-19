@@ -6,6 +6,7 @@ import {
   DataQuery,
   DataSourceApi,
   DataSourceInstanceSettings,
+  DrilldownDimension,
   getDefaultTimeRange,
   LoadingState,
   PanelData,
@@ -31,6 +32,7 @@ import { QueryGroupOptionsEditor } from './QueryGroupOptions';
 interface Props {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
+  drilldownDimensions: DrilldownDimension[];
   onRunQueries: () => void;
   onOptionsChange: (options: QueryGroupOptions) => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
@@ -265,7 +267,7 @@ export class QueryGroup extends PureComponent<Props, State> {
   };
 
   renderQueries(dsSettings: DataSourceInstanceSettings) {
-    const { onRunQueries, onDrillDownQueriesChange, options } = this.props;
+    const { onRunQueries, onDrillDownQueriesChange, options, drilldownDimensions } = this.props;
     const { data, queries } = this.state;
 
     if (isSharedDashboardQuery(dsSettings.name)) {
@@ -289,6 +291,7 @@ export class QueryGroup extends PureComponent<Props, State> {
           onAddQuery={this.onAddQuery}
           onRunQueries={onRunQueries}
           onDrillDownQueriesChange={onDrillDownQueriesChange}
+          drilldownDimensions={drilldownDimensions}
           data={data}
         />
       </div>

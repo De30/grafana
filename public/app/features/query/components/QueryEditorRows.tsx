@@ -6,6 +6,7 @@ import {
   DataQuery,
   DataSourceInstanceSettings,
   DataSourceRef,
+  DrilldownDimension,
   EventBusExtended,
   HistoryItem,
   PanelData,
@@ -19,6 +20,7 @@ interface Props {
   queries: DataQuery[];
   drillDownQueries?: Record<string, object[]>;
   dsSettings: DataSourceInstanceSettings;
+  drilldownDimensions: DrilldownDimension[];
 
   // Query editing
   onQueriesChange: (queries: DataQuery[]) => void;
@@ -133,8 +135,17 @@ export class QueryEditorRows extends PureComponent<Props> {
   onDrillDownCreate = () => {};
 
   render() {
-    const { dsSettings, data, queries, app, history, eventBus, onDrillDownQueriesChange, drillDownQueries } =
-      this.props;
+    const {
+      dsSettings,
+      data,
+      queries,
+      app,
+      history,
+      eventBus,
+      onDrillDownQueriesChange,
+      drillDownQueries,
+      drilldownDimensions,
+    } = this.props;
 
     return (
       <DragDropContext onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
@@ -164,6 +175,7 @@ export class QueryEditorRows extends PureComponent<Props> {
                         onAddQuery={this.props.onAddQuery}
                         onRunQuery={this.props.onRunQueries}
                         onDrillDownQueriesChange={onDrillDownQueriesChange}
+                        drilldownDimensions={drilldownDimensions}
                         queries={queries}
                         app={app}
                         history={history}

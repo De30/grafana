@@ -775,7 +775,6 @@ export const initVariablesTransaction =
       const uid = toStateKey(urlUid);
       const state = getState();
       const lastKey = getIfExistsLastKey(state);
-      console.log('lastKey', lastKey);
       if (lastKey) {
         const transactionState = getVariablesState(lastKey, state).transaction;
         if (transactionState.status === TransactionStatus.Fetching) {

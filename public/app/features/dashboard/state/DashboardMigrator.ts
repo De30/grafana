@@ -303,6 +303,11 @@ export class DashboardMigrator {
     if (oldVersion < 12) {
       // update template variables
       each(this.dashboard.getVariables(), (templateVariable: any) => {
+        //TODO defaultVariablesFilter should also exclude type drilldown but at the same time make the variable available in other places...
+        if (templateVariable.type === 'drilldown') {
+          return;
+        }
+
         if (templateVariable.refresh) {
           templateVariable.refresh = 1;
         }

@@ -97,6 +97,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
     }
 
     const options = this.buildQueryOptions(panel);
+    const drilldownDimensions = panel.getDrilldownDimensions();
 
     return (
       <QueryGroup
@@ -106,6 +107,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
         onOpenQueryInspector={this.onOpenQueryInspector}
         onOptionsChange={this.onOptionsChange}
         onDrillDownQueriesChange={this.onDrillDownQueriesChange}
+        drilldownDimensions={drilldownDimensions}
       />
     );
   }

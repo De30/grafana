@@ -9,6 +9,7 @@ import {
   DataQuery,
   DataSourceApi,
   DataSourceInstanceSettings,
+  DrilldownDimension,
   EventBusExtended,
   EventBusSrv,
   HistoryItem,
@@ -32,6 +33,7 @@ import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 
+import { DrilldownQueriesModal } from './DrilldownQueriesModal';
 import { RowActionComponents } from './QueryActionComponent';
 import { QueryEditorRowHeader } from './QueryEditorRowHeader';
 import { QueryErrorAlert } from './QueryErrorAlert';
@@ -44,6 +46,7 @@ interface Props<TQuery extends DataQuery> {
   id: string;
   index: number;
   dataSource: DataSourceInstanceSettings;
+  drilldownDimensions: DrilldownDimension[];
 
   onChangeDataSource?: (dsSettings: DataSourceInstanceSettings) => void;
   renderHeaderExtras?: () => ReactNode;
@@ -68,6 +71,7 @@ interface State<TQuery extends DataQuery> {
   data?: PanelData;
   isOpen?: boolean;
   showingHelp: boolean;
+  isDrilldownModalOpen?: boolean;
 }
 
 export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Props<TQuery>, State<TQuery>> {
@@ -81,6 +85,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     data: undefined,
     isOpen: true,
     showingHelp: false,
+    isDrilldownModalOpen: false,
   };
 
   componentDidMount() {
@@ -426,8 +431,9 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   render() {
-    const { query, id, index, visualization, onDrillDownQueriesChange, drillDownQueries } = this.props;
-    const { datasource, showingHelp, data } = this.state;
+    const { query, id, index, visualization, onDrillDownQueriesChange, drillDownQueries, drilldownDimensions } =
+      this.props;
+    const { datasource, showingHelp, data, isDrilldownModalOpen } = this.state;
     const isDisabled = query.hide;
 
     const rowClasses = classNames('query-editor-row', {
@@ -464,23 +470,22 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                 </OperationRowHelp>
               )}
               {editor}
-              {/* Render drill down queries here */}
-              {drillDownQueries ? (
-                <div>
-                  {drillDownQueries.map((q, i) => {
-                    return this.renderDrilldownEditor(id, q, i);
-                  })}
-                </div>
-              ) : null}
-              <Button
-                variant="link"
-                icon="plus"
-                onClick={() => {
-                  onDrillDownQueriesChange(id, drillDownQueries ? [...drillDownQueries, {}] : [{}]);
-                }}
-              >
-                Add drill down query
-              </Button>
+              {drilldownDimensions.length > 0 && (
+                <>
+                  <Button variant="link" onClick={() => this.setState({ isDrilldownModalOpen: true })}>
+                    Modify drilldown queries
+                  </Button>
+                  <DrilldownQueriesModal
+                    id={id}
+                    drilldownQueries={drillDownQueries}
+                    drilldownDimensions={drilldownDimensions}
+                    onDrillDownQueriesChange={onDrillDownQueriesChange}
+                    renderDrilldownEditor={this.renderDrilldownEditor}
+                    isOpen={Boolean(isDrilldownModalOpen)}
+                    onDismiss={() => this.setState({ isDrilldownModalOpen: false })}
+                  />
+                </>
+              )}
             </ErrorBoundaryAlert>
             {data?.error && data.error.refId === query.refId && <QueryErrorAlert error={data.error} />}
             {visualization}
