@@ -1,4 +1,5 @@
 {
+  "commitMessagePrefix": "Dependencies:",
   "extends": [
     "config:base"
   ],
@@ -31,13 +32,13 @@
     "ora" // we should bump this once we move to esm modules
   ],
   "ignorePaths": ["packages/grafana-toolkit/package.json", "emails/**", "plugins-bundled/**", "**/mocks/**"],
-  "labels": ["area/frontend", "dependencies"],
+  "labels": ["add to changelog", "area/frontend", "dependencies"],
   "packageRules": [
     {
       "matchUpdateTypes": ["patch"],
       "excludePackagePatterns": ["@storybook"],
       "extends": ["schedule:monthly"],
-      "groupName": "Monthly patch updates"
+      "groupName": "Batched patch updates"
     },
     {
       "matchPackagePatterns": ["@storybook"],
