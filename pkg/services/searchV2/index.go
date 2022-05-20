@@ -69,11 +69,13 @@ func newDashboardIndex(dashLoader dashboardLoader, evStore eventStore, extender 
 }
 
 func (i *dashboardIndex) run(ctx context.Context) error {
-	fullReIndexTicker := time.NewTicker(5 * time.Minute)
-	defer fullReIndexTicker.Stop()
+	fullReIndexInterval := 5 * time.Minute
+	fullReIndexTimer := time.NewTimer(fullReIndexInterval)
+	defer fullReIndexTimer.Stop()
 
-	partialUpdateTicker := time.NewTicker(5 * time.Second)
-	defer partialUpdateTicker.Stop()
+	partialUpdateInterval := 5 * time.Second
+	partialUpdateTimer := time.NewTicker(partialUpdateInterval)
+	defer partialUpdateTimer.Stop()
 
 	var lastEventID int64
 	lastEvent, err := i.eventStore.GetLastEvent(ctx)
@@ -91,8 +93,9 @@ func (i *dashboardIndex) run(ctx context.Context) error {
 
 	for {
 		select {
-		case <-partialUpdateTicker.C:
+		case <-partialUpdateTimer.C:
 			lastEventID = i.applyIndexUpdates(ctx, lastEventID)
+			partialUpdateTimer.Reset(partialUpdateInterval)
 		case orgID := <-i.buildSignals:
 			i.mu.RLock()
 			_, ok := i.perOrgWriter[orgID]
@@ -103,10 +106,11 @@ func (i *dashboardIndex) run(ctx context.Context) error {
 			}
 			i.mu.RUnlock()
 			_, _ = i.buildOrgIndex(ctx, orgID)
-		case <-fullReIndexTicker.C:
+		case <-fullReIndexTimer.C:
 			started := time.Now()
 			i.reIndexFromScratch(ctx)
 			i.logger.Info("Full re-indexing finished", "fullReIndexElapsed", time.Since(started))
+			fullReIndexTimer.Reset(fullReIndexInterval)
 		case <-ctx.Done():
 			return ctx.Err()
 		}
