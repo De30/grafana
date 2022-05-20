@@ -202,6 +202,7 @@ export function applyFieldOverrides(options: ApplyFieldOverrideOptions): DataFra
         context.replaceVariables,
         options.timeZone,
         options.drilldownDimensions,
+        options.drilldownQueries,
         options.onApplyDrilldown
       );
     }
@@ -351,18 +352,19 @@ export const getLinksSupplier =
     replaceVariables: InterpolateFunction,
     timeZone?: TimeZone,
     drilldownDimensions?: DrilldownDimension[],
+    drilldownQueries?: Record<string, object[]>,
     onApplyDrilldown?: (dimensions: Array<{ dimension: string; value: any }>) => void
   ) =>
   (config: ValueLinkConfig): Array<LinkModel<Field>> => {
     const links: Array<LinkModel<Field>> = [];
-
-    if (drilldownDimensions && onApplyDrilldown) {
+    if (drilldownDimensions && drilldownQueries && onApplyDrilldown) {
       for (let i = 0; i < drilldownDimensions.length; i++) {
         const dimension = drilldownDimensions[i];
+        const query = drilldownQueries[frame.refId!][i];
         const dimIdx = i;
 
         // Should we use field.name or field display name instead?
-        if (dimension.name === field.name) {
+        if (dimension.name === field.name && query !== undefined) {
           links.push({
             onClick: () => {
               let dimmensionsToApply = [

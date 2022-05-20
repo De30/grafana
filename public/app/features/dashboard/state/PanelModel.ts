@@ -560,6 +560,10 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     return [];
   }
 
+  getDrilldownQueries(): Record<string, object[]> {
+    return this.drilldownQueries;
+  }
+
   getQueryRunner(): PanelQueryRunner {
     if (!this.queryRunner) {
       this.queryRunner = new PanelQueryRunner(this);

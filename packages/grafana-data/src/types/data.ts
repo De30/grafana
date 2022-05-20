@@ -177,5 +177,6 @@ export interface DataConfigSource {
   getTransformations: () => DataTransformerConfig[] | undefined;
   getFieldOverrideOptions: () => ApplyFieldOverrideOptions | undefined;
   getDrilldownDimensions?: () => DrilldownDimension[];
+  getDrilldownQueries?: () => Record<string, object[]>;
   snapshotData?: DataFrameDTO[];
 }

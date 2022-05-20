@@ -120,6 +120,7 @@ export interface ApplyFieldOverrideOptions {
   theme: GrafanaTheme2;
   timeZone?: TimeZone;
   drilldownDimensions?: DrilldownDimension[];
+  drilldownQueries?: Record<string, object[]>;
   onApplyDrilldown?: (drilldownDimensions: Array<{ dimension: string; value: any }>) => void;
 }
 

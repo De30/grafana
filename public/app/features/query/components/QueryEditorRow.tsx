@@ -46,7 +46,7 @@ interface Props<TQuery extends DataQuery> {
   id: string;
   index: number;
   dataSource: DataSourceInstanceSettings;
-  drilldownDimensions: DrilldownDimension[];
+  drilldownDimensions?: DrilldownDimension[];
 
   onChangeDataSource?: (dsSettings: DataSourceInstanceSettings) => void;
   renderHeaderExtras?: () => ReactNode;
@@ -285,6 +285,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
             onChange={(q) => {
               if (drillDownQueries) {
                 const newQueries = [...drillDownQueries];
+                q.refId = refId;
                 newQueries[i] = q;
                 onDrillDownQueriesChange(refId, newQueries);
               }
@@ -470,7 +471,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                 </OperationRowHelp>
               )}
               {editor}
-              {drilldownDimensions.length > 0 && (
+              {drilldownDimensions && drilldownDimensions.length > 0 && (
                 <>
                   <Button variant="link" onClick={() => this.setState({ isDrilldownModalOpen: true })}>
                     Modify drilldown queries

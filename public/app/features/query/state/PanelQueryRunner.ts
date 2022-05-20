@@ -152,12 +152,17 @@ export class PanelQueryRunner {
               drilldownDimensions = undefined;
             }
 
+            let drilldownQueries = this.dataConfigSource.getDrilldownQueries
+              ? this.dataConfigSource.getDrilldownQueries()
+              : undefined;
+
             processedData = {
               ...processedData,
               series: applyFieldOverrides({
                 timeZone: data.request?.timezone ?? 'browser',
                 data: processedData.series,
                 drilldownDimensions,
+                drilldownQueries,
                 onApplyDrilldown: (dimensions) => {
                   dispatch(applyDrillDownDimensions(dimensions));
                 },

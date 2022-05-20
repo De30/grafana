@@ -20,7 +20,7 @@ interface Props {
   queries: DataQuery[];
   drillDownQueries?: Record<string, object[]>;
   dsSettings: DataSourceInstanceSettings;
-  drilldownDimensions: DrilldownDimension[];
+  drilldownDimensions?: DrilldownDimension[];
 
   // Query editing
   onQueriesChange: (queries: DataQuery[]) => void;

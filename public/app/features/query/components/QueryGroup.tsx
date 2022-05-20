@@ -32,7 +32,7 @@ import { QueryGroupOptionsEditor } from './QueryGroupOptions';
 interface Props {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
-  drilldownDimensions: DrilldownDimension[];
+  drilldownDimensions?: DrilldownDimension[];
   onRunQueries: () => void;
   onOptionsChange: (options: QueryGroupOptions) => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
