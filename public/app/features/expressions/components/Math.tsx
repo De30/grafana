@@ -40,7 +40,13 @@ export const Math: FC<Props> = ({ labelWidth, onChange, query }) => {
         `}
       >
         <>
-          <TextArea value={query.expression} onChange={onExpressionChange} rows={5} placeholder={mathPlaceholder} />
+          <TextArea
+            value={query.expression}
+            onChange={onExpressionChange}
+            rows={5}
+            cols={10}
+            placeholder={mathPlaceholder}
+          />
           <Button color="primary" size="sm" onClick={() => toggleShowHelp()}>
             {showHelp === false ? 'Show' : 'Hide'} help
           </Button>
