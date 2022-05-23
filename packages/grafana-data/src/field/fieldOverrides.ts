@@ -374,6 +374,11 @@ export const getLinksSupplier =
                 },
               ];
 
+              //do we really need each of the former drilldown fields in the visualisation?
+              //I would assume we don't, in which case we need to calculate upward values
+              //differently or else onApplyDrilldown() is going to apply only the last dimension
+              //without the upward ones. This will crash the queries since the
+              //upward variables won't be set
               if (dimIdx > 0) {
                 const upwardDrilldownDimensions = drilldownDimensions.slice(0, dimIdx);
                 let upwardValues: any[] = [];

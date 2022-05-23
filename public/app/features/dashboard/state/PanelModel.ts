@@ -553,7 +553,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   }
 
   getDrilldownDimensions() {
-    if (this.drilldownDimensionsConfig) {
+    if (typeof this.drilldownDimensionsConfig === 'function') {
       return this.drilldownDimensionsConfig();
     }
 

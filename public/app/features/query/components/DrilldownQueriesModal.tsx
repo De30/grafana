@@ -63,7 +63,7 @@ export const DrilldownQueriesModal = ({
   return (
     <Modal className={styles.modal} title={title} isOpen={isOpen} onDismiss={onDismiss}>
       <div>
-        {drilldownQueries ? (
+        {drilldownQueries !== undefined && drilldownQueries.length > 0 ? (
           <div>
             {drilldownQueries
               .map((q: any, i: number) => (

@@ -78,6 +78,11 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   element: HTMLElement | null = null;
   angularScope: AngularQueryComponentScope<TQuery> | null = null;
   angularQueryEditor: AngularComponent | null = null;
+  angularDrilldownComponents: Array<{
+    element: HTMLElement | null;
+    angularScope: AngularQueryComponentScope<TQuery> | null;
+    angularQueryEditor: AngularComponent | null;
+  }> = [];
 
   state: State<TQuery> = {
     datasource: null,
@@ -90,23 +95,38 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
   componentDidMount() {
     this.loadDatasource();
+
+    this.props.drilldownDimensions?.map((item) => {
+      this.angularDrilldownComponents.push({
+        element: null,
+        angularScope: null,
+        angularQueryEditor: null,
+      });
+    });
   }
 
   componentWillUnmount() {
     if (this.angularQueryEditor) {
       this.angularQueryEditor.destroy();
     }
+
+    for (let i = 0; i < this.angularDrilldownComponents.length; i++) {
+      if (this.angularDrilldownComponents[i].angularQueryEditor) {
+        this.angularDrilldownComponents[i].angularQueryEditor?.destroy();
+        this.angularDrilldownComponents.splice(i, 1);
+      }
+    }
   }
 
-  getAngularQueryComponentScope(): AngularQueryComponentScope<TQuery> {
-    const { query, queries } = this.props;
+  getAngularQueryComponentScope(index?: number): AngularQueryComponentScope<TQuery> {
+    const { query, queries, drillDownQueries, onDrillDownQueriesChange } = this.props;
     const { datasource } = this.state;
     const panel = new PanelModel({ targets: queries });
     const dashboard = {} as DashboardModel;
 
     const me = this;
 
-    return {
+    const scope = {
       datasource: datasource,
       target: query,
       panel: panel,
@@ -130,6 +150,23 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
       events: this.props.eventBus || new EventBusSrv(),
       range: getTimeSrv().timeRange(),
     };
+
+    //return drilldown scope
+    if (index !== undefined) {
+      scope.target = drillDownQueries![index] as TQuery;
+      scope.refresh = () => {
+        if (drillDownQueries) {
+          const newQueries = [...drillDownQueries];
+          (drillDownQueries![index] as TQuery).refId = query.refId;
+          newQueries[index] = drillDownQueries![index];
+          onDrillDownQueriesChange(query.refId, newQueries);
+        }
+      };
+
+      return scope;
+    }
+
+    return scope;
   }
 
   getQueryDataSourceIdentifier(): string | null | undefined {
@@ -173,8 +210,30 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
       }
     }
 
-    // check if we need to load another datasource
+    this.props.drillDownQueries?.map((item, index) => {
+      if (
+        !this.angularDrilldownComponents[index].element ||
+        this.angularDrilldownComponents[index].angularQueryEditor
+      ) {
+        return;
+      }
+
+      this.renderDrilldownAngularQueryEditor(index);
+    });
+
+    this.angularDrilldownComponents
+      .filter((item) => item.element === null)
+      .map((item) => {
+        item.angularQueryEditor?.destroy();
+        item = {
+          element: null,
+          angularScope: null,
+          angularQueryEditor: null,
+        };
+      });
+
     if (datasource && loadedDataSourceIdentifier !== this.getQueryDataSourceIdentifier()) {
+      // check if we need to load another datasource
       if (this.angularQueryEditor) {
         this.angularQueryEditor.destroy();
         this.angularQueryEditor = null;
@@ -189,6 +248,32 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
     this.renderAngularQueryEditor();
   }
+
+  renderDrilldownAngularQueryEditor = (index: number) => {
+    if (!this.angularDrilldownComponents[index]) {
+      return;
+    }
+
+    if (!this.angularDrilldownComponents[index].element) {
+      return;
+    }
+
+    if (this.angularDrilldownComponents[index].angularQueryEditor) {
+      this.angularDrilldownComponents[index].angularQueryEditor!.destroy();
+      this.angularDrilldownComponents[index].angularQueryEditor = null;
+    }
+
+    const loader = getAngularLoader();
+    const template = '<plugin-component type="query-ctrl" />';
+    const scopeProps = { ctrl: this.getAngularQueryComponentScope(index) };
+
+    this.angularDrilldownComponents[index].angularQueryEditor = loader.load(
+      this.angularDrilldownComponents[index].element,
+      scopeProps,
+      template
+    );
+    this.angularDrilldownComponents[index].angularScope = scopeProps.ctrl;
+  };
 
   renderAngularQueryEditor = () => {
     if (!this.element) {
@@ -268,10 +353,18 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     const { app = CoreApp.PanelEditor, history, onDrillDownQueriesChange, drillDownQueries } = this.props;
     const { datasource, data } = this.state;
 
-    // TODO angular support
-    // if (datasource?.components?.QueryCtrl) {
-    //   return <div ref={(element) => (this.element = element)} />;
-    // }
+    if (datasource?.components?.QueryCtrl) {
+      if (this.angularDrilldownComponents[i].angularQueryEditor !== null) {
+        this.angularDrilldownComponents[i].angularQueryEditor?.destroy();
+        this.angularDrilldownComponents[i] = {
+          element: null,
+          angularScope: null,
+          angularQueryEditor: null,
+        };
+      }
+
+      return <div ref={(element) => (this.angularDrilldownComponents[i].element = element)} />;
+    }
 
     if (datasource) {
       let QueryEditor = this.getReactQueryEditor(datasource);
