@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AwsAuthType } from '@grafana/aws-sdk';
@@ -64,14 +64,20 @@ const setup = (propOverrides?: object) => {
 
   Object.assign(props, propOverrides);
 
-  return shallow(<ConfigEditor {...props} />);
+  return props;
 };
 
 describe('Render', () => {
-  it('should render component', () => {
-    const wrapper = setup();
+  (window as any).grafanaBootData = {
+    settings: {},
+  };
 
-    expect(wrapper).toMatchSnapshot();
+  it('should render component', () => {
+    const props = setup();
+    render(<ConfigEditor {...props} />);
+    const nameInput = screen.getByLabelText('Name');
+
+    expect(nameInput).toBeInTheDocument();
   });
 
   it('should disable access key id field', () => {
