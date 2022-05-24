@@ -1,7 +1,8 @@
+import { css, cx } from '@emotion/css';
 import React from 'react';
+
 import { GrafanaTheme2 } from '@grafana/data';
 import { Icon, IconName, Link, useTheme2 } from '@grafana/ui';
-import { css, cx } from '@emotion/css';
 
 export interface Props {
   icon?: IconName;
@@ -30,10 +31,10 @@ export function NavBarMenuItem({
   const theme = useTheme2();
   const styles = getStyles(theme, isActive);
   const elStyle = cx(styles.element, styleOverrides);
-
   const linkContent = (
     <div className={styles.linkContent}>
-      <span>{text}</span>
+      {icon && <Icon data-testid="dropdown-child-icon" name={icon} />}
+      <div className={styles.linkText}>{text}</div>
       {target === '_blank' && (
         <Icon data-testid="external-link-icon" name="external-link-alt" className={styles.externalLinkIcon} />
       )}
@@ -78,10 +79,15 @@ NavBarMenuItem.displayName = 'NavBarMenuItem';
 
 const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
   linkContent: css({
-    display: 'grid',
-    placeItems: 'center',
-    gridAutoFlow: 'column',
+    alignItems: 'center',
+    display: 'flex',
     gap: '0.5rem',
+    width: '100%',
+  }),
+  linkText: css({
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
   }),
   externalLinkIcon: css({
     color: theme.colors.text.secondary,
@@ -96,9 +102,10 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
     flex: 1,
     fontSize: 'inherit',
     height: '100%',
-    padding: '5px 12px 5px 10px',
+    overflowWrap: 'anywhere',
+    padding: theme.spacing(0.5, 2),
     textAlign: 'left',
-    whiteSpace: 'nowrap',
+    width: '100%',
     '&:hover, &:focus-visible': {
       backgroundColor: theme.colors.action.hover,
       color: theme.colors.text.primary,

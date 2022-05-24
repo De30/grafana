@@ -1,8 +1,8 @@
 +++
-title = "Alertmanager"
+aliases = ["/docs/grafana/latest/datasources/alertmanager/", "/docs/grafana/latest/features/datasources/alertmanager/"]
 description = "Guide for using Alertmanager in Grafana"
 keywords = ["grafana", "prometheus", "guide"]
-aliases = ["/docs/grafana/latest/features/datasources/alertmanager"]
+title = "Alertmanager"
 weight = 150
 +++
 
@@ -29,7 +29,6 @@ datasources:
     url: http://localhost:9093
     access: proxy
     jsonData:
-      implementation: 'prometheus' # alternatively 'mimir'
     # optionally
     basicAuth: true
     basicAuthUser: my_user
