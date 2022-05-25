@@ -27,6 +27,7 @@ interface Props {
   onAddQuery: (query: DataQuery) => void;
   onRunQueries: () => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
+  onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
 
   // Query Response Data
   data: PanelData;
@@ -145,6 +146,7 @@ export class QueryEditorRows extends PureComponent<Props> {
       onDrillDownQueriesChange,
       drillDownQueries,
       drilldownDimensions,
+      onLocalDrilldownDimensionsUpdate,
     } = this.props;
 
     return (
@@ -175,6 +177,7 @@ export class QueryEditorRows extends PureComponent<Props> {
                         onAddQuery={this.props.onAddQuery}
                         onRunQuery={this.props.onRunQueries}
                         onDrillDownQueriesChange={onDrillDownQueriesChange}
+                        onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
                         drilldownDimensions={drilldownDimensions}
                         queries={queries}
                         app={app}

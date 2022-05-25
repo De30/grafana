@@ -55,6 +55,7 @@ interface Props<TQuery extends DataQuery> {
   onChange: (query: TQuery) => void;
   onRunQuery: () => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
+  onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
 
   visualization?: ReactNode;
   hideDisableQuery?: boolean;
@@ -525,8 +526,16 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   render() {
-    const { query, id, index, visualization, onDrillDownQueriesChange, drillDownQueries, drilldownDimensions } =
-      this.props;
+    const {
+      query,
+      id,
+      index,
+      visualization,
+      onDrillDownQueriesChange,
+      onLocalDrilldownDimensionsUpdate,
+      drillDownQueries,
+      drilldownDimensions,
+    } = this.props;
     const { datasource, showingHelp, data, isDrilldownModalOpen } = this.state;
     const isDisabled = query.hide;
 
@@ -575,6 +584,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                     drilldownDimensions={drilldownDimensions}
                     onDrillDownQueriesChange={onDrillDownQueriesChange}
                     renderDrilldownEditor={this.renderDrilldownEditor}
+                    onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
                     isOpen={Boolean(isDrilldownModalOpen)}
                     onDismiss={() => this.setState({ isDrilldownModalOpen: false })}
                   />

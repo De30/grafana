@@ -144,6 +144,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   panels?: PanelModel[];
   declare targets: DataQuery[];
   declare drilldownQueries: Record<string, object[]>;
+  declare localDrilldownDimensions: DrilldownDimension[];
   transformations?: DataTransformerConfig[];
   datasource: DataSourceRef | null = null;
   thresholds?: any;
@@ -303,20 +304,27 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   runAllPanelQueries(dashboardId: number, dashboardTimezone: string, timeData: TimeOverrideResult, width: number) {
     let queriesToRun: DataQuery[] = [];
     let hasDrilldown = false;
+    let appliedDrilldownDimensions = null;
 
-    const appliedDrilldownDimensions: DrilldownVariable = getTemplateSrv()
-      .getVariables()
-      .find((val) => val.name === '__drilldown') as DrilldownVariable;
+    if (this.localDrilldownDimensions && this.localDrilldownDimensions.length) {
+      appliedDrilldownDimensions = this.localDrilldownDimensions;
+    } else {
+      const drilldownVar: DrilldownVariable = getTemplateSrv()
+        .getVariables()
+        .find((val) => val.name === '__drilldown') as DrilldownVariable;
+
+      appliedDrilldownDimensions = drilldownVar.current.value;
+    }
 
     if (
       this.drilldownQueries &&
       Object.keys(this.drilldownQueries).length > 0 &&
-      appliedDrilldownDimensions.current.value.length > 0
+      appliedDrilldownDimensions!.length > 0
     ) {
       // TODO:  Given the drilldown template variable value select which query to run.
       for (const query of this.targets) {
         const refId = query.refId;
-        const index = appliedDrilldownDimensions.current.value.length - 1;
+        const index = appliedDrilldownDimensions!.length - 1;
 
         if (this.drilldownQueries[refId][index]) {
           hasDrilldown = true;
@@ -548,11 +556,19 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     return this.plugin?.dataSupport ?? { annotations: false, alertStates: false };
   }
 
+  updateLocalDrilldownDimensions(newDimensions: DrilldownDimension[]) {
+    this.localDrilldownDimensions = newDimensions;
+  }
+
   setDrilldownDimensions(config: () => DrilldownDimension[]) {
     this.drilldownDimensionsConfig = config;
   }
 
   getDrilldownDimensions() {
+    if (this.localDrilldownDimensions && this.localDrilldownDimensions.length) {
+      return this.localDrilldownDimensions;
+    }
+
     if (typeof this.drilldownDimensionsConfig === 'function') {
       return this.drilldownDimensionsConfig();
     }
