@@ -37,6 +37,7 @@ interface Props {
   onOptionsChange: (options: QueryGroupOptions) => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
   onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
+  hasLocalDrilldownDimensions: () => boolean;
   onOpenQueryInspector?: () => void;
 }
 
@@ -269,8 +270,14 @@ export class QueryGroup extends PureComponent<Props, State> {
   };
 
   renderQueries(dsSettings: DataSourceInstanceSettings) {
-    const { onRunQueries, onDrillDownQueriesChange, onLocalDrilldownDimensionsUpdate, options, drilldownDimensions } =
-      this.props;
+    const {
+      onRunQueries,
+      onDrillDownQueriesChange,
+      onLocalDrilldownDimensionsUpdate,
+      hasLocalDrilldownDimensions,
+      options,
+      drilldownDimensions,
+    } = this.props;
     const { data, queries } = this.state;
 
     if (isSharedDashboardQuery(dsSettings.name)) {
@@ -293,6 +300,7 @@ export class QueryGroup extends PureComponent<Props, State> {
           onQueriesChange={this.onQueriesChange}
           onAddQuery={this.onAddQuery}
           onRunQueries={onRunQueries}
+          hasLocalDrilldownDimensions={hasLocalDrilldownDimensions}
           onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
           onDrillDownQueriesChange={onDrillDownQueriesChange}
           drilldownDimensions={drilldownDimensions}

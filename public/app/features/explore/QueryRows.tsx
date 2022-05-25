@@ -79,6 +79,7 @@ export const QueryRows = ({ exploreId }: Props) => {
       eventBus={eventBridge}
       // TODO: fix this empty callback, not necessary in this context!
       onDrillDownQueriesChange={() => {}}
+      hasLocalDrilldownDimensions={() => false}
     />
   );
 };

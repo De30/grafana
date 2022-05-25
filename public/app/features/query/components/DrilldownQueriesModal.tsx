@@ -2,18 +2,19 @@ import { css } from '@emotion/css';
 import React, { useState } from 'react';
 
 import { DrilldownDimension, GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { Button, Field, HorizontalGroup, Icon, Input, Modal, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
+import { Button, HorizontalGroup, Icon, Modal, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
+
+import { DrilldownPanelScope } from './drilldown/DrilldownPanelScope';
 
 export interface DrilldownQueriesModalProps {
   id: string;
   isOpen: boolean;
   drilldownQueries: any[] | undefined;
   drilldownDimensions: DrilldownDimension[];
-  isLocalDrilldown?: boolean;
   renderDrilldownEditor: (arg1: string, arg2: any, arg3: number) => JSX.Element | null;
   onDrillDownQueriesChange: (arg1: string, arg2: object[]) => void;
+  hasLocalDrilldownDimensions: () => boolean;
   onDismiss: () => void;
-  onLocalDrilldownChange?: (val: boolean) => void;
   onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
 }
 
@@ -30,11 +31,14 @@ export const DrilldownQueriesModal = ({
   renderDrilldownEditor,
   onDrillDownQueriesChange,
   onLocalDrilldownDimensionsUpdate,
+  hasLocalDrilldownDimensions,
   onDismiss,
 }: DrilldownQueriesModalProps): JSX.Element => {
   const styles = useStyles2(getStyles);
   const title = 'Drilldown queries';
-  const [hierarchyScope, setHierarchyScope] = useState(DrilldownHierarchyScope.Dashboard);
+  const [hierarchyScope, setHierarchyScope] = useState(
+    hasLocalDrilldownDimensions() ? DrilldownHierarchyScope.Panel : DrilldownHierarchyScope.Dashboard
+  );
 
   const onAddDrilldownClick = () => {
     if (drilldownQueries !== undefined && drilldownQueries.length === drilldownDimensions.length) {
@@ -45,9 +49,9 @@ export const DrilldownQueriesModal = ({
   };
 
   const onDeleteDimension = (index: number) => {
-    const newDimensions = drilldownQueries?.filter((item, i) => i !== index);
+    const newQueries = drilldownQueries?.filter((item, i) => i !== index);
 
-    onDrillDownQueriesChange(id, newDimensions ? [...newDimensions] : []);
+    onDrillDownQueriesChange(id, newQueries ? [...newQueries] : []);
   };
 
   const renderEditorHeader = (dimension: string, index: number) => {
@@ -72,6 +76,10 @@ export const DrilldownQueriesModal = ({
 
   const onDimensionsTypeChange = (value: DrilldownHierarchyScope) => {
     setHierarchyScope(value);
+    if (onLocalDrilldownDimensionsUpdate) {
+      onLocalDrilldownDimensionsUpdate([]);
+    }
+    onDrillDownQueriesChange(id, []);
   };
 
   const options: Array<SelectableValue<DrilldownHierarchyScope>> = [
@@ -113,7 +121,14 @@ export const DrilldownQueriesModal = ({
         </>
       )}
       {hierarchyScope === DrilldownHierarchyScope.Panel && (
-        <DrilldownPanelHierarchy onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate} />
+        <DrilldownPanelScope
+          onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
+          renderDrilldownEditor={renderDrilldownEditor}
+          onDrillDownQueriesChange={onDrillDownQueriesChange}
+          id={id}
+          drilldownDimensions={drilldownDimensions}
+          drilldownQueries={drilldownQueries}
+        />
       )}
     </Modal>
   );
@@ -124,53 +139,3 @@ const getStyles = (theme: GrafanaTheme2) => ({
     width: 90%;
   `,
 });
-
-interface DrilldownPanelHierarchyProps {
-  onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
-}
-
-const DrilldownPanelHierarchy = ({ onLocalDrilldownDimensionsUpdate }: DrilldownPanelHierarchyProps) => {
-  const [hierarchyDimensions, setHierarchyDimensions] = useState<Array<string | null>>([]);
-
-  const onAddPanelDrilldownQuery = () => {
-    const newHierarchy = [...hierarchyDimensions, null];
-
-    setHierarchyDimensions(newHierarchy);
-  };
-
-  const onDimensionChange = (index: number) => (e: React.FormEvent<HTMLInputElement>) => {
-    const nextHierarchy = hierarchyDimensions.slice();
-
-    nextHierarchy[index] = e.currentTarget.value;
-
-    setHierarchyDimensions(nextHierarchy);
-  };
-
-  const onSavePanelDimensions = () => {
-    if (onLocalDrilldownDimensionsUpdate) {
-      onLocalDrilldownDimensionsUpdate(hierarchyDimensions);
-    }
-  };
-
-  return (
-    <>
-      <div>
-        {hierarchyDimensions.map((dimension, index) => {
-          return (
-            <Field key={dimension + '_' + index} label="Dimension name">
-              <Input required defaultValue={dimension ?? ''} onBlur={onDimensionChange(index)} />
-            </Field>
-          );
-        })}
-        <Button variant="primary" icon="plus" onClick={onAddPanelDrilldownQuery}>
-          Add drilldown query
-        </Button>
-      </div>
-      <Modal.ButtonRow>
-        <Button variant="primary" icon="plus" onClick={onSavePanelDimensions}>
-          Save
-        </Button>
-      </Modal.ButtonRow>
-    </>
-  );
-};

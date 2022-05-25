@@ -91,6 +91,10 @@ export class PanelEditorQueries extends PureComponent<Props> {
     this.props.panel.updateLocalDrilldownDimensions(localDrilldownDimensions);
   };
 
+  onLocalDrilldownDimensionsCheck = () => {
+    return this.props.panel.hasLocalDrilldownDimensions();
+  };
+
   render() {
     const { panel } = this.props;
 
@@ -112,6 +116,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
         onOptionsChange={this.onOptionsChange}
         onDrillDownQueriesChange={this.onDrillDownQueriesChange}
         onLocalDrilldownDimensionsUpdate={this.onUpdateLocalDrilldownDimensions}
+        hasLocalDrilldownDimensions={this.onLocalDrilldownDimensionsCheck}
         drilldownDimensions={drilldownDimensions}
       />
     );

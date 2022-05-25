@@ -564,6 +564,10 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     this.drilldownDimensionsConfig = config;
   }
 
+  hasLocalDrilldownDimensions() {
+    return Boolean(this.localDrilldownDimensions.length);
+  }
+
   getDrilldownDimensions() {
     if (this.localDrilldownDimensions && this.localDrilldownDimensions.length) {
       return this.localDrilldownDimensions;

@@ -103,6 +103,7 @@ export const QueryWrapper: FC<Props> = ({
         hideDisableQuery={true}
         // TODO: fix this empty callback, not necessary in this context!
         onDrillDownQueriesChange={() => {}}
+        hasLocalDrilldownDimensions={() => false}
       />
     </div>
   );

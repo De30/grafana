@@ -95,6 +95,7 @@ export const TestStuffPage: FC = () => {
             onOptionsChange={onOptionsChange}
             // TODO: fix this empty callback, not necessary in this context!
             onDrillDownQueriesChange={() => {}}
+            hasLocalDrilldownDimensions={() => false}
           />
         </div>
         <div style={{ display: 'flex', gap: '1em' }}>
