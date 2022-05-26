@@ -9,6 +9,7 @@ import { useStyles2, Field, Input, InputControl, Label, Tooltip, Icon } from '@g
 import { RuleFormType, RuleFormValues } from '../../types/rule-form';
 
 import AnnotationsField from './AnnotationsField';
+import { ConnectPanel } from './ConnectPanel';
 import { GroupAndNamespaceFields } from './GroupAndNamespaceFields';
 import LabelsField from './LabelsField';
 import { RuleEditorSection } from './RuleEditorSection';
@@ -130,6 +131,12 @@ export const DetailsStep: FC = () => {
           </Field>
         </div>
       )}
+      <Field
+        label="Connect to panel"
+        description="Connect this alert rule to a panel on a dashboard to show the state of this alert rule"
+      >
+        <InputControl name="panel" render={() => <ConnectPanel />} />
+      </Field>
       {type !== RuleFormType.cloudRecording && <AnnotationsField />}
       <LabelsField />
     </RuleEditorSection>
