@@ -145,8 +145,8 @@ export class PanelQueryRunner {
           if (fieldConfig != null && (isFirstPacket || !streamingPacketWithSameSchema)) {
             lastConfigRev = this.dataConfigSource.configRev!;
 
-            let drilldownDimensions = this.dataConfigSource.getDrilldownDimensions
-              ? this.dataConfigSource.getDrilldownDimensions()
+            let drilldownDimensions = this.dataConfigSource.getDashboardDrilldownDimensions
+              ? this.dataConfigSource.getDashboardDrilldownDimensions()
               : undefined;
             if (drilldownDimensions?.length === 0) {
               drilldownDimensions = undefined;

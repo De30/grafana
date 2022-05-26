@@ -176,7 +176,7 @@ export interface DataConfigSource {
   getDataSupport: () => PanelPluginDataSupport;
   getTransformations: () => DataTransformerConfig[] | undefined;
   getFieldOverrideOptions: () => ApplyFieldOverrideOptions | undefined;
-  getDrilldownDimensions?: () => DrilldownDimension[];
+  getDashboardDrilldownDimensions?: () => DrilldownDimension[];
   getDrilldownQueries?: () => Record<string, object[]>;
   snapshotData?: DataFrameDTO[];
 }

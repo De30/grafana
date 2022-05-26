@@ -33,11 +33,11 @@ interface Props {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
   drilldownDimensions?: DrilldownDimension[];
+  localDrilldownDimensions?: DrilldownDimension[];
   onRunQueries: () => void;
   onOptionsChange: (options: QueryGroupOptions) => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
   onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
-  hasLocalDrilldownDimensions: () => boolean;
   onOpenQueryInspector?: () => void;
 }
 
@@ -274,7 +274,7 @@ export class QueryGroup extends PureComponent<Props, State> {
       onRunQueries,
       onDrillDownQueriesChange,
       onLocalDrilldownDimensionsUpdate,
-      hasLocalDrilldownDimensions,
+      localDrilldownDimensions,
       options,
       drilldownDimensions,
     } = this.props;
@@ -300,7 +300,7 @@ export class QueryGroup extends PureComponent<Props, State> {
           onQueriesChange={this.onQueriesChange}
           onAddQuery={this.onAddQuery}
           onRunQueries={onRunQueries}
-          hasLocalDrilldownDimensions={hasLocalDrilldownDimensions}
+          localDrilldownDimensions={localDrilldownDimensions}
           onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
           onDrillDownQueriesChange={onDrillDownQueriesChange}
           drilldownDimensions={drilldownDimensions}

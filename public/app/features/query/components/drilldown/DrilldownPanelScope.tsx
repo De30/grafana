@@ -53,12 +53,12 @@ export const DrilldownPanelScope = ({
       <div>
         {hierarchyDimensions.map((dimension, index) => {
           return (
-            <>
-              <Field key={dimension + '_' + index} label="Dimension name">
+            <div key={dimension + '_' + index + 'ads'}>
+              <Field label="Dimension name">
                 <Input required defaultValue={dimension ? dimension.name : ''} onBlur={onDimensionChange(index)} />
               </Field>
               {renderDrilldownEditor(id, drilldownQueries ? drilldownQueries[index] : null, index)}
-            </>
+            </div>
           );
         })}
         <Button variant="primary" icon="plus" onClick={onAddPanelDrilldownQuery}>

@@ -11,9 +11,9 @@ export interface DrilldownQueriesModalProps {
   isOpen: boolean;
   drilldownQueries: any[] | undefined;
   drilldownDimensions: DrilldownDimension[];
+  localDrilldownDimensions?: DrilldownDimension[];
   renderDrilldownEditor: (arg1: string, arg2: any, arg3: number) => JSX.Element | null;
   onDrillDownQueriesChange: (arg1: string, arg2: object[]) => void;
-  hasLocalDrilldownDimensions: () => boolean;
   onDismiss: () => void;
   onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
 }
@@ -28,16 +28,18 @@ export const DrilldownQueriesModal = ({
   isOpen,
   drilldownQueries,
   drilldownDimensions,
+  localDrilldownDimensions,
   renderDrilldownEditor,
   onDrillDownQueriesChange,
   onLocalDrilldownDimensionsUpdate,
-  hasLocalDrilldownDimensions,
   onDismiss,
 }: DrilldownQueriesModalProps): JSX.Element => {
   const styles = useStyles2(getStyles);
   const title = 'Drilldown queries';
   const [hierarchyScope, setHierarchyScope] = useState(
-    hasLocalDrilldownDimensions() ? DrilldownHierarchyScope.Panel : DrilldownHierarchyScope.Dashboard
+    localDrilldownDimensions !== undefined && localDrilldownDimensions.length
+      ? DrilldownHierarchyScope.Panel
+      : DrilldownHierarchyScope.Dashboard
   );
 
   const onAddDrilldownClick = () => {
@@ -120,13 +122,13 @@ export const DrilldownQueriesModal = ({
           </Modal.ButtonRow>
         </>
       )}
-      {hierarchyScope === DrilldownHierarchyScope.Panel && (
+      {localDrilldownDimensions !== undefined && hierarchyScope === DrilldownHierarchyScope.Panel && (
         <DrilldownPanelScope
           onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
           renderDrilldownEditor={renderDrilldownEditor}
           onDrillDownQueriesChange={onDrillDownQueriesChange}
           id={id}
-          drilldownDimensions={drilldownDimensions}
+          drilldownDimensions={localDrilldownDimensions}
           drilldownQueries={drilldownQueries}
         />
       )}

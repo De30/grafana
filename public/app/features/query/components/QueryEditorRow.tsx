@@ -47,6 +47,7 @@ interface Props<TQuery extends DataQuery> {
   index: number;
   dataSource: DataSourceInstanceSettings;
   drilldownDimensions?: DrilldownDimension[];
+  localDrilldownDimensions?: DrilldownDimension[];
 
   onChangeDataSource?: (dsSettings: DataSourceInstanceSettings) => void;
   renderHeaderExtras?: () => ReactNode;
@@ -56,7 +57,6 @@ interface Props<TQuery extends DataQuery> {
   onRunQuery: () => void;
   onDrillDownQueriesChange: (refId: string, drillDownQueries: object[]) => void;
   onLocalDrilldownDimensionsUpdate?: (newDimensions: any) => void;
-  hasLocalDrilldownDimensions: () => boolean;
 
   visualization?: ReactNode;
   hideDisableQuery?: boolean;
@@ -98,13 +98,20 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   componentDidMount() {
     this.loadDatasource();
 
-    this.props.drilldownDimensions?.map((item) => {
-      this.angularDrilldownComponents.push({
-        element: null,
-        angularScope: null,
-        angularQueryEditor: null,
-      });
-    });
+    let drilldownLength =
+      this.props.localDrilldownDimensions && this.props.localDrilldownDimensions.length > 0
+        ? this.props.localDrilldownDimensions.length
+        : this.props.drilldownDimensions?.length;
+
+    if (drilldownLength) {
+      for (let i = 0; i < 1; i++) {
+        this.angularDrilldownComponents.push({
+          element: null,
+          angularScope: null,
+          angularQueryEditor: null,
+        });
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -212,11 +219,8 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
       }
     }
 
-    this.props.drillDownQueries?.map((item, index) => {
-      if (
-        !this.angularDrilldownComponents[index].element ||
-        this.angularDrilldownComponents[index].angularQueryEditor
-      ) {
+    this.angularDrilldownComponents.map((item, index) => {
+      if (!item.element || item.angularQueryEditor) {
         return;
       }
 
@@ -356,7 +360,13 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     const { datasource, data } = this.state;
 
     if (datasource?.components?.QueryCtrl) {
-      if (this.angularDrilldownComponents[i].angularQueryEditor !== null) {
+      if (this.angularDrilldownComponents[i] === undefined) {
+        this.angularDrilldownComponents.push({
+          element: null,
+          angularScope: null,
+          angularQueryEditor: null,
+        });
+      } else if (this.angularDrilldownComponents[i].angularQueryEditor !== null) {
         this.angularDrilldownComponents[i].angularQueryEditor?.destroy();
         this.angularDrilldownComponents[i] = {
           element: null,
@@ -536,7 +546,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
       onLocalDrilldownDimensionsUpdate,
       drillDownQueries,
       drilldownDimensions,
-      hasLocalDrilldownDimensions,
+      localDrilldownDimensions,
     } = this.props;
     const { datasource, showingHelp, data, isDrilldownModalOpen } = this.state;
     const isDisabled = query.hide;
@@ -586,7 +596,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                     drilldownDimensions={drilldownDimensions}
                     onDrillDownQueriesChange={onDrillDownQueriesChange}
                     renderDrilldownEditor={this.renderDrilldownEditor}
-                    hasLocalDrilldownDimensions={hasLocalDrilldownDimensions}
+                    localDrilldownDimensions={localDrilldownDimensions}
                     onLocalDrilldownDimensionsUpdate={onLocalDrilldownDimensionsUpdate}
                     isOpen={Boolean(isDrilldownModalOpen)}
                     onDismiss={() => this.setState({ isDrilldownModalOpen: false })}
