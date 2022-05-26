@@ -26,11 +26,6 @@ export const DrilldownPanelScope = ({
     const newHierarchy = [...hierarchyDimensions, null];
 
     setHierarchyDimensions(newHierarchy);
-
-    if (drilldownQueries !== undefined) {
-      return;
-    }
-
     onDrillDownQueriesChange(id, drilldownQueries ? [...drilldownQueries, {}] : [{}]);
   };
 
@@ -57,7 +52,7 @@ export const DrilldownPanelScope = ({
               <Field label="Dimension name">
                 <Input required defaultValue={dimension ? dimension.name : ''} onBlur={onDimensionChange(index)} />
               </Field>
-              {renderDrilldownEditor(id, drilldownQueries ? drilldownQueries[index] : null, index)}
+              {renderDrilldownEditor(id, drilldownQueries ? drilldownQueries[index] : {}, index)}
             </div>
           );
         })}

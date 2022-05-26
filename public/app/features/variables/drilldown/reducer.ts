@@ -26,9 +26,16 @@ export const drilldownVariableSlice = createSlice({
         value: { ...instanceState.current.value, [action.payload.data.key]: action.payload.data.value },
       };
     },
+
+    resetDrilldownVariable: (state: VariablesState, action: PayloadAction<VariablePayload<void>>) => {
+      const instanceState = getInstanceState<DrilldownVariable>(state, action.payload.id);
+      instanceState.current = {
+        value: {},
+      };
+    },
   },
 });
 
 export const drilldownVariableReducer = drilldownVariableSlice.reducer;
 
-export const { updateDrilldownVariable } = drilldownVariableSlice.actions;
+export const { updateDrilldownVariable, resetDrilldownVariable } = drilldownVariableSlice.actions;

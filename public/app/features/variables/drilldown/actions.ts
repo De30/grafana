@@ -7,7 +7,7 @@ import { getLastKey, getVariablesState, getVariable } from '../state/selectors';
 import { KeyedVariableIdentifier } from '../state/types';
 import { toKeyedVariableIdentifier, toVariablePayload } from '../utils';
 
-import { updateDrilldownVariable } from './reducer';
+import { resetDrilldownVariable, updateDrilldownVariable } from './reducer';
 
 interface ApplyDrillDownDimensionsDependencies {
   templateSrv: TemplateSrv;
@@ -38,6 +38,20 @@ export const applyDrillDownDimensions = (
         updateDrilldownVariable(toVariablePayload<UpdateDrilldownVariablePayload>(identifier, options))
       )
     );
+    await dispatch(variableUpdated(toKeyedVariableIdentifier(variable), true));
+  };
+};
+
+export const resetDrillDownDimensions = (): ThunkResult<void> => {
+  return async (dispatch, getState) => {
+    const key = getLastKey(getState());
+
+    const templatingState = getVariablesState(key, getState());
+    const drilldownState = templatingState.variables['__drilldown'];
+    const identifier: KeyedVariableIdentifier = toKeyedVariableIdentifier(drilldownState);
+    const variable = getVariable(identifier, getState());
+    dispatch(toKeyedAction(key, resetDrilldownVariable(toVariablePayload(identifier))));
+
     await dispatch(variableUpdated(toKeyedVariableIdentifier(variable), true));
   };
 };

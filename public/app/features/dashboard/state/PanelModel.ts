@@ -309,12 +309,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       .getVariables()
       .find((val) => val.name === '__drilldown') as DrilldownVariable;
 
-    const appliedDrilldownDimensions = drilldownVar.current.value['dashboard'];
+    let appliedDrilldownDimensions = drilldownVar.current.value['dashboard'];
+
+    if (this.panelDrilldownDimensions) {
+      appliedDrilldownDimensions = drilldownVar.current.value[this.id];
+    }
 
     if (
       this.drilldownQueries &&
       Object.keys(this.drilldownQueries).length > 0 &&
-      appliedDrilldownDimensions!.length > 0
+      appliedDrilldownDimensions?.length > 0
     ) {
       // TODO:  Given the drilldown template variable value select which query to run.
       for (const query of this.targets) {
@@ -349,7 +353,13 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       timeInfo: timeData.timeInfo,
       maxDataPoints: this.maxDataPoints || Math.floor(width),
       minInterval: this.interval,
-      scopedVars: this.scopedVars,
+      scopedVars: {
+        ...this.scopedVars,
+        __drilldown: {
+          value: appliedDrilldownDimensions,
+          text: '',
+        },
+      },
       cacheTimeout: this.cacheTimeout,
 
       // if there are any drill down queries executed, we skip applying the transformations

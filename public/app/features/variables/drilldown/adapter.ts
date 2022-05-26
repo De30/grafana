@@ -7,7 +7,7 @@ import { VariableEditorProps } from '../editor/types';
 import { DrilldownVariable, initialVariableModelState, VariableHide } from '../types';
 
 import { DrilldownPicker } from './DrilldownPicker';
-import { applyDrillDownDimensions } from './actions';
+import { applyDrillDownDimensions, resetDrillDownDimensions } from './actions';
 import { drilldownVariableReducer } from './reducer';
 
 export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVariable> => {
@@ -32,13 +32,17 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       return;
     },
     setValueFromUrl: async (variable, urlValue) => {
-      //TODO Decide on a better base64 encoder
-      const appliedDrilldownDimensions = JSON.parse(atob(urlValue as string));
-      const promises = Object.keys(appliedDrilldownDimensions.value).map((key: string) => {
-        return dispatch(applyDrillDownDimensions({ key: key, value: appliedDrilldownDimensions.value[key] }));
-      });
+      if (urlValue) {
+        const appliedDrilldownDimensions = JSON.parse(atob(urlValue as string));
+        const promises = Object.keys(appliedDrilldownDimensions.value).map((key: string) => {
+          return dispatch(applyDrillDownDimensions({ key: key, value: appliedDrilldownDimensions.value[key] }));
+        });
 
-      await Promise.all(promises);
+        await Promise.all(promises);
+      } else {
+        return dispatch(resetDrillDownDimensions());
+      }
+      //TODO Decide on a better base64 encoder
     },
     updateOptions: async (variable) => {
       return;
@@ -47,7 +51,23 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       return {};
     },
     getValueForUrl: (variable) => {
-      //TODO Decide on a better base64 encoder
+      const {
+        current: { value },
+      } = variable;
+
+      let hasAnyDimensionsApplied = false;
+
+      for (const [_, dim] of Object.entries(value)) {
+        if (dim && dim.length > 0) {
+          hasAnyDimensionsApplied = true;
+          break;
+        }
+      }
+
+      if (!hasAnyDimensionsApplied) {
+        return '';
+      }
+
       return btoa(JSON.stringify(variable.current));
     },
   };
