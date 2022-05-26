@@ -9,14 +9,17 @@ import { toKeyedVariableIdentifier, toVariablePayload } from '../utils';
 
 import { updateDrilldownVariable } from './reducer';
 
-type DrilldownDimensionOptions = Array<{ dimension: string; value: any }>;
-
 interface ApplyDrillDownDimensionsDependencies {
   templateSrv: TemplateSrv;
 }
 
+export interface UpdateDrilldownVariablePayload {
+  key: string;
+  value: Array<{ dimension: string; value: string }>;
+}
+
 export const applyDrillDownDimensions = (
-  options: DrilldownDimensionOptions,
+  options: UpdateDrilldownVariablePayload,
   dependencies: ApplyDrillDownDimensionsDependencies = {
     templateSrv: getTemplateSrv(),
   }
@@ -32,7 +35,7 @@ export const applyDrillDownDimensions = (
     dispatch(
       toKeyedAction(
         key,
-        updateDrilldownVariable(toVariablePayload<Array<{ dimension: string; value: string }>>(identifier, options))
+        updateDrilldownVariable(toVariablePayload<UpdateDrilldownVariablePayload>(identifier, options))
       )
     );
     await dispatch(variableUpdated(toKeyedVariableIdentifier(variable), true));

@@ -4,11 +4,13 @@ import { getInstanceState } from '../state/selectors';
 import { initialVariablesState, VariablePayload, VariablesState } from '../state/types';
 import { DrilldownVariable, initialVariableModelState, VariableHide } from '../types';
 
+import { UpdateDrilldownVariablePayload } from './actions';
+
 export const initialDrilldownVariableModelState: DrilldownVariable = {
   ...initialVariableModelState,
   type: 'drilldown',
   hide: VariableHide.dontHide,
-  current: { value: [] },
+  current: { value: { dashboard: [] } },
 };
 
 export const drilldownVariableSlice = createSlice({
@@ -17,10 +19,12 @@ export const drilldownVariableSlice = createSlice({
   reducers: {
     updateDrilldownVariable: (
       state: VariablesState,
-      action: PayloadAction<VariablePayload<Array<{ dimension: string; value: string }>>>
+      action: PayloadAction<VariablePayload<UpdateDrilldownVariablePayload>>
     ) => {
       const instanceState = getInstanceState<DrilldownVariable>(state, action.payload.id);
-      instanceState.current = { value: action.payload.data };
+      instanceState.current = {
+        value: { ...instanceState.current.value, [action.payload.data.key]: action.payload.data.value },
+      };
     },
   },
 });

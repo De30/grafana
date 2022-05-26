@@ -145,11 +145,10 @@ export class PanelQueryRunner {
           if (fieldConfig != null && (isFirstPacket || !streamingPacketWithSameSchema)) {
             lastConfigRev = this.dataConfigSource.configRev!;
 
-            let drilldownDimensions = this.dataConfigSource.getDashboardDrilldownDimensions
-              ? this.dataConfigSource.getDashboardDrilldownDimensions()
-              : undefined;
-            if (drilldownDimensions?.length === 0) {
-              drilldownDimensions = undefined;
+            let drilldownDimensions = this.dataConfigSource.getDrilldownDimensions();
+
+            if (drilldownDimensions?.dimensions.length === 0) {
+              drilldownDimensions.dimensions = [];
             }
 
             let drilldownQueries = this.dataConfigSource.getDrilldownQueries
@@ -161,10 +160,10 @@ export class PanelQueryRunner {
               series: applyFieldOverrides({
                 timeZone: data.request?.timezone ?? 'browser',
                 data: processedData.series,
-                drilldownDimensions,
+                drilldownDimensions: drilldownDimensions.dimensions,
                 drilldownQueries,
                 onApplyDrilldown: (dimensions) => {
-                  dispatch(applyDrillDownDimensions(dimensions));
+                  dispatch(applyDrillDownDimensions({ key: drilldownDimensions.scope, value: dimensions }));
                 },
                 ...fieldConfig!,
               }),

@@ -144,7 +144,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   panels?: PanelModel[];
   declare targets: DataQuery[];
   declare drilldownQueries: Record<string, object[]>;
-  declare localDrilldownDimensions: DrilldownDimension[];
+  declare panelDrilldownDimensions: DrilldownDimension[];
   transformations?: DataTransformerConfig[];
   datasource: DataSourceRef | null = null;
   thresholds?: any;
@@ -304,17 +304,12 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   runAllPanelQueries(dashboardId: number, dashboardTimezone: string, timeData: TimeOverrideResult, width: number) {
     let queriesToRun: DataQuery[] = [];
     let hasDrilldown = false;
-    let appliedDrilldownDimensions = null;
 
-    if (this.localDrilldownDimensions && this.localDrilldownDimensions.length) {
-      appliedDrilldownDimensions = this.localDrilldownDimensions;
-    } else {
-      const drilldownVar: DrilldownVariable = getTemplateSrv()
-        .getVariables()
-        .find((val) => val.name === '__drilldown') as DrilldownVariable;
+    const drilldownVar: DrilldownVariable = getTemplateSrv()
+      .getVariables()
+      .find((val) => val.name === '__drilldown') as DrilldownVariable;
 
-      appliedDrilldownDimensions = drilldownVar.current.value;
-    }
+    const appliedDrilldownDimensions = drilldownVar.current.value['dashboard'];
 
     if (
       this.drilldownQueries &&
@@ -556,16 +551,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     return this.plugin?.dataSupport ?? { annotations: false, alertStates: false };
   }
 
-  updateLocalDrilldownDimensions(newDimensions: DrilldownDimension[]) {
-    this.localDrilldownDimensions = newDimensions;
+  updatePanelDrilldownDimensions(newDimensions: DrilldownDimension[]) {
+    this.panelDrilldownDimensions = newDimensions;
   }
 
   setDrilldownDimensions(config: () => DrilldownDimension[]) {
     this.drilldownDimensionsConfig = config;
   }
 
-  getLocalDrilldownDimensions() {
-    return this.localDrilldownDimensions;
+  getPanelDrilldownDimensions() {
+    return this.panelDrilldownDimensions;
   }
 
   getDashboardDrilldownDimensions() {
@@ -574,6 +569,20 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     }
 
     return [];
+  }
+
+  getDrilldownDimensions(): { scope: string; dimensions: DrilldownDimension[] } {
+    if (this.panelDrilldownDimensions && this.panelDrilldownDimensions.length) {
+      return {
+        scope: this.id.toString(),
+        dimensions: this.panelDrilldownDimensions,
+      };
+    }
+
+    return {
+      scope: 'dashboard',
+      dimensions: this.getDashboardDrilldownDimensions(),
+    };
   }
 
   getDrilldownQueries(): Record<string, object[]> {

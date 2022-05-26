@@ -20,7 +20,7 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
       type: 'drilldown',
       hide: VariableHide.hideLabel,
       skipUrlSync: false,
-      current: { value: [] },
+      current: { value: { dashboard: [] } },
     },
     reducer: drilldownVariableReducer,
     picker: DrilldownPicker,
@@ -34,7 +34,11 @@ export const createDrilldownVariableAdapter = (): VariableAdapter<DrilldownVaria
     setValueFromUrl: async (variable, urlValue) => {
       //TODO Decide on a better base64 encoder
       const appliedDrilldownDimensions = JSON.parse(atob(urlValue as string));
-      await dispatch(applyDrillDownDimensions(appliedDrilldownDimensions.value));
+      const promises = Object.keys(appliedDrilldownDimensions.value).map((key: string) => {
+        return dispatch(applyDrillDownDimensions({ key: key, value: appliedDrilldownDimensions.value[key] }));
+      });
+
+      await Promise.all(promises);
     },
     updateOptions: async (variable) => {
       return;

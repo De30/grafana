@@ -63,6 +63,7 @@ const defaultPanelConfig: grafanaData.DataConfigSource = {
   getFieldOverrideOptions: () => undefined,
   getTransformations: () => undefined,
   getDataSupport: () => ({ annotations: false, alertStates: false }),
+  getDrilldownDimensions: () => ({ scope: '', dimensions: [] }),
 };
 
 function describeQueryRunnerScenario(
@@ -258,6 +259,7 @@ describe('PanelQueryRunner', () => {
       }),
       getTransformations: () => undefined,
       getDataSupport: () => ({ annotations: false, alertStates: false }),
+      getDrilldownDimensions: () => ({ scope: '', dimensions: [] }),
     }
   );
 
@@ -282,6 +284,7 @@ describe('PanelQueryRunner', () => {
       // @ts-ignore
       getTransformations: () => [{} as unknown as grafanaData.DataTransformerConfig],
       getDataSupport: () => ({ annotations: false, alertStates: false }),
+      getDrilldownDimensions: () => ({ scope: '', dimensions: [] }),
     }
   );
 
@@ -325,6 +328,7 @@ describe('PanelQueryRunner', () => {
       // @ts-ignore
       getTransformations: () => [{} as unknown as grafanaData.DataTransformerConfig],
       getDataSupport: () => ({ annotations: false, alertStates: false }),
+      getDrilldownDimensions: () => ({ scope: '', dimensions: [] }),
     }
   );
 

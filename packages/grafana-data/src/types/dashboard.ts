@@ -40,7 +40,7 @@ export interface PanelModel<TOptions = any, TCustomFieldConfig = any> {
   drilldownQueries?: Record<string, object[]>;
   /** drilldownQueries?: Record<string, Array<Record<string, any>>>; */
 
-  localDrilldownDimensions?: DrilldownDimension[];
+  panelDrilldownDimensions?: DrilldownDimension[];
 
   /** alerting v1 object */
   alert?: any;

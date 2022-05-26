@@ -137,6 +137,7 @@ export function getDefaultState(): State {
     getTransformations: () => [] as DataTransformerConfig[],
     getFieldOverrideOptions: () => options,
     getDataSupport: () => ({ annotations: false, alertStates: false }),
+    getDrilldownDimensions: () => ({ scope: '', dimensions: [] }),
   };
 
   return {

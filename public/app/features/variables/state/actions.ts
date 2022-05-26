@@ -260,7 +260,7 @@ export const addSystemTemplateVariables = (key: string, dashboard: DashboardMode
       index: -1,
       skipUrlSync: false,
       hide: VariableHide.hideLabel,
-      current: { value: [] },
+      current: { value: { dashboard: [] } },
       rootStateKey: key,
     };
 
