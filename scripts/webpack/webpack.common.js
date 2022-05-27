@@ -2,6 +2,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
+const BuildMetaPlugin = require('./plugins/BuildMetaPlugin');
 const CopyUniconsPlugin = require('./plugins/CopyUniconsPlugin');
 const CorsWorkerPlugin = require('./plugins/CorsWorkerPlugin');
 
@@ -64,6 +65,10 @@ module.exports = {
           to: '../lib/monaco/min/vs/language/kusto/',
         },
       ],
+    }),
+    // output build metadata for external services
+    new BuildMetaPlugin({
+      filename: path.resolve(__dirname, '../../public/build', 'build_meta.json'),
     }),
   ],
   module: {
