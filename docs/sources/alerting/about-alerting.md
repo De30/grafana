@@ -20,7 +20,7 @@ This topic explains how to create [alert rules]({{< relref "./fundamentals/alert
 
 These three individual concepts are the minimum necessities to successfully create alerts and receive notifications.
 
-We will also touch on various other concepts such as [silences]({{< relref "./silences/_index.md" >}}) and [mute timings]({{< relref "./notifications/mute-timings.md" >}}) to more granularly manage alert notifications, [role-based access control]({{< relref "../enterprise/access-control/_index.md" >}}) to limit access and manage permissions and additional advanced topics such as [external alertmanagers]({{< relref "./fundamentals/alertmanager.md#add-a-new-external-alertmanager" >}}) and [high availability]({{< relref "./high-availability/_index.md" >}}).
+We will also touch on various other concepts such as [silences]({{< relref "./silences/_index.md" >}}) and [mute timings]({{< relref "./notifications/mute-timings/_index.md" >}}) to more granularly manage alert notifications, [role-based access control]({{< relref "../enterprise/access-control/_index.md" >}}) to limit access and manage permissions and additional advanced topics such as [external alertmanagers]({{< relref "./fundamentals/alertmanager.md#add-a-new-external-alertmanager" >}}) and [high availability]({{< relref "./high-availability/_index.md" >}}).
 
 ## Overview
 
