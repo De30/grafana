@@ -53,6 +53,7 @@ interface PrepConfigOpts {
   cellGap?: number | null; // in css pixels
   hideThreshold?: number;
   yAxisReverse?: boolean;
+  yAxisLog?: number;
 }
 
 export function prepConfig(opts: PrepConfigOpts) {
@@ -205,7 +206,7 @@ export function prepConfig(opts: PrepConfigOpts) {
     theme: theme,
   });
 
-  const shouldUseLogScale = heatmapType === DataFrameType.HeatmapSparse;
+  const shouldUseLogScale = opts.yAxisLog || heatmapType === DataFrameType.HeatmapSparse;
 
   builder.addScale({
     scaleKey: 'y',
@@ -215,9 +216,22 @@ export function prepConfig(opts: PrepConfigOpts) {
     direction: yAxisReverse ? ScaleDirection.Down : ScaleDirection.Up,
     // should be tweakable manually
     distribution: shouldUseLogScale ? ScaleDistribution.Log : ScaleDistribution.Linear,
-    log: 2,
+    log: opts.yAxisLog ?? 2,
     range: shouldUseLogScale
-      ? undefined
+      ? (u, dataMin, dataMax) => {
+          let yExp = u.scales['y'].log!;
+
+          if (dataRef.current?.yLayout === BucketLayout.le) {
+            dataMin /= yExp;
+          } else if (dataRef.current?.yLayout === BucketLayout.ge) {
+            dataMax *= yExp;
+          } else {
+            dataMin /= yExp / 2;
+            dataMax *= yExp / 2;
+          }
+
+          return [dataMin, dataMax];
+        }
       : (u, dataMin, dataMax) => {
           let bucketSize = dataRef.current?.yBucketSize;
 
@@ -451,8 +465,20 @@ export function heatmapPathsDense(opts: PathbuilderOpts) {
         let xBinIncr = xs[yBinQty] - xs[0];
 
         // uniform tile sizes based on zoom level
-        let xSize = Math.abs(valToPosX(xBinIncr, scaleX, xDim, xOff) - valToPosX(0, scaleX, xDim, xOff));
-        let ySize = Math.abs(valToPosY(yBinIncr, scaleY, yDim, yOff) - valToPosY(0, scaleY, yDim, yOff));
+        let xSize: number;
+        let ySize: number;
+
+        if (scaleX.distr === 3) {
+          xSize = Math.abs(valToPosX(xs[1], scaleX, xDim, xOff) - valToPosX(xs[0], scaleX, xDim, xOff));
+        } else {
+          xSize = Math.abs(valToPosX(xBinIncr, scaleX, xDim, xOff) - valToPosX(0, scaleX, xDim, xOff));
+        }
+
+        if (scaleY.distr === 3) {
+          ySize = Math.abs(valToPosY(ys[1], scaleY, yDim, yOff) - valToPosY(ys[0], scaleY, yDim, yOff));
+        } else {
+          ySize = Math.abs(valToPosY(yBinIncr, scaleY, yDim, yOff) - valToPosY(0, scaleY, yDim, yOff));
+        }
 
         // clamp min tile size to 1px
         xSize = Math.max(1, round(xSize - cellGap));
