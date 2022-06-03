@@ -1,3 +1,4 @@
+// @ts-ignore
 import sqlFormatter from 'sql-formatter-plus';
 
 export function formatSQL(q: string) {

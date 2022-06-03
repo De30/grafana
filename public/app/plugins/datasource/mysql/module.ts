@@ -5,6 +5,7 @@ import {
   createResetHandler,
   PasswordFieldEnum,
 } from '../../../features/datasources/utils/passwordHandlers';
+import { SqlQueryEditor } from '../sql/components/QueryEditor';
 import { SQLQuery } from '../sql/types';
 
 import { MysqlDatasource } from './datasource';
@@ -53,6 +54,7 @@ export {
 };
 
 export const plugin = new DataSourcePlugin<MysqlDatasource, SQLQuery>(MysqlDatasource)
-  .setQueryCtrl(MysqlQueryCtrl)
+  // .setQueryCtrl(MysqlQueryCtrl)
+  .setQueryEditor(SqlQueryEditor)
   .setConfigCtrl(MysqlConfigCtrl)
   .setAnnotationQueryCtrl(MysqlAnnotationsQueryCtrl);

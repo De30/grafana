@@ -31,7 +31,7 @@ describe('MySQLDatasource', () => {
     const variable = { ...initialCustomVariableModelState };
     fetchMock.mockImplementation((options) => of(createFetchResponse(response)));
 
-    const ds = new MysqlDatasource(instanceSettings, templateSrv);
+    const ds = new MysqlDatasource(instanceSettings);
 
     return { ds, variable, templateSrv, fetchMock };
   };
