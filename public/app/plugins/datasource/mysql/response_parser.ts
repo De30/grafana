@@ -1,7 +1,7 @@
 import { AnnotationEvent, DataFrame, MetricFindValue } from '@grafana/data';
 import { BackendDataSourceResponse, FetchResponse, toDataQueryResponse } from '@grafana/runtime';
 
-export default class ResponseParser {
+export default class MySqlResponseParser {
   transformMetricFindResponse(raw: FetchResponse<BackendDataSourceResponse>): MetricFindValue[] {
     const frames = toDataQueryResponse(raw).data as DataFrame[];
 
