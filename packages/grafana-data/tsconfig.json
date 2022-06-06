@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "declarationDir": "dist",
-    "outDir": "compiled",
+    "declarationDir": "./compiled",
+    "emitDeclarationOnly": true,
+    "incremental": true,
+    "isolatedModules": true,
     "rootDirs": ["."],
-    "isolatedModules": true
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "exclude": ["dist", "node_modules"],
+  "exclude": ["node_modules", "dist/**/*"],
   "extends": "@grafana/tsconfig",
   "include": ["src/**/*.ts*", "typings/jest", "../../public/app/types/jquery/*.ts", "../../public/app/types/*.d.ts"]
 }

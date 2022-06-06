@@ -19,7 +19,7 @@
   "module": "dist/esm/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c rollup.config.ts",
+    "build": "tsc -p ./tsconfig.build.json && rollup -c rollup.config.ts",
     "watch": "rollup -w -c rollup.config.ts",
     "clean": "rimraf ./dist ./compiled",
     "docsExtract": "mkdir -p ../../reports/docs && api-extractor run 2>&1 | tee ../../reports/docs/$(basename $(pwd)).log",
