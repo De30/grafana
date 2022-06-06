@@ -1,34 +1,41 @@
-import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
-import sourceMaps from 'rollup-plugin-sourcemaps';
-import { terser } from 'rollup-plugin-terser';
+import dts from 'rollup-plugin-dts';
+import esbuild from 'rollup-plugin-esbuild';
 
-const pkg = require('./package.json');
+const name = require('./package.json').main.replace(/\.js$/, '');
 
-const libraryName = pkg.name;
+const bundle = (config) => ({
+  input: 'src/index.ts',
+  external: (id) => !/^[./]/.test(id),
+  ...config,
+});
 
-const buildCjsPackage = ({ env }) => {
-  return {
-    input: `compiled/index.js`,
+export default [
+  bundle({
+    plugins: [resolve(), esbuild()],
     output: [
       {
-        file: `dist/index.${env}.js`,
-        name: libraryName,
+        dir: './dist',
         format: 'cjs',
         sourcemap: true,
-        exports: 'named',
-        globals: {},
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
+      },
+      {
+        dir: './dist/esm',
+        format: 'es',
+        sourcemap: true,
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
       },
     ],
-    external: ['lodash', 'react', '@grafana/ui', '@grafana/data', '@grafana/schema', '@grafana/e2e-selectors'], // Use Lodash from grafana
-    plugins: [
-      commonjs({
-        include: /node_modules/,
-      }),
-      resolve(),
-      sourceMaps(),
-      env === 'production' && terser(),
-    ],
-  };
-};
-export default [buildCjsPackage({ env: 'development' }), buildCjsPackage({ env: 'production' })];
+  }),
+  bundle({
+    input: './compiled/index.d.ts',
+    plugins: [dts()],
+    output: {
+      file: `${name}.d.ts`,
+      format: 'es',
+    },
+  }),
+];

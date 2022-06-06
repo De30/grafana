@@ -1,12 +1,15 @@
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
 import path from 'path';
+import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
 
+const name = require('./package.json').main.replace(/\.js$/, '');
+
 const bundle = (config) => ({
-  ...config,
   input: 'src/index.ts',
   external: (id) => !/^[./]/.test(id),
+  ...config,
 });
 
 export default [
@@ -35,5 +38,13 @@ export default [
         chunkFileNames: `[name].js`,
       },
     ],
+  }),
+  bundle({
+    input: './compiled/index.d.ts',
+    plugins: [dts()],
+    output: {
+      file: `${name}.d.ts`,
+      format: 'es',
+    },
   }),
 ];
