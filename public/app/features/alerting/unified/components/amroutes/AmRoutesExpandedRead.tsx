@@ -56,6 +56,7 @@ export const AmRoutesExpandedRead: FC<AmRoutesExpandedReadProps> = ({
         {!!subroutes.length ? (
           <AmRoutesTable
             isAddMode={isAddMode}
+            readOnly={readOnly}
             onCancelAdd={() => {
               setIsAddMode(false);
               setSubroutes((subroutes) => {

@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Card, Link, useStyles2, useTheme2 } from '@grafana/ui';
+import { Alert, Card, Link, useStyles2, useTheme2 } from '@grafana/ui';
 
 import { Labels } from '../../../../../types/unified-alerting-dto';
 import { useUnifiedAlertingSelector } from '../../hooks/useUnifiedAlertingSelector';
@@ -15,8 +15,7 @@ import { RuleFormType, RuleFormValues } from '../../types/rule-form';
 import { labelsMatchMatchers, matcherFieldToMatcher } from '../../utils/alertmanager';
 import { amRouteToFormAmRoute } from '../../utils/amroutes';
 import { GRAFANA_RULES_SOURCE_NAME } from '../../utils/datasource';
-import { DynamicTable, DynamicTableItemProps } from '../DynamicTable';
-import { Matchers } from '../silences/Matchers';
+import { AmRoutesTable } from '../amroutes/AmRoutesTable';
 
 import { RuleEditorSection } from './RuleEditorSection';
 
@@ -39,6 +38,7 @@ export const NotificationsStep: FC = () => {
 
   const amConfig = useUnifiedAlertingSelector((state) => state.amConfigs[GRAFANA_RULES_SOURCE_NAME])?.result;
   const [rootRoute] = amRouteToFormAmRoute(amConfig?.alertmanager_config.route);
+
   const labelsObject = labels.reduce<Labels>((result, current) => ({ ...result, [current.key]: current.value }), {});
 
   return (
@@ -94,65 +94,31 @@ const AmRoutesPolicyPreview = ({ ruleLabels, routes }: AmRoutesPreviewProps) => 
 
   const availableRoutes = difference(routes, matchingRoutes);
 
-  const matchingTableRoutes = matchingRoutes.map<DynamicTableItemProps<FormAmRoute>>((route) => ({
-    id: route.id,
-    data: route,
-  }));
-
-  const availableTableRoutes = availableRoutes.map<DynamicTableItemProps<FormAmRoute>>((route) => ({
-    id: route.id,
-    data: route,
-  }));
-
   return (
     <>
-      <div>Matching policies</div>
-      <DynamicTable
-        items={matchingTableRoutes}
-        cols={[
-          {
-            id: 'preview-matchingLabels',
-            label: 'Matching labels',
-            renderCell: (route) => {
-              return route.data.object_matchers.length ? (
-                <Matchers matchers={route.data.object_matchers.map(matcherFieldToMatcher)} />
-              ) : (
-                <span>Matches all alert instances</span>
-              );
-            },
-            size: 10,
-          },
-          {
-            id: 'preview-ContactPoints',
-            label: 'Contact point',
-            renderCell: (route) => route.data.receiver || '-',
-            size: 5,
-          },
-        ]}
+      <Alert title="Grafana built-in Alertmanager" severity="info">
+        These notification policies comes from the built-in Grafana Alertmanager If you disabled the built-in Grafana
+        Alertmanager and use and external one the policies below should be ignored.
+      </Alert>
+      <div>Notification policies matching current labels</div>
+      <AmRoutesTable
+        isAddMode={false}
+        readOnly={true}
+        onChange={() => null}
+        onCancelAdd={() => null}
+        receivers={[]}
+        routes={matchingRoutes}
+        alertManagerSourceName={GRAFANA_RULES_SOURCE_NAME}
       />
-      <div>Available policies</div>
-      <DynamicTable
-        cols={[
-          {
-            id: 'preview-available-labels',
-            label: 'Labels',
-            renderCell: (route) => {
-              return route.data.object_matchers.length ? (
-                <Matchers matchers={route.data.object_matchers.map(matcherFieldToMatcher)} />
-              ) : (
-                <span>Matches all alert instances</span>
-              );
-            },
-            size: 10,
-          },
-          {
-            id: 'preview-available-ContactPoints',
-            label: 'Contact point',
-            renderCell: (route) => route.data.receiver || '-',
-            size: 5,
-          },
-        ]}
-        items={availableTableRoutes}
+      <div> Available notification policies</div>
+      <AmRoutesTable
+        isAddMode={false}
+        readOnly={true}
+        onChange={() => null}
+        onCancelAdd={() => null}
+        receivers={[]}
+        routes={availableRoutes}
+        alertManagerSourceName={GRAFANA_RULES_SOURCE_NAME}
       />
     </>
   );
