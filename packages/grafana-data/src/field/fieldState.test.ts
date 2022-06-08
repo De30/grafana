@@ -154,6 +154,36 @@ describe('Check field state calculations (displayName and id)', () => {
     expect(title).toEqual('Server A');
   });
 
+  it('Should only include unique labels across all frames', () => {
+    const title = checkScenario({
+      frames: [
+        toDataFrame({
+          fields: [{ name: 'value', labels: { server: 'A', dc: 'A' } }],
+        }),
+        toDataFrame({
+          fields: [{ name: 'value', labels: { server: 'B', dc: 'A' } }],
+        }),
+      ],
+    });
+
+    expect(title).toEqual('{server="A"}');
+  });
+
+  it('Should only include unique labels in wide frame', () => {
+    const title = checkScenario({
+      frames: [
+        toDataFrame({
+          fields: [
+            { name: 'value', labels: { server: 'A', dc: 'A', pod: 'A' } },
+            { name: 'value2', labels: { server: 'B', dc: 'A', pod: 'B' } },
+          ],
+        }),
+      ],
+    });
+
+    expect(title).toEqual('{server="A"}');
+  });
+
   it('should use label name and value if more than one label', () => {
     const title = checkScenario({
       frames: [

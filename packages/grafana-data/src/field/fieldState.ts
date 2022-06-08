@@ -1,5 +1,11 @@
-import { DataFrame, Field, TIME_SERIES_VALUE_FIELD_NAME, FieldType, TIME_SERIES_TIME_FIELD_NAME } from '../types';
-import { formatLabels } from '../utils/labels';
+import {
+  DataFrame,
+  Field,
+  TIME_SERIES_VALUE_FIELD_NAME,
+  FieldType,
+  TIME_SERIES_TIME_FIELD_NAME,
+  Labels,
+} from '../types';
 
 /**
  * Get an appropriate display title
@@ -101,16 +107,16 @@ function calculateFieldDisplayName(field: Field, frame?: DataFrame, allFrames?: 
   }
 
   if (field.labels && frame) {
-    let singleLabelName = getSingleLabelName(allFrames ?? [frame]);
+    let labelInfo = getLabelsInfo(allFrames ?? [frame]);
 
-    if (!singleLabelName) {
-      let allLabels = formatLabels(field.labels);
+    if (labelInfo.labelCount === 1) {
+      parts.push(field.labels[labelInfo.labelName]);
+    } else {
+      let allLabels = formatLabels(field.labels, labelInfo);
       if (allLabels) {
         parts.push(allLabels);
         labelsAdded = true;
       }
-    } else if (field.labels[singleLabelName]) {
-      parts.push(field.labels[singleLabelName]);
       labelsAdded = true;
     }
   }
@@ -171,11 +177,21 @@ function getUniqueFieldName(field: Field, frame?: DataFrame) {
   return field.name;
 }
 
+interface FrameCollectionLabelInfo {
+  allLabels: Record<string, Set<string>>;
+  labelName: string;
+  labelCount: number;
+}
+
 /**
  * Checks all data frames and return name of label if there is only one label name in all frames
  */
-function getSingleLabelName(frames: DataFrame[]): string | null {
-  let singleName: string | null = null;
+function getLabelsInfo(frames: DataFrame[]): FrameCollectionLabelInfo {
+  const result: FrameCollectionLabelInfo = {
+    allLabels: {},
+    labelName: '',
+    labelCount: 0,
+  };
 
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
@@ -187,14 +203,34 @@ function getSingleLabelName(frames: DataFrame[]): string | null {
 
       // yes this should be in!
       for (const labelKey in field.labels) {
-        if (singleName === null) {
-          singleName = labelKey;
-        } else if (labelKey !== singleName) {
-          return null;
+        if (!result.allLabels[labelKey]) {
+          result.labelCount += 1;
+          result.labelName = labelKey;
+          result.allLabels[labelKey] = new Set<string>();
         }
+
+        result.allLabels[labelKey].add(field.labels[labelKey]);
       }
     }
   }
 
-  return singleName;
+  return result;
+}
+
+export function formatLabels(labels: Labels, labelsInfo?: FrameCollectionLabelInfo): string {
+  if (!labels || Object.keys(labels).length === 0) {
+    return '';
+  }
+
+  let keys = Object.keys(labels).sort();
+  if (labelsInfo) {
+    keys = keys.filter((key) => labelsInfo.allLabels[key].size > 1);
+  }
+
+  const selector = keys.map((key) => `${key}="${labels[key]}"`).join(', ');
+  if (selector === '') {
+    return '';
+  }
+
+  return '{' + selector + '}';
 }
