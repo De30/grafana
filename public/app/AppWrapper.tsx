@@ -13,7 +13,6 @@ import { AngularRoot } from './angular/AngularRoot';
 import { loadAndInitAngularIfEnabled } from './angular/loadAndInitAngularIfEnabled';
 import { GrafanaApp } from './app';
 import { AppNotificationList } from './core/components/AppNotifications/AppNotificationList';
-import { NavBar } from './core/components/NavBar/NavBar';
 import { MegaMenu } from './core/components/NavBar/Next/MegaMenu';
 import { TopBar } from './core/components/NavBar/Next/TopBar';
 import { I18nProvider } from './core/localisation';
@@ -88,8 +87,6 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
 
     navigationLogger('AppWrapper', false, 'rendering');
 
-    const newNavigationEnabled = Boolean(config.featureToggles.newNavigation);
-
     const commandPaletteActionSelected = (action: Action) => {
       reportInteraction('commandPalette_action_selected', {
         actionId: action.id,
@@ -111,7 +108,7 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
                     {config.featureToggles.commandPalette && <CommandPalette />}
                     <div className="grafana-app">
                       <Router history={locationService.getHistory()}>
-                        {ready && <>{newNavigationEnabled ? <TopBar /> : <NavBar />}</>}
+                        {ready && <TopBar />}
                         <MegaMenu />
                         <main className="main-view">
                           {pageBanners.map((Banner, index) => (

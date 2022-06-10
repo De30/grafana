@@ -68,7 +68,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     nav: css({
       display: 'flex',
       flexDirection: 'column',
-      background: theme.colors.background.secondary,
+      background: theme.colors.background.canvas,
       padding: theme.spacing(3, 2),
       [theme.breakpoints.up('md')]: {
         width: '250px',

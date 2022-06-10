@@ -147,12 +147,12 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     pageContent: css({
       flexGrow: 1,
-      background: theme.colors.background.primary,
-      boxShadow: shadow,
     }),
     pageInner: css({
       padding: theme.spacing(3),
-      marginBottom: theme.spacing(2),
+      boxShadow: shadow,
+      background: theme.colors.background.primary,
+      margin: theme.spacing(1, 1, 1, 0),
       display: 'flex',
       flexDirection: 'column',
       flexGrow: 1,
