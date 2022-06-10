@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccessControlClient interface {
-	Status(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StatusResponse, error)
+	IsDisabled(ctx context.Context, in *Void, opts ...grpc.CallOption) (*IsDisabledResponse, error)
 	RegisterPluginRoles(ctx context.Context, in *RegisterPluginRolesRequest, opts ...grpc.CallOption) (*RegisterPluginRolesResponse, error)
 	HasAccess(ctx context.Context, in *HasAccessRequest, opts ...grpc.CallOption) (*HasAccessResponse, error)
 }
@@ -31,9 +31,9 @@ func NewAccessControlClient(cc grpc.ClientConnInterface) AccessControlClient {
 	return &accessControlClient{cc}
 }
 
-func (c *accessControlClient) Status(ctx context.Context, in *Void, opts ...grpc.CallOption) (*StatusResponse, error) {
-	out := new(StatusResponse)
-	err := c.cc.Invoke(ctx, "/accesscontrol.plugins.AccessControl/Status", in, out, opts...)
+func (c *accessControlClient) IsDisabled(ctx context.Context, in *Void, opts ...grpc.CallOption) (*IsDisabledResponse, error) {
+	out := new(IsDisabledResponse)
+	err := c.cc.Invoke(ctx, "/accesscontrol.plugins.AccessControl/IsDisabled", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *accessControlClient) HasAccess(ctx context.Context, in *HasAccessReques
 // All implementations must embed UnimplementedAccessControlServer
 // for forward compatibility
 type AccessControlServer interface {
-	Status(context.Context, *Void) (*StatusResponse, error)
+	IsDisabled(context.Context, *Void) (*IsDisabledResponse, error)
 	RegisterPluginRoles(context.Context, *RegisterPluginRolesRequest) (*RegisterPluginRolesResponse, error)
 	HasAccess(context.Context, *HasAccessRequest) (*HasAccessResponse, error)
 	mustEmbedUnimplementedAccessControlServer()
@@ -72,8 +72,8 @@ type AccessControlServer interface {
 type UnimplementedAccessControlServer struct {
 }
 
-func (UnimplementedAccessControlServer) Status(context.Context, *Void) (*StatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+func (UnimplementedAccessControlServer) IsDisabled(context.Context, *Void) (*IsDisabledResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsDisabled not implemented")
 }
 func (UnimplementedAccessControlServer) RegisterPluginRoles(context.Context, *RegisterPluginRolesRequest) (*RegisterPluginRolesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterPluginRoles not implemented")
@@ -94,20 +94,20 @@ func RegisterAccessControlServer(s grpc.ServiceRegistrar, srv AccessControlServe
 	s.RegisterService(&AccessControl_ServiceDesc, srv)
 }
 
-func _AccessControl_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccessControl_IsDisabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Void)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccessControlServer).Status(ctx, in)
+		return srv.(AccessControlServer).IsDisabled(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accesscontrol.plugins.AccessControl/Status",
+		FullMethod: "/accesscontrol.plugins.AccessControl/IsDisabled",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccessControlServer).Status(ctx, req.(*Void))
+		return srv.(AccessControlServer).IsDisabled(ctx, req.(*Void))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -156,8 +156,8 @@ var AccessControl_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AccessControlServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Status",
-			Handler:    _AccessControl_Status_Handler,
+			MethodName: "IsDisabled",
+			Handler:    _AccessControl_IsDisabled_Handler,
 		},
 		{
 			MethodName: "RegisterPluginRoles",

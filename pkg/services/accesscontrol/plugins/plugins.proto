@@ -18,8 +18,8 @@ message Error {
     string error = 1;
 }
 
-message StatusResponse {
-    bool status = 1;
+message IsDisabledResponse {
+    bool isDisabled = 1;
 }
 
 message Permission {
@@ -82,7 +82,7 @@ message Void {}
 
 /* Services */
 service AccessControl {
-    rpc Status(Void) returns (StatusResponse);
+    rpc IsDisabled(Void) returns (IsDisabledResponse);
     rpc RegisterPluginRoles(RegisterPluginRolesRequest) returns (RegisterPluginRolesResponse);
     rpc HasAccess(HasAccessRequest) returns (HasAccessResponse);
     // TODO Describe filter
