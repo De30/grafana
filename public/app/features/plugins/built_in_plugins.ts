@@ -40,6 +40,7 @@ const tempoPlugin = async () =>
 const alertmanagerPlugin = async () =>
   await import(/* webpackChunkName: "alertmanagerPlugin" */ 'app/plugins/datasource/alertmanager/module');
 
+import * as alertRulePanel from 'app/plugins/panel/alert-rule/module';
 import * as alertGroupsPanel from 'app/plugins/panel/alertGroups/module';
 import * as alertListPanel from 'app/plugins/panel/alertlist/module';
 import * as annoListPanel from 'app/plugins/panel/annolist/module';
@@ -131,6 +132,7 @@ const builtInPlugins: any = {
   'app/plugins/panel/nodeGraph/module': nodeGraph,
   'app/plugins/panel/histogram/module': histogramPanel,
   'app/plugins/panel/alertGroups/module': alertGroupsPanel,
+  'app/plugins/panel/alert-rule/module': alertRulePanel,
 };
 
 export default builtInPlugins;

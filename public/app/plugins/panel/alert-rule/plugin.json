@@ -1,0 +1,20 @@
+{
+  "type": "panel",
+  "name": "Alert rule",
+  "id": "alertrule",
+
+  "skipDataQuery": true,
+
+  "info": {
+    "description": "Shows information about a specified alert rule",
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com"
+    },
+    "logos": {
+      "small": "",
+      "large": ""
+    },
+    "state": "alpha"
+  }
+}
