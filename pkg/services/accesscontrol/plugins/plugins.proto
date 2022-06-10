@@ -1,10 +1,14 @@
 syntax = "proto3";
 package accesscontrol.plugins;
 
-// protoc -I ./ plugins.proto  --go-grpc_out=./ --go_out=./
+import "google/protobuf/any.proto";
 
 option go_package = "./;plugins";
 
+// To build
+// protoc -I ./ plugins.proto  --go-grpc_out=./ --go_out=./
+
+/* Types */
 message User {
     int64 ID = 1;
     int64 orgID = 2;
@@ -39,12 +43,24 @@ message RoleRegistration {
     repeated string Grants = 2;
 }
 
-// TODO Evaluate more than a single permission
 message PermissionEvaluator {
     string action = 1;
     repeated string scope = 2;
 }
 
+message AnyEvaluator {
+    repeated google.protobuf.Any anyOf = 1;
+}
+
+message AllEvaluator {
+    repeated google.protobuf.Any allOf = 1;
+}
+
+message Evaluator {
+    google.protobuf.Any ev = 1;
+}
+
+/* Requests and Responses */ 
 message RegisterPluginRolesRequest {
     repeated RoleRegistration registrations = 1;
 }
@@ -55,7 +71,7 @@ message RegisterPluginRolesResponse {
 
 message HasAccessRequest {
     User user = 1;
-    PermissionEvaluator evaluator = 2;
+    Evaluator evaluator = 2;
 }
 
 message HasAccessResponse {
@@ -64,6 +80,7 @@ message HasAccessResponse {
 
 message Void {}
 
+/* Services */
 service AccessControl {
     rpc Status(Void) returns (StatusResponse);
     rpc RegisterPluginRoles(RegisterPluginRolesRequest) returns (RegisterPluginRolesResponse);
