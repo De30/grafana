@@ -13,8 +13,8 @@ import {
   SlatePrism,
   TypeaheadInput,
   TypeaheadOutput,
+  InputActionMeta,
 } from '@grafana/ui';
-import { InputActionMeta } from '@grafana/ui/src/components/Select/types';
 import { notifyApp } from 'app/core/actions';
 import { createErrorNotification } from 'app/core/copy/appNotification';
 import { dispatch } from 'app/store/store';

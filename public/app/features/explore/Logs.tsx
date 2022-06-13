@@ -33,8 +33,8 @@ import {
   InlineSwitch,
   withTheme2,
   Themeable2,
+  RowContextOptions,
 } from '@grafana/ui';
-import { RowContextOptions } from '@grafana/ui/src/components/Logs/LogRowContextProvider';
 import { dedupLogRows, filterLogLevels } from 'app/core/logs_model';
 import store from 'app/core/store';
 import { ExploreId } from 'app/types/explore';

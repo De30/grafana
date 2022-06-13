@@ -1,5 +1,5 @@
 import { DataFrame, Field, FieldMatcher, FieldType, getFieldDisplayName } from '@grafana/data';
-import { XYFieldMatchers } from '@grafana/ui/src/components/GraphNG/types';
+import { XYFieldMatchers } from '@grafana/ui';
 
 import { XYDimensionConfig } from './models.gen';
 

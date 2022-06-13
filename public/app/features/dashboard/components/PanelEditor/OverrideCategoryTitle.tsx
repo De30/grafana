@@ -2,8 +2,7 @@ import { css } from '@emotion/css';
 import React, { FC } from 'react';
 
 import { FieldConfigOptionsRegistry, GrafanaTheme, ConfigOverrideRule } from '@grafana/data';
-import { HorizontalGroup, Icon, IconButton, useStyles } from '@grafana/ui';
-import { FieldMatcherUIRegistryItem } from '@grafana/ui/src/components/MatchersUI/types';
+import { HorizontalGroup, Icon, IconButton, useStyles, FieldMatcherUIRegistryItem } from '@grafana/ui';
 
 interface OverrideCategoryTitleProps {
   isExpanded: boolean;

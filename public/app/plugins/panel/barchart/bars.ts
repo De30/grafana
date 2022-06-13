@@ -10,10 +10,7 @@ import {
   VizTextDisplayOptions,
   VizLegendOptions,
 } from '@grafana/schema';
-import { measureText, PlotTooltipInterpolator } from '@grafana/ui';
-import { formatTime } from '@grafana/ui/src/components/uPlot/config/UPlotAxisBuilder';
-
-import { preparePlotData2, StackingGroup } from '../../../../../packages/grafana-ui/src/components/uPlot/utils';
+import { measureText, PlotTooltipInterpolator, formatTime, preparePlotData2, StackingGroup } from '@grafana/ui';
 
 import { distribute, SPACE_BETWEEN } from './distribute';
 import { intersects, pointWithin, Quadtree, Rect } from './quadtree';

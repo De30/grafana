@@ -27,8 +27,8 @@ import {
   VizLayout,
   VizLegend,
   VizTooltipContainer,
+  PropDiffFn,
 } from '@grafana/ui';
-import { PropDiffFn } from '@grafana/ui/src/components/GraphNG/GraphNG';
 import { CloseButton } from 'app/core/components/CloseButton/CloseButton';
 
 import { DataHoverView } from '../geomap/components/DataHoverView';

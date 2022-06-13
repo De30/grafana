@@ -2,8 +2,16 @@ import { css } from '@emotion/css';
 import React, { FC, useCallback } from 'react';
 
 import { FieldType, GrafanaTheme2, SelectableValue, StandardEditorProps } from '@grafana/data';
-import { InlineField, InlineFieldRow, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
-import { useFieldDisplayNames, useSelectOptions } from '@grafana/ui/src/components/MatchersUI/utils';
+import {
+  InlineField,
+  InlineFieldRow,
+  RadioButtonGroup,
+  Select,
+  useStyles2,
+  useFieldDisplayNames,
+  useSelectOptions,
+} from '@grafana/ui';
+
 import { NumberInput } from 'app/core/components/OptionsUI/NumberInput';
 
 import { ScalarDimensionConfig, ScalarDimensionMode, ScalarDimensionOptions } from '../types';

@@ -1,8 +1,13 @@
 import React, { PureComponent } from 'react';
 
 import { FieldDisplay, getFieldDisplayValues, PanelProps } from '@grafana/data';
-import { DataLinksContextMenu, Gauge, VizRepeater, VizRepeaterRenderValueProps } from '@grafana/ui';
-import { DataLinksContextMenuApi } from '@grafana/ui/src/components/DataLinks/DataLinksContextMenu';
+import {
+  DataLinksContextMenu,
+  DataLinksContextMenuApi,
+  Gauge,
+  VizRepeater,
+  VizRepeaterRenderValueProps,
+} from '@grafana/ui';
 import { config } from 'app/core/config';
 
 import { clearNameForSingleSeries } from '../bargauge/BarGaugePanel';

@@ -21,7 +21,7 @@ import {
   TimeRange,
 } from '@grafana/data';
 import { DataSourceWithBackend, FetchError, getBackendSrv, toDataQueryResponse } from '@grafana/runtime';
-import { RowContextOptions } from '@grafana/ui/src/components/Logs/LogRowContextProvider';
+import { RowContextOptions } from '@grafana/ui';
 import { notifyApp } from 'app/core/actions';
 import { config } from 'app/core/config';
 import { createErrorNotification } from 'app/core/copy/appNotification';

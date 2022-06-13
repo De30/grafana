@@ -7,9 +7,16 @@ import uPlot from 'uplot';
 import { Field, getDisplayProcessor, PanelProps } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
 import { TooltipDisplayMode } from '@grafana/schema';
-import { usePanelContext, TimeSeries, TooltipPlugin, ZoomPlugin, UPlotConfigBuilder, useTheme2 } from '@grafana/ui';
-import { AxisProps } from '@grafana/ui/src/components/uPlot/config/UPlotAxisBuilder';
-import { ScaleProps } from '@grafana/ui/src/components/uPlot/config/UPlotScaleBuilder';
+import {
+  usePanelContext,
+  TimeSeries,
+  TooltipPlugin,
+  ZoomPlugin,
+  UPlotConfigBuilder,
+  useTheme2,
+  AxisProps,
+  ScaleProps,
+} from '@grafana/ui';
 import { config } from 'app/core/config';
 import { getFieldLinksForExplore } from 'app/features/explore/utils/links';
 
