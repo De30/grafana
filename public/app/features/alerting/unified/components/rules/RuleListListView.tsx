@@ -4,15 +4,17 @@ import React, { FC } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Stack } from '@grafana/experimental';
 import { Button, Icon, Pagination, Tag, useStyles2 } from '@grafana/ui';
-import { CombinedRule, CombinedRuleNamespace } from 'app/types/unified-alerting';
+import { AlertingRule, CombinedRule, CombinedRuleNamespace } from 'app/types/unified-alerting';
 import { GrafanaAlertState, PromAlertingRuleState, PromRuleType } from 'app/types/unified-alerting-dto';
+
+import { isGrafanaRulesSource } from '../../utils/datasource';
 
 interface Props {
   namespaces: CombinedRuleNamespace[];
   expandAll: boolean;
 }
 
-function filterAlertStates(rules: CombinedRule[], state: PromAlertingRuleState) {
+function filterAlertStates(rules: Array<CombinedRule<AlertingRule>>, state: PromAlertingRuleState) {
   return rules.filter((rule) => rule.promRule?.type === PromRuleType.Alerting && rule.promRule?.state === state);
 }
 
@@ -26,7 +28,9 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
   const styles = useStyles2(getStyles);
 
   const allRules = namespaces.flatMap((namespace) => namespace.groups.flatMap((group) => group.rules));
-  const alertRules = allRules.filter((rule) => rule.promRule?.type === PromRuleType.Alerting);
+  const alertRules = allRules.filter((rule) => rule.promRule?.type === PromRuleType.Alerting) as Array<
+    CombinedRule<AlertingRule>
+  >;
 
   const GROUPED_BY_STATE = {
     [GrafanaAlertState.Alerting]: filterAlertStates(alertRules, PromAlertingRuleState.Firing),
@@ -74,12 +78,9 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
             {GROUPED_BY_STATE[GrafanaAlertState.Alerting].map((rule) => (
               <div key={rule.namespace.name + rule.group.name + rule.name} className={styles.list.body.row}>
                 <Stack alignItems={'baseline'}>
-                  {rule.promRule?.type === PromRuleType.Alerting &&
-                    rule.promRule?.state === PromAlertingRuleState.Firing && <Icon name="fire" size="lg" />}
-                  {rule.promRule?.type === PromRuleType.Alerting &&
-                    rule.promRule?.state === PromAlertingRuleState.Inactive && <Icon name="check-circle" size="lg" />}
-                  {rule.promRule?.type === PromRuleType.Alerting &&
-                    rule.promRule?.state === PromAlertingRuleState.Pending && <Icon name="circle" size="lg" />}
+                  {rule.promRule?.state === PromAlertingRuleState.Firing && <Icon name="fire" size="lg" />}
+                  {rule.promRule?.state === PromAlertingRuleState.Inactive && <Icon name="check-circle" size="lg" />}
+                  {rule.promRule?.state === PromAlertingRuleState.Pending && <Icon name="circle" size="lg" />}
                   <Stack direction="column" gap={0.25}>
                     {/* Name and tags */}
                     <Stack gap={0.5} alignItems={'center'}>
@@ -99,10 +100,12 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                           {rule.namespace.name} / {rule.group.name}
                         </small>
                       </Stack>
-                      <Stack gap={0.5} alignItems={'center'}>
-                        <Icon name="database" size="sm" />
-                        <small>gdev-prometheus</small>
-                      </Stack>
+                      {!isGrafanaRulesSource(rule.namespace.rulesSource) && (
+                        <Stack gap={0.5} alignItems={'center'}>
+                          <Icon name="database" size="sm" />
+                          <small>{rule.namespace.rulesSource.name}</small>
+                        </Stack>
+                      )}
                       <Stack gap={0.5} alignItems={'center'}>
                         <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
                       </Stack>
@@ -110,11 +113,13 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                   </Stack>
                   <Spacer />
                   <Stack alignItems={'center'}>
-                    <Stack gap={0.25} alignItems={'center'}>
-                      <Muted>
-                        <Icon name="layer-group" /> <small>{5}</small>
-                      </Muted>
-                    </Stack>
+                    {hasAlertInstances(rule.promRule) && (
+                      <Stack gap={0.25} alignItems={'center'}>
+                        <Muted>
+                          <Icon name="layer-group" /> <small>{rule.promRule?.alerts?.length}</small>
+                        </Muted>
+                      </Stack>
+                    )}
                     <Stack gap={0.5} alignItems={'center'}>
                       <Button icon="book" size="sm">
                         View runbook
@@ -141,6 +146,14 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
     </>
   );
 };
+
+function hasAlertInstances(rule?: AlertingRule) {
+  if (!rule) {
+    return false;
+  }
+
+  return (rule.alerts ?? []).length > 0;
+}
 
 const Spacer = () => (
   <div
