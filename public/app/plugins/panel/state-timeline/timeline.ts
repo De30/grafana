@@ -1,6 +1,6 @@
 import uPlot, { Cursor, Series } from 'uplot';
 
-import { GrafanaTheme2, TimeRange, alpha } from '@grafana/data';
+import { GrafanaTheme2, TimeRange, colorManipulator } from '@grafana/data';
 import { VisibilityMode } from '@grafana/schema';
 import { FIXED_UNIT } from '@grafana/ui';
 import { distribute, SPACE_BETWEEN } from 'app/plugins/panel/barchart/distribute';
@@ -562,5 +562,5 @@ function getFillColor(fieldConfig: TimelineFieldConfig, color: string) {
   }
 
   const opacityPercent = (fieldConfig.fillOpacity ?? 100) / 100;
-  return alpha(color, opacityPercent);
+  return colorManipulator.alpha(color, opacityPercent);
 }

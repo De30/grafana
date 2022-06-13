@@ -12,8 +12,8 @@ import {
   parseLabels,
   QueryResultMeta,
   toFilteredDataFrameDTO,
+  join
 } from '@grafana/data';
-import { join } from '@grafana/data';
 import { StreamingFrameAction, StreamingFrameOptions } from '@grafana/runtime/src/services/live';
 import { renderLegendFormat } from 'app/plugins/datasource/prometheus/legend';
 import { AlignedData } from 'uplot';

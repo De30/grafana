@@ -3,7 +3,7 @@ import React, { HTMLAttributes, useCallback, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
 
 import { GrafanaTheme2, dateTimeFormat, systemDateFormats, TimeZone } from '@grafana/data';
-import { Portal, useStyles2, usePanelContext, getTooltipContainerStyles } from '@grafana/ui';
+import { Portal, useStyles2, usePanelContext, styleMixins } from '@grafana/ui';
 
 import { getCommonAnnotationStyles } from '../styles';
 
@@ -161,7 +161,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       max-width: 400px;
     `,
     tooltip: css`
-      ${getTooltipContainerStyles(theme)};
+      ${styleMixins.getTooltipContainerStyles(theme)};
       padding: 0;
     `,
   };

@@ -1,6 +1,6 @@
 import { PanelOptionsEditorBuilder } from '@grafana/data';
 import { ScaleDistribution } from '@grafana/schema';
-import { ScaleDistributionEditor } from '@grafana/ui';
+import { commonOptionsBuilder } from '@grafana/ui';
 
 import { HeatmapCalculationMode, HeatmapCalculationOptions } from '../models.gen';
 
@@ -39,7 +39,7 @@ export function addHeatmapCalculationOptions(
     path: `${prefix}yBuckets.scale`,
     name: 'Y Bucket scale',
     category,
-    editor: ScaleDistributionEditor,
+    editor: commonOptionsBuilder.ScaleDistributionEditor,
     defaultValue: { type: ScaleDistribution.Linear },
   });
 }

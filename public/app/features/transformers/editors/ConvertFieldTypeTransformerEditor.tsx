@@ -11,9 +11,8 @@ import {
   TransformerUIProps,
   ConvertFieldTypeTransformerOptions,
   ConvertFieldTypeOptions,
-  FieldNamePicker,
 } from '@grafana/data';
-import { Button, InlineField, InlineFieldRow, Input, Select } from '@grafana/ui';
+import { Button, InlineField, InlineFieldRow, Input, Select, FieldNamePicker } from '@grafana/ui';
 
 const fieldNamePickerSettings: StandardEditorsRegistryItem<string, FieldNamePickerConfigSettings> = {
   settings: { width: 24 },

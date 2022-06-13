@@ -1,3 +1,3 @@
 export { ZoomPlugin } from './ZoomPlugin';
-export { TooltipPlugin } from './TooltipPlugin';
+export { TooltipPlugin, positionTooltip } from './TooltipPlugin';
 export { KeyboardPlugin } from './KeyboardPlugin';

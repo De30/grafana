@@ -1,6 +1,6 @@
 import uPlot, { Axis, AlignedData, Scale } from 'uplot';
 
-import { DataFrame, GrafanaTheme2, alpha } from '@grafana/data';
+import { DataFrame, GrafanaTheme2, colorManipulator } from '@grafana/data';
 import {
   StackingMode,
   VisibilityMode,
@@ -477,7 +477,8 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
         });
 
         barsColors.push({
-          fill: fillOpacity < 1 ? colors.map((c) => (c != null ? alpha(c, fillOpacity) : null)) : colors,
+          fill:
+            fillOpacity < 1 ? colors.map((c) => (c != null ? colorManipulator.alpha(c, fillOpacity) : null)) : colors,
           stroke: colors,
         });
       }
