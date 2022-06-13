@@ -75,11 +75,11 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                       <Icon name="folder" size="sm" /> <small>Server Monitoring / My Group</small>
                     </Stack>
                     <Stack gap={0.5} alignItems={'center'}>
-                      <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
-                    </Stack>
-                    <Stack gap={0.5} alignItems={'center'}>
                       <Icon name="database" size="sm" />
                       <small>gdev-prometheus</small>
+                    </Stack>
+                    <Stack gap={0.5} alignItems={'center'}>
+                      <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
                     </Stack>
                   </Stack>
                 </Stack>
@@ -125,11 +125,11 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                       <Icon name="folder" size="sm" /> <small>Server Monitoring / My Group</small>
                     </Stack>
                     <Stack gap={0.5} alignItems={'center'}>
-                      <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
-                    </Stack>
-                    <Stack gap={0.5} alignItems={'center'}>
                       <Icon name="database" size="sm" />
                       <small>gdev-prometheus</small>
+                    </Stack>
+                    <Stack gap={0.5} alignItems={'center'}>
+                      <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
                     </Stack>
                   </Stack>
                 </Stack>
