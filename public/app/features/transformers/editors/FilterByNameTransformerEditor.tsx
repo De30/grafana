@@ -9,8 +9,8 @@ import {
   TransformerUIProps,
   getFieldDisplayName,
   stringToJsRegex,
+  FilterFieldsByNameTransformerOptions,
 } from '@grafana/data';
-import { FilterFieldsByNameTransformerOptions } from '@grafana/data/src/transformations/transformers/filterByName';
 import { Field, Input, FilterPill, HorizontalGroup } from '@grafana/ui';
 
 interface FilterByNameTransformerEditorProps extends TransformerUIProps<FilterFieldsByNameTransformerOptions> {}

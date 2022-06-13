@@ -7,13 +7,11 @@ import {
   PanelData,
   StandardEditorContext,
   VariableSuggestionsScope,
-} from '@grafana/data';
-import { PanelOptionsSupplier } from '@grafana/data/src/panel/PanelPlugin';
-import {
+  PanelOptionsSupplier,
   isNestedPanelOptions,
   NestedValueAccess,
   PanelOptionsEditorBuilder,
-} from '@grafana/data/src/utils/OptionsUIBuilders';
+} from '@grafana/data';
 import { getDataLinksVariableSuggestions } from 'app/features/panel/panellinks/link_srv';
 
 import { OptionsPaneCategoryDescriptor } from './OptionsPaneCategoryDescriptor';

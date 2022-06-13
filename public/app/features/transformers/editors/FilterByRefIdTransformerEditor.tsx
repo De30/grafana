@@ -6,8 +6,8 @@ import {
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
+  FilterFramesByRefIdTransformerOptions,
 } from '@grafana/data';
-import { FilterFramesByRefIdTransformerOptions } from '@grafana/data/src/transformations/transformers/filterByRefId';
 import { HorizontalGroup, FilterPill } from '@grafana/ui';
 
 interface FilterByRefIdTransformerEditorProps extends TransformerUIProps<FilterFramesByRefIdTransformerOptions> {}

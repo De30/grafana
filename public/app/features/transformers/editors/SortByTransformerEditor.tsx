@@ -1,7 +1,13 @@
 import React, { useCallback } from 'react';
 
-import { DataTransformerID, standardTransformers, TransformerRegistryItem, TransformerUIProps } from '@grafana/data';
-import { SortByField, SortByTransformerOptions } from '@grafana/data/src/transformations/transformers/sortBy';
+import {
+  DataTransformerID,
+  standardTransformers,
+  TransformerRegistryItem,
+  TransformerUIProps,
+  SortByField,
+  SortByTransformerOptions,
+} from '@grafana/data';
 import { InlineField, InlineSwitch, InlineFieldRow, Select } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

@@ -6,8 +6,8 @@ import {
   getFieldDisplayName,
   GrafanaTheme2,
   outerJoinDataFrames,
+  maybeSortFrame,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import { findField } from 'app/features/dimensions';
 
 import { prepareGraphableFields } from '../timeseries/utils';

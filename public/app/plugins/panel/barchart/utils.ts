@@ -14,8 +14,8 @@ import {
   outerJoinDataFrames,
   reduceField,
   VizOrientation,
+  maybeSortFrame,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import {
   AxisPlacement,
   ScaleDirection,
