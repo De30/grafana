@@ -11,8 +11,8 @@ import {
   VizLegend,
   VizLegendItem,
   VizTooltipContainer,
+  FacetedData,
 } from '@grafana/ui';
-import { FacetedData } from '@grafana/ui/src/components/uPlot/types';
 
 import { TooltipView } from './TooltipView';
 import { XYChartOptions } from './models.gen';

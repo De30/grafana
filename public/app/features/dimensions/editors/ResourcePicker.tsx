@@ -13,8 +13,8 @@ import {
   PopoverController,
   useStyles2,
   useTheme2,
+  closePopover,
 } from '@grafana/ui';
-import { closePopover } from '@grafana/ui/src/utils/closePopover';
 
 import { getPublicOrAbsoluteUrl } from '../resource';
 import { MediaType, ResourceFolderName, ResourcePickerSize } from '../types';

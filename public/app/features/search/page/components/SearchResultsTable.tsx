@@ -6,9 +6,7 @@ import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 
 import { Field, GrafanaTheme2 } from '@grafana/data';
-import { useStyles2 } from '@grafana/ui';
-import { TableCell } from '@grafana/ui/src/components/Table/TableCell';
-import { getTableStyles } from '@grafana/ui/src/components/Table/styles';
+import { getTableStyles, TableCell, useStyles2 } from '@grafana/ui';
 
 import { QueryResponse } from '../../service';
 import { SelectionChecker, SelectionToggle } from '../selection';

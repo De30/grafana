@@ -12,8 +12,8 @@ import {
   MenuGroup,
   MenuItem,
   UPlotConfigBuilder,
+  pluginLog,
 } from '@grafana/ui';
-import { pluginLog } from '@grafana/ui/src/components/uPlot/utils';
 
 type ContextMenuSelectionCoords = { viewport: CartesianCoords2D; plotCanvas: CartesianCoords2D };
 type ContextMenuSelectionPoint = { seriesIdx: number | null; dataIdx: number | null };

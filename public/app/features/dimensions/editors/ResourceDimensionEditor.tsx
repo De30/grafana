@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
 
 import { FieldNamePickerConfigSettings, StandardEditorProps, StandardEditorsRegistryItem } from '@grafana/data';
-import { InlineField, InlineFieldRow, RadioButtonGroup } from '@grafana/ui';
-import { FieldNamePicker } from '@grafana/ui/src/components/MatchersUI/FieldNamePicker';
+import { InlineField, InlineFieldRow, RadioButtonGroup, FieldNamePicker } from '@grafana/ui';
 
 import { getPublicOrAbsoluteUrl, ResourceFolderName } from '..';
 import {

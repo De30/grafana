@@ -3,8 +3,7 @@ import React, { HTMLAttributes, useCallback, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
 
 import { GrafanaTheme2, dateTimeFormat, systemDateFormats, TimeZone } from '@grafana/data';
-import { Portal, useStyles2, usePanelContext } from '@grafana/ui';
-import { getTooltipContainerStyles } from '@grafana/ui/src/themes/mixins';
+import { Portal, useStyles2, usePanelContext, getTooltipContainerStyles } from '@grafana/ui';
 
 import { getCommonAnnotationStyles } from '../styles';
 

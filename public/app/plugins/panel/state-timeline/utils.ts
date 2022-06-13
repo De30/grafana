@@ -30,12 +30,12 @@ import {
   UPlotConfigBuilder,
   UPlotConfigPrepFn,
   VizLegendItem,
+  applyNullInsertThreshold,
+  nullToValue,
+  PlotTooltipInterpolator,
+  preparePlotData2,
+  getStackingGroups,
 } from '@grafana/ui';
-import { applyNullInsertThreshold } from '@grafana/ui/src/components/GraphNG/nullInsertThreshold';
-import { nullToValue } from '@grafana/ui/src/components/GraphNG/nullToValue';
-import { PlotTooltipInterpolator } from '@grafana/ui/src/components/uPlot/types';
-
-import { preparePlotData2, getStackingGroups } from '../../../../../packages/grafana-ui/src/components/uPlot/utils';
 
 import { getConfig, TimelineCoreOptions } from './timeline';
 import { TimelineFieldConfig, TimelineOptions } from './types';
