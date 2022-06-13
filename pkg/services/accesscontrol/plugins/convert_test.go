@@ -10,27 +10,6 @@ import (
 )
 
 func Test_toEvaluator(t *testing.T) {
-	permEvalToAny := func(ev *PermissionEvaluator) *anypb.Any {
-		data := &anypb.Any{}
-		err := data.MarshalFrom(ev)
-		require.NoError(t, err)
-		return data
-	}
-
-	anyEvalToAny := func(ev *AnyEvaluator) *anypb.Any {
-		data := &anypb.Any{}
-		err := data.MarshalFrom(ev)
-		require.NoError(t, err)
-		return data
-	}
-
-	allEvalToAny := func(ev *AllEvaluator) *anypb.Any {
-		data := &anypb.Any{}
-		err := data.MarshalFrom(ev)
-		require.NoError(t, err)
-		return data
-	}
-
 	tests := []struct {
 		name    string
 		ev      Evaluator
@@ -49,40 +28,37 @@ func Test_toEvaluator(t *testing.T) {
 		},
 		{
 			name:    "Empty permission evaluator",
-			ev:      Evaluator{Ev: permEvalToAny(&PermissionEvaluator{})},
+			ev:      Evaluator{Ev: (&PermissionEvaluator{}).toAny(t)},
 			wantErr: true,
 		},
 		{
 			name:    "Empty All evaluator",
-			ev:      Evaluator{Ev: allEvalToAny(&AllEvaluator{AllOf: []*anypb.Any{}})},
+			ev:      Evaluator{Ev: (&AllEvaluator{AllOf: []*anypb.Any{}}).toAny(t)},
 			wantErr: true,
 		},
 		{
 			name:    "Empty Any evaluator",
-			ev:      Evaluator{Ev: anyEvalToAny(&AnyEvaluator{AnyOf: []*anypb.Any{}})},
+			ev:      Evaluator{Ev: (&AnyEvaluator{AnyOf: []*anypb.Any{}}).toAny(t)},
 			wantErr: true,
 		},
 		{
-			name: "Simple evaluate permissions",
-			ev: Evaluator{Ev: permEvalToAny(
-				&PermissionEvaluator{Action: "teams:read", Scope: []string{"teams:id:1"}},
-			)},
+			name:    "Simple evaluate permissions",
+			ev:      Evaluator{Ev: (&PermissionEvaluator{Action: "teams:read", Scope: []string{"teams:id:1"}}).toAny(t)},
 			want:    ac.EvalPermission("teams:read", "teams:id:1"),
 			wantErr: false,
 		},
 		{
 			name: "Complex permissions",
-			ev: Evaluator{Ev: anyEvalToAny(&AnyEvaluator{
+			ev: Evaluator{Ev: (&AnyEvaluator{
 				AnyOf: []*anypb.Any{
-					permEvalToAny(&PermissionEvaluator{Action: "teams:read", Scope: []string{"teams:id:1"}}),
-					allEvalToAny(&AllEvaluator{
+					(&PermissionEvaluator{Action: "teams:read", Scope: []string{"teams:id:1"}}).toAny(t),
+					(&AllEvaluator{
 						AllOf: []*anypb.Any{
-							permEvalToAny(&PermissionEvaluator{Action: "users:read", Scope: []string{"users:*"}}),
-							permEvalToAny(&PermissionEvaluator{Action: "org.users:read", Scope: []string{"users:*"}}),
+							(&PermissionEvaluator{Action: "users:read", Scope: []string{"users:*"}}).toAny(t),
+							(&PermissionEvaluator{Action: "org.users:read", Scope: []string{"users:*"}}).toAny(t),
 						},
-					}),
-				}},
-			)},
+					}).toAny(t),
+				}}).toAny(t)},
 			want: ac.EvalAny(
 				ac.EvalPermission("teams:read", "teams:id:1"),
 				ac.EvalAll(

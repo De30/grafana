@@ -3,35 +3,49 @@ package plugins
 import (
 	context "context"
 	"fmt"
+	"net"
+	"net/http"
 
+	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
+	"google.golang.org/grpc"
 )
 
-// RegisterAccessControlServer
-
 type ServerImpl struct {
-	ac accesscontrol.AccessControl
+	ac     accesscontrol.AccessControl
+	logger log.Logger
 	UnimplementedAccessControlServer
 }
 
-func ProvideAccessControlServer(ac accesscontrol.AccessControl) AccessControlServer {
-	s := &ServerImpl{ac: ac}
-	// RegisterAccessControlServer(s)
-	return s
+func ProvideAccessControlServer(lis net.Listener, ac accesscontrol.AccessControl, cfg *setting.Cfg) (AccessControlServer, error) {
+	s := &ServerImpl{ac: ac, logger: log.New("accesscontrol.plugins")}
+	grpcServer := grpc.NewServer()
+	RegisterAccessControlServer(grpcServer, s)
+
+	go func() {
+		if errGrpcServe := grpcServer.Serve(lis); errGrpcServe != nil {
+			s.logger.Error("accesscontrol grpc server stopped", "error", errGrpcServe)
+		}
+	}()
+	return s, nil
 }
 
 func (s *ServerImpl) IsDisabled(_ context.Context, _ *Void) (*IsDisabledResponse, error) {
+	s.logger.Debug("IsDisabled called")
 	resp := &IsDisabledResponse{
-		IsDisabled: !s.ac.IsDisabled(),
+		IsDisabled: s.ac.IsDisabled(),
 	}
 	return resp, nil
 }
 
-func (s *ServerImpl) RegisterPluginRoles(_ context.Context, req *RegisterPluginRolesRequest) (*RegisterPluginRolesResponse, error) {
+func (s *ServerImpl) RegisterPluginRoles(_ context.Context,
+	req *RegisterPluginRolesRequest) (*RegisterPluginRolesResponse, error) {
 	// Early return if no registration
 	if req == nil || len(req.Registrations) == 0 {
+		s.logger.Debug("No registration provided")
 		return &RegisterPluginRolesResponse{}, nil
 	}
 
@@ -45,6 +59,7 @@ func (s *ServerImpl) RegisterPluginRoles(_ context.Context, req *RegisterPluginR
 
 	err := s.ac.DeclareFixedRoles(registrations...)
 	if err != nil {
+		s.logger.Error("Could not register roles", "error", err)
 		return &RegisterPluginRolesResponse{
 			Error: &Error{Error: fmt.Sprintf("Could not register roles: %v", err)},
 		}, err
@@ -57,6 +72,7 @@ func (s *ServerImpl) HasAccess(c context.Context, req *HasAccessRequest) (*HasAc
 	// Early return if request
 	switch {
 	case req == nil:
+		s.logger.Debug("No request")
 		return &HasAccessResponse{HasAccess: false}, nil
 	case req.User == nil:
 		return &HasAccessResponse{HasAccess: false}, &noUserProvided{}
@@ -68,9 +84,14 @@ func (s *ServerImpl) HasAccess(c context.Context, req *HasAccessRequest) (*HasAc
 	if err != nil {
 		return &HasAccessResponse{HasAccess: false}, err
 	}
+	s.logger.Debug("Parsed evaluator")
 
-	// TODO test this
-	hasAccess := accesscontrol.HasAccess(s.ac, &models.ReqContext{Context: web.FromContext(c), SignedInUser: req.User.toSignedInUser()})
+	// TODO replace this dirty hack
+	reqCtx := &models.ReqContext{
+		Context:      &web.Context{Req: (&http.Request{}).WithContext(c)},
+		SignedInUser: req.User.toSignedInUser(),
+	}
+	hasAccess := accesscontrol.HasAccess(s.ac, reqCtx)
 
 	return &HasAccessResponse{HasAccess: hasAccess(func(rc *models.ReqContext) bool { return false }, ev)}, nil
 }
