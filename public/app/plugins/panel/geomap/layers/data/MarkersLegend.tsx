@@ -5,7 +5,7 @@ import { css, cx } from '@emotion/css';
 import { config } from 'app/core/config';
 import { DimensionSupplier } from 'app/features/dimensions';
 import { getThresholdItems } from 'app/plugins/panel/state-timeline/utils';
-import { getMinMaxAndDelta } from '@grafana/data/src/field/scale';
+import { getMinMaxAndDelta } from '@grafana/data';
 import SVG from 'react-inlinesvg';
 import { StyleConfigState } from '../../style/types';
 import { ColorScale } from 'app/core/components/ColorScale/ColorScale';

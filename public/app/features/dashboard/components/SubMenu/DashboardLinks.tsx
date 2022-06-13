@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { useEffectOnce } from 'react-use';
 
-import { sanitizeUrl } from '@grafana/data/src/text/sanitize';
+import { sanitizeUrl } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { TimeRangeUpdatedEvent } from '@grafana/runtime';
 import { Icon, IconName, Tooltip, useForceUpdate } from '@grafana/ui';

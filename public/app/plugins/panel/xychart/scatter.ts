@@ -9,8 +9,8 @@ import {
   getFieldDisplayName,
   getFieldSeriesColor,
   GrafanaTheme2,
+  alpha,
 } from '@grafana/data';
-import { alpha } from '@grafana/data/src/themes/colorManipulator';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, ScaleDirection, ScaleOrientation, VisibilityMode } from '@grafana/schema';
 import { UPlotConfigBuilder, FacetedData, FacetSeries } from '@grafana/ui';

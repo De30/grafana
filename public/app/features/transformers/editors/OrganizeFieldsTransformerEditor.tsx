@@ -8,9 +8,9 @@ import {
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
+  OrganizeFieldsTransformerOptions,
+  createOrderFieldsComparer,
 } from '@grafana/data';
-import { createOrderFieldsComparer } from '@grafana/data/src/transformations/transformers/order';
-import { OrganizeFieldsTransformerOptions } from '@grafana/data/src/transformations/transformers/organize';
 import { stylesFactory, useTheme, Input, IconButton, Icon, FieldValidationMessage } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

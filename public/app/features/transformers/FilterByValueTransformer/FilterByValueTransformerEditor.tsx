@@ -13,13 +13,11 @@ import {
   FieldType,
   ValueMatcherID,
   valueMatchers,
-} from '@grafana/data';
-import {
   FilterByValueFilter,
   FilterByValueMatch,
   FilterByValueTransformerOptions,
   FilterByValueType,
-} from '@grafana/data/src/transformations/transformers/filterByValue';
+} from '@grafana/data';
 import { Button, RadioButtonGroup, stylesFactory } from '@grafana/ui';
 
 import { DataFrameFieldsInfo, FilterByValueFilterEditor } from './FilterByValueFilterEditor';

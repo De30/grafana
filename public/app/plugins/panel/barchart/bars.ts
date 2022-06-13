@@ -1,7 +1,6 @@
 import uPlot, { Axis, AlignedData, Scale } from 'uplot';
 
-import { DataFrame, GrafanaTheme2 } from '@grafana/data';
-import { alpha } from '@grafana/data/src/themes/colorManipulator';
+import { DataFrame, GrafanaTheme2, alpha } from '@grafana/data';
 import {
   StackingMode,
   VisibilityMode,

@@ -6,11 +6,9 @@ import {
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
-} from '@grafana/data';
-import {
   LabelsToFieldsMode,
   LabelsToFieldsOptions,
-} from '@grafana/data/src/transformations/transformers/labelsToFields';
+} from '@grafana/data';
 import { Stack } from '@grafana/experimental';
 import { InlineField, InlineFieldRow, RadioButtonGroup, Select, FilterPill } from '@grafana/ui';
 

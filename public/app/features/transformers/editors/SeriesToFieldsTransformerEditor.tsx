@@ -6,8 +6,8 @@ import {
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
+  SeriesToColumnsOptions,
 } from '@grafana/data';
-import { SeriesToColumnsOptions } from '@grafana/data/src/transformations/transformers/seriesToColumns';
 import { Select } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

@@ -7,11 +7,9 @@ import {
   getFieldColorModeForField,
   getFieldSeriesColor,
   GrafanaTheme2,
-} from '@grafana/data';
-import {
   histogramBucketSizes,
   histogramFrameBucketMaxFieldName,
-} from '@grafana/data/src/transformations/transformers/histogram';
+} from '@grafana/data';
 import {
   VizLegendOptions,
   LegendDisplayMode,

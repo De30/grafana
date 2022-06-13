@@ -9,8 +9,8 @@ import {
   getFieldDisplayValues,
   NumericRange,
   PanelProps,
+  findNumericFieldMinMax,
 } from '@grafana/data';
-import { findNumericFieldMinMax } from '@grafana/data/src/field/fieldOverrides';
 import { BigValueTextMode, BigValueGraphMode } from '@grafana/schema';
 import {
   BigValue,

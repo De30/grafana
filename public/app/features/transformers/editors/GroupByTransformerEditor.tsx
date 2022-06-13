@@ -8,12 +8,10 @@ import {
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
-} from '@grafana/data';
-import {
   GroupByFieldOptions,
   GroupByOperationID,
   GroupByTransformerOptions,
-} from '@grafana/data/src/transformations/transformers/groupBy';
+} from '@grafana/data';
 import { Select, StatsPicker, stylesFactory } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

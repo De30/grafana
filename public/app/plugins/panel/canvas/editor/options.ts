@@ -1,4 +1,4 @@
-import { PanelOptionsSupplier } from '@grafana/data/src/panel/PanelPlugin';
+import { PanelOptionsSupplier } from '@grafana/data';
 import { BackgroundImageSize, CanvasElementOptions } from 'app/features/canvas';
 import { ColorDimensionEditor, ResourceDimensionEditor } from 'app/features/dimensions/editors';
 

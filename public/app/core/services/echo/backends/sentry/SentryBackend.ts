@@ -1,8 +1,7 @@
 import { BrowserOptions, init as initSentry, setUser as sentrySetUser } from '@sentry/browser';
 import { FetchTransport } from '@sentry/browser/dist/transports';
 
-import { BuildInfo } from '@grafana/data';
-import { SentryConfig } from '@grafana/data/src/types/config';
+import { BuildInfo, SentryConfig } from '@grafana/data';
 import { EchoBackend, EchoEventType } from '@grafana/runtime';
 
 import { CustomEndpointTransport } from './transports/CustomEndpointTransport';

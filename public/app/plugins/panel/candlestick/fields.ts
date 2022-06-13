@@ -7,8 +7,8 @@ import {
   GrafanaTheme2,
   outerJoinDataFrames,
   TimeRange,
+  maybeSortFrame,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import { findField } from 'app/features/dimensions';
 
 import { prepareGraphableFields } from '../timeseries/utils';

@@ -1,5 +1,4 @@
-import { FieldColorModeId, FieldConfigProperty, PanelPlugin } from '@grafana/data';
-import { histogramFieldInfo } from '@grafana/data/src/transformations/transformers/histogram';
+import { FieldColorModeId, FieldConfigProperty, PanelPlugin, histogramFieldInfo } from '@grafana/data';
 import { commonOptionsBuilder, graphFieldOptions } from '@grafana/ui';
 
 import { HistogramPanel } from './HistogramPanel';

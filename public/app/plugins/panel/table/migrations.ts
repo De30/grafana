@@ -7,8 +7,8 @@ import {
   ThresholdsMode,
   ThresholdsConfig,
   FieldConfig,
+  ReduceTransformerOptions,
 } from '@grafana/data';
-import { ReduceTransformerOptions } from '@grafana/data/src/transformations/transformers/reduce';
 
 import { PanelOptions } from './models.gen';
 

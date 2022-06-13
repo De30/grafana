@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { PanelData } from '@grafana/data/src/types';
+import { PanelData } from '@grafana/data';
 import { EditorRows, EditorRow, EditorFieldGroup } from '@grafana/experimental';
 import { config } from '@grafana/runtime';
 import { InlineFieldRow, useStyles2 } from '@grafana/ui';

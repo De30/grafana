@@ -7,8 +7,8 @@ import {
   TransformerRegistryItem,
   TransformerUIProps,
   stringToJsRegex,
+  RenameByRegexTransformerOptions,
 } from '@grafana/data';
-import { RenameByRegexTransformerOptions } from '@grafana/data/src/transformations/transformers/renameByRegex';
 import { Field, Input } from '@grafana/ui';
 
 interface RenameByRegexTransformerEditorProps extends TransformerUIProps<RenameByRegexTransformerOptions> {}

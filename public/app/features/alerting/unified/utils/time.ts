@@ -1,4 +1,4 @@
-import { describeInterval } from '@grafana/data/src/datetime/rangeutil';
+import { describeInterval } from '@grafana/data';
 
 import { TimeOptions } from '../types/time';
 
