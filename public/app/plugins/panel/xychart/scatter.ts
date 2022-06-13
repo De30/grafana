@@ -9,8 +9,9 @@ import {
   getFieldDisplayName,
   getFieldSeriesColor,
   GrafanaTheme2,
-  alpha,
+  colorManipulator,
 } from '@grafana/data';
+import { alpha } from '@grafana/data/src/themes/colorManipulator';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, ScaleDirection, ScaleOrientation, VisibilityMode } from '@grafana/schema';
 import { UPlotConfigBuilder, FacetedData, FacetSeries } from '@grafana/ui';
@@ -598,7 +599,7 @@ const prepConfig = (
       theme,
       scaleKey: '', // facets' scales used (above)
       lineColor: lineColor as string,
-      fillColor: alpha(pointColor, 0.5),
+      fillColor: colorManipulator.alpha(pointColor, 0.5),
     });
   });
 

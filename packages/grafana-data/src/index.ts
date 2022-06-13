@@ -24,7 +24,7 @@ export type {
 export { LayoutModes } from './types/layout';
 export type { LayoutMode } from './types/layout';
 export { PanelPlugin } from './panel/PanelPlugin';
-export type { SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
+export type { PanelOptionsSupplier, SetFieldConfigOptionsArgs, StandardOptionConfig } from './panel/PanelPlugin';
 export { createFieldConfigRegistry } from './panel/registryFactories';
 export type { QueryRunner, QueryRunnerOptions } from './types/queryRunner';
 export type { GroupingToMatrixTransformerOptions } from './transformations/transformers/groupingToMatrix';

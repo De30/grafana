@@ -25,7 +25,7 @@ import {
   DataLinksContextMenu,
   SeriesTable,
   usePanelContext,
-  getTooltipContainerStyles,
+  styleMixins,
   useComponentInstanceId,
 } from '@grafana/ui';
 
@@ -434,7 +434,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       `,
     },
     tooltipPortal: css`
-      ${getTooltipContainerStyles(theme)}
+      ${styleMixins.getTooltipContainerStyles(theme)}
     `,
   };
 };

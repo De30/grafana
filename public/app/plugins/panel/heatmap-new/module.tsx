@@ -3,7 +3,7 @@ import React from 'react';
 import { FieldConfigProperty, FieldType, identityOverrideProcessor, PanelData, PanelPlugin } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, GraphFieldConfig, ScaleDistribution, ScaleDistributionConfig } from '@grafana/schema';
-import { addHideFrom, ScaleDistributionEditor } from '@grafana/ui';
+import { commonOptionsBuilder } from '@grafana/ui';
 import { ColorScale } from 'app/core/components/ColorScale/ColorScale';
 import { addHeatmapCalculationOptions } from 'app/features/transformers/calculateHeatmap/editor/helper';
 import { readHeatmapRowsCustomMeta } from 'app/features/transformers/calculateHeatmap/heatmap';
@@ -25,14 +25,14 @@ export const plugin = new PanelPlugin<PanelOptions, GraphFieldConfig>(HeatmapPan
         path: 'scaleDistribution',
         name: 'Y axis scale',
         category: ['Heatmap'],
-        editor: ScaleDistributionEditor as any,
-        override: ScaleDistributionEditor as any,
+        editor: commonOptionsBuilder.ScaleDistributionEditor as any,
+        override: commonOptionsBuilder.ScaleDistributionEditor as any,
         defaultValue: { type: ScaleDistribution.Linear },
         shouldApply: (f) => f.type === FieldType.number,
         process: identityOverrideProcessor,
         hideFromDefaults: true,
       });
-      addHideFrom(builder); // for tooltip etc
+      commonOptionsBuilder.addHideFrom(builder); // for tooltip etc
     },
   })
   .setPanelChangeHandler(heatmapChangedHandler)

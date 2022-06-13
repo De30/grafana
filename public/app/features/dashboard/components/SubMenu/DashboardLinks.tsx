@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { useEffectOnce } from 'react-use';
 
-import { sanitizeUrl } from '@grafana/data';
+import { textUtil } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { TimeRangeUpdatedEvent } from '@grafana/runtime';
 import { Icon, IconName, Tooltip, useForceUpdate } from '@grafana/ui';
@@ -43,7 +43,7 @@ export const DashboardLinks: FC<Props> = ({ dashboard, links }) => {
         const linkElement = (
           <a
             className="gf-form-label gf-form-label--dashlink"
-            href={sanitizeUrl(linkInfo.href)}
+            href={textUtil.sanitizeUrl(linkInfo.href)}
             target={link.targetBlank ? '_blank' : undefined}
             rel="noreferrer"
             data-testid={selectors.components.DashboardLinks.link}
