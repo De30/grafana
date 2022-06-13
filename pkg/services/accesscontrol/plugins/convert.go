@@ -58,11 +58,17 @@ func toEvaluator(ev *anypb.Any) (ac.Evaluator, error) {
 		if err := ev.UnmarshalTo(perm); err != nil {
 			return nil, err
 		}
+		if perm.GetAction() == "" {
+			return nil, &actionRequiredError{}
+		}
 		return ac.EvalPermission(perm.GetAction(), perm.Scope...), nil
 	case ev.MessageIs(&AnyEvaluator{}):
 		any := &AnyEvaluator{}
 		if err := ev.UnmarshalTo(any); err != nil {
 			return nil, err
+		}
+		if len(any.AnyOf) == 0 {
+			return nil, &actionRequiredError{}
 		}
 		anyOf := []ac.Evaluator{}
 		for _, a := range any.AnyOf {
@@ -78,6 +84,9 @@ func toEvaluator(ev *anypb.Any) (ac.Evaluator, error) {
 		if err := ev.UnmarshalTo(all); err != nil {
 			return nil, err
 		}
+		if len(all.AllOf) == 0 {
+			return nil, &actionRequiredError{}
+		}
 		allOf := []ac.Evaluator{}
 		for _, a := range all.AllOf {
 			acA, err := toEvaluator(a)
@@ -92,7 +101,6 @@ func toEvaluator(ev *anypb.Any) (ac.Evaluator, error) {
 	}
 }
 
-// TODO test this
 func (e *Evaluator) toEvaluator() (ac.Evaluator, error) {
 	if e.Ev == nil {
 		return nil, &noEvaluatorProvided{}

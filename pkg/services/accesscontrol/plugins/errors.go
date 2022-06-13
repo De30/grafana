@@ -17,3 +17,9 @@ type unknownEvaluator struct{}
 func (e *unknownEvaluator) Error() string {
 	return "unknown evaluator"
 }
+
+type actionRequiredError struct{}
+
+func (e *actionRequiredError) Error() string {
+	return "evaluator has no action"
+}
