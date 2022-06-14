@@ -22,6 +22,7 @@ import {
   urlUtil,
   ValueMap,
   ValueMapping,
+  standardTransformers,
 } from '@grafana/data';
 import { getDataSourceSrv, setDataSourceSrv } from '@grafana/runtime';
 import { AxisPlacement, GraphFieldConfig } from '@grafana/ui';
@@ -44,8 +45,6 @@ import { CloudWatchMetricsQuery, LegacyAnnotationQuery } from 'app/plugins/datas
 import { plugin as gaugePanelPlugin } from 'app/plugins/panel/gauge/module';
 import { plugin as statPanelPlugin } from 'app/plugins/panel/stat/module';
 
-import { labelsToFieldsTransformer } from '../../../../../packages/grafana-data/src/transformations/transformers/labelsToFields';
-import { mergeTransformer } from '../../../../../packages/grafana-data/src/transformations/transformers/merge';
 import {
   migrateCloudWatchQuery,
   migrateMultipleStatsAnnotationQuery,
@@ -688,9 +687,9 @@ export class DashboardMigrator {
       panelUpgrades.push((panel: PanelModel) => {
         if (panel.transformations) {
           for (const t of panel.transformations) {
-            if (t.id === labelsToFieldsTransformer.id) {
-              return appendTransformerAfter(panel, labelsToFieldsTransformer.id, {
-                id: mergeTransformer.id,
+            if (t.id === standardTransformers.labelsToFieldsTransformer.id) {
+              return appendTransformerAfter(panel, standardTransformers.labelsToFieldsTransformer.id, {
+                id: standardTransformers.mergeTransformer.id,
                 options: {},
               });
             }

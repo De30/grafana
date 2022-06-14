@@ -73,7 +73,7 @@ export { variableSuggestionToCodeEditorSuggestion } from './Monaco/utils';
 
 // TODO: namespace
 export { Modal } from './Modal/Modal';
-export type { getModalStyles } from './Modal/getModalStyles';
+export { getModalStyles } from './Modal/getModalStyles';
 export { ModalHeader } from './Modal/ModalHeader';
 export { ModalTabsHeader } from './Modal/ModalTabsHeader';
 export { ModalTabContent } from './Modal/ModalTabContent';

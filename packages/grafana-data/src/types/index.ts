@@ -46,8 +46,8 @@ export type {
   LicenseInfo,
   PreloadPlugin,
   SentryConfig,
-  GrafanaEdition,
 } from './config';
+export { GrafanaEdition } from './config';
 export type { FeatureToggles } from './featureToggles.gen';
 export * from './alerts';
 export * from './slider';
