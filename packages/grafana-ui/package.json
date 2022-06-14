@@ -18,6 +18,11 @@
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
   "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE_APACHE2"
+  ],
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json && rollup -c rollup.config.ts",
     "watch": "rollup -w -c rollup.config.ts",
