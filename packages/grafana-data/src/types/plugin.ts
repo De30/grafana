@@ -61,6 +61,9 @@ export interface PluginMeta<T extends KeyValue = {}> {
   module: string;
   baseUrl: string;
 
+  // Which frontend module loader to use (webpack or systemjs)
+  moduleLoader?: 'federated' | 'system';
+
   // Define plugin requirements
   dependencies?: PluginDependencies;
 

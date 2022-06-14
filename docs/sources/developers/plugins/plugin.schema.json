@@ -25,6 +25,11 @@
       "type": "string",
       "description": "Human-readable name of the plugin that is shown to the user in the UI."
     },
+    "moduleLoader": {
+      "type": "string",
+      "description": "Which frontend module loader to use (webpack or systemjs)",
+      "enum": ["system", "federated"]
+    },
     "category": {
       "type": "string",
       "description": "Plugin category used on the Add data source page.",
