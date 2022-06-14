@@ -2,12 +2,8 @@ import { css } from '@emotion/css';
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { GrafanaTheme2, SelectableValue, StandardEditorProps } from '@grafana/data';
-import { InlineField, InlineFieldRow, Select, useStyles2 } from '@grafana/ui';
+import { InlineField, InlineFieldRow, Select, useStyles2, useFieldDisplayNames, useSelectOptions } from '@grafana/ui';
 
-import {
-  useFieldDisplayNames,
-  useSelectOptions,
-} from '../../../../../packages/grafana-ui/src/components/MatchersUI/utils';
 import { validateScaleOptions, validateScaleConfig } from '../scale';
 import { ScaleDimensionConfig, ScaleDimensionOptions } from '../types';
 
