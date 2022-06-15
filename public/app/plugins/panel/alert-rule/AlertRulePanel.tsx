@@ -1,80 +1,21 @@
 import { css } from '@emotion/css';
-import React, { FC, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { FC } from 'react';
 
 import { GrafanaTheme2, PanelProps } from '@grafana/data';
-import { CustomScrollbar, LinkButton, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { RuleState } from 'app/features/alerting/unified/components/rules/RuleState';
-import { useCombinedRule } from 'app/features/alerting/unified/hooks/useCombinedRule';
-import { fetchAllPromRulesAction } from 'app/features/alerting/unified/state/actions';
-import { RULE_LIST_POLL_INTERVAL_MS } from 'app/features/alerting/unified/utils/constants';
-import { createViewLink } from 'app/features/alerting/unified/utils/misc';
-import { isAlertingRule } from 'app/features/alerting/unified/utils/rules';
-import { Alert } from 'app/types/unified-alerting';
+import { CustomScrollbar, useStyles2 } from '@grafana/ui';
 
 import { AlertRulePanelOptions } from './types';
 
 interface Props extends PanelProps<AlertRulePanelOptions> {}
-const errorMessage = 'Could not find data source for rule';
 export const AlertRulePanel: FC<Props> = ({ options, width, height }) => {
-  const { alertRule } = options;
-  const { loading, error, result: rule } = useCombinedRule(alertRule.ruleIdentifier, alertRule.ruleSource);
   const styles = useStyles2(getStyles);
-  const returnTo = location.pathname + location.search;
-  const dispatch = useDispatch();
-
-  //This needs to be replaced by listening to the dashboard refresh settings
-  useEffect(() => {
-    dispatch(fetchAllPromRulesAction());
-    const interval = setInterval(() => dispatch(fetchAllPromRulesAction()), RULE_LIST_POLL_INTERVAL_MS);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [dispatch]);
-
-  const alerts = useMemo(
-    (): Alert[] => (rule && isAlertingRule(rule.promRule) && rule.promRule.alerts?.length ? rule.promRule.alerts : []),
-    [rule]
-  );
-
-  if (!rule) {
-    return <span>Rule could not be found.</span>;
-  }
-
-  if (loading) {
-    return <LoadingPlaceholder text="Loading rule..." />;
-  }
-
-  if (error) {
-    return (
-      <details>
-        {error?.message ?? errorMessage}
-        <br />
-        {!!error?.stack && error.stack}
-      </details>
-    );
-  }
 
   return (
     <CustomScrollbar autoHeightMin="100%" autoHeightMax="100%">
       <div style={{ width, height }}>
-        <h4>{rule.name}</h4>
+        <h4>Rule name</h4>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div className={styles.ruleState}>
-            <RuleState rule={rule} isCreating={false} isDeleting={false} />
-            <div>
-              <LinkButton
-                className={styles.button}
-                size="xs"
-                key="view"
-                variant="secondary"
-                href={createViewLink(rule.namespace.rulesSource, rule, returnTo)}
-              >
-                View rule
-              </LinkButton>
-            </div>
-          </div>
-          <div>{/* Use some other way of visualizing instances */}</div>
+          <div className={styles.ruleState}>{/*Rule state*/}</div>
         </div>
       </div>
     </CustomScrollbar>
