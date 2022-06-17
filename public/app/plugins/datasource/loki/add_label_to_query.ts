@@ -4,14 +4,14 @@ import { parser } from '@grafana/lezer-logql';
 
 import { getString } from '../prometheus/querybuilder/shared/parsingUtils';
 
-type AddLabel = {
+type AddSelector = {
   key: string;
   value: string;
-  operator?: string;
+  operator: string;
 };
 
 type AddOperations = {
-  addLabel?: AddLabel;
+  addSelector?: AddSelector;
 };
 
 interface QueryContext {
@@ -24,12 +24,12 @@ function handleExpression(
   queryContext: QueryContext,
   queryParts: string[]
 ) {
-  // console.log(node.name, getString(queryContext.query, node));
+  // console.log(queryParts);
   switch (node.name) {
     case 'Selector': {
-      if (operations.addLabel) {
+      if (operations.addSelector) {
         const selector = getString(queryContext.query, node);
-        const newSelector = addToSelector(selector, operations.addLabel);
+        const newSelector = addToSelector(selector, operations.addSelector);
         queryContext.query = updateQuery(queryContext.query, node, newSelector);
       }
     }
@@ -70,17 +70,9 @@ function handleExpression(
   }
 }
 
-export function addLabelToQuery(query: string, key: string, value: string | number, operator?: string): string {
-  if (!key || !value) {
-    throw new Error('Need label to add to query.');
-  }
-
+export function addOperations(query: string, operations: AddOperations): string {
   const queryContext: QueryContext = {
     query: query,
-  };
-
-  const operations: AddOperations = {
-    addLabel: { key, value: value === Infinity ? '+Inf' : value.toString(), operator },
   };
 
   const tree = parser.parse(query);
@@ -94,7 +86,9 @@ export function addLabelToQuery(query: string, key: string, value: string | numb
     console.log('err', err);
   }
 
-  return queryContext.query;
+  const finalQuery = queryContext.query;
+  console.log(finalQuery);
+  return finalQuery;
 }
 
 function getQueryParts(node: SyntaxNode, parts: string[]) {
@@ -106,7 +100,7 @@ function getQueryParts(node: SyntaxNode, parts: string[]) {
   }
 }
 
-function addToSelector(selector: string, addLabel: AddLabel): string {
+function addToSelector(selector: string, addLabel: AddSelector): string {
   const operator = addLabel.operator ? addLabel.operator : '=';
   return selector.slice(0, selector.length - 1) + `, ${addLabel.key}${operator}"${addLabel.value}"}`;
 }
@@ -114,5 +108,3 @@ function addToSelector(selector: string, addLabel: AddLabel): string {
 function updateQuery(query: string, replacementNode: SyntaxNode, replacement: string): string {
   return query.slice(0, replacementNode.from) + replacement + query.slice(replacementNode.to, query.length);
 }
-
-export default addLabelToQuery;
