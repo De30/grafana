@@ -1,140 +1,118 @@
-import { chain, isEqual } from 'lodash';
+import { SyntaxNode } from '@lezer/common';
 
-import { PROM_KEYWORDS, OPERATORS, LOGICAL_OPERATORS } from 'app/plugins/datasource/prometheus/promql';
+import { parser } from '@grafana/lezer-logql';
 
-import { LOKI_KEYWORDS } from './syntax';
+import { getString } from '../prometheus/querybuilder/shared/parsingUtils';
 
-const builtInWords = [...PROM_KEYWORDS, ...OPERATORS, ...LOGICAL_OPERATORS, ...LOKI_KEYWORDS];
+type AddLabel = {
+  key: string;
+  value: string;
+  operator?: string;
+};
 
-// We want to extract all possible metrics and also keywords
-const metricsAndKeywordsRegexp = /([A-Za-z:][\w:]*)\b(?![\]{=!",])/g;
+type AddOperations = {
+  addLabel?: AddLabel;
+};
 
-export function addLabelToQuery(
-  query: string,
-  key: string,
-  value: string | number,
-  operator?: string,
-  hasNoMetrics?: boolean
-): string {
+interface QueryContext {
+  query: string;
+}
+
+function handleExpression(
+  node: SyntaxNode,
+  operations: AddOperations,
+  queryContext: QueryContext,
+  queryParts: string[]
+) {
+  // console.log(node.name, getString(queryContext.query, node));
+  switch (node.name) {
+    case 'Selector': {
+      if (operations.addLabel) {
+        const selector = getString(queryContext.query, node);
+        const newSelector = addToSelector(selector, operations.addLabel);
+        queryContext.query = updateQuery(queryContext.query, node, newSelector);
+      }
+    }
+
+    // case 'LineFilters': {
+    //   if (operations.addLineFilter) {
+    //     const { query } = queryContext;
+    //     const lineFilters = getString(query, node);
+    //     const { value, operator } = operations.addLineFilter;
+    //     console.log('lineFilters', lineFilters);
+
+    //     const newLineFilters = lineFilters + ` ${operator} "${value}"`;
+    //     queryContext.query = query.slice(0, node.from) + newLineFilters + query.slice(node.to, query.length);
+
+    //     // console.log('query', query);
+    //     // console.log('node.from', node.from);
+    //     // console.log('start', query.slice(0, node.from));
+    //     // console.log('operator', ` ${operator} "${value}"`);
+    //     // console.log('end', query.slice(node.to, query.length));
+    //     // console.log('alt end', query.slice(node.to, query.length - 1));
+
+    //     queryContext.query = query.slice(0, node.from) + +query.slice(node.to, query.length);
+    //   }
+    // }
+
+    default: {
+      // Any other nodes we just ignore and go to it's children. This should be fine as there are lot's of wrapper
+      // nodes that can be skipped.
+      // TODO: there are probably cases where we will just skip nodes we don't support and we should be able to
+      //  detect those and report back.
+      // console.log('other', node.name, getString(expr, node));
+      let child = node.firstChild;
+      while (child) {
+        handleExpression(child, operations, queryContext, queryParts);
+        child = child.nextSibling;
+      }
+    }
+  }
+}
+
+export function addLabelToQuery(query: string, key: string, value: string | number, operator?: string): string {
   if (!key || !value) {
     throw new Error('Need label to add to query.');
   }
 
-  // We need to make sure that we convert the value back to string because it may be a number
-  const transformedValue = value === Infinity ? '+Inf' : value.toString();
+  const queryContext: QueryContext = {
+    query: query,
+  };
 
-  // Add empty selectors to bare metric names
-  let previousWord: string;
+  const operations: AddOperations = {
+    addLabel: { key, value: value === Infinity ? '+Inf' : value.toString(), operator },
+  };
 
-  query = query.replace(metricsAndKeywordsRegexp, (match, word, offset) => {
-    const isMetric = isWordMetric(query, word, offset, previousWord, hasNoMetrics);
-    previousWord = word;
+  const tree = parser.parse(query);
+  const node = tree.topNode;
 
-    return isMetric ? `${word}{}` : word;
-  });
-
-  //This is a RegExp for stream selector - e.g. {job="grafana"}
-  const selectorRegexp = /(\$)?{([^{]*)}/g;
-  const parts = [];
-  let lastIndex = 0;
-  let suffix = '';
-
-  let match = selectorRegexp.exec(query);
-  /* 
-    There are 2 possible false positive scenarios: 
-    
-    1. We match Grafana's variables with ${ syntax - such as${__rate_s}. To filter these out we could use negative lookbehind,
-    but Safari browser currently doesn't support it. Therefore we need to hack this by creating 2 matching groups. 
-    (\$) is for the Grafana's variables and if we match it, we know this is not a stream selector and we don't want to add label.
-
-    2. Log queries can include {{.label}} syntax when line_format is used. We need to filter these out by checking
-    if match starts with "{."
-  */
-  while (match) {
-    const prefix = query.slice(lastIndex, match.index);
-    lastIndex = match.index + match[2].length + 2;
-    suffix = query.slice(match.index + match[0].length);
-
-    // Filtering our false positives
-    if (match[0].startsWith('{.') || match[1]) {
-      parts.push(prefix);
-      parts.push(match[0]);
-    } else {
-      // If we didn't match first group, we are inside selector and we want to add labels
-      const selector = match[2];
-      const selectorWithLabel = addLabelToSelector(selector, key, transformedValue, operator);
-      parts.push(prefix, selectorWithLabel);
-    }
-
-    match = selectorRegexp.exec(query);
+  try {
+    const queryParts: string[] = [];
+    getQueryParts(node, queryParts);
+    handleExpression(node, operations, queryContext, queryParts);
+  } catch (err) {
+    console.log('err', err);
   }
 
-  parts.push(suffix);
-  return parts.join('');
+  return queryContext.query;
 }
 
-const labelRegexp = /(\w+)\s*(=|!=|=~|!~)\s*("[^"]*")/g;
-
-export function addLabelToSelector(selector: string, labelKey: string, labelValue: string, labelOperator?: string) {
-  const parsedLabels = [];
-
-  // Split selector into labels
-  if (selector) {
-    let match = labelRegexp.exec(selector);
-    while (match) {
-      parsedLabels.push({ key: match[1], operator: match[2], value: match[3] });
-      match = labelRegexp.exec(selector);
-    }
+function getQueryParts(node: SyntaxNode, parts: string[]) {
+  parts.push(node.name);
+  let child = node.firstChild;
+  while (child) {
+    getQueryParts(child, parts);
+    child = child.nextSibling;
   }
-
-  // Add new label
-  const operatorForLabelKey = labelOperator || '=';
-  parsedLabels.push({ key: labelKey, operator: operatorForLabelKey, value: `"${labelValue}"` });
-
-  // Sort labels by key and put them together
-  const formatted = chain(parsedLabels)
-    .uniqWith(isEqual)
-    .compact()
-    .sortBy('key')
-    .map(({ key, operator, value }) => `${key}${operator}${value}`)
-    .value()
-    .join(',');
-
-  return `{${formatted}}`;
 }
 
-function isPositionInsideChars(text: string, position: number, openChar: string, closeChar: string) {
-  const nextSelectorStart = text.slice(position).indexOf(openChar);
-  const nextSelectorEnd = text.slice(position).indexOf(closeChar);
-  return nextSelectorEnd > -1 && (nextSelectorStart === -1 || nextSelectorStart > nextSelectorEnd);
+function addToSelector(selector: string, addLabel: AddLabel): string {
+  const operator = addLabel.operator ? addLabel.operator : '=';
+  return selector.slice(0, selector.length - 1) + `, ${addLabel.key}${operator}"${addLabel.value}"}`;
 }
 
-function isWordMetric(query: string, word: string, offset: number, previousWord: string, hasNoMetrics?: boolean) {
-  const insideSelector = isPositionInsideChars(query, offset, '{', '}');
-  // Handle "sum by (key) (metric)"
-  const previousWordIsKeyWord = previousWord && OPERATORS.indexOf(previousWord) > -1;
-  // Check for colon as as "word boundary" symbol
-  const isColonBounded = word.endsWith(':');
-  // Check for words that start with " which means that they are not metrics
-  const startsWithQuote = query[offset - 1] === '"';
-  // Check for template variables
-  const isTemplateVariable = query[offset - 1] === '$';
-  // Check for time units
-  const isTimeUnit = ['s', 'm', 'h', 'd', 'w'].includes(word) && Boolean(Number(query[offset - 1]));
-
-  if (
-    !hasNoMetrics &&
-    !insideSelector &&
-    !isColonBounded &&
-    !previousWordIsKeyWord &&
-    !startsWithQuote &&
-    !isTemplateVariable &&
-    !isTimeUnit &&
-    builtInWords.indexOf(word) === -1
-  ) {
-    return true;
-  }
-  return false;
+function updateQuery(query: string, replacementNode: SyntaxNode, replacement: string): string {
+  return query.slice(0, replacementNode.from) + replacement + query.slice(replacementNode.to, query.length);
 }
 
 export default addLabelToQuery;

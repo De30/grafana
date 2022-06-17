@@ -656,7 +656,7 @@ export class LokiDatasource
       // If query has parser, we treat all labels as parsed and use | key="value" syntax
       return addParsedLabelToQuery(queryExpr, key, escapedValue, operator);
     } else {
-      return addLabelToQuery(queryExpr, key, escapedValue, operator, true);
+      return addLabelToQuery(queryExpr, key, escapedValue, operator);
     }
   }
 
