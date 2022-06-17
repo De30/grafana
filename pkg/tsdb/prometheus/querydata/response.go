@@ -14,17 +14,17 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-func (s *QueryData) parseResponse(ctx context.Context, q *models.Query, res *http.Response) (*backend.DataResponse, error) {
+func (qd *QueryData) parseResponse(ctx context.Context, q *models.Query, res *http.Response) (*backend.DataResponse, error) {
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			s.log.Error("Failed to close response body", "err", err)
+			qd.log.Error("Failed to close response body", "err", err)
 		}
 	}()
 
 	iter := jsoniter.Parse(jsoniter.ConfigDefault, res.Body, 1024)
 	r := converter.ReadPrometheusStyleResult(iter, converter.Options{
-		MatrixWideSeries: s.enableWideSeries,
-		VectorWideSeries: s.enableWideSeries,
+		MatrixWideSeries: qd.enableWideSeries,
+		VectorWideSeries: qd.enableWideSeries,
 	})
 	if r == nil {
 		return nil, fmt.Errorf("received empty response from prometheus")
@@ -32,7 +32,7 @@ func (s *QueryData) parseResponse(ctx context.Context, q *models.Query, res *htt
 
 	// The ExecutedQueryString can be viewed in QueryInspector in UI
 	for _, frame := range r.Frames {
-		if s.enableWideSeries {
+		if qd.enableWideSeries {
 			addMetadataToWideFrame(q, frame)
 		} else {
 			addMetadataToMultiFrame(q, frame)

@@ -15,7 +15,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/tsdb/intervalv2"
-	"github.com/grafana/grafana/pkg/tsdb/prometheus/client"
+	prometheusClient "github.com/grafana/grafana/pkg/tsdb/prometheus/client"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/models"
 	"github.com/grafana/grafana/pkg/util/maputil"
 	"go.opentelemetry.io/otel/attribute"
@@ -25,7 +25,7 @@ const legendFormatAuto = "__auto"
 
 var legendFormatRegexp = regexp.MustCompile(`\{\{\s*(.+?)\s*\}\}`)
 
-type clientGetter func(map[string]string) (*client.Client, error)
+type clientGetter func(map[string]string) (*prometheusClient.Client, error)
 
 type ExemplarEvent struct {
 	Time   time.Time
@@ -62,17 +62,13 @@ func New(
 		return nil, err
 	}
 
-	p := client.NewProvider(settings, jsonData, httpClientProvider, cfg, features, plog)
-	pc, err := client.NewProviderCache(p)
-	if err != nil {
-		return nil, err
-	}
+	provider := prometheusClient.NewProvider(settings, jsonData, httpClientProvider, cfg, features, plog)
 
 	return &QueryData{
 		intervalCalculator: intervalv2.NewCalculator(),
 		tracer:             tracer,
 		log:                plog,
-		getClient:          pc.GetClient,
+		getClient:          provider.GetClient,
 		TimeInterval:       timeInterval,
 		ID:                 settings.ID,
 		URL:                settings.URL,
@@ -80,28 +76,28 @@ func New(
 	}, nil
 }
 
-func (s *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+func (qd *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
 	fromAlert := req.Headers["FromAlert"] == "true"
 	result := backend.QueryDataResponse{
 		Responses: backend.Responses{},
 	}
 
-	client, err := s.getClient(req.Headers)
+	client, err := qd.getClient(req.Headers)
 	if err != nil {
 		return &result, err
 	}
 
 	for _, q := range req.Queries {
-		query, err := models.Parse(q, s.TimeInterval, s.intervalCalculator, fromAlert)
+		query, err := models.Parse(q, qd.TimeInterval, qd.intervalCalculator, fromAlert)
 		if err != nil {
 			return &result, err
 		}
-		r, err := s.fetch(ctx, client, query)
+		r, err := qd.fetch(ctx, client, query)
 		if err != nil {
 			return &result, err
 		}
 		if r == nil {
-			s.log.Debug("Received nilresponse from runQuery", "query", query.Expr)
+			qd.log.Debug("Received nil response from runQuery", "query", query.Expr)
 			continue
 		}
 		result.Responses[q.RefID] = *r
@@ -110,10 +106,10 @@ func (s *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) 
 	return &result, nil
 }
 
-func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.Query) (*backend.DataResponse, error) {
-	s.log.Debug("Sending query", "start", q.Start, "end", q.End, "step", q.Step, "query", q.Expr)
+func (qd *QueryData) fetch(ctx context.Context, client *prometheusClient.Client, q *models.Query) (*backend.DataResponse, error) {
+	qd.log.Debug("Sending query", "start", q.Start, "end", q.End, "step", q.Step, "query", q.Expr)
 
-	traceCtx, span := s.trace(ctx, q)
+	traceCtx, span := qd.trace(ctx, q)
 	defer span.End()
 
 	response := &backend.DataResponse{
@@ -122,7 +118,7 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 	}
 
 	if q.RangeQuery {
-		res, err := s.rangeQuery(traceCtx, client, q)
+		res, err := qd.rangeQuery(traceCtx, client, q)
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +126,7 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 	}
 
 	if q.InstantQuery {
-		res, err := s.instantQuery(traceCtx, client, q)
+		res, err := qd.instantQuery(traceCtx, client, q)
 		if err != nil {
 			return nil, err
 		}
@@ -138,11 +134,11 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 	}
 
 	if q.ExemplarQuery {
-		res, err := s.exemplarQuery(traceCtx, client, q)
+		res, err := qd.exemplarQuery(traceCtx, client, q)
 		if err != nil {
 			// If exemplar query returns error, we want to only log it and
 			// continue with other results processing
-			s.log.Error("Exemplar query failed", "query", q.Expr, "err", err)
+			qd.log.Error("Exemplar query failed", "query", q.Expr, "err", err)
 		}
 		if res != nil {
 			response.Frames = append(response.Frames, res.Frames...)
@@ -152,32 +148,32 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 	return response, nil
 }
 
-func (s *QueryData) rangeQuery(ctx context.Context, c *client.Client, q *models.Query) (*backend.DataResponse, error) {
+func (qd *QueryData) rangeQuery(ctx context.Context, c *prometheusClient.Client, q *models.Query) (*backend.DataResponse, error) {
 	res, err := c.QueryRange(ctx, q)
 	if err != nil {
 		return nil, err
 	}
-	return s.parseResponse(ctx, q, res)
+	return qd.parseResponse(ctx, q, res)
 }
 
-func (s *QueryData) instantQuery(ctx context.Context, c *client.Client, q *models.Query) (*backend.DataResponse, error) {
+func (qd *QueryData) instantQuery(ctx context.Context, c *prometheusClient.Client, q *models.Query) (*backend.DataResponse, error) {
 	res, err := c.QueryInstant(ctx, q)
 	if err != nil {
 		return nil, err
 	}
-	return s.parseResponse(ctx, q, res)
+	return qd.parseResponse(ctx, q, res)
 }
 
-func (s *QueryData) exemplarQuery(ctx context.Context, c *client.Client, q *models.Query) (*backend.DataResponse, error) {
+func (qd *QueryData) exemplarQuery(ctx context.Context, c *prometheusClient.Client, q *models.Query) (*backend.DataResponse, error) {
 	res, err := c.QueryExemplars(ctx, q)
 	if err != nil {
 		return nil, err
 	}
-	return s.parseResponse(ctx, q, res)
+	return qd.parseResponse(ctx, q, res)
 }
 
-func (s *QueryData) trace(ctx context.Context, q *models.Query) (context.Context, tracing.Span) {
-	traceCtx, span := s.tracer.Start(ctx, "datasource.prometheus")
+func (qd *QueryData) trace(ctx context.Context, q *models.Query) (context.Context, tracing.Span) {
+	traceCtx, span := qd.tracer.Start(ctx, "datasource.prometheus")
 	span.SetAttributes("expr", q.Expr, attribute.Key("expr").String(q.Expr))
 	span.SetAttributes("start_unixnano", q.Start, attribute.Key("start_unixnano").Int64(q.Start.UnixNano()))
 	span.SetAttributes("stop_unixnano", q.End, attribute.Key("stop_unixnano").Int64(q.End.UnixNano()))
