@@ -82,8 +82,10 @@ func LoadGrafanaInstancesWithThema(
 	return lin, nil
 }
 
-// prefixWithGrafanaCUE constructs an fs.FS that merges the provided fs.FS with one
-// containing grafana's cue.mod at the root. The provided prefix should be the
+// prefixWithGrafanaCUE constructs an fs.FS that merges the provided fs.FS with
+// one containing grafana's cue.mod at the root. The provided prefix should be
+// the relative path from the grafana root to the parent directory containing
+// the desired CUE file to load.
 //
 // The returned fs.FS is suitable for passing to a CUE loader, such as
 // cuelang.org/cue/load.Instances or

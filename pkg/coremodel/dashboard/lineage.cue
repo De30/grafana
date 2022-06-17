@@ -3,12 +3,12 @@ package dashboard
 import (
 	"strings"
 
-	"github.com/grafana/thema"
+	"github.com/grafana/grafana/pkg/framework/coremodel"
 )
 
-thema.#Lineage
+coremodel.#Coremodel
 name: "dashboard"
-seqs: [
+lineage: seqs: [
 	{
 		schemas: [
 			{// 0.0
