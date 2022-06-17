@@ -44,7 +44,7 @@ import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_sr
 import { serializeParams } from '../../../core/utils/fetch';
 import { renderLegendFormat } from '../prometheus/legend';
 
-import { addOperations } from './add_label_to_query';
+import { addOperations } from './addQueryOperations';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
 import LanguageProvider from './language_provider';
@@ -652,12 +652,7 @@ export class LokiDatasource
   ) {
     let escapedValue = escapeLabelValueInSelector(value === Infinity ? '+Inf' : value.toString(), operator);
 
-    // if (queryHasPipeParser(queryExpr) && !isMetricsQuery(queryExpr) && !notParsedLabelOverride) {
-    //   // If query has parser, we treat all labels as parsed and use | key="value" syntax
-    //   return addParsedLabelToQuery(queryExpr, key, escapedValue, operator);
-    // } else {
     return addOperations(queryExpr, { addSelector: { key, value: escapedValue, operator } });
-    // }
   }
 
   // Used when running queries through backend

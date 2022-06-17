@@ -6,7 +6,7 @@ import { getString } from '../prometheus/querybuilder/shared/parsingUtils';
 
 type AddSelector = {
   key: string;
-  value: string;
+  value: string | number;
   operator: string;
 };
 
@@ -24,43 +24,26 @@ function handleExpression(
   queryContext: QueryContext,
   queryParts: string[]
 ) {
-  // console.log(queryParts);
   switch (node.name) {
     case 'Selector': {
-      if (operations.addSelector) {
+      if (operations.addSelector && !queryParts.includes('LabelParser')) {
         const selector = getString(queryContext.query, node);
         const newSelector = addToSelector(selector, operations.addSelector);
         queryContext.query = updateQuery(queryContext.query, node, newSelector);
       }
+      break;
     }
 
-    // case 'LineFilters': {
-    //   if (operations.addLineFilter) {
-    //     const { query } = queryContext;
-    //     const lineFilters = getString(query, node);
-    //     const { value, operator } = operations.addLineFilter;
-    //     console.log('lineFilters', lineFilters);
-
-    //     const newLineFilters = lineFilters + ` ${operator} "${value}"`;
-    //     queryContext.query = query.slice(0, node.from) + newLineFilters + query.slice(node.to, query.length);
-
-    //     // console.log('query', query);
-    //     // console.log('node.from', node.from);
-    //     // console.log('start', query.slice(0, node.from));
-    //     // console.log('operator', ` ${operator} "${value}"`);
-    //     // console.log('end', query.slice(node.to, query.length));
-    //     // console.log('alt end', query.slice(node.to, query.length - 1));
-
-    //     queryContext.query = query.slice(0, node.from) + +query.slice(node.to, query.length);
-    //   }
-    // }
+    case 'LabelParser': {
+      if (operations.addSelector && queryParts.includes('LabelParser')) {
+        const parser = getString(queryContext.query, node);
+        const parserWithParsedLabels = addParsedLabelAfterParser(parser, operations.addSelector);
+        queryContext.query = updateQuery(queryContext.query, node, parserWithParsedLabels);
+      }
+      break;
+    }
 
     default: {
-      // Any other nodes we just ignore and go to it's children. This should be fine as there are lot's of wrapper
-      // nodes that can be skipped.
-      // TODO: there are probably cases where we will just skip nodes we don't support and we should be able to
-      //  detect those and report back.
-      // console.log('other', node.name, getString(expr, node));
       let child = node.firstChild;
       while (child) {
         handleExpression(child, operations, queryContext, queryParts);
@@ -71,6 +54,9 @@ function handleExpression(
 }
 
 export function addOperations(query: string, operations: AddOperations): string {
+  if (!query) {
+    throw Error('no query provided');
+  }
   const queryContext: QueryContext = {
     query: query,
   };
@@ -87,7 +73,6 @@ export function addOperations(query: string, operations: AddOperations): string 
   }
 
   const finalQuery = queryContext.query;
-  console.log(finalQuery);
   return finalQuery;
 }
 
@@ -101,8 +86,16 @@ function getQueryParts(node: SyntaxNode, parts: string[]) {
 }
 
 function addToSelector(selector: string, addLabel: AddSelector): string {
-  const operator = addLabel.operator ? addLabel.operator : '=';
-  return selector.slice(0, selector.length - 1) + `, ${addLabel.key}${operator}"${addLabel.value}"}`;
+  const { key, operator, value } = addLabel;
+  if (selector === '{}') {
+    return `{${key}${operator}"${value}"}`;
+  }
+  return selector.slice(0, selector.length - 1) + `,${key}${operator}"${value}"}`;
+}
+
+function addParsedLabelAfterParser(parser: string, addLabel: AddSelector): string {
+  const { key, operator, value } = addLabel;
+  return parser + ` | ${key}${operator}"${value}"`;
 }
 
 function updateQuery(query: string, replacementNode: SyntaxNode, replacement: string): string {
