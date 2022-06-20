@@ -1,14 +1,14 @@
 import { cx, css } from '@emotion/css';
 import React, { PureComponent, SyntheticEvent } from 'react';
 
-import { GrafanaTheme } from '@grafana/data';
+import { GrafanaTheme2 } from '@grafana/data';
 
-import { stylesFactory, withTheme } from '../../themes';
-import { Themeable } from '../../types';
+import { withTheme2 } from '../../themes';
+import { Themeable2 } from '../../types';
 import { ComponentSize } from '../../types/size';
 import { Button, ButtonVariant } from '../Button';
 
-export interface Props extends Themeable {
+export interface Props extends Themeable2 {
   /** Confirm action callback */
   onConfirm(): void;
   /** Custom button styles */
@@ -143,9 +143,9 @@ class UnThemedConfirmButton extends PureComponent<Props, State> {
   }
 }
 
-export const ConfirmButton = withTheme(UnThemedConfirmButton);
+export const ConfirmButton = withTheme2(UnThemedConfirmButton);
 
-const getStyles = stylesFactory((theme: GrafanaTheme) => {
+const getStyles = (theme: GrafanaTheme2) => {
   return {
     buttonContainer: css`
       display: flex;
@@ -171,7 +171,6 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
     `,
     confirmButton: css`
       align-items: flex-start;
-      background: ${theme.colors.bg1};
       display: flex;
       position: absolute;
       pointer-events: none;
@@ -193,7 +192,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme) => {
       cursor: not-allowed;
     `,
   };
-});
+};
 
 // Declare defaultProps directly on the themed component so they are displayed
 // in the props table
