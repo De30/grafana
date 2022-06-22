@@ -291,17 +291,14 @@ func (ss *SQLStore) UpdateDataSource(ctx context.Context, cmd *datasources.Updat
 
 func (ss *SQLStore) UpdateCorrelations(ctx context.Context, cmd *datasources.UpdateCorrelationsCommand) error {
 	return ss.WithTransactionalDbSession(ctx, func(sess *DBSession) error {
-		ds := &datasources.DataSource{
-			Id:           cmd.Id,
-			OrgId:        cmd.OrgId,
+		ds := datasources.DataSource{
 			Correlations: cmd.Correlations,
 			Updated:      time.Now(),
 		}
 
 		// TODO: should we also check for version here instead (like UpdateDatasource)?
-		var updateSession = sess.Where("id=? and org_id=?", ds.Id, ds.OrgId)
 
-		affected, err := updateSession.Update(ds)
+		affected, err := sess.Where("id=? and org_id=?", cmd.Id, cmd.OrgId).MustCols("correlations").Omit("json_data").Update(ds)
 		if err != nil {
 			return err
 		}

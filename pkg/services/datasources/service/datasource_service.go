@@ -245,22 +245,10 @@ func (s *Service) GetDefaultDataSource(ctx context.Context, query *datasources.G
 // 	3) do nothing and handle it in the FE
 func (s *Service) CreateCorrelation(ctx context.Context, cmd *datasources.CreateCorrelationCommand) error {
 	return s.SQLStore.InTransaction(ctx, func(ctx context.Context) error {
-		var err error
-
-		// TODO: the following is far from efficient, but should be enough to get a POC running
-		query := &datasources.GetDataSourceQuery{
-			OrgId: cmd.OrgID,
-			Uid:   cmd.SourceUID,
-		}
-
-		if err = s.SQLStore.GetDataSource(ctx, query); err != nil {
-			// Source datasource does not exist
+		// check if source exists and is editable
+		err, ds := s.getEditableCorrelationSource(ctx, cmd.OrgID, cmd.SourceUID)
+		if err != nil {
 			return err
-		}
-
-		ds := query.Result
-		if ds.ReadOnly {
-			return datasources.ErrDatasourceIsReadOnly
 		}
 
 		if err = s.SQLStore.GetDataSource(ctx, &datasources.GetDataSourceQuery{
@@ -271,6 +259,9 @@ func (s *Service) CreateCorrelation(ctx context.Context, cmd *datasources.Create
 			return err
 		}
 
+		// As of now we technically support only a single source+target correlation,
+		// but this may change. In that case we'll have to rely on a generated UID
+		// to identify a single correlation and refactor this logic
 		for _, correlation := range ds.Correlations {
 			if correlation.Target == cmd.TargetUID {
 				return datasources.ErrCorrelationExists
@@ -295,6 +286,58 @@ func (s *Service) CreateCorrelation(ctx context.Context, cmd *datasources.Create
 
 		return err
 	})
+}
+
+func (s *Service) DeleteCorrelation(ctx context.Context, cmd *datasources.DeleteCorrelationCommand) error {
+	return s.SQLStore.InTransaction(ctx, func(ctx context.Context) error {
+		// check if source exists and is editable
+		err, ds := s.getEditableCorrelationSource(ctx, cmd.OrgID, cmd.SourceUID)
+		if err != nil {
+			return err
+		}
+
+		correlations := make([]datasources.Correlation, 0)
+		var found = false
+		for _, c := range ds.Correlations {
+			// This will also delete any eventual duplicate as a side effect.
+			// As of now we support only a single source+target correlation,
+			// but this may change. In that case we'll have to refactor this and match
+			// against the correlation unique ID instead
+			if c.Target == cmd.TargetUID {
+				found = true
+			} else {
+				correlations = append(correlations, c)
+			}
+		}
+		if !found {
+			return datasources.ErrCorrelationNotFound
+		}
+
+		return s.SQLStore.UpdateCorrelations(ctx, &datasources.UpdateCorrelationsCommand{
+			Id:           ds.Id,
+			OrgId:        cmd.OrgID,
+			Correlations: correlations,
+		})
+	})
+}
+
+func (s *Service) getEditableCorrelationSource(ctx context.Context, orgId int64, uid string) (error, *datasources.DataSource) {
+	query := &datasources.GetDataSourceQuery{
+		OrgId: orgId,
+		Uid:   uid,
+	}
+
+	if err := s.SQLStore.GetDataSource(ctx, query); err != nil {
+		// datasource does not exist
+		return err, nil
+	}
+
+	ds := query.Result
+	if ds.ReadOnly {
+		return datasources.ErrDatasourceIsReadOnly, nil
+	}
+
+	return nil, query.Result
 }
 
 func (s *Service) GetHTTPClient(ctx context.Context, ds *datasources.DataSource, provider httpclient.Provider) (*http.Client, error) {

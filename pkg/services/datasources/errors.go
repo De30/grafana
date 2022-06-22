@@ -12,4 +12,5 @@ var (
 	ErrDataSourceIdentifierNotSet        = errors.New("unique identifier and org id are needed to be able to get or delete a datasource")
 	ErrDatasourceIsReadOnly              = errors.New("data source is readonly, can only be updated from configuration")
 	ErrCorrelationExists                 = errors.New("correlation to the same datasource already exists")
+	ErrCorrelationNotFound               = errors.New("correlation not found")
 )

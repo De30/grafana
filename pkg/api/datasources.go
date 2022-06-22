@@ -465,6 +465,38 @@ func (hs *HTTPServer) CreateCorrelation(c *models.ReqContext) response.Response 
 	})
 }
 
+// Delete /api/datasources/:uid/correlation/:targetUid
+func (hs *HTTPServer) DeleteCorrelation(c *models.ReqContext) response.Response {
+	cmd := datasources.DeleteCorrelationCommand{
+		OrgID:     c.OrgId,
+		SourceUID: web.Params(c.Req)[":uid"],
+		TargetUID: web.Params(c.Req)[":targetUid"],
+	}
+
+	err := hs.DataSourcesService.DeleteCorrelation(c.Req.Context(), &cmd)
+
+	if err != nil {
+		if errors.Is(err, datasources.ErrDataSourceNotFound) {
+			return response.Error(http.StatusNotFound, "Data source not found", nil)
+		}
+		if errors.Is(err, datasources.ErrDatasourceIsReadOnly) {
+			return response.Error(http.StatusForbidden, "Data source is read only", nil)
+		}
+		if errors.Is(err, datasources.ErrCorrelationNotFound) {
+			return response.Error(http.StatusForbidden, "Correlation not found", nil)
+		}
+
+		return response.Error(http.StatusInternalServerError, "Failed to query datasources", err)
+	}
+
+	// TODO: maybe this?
+	// hs.Live.HandleDatasourceUpdate(c.OrgId, cmd.SourceUID)
+
+	return response.JSON(http.StatusOK, util.DynMap{
+		"message": "Correlation deleted",
+	})
+}
+
 // /api/datasources/:id/resources/*
 func (hs *HTTPServer) CallDatasourceResource(c *models.ReqContext) {
 	datasourceID, err := strconv.ParseInt(web.Params(c.Req)[":id"], 10, 64)

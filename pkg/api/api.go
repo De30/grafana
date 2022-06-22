@@ -56,6 +56,7 @@ func (hs *HTTPServer) registerRoutes() {
 	r.Get("/datasources/", authorize(reqOrgAdmin, datasources.ConfigurationPageAccess), hs.Index)
 	r.Get("/datasources/new", authorize(reqOrgAdmin, datasources.NewPageAccess), hs.Index)
 	r.Get("/datasources/edit/*", authorize(reqOrgAdmin, datasources.EditPageAccess), hs.Index)
+	r.Get("/datasources/correlations", authorize(reqOrgAdmin, datasources.ConfigurationPageAccess), hs.Index)
 	r.Get("/org/users", authorize(reqOrgAdmin, ac.EvalPermission(ac.ActionOrgUsersRead)), hs.Index)
 	r.Get("/org/users/new", reqOrgAdmin, hs.Index)
 	r.Get("/org/users/invite", authorize(reqOrgAdmin, ac.EvalPermission(ac.ActionUsersCreate)), hs.Index)
@@ -321,6 +322,7 @@ func (hs *HTTPServer) registerRoutes() {
 			// Correlations
 			datasourceRoute.Group("/:uid/correlations", func(correlationsRoute routing.RouteRegister) {
 				correlationsRoute.Post("/", authorize(reqOrgAdmin, ac.EvalPermission(datasources.ActionWrite, uidScope)), routing.Wrap(hs.CreateCorrelation))
+				correlationsRoute.Delete("/:targetUid", authorize(reqSignedIn, ac.EvalPermission(datasources.ActionWrite, uidScope)), routing.Wrap(hs.DeleteCorrelation))
 			})
 		})
 
