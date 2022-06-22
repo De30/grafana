@@ -160,6 +160,16 @@ func fallbackDisplayName(rName string) string {
 	return strings.TrimSpace(strings.Replace(rNameWithoutPrefix, ":", " ", -1))
 }
 
+type RoleBinding struct {
+	ID                int64     `json:"id" xorm:"pk autoincr 'id'"`
+	OrgID             int64     `json:"orgId" xorm:"org_id"`
+	RoleID            int64     `json:"roleId" xorm:"role_id"`
+	SubjectKind       string    `json:"subjectKind" xorm:"subject_kind"`
+	SubjectIdentifier string    `json:"subjectIdentifier" xorm:"subject_identifier"`
+	Created           time.Time `json:"created" xorm:"created"`
+	Updated           time.Time `json:"updated" xorm:"updated"`
+}
+
 type TeamRole struct {
 	ID     int64 `json:"id" xorm:"pk autoincr 'id'"`
 	OrgID  int64 `json:"orgId" xorm:"org_id"`
