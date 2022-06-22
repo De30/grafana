@@ -4039,6 +4039,52 @@
         }
       }
     },
+    "/datasources/{uid}/correlations": {
+      "post": {
+        "tags": ["correlations"],
+        "summary": "Creates a correlation.",
+        "operationId": "createCorrelation",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "uid",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCorrelationCommand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/createCorrelationResponse"
+          },
+          "400": {
+            "$ref": "#/responses/badRequestError"
+          },
+          "401": {
+            "$ref": "#/responses/unauthorisedError"
+          },
+          "403": {
+            "$ref": "#/responses/forbiddenError"
+          },
+          "404": {
+            "$ref": "#/responses/notFoundError"
+          },
+          "409": {
+            "$ref": "#/responses/conflictError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
+          }
+        }
+      }
+    },
     "/ds/query": {
       "post": {
         "description": "If you are running Grafana Enterprise and have Fine-grained access control enabled\nyou need to have a permission with action: `datasources:query`.",
@@ -8980,7 +9026,7 @@
           "$ref": "#/definitions/ScheduleDTO"
         },
         "state": {
-          "type": "string"
+          "$ref": "#/definitions/State"
         },
         "templateVars": {
           "type": "object"
@@ -8992,6 +9038,23 @@
         "userId": {
           "type": "integer",
           "format": "int64"
+        }
+      }
+    },
+    "Correlation": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "options": {
+          "$ref": "#/definitions/Json"
+        },
+        "target": {
+          "type": "string"
         }
       }
     },
@@ -9026,6 +9089,21 @@
           "type": "string"
         },
         "uid": {
+          "type": "string"
+        }
+      }
+    },
+    "CreateCorrelationCommand": {
+      "description": "CreateCorrelationCommand adds a correlation",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "targetUid": {
           "type": "string"
         }
       }
@@ -9448,9 +9526,6 @@
           "type": "boolean"
         },
         "isHome": {
-          "type": "boolean"
-        },
-        "isPublic": {
           "type": "boolean"
         },
         "isSnapshot": {
@@ -10054,6 +10129,9 @@
     "Folder": {
       "type": "object",
       "properties": {
+        "accessControl": {
+          "$ref": "#/definitions/Metadata"
+        },
         "canAdmin": {
           "type": "boolean"
         },
@@ -10105,6 +10183,9 @@
     "FolderSearchHit": {
       "type": "object",
       "properties": {
+        "accessControl": {
+          "$ref": "#/definitions/Metadata"
+        },
         "id": {
           "type": "integer",
           "format": "int64"
@@ -11701,6 +11782,9 @@
         }
       }
     },
+    "State": {
+      "type": "string"
+    },
     "Status": {
       "type": "object",
       "properties": {
@@ -12203,6 +12287,12 @@
         },
         "basicAuthUser": {
           "type": "string"
+        },
+        "correlations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Correlation"
+          }
         },
         "database": {
           "type": "string"
@@ -12726,6 +12816,23 @@
           "message": {
             "description": "Message Message of the created annotation.",
             "type": "string"
+          }
+        }
+      }
+    },
+    "createCorrelationResponse": {
+      "description": "",
+      "schema": {
+        "type": "object",
+        "required": ["correlation", "message"],
+        "properties": {
+          "correlation": {
+            "$ref": "#/definitions/Correlation"
+          },
+          "message": {
+            "description": "Message Message of the created correlation.",
+            "type": "string",
+            "example": "Correlation created"
           }
         }
       }
