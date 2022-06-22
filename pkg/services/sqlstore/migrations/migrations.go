@@ -92,8 +92,8 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 	accesscontrol.AddManagedFolderAlertActionsMigration(mg)
 	accesscontrol.AddActionNameMigrator(mg)
 	addPlaylistUIDMigration(mg)
-
 	ualert.UpdateRuleGroupIndexMigration(mg)
+	accesscontrol.AddRoleBindingMigrations(mg)
 }
 
 func addMigrationLogMigrations(mg *Migrator) {
