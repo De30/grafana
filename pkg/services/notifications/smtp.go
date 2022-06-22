@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime"
 	"net"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -92,7 +94,8 @@ func (sc *SmtpClient) setFiles(
 
 	for _, file := range msg.AttachedFiles {
 		file := file
-		m.Attach(file.Name, gomail.SetCopyFunc(func(writer io.Writer) error {
+		baseName := mime.QEncoding.Encode("utf-8", filepath.Base(file.Name))
+		m.Attach(file.Name, gomail.Rename(baseName), gomail.SetCopyFunc(func(writer io.Writer) error {
 			_, err := writer.Write(file.Content)
 			return err
 		}))
