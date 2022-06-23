@@ -18,7 +18,6 @@ func AddRoleBindingMigrations(mg *migrator.Migrator) {
 			{Name: "subject_identifier", Type: migrator.DB_NVarchar, Length: 190, Nullable: false},
 			{Name: "role_id", Type: migrator.DB_BigInt},
 			{Name: "created", Type: migrator.DB_DateTime, Nullable: false},
-			{Name: "updated", Type: migrator.DB_DateTime, Nullable: false},
 		},
 		Indices: []*migrator.Index{
 			{Cols: []string{"org_id"}},
@@ -70,7 +69,6 @@ func (m *roleBindingMigration) Exec(sess *xorm.Session, mg *migrator.Migrator) e
 			SubjectKind:       "user",
 			SubjectIdentifier: strconv.FormatInt(u.UserID, 10),
 			Created:           u.Created,
-			Updated:           u.Created,
 		})
 	}
 
@@ -81,7 +79,6 @@ func (m *roleBindingMigration) Exec(sess *xorm.Session, mg *migrator.Migrator) e
 			SubjectKind:       "team",
 			SubjectIdentifier: strconv.FormatInt(t.TeamID, 10),
 			Created:           t.Created,
-			Updated:           t.Created,
 		})
 	}
 
@@ -92,7 +89,6 @@ func (m *roleBindingMigration) Exec(sess *xorm.Session, mg *migrator.Migrator) e
 			SubjectKind:       "builtin",
 			SubjectIdentifier: b.Role,
 			Created:           b.Created,
-			Updated:           b.Updated,
 		})
 	}
 
