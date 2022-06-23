@@ -170,7 +170,7 @@ type RoleBinding struct {
 	Created           time.Time `xorm:"created"`
 }
 
-type Binder interface {
+type Binding interface {
 	SubjectKind() string
 	SubjectIdentifier() string
 }
@@ -192,15 +192,15 @@ type userBinding struct {
 	userID int64
 }
 
-func UserBinding(userID int64) Binder {
+func UserBinding(userID int64) Binding {
 	return binding{"user", strconv.FormatInt(userID, 10)}
 }
 
-func TeamBinding(teamID int64) Binder {
+func TeamBinding(teamID int64) Binding {
 	return binding{"team", strconv.FormatInt(teamID, 10)}
 }
 
-func BuiltInRoleBinding(role models.RoleType) Binder {
+func BuiltInRoleBinding(role models.RoleType) Binding {
 	return binding{"builtin", string(role)}
 }
 
