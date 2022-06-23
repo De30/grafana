@@ -3,6 +3,7 @@ package accesscontrol
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -161,13 +162,46 @@ func fallbackDisplayName(rName string) string {
 }
 
 type RoleBinding struct {
-	ID                int64     `json:"id" xorm:"pk autoincr 'id'"`
-	OrgID             int64     `json:"orgId" xorm:"org_id"`
-	RoleID            int64     `json:"roleId" xorm:"role_id"`
-	SubjectKind       string    `json:"subjectKind" xorm:"subject_kind"`
-	SubjectIdentifier string    `json:"subjectIdentifier" xorm:"subject_identifier"`
-	Created           time.Time `json:"created" xorm:"created"`
-	Updated           time.Time `json:"updated" xorm:"updated"`
+	ID                int64     `xorm:"pk autoincr 'id'"`
+	OrgID             int64     `xorm:"org_id"`
+	RoleID            int64     `xorm:"role_id"`
+	SubjectKind       string    `xorm:"subject_kind"`
+	SubjectIdentifier string    `xorm:"subject_identifier"`
+	Created           time.Time `xorm:"created"`
+}
+
+type Binder interface {
+	SubjectKind() string
+	SubjectIdentifier() string
+}
+
+type binding struct {
+	kind       string
+	identifier string
+}
+
+func (b binding) SubjectKind() string {
+	return b.kind
+}
+
+func (b binding) SubjectIdentifier() string {
+	return b.identifier
+}
+
+type userBinding struct {
+	userID int64
+}
+
+func UserBinding(userID int64) Binder {
+	return binding{"user", strconv.FormatInt(userID, 10)}
+}
+
+func TeamBinding(teamID int64) Binder {
+	return binding{"team", strconv.FormatInt(teamID, 10)}
+}
+
+func BuiltInRoleBinding(role models.RoleType) Binder {
+	return binding{"builtin", string(role)}
 }
 
 type TeamRole struct {
