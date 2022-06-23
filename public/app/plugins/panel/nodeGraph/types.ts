@@ -2,26 +2,7 @@ import { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
 
 import { Field } from '@grafana/data';
 
-export interface NodeGraphOptions {
-  nodes?: NodeOptions;
-  edges?: EdgeOptions;
-}
-
-interface NodeOptions {
-  mainStatUnit?: string;
-  secondaryStatUnit?: string;
-  arcs?: ArcOption[];
-}
-
-export interface ArcOption {
-  field?: string;
-  color?: any;
-}
-
-interface EdgeOptions {
-  mainStatUnit?: string;
-  secondaryStatUnit?: string;
-}
+export interface Options {}
 
 export type NodeDatum = SimulationNodeDatum & {
   id: string;
