@@ -2,10 +2,13 @@ package database
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
+	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/setting"
 )
 
 const (
@@ -20,35 +23,26 @@ type AccessControlStore struct {
 	sql *sqlstore.SQLStore
 }
 
-func (s *AccessControlStore) GetUserPermissions(ctx context.Context, query accesscontrol.GetUserPermissionsQuery) ([]accesscontrol.Permission, error) {
+func (s *AccessControlStore) GetUserPermissions(ctx context.Context, orgID int64, user *models.SignedInUser, filter accesscontrol.GetUserPermissionsQuery) ([]accesscontrol.Permission, error) {
 	result := make([]accesscontrol.Permission, 0)
 	err := s.sql.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		filter, params := userRolesFilter(query.OrgID, query.UserID, query.Roles)
-
-		// TODO: optimize this
-		q := `SELECT DISTINCT
-			permission.action,
-			permission.scope
-			FROM permission
-			INNER JOIN role ON role.id = permission.role_id
-		` + filter
-
-		if query.Actions != nil {
-			q += " AND permission.action IN("
-			if len(query.Actions) > 0 {
-				q += "?" + strings.Repeat(",?", len(query.Actions)-1)
-			}
-			q += ")"
-			for _, a := range query.Actions {
-				params = append(params, a)
-			}
-		}
-
-		q += `
-			ORDER BY permission.scope
+		query := `
+		SELECT DISTINCT
+			p.action,
+			p.scope
+		FROM permission p
+				 INNER JOIN role r ON r.id = p.role_id
+				 INNER JOIN role_binding rb ON r.id = rb.role_id
+		WHERE (rb.org_id = ? OR rb.org_id = 0)
 		`
+		var params []interface{}
+		params = append(params, orgID)
 
-		if err := sess.SQL(q, params...).Find(&result); err != nil {
+		filterQuery, filterParams := permissionFilter(user, filter)
+		params = append(params, filterParams...)
+		query += filterQuery + " ORDER BY p.scope"
+
+		if err := sess.SQL(query, params...).Find(&result); err != nil {
 			return err
 		}
 
@@ -58,37 +52,42 @@ func (s *AccessControlStore) GetUserPermissions(ctx context.Context, query acces
 	return result, err
 }
 
-func userRolesFilter(orgID, userID int64, roles []string) (string, []interface{}) {
-	q := `
-	WHERE role.id IN (
-		SELECT ur.role_id
-		FROM user_role AS ur
-		WHERE ur.user_id = ?
-		AND (ur.org_id = ? OR ur.org_id = ?)
-		UNION
-		SELECT tr.role_id FROM team_role as tr
-		INNER JOIN team_member as tm ON tm.team_id = tr.team_id
-		WHERE tm.user_id = ? AND tr.org_id = ?
-	`
-	params := []interface{}{userID, orgID, globalOrgID, userID, orgID}
+func permissionFilter(user *models.SignedInUser, filter accesscontrol.GetUserPermissionsQuery) (string, []interface{}) {
+	var params []interface{}
+	query := "AND ((rb.subject_kind = 'user' AND rb.subject_identifier = ?)"
+	params = append(params, strconv.FormatInt(user.UserId, 10))
 
-	if len(roles) != 0 {
-		q += `
-			UNION
-			SELECT br.role_id FROM builtin_role AS br
-			WHERE role IN (? ` + strings.Repeat(", ?", len(roles)-1) + `)
-		`
-		for _, role := range roles {
-			params = append(params, role)
+	if len(user.Teams) > 0 {
+		query += " OR (rb.subject_kind = 'team' AND rb.subject_identifier IN (?" + strings.Repeat(", ?", len(user.Teams)-1) + "))"
+		for _, t := range user.Teams {
+			params = append(params, strconv.FormatInt(t, 10))
 		}
-
-		q += `AND (br.org_id = ? OR br.org_id = ?)`
-		params = append(params, orgID, globalOrgID)
 	}
 
-	q += `)`
+	// FIXME: settings
+	roles := accesscontrol.GetOrgRoles(setting.NewCfg(), user)
+	if len(roles) > 0 {
+		query += " OR (rb.subject_kind = 'builtin' AND rb.subject_identifier IN (?" + strings.Repeat(", ?", len(roles)-1) + "))"
+		for _, r := range roles {
+			params = append(params, r)
+		}
+	}
 
-	return q, params
+	query += ")"
+	// FIXME: actions filter
+
+	if filter.Actions != nil {
+		query += " AND p.action IN("
+		if len(filter.Actions) > 0 {
+			query += "?" + strings.Repeat(",?", len(filter.Actions)-1)
+		}
+		query += ")"
+		for _, a := range filter.Actions {
+			params = append(params, a)
+		}
+	}
+
+	return query, params
 }
 
 func deletePermissions(sess *sqlstore.DBSession, ids []int64) error {
