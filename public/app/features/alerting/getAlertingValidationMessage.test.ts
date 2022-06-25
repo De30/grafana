@@ -36,7 +36,7 @@ describe('getAlertingValidationMessage', () => {
           return [];
         },
         getInstanceSettings: (() => {}) as any,
-        reload: () => jest.fn(),
+        reload: Promise.resolve,
       };
       const targets: ElasticsearchQuery[] = [
         { refId: 'A', query: '@hostname:$hostname' },
@@ -79,7 +79,7 @@ describe('getAlertingValidationMessage', () => {
         getList(): DataSourceInstanceSettings[] {
           return [];
         },
-        reload: () => jest.fn(),
+        reload: Promise.resolve,
       };
       const targets: any[] = [
         { refId: 'A', query: 'some query', datasource: 'alertingDatasource' },
@@ -111,7 +111,7 @@ describe('getAlertingValidationMessage', () => {
         getList(): DataSourceInstanceSettings[] {
           return [];
         },
-        reload: () => jest.fn(),
+        reload: Promise.resolve,
       };
       const targets: ElasticsearchQuery[] = [
         { refId: 'A', query: '@hostname:$hostname' },
@@ -146,7 +146,7 @@ describe('getAlertingValidationMessage', () => {
         getList(): DataSourceInstanceSettings[] {
           return [];
         },
-        reload: () => jest.fn(),
+        reload: Promise.resolve,
       };
       const targets: ElasticsearchQuery[] = [
         { refId: 'A', query: '@hostname:hostname' },
@@ -180,7 +180,7 @@ describe('getAlertingValidationMessage', () => {
         getList(): DataSourceInstanceSettings[] {
           return [];
         },
-        reload: () => jest.fn(),
+        reload: Promise.resolve,
       };
       const targets: ElasticsearchQuery[] = [
         { refId: 'A', query: '@hostname:hostname' },

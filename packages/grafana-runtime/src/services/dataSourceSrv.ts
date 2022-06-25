@@ -32,7 +32,7 @@ export interface DataSourceSrv {
   /**
    * Reloads the DataSourceSrv
    */
-  reload(): void;
+  reload(): Promise<void>;
 }
 
 /** @public */

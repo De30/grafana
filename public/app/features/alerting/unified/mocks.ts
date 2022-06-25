@@ -47,6 +47,7 @@ export function mockDataSource<T extends DataSourceJsonData = DataSourceJsonData
     name: `Prometheus-${id}`,
     access: 'proxy',
     jsonData: {} as T,
+    correlations: [],
     meta: {
       info: {
         logos: {
@@ -290,7 +291,7 @@ export class MockDataSourceSrv implements DataSourceSrv {
     return DatasourceSrv.prototype.loadDatasource.call(this, name);
   }
 
-  reload() {}
+  async reload() {}
 }
 
 export const mockGrafanaReceiver = (

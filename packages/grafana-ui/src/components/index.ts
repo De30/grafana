@@ -74,6 +74,7 @@ export { PageToolbar } from './PageLayout/PageToolbar';
 // Renderless
 export { SetInterval } from './SetInterval/SetInterval';
 
+export { AnotherTable } from './AnotherTable';
 export { Table } from './Table/Table';
 export { TableCellDisplayMode, TableSortByFieldState } from './Table/types';
 export { TableInputCSV } from './TableInputCSV/TableInputCSV';
