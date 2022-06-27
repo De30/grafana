@@ -55,7 +55,7 @@ func benchmarkDSPermissions(b *testing.B, dsNum, usersNum int) {
 func getDSPermissions(b *testing.B, store *AccessControlStore, dataSources []int64) {
 	dsId := dataSources[0]
 
-	permissions, err := store.GetResourcePermissions(context.Background(), accesscontrol.GlobalOrgID, types.GetResourcePermissionsQuery{
+	permissions, err := store.GetResourcePermissions(context.Background(), accesscontrol.GlobalOrgID, types.GetResourcePermissionsFilter{
 		User:              &models.SignedInUser{OrgId: 1, Permissions: map[int64]map[string][]string{1: {"org.users:read": {"users:*"}, "teams:read": {"teams:*"}}}},
 		Actions:           []string{dsAction},
 		Resource:          dsResource,

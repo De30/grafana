@@ -151,7 +151,7 @@ func (s *AccessControlStore) setResourcePermission(
 	return permission, nil
 }
 
-func (s *AccessControlStore) GetResourcePermissions(ctx context.Context, orgID int64, query types.GetResourcePermissionsQuery) ([]accesscontrol.ResourcePermission, error) {
+func (s *AccessControlStore) GetResourcePermissions(ctx context.Context, orgID int64, query types.GetResourcePermissionsFilter) ([]accesscontrol.ResourcePermission, error) {
 	var result []accesscontrol.ResourcePermission
 
 	err := s.sql.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
@@ -175,7 +175,7 @@ func (s *AccessControlStore) createResourcePermission(sess *sqlstore.DBSession, 
 	return permission.ID, nil
 }
 
-func (s *AccessControlStore) getResourcePermissions(sess *sqlstore.DBSession, orgID int64, query types.GetResourcePermissionsQuery) ([]accesscontrol.ResourcePermission, error) {
+func (s *AccessControlStore) getResourcePermissions(sess *sqlstore.DBSession, orgID int64, query types.GetResourcePermissionsFilter) ([]accesscontrol.ResourcePermission, error) {
 	if len(query.Actions) == 0 {
 		return nil, nil
 	}

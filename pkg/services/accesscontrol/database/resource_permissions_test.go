@@ -337,7 +337,7 @@ func TestAccessControlStore_GetResourcePermissions(t *testing.T) {
 
 			seedResourcePermissions(t, store, sql, test.actions, test.resource, test.resourceID, test.resourceAttribute, test.numUsers)
 
-			permissions, err := store.GetResourcePermissions(context.Background(), test.user.OrgId, types.GetResourcePermissionsQuery{
+			permissions, err := store.GetResourcePermissions(context.Background(), test.user.OrgId, types.GetResourcePermissionsFilter{
 				User:              test.user,
 				Actions:           test.actions,
 				Resource:          test.resource,

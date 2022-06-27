@@ -43,7 +43,7 @@ type Store interface {
 	) ([]accesscontrol.ResourcePermission, error)
 
 	// GetResourcePermissions will return all permission for supplied resource id
-	GetResourcePermissions(ctx context.Context, orgID int64, query types.GetResourcePermissionsQuery) ([]accesscontrol.ResourcePermission, error)
+	GetResourcePermissions(ctx context.Context, orgID int64, query types.GetResourcePermissionsFilter) ([]accesscontrol.ResourcePermission, error)
 }
 
 func New(
@@ -115,7 +115,7 @@ func (s *Service) GetPermissions(ctx context.Context, user *models.SignedInUser,
 		}
 	}
 
-	return s.store.GetResourcePermissions(ctx, user.OrgId, types.GetResourcePermissionsQuery{
+	return s.store.GetResourcePermissions(ctx, user.OrgId, types.GetResourcePermissionsFilter{
 		User:              user,
 		Actions:           s.actions,
 		Resource:          s.options.Resource,

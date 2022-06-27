@@ -19,7 +19,7 @@ type SetResourcePermissionsCommand struct {
 	Hook ResourceHookFunc
 }
 
-type GetResourcePermissionsQuery struct {
+type GetResourcePermissionsFilter struct {
 	Actions           []string
 	Resource          string
 	ResourceID        string
