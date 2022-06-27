@@ -81,46 +81,41 @@ func TestAccessControlStore_GetUserPermissions(t *testing.T) {
 			user, team := createUserAndTeam(t, sql, tt.orgID)
 
 			for _, id := range tt.userPermissions {
-				_, err := store.SetUserResourcePermission(context.Background(), tt.orgID, accesscontrol.User{ID: user.Id}, types.SetResourcePermissionCommand{
-					Actions:    []string{"dashboards:write"},
-					Resource:   "dashboards",
-					ResourceID: id,
+				_, err := store.SetResourcePermission(context.Background(), tt.orgID, accesscontrol.UserBinding(user.Id), types.SetResourcePermissionCommand{
+					Actions:           []string{"dashboards:write"},
+					Resource:          "dashboards",
+					ResourceID:        id,
+					ResourceAttribute: "id",
 				}, nil)
 				require.NoError(t, err)
 			}
 
 			for _, id := range tt.teamPermissions {
-				_, err := store.SetTeamResourcePermission(context.Background(), tt.orgID, team.Id, types.SetResourcePermissionCommand{
-					Actions:    []string{"dashboards:read"},
-					Resource:   "dashboards",
-					ResourceID: id,
+				_, err := store.SetResourcePermission(context.Background(), tt.orgID, accesscontrol.TeamBinding(team.Id), types.SetResourcePermissionCommand{
+					Actions:           []string{"dashboards:read"},
+					Resource:          "dashboards",
+					ResourceID:        id,
+					ResourceAttribute: "id",
 				}, nil)
 				require.NoError(t, err)
 			}
 
 			for _, id := range tt.builtinPermissions {
-				_, err := store.SetBuiltInResourcePermission(context.Background(), tt.orgID, "Admin", types.SetResourcePermissionCommand{
-					Actions:    []string{"dashboards:read"},
-					Resource:   "dashboards",
-					ResourceID: id,
+				_, err := store.SetResourcePermission(context.Background(), tt.orgID, accesscontrol.BuiltInRoleBinding("Admin"), types.SetResourcePermissionCommand{
+					Actions:           []string{"dashboards:read"},
+					Resource:          "dashboards",
+					ResourceID:        id,
+					ResourceAttribute: "id",
 				}, nil)
 				require.NoError(t, err)
 			}
 
-			var roles []string
-			role := models.RoleType(tt.role)
-
-			if role.IsValid() {
-				roles = append(roles, string(role))
-				for _, c := range role.Children() {
-					roles = append(roles, string(c))
-				}
-			}
-
-			permissions, err := store.GetUserPermissions(context.Background(), accesscontrol.GetUserPermissionsQuery{
-				OrgID:   tt.orgID,
-				UserID:  user.Id,
-				Roles:   roles,
+			permissions, err := store.GetUserPermissions(context.Background(), tt.orgID, &models.SignedInUser{
+				UserId:  user.Id,
+				OrgId:   user.OrgId,
+				Teams:   []int64{team.Id},
+				OrgRole: models.RoleType(tt.role),
+			}, accesscontrol.GetUserPermissionsQuery{
 				Actions: tt.actions,
 			})
 

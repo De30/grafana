@@ -205,18 +205,22 @@ func (s *Service) SetPermissions(
 
 	dbCommands := make([]types.SetResourcePermissionsCommand, 0, len(commands))
 	for _, cmd := range commands {
+		var binding accesscontrol.Binding
 		if cmd.UserID != 0 {
 			if err := s.validateUser(ctx, orgID, cmd.UserID); err != nil {
 				return nil, err
 			}
+			binding = accesscontrol.UserBinding(cmd.UserID)
 		} else if cmd.TeamID != 0 {
 			if err := s.validateTeam(ctx, orgID, cmd.TeamID); err != nil {
 				return nil, err
 			}
+			binding = accesscontrol.TeamBinding(cmd.TeamID)
 		} else {
 			if err := s.validateBuiltinRole(ctx, cmd.BuiltinRole); err != nil {
 				return nil, err
 			}
+			binding = accesscontrol.BuiltInRoleBinding(models.RoleType(cmd.BuiltinRole))
 		}
 
 		actions, err := s.mapPermission(cmd.Permission)
@@ -225,9 +229,7 @@ func (s *Service) SetPermissions(
 		}
 
 		dbCommands = append(dbCommands, types.SetResourcePermissionsCommand{
-			User:        accesscontrol.User{ID: cmd.UserID},
-			TeamID:      cmd.TeamID,
-			BuiltinRole: cmd.BuiltinRole,
+			Binding: binding,
 			SetResourcePermissionCommand: types.SetResourcePermissionCommand{
 				Actions:           actions,
 				Resource:          s.options.Resource,

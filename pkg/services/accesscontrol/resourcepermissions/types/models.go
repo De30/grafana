@@ -14,11 +14,9 @@ type SetResourcePermissionCommand struct {
 }
 
 type SetResourcePermissionsCommand struct {
-	User        accesscontrol.User
-	TeamID      int64
-	BuiltinRole string
-
+	Binding accesscontrol.Binding
 	SetResourcePermissionCommand
+	Hook ResourceHookFunc
 }
 
 type GetResourcePermissionsQuery struct {

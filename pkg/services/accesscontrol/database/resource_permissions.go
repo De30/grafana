@@ -6,26 +6,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/resourcepermissions/types"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
 type flatResourcePermission struct {
-	ID          int64 `xorm:"id"`
-	RoleName    string
-	Action      string
-	Scope       string
-	UserId      int64
-	UserLogin   string
-	UserEmail   string
-	TeamId      int64
-	TeamEmail   string
-	Team        string
-	BuiltInRole string
-	Created     time.Time
-	Updated     time.Time
+	ID                int64 `xorm:"id"`
+	RoleName          string
+	Action            string
+	Scope             string
+	SubjectKind       string
+	SubjectIdentifier string
+	Created           time.Time
+	Updated           time.Time
 }
 
 func (p *flatResourcePermission) IsManaged(scope string) bool {
@@ -36,122 +30,28 @@ func (p *flatResourcePermission) IsInherited(scope string) bool {
 	return p.Scope != scope
 }
 
-func (s *AccessControlStore) SetUserResourcePermission(
-	ctx context.Context, orgID int64, user accesscontrol.User,
-	cmd types.SetResourcePermissionCommand,
-	hook types.UserResourceHookFunc,
+func (s *AccessControlStore) SetResourcePermission(
+	ctx context.Context, orgID int64, binding accesscontrol.Binding,
+	cmd types.SetResourcePermissionCommand, hook types.ResourceHookFunc,
 ) (*accesscontrol.ResourcePermission, error) {
-	if user.ID == 0 {
-		return nil, models.ErrUserNotFound
-	}
-
 	var err error
 	var permission *accesscontrol.ResourcePermission
 	err = s.sql.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		permission, err = s.setUserResourcePermission(sess, orgID, user, cmd, hook)
+		permission, err = s.setResourcePermission(sess, orgID, managedRoleName(binding), roleBinder(sess, orgID, binding), cmd)
+		if err != nil {
+			return err
+		}
+
+		if hook != nil {
+			if err := hook(sess, orgID, binding, cmd.ResourceID, cmd.Permission); err != nil {
+				return err
+			}
+		}
 		return err
 	})
-
-	return permission, err
-}
-func (s *AccessControlStore) setUserResourcePermission(
-	sess *sqlstore.DBSession, orgID int64, user accesscontrol.User,
-	cmd types.SetResourcePermissionCommand,
-	hook types.UserResourceHookFunc,
-) (*accesscontrol.ResourcePermission, error) {
-	permission, err := s.setResourcePermission(sess, orgID, accesscontrol.ManagedUserRoleName(user.ID), s.userAdder(sess, orgID, user.ID), cmd)
 	if err != nil {
 		return nil, err
 	}
-
-	if hook != nil {
-		if err := hook(sess, orgID, user, cmd.ResourceID, cmd.Permission); err != nil {
-			return nil, err
-		}
-	}
-
-	return permission, nil
-}
-
-func (s *AccessControlStore) SetTeamResourcePermission(
-	ctx context.Context, orgID, teamID int64,
-	cmd types.SetResourcePermissionCommand,
-	hook types.TeamResourceHookFunc,
-) (*accesscontrol.ResourcePermission, error) {
-	if teamID == 0 {
-		return nil, models.ErrTeamNotFound
-	}
-
-	var err error
-	var permission *accesscontrol.ResourcePermission
-
-	err = s.sql.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		permission, err = s.setTeamResourcePermission(sess, orgID, teamID, cmd, hook)
-		return err
-	})
-
-	return permission, err
-}
-
-func (s *AccessControlStore) setTeamResourcePermission(
-	sess *sqlstore.DBSession, orgID, teamID int64,
-	cmd types.SetResourcePermissionCommand,
-	hook types.TeamResourceHookFunc,
-) (*accesscontrol.ResourcePermission, error) {
-	permission, err := s.setResourcePermission(sess, orgID, accesscontrol.ManagedTeamRoleName(teamID), s.teamAdder(sess, orgID, teamID), cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	if hook != nil {
-		if err := hook(sess, orgID, teamID, cmd.ResourceID, cmd.Permission); err != nil {
-			return nil, err
-		}
-	}
-
-	return permission, nil
-}
-
-func (s *AccessControlStore) SetBuiltInResourcePermission(
-	ctx context.Context, orgID int64, builtInRole string,
-	cmd types.SetResourcePermissionCommand,
-	hook types.BuiltinResourceHookFunc,
-) (*accesscontrol.ResourcePermission, error) {
-	if !models.RoleType(builtInRole).IsValid() || builtInRole == accesscontrol.RoleGrafanaAdmin {
-		return nil, fmt.Errorf("invalid role: %s", builtInRole)
-	}
-
-	var err error
-	var permission *accesscontrol.ResourcePermission
-
-	err = s.sql.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		permission, err = s.setBuiltInResourcePermission(sess, orgID, builtInRole, cmd, hook)
-		return err
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return permission, nil
-}
-
-func (s *AccessControlStore) setBuiltInResourcePermission(
-	sess *sqlstore.DBSession, orgID int64, builtInRole string,
-	cmd types.SetResourcePermissionCommand,
-	hook types.BuiltinResourceHookFunc,
-) (*accesscontrol.ResourcePermission, error) {
-	permission, err := s.setResourcePermission(sess, orgID, accesscontrol.ManagedBuiltInRoleName(builtInRole), s.builtInRoleAdder(sess, orgID, builtInRole), cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	if hook != nil {
-		if err := hook(sess, orgID, builtInRole, cmd.ResourceID, cmd.Permission); err != nil {
-			return nil, err
-		}
-	}
-
 	return permission, nil
 }
 
@@ -165,16 +65,14 @@ func (s *AccessControlStore) SetResourcePermissions(
 
 	err = s.sql.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
 		for _, cmd := range commands {
-			var p *accesscontrol.ResourcePermission
-			if cmd.User.ID != 0 {
-				p, err = s.setUserResourcePermission(sess, orgID, cmd.User, cmd.SetResourcePermissionCommand, hooks.User)
-			} else if cmd.TeamID != 0 {
-				p, err = s.setTeamResourcePermission(sess, orgID, cmd.TeamID, cmd.SetResourcePermissionCommand, hooks.Team)
-			} else if models.RoleType(cmd.BuiltinRole).IsValid() || cmd.BuiltinRole == accesscontrol.RoleGrafanaAdmin {
-				p, err = s.setBuiltInResourcePermission(sess, orgID, cmd.BuiltinRole, cmd.SetResourcePermissionCommand, hooks.BuiltInRole)
-			}
+			p, err := s.setResourcePermission(sess, orgID, managedRoleName(cmd.Binding), roleBinder(sess, orgID, cmd.Binding), cmd.SetResourcePermissionCommand)
 			if err != nil {
 				return err
+			}
+			if cmd.Hook != nil {
+				if err := cmd.Hook(sess, orgID, cmd.Binding, cmd.ResourceID, cmd.Permission); err != nil {
+					return err
+				}
 			}
 			if p != nil {
 				permissions = append(permissions, *p)
@@ -282,146 +180,71 @@ func (s *AccessControlStore) getResourcePermissions(sess *sqlstore.DBSession, or
 		return nil, nil
 	}
 
-	rawSelect := `
+	sql := `
 	SELECT
 		p.*,
-		r.name as role_name,
-	`
-
-	userSelect := rawSelect + `
-		ur.user_id AS user_id,
-		u.login AS user_login,
-		u.email AS user_email,
-		0 AS team_id,
-		'' AS team,
-		'' AS team_email,
-		'' AS built_in_role
-	`
-
-	teamSelect := rawSelect + `
-		0 AS user_id,
-		'' AS user_login,
-		'' AS user_email,
-		tr.team_id AS team_id,
-		t.name AS team,
-		t.email AS team_email,
-		'' AS built_in_role
-	`
-
-	builtinSelect := rawSelect + `
-		0 AS user_id,
-		'' AS user_login,
-		'' AS user_email,
-		0 as team_id,
-		'' AS team,
-		'' AS team_email,
-		br.role AS built_in_role
-	`
-
-	rawFrom := `
+		rb.subject_kind,
+		rb.subject_identifier
 	FROM permission p
-		INNER JOIN role r ON p.role_id = r.id
-    `
-	userFrom := rawFrom + `
-		INNER JOIN user_role ur ON r.id = ur.role_id AND (ur.org_id = 0 OR ur.org_id = ?)
-		INNER JOIN ` + s.sql.Dialect.Quote("user") + ` u ON ur.user_id = u.id
+		INNER JOIN role r on r.id = p.role_id
+		INNER JOIN role_binding rb on r.id = rb.role_id
+	WHERE (rb.org_id = 0 OR rb.org_id = ?)
+ 	AND (p.scope = '*' OR p.scope = ? OR p.scope = ? OR p.scope = ?
 	`
-	teamFrom := rawFrom + `
-		INNER JOIN team_role tr ON r.id = tr.role_id AND (tr.org_id = 0 OR tr.org_id = ?)
-		INNER JOIN team t ON tr.team_id = t.id
-	`
-
-	builtinFrom := rawFrom + `
-		INNER JOIN builtin_role br ON r.id = br.role_id AND (br.org_id = 0 OR br.org_id = ?)
-	`
-
-	where := `WHERE (r.org_id = ? OR r.org_id = 0) AND (p.scope = '*' OR p.scope = ? OR p.scope = ? OR p.scope = ?`
-
+	var params []interface{}
 	scope := accesscontrol.Scope(query.Resource, query.ResourceAttribute, query.ResourceID)
-
-	args := []interface{}{
-		orgID,
+	params = append(
+		params,
 		orgID,
 		accesscontrol.Scope(query.Resource, "*"),
 		accesscontrol.Scope(query.Resource, query.ResourceAttribute, "*"),
 		scope,
-	}
+	)
 
 	if len(query.InheritedScopes) > 0 {
-		where += ` OR p.scope IN(?` + strings.Repeat(",?", len(query.InheritedScopes)-1) + `)`
+		sql += ` OR p.scope IN(?` + strings.Repeat(",?", len(query.InheritedScopes)-1) + `)`
 		for _, scope := range query.InheritedScopes {
-			args = append(args, scope)
+			params = append(params, scope)
 		}
 	}
 
-	where += `) AND p.action IN (?` + strings.Repeat(",?", len(query.Actions)-1) + `)`
-
-	if query.OnlyManaged {
-		where += `AND r.name LIKE 'managed:%'`
-	}
+	sql += `) AND p.action IN (?` + strings.Repeat(",?", len(query.Actions)-1) + `)`
 
 	for _, a := range query.Actions {
-		args = append(args, a)
+		params = append(params, a)
 	}
 
-	initialLength := len(args)
-
-	userFilter, err := accesscontrol.Filter(query.User, "u.id", "users:id:", accesscontrol.ActionOrgUsersRead)
-	if err != nil {
-		return nil, err
-	}
-	user := userSelect + userFrom + where + " AND " + userFilter.Where
-	args = append(args, userFilter.Args...)
-
-	teamFilter, err := accesscontrol.Filter(query.User, "t.id", "teams:id:", accesscontrol.ActionTeamsRead)
-	if err != nil {
-		return nil, err
+	if query.OnlyManaged {
+		sql += `AND r.name LIKE 'managed:%'`
 	}
 
-	team := teamSelect + teamFrom + where + " AND " + teamFilter.Where
-	args = append(args, args[:initialLength]...)
-	args = append(args, teamFilter.Args...)
-
-	builtin := builtinSelect + builtinFrom + where
-	args = append(args, args[:initialLength]...)
-
-	sql := user + " UNION " + team + " UNION " + builtin
 	queryResults := make([]flatResourcePermission, 0)
-	if err := sess.SQL(sql, args...).Find(&queryResults); err != nil {
+	if err := sess.SQL(sql, params...).Find(&queryResults); err != nil {
 		return nil, err
 	}
 
 	var result []accesscontrol.ResourcePermission
-	users, teams, builtins := groupPermissionsByAssignment(queryResults)
-	for _, p := range users {
-		result = append(result, flatPermissionsToResourcePermissions(scope, p)...)
-	}
-	for _, p := range teams {
-		result = append(result, flatPermissionsToResourcePermissions(scope, p)...)
-	}
-	for _, p := range builtins {
-		result = append(result, flatPermissionsToResourcePermissions(scope, p)...)
+	byKind := groupPermissionsByKind(queryResults)
+
+	for _, kind := range byKind {
+		for _, p := range kind {
+			result = append(result, flatPermissionsToResourcePermissions(scope, p)...)
+		}
 	}
 
 	return result, nil
 }
 
-func groupPermissionsByAssignment(permissions []flatResourcePermission) (map[int64][]flatResourcePermission, map[int64][]flatResourcePermission, map[string][]flatResourcePermission) {
-	users := make(map[int64][]flatResourcePermission)
-	teams := make(map[int64][]flatResourcePermission)
-	builtins := make(map[string][]flatResourcePermission)
-
+// TODO : Group by kind (better aggregation)
+func groupPermissionsByKind(permissions []flatResourcePermission) map[string]map[string][]flatResourcePermission {
+	byKind := make(map[string]map[string][]flatResourcePermission, 3)
 	for _, p := range permissions {
-		if p.UserId != 0 {
-			users[p.UserId] = append(users[p.UserId], p)
-		} else if p.TeamId != 0 {
-			teams[p.TeamId] = append(teams[p.TeamId], p)
-		} else if p.BuiltInRole != "" {
-			builtins[p.BuiltInRole] = append(builtins[p.BuiltInRole], p)
+		if _, ok := byKind[p.SubjectKind]; !ok {
+			byKind[p.SubjectKind] = make(map[string][]flatResourcePermission)
 		}
+		byKind[p.SubjectKind][p.SubjectIdentifier] = append(byKind[p.SubjectKind][p.SubjectIdentifier], p)
 	}
-
-	return users, teams, builtins
+	return byKind
 }
 
 func flatPermissionsToResourcePermissions(scope string, permissions []flatResourcePermission) []accesscontrol.ResourcePermission {
@@ -457,80 +280,38 @@ func flatPermissionsToResourcePermission(scope string, permissions []flatResourc
 
 	first := permissions[0]
 	return &accesscontrol.ResourcePermission{
-		ID:          first.ID,
-		RoleName:    first.RoleName,
-		Actions:     actions,
-		Scope:       first.Scope,
-		UserId:      first.UserId,
-		UserLogin:   first.UserLogin,
-		UserEmail:   first.UserEmail,
-		TeamId:      first.TeamId,
-		TeamEmail:   first.TeamEmail,
-		Team:        first.Team,
-		BuiltInRole: first.BuiltInRole,
-		Created:     first.Created,
-		Updated:     first.Updated,
-		IsManaged:   first.IsManaged(scope),
+		ID:                first.ID,
+		RoleName:          first.RoleName,
+		Actions:           actions,
+		Scope:             first.Scope,
+		SubjectKind:       first.SubjectKind,
+		SubjectIdentifier: first.SubjectIdentifier,
+		IsManaged:         first.IsManaged(scope),
+		Created:           first.Created,
+		Updated:           first.Updated,
 	}
 }
 
-func (s *AccessControlStore) userAdder(sess *sqlstore.DBSession, orgID, userID int64) roleAdder {
+func roleBinder(sess *sqlstore.DBSession, orgID int64, binding accesscontrol.Binding) roleAdder {
 	return func(roleID int64) error {
-		if res, err := sess.Query("SELECT 1 FROM user_role WHERE org_id=? AND user_id=? AND role_id=?", orgID, userID, roleID); err != nil {
-			return err
-		} else if len(res) == 1 {
-			return fmt.Errorf("role is already added to this user")
-		}
-
-		userRole := &accesscontrol.UserRole{
-			OrgID:   orgID,
-			UserID:  userID,
-			RoleID:  roleID,
-			Created: time.Now(),
-		}
-
-		_, err := sess.Insert(userRole)
-
-		return err
-	}
-}
-
-func (s *AccessControlStore) teamAdder(sess *sqlstore.DBSession, orgID, teamID int64) roleAdder {
-	return func(roleID int64) error {
-		if res, err := sess.Query("SELECT 1 FROM team_role WHERE org_id=? AND team_id=? AND role_id=?", orgID, teamID, roleID); err != nil {
+		if res, err := sess.Query(
+			"SELECT 1 FROM role_binding WHERE org_id = ? AND subject_kind = ? AND subject_identifier = ? AND role_id = ?",
+			orgID, binding.SubjectKind(), binding.SubjectIdentifier(), roleID,
+		); err != nil {
 			return err
 		} else if len(res) == 1 {
 			return fmt.Errorf("role is already added to this team")
 		}
 
-		teamRole := &accesscontrol.TeamRole{
-			OrgID:   orgID,
-			TeamID:  teamID,
-			RoleID:  roleID,
-			Created: time.Now(),
+		binding := &accesscontrol.RoleBinding{
+			OrgID:             orgID,
+			RoleID:            roleID,
+			Created:           time.Now(),
+			SubjectKind:       binding.SubjectKind(),
+			SubjectIdentifier: binding.SubjectIdentifier(),
 		}
 
-		_, err := sess.Insert(teamRole)
-		return err
-	}
-}
-
-func (s *AccessControlStore) builtInRoleAdder(sess *sqlstore.DBSession, orgID int64, builtinRole string) roleAdder {
-	return func(roleID int64) error {
-		if res, err := sess.Query("SELECT 1 FROM builtin_role WHERE role_id=? AND role=? AND org_id=?", roleID, builtinRole, orgID); err != nil {
-			return err
-		} else if len(res) == 1 {
-			return fmt.Errorf("built-in role already has the role granted")
-		}
-
-		_, err := sess.Table("builtin_role").Insert(accesscontrol.BuiltinRole{
-			RoleID:  roleID,
-			OrgID:   orgID,
-			Role:    builtinRole,
-			Updated: time.Now(),
-			Created: time.Now(),
-		})
-
+		_, err := sess.Insert(binding)
 		return err
 	}
 }
@@ -578,21 +359,11 @@ func (s *AccessControlStore) getResourcePermissionsByIds(sess *sqlstore.DBSessio
 	rawSql := `
 	SELECT
 		p.*,
-		ur.user_id AS user_id,
-		u.login AS user_login,
-		u.email AS user_email,
-		tr.team_id AS team_id,
-		t.name AS team,
-		t.email AS team_email,
-		r.name as role_name,
-		br.role AS built_in_role
+		rb.subject_kind,
+		rb.subject_identifier
 	FROM permission p
 		INNER JOIN role r ON p.role_id = r.id
-		LEFT JOIN team_role tr ON r.id = tr.role_id
-		LEFT JOIN team t ON tr.team_id = t.id
-		LEFT JOIN user_role ur ON r.id = ur.role_id
-		LEFT JOIN ` + s.sql.Dialect.Quote("user") + ` u ON ur.user_id = u.id
-		LEFT JOIN builtin_role br ON r.id = br.role_id
+		INNER JOIN role_binding rb ON rb.role_id = r.id
 	WHERE p.id IN (?` + strings.Repeat(",?", len(ids)-1) + `)
 	`
 
@@ -613,4 +384,8 @@ func managedPermission(action, resource string, resourceID, resourceAttribute st
 		Action: action,
 		Scope:  accesscontrol.Scope(resource, resourceAttribute, resourceID),
 	}
+}
+
+func managedRoleName(binding accesscontrol.Binding) string {
+	return fmt.Sprintf("managed:%ss:%s:permissions", binding.SubjectKind(), binding.SubjectIdentifier())
 }

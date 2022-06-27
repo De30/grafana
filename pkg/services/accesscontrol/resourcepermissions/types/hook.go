@@ -11,6 +11,8 @@ type ResourceHooks struct {
 	BuiltInRole BuiltinResourceHookFunc
 }
 
+type ResourceHookFunc func(session *sqlstore.DBSession, orgID int64, binding accesscontrol.Binding, resourceID, permission string) error
+
 type UserResourceHookFunc func(session *sqlstore.DBSession, orgID int64, user accesscontrol.User, resourceID, permission string) error
 type TeamResourceHookFunc func(session *sqlstore.DBSession, orgID, teamID int64, resourceID, permission string) error
 type BuiltinResourceHookFunc func(session *sqlstore.DBSession, orgID int64, builtInRole, resourceID, permission string) error
