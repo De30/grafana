@@ -43,7 +43,7 @@ func (s *AccessControlStore) SetResourcePermission(
 		}
 
 		if hook != nil {
-			if err := hook(sess, orgID, binding, cmd.ResourceID, cmd.Permission); err != nil {
+			if err := hook(sess); err != nil {
 				return err
 			}
 		}
@@ -70,7 +70,7 @@ func (s *AccessControlStore) SetResourcePermissions(
 				return err
 			}
 			if cmd.Hook != nil {
-				if err := cmd.Hook(sess, orgID, cmd.Binding, cmd.ResourceID, cmd.Permission); err != nil {
+				if err := cmd.Hook(sess); err != nil {
 					return err
 				}
 			}

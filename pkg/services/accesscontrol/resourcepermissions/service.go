@@ -14,26 +14,9 @@ import (
 )
 
 type Store interface {
-	// SetUserResourcePermission sets permission for managed user role on a resource
-	SetUserResourcePermission(
-		ctx context.Context, orgID int64,
-		user accesscontrol.User,
-		cmd types.SetResourcePermissionCommand,
-		hook types.UserResourceHookFunc,
-	) (*accesscontrol.ResourcePermission, error)
-
-	// SetTeamResourcePermission sets permission for managed team role on a resource
-	SetTeamResourcePermission(
-		ctx context.Context, orgID, teamID int64,
-		cmd types.SetResourcePermissionCommand,
-		hook types.TeamResourceHookFunc,
-	) (*accesscontrol.ResourcePermission, error)
-
-	// SetBuiltInResourcePermission sets permissions for managed builtin role on a resource
-	SetBuiltInResourcePermission(
-		ctx context.Context, orgID int64, builtinRole string,
-		cmd types.SetResourcePermissionCommand,
-		hook types.BuiltinResourceHookFunc,
+	SetResourcePermission(
+		ctx context.Context, orgID int64, binding accesscontrol.Binding,
+		cmd types.SetResourcePermissionCommand, hook types.ResourceHookFunc,
 	) (*accesscontrol.ResourcePermission, error)
 
 	SetResourcePermissions(
@@ -140,13 +123,17 @@ func (s *Service) SetUserPermission(ctx context.Context, orgID int64, user acces
 		return nil, err
 	}
 
-	return s.store.SetUserResourcePermission(ctx, orgID, user, types.SetResourcePermissionCommand{
+	return s.store.SetResourcePermission(ctx, orgID, accesscontrol.UserBinding(user.ID), types.SetResourcePermissionCommand{
 		Actions:           actions,
-		Permission:        permission,
 		Resource:          s.options.Resource,
 		ResourceID:        resourceID,
 		ResourceAttribute: s.options.ResourceAttribute,
-	}, s.options.OnSetUser)
+	}, func(session *sqlstore.DBSession) error {
+		if s.options.OnSetUser == nil {
+			return nil
+		}
+		return s.options.OnSetUser(session, orgID, user, resourceID, permission)
+	})
 }
 
 func (s *Service) SetTeamPermission(ctx context.Context, orgID, teamID int64, resourceID, permission string) (*accesscontrol.ResourcePermission, error) {
@@ -163,13 +150,17 @@ func (s *Service) SetTeamPermission(ctx context.Context, orgID, teamID int64, re
 		return nil, err
 	}
 
-	return s.store.SetTeamResourcePermission(ctx, orgID, teamID, types.SetResourcePermissionCommand{
+	return s.store.SetResourcePermission(ctx, orgID, accesscontrol.TeamBinding(teamID), types.SetResourcePermissionCommand{
 		Actions:           actions,
-		Permission:        permission,
 		Resource:          s.options.Resource,
 		ResourceID:        resourceID,
 		ResourceAttribute: s.options.ResourceAttribute,
-	}, s.options.OnSetTeam)
+	}, func(session *sqlstore.DBSession) error {
+		if s.options.OnSetTeam == nil {
+			return nil
+		}
+		return s.options.OnSetTeam(session, orgID, teamID, resourceID, permission)
+	})
 }
 
 func (s *Service) SetBuiltInRolePermission(ctx context.Context, orgID int64, builtInRole, resourceID, permission string) (*accesscontrol.ResourcePermission, error) {
@@ -186,13 +177,17 @@ func (s *Service) SetBuiltInRolePermission(ctx context.Context, orgID int64, bui
 		return nil, err
 	}
 
-	return s.store.SetBuiltInResourcePermission(ctx, orgID, builtInRole, types.SetResourcePermissionCommand{
+	return s.store.SetResourcePermission(ctx, orgID, accesscontrol.BuiltInRoleBinding(models.RoleType(builtInRole)), types.SetResourcePermissionCommand{
 		Actions:           actions,
-		Permission:        permission,
 		Resource:          s.options.Resource,
 		ResourceID:        resourceID,
 		ResourceAttribute: s.options.ResourceAttribute,
-	}, s.options.OnSetBuiltInRole)
+	}, func(session *sqlstore.DBSession) error {
+		if s.options.OnSetBuiltInRole == nil {
+			return nil
+		}
+		return s.options.OnSetBuiltInRole(session, orgID, builtInRole, resourceID, permission)
+	})
 }
 
 func (s *Service) SetPermissions(
@@ -206,21 +201,40 @@ func (s *Service) SetPermissions(
 	dbCommands := make([]types.SetResourcePermissionsCommand, 0, len(commands))
 	for _, cmd := range commands {
 		var binding accesscontrol.Binding
+		var hook types.ResourceHookFunc
 		if cmd.UserID != 0 {
 			if err := s.validateUser(ctx, orgID, cmd.UserID); err != nil {
 				return nil, err
 			}
 			binding = accesscontrol.UserBinding(cmd.UserID)
+			hook = func(session *sqlstore.DBSession) error {
+				if s.options.OnSetUser == nil {
+					return nil
+				}
+				return s.options.OnSetUser(session, orgID, accesscontrol.User{ID: cmd.UserID}, resourceID, cmd.Permission)
+			}
 		} else if cmd.TeamID != 0 {
 			if err := s.validateTeam(ctx, orgID, cmd.TeamID); err != nil {
 				return nil, err
 			}
 			binding = accesscontrol.TeamBinding(cmd.TeamID)
+			hook = func(session *sqlstore.DBSession) error {
+				if s.options.OnSetTeam == nil {
+					return nil
+				}
+				return s.options.OnSetTeam(session, orgID, cmd.TeamID, resourceID, cmd.Permission)
+			}
 		} else {
 			if err := s.validateBuiltinRole(ctx, cmd.BuiltinRole); err != nil {
 				return nil, err
 			}
 			binding = accesscontrol.BuiltInRoleBinding(models.RoleType(cmd.BuiltinRole))
+			hook = func(session *sqlstore.DBSession) error {
+				if s.options.OnSetBuiltInRole == nil {
+					return nil
+				}
+				return s.options.OnSetBuiltInRole(session, orgID, cmd.BuiltinRole, resourceID, cmd.Permission)
+			}
 		}
 
 		actions, err := s.mapPermission(cmd.Permission)
@@ -230,12 +244,12 @@ func (s *Service) SetPermissions(
 
 		dbCommands = append(dbCommands, types.SetResourcePermissionsCommand{
 			Binding: binding,
+			Hook:    hook,
 			SetResourcePermissionCommand: types.SetResourcePermissionCommand{
 				Actions:           actions,
 				Resource:          s.options.Resource,
 				ResourceID:        resourceID,
 				ResourceAttribute: s.options.ResourceAttribute,
-				Permission:        cmd.Permission,
 			},
 		})
 	}
