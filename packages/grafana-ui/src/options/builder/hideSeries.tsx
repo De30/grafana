@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import { FieldConfigEditorBuilder, FieldConfigEditorProps } from '@grafana/data';
 import { HideableFieldConfig, HideSeriesConfig } from '@grafana/schema';
 
-import { FilterPill, HorizontalGroup } from '../../index';
+import { FilterPill, HorizontalGroup } from '../../components';
 
 const SeriesConfigEditor: React.FC<FieldConfigEditorProps<HideSeriesConfig, {}>> = (props) => {
   const { value, onChange } = props;

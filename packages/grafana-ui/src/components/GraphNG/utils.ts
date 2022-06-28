@@ -7,10 +7,14 @@ import {
   ScaleDistributionConfig,
 } from '@grafana/schema';
 
-import { FIXED_UNIT } from './GraphNG';
 import { applyNullInsertThreshold } from './nullInsertThreshold';
 import { nullToUndefThreshold } from './nullToUndefThreshold';
 import { XYFieldMatchers } from './types';
+
+/**
+ * @internal -- not a public API
+ */
+export const FIXED_UNIT = '__fixed';
 
 function isVisibleBarField(f: Field) {
   return (

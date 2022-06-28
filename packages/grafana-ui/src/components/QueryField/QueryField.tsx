@@ -10,15 +10,6 @@ import { selectors } from '@grafana/e2e-selectors';
 import { Editor, Plugin } from '@grafana/slate-react';
 
 import {
-  makeValue,
-  SCHEMA,
-  CompletionItemGroup,
-  TypeaheadOutput,
-  TypeaheadInput,
-  SuggestionsState,
-  Themeable2,
-} from '../..';
-import {
   ClearPlugin,
   NewlinePlugin,
   SelectionShortcutsPlugin,
@@ -29,6 +20,9 @@ import {
 } from '../../slate-plugins';
 import { withTheme2 } from '../../themes';
 import { getFocusStyles } from '../../themes/mixins';
+import { Themeable2, CompletionItemGroup, TypeaheadInput, TypeaheadOutput, SuggestionsState } from '../../types';
+import { makeValue } from '../../utils';
+import { SCHEMA } from '../../utils/slate';
 
 export interface QueryFieldProps extends Themeable2 {
   additionalPlugins?: Plugin[];

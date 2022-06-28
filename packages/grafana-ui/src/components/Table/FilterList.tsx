@@ -4,8 +4,11 @@ import { FixedSizeList as List } from 'react-window';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 
-import { Checkbox, FilterInput, Label, VerticalGroup } from '..';
 import { stylesFactory, useTheme2 } from '../../themes';
+import { FilterInput } from '../FilterInput/FilterInput';
+import { Checkbox } from '../Forms/Checkbox';
+import { Label } from '../Forms/Label';
+import { VerticalGroup } from '../Layout/Layout';
 
 interface Props {
   values: SelectableValue[];

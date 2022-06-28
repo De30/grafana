@@ -97,13 +97,8 @@ export { TabContent } from './Tabs/TabContent';
 export { Counter } from './Tabs/Counter';
 
 // Visualizations
-export {
-  BigValue,
-  BigValueColorMode,
-  BigValueGraphMode,
-  BigValueJustifyMode,
-  BigValueTextMode,
-} from './BigValue/BigValue';
+export { BigValue } from './BigValue/BigValue';
+export { BigValueColorMode, BigValueGraphMode, BigValueJustifyMode, BigValueTextMode } from './BigValue/types';
 export { Sparkline } from './Sparkline/Sparkline';
 
 export { Gauge } from './Gauge/Gauge';
@@ -286,7 +281,8 @@ export { pluginLog, getStackingGroups, preparePlotData2 } from './uPlot/utils';
 export type { StackingGroup } from './uPlot/utils';
 export type { PlotTooltipInterpolator, PlotSelection, FacetSeries, FacetedData } from './uPlot/types';
 export type { UPlotConfigPrepFn } from './uPlot/config/UPlotConfigBuilder';
-export { GraphNG, FIXED_UNIT } from './GraphNG/GraphNG';
+export { GraphNG } from './GraphNG/GraphNG';
+export { FIXED_UNIT } from './GraphNG/utils';
 export type { GraphNGProps, PropDiffFn } from './GraphNG/GraphNG';
 export { TimeSeries } from './TimeSeries/TimeSeries';
 export { useGraphNGContext } from './GraphNG/hooks';

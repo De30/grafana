@@ -18,6 +18,7 @@ import { useStyles2 } from '../../themes';
 import { CustomScrollbar } from '../CustomScrollbar/CustomScrollbar';
 import { Pagination } from '../Pagination/Pagination';
 
+import { getColumns } from './DefaultCell.utils';
 import { FooterRow } from './FooterRow';
 import { HeaderRow } from './HeaderRow';
 import { TableCell } from './TableCell';
@@ -29,7 +30,7 @@ import {
   TableSortByActionCallback,
   TableSortByFieldState,
 } from './types';
-import { getColumns, sortCaseInsensitive, sortNumber } from './utils';
+import { sortCaseInsensitive, sortNumber } from './utils';
 
 const COLUMN_MIN_WIDTH = 150;
 

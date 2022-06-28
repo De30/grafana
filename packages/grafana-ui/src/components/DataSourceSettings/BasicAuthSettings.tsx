@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { InlineField } from '../..';
 import { FormField } from '../FormField/FormField';
+import { InlineField } from '../Forms/InlineField';
 import { SecretFormField } from '../SecretFormField/SecretFormField';
 
 import { HttpSettingsProps } from './types';

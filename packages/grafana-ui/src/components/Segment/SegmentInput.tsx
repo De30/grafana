@@ -7,8 +7,8 @@ import { measureText } from '../../utils/measureText';
 import { InlineLabel } from '../Forms/InlineLabel';
 
 import { getSegmentStyles } from './styles';
-
-import { useExpandableLabel, SegmentProps } from '.';
+import { SegmentProps } from './types';
+import { useExpandableLabel } from './useExpandableLabel';
 
 export interface SegmentInputProps<T> extends SegmentProps<T>, Omit<HTMLProps<HTMLInputElement>, 'value' | 'onChange'> {
   value: string | number;

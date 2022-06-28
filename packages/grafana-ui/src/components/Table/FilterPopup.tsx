@@ -3,8 +3,12 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { Field, GrafanaTheme, SelectableValue } from '@grafana/data';
 
-import { Button, ClickOutsideWrapper, HorizontalGroup, IconButton, Label, VerticalGroup } from '..';
 import { stylesFactory, useStyles, useTheme2 } from '../../themes';
+import { Button } from '../Button';
+import { ClickOutsideWrapper } from '../ClickOutsideWrapper/ClickOutsideWrapper';
+import { Label } from '../Forms/Label';
+import { IconButton } from '../IconButton/IconButton';
+import { VerticalGroup, HorizontalGroup } from '../Layout/Layout';
 
 import { FilterList } from './FilterList';
 import { TableStyles } from './styles';

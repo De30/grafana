@@ -31,11 +31,6 @@ import { preparePlotFrame as defaultPreparePlotFrame } from './utils';
 /**
  * @internal -- not a public API
  */
-export const FIXED_UNIT = '__fixed';
-
-/**
- * @internal -- not a public API
- */
 export type PropDiffFn<T extends any = any> = (prev: T, next: T) => boolean;
 
 export interface GraphNGProps extends Themeable2 {
