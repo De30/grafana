@@ -3,11 +3,9 @@
     "baseUrl": "./",
     "declarationDir": "./compiled",
     "emitDeclarationOnly": true,
-    "incremental": true,
     "isolatedModules": true,
     "outDir": "compiled",
-    "rootDirs": [".", "stories"],
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "rootDirs": [".", "stories"]
   },
   "exclude": ["node_modules", "dist/**/*"],
   "extends": "@grafana/tsconfig",
