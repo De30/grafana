@@ -5,6 +5,7 @@ import { getPluginSettings } from './pluginSettings';
 import { importAppPlugin, importDataSourcePlugin } from './plugin_loader';
 
 export async function loadPlugin(pluginId: string): Promise<GrafanaPlugin> {
+  console.log('using loadPlugin');
   const info = await getPluginSettings(pluginId);
   let result: GrafanaPlugin | undefined;
 

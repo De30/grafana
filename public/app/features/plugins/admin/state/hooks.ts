@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { PluginError } from '@grafana/data';
+import { contextSrv } from 'app/core/core';
+import { AccessControlAction } from 'app/types';
 
 import { sortPlugins, Sorters } from '../helpers';
 import { CatalogPlugin, PluginCatalogStoreState, PluginListDisplayMode } from '../types';
@@ -122,7 +124,12 @@ export const useFetchDetails = (id: string) => {
   const dispatch = useDispatch();
   const plugin = useSelector((state: PluginCatalogStoreState) => selectById(state, id));
   const isNotFetching = !useSelector(selectIsRequestPending(fetchDetails.typePrefix));
-  const shouldFetch = isNotFetching && plugin && !plugin.details;
+  const canFetch = plugin && contextSrv.hasAccessInMetadata(AccessControlAction.PluginsSettingsRead, plugin, true);
+  const shouldFetch = isNotFetching && plugin && !plugin.details && (!plugin.accessControl || canFetch);
+  // TODO remove debug logging
+  console.log('plugin', plugin);
+  console.log('canFetch', canFetch);
+  console.log('shouldFetch', shouldFetch);
 
   useEffect(() => {
     shouldFetch && dispatch(fetchDetails(id));

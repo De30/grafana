@@ -4,6 +4,7 @@ import { loadPlugin } from '../../utils';
 import { CatalogPlugin } from '../types';
 
 export const usePluginConfig = (plugin?: CatalogPlugin) => {
+  console.log('usePluginConfig');
   return useAsync(async () => {
     if (!plugin) {
       return null;

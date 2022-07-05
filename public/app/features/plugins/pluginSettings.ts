@@ -8,6 +8,7 @@ type PluginCache = {
 const pluginInfoCache: PluginCache = {};
 
 export function getPluginSettings(pluginId: string): Promise<PluginMeta> {
+  console.log('Using get plugin settings');
   const v = pluginInfoCache[pluginId];
   if (v) {
     return Promise.resolve(v);
