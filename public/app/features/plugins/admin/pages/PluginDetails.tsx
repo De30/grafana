@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import React, { useEffect } from 'react';
 import { usePrevious } from 'react-use';
 
-import { GrafanaTheme2 } from '@grafana/data';
+import { GrafanaTheme2, WithAccessControlMetadata } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { useStyles2, TabsBar, TabContent, Tab, Alert, IconName } from '@grafana/ui';
 import { Layout } from '@grafana/ui/src/components/Layout/Layout';
@@ -19,9 +19,9 @@ import { usePluginDetailsTabs } from '../hooks/usePluginDetailsTabs';
 import { useGetSingle, useFetchStatus, useFetchDetailsStatus } from '../state/hooks';
 import { PluginTabLabels, PluginTabIds, PluginDetailsTab } from '../types';
 
-type Props = GrafanaRouteComponentProps<{ pluginId?: string }>;
+type Props = WithAccessControlMetadata & GrafanaRouteComponentProps<{ pluginId?: string }>;
 
-export default function PluginDetails({ match, queryParams }: Props): JSX.Element | null {
+export default function PluginDetails({ match, queryParams, accessControl }: Props): JSX.Element | null {
   const {
     params: { pluginId = '' },
     url,
