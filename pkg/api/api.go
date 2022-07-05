@@ -332,13 +332,13 @@ func (hs *HTTPServer) registerRoutes() {
 		apiRoute.Get("/plugins/errors", routing.Wrap(hs.GetPluginErrorsList))
 
 		apiRoute.Group("/plugins", func(pluginRoute routing.RouteRegister) {
-			pluginRoute.Post("/:pluginId/install", routing.Wrap(hs.InstallPlugin))
-			pluginRoute.Post("/:pluginId/uninstall", routing.Wrap(hs.UninstallPlugin))
+			pluginRoute.Post("/:pluginId/install", authorize(reqOrgAdmin, ac.EvalPermission(plugins.ActionIntall)), routing.Wrap(hs.InstallPlugin))
+			pluginRoute.Post("/:pluginId/uninstall", authorize(reqOrgAdmin, ac.EvalPermission(plugins.ActionIntall)), routing.Wrap(hs.UninstallPlugin))
 		}, reqGrafanaAdmin)
 
 		apiRoute.Group("/plugins", func(pluginRoute routing.RouteRegister) {
 			pluginRoute.Get("/:pluginId/dashboards/", routing.Wrap(hs.GetPluginDashboards))
-			pluginRoute.Post("/:pluginId/settings", routing.Wrap(hs.UpdatePluginSetting)) // TODO should we block access here on plugins access?
+			pluginRoute.Post("/:pluginId/settings", authorize(reqOrgAdmin, ac.EvalPermission(plugins.ActionSettingsWrite, pluginIDScope)), routing.Wrap(hs.UpdatePluginSetting))
 			pluginRoute.Get("/:pluginId/metrics", routing.Wrap(hs.CollectPluginMetrics))
 		}, reqOrgAdmin)
 
