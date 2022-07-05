@@ -87,7 +87,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 	}
 
 	// Compute metadata
-	metadata := hs.getMultiAccessControlMetadata(c, c.OrgId,
+	pluginsMetadata := hs.getMultiAccessControlMetadata(c, c.OrgId,
 		plugins.ScopeProvider.GetResourceScope(""), filteredPluginIDs)
 
 	// Prepare DTO
@@ -123,7 +123,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 		}
 
 		// Set AccessControl Metadata
-		listItem.AccessControl = metadata[pluginDef.ID]
+		listItem.AccessControl = pluginsMetadata[pluginDef.ID]
 
 		result = append(result, listItem)
 	}
@@ -138,16 +138,6 @@ func (hs *HTTPServer) GetPluginSettingByID(c *models.ReqContext) response.Respon
 	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		return response.Error(http.StatusNotFound, "Plugin not found, no installed plugin with that id", nil)
-	}
-
-	// TODO challenge this:
-	// we might need different permissions given this endpoint is used to load the plugin and to get the settings.
-	if plugin.IsApp() {
-		hasAccess := accesscontrol.HasAccess(hs.AccessControl, c)
-		if !hasAccess(accesscontrol.ReqSignedIn,
-			accesscontrol.EvalPermission(plugins.ActionAppAccess, plugins.ScopeProvider.GetResourceScope(plugin.ID))) {
-			return response.Error(http.StatusForbidden, "Access Denied", nil)
-		}
 	}
 
 	dto := &dtos.PluginSetting{
