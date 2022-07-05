@@ -2,7 +2,7 @@ package plugins
 
 import (
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 )
 
 const (
@@ -17,39 +17,50 @@ const (
 )
 
 var (
-	ScopeProvider = accesscontrol.NewScopeProvider("plugins")
+	ScopeProvider = ac.NewScopeProvider("plugins")
 )
 
-func DeclareRBACRoles(ac accesscontrol.AccessControl) error {
+func DeclareRBACRoles(acService ac.AccessControl) error {
 	// FIXME: come up with a proper name
-	AppPluginsReader := accesscontrol.RoleRegistration{
-		Role: accesscontrol.RoleDTO{
-			Name:        accesscontrol.FixedRolePrefix + "plugins.app:reader",
+	AppPluginsReader := ac.RoleRegistration{
+		Role: ac.RoleDTO{
+			Name:        ac.FixedRolePrefix + "plugins.app:reader",
 			DisplayName: "Application Plugins Access",
 			Description: "Grant access to Application plugins (still enforcing the organization role)",
 			Group:       "Plugins",
-			Permissions: []accesscontrol.Permission{
+			Permissions: []ac.Permission{
 				{Action: ActionAppAccess, Scope: ScopeProvider.GetResourceAllScope()},
 				{Action: ActionSettingsRead, Scope: ScopeProvider.GetResourceAllScope()},
 			},
 		},
 		Grants: []string{string(models.ROLE_VIEWER)},
 	}
-
-	PluginsWriter := accesscontrol.RoleRegistration{
-		Role: accesscontrol.RoleDTO{
-			Name:        accesscontrol.FixedRolePrefix + "plugins.app:reader",
+	PluginsWriter := ac.RoleRegistration{
+		Role: ac.RoleDTO{
+			Name:        ac.FixedRolePrefix + "plugins.app:reader",
 			DisplayName: "Plugin Access",
-			Description: "Install, Uninstall, Enable, Disable plugins, view and edit plugins' settings",
+			Description: "Enable and disable plugins, view and edit plugins' settings",
 			Group:       "Plugins",
-			Permissions: []accesscontrol.Permission{
-				{Action: ActionIntall},
+			Permissions: []ac.Permission{
 				{Action: ActionToggle, Scope: ScopeProvider.GetResourceAllScope()},
 				{Action: ActionSettingsRead, Scope: ScopeProvider.GetResourceAllScope()},
 				{Action: ActionSettingsWrite, Scope: ScopeProvider.GetResourceAllScope()},
 			},
 		},
-		Grants: []string{accesscontrol.RoleGrafanaAdmin},
+		Grants: []string{string(models.ROLE_ADMIN)},
 	}
-	return ac.DeclareFixedRoles(AppPluginsReader, PluginsWriter)
+	PluginsManager := ac.RoleRegistration{
+		Role: ac.RoleDTO{
+			Name:        ac.FixedRolePrefix + "plugins.app:reader",
+			DisplayName: "Plugin Access",
+			Description: "Install, uninstall, enable, disable plugins",
+			Group:       "Plugins",
+			Permissions: []ac.Permission{
+				{Action: ActionIntall},
+				{Action: ActionToggle, Scope: ScopeProvider.GetResourceAllScope()},
+			},
+		},
+		Grants: []string{ac.RoleGrafanaAdmin},
+	}
+	return acService.DeclareFixedRoles(AppPluginsReader, PluginsWriter, PluginsManager)
 }
