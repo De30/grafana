@@ -47,8 +47,19 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 		return response.Error(500, "Failed to get list of plugins", err)
 	}
 
+	// Compute AccessControl Metadata
+	pluginDefinitions := hs.pluginStore.Plugins(c.Req.Context())
+	appPluginsIDs := map[string]bool{}
+	for _, pluginDef := range pluginDefinitions {
+		if pluginDef.IsApp() {
+			appPluginsIDs[pluginDef.ID] = true
+		}
+	}
+	metadata := hs.getMultiAccessControlMetadata(c, c.OrgId,
+		plugins.ScopeProvider.GetResourceScope(""), appPluginsIDs)
+
 	result := make(dtos.PluginList, 0)
-	for _, pluginDef := range hs.pluginStore.Plugins(c.Req.Context()) {
+	for _, pluginDef := range pluginDefinitions {
 		// filter out app sub plugins
 		if embeddedFilter == "0" && pluginDef.IncludedInAppID != "" {
 			continue
@@ -105,6 +116,11 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 		// filter out built in plugins
 		if pluginDef.BuiltIn {
 			continue
+		}
+
+		// Set AccessControl Metadata
+		if pluginDef.IsApp() {
+			listItem.AccessControl = metadata[pluginDef.ID]
 		}
 
 		result = append(result, listItem)

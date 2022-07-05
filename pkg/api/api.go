@@ -338,7 +338,7 @@ func (hs *HTTPServer) registerRoutes() {
 
 		apiRoute.Group("/plugins", func(pluginRoute routing.RouteRegister) {
 			pluginRoute.Get("/:pluginId/dashboards/", routing.Wrap(hs.GetPluginDashboards))
-			pluginRoute.Post("/:pluginId/settings", routing.Wrap(hs.UpdatePluginSetting))
+			pluginRoute.Post("/:pluginId/settings", routing.Wrap(hs.UpdatePluginSetting)) // TODO should we block access here on plugins access?
 			pluginRoute.Get("/:pluginId/metrics", routing.Wrap(hs.CollectPluginMetrics))
 		}, reqOrgAdmin)
 
