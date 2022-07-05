@@ -18,6 +18,20 @@ const (
 
 var (
 	ScopeProvider = ac.NewScopeProvider("plugins")
+
+	// Protects access to the Configuration > Plugins page
+	ConfigurationAccessEvaluator = ac.EvalAny(
+		ac.EvalAll(
+			ac.EvalPermission(ActionSettingsRead),
+			ac.EvalPermission(ActionSettingsWrite),
+		),
+		ac.EvalPermission(ActionToggle),
+	)
+
+	// Protects access to the Server Admin > Plugins page
+	AdminAccessEvaluator = ac.EvalAny(
+		ac.EvalPermission(ActionIntall),
+	)
 )
 
 func DeclareRBACRoles(acService ac.AccessControl) error {
