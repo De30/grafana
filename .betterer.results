@@ -6585,11 +6585,11 @@ exports[`better eslint`] = {
       [50, 22, 101, "Do not use any type assertions.", "3734235969"],
       [50, 22, 88, "Do not use any type assertions.", "3757401717"]
     ],
-    "public/app/features/query/components/QueryEditorRow.tsx:3054089793": [
+    "public/app/features/query/components/QueryEditorRow.tsx:1211790107": [
       [97, 22, 20, "Do not use any type assertions.", "2923490522"],
       [144, 18, 46, "Do not use any type assertions.", "1673417097"],
       [144, 18, 21, "Do not use any type assertions.", "1354497810"],
-      [360, 22, 40, "Do not use any type assertions.", "1350130209"]
+      [358, 22, 40, "Do not use any type assertions.", "1350130209"]
     ],
     "public/app/features/query/components/QueryEditorRowHeader.test.tsx:2607197828": [
       [99, 16, 32, "Do not use any type assertions.", "2255106576"]

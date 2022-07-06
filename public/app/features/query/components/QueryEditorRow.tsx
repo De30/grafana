@@ -377,7 +377,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
     return (
       <HorizontalGroup width="auto">
-        <QueryOperationAction title="Run Query" icon="play" onClick={this.onRunQuery} />
+        <QueryOperationAction title="Run Query" icon="play" active={true} onClick={this.props.onRunQuery} />
         {hasEditorHelp && (
           <QueryOperationAction
             title="Toggle data source help"
