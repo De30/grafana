@@ -369,15 +369,22 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   renderActions = (props: QueryOperationRowRenderProps) => {
-    const { query, hideDisableQuery = false } = this.props;
+    const { data, query, hideDisableQuery = false } = this.props;
     const { hasTextEditMode, datasource, showingHelp } = this.state;
     const isDisabled = query.hide;
 
     const hasEditorHelp = datasource?.components?.QueryEditorHelp;
+    const queryActive = data.state === LoadingState.Loading;
 
     return (
       <HorizontalGroup width="auto">
-        <QueryOperationAction title="Run Query" icon="play" active={true} onClick={this.props.onRunQuery} />
+        <QueryOperationAction
+          title="Run Query"
+          icon="play"
+          disabled={queryActive}
+          active={queryActive}
+          onClick={this.props.onRunQuery}
+        />
         {hasEditorHelp && (
           <QueryOperationAction
             title="Toggle data source help"
