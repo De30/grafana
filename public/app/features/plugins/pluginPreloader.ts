@@ -7,7 +7,6 @@ export async function preloadPlugins(pluginsToPreload: PreloadPlugin[] = []): Pr
 }
 
 async function preloadPlugin(plugin: PreloadPlugin): Promise<void> {
-  console.log('preloadPlugin');
   const { path, version } = plugin;
   try {
     await importPluginModule(path, version);
