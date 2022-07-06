@@ -47,7 +47,6 @@ export const QueryOperationRowHeader: React.FC<QueryOperationRowHeaderProps> = (
       </div>
 
       <div className={styles.column}>
-        <Icon name="play" title="Run" color="blue" />
         {actionsElement}
         {draggable && (
           <Icon
