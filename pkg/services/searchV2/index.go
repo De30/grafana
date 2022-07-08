@@ -386,6 +386,12 @@ func (i *searchIndex) reportSizeOfIndexDiskBackup(orgID int64) {
 }
 
 func (i *searchIndex) buildOrgIndex(ctx context.Context, orgID int64) (int, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			i.logger.Error("panic while building org index", "rcv", r, "orgId", orgID)
+		}
+	}()
+
 	started := time.Now()
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
