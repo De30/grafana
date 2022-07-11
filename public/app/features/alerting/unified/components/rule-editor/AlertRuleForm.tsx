@@ -5,7 +5,9 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, ConfirmModal, CustomScrollbar, PageToolbar, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, ConfirmModal, PageToolbar, Spinner, useStyles2 } from '@grafana/ui';
+import { Page } from 'app/core/components/Page/Page';
+import { PageLayoutType } from 'app/core/components/Page/types';
 import { useAppNotification } from 'app/core/copy/appNotification';
 import { useCleanup } from 'app/core/hooks/useCleanup';
 import { useQueryParams } from 'app/core/hooks/useQueryParams';
@@ -105,77 +107,87 @@ export const AlertRuleForm: FC<Props> = ({ existing }) => {
     notifyApp.error('There are errors in the form. Please correct them and try again!');
   };
 
+  const toolbarActions = [
+    <Link to={returnTo} key="cancel">
+      <Button variant="secondary" disabled={submitState.loading} type="button" fill="outline">
+        Cancel
+      </Button>
+    </Link>,
+    existing ? (
+      <Button variant="destructive" type="button" onClick={() => setShowDeleteModal(true)} key="delete">
+        Delete
+      </Button>
+    ) : null,
+    isCortexLokiOrRecordingRule(watch) && (
+      <Button
+        variant="secondary"
+        type="button"
+        onClick={() => setShowEditYaml(true)}
+        disabled={submitState.loading}
+        key="edit-yaml"
+      >
+        Edit yaml
+      </Button>
+    ),
+    <Button
+      variant="primary"
+      type="button"
+      onClick={handleSubmit((values) => submit(values, false), onInvalid)}
+      disabled={submitState.loading}
+      key="save"
+    >
+      {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
+      Save
+    </Button>,
+    <Button
+      variant="primary"
+      type="button"
+      onClick={handleSubmit((values) => submit(values, true), onInvalid)}
+      disabled={submitState.loading}
+      key="save and exit"
+    >
+      {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
+      Save and exit
+    </Button>,
+  ];
+
+  const title = `${existing ? 'Edit' : 'Create'} alert rule`;
+  const pageNav = { text: title };
+  const toolbar = (
+    <PageToolbar title={title} pageIcon="bell">
+      {toolbarActions}
+    </PageToolbar>
+  );
+
   return (
-    <FormProvider {...formAPI}>
-      <form onSubmit={(e) => e.preventDefault()} className={styles.form}>
-        <PageToolbar title={`${existing ? 'Edit' : 'Create'} alert rule`} pageIcon="bell">
-          <Link to={returnTo}>
-            <Button variant="secondary" disabled={submitState.loading} type="button" fill="outline">
-              Cancel
-            </Button>
-          </Link>
-          {existing ? (
-            <Button variant="destructive" type="button" onClick={() => setShowDeleteModal(true)}>
-              Delete
-            </Button>
-          ) : null}
-          {isCortexLokiOrRecordingRule(watch) && (
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => setShowEditYaml(true)}
-              disabled={submitState.loading}
-            >
-              Edit yaml
-            </Button>
-          )}
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleSubmit((values) => submit(values, false), onInvalid)}
-            disabled={submitState.loading}
-          >
-            {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
-            Save
-          </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleSubmit((values) => submit(values, true), onInvalid)}
-            disabled={submitState.loading}
-          >
-            {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
-            Save and exit
-          </Button>
-        </PageToolbar>
-        <div className={styles.contentOuter}>
-          <CustomScrollbar autoHeightMin="100%" hideHorizontalTrack={true}>
-            <div className={styles.contentInner}>
-              <QueryAndAlertConditionStep editingExistingRule={!!existing} />
-              {showStep2 && (
-                <>
-                  {type === RuleFormType.grafana ? <GrafanaEvaluationBehavior /> : <CloudEvaluationBehavior />}
-                  <DetailsStep initialFolder={defaultValues.folder} />
-                  <NotificationsStep />
-                </>
-              )}
-            </div>
-          </CustomScrollbar>
-        </div>
-      </form>
-      {showDeleteModal ? (
-        <ConfirmModal
-          isOpen={true}
-          title="Delete rule"
-          body="Deleting this rule will permanently remove it. Are you sure you want to delete this rule?"
-          confirmText="Yes, delete"
-          icon="exclamation-triangle"
-          onConfirm={deleteRule}
-          onDismiss={() => setShowDeleteModal(false)}
-        />
-      ) : null}
-      {showEditYaml ? <RuleInspector onClose={() => setShowEditYaml(false)} /> : null}
-    </FormProvider>
+    <Page navId="alert-list" toolbar={toolbar} pageNav={pageNav} layout={PageLayoutType.Dashboard}>
+      <FormProvider {...formAPI}>
+        <form onSubmit={(e) => e.preventDefault()} className={styles.form}>
+          <div className={styles.contentInner}>
+            <QueryAndAlertConditionStep editingExistingRule={!!existing} />
+            {showStep2 && (
+              <>
+                {type === RuleFormType.grafana ? <GrafanaEvaluationBehavior /> : <CloudEvaluationBehavior />}
+                <DetailsStep initialFolder={defaultValues.folder} />
+                <NotificationsStep />
+              </>
+            )}
+          </div>
+        </form>
+        {showDeleteModal ? (
+          <ConfirmModal
+            isOpen={true}
+            title="Delete rule"
+            body="Deleting this rule will permanently remove it. Are you sure you want to delete this rule?"
+            confirmText="Yes, delete"
+            icon="exclamation-triangle"
+            onConfirm={deleteRule}
+            onDismiss={() => setShowDeleteModal(false)}
+          />
+        ) : null}
+        {showEditYaml ? <RuleInspector onClose={() => setShowEditYaml(false)} /> : null}
+      </FormProvider>
+    </Page>
   );
 };
 
@@ -199,14 +211,9 @@ const getStyles = (theme: GrafanaTheme2) => {
     contentInner: css`
       flex: 1;
       padding: ${theme.spacing(2)};
-    `,
-    contentOuter: css`
       background: ${theme.colors.background.primary};
       border: 1px solid ${theme.colors.border.weak};
       border-radius: ${theme.shape.borderRadius()};
-      margin: ${theme.spacing(0, 2, 2)};
-      overflow: hidden;
-      flex: 1;
     `,
     flexRow: css`
       display: flex;
