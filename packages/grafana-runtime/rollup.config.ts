@@ -14,12 +14,12 @@ export default [
       {
         format: 'cjs',
         sourcemap: true,
-        dir: path.dirname(pkg.publishConfig.main),
+        dir: path.dirname(pkg.main),
       },
       {
         format: 'esm',
         sourcemap: true,
-        dir: path.dirname(pkg.publishConfig.module),
+        dir: path.dirname(pkg.module),
         preserveModules: true,
         // @ts-expect-error (TS cannot assure that `process.env.PROJECT_CWD` is a string)
         preserveModulesRoot: path.join(process.env.PROJECT_CWD, `packages/grafana-runtime/src`),

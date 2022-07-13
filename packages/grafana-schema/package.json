@@ -13,11 +13,10 @@
     "url": "http://github.com/grafana/grafana.git",
     "directory": "packages/grafana-schema"
   },
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
   "types": "src/index.ts",
   "publishConfig": {
-    "main": "dist/index.js",
-    "module": "dist/esm/index.js",
     "types": "dist/index.d.ts",
     "access": "public"
   },
