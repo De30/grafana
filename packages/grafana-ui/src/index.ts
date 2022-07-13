@@ -12,3 +12,6 @@ export * from './slate-plugins';
 
 // Moved to `@grafana/schema`, in Grafana 9, this will be removed
 export * from './schema';
+
+// This file is temp for module federation PoC.
+export * from './extras';

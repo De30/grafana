@@ -26,3 +26,6 @@ export { PanelPlugin, type SetFieldConfigOptionsArgs, type StandardOptionConfig 
 export { createFieldConfigRegistry } from './panel/registryFactories';
 export { type QueryRunner, type QueryRunnerOptions } from './types/queryRunner';
 export { type GroupingToMatrixTransformerOptions } from './transformations/transformers/groupingToMatrix';
+
+// This file is temp for module federation PoC.
+export * from './extras';
