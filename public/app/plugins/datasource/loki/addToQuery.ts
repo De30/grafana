@@ -58,6 +58,18 @@ export function addParserToQuery(query: string, parser: string): string {
 }
 
 /**
+ * Adds label format to existing query. Useful for query modification for hints.
+ * It uses LogQL parser to find log query and add label format at the end.
+ *
+ * @param query
+ * @param labelFormat
+ */
+export function addLabelFormatToQuery(query: string, labelFormat: { label: string; rename: string }): string {
+  const logQueryPositions = getLogQueryPosition(query);
+  return addLabelFormat(query, logQueryPositions, labelFormat);
+}
+
+/**
  * Adds filtering for pipeline errors to existing query. Useful for query modification for hints.
  * It uses LogQL parser to find parsers and adds pipeline errors filtering after them.
  *
@@ -128,6 +140,24 @@ function getLineFiltersPositions(query: string): Position[] {
   return positions;
 }
 
+/**
+ * Parse the string and get all Log query positions in the query.
+ * @param query
+ */
+function getLogQueryPosition(query: string): Position[] {
+  const tree = parser.parse(query);
+  const positions: Position[] = [];
+  tree.iterate({
+    enter: (type, from, to, get): false | void => {
+      if (type.name === 'LogExpr') {
+        positions.push({ from, to });
+        return false;
+      }
+    },
+  });
+  return positions;
+}
+
 function toLabelFilter(key: string, value: string, operator: string): QueryBuilderLabelFilter {
   // We need to make sure that we convert the value back to string because it may be a number
   return { label: key, op: operator, value };
@@ -188,6 +218,35 @@ function addFilterAsLabelFilter(query: string, parserPositions: Position[], filt
     const end = isLast ? query.substring(match.to) : '';
 
     const labelFilter = ` | ${filter.label}${filter.op}\`${filter.value}\``;
+    newQuery += start + labelFilter + end;
+    prev = match.to;
+  }
+  return newQuery;
+}
+
+/**
+ * Add filter as label filter after the parsers
+ * @param query
+ * @param logQueryPositions
+ * @param labelFormat
+ */
+function addLabelFormat(
+  query: string,
+  logQueryPositions: Position[],
+  labelFormat: { label: string; rename: string }
+): string {
+  let newQuery = '';
+  let prev = 0;
+
+  for (let i = 0; i < logQueryPositions.length; i++) {
+    // This is basically just doing splice on a string for each matched vector selector.
+    const match = logQueryPositions[i];
+    const isLast = i === logQueryPositions.length - 1;
+
+    const start = query.substring(prev, match.to);
+    const end = isLast ? query.substring(match.to) : '';
+
+    const labelFilter = ` | label_format ${labelFormat.label}=\`${labelFormat.rename}\``;
     newQuery += start + labelFilter + end;
     prev = match.to;
   }

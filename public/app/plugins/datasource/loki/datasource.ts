@@ -43,7 +43,7 @@ import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_sr
 import { serializeParams } from '../../../core/utils/fetch';
 import { renderLegendFormat } from '../prometheus/legend';
 
-import { addLabelToQuery, addNoPipelineErrorToQuery, addParserToQuery } from './addToQuery';
+import { addLabelFormatToQuery, addLabelToQuery, addNoPipelineErrorToQuery, addParserToQuery } from './addToQuery';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
 import LanguageProvider from './language_provider';
@@ -410,6 +410,15 @@ export class LokiDatasource
       }
       case 'ADD_NO_PIPELINE_ERROR': {
         expression = addNoPipelineErrorToQuery(expression);
+        break;
+      }
+
+      case 'ADD_LEVEL_LABEL_FORMAT': {
+        console.log(action);
+        expression = addLabelFormatToQuery(expression, {
+          rename: action.options.rename,
+          label: action.options.label,
+        });
         break;
       }
       default:

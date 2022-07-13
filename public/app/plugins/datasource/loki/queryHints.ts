@@ -1,7 +1,11 @@
 import { DataFrame, QueryHint } from '@grafana/data';
 
 import { isQueryPipelineErrorFiltering, isQueryWithParser } from './query_utils';
-import { extractHasErrorLabelFromDataFrame, extractLogParserFromDataFrame } from './responseUtils';
+import {
+  extractHasErrorLabelFromDataFrame,
+  extractHasLevelLikeLabelFromDataFrame,
+  extractLogParserFromDataFrame,
+} from './responseUtils';
 
 export function getQueryHints(query: string, series: DataFrame[]): QueryHint[] {
   if (series.length === 0) {
@@ -10,6 +14,25 @@ export function getQueryHints(query: string, series: DataFrame[]): QueryHint[] {
 
   const hints: QueryHint[] = [];
   const { queryWithParser, parserCount } = isQueryWithParser(query);
+  const levelLikeLabel = extractHasLevelLikeLabelFromDataFrame(series[0]);
+
+  if (levelLikeLabel) {
+    hints.push({
+      type: 'ADD_LEVEL_LABEL_FORMAT',
+      label: 'Selected log stream selector has JSON formatted logs.',
+      fix: {
+        label: 'Consider using JSON parser.',
+        action: {
+          type: 'ADD_LEVEL_LABEL_FORMAT',
+          query,
+          options: {
+            rename: 'level',
+            label: levelLikeLabel,
+          },
+        },
+      },
+    });
+  }
 
   if (!queryWithParser) {
     const { hasLogfmt, hasJSON } = extractLogParserFromDataFrame(series[0]);

@@ -37,3 +37,17 @@ export function extractHasErrorLabelFromDataFrame(frame: DataFrame): boolean {
   const labels: Array<{ [key: string]: string }> = labelField.values.toArray();
   return labels.some((label) => label['__error__']);
 }
+
+export function extractHasLevelLikeLabelFromDataFrame(frame: DataFrame): string | undefined {
+  const labelField = frame.fields.find((field) => field.name === 'labels' && field.type === FieldType.other);
+  if (labelField == null) {
+    return undefined;
+  }
+
+  const labelsArray: Array<{ [key: string]: string }> = labelField.values.toArray();
+
+  const levelLikeLabelArray = labelsArray.map((labels) =>
+    Object.keys(labels).find((key) => key === 'lvl' || key.includes('level'))
+  );
+  return levelLikeLabelArray[0];
+}

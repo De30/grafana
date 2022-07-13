@@ -74,7 +74,7 @@ function getRandomLogItem(counter) {
     counter: counter.toString(),
     float: Math.random() > 0.2 ? (Math.trunc(100000 * Math.random())/1000).toString() : 'NaN',
     label: chooseRandomElement(['val1', 'val2', 'val3']),
-    level: chooseRandomElement(['debug','info', 'info', 'info', 'info', 'warning', 'error', 'error']),
+    lvl: chooseRandomElement(['debug','info', 'info', 'info', 'info', 'warning', 'error', 'error']),
   };
 }
 
