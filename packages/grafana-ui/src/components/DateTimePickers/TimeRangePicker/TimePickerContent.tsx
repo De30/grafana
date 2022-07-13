@@ -1,10 +1,10 @@
 import { css, cx } from '@emotion/css';
 import React, { memo, useMemo, useState } from 'react';
+import { FilterInput } from 'src/components/FilterInput/FilterInput';
 
 import { GrafanaTheme2, isDateTime, rangeUtil, RawTimeRange, TimeOption, TimeRange, TimeZone } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
-import { FilterInput } from '../..';
 import { stylesFactory, useTheme2 } from '../../../themes';
 import { getFocusStyles } from '../../../themes/mixins';
 import { CustomScrollbar } from '../../CustomScrollbar/CustomScrollbar';
