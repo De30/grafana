@@ -7,13 +7,13 @@ import {
   ContextMenu,
   GraphContextMenuHeader,
   IconName,
-  MenuItemProps,
-  MenuItemsGroup,
   MenuGroup,
   MenuItem,
+  MenuItemProps,
+  MenuItemsGroup,
+  pluginLog,
   UPlotConfigBuilder,
 } from '@grafana/ui';
-import { pluginLog } from '@grafana/ui/src/components/uPlot/utils';
 
 type ContextMenuSelectionCoords = { viewport: CartesianCoords2D; plotCanvas: CartesianCoords2D };
 type ContextMenuSelectionPoint = { seriesIdx: number | null; dataIdx: number | null };

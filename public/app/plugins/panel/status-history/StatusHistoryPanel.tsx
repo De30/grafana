@@ -1,8 +1,15 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { CartesianCoords2D, DataFrame, FieldType, PanelProps } from '@grafana/data';
-import { Portal, UPlotConfigBuilder, useTheme2, VizTooltipContainer, ZoomPlugin } from '@grafana/ui';
-import { HoverEvent, addTooltipSupport } from '@grafana/ui/src/components/uPlot/config/addTooltipSupport';
+import {
+  HoverEvent,
+  addTooltipSupport,
+  Portal,
+  UPlotConfigBuilder,
+  useTheme2,
+  VizTooltipContainer,
+  ZoomPlugin,
+} from '@grafana/ui';
 import { CloseButton } from 'app/core/components/CloseButton/CloseButton';
 
 import { TimelineChart } from '../state-timeline/TimelineChart';

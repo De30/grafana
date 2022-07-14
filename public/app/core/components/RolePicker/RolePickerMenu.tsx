@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   CustomScrollbar,
+  getSelectStyles,
   HorizontalGroup,
   Icon,
   Portal,
@@ -14,7 +15,6 @@ import {
   useStyles2,
   useTheme2,
 } from '@grafana/ui';
-import { getSelectStyles } from '@grafana/ui/src/components/Select/getSelectStyles';
 import { OrgRole, Role } from 'app/types';
 
 import { MENU_MAX_HEIGHT } from './constants';

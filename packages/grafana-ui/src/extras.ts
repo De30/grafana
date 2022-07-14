@@ -31,7 +31,7 @@ export type { TooltipPlacement } from './components/Tooltip';
 export { formatTime } from './components/uPlot/config/UPlotAxisBuilder';
 export type { AxisProps } from './components/uPlot/config/UPlotAxisBuilder';
 export type { ScaleProps } from './components/uPlot/config/UPlotScaleBuilder';
-export { positionTooltip } from './components/uPlot/plugins/TooltipPlugin';
+export { type HoverEvent, addTooltipSupport } from './components/uPlot/config/addTooltipSupport';
 export type { FacetedData, FacetSeries } from './components/uPlot/types';
 export { getStackingGroups, pluginLog, preparePlotData2 } from './components/uPlot/utils';
 export type { StackingGroup } from './components/uPlot/utils';

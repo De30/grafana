@@ -1,18 +1,16 @@
-import uPlot, { Axis, AlignedData, Scale } from 'uplot';
+import uPlot, { AlignedData, Axis, Scale } from 'uplot';
 
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import { alpha } from '@grafana/data/src/themes/colorManipulator';
 import {
-  StackingMode,
-  VisibilityMode,
   ScaleDirection,
   ScaleOrientation,
-  VizTextDisplayOptions,
+  StackingMode,
+  VisibilityMode,
   VizLegendOptions,
+  VizTextDisplayOptions,
 } from '@grafana/schema';
-import { measureText, PlotTooltipInterpolator } from '@grafana/ui';
-import { formatTime } from '@grafana/ui/src/components/uPlot/config/UPlotAxisBuilder';
-import { StackingGroup, preparePlotData2 } from '@grafana/ui/src/components/uPlot/utils';
+import { formatTime, measureText, PlotTooltipInterpolator, preparePlotData2, StackingGroup } from '@grafana/ui';
 
 import { distribute, SPACE_BETWEEN } from './distribute';
 import { intersects, pointWithin, Quadtree, Rect } from './quadtree';

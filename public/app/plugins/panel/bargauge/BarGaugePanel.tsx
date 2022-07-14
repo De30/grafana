@@ -2,18 +2,23 @@ import { isNumber } from 'lodash';
 import React, { PureComponent } from 'react';
 
 import {
+  DisplayProcessor,
+  DisplayValue,
   DisplayValueAlignmentFactors,
+  FieldConfig,
   FieldDisplay,
   getDisplayValueAlignmentFactors,
   getFieldDisplayValues,
   PanelProps,
-  FieldConfig,
-  DisplayProcessor,
-  DisplayValue,
   VizOrientation,
 } from '@grafana/data';
-import { BarGauge, DataLinksContextMenu, VizRepeater, VizRepeaterRenderValueProps } from '@grafana/ui';
-import { DataLinksContextMenuApi } from '@grafana/ui/src/components/DataLinks/DataLinksContextMenu';
+import {
+  BarGauge,
+  DataLinksContextMenu,
+  DataLinksContextMenuApi,
+  VizRepeater,
+  VizRepeaterRenderValueProps,
+} from '@grafana/ui';
 import { config } from 'app/core/config';
 
 import { PanelOptions } from './models.gen';

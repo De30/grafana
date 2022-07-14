@@ -5,8 +5,7 @@ import { useLocalStorage } from 'react-use';
 
 import { GrafanaTheme, PanelData, SelectableValue } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
-import { Button, CustomScrollbar, FilterInput, RadioButtonGroup, useStyles } from '@grafana/ui';
-import { Field } from '@grafana/ui/src/components/Forms/Field';
+import { Button, CustomScrollbar, Field, FilterInput, RadioButtonGroup, useStyles } from '@grafana/ui';
 import { LS_VISUALIZATION_SELECT_TAB_KEY } from 'app/core/constants';
 import { PanelLibraryOptionsGroup } from 'app/features/library-panels/components/PanelLibraryOptionsGroup/PanelLibraryOptionsGroup';
 import { VisualizationSuggestions } from 'app/features/panel/components/VizTypePicker/VisualizationSuggestions';

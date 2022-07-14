@@ -13,8 +13,7 @@ import {
 import { alpha } from '@grafana/data/src/themes/colorManipulator';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, ScaleDirection, ScaleOrientation, VisibilityMode } from '@grafana/schema';
-import { UPlotConfigBuilder } from '@grafana/ui';
-import { FacetedData, FacetSeries } from '@grafana/ui/src/components/uPlot/types';
+import { FacetedData, FacetSeries, UPlotConfigBuilder } from '@grafana/ui';
 import {
   findFieldIndex,
   getScaledDimensionForField,

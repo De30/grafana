@@ -11,9 +11,14 @@ import {
   PanelProps,
 } from '@grafana/data';
 import { findNumericFieldMinMax } from '@grafana/data/src/field/fieldOverrides';
-import { BigValueTextMode, BigValueGraphMode } from '@grafana/schema';
-import { BigValue, DataLinksContextMenu, VizRepeater, VizRepeaterRenderValueProps } from '@grafana/ui';
-import { DataLinksContextMenuApi } from '@grafana/ui/src/components/DataLinks/DataLinksContextMenu';
+import { BigValueGraphMode, BigValueTextMode } from '@grafana/schema';
+import {
+  BigValue,
+  DataLinksContextMenu,
+  DataLinksContextMenuApi,
+  VizRepeater,
+  VizRepeaterRenderValueProps,
+} from '@grafana/ui';
 import { config } from 'app/core/config';
 
 import { PanelOptions } from './models.gen';

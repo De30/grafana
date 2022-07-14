@@ -3,39 +3,40 @@ import uPlot from 'uplot';
 
 import {
   ArrayVector,
-  DataFrame,
   DashboardCursorSync,
-  DataHoverPayload,
-  DataHoverEvent,
+  DataFrame,
   DataHoverClearEvent,
+  DataHoverEvent,
+  DataHoverPayload,
   FALLBACK_COLOR,
   Field,
   FieldColorModeId,
   FieldConfig,
   FieldType,
   formattedValueToString,
+  getActiveThreshold,
+  getFieldConfigWithMinMax,
   getFieldDisplayName,
   getValueFormat,
   GrafanaTheme2,
-  getActiveThreshold,
   Threshold,
-  getFieldConfigWithMinMax,
   ThresholdsMode,
   TimeRange,
 } from '@grafana/data';
 import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
-import { VizLegendOptions, AxisPlacement, ScaleDirection, ScaleOrientation } from '@grafana/schema';
+import { AxisPlacement, ScaleDirection, ScaleOrientation, VizLegendOptions } from '@grafana/schema';
 import {
+  applyNullInsertThreshold,
   FIXED_UNIT,
+  getStackingGroups,
+  nullToValue,
+  PlotTooltipInterpolator,
+  preparePlotData2,
   SeriesVisibilityChangeMode,
   UPlotConfigBuilder,
   UPlotConfigPrepFn,
   VizLegendItem,
 } from '@grafana/ui';
-import { applyNullInsertThreshold } from '@grafana/ui/src/components/GraphNG/nullInsertThreshold';
-import { nullToValue } from '@grafana/ui/src/components/GraphNG/nullToValue';
-import { PlotTooltipInterpolator } from '@grafana/ui/src/components/uPlot/types';
-import { preparePlotData2, getStackingGroups } from '@grafana/ui/src/components/uPlot/utils';
 
 import { getConfig, TimelineCoreOptions } from './timeline';
 import { TimelineFieldConfig, TimelineOptions } from './types';

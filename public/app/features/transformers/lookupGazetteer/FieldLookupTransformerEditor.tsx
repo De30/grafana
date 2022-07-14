@@ -3,14 +3,13 @@ import React, { useCallback } from 'react';
 import {
   DataTransformerID,
   FieldNamePickerConfigSettings,
+  FieldType,
   PluginState,
   StandardEditorsRegistryItem,
   TransformerRegistryItem,
   TransformerUIProps,
-  FieldType,
 } from '@grafana/data';
-import { InlineField, InlineFieldRow } from '@grafana/ui';
-import { FieldNamePicker } from '@grafana/ui/src/components/MatchersUI/FieldNamePicker';
+import { FieldNamePicker, InlineField, InlineFieldRow } from '@grafana/ui';
 import { GazetteerPathEditor, GazetteerPathEditorConfigSettings } from 'app/features/geo/editor/GazetteerPathEditor';
 
 import { FieldLookupOptions, fieldLookupTransformer } from './fieldLookup';

@@ -4,8 +4,7 @@ import { usePrevious } from 'react-use';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { useStyles2, TabsBar, TabContent, Tab, Alert, IconName } from '@grafana/ui';
-import { Layout } from '@grafana/ui/src/components/Layout/Layout';
+import { Alert, IconName, Layout, Tab, TabContent, TabsBar, useStyles2 } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { AppNotificationSeverity } from 'app/types';
@@ -16,8 +15,8 @@ import { PluginDetailsDisabledError } from '../components/PluginDetailsDisabledE
 import { PluginDetailsHeader } from '../components/PluginDetailsHeader';
 import { PluginDetailsSignature } from '../components/PluginDetailsSignature';
 import { usePluginDetailsTabs } from '../hooks/usePluginDetailsTabs';
-import { useGetSingle, useFetchStatus, useFetchDetailsStatus } from '../state/hooks';
-import { PluginTabLabels, PluginTabIds, PluginDetailsTab } from '../types';
+import { useFetchDetailsStatus, useFetchStatus, useGetSingle } from '../state/hooks';
+import { PluginDetailsTab, PluginTabIds, PluginTabLabels } from '../types';
 
 type Props = GrafanaRouteComponentProps<{ pluginId?: string }>;
 

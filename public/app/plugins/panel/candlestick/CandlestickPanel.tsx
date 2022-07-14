@@ -7,9 +7,16 @@ import uPlot from 'uplot';
 import { Field, getDisplayProcessor, PanelProps } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
 import { TooltipDisplayMode } from '@grafana/schema';
-import { usePanelContext, TimeSeries, TooltipPlugin, ZoomPlugin, UPlotConfigBuilder, useTheme2 } from '@grafana/ui';
-import { AxisProps } from '@grafana/ui/src/components/uPlot/config/UPlotAxisBuilder';
-import { ScaleProps } from '@grafana/ui/src/components/uPlot/config/UPlotScaleBuilder';
+import {
+  AxisProps,
+  ScaleProps,
+  TimeSeries,
+  TooltipPlugin,
+  UPlotConfigBuilder,
+  usePanelContext,
+  useTheme2,
+  ZoomPlugin,
+} from '@grafana/ui';
 import { config } from 'app/core/config';
 import { getFieldLinksForExplore } from 'app/features/explore/utils/links';
 
@@ -21,7 +28,7 @@ import { OutsideRangePlugin } from '../timeseries/plugins/OutsideRangePlugin';
 import { ThresholdControlsPlugin } from '../timeseries/plugins/ThresholdControlsPlugin';
 
 import { prepareCandlestickFields } from './fields';
-import { defaultColors, CandlestickOptions, VizDisplayMode } from './models.gen';
+import { CandlestickOptions, defaultColors, VizDisplayMode } from './models.gen';
 import { drawMarkers, FieldIndices } from './utils';
 
 interface CandlestickPanelProps extends PanelProps<CandlestickOptions> {}

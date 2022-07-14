@@ -7,7 +7,7 @@ import {
   reduceField,
   fieldReducers,
 } from '@grafana/data';
-import { FooterItem } from '@grafana/ui/src/components/Table/types';
+import { FooterItem } from '@grafana/ui';
 import { config } from 'app/core/config';
 
 import { TableFooterCalc } from './models.gen';

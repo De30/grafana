@@ -2,11 +2,10 @@ import { css } from '@emotion/css';
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { GrafanaTheme2, SelectableValue, StandardEditorProps } from '@grafana/data';
-import { InlineField, InlineFieldRow, Select, useStyles2 } from '@grafana/ui';
-import { useFieldDisplayNames, useSelectOptions } from '@grafana/ui/src/components/MatchersUI/utils';
+import { InlineField, InlineFieldRow, Select, useFieldDisplayNames, useSelectOptions, useStyles2 } from '@grafana/ui';
 import { NumberInput } from 'app/core/components/OptionsUI/NumberInput';
 
-import { validateScaleOptions, validateScaleConfig } from '../scale';
+import { validateScaleConfig, validateScaleOptions } from '../scale';
 import { ScaleDimensionConfig, ScaleDimensionOptions } from '../types';
 
 const fixedValueOption: SelectableValue<string> = {

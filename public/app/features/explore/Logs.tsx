@@ -1,40 +1,40 @@
 import { css } from '@emotion/css';
 import { capitalize } from 'lodash';
 import memoizeOne from 'memoize-one';
-import React, { PureComponent, createRef } from 'react';
+import React, { createRef, PureComponent } from 'react';
 
 import {
-  rangeUtil,
-  RawTimeRange,
-  LogLevel,
-  TimeZone,
   AbsoluteTimeRange,
-  LogsDedupStrategy,
+  DataFrame,
+  DataQuery,
+  DataQueryResponse,
+  Field,
+  GrafanaTheme2,
+  LinkModel,
+  LoadingState,
+  LogLevel,
   LogRowModel,
   LogsDedupDescription,
+  LogsDedupStrategy,
   LogsMetaItem,
   LogsSortOrder,
-  LinkModel,
-  Field,
-  DataQuery,
-  DataFrame,
-  GrafanaTheme2,
-  LoadingState,
+  rangeUtil,
+  RawTimeRange,
   SplitOpen,
-  DataQueryResponse,
+  TimeZone,
 } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 import {
-  RadioButtonGroup,
-  LogRows,
   Button,
   InlineField,
   InlineFieldRow,
   InlineSwitch,
-  withTheme2,
+  LogRows,
+  RadioButtonGroup,
+  RowContextOptions,
   Themeable2,
+  withTheme2,
 } from '@grafana/ui';
-import { RowContextOptions } from '@grafana/ui/src/components/Logs/LogRowContextProvider';
 import { dedupLogRows, filterLogLevels } from 'app/core/logsModel';
 import store from 'app/core/store';
 import { ExploreId } from 'app/types/explore';

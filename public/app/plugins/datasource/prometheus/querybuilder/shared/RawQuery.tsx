@@ -3,7 +3,7 @@ import Prism, { Grammar } from 'prismjs';
 import React from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data/src';
-import { useTheme2 } from '@grafana/ui/src';
+import { useTheme2 } from '@grafana/ui';
 
 export interface Props {
   query: string;

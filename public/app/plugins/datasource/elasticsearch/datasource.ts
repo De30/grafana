@@ -27,7 +27,7 @@ import {
   QueryFixAction,
 } from '@grafana/data';
 import { BackendSrvRequest, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-import { RowContextOptions } from '@grafana/ui/src/components/Logs/LogRowContextProvider';
+import { RowContextOptions } from '@grafana/ui';
 import { queryLogsVolume } from 'app/core/logsModel';
 import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_srv';
 

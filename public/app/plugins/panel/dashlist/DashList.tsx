@@ -4,9 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { GrafanaTheme2, InterpolateFunction, PanelProps } from '@grafana/data';
-import { CustomScrollbar, stylesFactory, useStyles2 } from '@grafana/ui';
-import { Icon, IconProps } from '@grafana/ui/src/components/Icon/Icon';
-import { getFocusStyles } from '@grafana/ui/src/themes/mixins';
+import { CustomScrollbar, getFocusStyles, Icon, IconProps, stylesFactory, useStyles2 } from '@grafana/ui';
 import { setStarred } from 'app/core/reducers/navBarTree';
 import { getBackendSrv } from 'app/core/services/backend_srv';
 import impressionSrv from 'app/core/services/impression_srv';

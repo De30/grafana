@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { EditorField, InlineField } from '@grafana/ui';
-import { Props as InlineFieldProps } from '@grafana/ui/src/components/Forms/InlineField';
+import { EditorField, InlineField, InlineFieldProps } from '@grafana/ui';
 
 interface Props extends InlineFieldProps {
   label: string;

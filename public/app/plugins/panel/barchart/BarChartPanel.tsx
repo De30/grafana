@@ -16,6 +16,7 @@ import {
   measureText,
   PlotLegend,
   Portal,
+  PropDiffFn,
   TooltipDisplayMode,
   UPlotConfigBuilder,
   UPLOT_AXIS_FONT_SIZE,
@@ -24,9 +25,9 @@ import {
   VizLayout,
   VizLegend,
   VizTooltipContainer,
+  HoverEvent,
+  addTooltipSupport,
 } from '@grafana/ui';
-import { PropDiffFn } from '@grafana/ui/src/components/GraphNG/GraphNG';
-import { HoverEvent, addTooltipSupport } from '@grafana/ui/src/components/uPlot/config/addTooltipSupport';
 import { CloseButton } from 'app/core/components/CloseButton/CloseButton';
 
 import { DataHoverView } from '../geomap/components/DataHoverView';

@@ -1,15 +1,13 @@
 /* eslint-disable react/jsx-no-undef */
 import { css } from '@emotion/css';
-import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
-import { useTable, Column, TableOptions, Cell, useAbsoluteLayout } from 'react-table';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Cell, Column, TableOptions, useAbsoluteLayout, useTable } from 'react-table';
 import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { Observable } from 'rxjs';
 
 import { Field, GrafanaTheme2 } from '@grafana/data';
-import { useStyles2 } from '@grafana/ui';
-import { TableCell } from '@grafana/ui/src/components/Table/TableCell';
-import { getTableStyles } from '@grafana/ui/src/components/Table/styles';
+import { getTableStyles, TableCell, useStyles2 } from '@grafana/ui';
 
 import { useSearchKeyboardNavigation } from '../../hooks/useSearchKeyboardSelection';
 import { QueryResponse } from '../../service';

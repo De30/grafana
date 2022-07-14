@@ -9,8 +9,7 @@ import {
   TimeRange,
 } from '@grafana/data';
 import { GraphFieldConfig, LineInterpolation } from '@grafana/schema';
-import { applyNullInsertThreshold } from '@grafana/ui/src/components/GraphNG/nullInsertThreshold';
-import { nullToValue } from '@grafana/ui/src/components/GraphNG/nullToValue';
+import { applyNullInsertThreshold, nullToValue } from '@grafana/ui';
 
 /**
  * Returns null if there are no graphable fields

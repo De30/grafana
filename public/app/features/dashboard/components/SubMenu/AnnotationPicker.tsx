@@ -2,8 +2,7 @@ import { css } from '@emotion/css';
 import React, { useEffect, useState } from 'react';
 
 import { AnnotationQuery, EventBus, GrafanaTheme2 } from '@grafana/data';
-import { InlineField, InlineFieldRow, InlineSwitch, useStyles2 } from '@grafana/ui';
-import { LoadingIndicator } from '@grafana/ui/src/components/PanelChrome/LoadingIndicator';
+import { InlineField, InlineFieldRow, InlineSwitch, LoadingIndicator, useStyles2 } from '@grafana/ui';
 
 import { AnnotationQueryFinished, AnnotationQueryStarted } from '../../../../types/events';
 import { getDashboardQueryRunner } from '../../../query/state/DashboardQueryRunner/DashboardQueryRunner';

@@ -2,8 +2,7 @@ import { flatten } from 'lodash';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 
 import { SelectableValue, toOption } from '@grafana/data';
-import { Button, HorizontalGroup, Select, VerticalGroup } from '@grafana/ui';
-import { CustomControlProps } from '@grafana/ui/src/components/Select/types';
+import { Button, CustomControlProps, HorizontalGroup, Select, VerticalGroup } from '@grafana/ui';
 
 import { SELECT_WIDTH } from '../constants';
 import { labelsToGroupedOptions, stringArrayToFilters } from '../functions';

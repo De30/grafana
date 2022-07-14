@@ -6,8 +6,7 @@
 import { editor } from 'monaco-editor';
 import React, { FC } from 'react';
 
-import { CodeEditor } from '@grafana/ui';
-import { CodeEditorProps } from '@grafana/ui/src/components/Monaco/types';
+import { CodeEditor, CodeEditorProps } from '@grafana/ui';
 
 import goTemplateLanguageDefinition, { GO_TEMPLATE_LANGUAGE_ID } from './editor/definition';
 import { registerLanguage } from './editor/register';

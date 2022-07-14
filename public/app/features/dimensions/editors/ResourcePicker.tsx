@@ -5,6 +5,7 @@ import SVG from 'react-inlinesvg';
 import { GrafanaTheme2 } from '@grafana/data';
 import {
   Button,
+  closePopover,
   InlineField,
   InlineFieldRow,
   Input,
@@ -14,7 +15,6 @@ import {
   useStyles2,
   useTheme2,
 } from '@grafana/ui';
-import { closePopover } from '@grafana/ui/src/utils/closePopover';
 
 import { getPublicOrAbsoluteUrl } from '../resource';
 import { MediaType, ResourceFolderName, ResourcePickerSize } from '../types';

@@ -1,6 +1,6 @@
 import { PanelOptionsEditorBuilder } from '@grafana/data';
 import { ScaleDistribution } from '@grafana/schema';
-import { ScaleDistributionEditor } from '@grafana/ui/src/options/builder';
+import { ScaleDistributionEditor } from '@grafana/ui';
 
 import { HeatmapCalculationMode, HeatmapCalculationOptions } from '../models.gen';
 

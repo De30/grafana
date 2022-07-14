@@ -8,8 +8,17 @@ import { Unsubscribable } from 'rxjs';
 
 import { AbsoluteTimeRange, DataQuery, GrafanaTheme2, LoadingState, QueryFixAction, RawTimeRange } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
-import { Collapse, CustomScrollbar, ErrorBoundaryAlert, Themeable2, withTheme2, PanelContainer } from '@grafana/ui';
-import { FILTER_FOR_OPERATOR, FILTER_OUT_OPERATOR, FilterItem } from '@grafana/ui/src/components/Table/types';
+import {
+  Collapse,
+  CustomScrollbar,
+  ErrorBoundaryAlert,
+  FilterItem,
+  FILTER_FOR_OPERATOR,
+  FILTER_OUT_OPERATOR,
+  PanelContainer,
+  Themeable2,
+  withTheme2,
+} from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { supportedFeatures } from 'app/core/history/richHistoryStorageProvider';
 import { getNodeGraphDataFrames } from 'app/plugins/panel/nodeGraph/utils';
@@ -33,7 +42,7 @@ import RichHistoryContainer from './RichHistory/RichHistoryContainer';
 import { SecondaryActions } from './SecondaryActions';
 import TableContainer from './TableContainer';
 import { TraceViewContainer } from './TraceView/TraceViewContainer';
-import { changeSize, changeGraphStyle } from './state/explorePane';
+import { changeGraphStyle, changeSize } from './state/explorePane';
 import { splitOpen } from './state/main';
 import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } from './state/query';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';

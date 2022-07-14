@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import { PanelProps } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
+  FacetedData,
   LegendDisplayMode,
   Portal,
   UPlotChart,
@@ -12,7 +13,6 @@ import {
   VizLegendItem,
   VizTooltipContainer,
 } from '@grafana/ui';
-import { FacetedData } from '@grafana/ui/src/components/uPlot/types';
 
 import { TooltipView } from './TooltipView';
 import { XYChartOptions } from './models.gen';

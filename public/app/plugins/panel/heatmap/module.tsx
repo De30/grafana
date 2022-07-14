@@ -3,7 +3,7 @@ import React from 'react';
 import { FieldConfigProperty, FieldType, identityOverrideProcessor, PanelData, PanelPlugin } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, GraphFieldConfig, ScaleDistribution, ScaleDistributionConfig } from '@grafana/schema';
-import { addHideFrom, ScaleDistributionEditor } from '@grafana/ui/src/options/builder';
+import { addHideFrom, ScaleDistributionEditor } from '@grafana/ui';
 import { ColorScale } from 'app/core/components/ColorScale/ColorScale';
 import { addHeatmapCalculationOptions } from 'app/features/transformers/calculateHeatmap/editor/helper';
 import { readHeatmapRowsCustomMeta } from 'app/features/transformers/calculateHeatmap/heatmap';

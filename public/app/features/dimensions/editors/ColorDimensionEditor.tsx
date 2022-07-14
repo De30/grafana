@@ -2,8 +2,7 @@ import { css } from '@emotion/css';
 import React, { FC, useCallback } from 'react';
 
 import { GrafanaTheme2, SelectableValue, StandardEditorProps } from '@grafana/data';
-import { Select, ColorPicker, useStyles2 } from '@grafana/ui';
-import { useFieldDisplayNames, useSelectOptions } from '@grafana/ui/src/components/MatchersUI/utils';
+import { ColorPicker, Select, useFieldDisplayNames, useSelectOptions, useStyles2 } from '@grafana/ui';
 
 import { ColorDimensionConfig } from '../types';
 

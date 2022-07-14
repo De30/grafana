@@ -2,8 +2,7 @@ import { debounce, intersection, unionBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { SelectableValue, toOption } from '@grafana/data';
-import { MultiSelect } from '@grafana/ui';
-import { InputActionMeta } from '@grafana/ui/src/components/Select/types';
+import { InputActionMeta, MultiSelect } from '@grafana/ui';
 import { notifyApp } from 'app/core/actions';
 import { createErrorNotification } from 'app/core/copy/appNotification';
 import { dispatch } from 'app/store/store';

@@ -10,8 +10,7 @@ import {
   SelectableValue,
 } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
-import { Select, Table } from '@grafana/ui';
-import { FilterItem, TableSortByFieldState } from '@grafana/ui/src/components/Table/types';
+import { FilterItem, Select, Table, TableSortByFieldState } from '@grafana/ui';
 import { config } from 'app/core/config';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 

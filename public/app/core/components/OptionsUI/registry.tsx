@@ -1,33 +1,32 @@
 import React from 'react';
 
 import {
+  DataLink,
+  dataLinksOverrideProcessor,
+  displayNameOverrideProcessor,
+  FieldColor,
+  FieldColorConfigSettings,
   FieldConfigPropertyItem,
+  FieldNamePickerConfigSettings,
   FieldType,
+  identityOverrideProcessor,
+  NumberFieldConfigSettings,
+  numberOverrideProcessor,
   standardEditorsRegistry,
   StandardEditorsRegistryItem,
+  StatsPickerConfigSettings,
+  StringFieldConfigSettings,
+  stringOverrideProcessor,
   ThresholdsConfig,
   ThresholdsFieldConfigSettings,
   ThresholdsMode,
   thresholdsOverrideProcessor,
+  TimeZone,
   ValueMapping,
   ValueMappingFieldConfigSettings,
   valueMappingsOverrideProcessor,
-  DataLink,
-  dataLinksOverrideProcessor,
-  NumberFieldConfigSettings,
-  numberOverrideProcessor,
-  StringFieldConfigSettings,
-  stringOverrideProcessor,
-  identityOverrideProcessor,
-  TimeZone,
-  FieldColor,
-  FieldColorConfigSettings,
-  StatsPickerConfigSettings,
-  displayNameOverrideProcessor,
-  FieldNamePickerConfigSettings,
 } from '@grafana/data';
-import { RadioButtonGroup, TimeZonePicker, Switch } from '@grafana/ui';
-import { FieldNamePicker } from '@grafana/ui/src/components/MatchersUI/FieldNamePicker';
+import { FieldNamePicker, RadioButtonGroup, Switch, TimeZonePicker } from '@grafana/ui';
 import { ThresholdsValueEditor } from 'app/features/dimensions/editors/ThresholdsEditor/thresholds';
 import { ValueMappingsEditor } from 'app/features/dimensions/editors/ValueMappingsEditor/ValueMappingsEditor';
 

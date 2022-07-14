@@ -14,8 +14,7 @@ import {
   PanelProps,
 } from '@grafana/data';
 import { config, getBackendSrv, locationService } from '@grafana/runtime';
-import { CustomScrollbar, stylesFactory, TagList } from '@grafana/ui';
-import { AbstractList } from '@grafana/ui/src/components/List/AbstractList';
+import { AbstractList, CustomScrollbar, stylesFactory, TagList } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { getDashboardSrv } from 'app/features/dashboard/services/DashboardSrv';
 

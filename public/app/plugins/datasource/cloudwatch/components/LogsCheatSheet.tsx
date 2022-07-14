@@ -4,7 +4,7 @@ import Prism from 'prismjs';
 import React, { PureComponent } from 'react';
 
 import { QueryEditorHelpProps } from '@grafana/data';
-import { flattenTokens } from '@grafana/ui/src/slate-plugins/slate-prism';
+import { flattenTokens } from '@grafana/ui';
 
 import tokenizer from '../syntax';
 import { CloudWatchQuery } from '../types';
