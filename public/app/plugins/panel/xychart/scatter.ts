@@ -1,6 +1,7 @@
 import uPlot from 'uplot';
 
 import {
+  alpha,
   DataFrame,
   FieldColorModeId,
   fieldColorModeRegistry,
@@ -10,7 +11,6 @@ import {
   getFieldSeriesColor,
   GrafanaTheme2,
 } from '@grafana/data';
-import { alpha } from '@grafana/data/src/themes/colorManipulator';
 import { config } from '@grafana/runtime';
 import { AxisPlacement, ScaleDirection, ScaleOrientation, VisibilityMode } from '@grafana/schema';
 import { FacetedData, FacetSeries, UPlotConfigBuilder } from '@grafana/ui';

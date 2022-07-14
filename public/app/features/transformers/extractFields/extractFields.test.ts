@@ -1,4 +1,4 @@
-import { toDataFrame } from '@grafana/data/src/dataframe/processDataFrame';
+import { toDataFrame } from '@grafana/data';
 
 import { ExtractFieldsOptions, extractFieldsTransformer } from './extractFields';
 

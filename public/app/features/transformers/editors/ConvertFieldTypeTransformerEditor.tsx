@@ -1,6 +1,8 @@
 import React, { ChangeEvent, useCallback } from 'react';
 
 import {
+  ConvertFieldTypeOptions,
+  ConvertFieldTypeTransformerOptions,
   DataTransformerID,
   FieldNamePickerConfigSettings,
   FieldType,
@@ -10,10 +12,6 @@ import {
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import {
-  ConvertFieldTypeOptions,
-  ConvertFieldTypeTransformerOptions,
-} from '@grafana/data/src/transformations/transformers/convertFieldType';
 import { Button, FieldNamePicker, InlineField, InlineFieldRow, Input, Select } from '@grafana/ui';
 
 const fieldNamePickerSettings: StandardEditorsRegistryItem<string, FieldNamePickerConfigSettings> = {

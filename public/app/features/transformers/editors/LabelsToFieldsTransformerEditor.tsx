@@ -2,15 +2,13 @@ import React, { useMemo } from 'react';
 
 import {
   DataTransformerID,
+  LabelsToFieldsMode,
+  LabelsToFieldsOptions,
   SelectableValue,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import {
-  LabelsToFieldsMode,
-  LabelsToFieldsOptions,
-} from '@grafana/data/src/transformations/transformers/labelsToFields';
 import { InlineField, InlineFieldRow, RadioButtonGroup, Select, FilterPill, Stack } from '@grafana/ui';
 
 const modes: Array<SelectableValue<LabelsToFieldsMode>> = [

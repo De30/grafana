@@ -2,9 +2,13 @@ import { get as lodashGet } from 'lodash';
 import React, { useMemo } from 'react';
 import { useObservable } from 'react-use';
 
-import { DataFrame, PanelOptionsEditorBuilder, StandardEditorContext } from '@grafana/data';
-import { PanelOptionsSupplier } from '@grafana/data/src/panel/PanelPlugin';
-import { NestedValueAccess } from '@grafana/data/src/utils/OptionsUIBuilders';
+import {
+  DataFrame,
+  PanelOptionsEditorBuilder,
+  StandardEditorContext,
+  PanelOptionsSupplier,
+  NestedValueAccess,
+} from '@grafana/data';
 import { FrameState } from 'app/features/canvas/runtime/frame';
 import { OptionsPaneCategory } from 'app/features/dashboard/components/PanelEditor/OptionsPaneCategory';
 import { OptionsPaneCategoryDescriptor } from 'app/features/dashboard/components/PanelEditor/OptionsPaneCategoryDescriptor';

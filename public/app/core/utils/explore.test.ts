@@ -1,5 +1,4 @@
-import { dateTime, ExploreUrlState, LogsSortOrder } from '@grafana/data';
-import { serializeStateToUrlParam } from '@grafana/data/src/utils/url';
+import { dateTime, ExploreUrlState, LogsSortOrder, serializeStateToUrlParam } from '@grafana/data';
 import { RefreshPicker } from '@grafana/ui';
 import store from 'app/core/store';
 
@@ -9,16 +8,16 @@ import {
   buildQueryTransaction,
   clearHistory,
   DEFAULT_RANGE,
+  getExploreUrl,
+  GetExploreUrlArguments,
   getRefIds,
+  getTimeRange,
+  getTimeRangeFromUrl,
   getValueWithRefId,
   hasNonEmptyQuery,
   parseUrlState,
   refreshIntervalToSortOrder,
   updateHistory,
-  getExploreUrl,
-  GetExploreUrlArguments,
-  getTimeRangeFromUrl,
-  getTimeRange,
 } from './explore';
 
 const DEFAULT_EXPLORE_STATE: ExploreUrlState = {

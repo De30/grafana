@@ -5,12 +5,12 @@ import {
   DisplayValueAlignmentFactors,
   FieldDisplay,
   FieldType,
+  findNumericFieldMinMax,
   getDisplayValueAlignmentFactors,
   getFieldDisplayValues,
   NumericRange,
   PanelProps,
 } from '@grafana/data';
-import { findNumericFieldMinMax } from '@grafana/data/src/field/fieldOverrides';
 import { BigValueGraphMode, BigValueTextMode } from '@grafana/schema';
 import {
   BigValue,

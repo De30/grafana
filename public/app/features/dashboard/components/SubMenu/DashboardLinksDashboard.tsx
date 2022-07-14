@@ -2,8 +2,7 @@ import { css, cx } from '@emotion/css';
 import React, { useRef, useState, useLayoutEffect } from 'react';
 import { useAsync } from 'react-use';
 
-import { GrafanaTheme2 } from '@grafana/data';
-import { sanitize, sanitizeUrl } from '@grafana/data/src/text/sanitize';
+import { GrafanaTheme2, sanitize, sanitizeUrl } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { Icon, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import { getBackendSrv } from 'app/core/services/backend_srv';

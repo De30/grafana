@@ -19,11 +19,11 @@ import {
   getFieldDisplayName,
   getValueFormat,
   GrafanaTheme2,
+  maybeSortFrame,
   Threshold,
   ThresholdsMode,
   TimeRange,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import { AxisPlacement, ScaleDirection, ScaleOrientation, VizLegendOptions } from '@grafana/schema';
 import {
   applyNullInsertThreshold,

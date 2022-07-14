@@ -1,9 +1,8 @@
-import { init as initSentry, setUser as sentrySetUser, Event as SentryEvent } from '@sentry/browser';
+import { Event as SentryEvent, init as initSentry, setUser as sentrySetUser } from '@sentry/browser';
 import { FetchTransport } from '@sentry/browser/dist/transports';
 import { waitFor } from '@testing-library/react';
 
-import { BuildInfo } from '@grafana/data';
-import { GrafanaEdition } from '@grafana/data/src/types/config';
+import { BuildInfo, GrafanaEdition } from '@grafana/data';
 import { EchoBackend, EchoEventType, EchoMeta, setEchoSrv } from '@grafana/runtime';
 
 import { Echo } from '../../Echo';

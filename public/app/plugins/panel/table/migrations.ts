@@ -1,14 +1,14 @@
-import { omitBy, isNil, isNumber, defaultTo } from 'lodash';
+import { defaultTo, isNil, isNumber, omitBy } from 'lodash';
 
 import {
-  PanelModel,
-  FieldMatcherID,
   ConfigOverrideRule,
-  ThresholdsMode,
-  ThresholdsConfig,
   FieldConfig,
+  FieldMatcherID,
+  PanelModel,
+  ReduceTransformerOptions,
+  ThresholdsConfig,
+  ThresholdsMode,
 } from '@grafana/data';
-import { ReduceTransformerOptions } from '@grafana/data/src/transformations/transformers/reduce';
 
 import { PanelOptions } from './models.gen';
 

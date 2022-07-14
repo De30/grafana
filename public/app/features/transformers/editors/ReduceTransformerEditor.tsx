@@ -3,12 +3,13 @@ import React, { useCallback } from 'react';
 import {
   DataTransformerID,
   ReducerID,
+  ReduceTransformerMode,
+  ReduceTransformerOptions,
   SelectableValue,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import { ReduceTransformerMode, ReduceTransformerOptions } from '@grafana/data/src/transformations/transformers/reduce';
 import { selectors } from '@grafana/e2e-selectors';
 import { LegacyForms, Select, StatsPicker } from '@grafana/ui';
 

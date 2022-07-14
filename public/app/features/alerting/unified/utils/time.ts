@@ -1,5 +1,4 @@
-import { durationToMilliseconds, parseDuration } from '@grafana/data';
-import { describeInterval } from '@grafana/data/src/datetime/rangeutil';
+import { durationToMilliseconds, parseDuration, describeInterval } from '@grafana/data';
 
 import { TimeOptions } from '../types/time';
 

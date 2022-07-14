@@ -7,20 +7,18 @@ import {
   getFieldColorModeForField,
   getFieldSeriesColor,
   GrafanaTheme2,
-} from '@grafana/data';
-import {
   histogramBucketSizes,
   histogramFrameBucketMaxFieldName,
-} from '@grafana/data/src/transformations/transformers/histogram';
+} from '@grafana/data';
 import { VizLegendOptions, ScaleDistribution, AxisPlacement, ScaleDirection, ScaleOrientation } from '@grafana/schema';
 import {
-  Themeable2,
-  UPlotConfigBuilder,
-  UPlotChart,
-  VizLayout,
-  PlotLegend,
   measureText,
+  PlotLegend,
+  Themeable2,
+  UPlotChart,
+  UPlotConfigBuilder,
   UPLOT_AXIS_FONT_SIZE,
+  VizLayout,
 } from '@grafana/ui';
 
 import { PanelOptions } from './models.gen';

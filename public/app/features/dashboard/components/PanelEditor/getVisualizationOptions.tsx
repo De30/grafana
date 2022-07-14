@@ -4,16 +4,14 @@ import React from 'react';
 import {
   EventBus,
   InterpolateFunction,
+  isNestedPanelOptions,
+  NestedValueAccess,
   PanelData,
+  PanelOptionsEditorBuilder,
+  PanelOptionsSupplier,
   StandardEditorContext,
   VariableSuggestionsScope,
 } from '@grafana/data';
-import { PanelOptionsSupplier } from '@grafana/data/src/panel/PanelPlugin';
-import {
-  isNestedPanelOptions,
-  NestedValueAccess,
-  PanelOptionsEditorBuilder,
-} from '@grafana/data/src/utils/OptionsUIBuilders';
 import { getDataLinksVariableSuggestions } from 'app/features/panel/panellinks/link_srv';
 
 import { OptionsPaneCategoryDescriptor } from './OptionsPaneCategoryDescriptor';

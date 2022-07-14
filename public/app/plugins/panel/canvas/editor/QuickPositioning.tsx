@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { GrafanaTheme2 } from '@grafana/data/src';
+import { GrafanaTheme2 } from '@grafana/data';
 import { IconButton, useStyles2 } from '@grafana/ui';
 import { HorizontalConstraint, Placement, QuickPlacement, VerticalConstraint } from 'app/features/canvas';
 import { ElementState } from 'app/features/canvas/runtime/element';

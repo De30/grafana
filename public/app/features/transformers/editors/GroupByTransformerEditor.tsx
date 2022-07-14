@@ -3,17 +3,15 @@ import React, { useCallback } from 'react';
 
 import {
   DataTransformerID,
+  GroupByFieldOptions,
+  GroupByOperationID,
+  GroupByTransformerOptions,
   ReducerID,
   SelectableValue,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import {
-  GroupByFieldOptions,
-  GroupByOperationID,
-  GroupByTransformerOptions,
-} from '@grafana/data/src/transformations/transformers/groupBy';
 import { Select, StatsPicker, stylesFactory } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

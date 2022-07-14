@@ -10,6 +10,7 @@ import {
   DataHoverClearEvent,
   DataFrame,
   TIME_SERIES_TIME_FIELD_NAME,
+  alpha
 } from '@grafana/data';
 import Map from 'ol/Map';
 import { FeatureLike } from 'ol/Feature';
@@ -27,7 +28,6 @@ import { Group as LayerGroup } from 'ol/layer';
 import VectorSource from 'ol/source/Vector';
 import { Fill, Stroke, Style, Circle } from 'ol/style';
 import Feature from 'ol/Feature';
-import { alpha } from '@grafana/data/src/themes/colorManipulator';
 
 // Configuration options for Circle overlays
 export interface RouteConfig {

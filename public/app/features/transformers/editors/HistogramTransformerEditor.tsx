@@ -1,10 +1,13 @@
 import React, { useCallback } from 'react';
 
-import { DataTransformerID, standardTransformers, TransformerRegistryItem, TransformerUIProps } from '@grafana/data';
 import {
-  HistogramTransformerOptions,
+  DataTransformerID,
   histogramFieldInfo,
-} from '@grafana/data/src/transformations/transformers/histogram';
+  HistogramTransformerOptions,
+  standardTransformers,
+  TransformerRegistryItem,
+  TransformerUIProps,
+} from '@grafana/data';
 import { InlineField, InlineFieldRow, InlineSwitch } from '@grafana/ui';
 import { NumberInput } from 'app/core/components/OptionsUI/NumberInput';
 

@@ -13,7 +13,9 @@ import {
   getActiveThreshold,
   getDataSourceRef,
   isDataSourceRef,
+  labelsToFieldsTransformer,
   MappingType,
+  mergeTransformer,
   PanelPlugin,
   SpecialValueMatch,
   standardEditorsRegistry,
@@ -23,8 +25,6 @@ import {
   ValueMap,
   ValueMapping,
 } from '@grafana/data';
-import { labelsToFieldsTransformer } from '@grafana/data/src/transformations/transformers/labelsToFields';
-import { mergeTransformer } from '@grafana/data/src/transformations/transformers/merge';
 import { getDataSourceSrv, setDataSourceSrv } from '@grafana/runtime';
 import { AxisPlacement, GraphFieldConfig } from '@grafana/ui';
 import { getAllOptionEditors, getAllStandardFieldConfigs } from 'app/core/components/OptionsUI/registry';

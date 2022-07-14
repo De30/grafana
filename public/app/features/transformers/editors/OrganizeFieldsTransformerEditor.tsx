@@ -3,15 +3,15 @@ import React, { useCallback, useMemo } from 'react';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 
 import {
+  createOrderFieldsComparer,
   DataTransformerID,
   GrafanaTheme,
+  OrganizeFieldsTransformerOptions,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import { createOrderFieldsComparer } from '@grafana/data/src/transformations/transformers/order';
-import { OrganizeFieldsTransformerOptions } from '@grafana/data/src/transformations/transformers/organize';
-import { stylesFactory, useTheme, Input, IconButton, Icon, FieldValidationMessage } from '@grafana/ui';
+import { FieldValidationMessage, Icon, IconButton, Input, stylesFactory, useTheme } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';
 

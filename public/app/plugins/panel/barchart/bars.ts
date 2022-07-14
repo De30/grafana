@@ -1,7 +1,6 @@
 import uPlot, { AlignedData, Axis, Scale } from 'uplot';
 
-import { DataFrame, GrafanaTheme2 } from '@grafana/data';
-import { alpha } from '@grafana/data/src/themes/colorManipulator';
+import { alpha, DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
   ScaleDirection,
   ScaleOrientation,

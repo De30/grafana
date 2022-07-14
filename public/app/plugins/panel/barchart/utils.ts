@@ -11,11 +11,11 @@ import {
   getFieldColorModeForField,
   getFieldSeriesColor,
   GrafanaTheme2,
+  maybeSortFrame,
   outerJoinDataFrames,
   reduceField,
   VizOrientation,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import {
   AxisPlacement,
   ScaleDirection,

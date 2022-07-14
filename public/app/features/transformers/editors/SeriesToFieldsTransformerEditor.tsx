@@ -3,11 +3,11 @@ import React, { useCallback } from 'react';
 import {
   DataTransformerID,
   SelectableValue,
+  SeriesToColumnsOptions,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import { SeriesToColumnsOptions } from '@grafana/data/src/transformations/transformers/seriesToColumns';
 import { Select } from '@grafana/ui';
 
 import { useAllFieldNamesFromDataFrames } from '../utils';

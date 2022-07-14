@@ -1,25 +1,23 @@
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
-  DataTransformerID,
-  standardTransformers,
-  TransformerRegistryItem,
-  TransformerUIProps,
-  getFieldDisplayName,
   DataFrame,
-  SelectableValue,
+  DataTransformerID,
   FieldType,
-  ValueMatcherID,
-  valueMatchers,
-} from '@grafana/data';
-import {
   FilterByValueFilter,
   FilterByValueMatch,
   FilterByValueTransformerOptions,
   FilterByValueType,
-} from '@grafana/data/src/transformations/transformers/filterByValue';
+  getFieldDisplayName,
+  SelectableValue,
+  standardTransformers,
+  TransformerRegistryItem,
+  TransformerUIProps,
+  ValueMatcherID,
+  valueMatchers,
+} from '@grafana/data';
 import { Button, RadioButtonGroup, stylesFactory } from '@grafana/ui';
 
 import { DataFrameFieldsInfo, FilterByValueFilterEditor } from './FilterByValueFilterEditor';

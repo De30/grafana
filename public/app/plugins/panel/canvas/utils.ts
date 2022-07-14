@@ -1,4 +1,4 @@
-import { AppEvents } from '@grafana/data/src';
+import { AppEvents } from '@grafana/data';
 
 import appEvents from '../../../core/app_events';
 import { CanvasElementItem, canvasElementRegistry, defaultElementItems } from '../../../features/canvas';

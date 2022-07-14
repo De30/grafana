@@ -1,7 +1,6 @@
 import { ComponentType } from 'react';
 
-import { RegistryItem } from '@grafana/data';
-import { PanelOptionsSupplier } from '@grafana/data/src/panel/PanelPlugin';
+import { PanelOptionsSupplier, RegistryItem } from '@grafana/data';
 
 import { DimensionContext } from '../dimensions/context';
 

@@ -5,15 +5,15 @@ import {
   FieldType,
   getFieldDisplayName,
   GrafanaTheme2,
+  maybeSortFrame,
   outerJoinDataFrames,
   TimeRange,
 } from '@grafana/data';
-import { maybeSortFrame } from '@grafana/data/src/transformations/transformers/joinDataFrames';
 import { findField } from 'app/features/dimensions';
 
 import { prepareGraphableFields } from '../timeseries/utils';
 
-import { CandlestickOptions, CandlestickFieldMap, VizDisplayMode } from './models.gen';
+import { CandlestickFieldMap, CandlestickOptions, VizDisplayMode } from './models.gen';
 
 export interface FieldPickerInfo {
   /** property name */

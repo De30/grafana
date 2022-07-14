@@ -1,7 +1,13 @@
 import { omit } from 'lodash';
 
-import { DataQuery, DataSourceApi, dateTimeFormat, ExploreUrlState, urlUtil } from '@grafana/data';
-import { serializeStateToUrlParam } from '@grafana/data/src/utils/url';
+import {
+  DataQuery,
+  DataSourceApi,
+  dateTimeFormat,
+  ExploreUrlState,
+  serializeStateToUrlParam,
+  urlUtil,
+} from '@grafana/data';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { notifyApp } from 'app/core/actions';
 import {

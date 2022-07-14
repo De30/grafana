@@ -3,12 +3,12 @@ import React from 'react';
 
 import {
   DataTransformerID,
+  RenameByRegexTransformerOptions,
   standardTransformers,
+  stringToJsRegex,
   TransformerRegistryItem,
   TransformerUIProps,
-  stringToJsRegex,
 } from '@grafana/data';
-import { RenameByRegexTransformerOptions } from '@grafana/data/src/transformations/transformers/renameByRegex';
 import { Field, Input } from '@grafana/ui';
 
 interface RenameByRegexTransformerEditorProps extends TransformerUIProps<RenameByRegexTransformerOptions> {}

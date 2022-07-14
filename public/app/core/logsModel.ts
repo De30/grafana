@@ -1,5 +1,5 @@
 import { size } from 'lodash';
-import { Observable, from, isObservable } from 'rxjs';
+import { from, isObservable, Observable } from 'rxjs';
 
 import {
   AbsoluteTimeRange,
@@ -31,13 +31,13 @@ import {
   MutableDataFrame,
   rangeUtil,
   ScopedVars,
+  SIPrefix,
   sortInAscendingOrder,
   textUtil,
   TimeRange,
   toDataFrame,
   toUtc,
 } from '@grafana/data';
-import { SIPrefix } from '@grafana/data/src/valueFormats/symbolFormatters';
 import { BarAlignment, GraphDrawStyle, StackingMode } from '@grafana/schema';
 import { ansicolor, colors } from '@grafana/ui';
 import { getThemeColor } from 'app/core/utils/colors';

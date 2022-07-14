@@ -1,7 +1,6 @@
-import { FieldType } from '@grafana/data';
-import { toDataFrame } from '@grafana/data/src/dataframe/processDataFrame';
+import { FieldType, toDataFrame } from '@grafana/data';
 
-import { rowsToCellsHeatmap, calculateHeatmapFromData } from './heatmap';
+import { calculateHeatmapFromData, rowsToCellsHeatmap } from './heatmap';
 import { HeatmapCalculationOptions } from './models.gen';
 
 describe('Heatmap transformer', () => {

@@ -6,24 +6,22 @@ import { map } from 'rxjs/operators';
 import {
   BinaryOperationID,
   binaryOperators,
+  BinaryOptions,
+  CalculateFieldMode,
+  CalculateFieldTransformerOptions,
   DataFrame,
   DataTransformerID,
   FieldType,
   getFieldDisplayName,
+  getNameFromOptions,
   KeyValue,
+  ReduceOptions,
   ReducerID,
   SelectableValue,
   standardTransformers,
   TransformerRegistryItem,
   TransformerUIProps,
 } from '@grafana/data';
-import {
-  BinaryOptions,
-  CalculateFieldMode,
-  CalculateFieldTransformerOptions,
-  getNameFromOptions,
-  ReduceOptions,
-} from '@grafana/data/src/transformations/transformers/calculateField';
 import { FilterPill, HorizontalGroup, Input, LegacyForms, Select, StatsPicker } from '@grafana/ui';
 
 interface CalculateFieldTransformerEditorProps extends TransformerUIProps<CalculateFieldTransformerOptions> {}

@@ -1,7 +1,6 @@
 import { BaseTransport } from '@grafana/agent-core';
 import { FetchTransport, initializeAgent } from '@grafana/agent-web';
-import { BuildInfo } from '@grafana/data';
-import { GrafanaEdition } from '@grafana/data/src/types/config';
+import { BuildInfo, GrafanaEdition } from '@grafana/data';
 import { EchoEventType, EchoMeta } from '@grafana/runtime';
 
 import { GrafanaJavascriptAgentBackend, GrafanaJavascriptAgentBackendOptions } from './GrafanaJavascriptAgentBackend';
