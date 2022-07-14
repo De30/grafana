@@ -33,3 +33,6 @@ export {
   type DataSourcePickerProps,
   type DataSourcePickerState,
 } from './components/DataSourcePicker';
+
+// This file is temp for module federation PoC.
+export * from './extras';
