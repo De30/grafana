@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { selectors as e2eSelectors } from '@grafana/e2e-selectors/src';
-import { reportInteraction } from '@grafana/runtime/src';
+import { selectors as e2eSelectors } from '@grafana/e2e-selectors';
+import { reportInteraction } from '@grafana/runtime';
 import {
   Alert,
   Button,

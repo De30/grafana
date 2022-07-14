@@ -8,8 +8,7 @@ import {
   ScopedVars,
   TimeRange,
 } from '@grafana/data';
-import { getDataSourceSrv } from '@grafana/runtime';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { getDataSourceSrv, ExpressionDatasourceRef } from '@grafana/runtime';
 import { getNextRefIdChar } from 'app/core/utils/query';
 import { DashboardModel, PanelModel } from 'app/features/dashboard/state';
 import { ExpressionDatasourceUID } from 'app/features/expressions/ExpressionDatasource';

@@ -1,7 +1,7 @@
 import { t, Trans } from '@lingui/macro';
 import React, { FormEvent, PureComponent } from 'react';
 
-import { reportInteraction } from '@grafana/runtime/src';
+import { reportInteraction } from '@grafana/runtime';
 import { ClipboardButton, Field, Modal, Switch, TextArea } from '@grafana/ui';
 
 import { ThemePicker } from './ThemePicker';

@@ -12,7 +12,7 @@ import {
   QueryResultMeta,
   toFilteredDataFrameDTO
 } from '@grafana/data';
-import { StreamingFrameAction, StreamingFrameOptions } from '@grafana/runtime/src/services/live';
+import { StreamingFrameAction, StreamingFrameOptions } from '@grafana/runtime';
 import { renderLegendFormat } from 'app/plugins/datasource/prometheus/legend';
 import { AlignedData } from 'uplot';
 

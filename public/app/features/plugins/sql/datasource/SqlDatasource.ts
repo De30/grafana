@@ -18,8 +18,9 @@ import {
   getBackendSrv,
   getTemplateSrv,
   TemplateSrv,
+  toDataQueryResponse,
+  toTestingStatus,
 } from '@grafana/runtime';
-import { toDataQueryResponse, toTestingStatus } from '@grafana/runtime/src/utils/queryResponse';
 import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';
 
 import { VariableWithMultiSupport } from '../../../variables/types';

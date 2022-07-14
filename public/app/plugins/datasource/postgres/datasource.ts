@@ -3,8 +3,13 @@ import { lastValueFrom, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
 import { AnnotationEvent, DataSourceInstanceSettings, MetricFindValue, ScopedVars, TimeRange } from '@grafana/data';
-import { BackendDataSourceResponse, DataSourceWithBackend, FetchResponse, getBackendSrv } from '@grafana/runtime';
-import { toTestingStatus } from '@grafana/runtime/src/utils/queryResponse';
+import {
+  BackendDataSourceResponse,
+  DataSourceWithBackend,
+  FetchResponse,
+  getBackendSrv,
+  toTestingStatus,
+} from '@grafana/runtime';
 import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_srv';
 import PostgresQueryModel from 'app/plugins/datasource/postgres/postgres_query_model';
 

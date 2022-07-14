@@ -1,4 +1,4 @@
-import { config } from '@grafana/runtime/src';
+import { config } from '@grafana/runtime';
 
 export function isTrial() {
   const expiry = config.licenseInfo?.trialExpiry;

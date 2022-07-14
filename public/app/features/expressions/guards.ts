@@ -1,5 +1,5 @@
 import { DataQuery } from '@grafana/data';
-import { isExpressionReference } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { isExpressionReference } from '@grafana/runtime';
 
 import { ExpressionQuery, ExpressionQueryType } from './types';
 

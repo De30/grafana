@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import { selectors } from '@grafana/e2e-selectors';
-import { DataSourcePicker } from '@grafana/runtime';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { DataSourcePicker, ExpressionDatasourceRef } from '@grafana/runtime';
 import {
   Button,
   Field,

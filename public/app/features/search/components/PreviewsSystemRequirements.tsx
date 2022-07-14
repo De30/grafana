@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { config } from '@grafana/runtime/src';
+import { config } from '@grafana/runtime';
 import { Alert, useStyles2 } from '@grafana/ui';
 
 export interface Props {

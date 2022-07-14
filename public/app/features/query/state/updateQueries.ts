@@ -1,5 +1,5 @@
 import { DataQuery, DataSourceApi, hasQueryExportSupport, hasQueryImportSupport } from '@grafana/data';
-import { isExpressionReference } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { isExpressionReference } from '@grafana/runtime';
 
 export async function updateQueries(
   nextDS: DataSourceApi,

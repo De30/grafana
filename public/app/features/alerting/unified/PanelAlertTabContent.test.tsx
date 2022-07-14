@@ -5,8 +5,7 @@ import { Router } from 'react-router-dom';
 import { byTestId } from 'testing-library-selector';
 
 import { DataSourceApi } from '@grafana/data';
-import { locationService, setDataSourceSrv } from '@grafana/runtime';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { locationService, setDataSourceSrv, ExpressionDatasourceRef } from '@grafana/runtime';
 import { DashboardModel, PanelModel } from 'app/features/dashboard/state';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { toggleOption } from 'app/features/variables/pickers/OptionsPicker/reducer';

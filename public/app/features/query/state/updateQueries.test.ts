@@ -4,7 +4,7 @@ import {
   DataSourceWithQueryExportSupport,
   DataSourceWithQueryImportSupport,
 } from '@grafana/data';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { ExpressionDatasourceRef } from '@grafana/runtime';
 
 import { updateQueries } from './updateQueries';
 

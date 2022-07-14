@@ -25,8 +25,7 @@ import {
   toDataFrame,
   transformDataFrame,
 } from '@grafana/data';
-import { getTemplateSrv } from '@grafana/runtime';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { getTemplateSrv, ExpressionDatasourceRef } from '@grafana/runtime';
 import { StreamingDataFrame } from 'app/features/live/data/StreamingDataFrame';
 import { isStreamingDataFrame } from 'app/features/live/data/utils';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';

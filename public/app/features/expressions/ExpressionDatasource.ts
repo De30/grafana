@@ -8,8 +8,7 @@ import {
   PluginType,
   ScopedVars,
 } from '@grafana/data';
-import { DataSourceWithBackend, getDataSourceSrv, getTemplateSrv } from '@grafana/runtime';
-import { ExpressionDatasourceRef } from '@grafana/runtime/src/utils/DataSourceWithBackend';
+import { DataSourceWithBackend, getDataSourceSrv, getTemplateSrv, ExpressionDatasourceRef } from '@grafana/runtime';
 
 import { ExpressionQueryEditor } from './ExpressionQueryEditor';
 import { ExpressionQuery, ExpressionQueryType } from './types';

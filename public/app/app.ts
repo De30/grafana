@@ -31,9 +31,9 @@ import {
   setEchoSrv,
   setLocationSrv,
   setQueryRunnerFactory,
+  setPanelDataErrorView,
+  setPanelRenderer,
 } from '@grafana/runtime';
-import { setPanelDataErrorView } from '@grafana/runtime/src/components/PanelDataErrorView';
-import { setPanelRenderer } from '@grafana/runtime/src/components/PanelRenderer';
 import { getScrollbarWidth } from '@grafana/ui';
 import config from 'app/core/config';
 import { arrayMove } from 'app/core/utils/arrayMove';
