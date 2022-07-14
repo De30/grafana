@@ -11,6 +11,7 @@ seqs: [
 				targetBlank?: bool
 				title?:       string
 				url?:         string
+				...
 			},
 		]
 	},

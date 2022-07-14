@@ -10,6 +10,7 @@ seqs: [
 			{
 				count?: int
 				term?:  string
+				...
 			},
 		]
 	},

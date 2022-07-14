@@ -10,6 +10,7 @@ seqs: [
 			{
 				email?: string
 				name?:  string
+				...
 			},
 		]
 	},

@@ -33,6 +33,7 @@ seqs: [
 
 				// Version of the library element you are updating.
 				version?: int
+				...
 			},
 		]
 	},

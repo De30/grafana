@@ -12,6 +12,7 @@ seqs: [
 				name?:   string
 				status?: string
 				uid?:    string
+				...
 			},
 		]
 	},

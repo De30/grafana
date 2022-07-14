@@ -11,6 +11,7 @@ seqs: [
 				alt?:  string
 				href?: string
 				src?:  string
+				...
 			},
 		]
 	},

@@ -17,6 +17,7 @@ seqs: [
 				parentVersion?: int
 				restoredFrom?:  int
 				version?:       int
+				...
 			},
 		]
 	},

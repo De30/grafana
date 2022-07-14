@@ -13,6 +13,7 @@ seqs: [
 				name?:      string
 				type?:      string
 				uid?:       string
+				...
 			},
 		]
 	},

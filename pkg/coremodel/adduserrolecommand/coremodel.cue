@@ -10,6 +10,7 @@ seqs: [
 			{
 				global?:  bool
 				roleUid?: string
+				...
 			},
 		]
 	},

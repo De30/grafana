@@ -10,6 +10,7 @@ seqs: [
 			{
 				T?: int
 				V?: number
+				...
 			},
 		]
 	},

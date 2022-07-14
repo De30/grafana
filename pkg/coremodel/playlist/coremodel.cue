@@ -12,6 +12,7 @@ seqs: [
 				interval?: string
 				name?:     string
 				uid?:      string
+				...
 			},
 		]
 	},

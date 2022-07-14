@@ -14,6 +14,7 @@ seqs: [
 				title?: string
 				uri?:   string
 				url?:   string
+				...
 			},
 		]
 	},

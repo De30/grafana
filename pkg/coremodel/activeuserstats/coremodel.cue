@@ -11,6 +11,7 @@ seqs: [
 				active_admins_and_editors?: int
 				active_users?:              int
 				active_viewers?:            int
+				...
 			},
 		]
 	},

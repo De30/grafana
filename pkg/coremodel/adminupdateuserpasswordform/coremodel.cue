@@ -9,6 +9,7 @@ seqs: [
 		schemas: [
 			{
 				password?: string
+				...
 			},
 		]
 	},

@@ -9,6 +9,7 @@ seqs: [
 		schemas: [
 			{
 				template?: string
+				...
 			},
 		]
 	},

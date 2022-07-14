@@ -12,6 +12,7 @@ seqs: [
 				target?:  string
 				used?:    int
 				user_id?: int
+				...
 			},
 		]
 	},

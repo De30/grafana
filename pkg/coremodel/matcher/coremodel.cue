@@ -19,6 +19,7 @@ seqs: [
 
 				// value
 				value: string
+				...
 			},
 		]
 	},

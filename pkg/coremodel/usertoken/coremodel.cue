@@ -21,6 +21,7 @@ seqs: [
 				UpdatedAt?:     int
 				UserAgent?:     string
 				UserId?:        int
+				...
 			},
 		]
 	},

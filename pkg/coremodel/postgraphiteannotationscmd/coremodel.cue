@@ -14,6 +14,7 @@ seqs: [
 				}
 				what?: string
 				when?: int
+				...
 			},
 		]
 	},

@@ -11,6 +11,7 @@ seqs: [
 				name?:  string
 				orgId?: int
 				role?:  "Viewer" | "Editor" | "Admin"
+				...
 			},
 		]
 	},

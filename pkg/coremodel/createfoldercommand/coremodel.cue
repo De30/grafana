@@ -10,6 +10,7 @@ seqs: [
 			{
 				title?: string
 				uid?:   string
+				...
 			},
 		]
 	},

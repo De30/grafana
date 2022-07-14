@@ -12,6 +12,7 @@ seqs: [
 				dashboardId?:  int
 				dashboardUID?: string
 				panelId?:      int
+				...
 			},
 		]
 	},

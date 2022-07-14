@@ -10,6 +10,7 @@ seqs: [
 			{
 				// original
 				original: string
+				...
 			},
 		]
 	},

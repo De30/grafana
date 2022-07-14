@@ -16,6 +16,7 @@ seqs: [
 
 				// state
 				state: "[unprocessed active suppressed]"
+				...
 			},
 		]
 	},

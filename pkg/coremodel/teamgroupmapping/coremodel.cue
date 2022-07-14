@@ -9,6 +9,7 @@ seqs: [
 		schemas: [
 			{
 				groupId?: string
+				...
 			},
 		]
 	},

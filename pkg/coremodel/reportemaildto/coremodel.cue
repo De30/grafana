@@ -20,6 +20,7 @@ seqs: [
 				// Send the report to the emails specified in the report. Required
 				// if emails is not present.
 				useEmailsFromReport?: bool
+				...
 			},
 		]
 	},

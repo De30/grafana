@@ -20,6 +20,7 @@ seqs: [
 				// For example, a 412 Precondition Failed error may include
 				// additional information of why that error happened.
 				status?: string
+				...
 			},
 		]
 	},

@@ -15,6 +15,7 @@ seqs: [
 				// team, user, escalation, schedule etc.
 				type?:     string
 				username?: string
+				...
 			},
 		]
 	},

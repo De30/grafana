@@ -11,6 +11,7 @@ seqs: [
 				name?:          string
 				role?:          "Viewer" | "Editor" | "Admin"
 				secondsToLive?: int
+				...
 			},
 		]
 	},

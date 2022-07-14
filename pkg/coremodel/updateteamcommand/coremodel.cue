@@ -11,6 +11,7 @@ seqs: [
 				Email?: string
 				Id?:    int
 				Name?:  string
+				...
 			},
 		]
 	},

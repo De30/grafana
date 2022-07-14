@@ -11,6 +11,7 @@ seqs: [
 				data_source_uid?:   string
 				id?:                string
 				remote_write_path?: string
+				...
 			},
 		]
 	},

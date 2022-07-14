@@ -11,6 +11,7 @@ seqs: [
 				global?:        bool
 				includeHidden?: bool
 				roleUids?: [...string]
+				...
 			},
 		]
 	},

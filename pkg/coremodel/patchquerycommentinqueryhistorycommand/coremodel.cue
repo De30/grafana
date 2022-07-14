@@ -10,6 +10,7 @@ seqs: [
 			{
 				// Updated comment
 				comment?: string
+				...
 			},
 		]
 	},

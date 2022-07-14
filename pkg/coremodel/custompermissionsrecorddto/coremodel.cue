@@ -21,6 +21,7 @@ seqs: [
 				uid?:               string
 				url?:               string
 				usersCount?:        int
+				...
 			},
 		]
 	},

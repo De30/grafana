@@ -18,6 +18,7 @@ seqs: [
 				orgId?:         int
 				role?:          string
 				userId?:        int
+				...
 			},
 		]
 	},

@@ -13,6 +13,7 @@ seqs: [
 				// (alert identified by unique labels) with a boolean value
 				// (firing/not firing)
 				instances?: [...[...int]]
+				...
 			},
 		]
 	},

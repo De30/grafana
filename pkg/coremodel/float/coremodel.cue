@@ -10,6 +10,7 @@ seqs: [
 			{
 				Float64?: number
 				Valid?:   bool
+				...
 			},
 		]
 	},

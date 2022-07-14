@@ -13,6 +13,7 @@ seqs: [
 				text?:    string
 				time?:    int
 				timeEnd?: int
+				...
 			},
 		]
 	},

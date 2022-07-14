@@ -11,6 +11,7 @@ seqs: [
 				canAdd?:    bool
 				canDelete?: bool
 				canEdit?:   bool
+				...
 			},
 		]
 	},

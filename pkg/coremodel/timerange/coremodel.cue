@@ -10,6 +10,7 @@ seqs: [
 			{
 				EndMinute?:   int
 				StartMinute?: int
+				...
 			},
 		]
 	},

@@ -10,6 +10,7 @@ seqs: [
 			{
 				alertId?: int
 				paused?:  bool
+				...
 			},
 		]
 	},

@@ -10,6 +10,7 @@ seqs: [
 			{
 				from?: string
 				to?:   string
+				...
 			},
 		]
 	},

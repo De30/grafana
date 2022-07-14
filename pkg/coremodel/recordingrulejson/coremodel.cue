@@ -23,6 +23,7 @@ seqs: [
 				}]
 				range?:         int
 				target_ref_id?: string
+				...
 			},
 		]
 	},

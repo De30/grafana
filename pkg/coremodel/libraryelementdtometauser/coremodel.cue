@@ -11,6 +11,7 @@ seqs: [
 				avatarUrl?: string
 				id?:        int
 				name?:      string
+				...
 			},
 		]
 	},

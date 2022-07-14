@@ -12,6 +12,7 @@ seqs: [
 				ok_text?:      string
 				text?:         string
 				title?:        string
+				...
 			},
 		]
 	},

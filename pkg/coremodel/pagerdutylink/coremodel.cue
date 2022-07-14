@@ -10,6 +10,7 @@ seqs: [
 			{
 				href?: string
 				text?: string
+				...
 			},
 		]
 	},

@@ -22,6 +22,7 @@ seqs: [
 
 				// Used to verify the hostname for the targets.
 				server_name?: string
+				...
 			},
 		]
 	},

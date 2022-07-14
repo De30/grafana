@@ -9,6 +9,7 @@ seqs: [
 		schemas: [
 			{
 				role?: "Viewer" | "Editor" | "Admin"
+				...
 			},
 		]
 	},

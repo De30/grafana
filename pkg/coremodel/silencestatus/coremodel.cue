@@ -10,6 +10,7 @@ seqs: [
 			{
 				// state
 				state: "[expired active pending]"
+				...
 			},
 		]
 	},

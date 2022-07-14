@@ -18,6 +18,7 @@ seqs: [
 				orgId?:       int
 				updated?:     string
 				userId?:      int
+				...
 			},
 		]
 	},

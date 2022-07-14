@@ -10,6 +10,7 @@ seqs: [
 			{
 				Error?: string
 				Login?: string
+				...
 			},
 		]
 	},

@@ -11,6 +11,7 @@ seqs: [
 				id?:   int
 				name?: string
 				uid?:  string
+				...
 			},
 		]
 	},

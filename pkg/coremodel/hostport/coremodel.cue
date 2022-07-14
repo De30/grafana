@@ -10,6 +10,7 @@ seqs: [
 			{
 				Host?: string
 				Port?: string
+				...
 			},
 		]
 	},

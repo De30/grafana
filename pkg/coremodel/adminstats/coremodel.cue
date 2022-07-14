@@ -31,6 +31,7 @@ seqs: [
 				tags?:                int
 				users?:               int
 				viewers?:             int
+				...
 			},
 		]
 	},

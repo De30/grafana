@@ -12,6 +12,7 @@ seqs: [
 				title?:     string
 				uid?:       string
 				version?:   int
+				...
 			},
 		]
 	},

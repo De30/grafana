@@ -10,6 +10,7 @@ seqs: [
 			{
 				newPassword?: string
 				oldPassword?: string
+				...
 			},
 		]
 	},

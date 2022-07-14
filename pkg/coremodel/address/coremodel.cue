@@ -14,6 +14,7 @@ seqs: [
 				country?:  string
 				state?:    string
 				zipCode?:  string
+				...
 			},
 		]
 	},

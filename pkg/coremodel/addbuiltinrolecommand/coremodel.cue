@@ -16,6 +16,7 @@ seqs: [
 				// Refer to the Built-in role assignments for more information.
 				global?:  bool
 				roleUid?: string
+				...
 			},
 		]
 	},

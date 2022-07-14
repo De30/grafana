@@ -11,6 +11,7 @@ seqs: [
 				message?:      string
 				starredCount?: int
 				totalCount?:   int
+				...
 			},
 		]
 	},

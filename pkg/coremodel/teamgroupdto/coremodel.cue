@@ -11,6 +11,7 @@ seqs: [
 				groupId?: string
 				orgId?:   int
 				teamId?:  int
+				...
 			},
 		]
 	},

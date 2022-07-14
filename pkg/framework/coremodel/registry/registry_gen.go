@@ -26,8 +26,6 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/alertinstancesresponse"
 	"github.com/grafana/grafana/pkg/coremodel/alertmanager"
 	"github.com/grafana/grafana/pkg/coremodel/alertmanagerconfig"
-	"github.com/grafana/grafana/pkg/coremodel/alertmanagernotfound"
-	"github.com/grafana/grafana/pkg/coremodel/alertmanagernotready"
 	"github.com/grafana/grafana/pkg/coremodel/alertnotificationlookup"
 	"github.com/grafana/grafana/pkg/coremodel/alertrulegroup"
 	"github.com/grafana/grafana/pkg/coremodel/alertstatus"
@@ -57,24 +55,18 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/importdashboardinput"
 	"github.com/grafana/grafana/pkg/coremodel/importdashboardresponse"
 	"github.com/grafana/grafana/pkg/coremodel/inclusiverange"
-	"github.com/grafana/grafana/pkg/coremodel/json"
 	"github.com/grafana/grafana/pkg/coremodel/label"
-	"github.com/grafana/grafana/pkg/coremodel/labelset"
 	"github.com/grafana/grafana/pkg/coremodel/libraryelementdtometauser"
 	"github.com/grafana/grafana/pkg/coremodel/massdeleteannotationscmd"
 	"github.com/grafana/grafana/pkg/coremodel/matcher"
 	"github.com/grafana/grafana/pkg/coremodel/messagetemplatecontent"
-	"github.com/grafana/grafana/pkg/coremodel/metadata"
 	"github.com/grafana/grafana/pkg/coremodel/monthrange"
-	"github.com/grafana/grafana/pkg/coremodel/multistatus"
 	"github.com/grafana/grafana/pkg/coremodel/navlink"
 	"github.com/grafana/grafana/pkg/coremodel/newapikeyresult"
-	"github.com/grafana/grafana/pkg/coremodel/notfound"
 	"github.com/grafana/grafana/pkg/coremodel/notifierconfig"
 	"github.com/grafana/grafana/pkg/coremodel/opsgenieconfigresponder"
 	"github.com/grafana/grafana/pkg/coremodel/orgdto"
 	"github.com/grafana/grafana/pkg/coremodel/orguserdto"
-	"github.com/grafana/grafana/pkg/coremodel/overridelabels"
 	"github.com/grafana/grafana/pkg/coremodel/pagerdutyimage"
 	"github.com/grafana/grafana/pkg/coremodel/pagerdutylink"
 	"github.com/grafana/grafana/pkg/coremodel/patchannotationscmd"
@@ -84,7 +76,6 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/pauseallalertscommand"
 	"github.com/grafana/grafana/pkg/coremodel/peerstatus"
 	"github.com/grafana/grafana/pkg/coremodel/permission"
-	"github.com/grafana/grafana/pkg/coremodel/permissiondenied"
 	"github.com/grafana/grafana/pkg/coremodel/playlist"
 	"github.com/grafana/grafana/pkg/coremodel/playlistdashboard"
 	"github.com/grafana/grafana/pkg/coremodel/playlistitemdto"
@@ -97,13 +88,11 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/queryhistorypreference"
 	"github.com/grafana/grafana/pkg/coremodel/receiver"
 	"github.com/grafana/grafana/pkg/coremodel/recordingrulejson"
-	"github.com/grafana/grafana/pkg/coremodel/regexp"
 	"github.com/grafana/grafana/pkg/coremodel/reportemaildto"
 	"github.com/grafana/grafana/pkg/coremodel/responsedetails"
 	"github.com/grafana/grafana/pkg/coremodel/restoredashboardversioncommand"
 	"github.com/grafana/grafana/pkg/coremodel/revokeauthtokencmd"
 	"github.com/grafana/grafana/pkg/coremodel/scheduledto"
-	"github.com/grafana/grafana/pkg/coremodel/settingsbag"
 	"github.com/grafana/grafana/pkg/coremodel/setuserrolescommand"
 	"github.com/grafana/grafana/pkg/coremodel/silencestatus"
 	"github.com/grafana/grafana/pkg/coremodel/slackconfirmationfield"
@@ -127,7 +116,6 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/updateusercommand"
 	"github.com/grafana/grafana/pkg/coremodel/updateuserquotacmd"
 	"github.com/grafana/grafana/pkg/coremodel/useriddto"
-	"github.com/grafana/grafana/pkg/coremodel/userinfo"
 	"github.com/grafana/grafana/pkg/coremodel/userlookupdto"
 	"github.com/grafana/grafana/pkg/coremodel/userorgdto"
 	"github.com/grafana/grafana/pkg/coremodel/userprofiledto"
@@ -135,7 +123,6 @@ import (
 	"github.com/grafana/grafana/pkg/coremodel/usersearchhitdto"
 	"github.com/grafana/grafana/pkg/coremodel/usertoken"
 	"github.com/grafana/grafana/pkg/coremodel/validationerror"
-	"github.com/grafana/grafana/pkg/coremodel/valuemapping"
 	"github.com/grafana/grafana/pkg/coremodel/versioninfo"
 	"github.com/grafana/grafana/pkg/coremodel/weekdayrange"
 	"github.com/grafana/grafana/pkg/coremodel/yearrange"
@@ -179,8 +166,6 @@ type Static struct {
 	alertinstancesresponse                 *alertinstancesresponse.Coremodel
 	alertmanager                           *alertmanager.Coremodel
 	alertmanagerconfig                     *alertmanagerconfig.Coremodel
-	alertmanagernotfound                   *alertmanagernotfound.Coremodel
-	alertmanagernotready                   *alertmanagernotready.Coremodel
 	alertnotificationlookup                *alertnotificationlookup.Coremodel
 	alertrulegroup                         *alertrulegroup.Coremodel
 	alertstatus                            *alertstatus.Coremodel
@@ -210,24 +195,18 @@ type Static struct {
 	importdashboardinput                   *importdashboardinput.Coremodel
 	importdashboardresponse                *importdashboardresponse.Coremodel
 	inclusiverange                         *inclusiverange.Coremodel
-	json                                   *json.Coremodel
 	label                                  *label.Coremodel
-	labelset                               *labelset.Coremodel
 	libraryelementdtometauser              *libraryelementdtometauser.Coremodel
 	massdeleteannotationscmd               *massdeleteannotationscmd.Coremodel
 	matcher                                *matcher.Coremodel
 	messagetemplatecontent                 *messagetemplatecontent.Coremodel
-	metadata                               *metadata.Coremodel
 	monthrange                             *monthrange.Coremodel
-	multistatus                            *multistatus.Coremodel
 	navlink                                *navlink.Coremodel
 	newapikeyresult                        *newapikeyresult.Coremodel
-	notfound                               *notfound.Coremodel
 	notifierconfig                         *notifierconfig.Coremodel
 	opsgenieconfigresponder                *opsgenieconfigresponder.Coremodel
 	orgdto                                 *orgdto.Coremodel
 	orguserdto                             *orguserdto.Coremodel
-	overridelabels                         *overridelabels.Coremodel
 	pagerdutyimage                         *pagerdutyimage.Coremodel
 	pagerdutylink                          *pagerdutylink.Coremodel
 	patchannotationscmd                    *patchannotationscmd.Coremodel
@@ -237,7 +216,6 @@ type Static struct {
 	pauseallalertscommand                  *pauseallalertscommand.Coremodel
 	peerstatus                             *peerstatus.Coremodel
 	permission                             *permission.Coremodel
-	permissiondenied                       *permissiondenied.Coremodel
 	playlist                               *playlist.Coremodel
 	playlistdashboard                      *playlistdashboard.Coremodel
 	playlistitemdto                        *playlistitemdto.Coremodel
@@ -250,13 +228,11 @@ type Static struct {
 	queryhistorypreference                 *queryhistorypreference.Coremodel
 	receiver                               *receiver.Coremodel
 	recordingrulejson                      *recordingrulejson.Coremodel
-	regexp                                 *regexp.Coremodel
 	reportemaildto                         *reportemaildto.Coremodel
 	responsedetails                        *responsedetails.Coremodel
 	restoredashboardversioncommand         *restoredashboardversioncommand.Coremodel
 	revokeauthtokencmd                     *revokeauthtokencmd.Coremodel
 	scheduledto                            *scheduledto.Coremodel
-	settingsbag                            *settingsbag.Coremodel
 	setuserrolescommand                    *setuserrolescommand.Coremodel
 	silencestatus                          *silencestatus.Coremodel
 	slackconfirmationfield                 *slackconfirmationfield.Coremodel
@@ -280,7 +256,6 @@ type Static struct {
 	updateusercommand                      *updateusercommand.Coremodel
 	updateuserquotacmd                     *updateuserquotacmd.Coremodel
 	useriddto                              *useriddto.Coremodel
-	userinfo                               *userinfo.Coremodel
 	userlookupdto                          *userlookupdto.Coremodel
 	userorgdto                             *userorgdto.Coremodel
 	userprofiledto                         *userprofiledto.Coremodel
@@ -288,7 +263,6 @@ type Static struct {
 	usersearchhitdto                       *usersearchhitdto.Coremodel
 	usertoken                              *usertoken.Coremodel
 	validationerror                        *validationerror.Coremodel
-	valuemapping                           *valuemapping.Coremodel
 	versioninfo                            *versioninfo.Coremodel
 	weekdayrange                           *weekdayrange.Coremodel
 	yearrange                              *yearrange.Coremodel
@@ -312,8 +286,6 @@ var (
 	_ coremodel.Interface = &alertinstancesresponse.Coremodel{}
 	_ coremodel.Interface = &alertmanager.Coremodel{}
 	_ coremodel.Interface = &alertmanagerconfig.Coremodel{}
-	_ coremodel.Interface = &alertmanagernotfound.Coremodel{}
-	_ coremodel.Interface = &alertmanagernotready.Coremodel{}
 	_ coremodel.Interface = &alertnotificationlookup.Coremodel{}
 	_ coremodel.Interface = &alertrulegroup.Coremodel{}
 	_ coremodel.Interface = &alertstatus.Coremodel{}
@@ -343,24 +315,18 @@ var (
 	_ coremodel.Interface = &importdashboardinput.Coremodel{}
 	_ coremodel.Interface = &importdashboardresponse.Coremodel{}
 	_ coremodel.Interface = &inclusiverange.Coremodel{}
-	_ coremodel.Interface = &json.Coremodel{}
 	_ coremodel.Interface = &label.Coremodel{}
-	_ coremodel.Interface = &labelset.Coremodel{}
 	_ coremodel.Interface = &libraryelementdtometauser.Coremodel{}
 	_ coremodel.Interface = &massdeleteannotationscmd.Coremodel{}
 	_ coremodel.Interface = &matcher.Coremodel{}
 	_ coremodel.Interface = &messagetemplatecontent.Coremodel{}
-	_ coremodel.Interface = &metadata.Coremodel{}
 	_ coremodel.Interface = &monthrange.Coremodel{}
-	_ coremodel.Interface = &multistatus.Coremodel{}
 	_ coremodel.Interface = &navlink.Coremodel{}
 	_ coremodel.Interface = &newapikeyresult.Coremodel{}
-	_ coremodel.Interface = &notfound.Coremodel{}
 	_ coremodel.Interface = &notifierconfig.Coremodel{}
 	_ coremodel.Interface = &opsgenieconfigresponder.Coremodel{}
 	_ coremodel.Interface = &orgdto.Coremodel{}
 	_ coremodel.Interface = &orguserdto.Coremodel{}
-	_ coremodel.Interface = &overridelabels.Coremodel{}
 	_ coremodel.Interface = &pagerdutyimage.Coremodel{}
 	_ coremodel.Interface = &pagerdutylink.Coremodel{}
 	_ coremodel.Interface = &patchannotationscmd.Coremodel{}
@@ -370,7 +336,6 @@ var (
 	_ coremodel.Interface = &pauseallalertscommand.Coremodel{}
 	_ coremodel.Interface = &peerstatus.Coremodel{}
 	_ coremodel.Interface = &permission.Coremodel{}
-	_ coremodel.Interface = &permissiondenied.Coremodel{}
 	_ coremodel.Interface = &playlist.Coremodel{}
 	_ coremodel.Interface = &playlistdashboard.Coremodel{}
 	_ coremodel.Interface = &playlistitemdto.Coremodel{}
@@ -383,13 +348,11 @@ var (
 	_ coremodel.Interface = &queryhistorypreference.Coremodel{}
 	_ coremodel.Interface = &receiver.Coremodel{}
 	_ coremodel.Interface = &recordingrulejson.Coremodel{}
-	_ coremodel.Interface = &regexp.Coremodel{}
 	_ coremodel.Interface = &reportemaildto.Coremodel{}
 	_ coremodel.Interface = &responsedetails.Coremodel{}
 	_ coremodel.Interface = &restoredashboardversioncommand.Coremodel{}
 	_ coremodel.Interface = &revokeauthtokencmd.Coremodel{}
 	_ coremodel.Interface = &scheduledto.Coremodel{}
-	_ coremodel.Interface = &settingsbag.Coremodel{}
 	_ coremodel.Interface = &setuserrolescommand.Coremodel{}
 	_ coremodel.Interface = &silencestatus.Coremodel{}
 	_ coremodel.Interface = &slackconfirmationfield.Coremodel{}
@@ -413,7 +376,6 @@ var (
 	_ coremodel.Interface = &updateusercommand.Coremodel{}
 	_ coremodel.Interface = &updateuserquotacmd.Coremodel{}
 	_ coremodel.Interface = &useriddto.Coremodel{}
-	_ coremodel.Interface = &userinfo.Coremodel{}
 	_ coremodel.Interface = &userlookupdto.Coremodel{}
 	_ coremodel.Interface = &userorgdto.Coremodel{}
 	_ coremodel.Interface = &userprofiledto.Coremodel{}
@@ -421,7 +383,6 @@ var (
 	_ coremodel.Interface = &usersearchhitdto.Coremodel{}
 	_ coremodel.Interface = &usertoken.Coremodel{}
 	_ coremodel.Interface = &validationerror.Coremodel{}
-	_ coremodel.Interface = &valuemapping.Coremodel{}
 	_ coremodel.Interface = &versioninfo.Coremodel{}
 	_ coremodel.Interface = &weekdayrange.Coremodel{}
 	_ coremodel.Interface = &yearrange.Coremodel{}
@@ -521,18 +482,6 @@ func (s *Static) Alertmanager() *alertmanager.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Alertmanagerconfig() *alertmanagerconfig.Coremodel {
 	return s.alertmanagerconfig
-}
-
-// Alertmanagernotfound returns the alertmanagernotfound coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Alertmanagernotfound() *alertmanagernotfound.Coremodel {
-	return s.alertmanagernotfound
-}
-
-// Alertmanagernotready returns the alertmanagernotready coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Alertmanagernotready() *alertmanagernotready.Coremodel {
-	return s.alertmanagernotready
 }
 
 // Alertnotificationlookup returns the alertnotificationlookup coremodel. The return value is guaranteed to
@@ -709,22 +658,10 @@ func (s *Static) Inclusiverange() *inclusiverange.Coremodel {
 	return s.inclusiverange
 }
 
-// Json returns the json coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Json() *json.Coremodel {
-	return s.json
-}
-
 // Label returns the label coremodel. The return value is guaranteed to
 // implement coremodel.Interface.
 func (s *Static) Label() *label.Coremodel {
 	return s.label
-}
-
-// Labelset returns the labelset coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Labelset() *labelset.Coremodel {
-	return s.labelset
 }
 
 // Libraryelementdtometauser returns the libraryelementdtometauser coremodel. The return value is guaranteed to
@@ -751,22 +688,10 @@ func (s *Static) Messagetemplatecontent() *messagetemplatecontent.Coremodel {
 	return s.messagetemplatecontent
 }
 
-// Metadata returns the metadata coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Metadata() *metadata.Coremodel {
-	return s.metadata
-}
-
 // Monthrange returns the monthrange coremodel. The return value is guaranteed to
 // implement coremodel.Interface.
 func (s *Static) Monthrange() *monthrange.Coremodel {
 	return s.monthrange
-}
-
-// Multistatus returns the multistatus coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Multistatus() *multistatus.Coremodel {
-	return s.multistatus
 }
 
 // Navlink returns the navlink coremodel. The return value is guaranteed to
@@ -779,12 +704,6 @@ func (s *Static) Navlink() *navlink.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Newapikeyresult() *newapikeyresult.Coremodel {
 	return s.newapikeyresult
-}
-
-// Notfound returns the notfound coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Notfound() *notfound.Coremodel {
-	return s.notfound
 }
 
 // Notifierconfig returns the notifierconfig coremodel. The return value is guaranteed to
@@ -809,12 +728,6 @@ func (s *Static) Orgdto() *orgdto.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Orguserdto() *orguserdto.Coremodel {
 	return s.orguserdto
-}
-
-// Overridelabels returns the overridelabels coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Overridelabels() *overridelabels.Coremodel {
-	return s.overridelabels
 }
 
 // Pagerdutyimage returns the pagerdutyimage coremodel. The return value is guaranteed to
@@ -869,12 +782,6 @@ func (s *Static) Peerstatus() *peerstatus.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Permission() *permission.Coremodel {
 	return s.permission
-}
-
-// Permissiondenied returns the permissiondenied coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Permissiondenied() *permissiondenied.Coremodel {
-	return s.permissiondenied
 }
 
 // Playlist returns the playlist coremodel. The return value is guaranteed to
@@ -949,12 +856,6 @@ func (s *Static) Recordingrulejson() *recordingrulejson.Coremodel {
 	return s.recordingrulejson
 }
 
-// Regexp returns the regexp coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Regexp() *regexp.Coremodel {
-	return s.regexp
-}
-
 // Reportemaildto returns the reportemaildto coremodel. The return value is guaranteed to
 // implement coremodel.Interface.
 func (s *Static) Reportemaildto() *reportemaildto.Coremodel {
@@ -983,12 +884,6 @@ func (s *Static) Revokeauthtokencmd() *revokeauthtokencmd.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Scheduledto() *scheduledto.Coremodel {
 	return s.scheduledto
-}
-
-// Settingsbag returns the settingsbag coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Settingsbag() *settingsbag.Coremodel {
-	return s.settingsbag
 }
 
 // Setuserrolescommand returns the setuserrolescommand coremodel. The return value is guaranteed to
@@ -1129,12 +1024,6 @@ func (s *Static) Useriddto() *useriddto.Coremodel {
 	return s.useriddto
 }
 
-// Userinfo returns the userinfo coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Userinfo() *userinfo.Coremodel {
-	return s.userinfo
-}
-
 // Userlookupdto returns the userlookupdto coremodel. The return value is guaranteed to
 // implement coremodel.Interface.
 func (s *Static) Userlookupdto() *userlookupdto.Coremodel {
@@ -1175,12 +1064,6 @@ func (s *Static) Usertoken() *usertoken.Coremodel {
 // implement coremodel.Interface.
 func (s *Static) Validationerror() *validationerror.Coremodel {
 	return s.validationerror
-}
-
-// Valuemapping returns the valuemapping coremodel. The return value is guaranteed to
-// implement coremodel.Interface.
-func (s *Static) Valuemapping() *valuemapping.Coremodel {
-	return s.valuemapping
 }
 
 // Versioninfo returns the versioninfo coremodel. The return value is guaranteed to
@@ -1292,16 +1175,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.alertmanagerconfig, err = alertmanagerconfig.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.alertmanagernotfound, err = alertmanagernotfound.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.alertmanagernotready, err = alertmanagernotready.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1451,17 +1324,7 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 		return nil, err
 	}
 
-	reg.json, err = json.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
 	reg.label, err = label.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.labelset, err = labelset.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1486,17 +1349,7 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 		return nil, err
 	}
 
-	reg.metadata, err = metadata.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
 	reg.monthrange, err = monthrange.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.multistatus, err = multistatus.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1507,11 +1360,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.newapikeyresult, err = newapikeyresult.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.notfound, err = notfound.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1532,11 +1380,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.orguserdto, err = orguserdto.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.overridelabels, err = overridelabels.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1582,11 +1425,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.permission, err = permission.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.permissiondenied, err = permissiondenied.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1651,11 +1489,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 		return nil, err
 	}
 
-	reg.regexp, err = regexp.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
 	reg.reportemaildto, err = reportemaildto.New(lib)
 	if err != nil {
 		return nil, err
@@ -1677,11 +1510,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.scheduledto, err = scheduledto.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.settingsbag, err = settingsbag.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1801,11 +1629,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 		return nil, err
 	}
 
-	reg.userinfo, err = userinfo.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
 	reg.userlookupdto, err = userlookupdto.New(lib)
 	if err != nil {
 		return nil, err
@@ -1837,11 +1660,6 @@ func doProvideStatic(lib thema.Library) (*Static, error) {
 	}
 
 	reg.validationerror, err = validationerror.New(lib)
-	if err != nil {
-		return nil, err
-	}
-
-	reg.valuemapping, err = valuemapping.New(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -1894,8 +1712,6 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Alertinstancesresponse(),
 		ereg.Alertmanager(),
 		ereg.Alertmanagerconfig(),
-		ereg.Alertmanagernotfound(),
-		ereg.Alertmanagernotready(),
 		ereg.Alertnotificationlookup(),
 		ereg.Alertrulegroup(),
 		ereg.Alertstatus(),
@@ -1925,24 +1741,18 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Importdashboardinput(),
 		ereg.Importdashboardresponse(),
 		ereg.Inclusiverange(),
-		ereg.Json(),
 		ereg.Label(),
-		ereg.Labelset(),
 		ereg.Libraryelementdtometauser(),
 		ereg.Massdeleteannotationscmd(),
 		ereg.Matcher(),
 		ereg.Messagetemplatecontent(),
-		ereg.Metadata(),
 		ereg.Monthrange(),
-		ereg.Multistatus(),
 		ereg.Navlink(),
 		ereg.Newapikeyresult(),
-		ereg.Notfound(),
 		ereg.Notifierconfig(),
 		ereg.Opsgenieconfigresponder(),
 		ereg.Orgdto(),
 		ereg.Orguserdto(),
-		ereg.Overridelabels(),
 		ereg.Pagerdutyimage(),
 		ereg.Pagerdutylink(),
 		ereg.Patchannotationscmd(),
@@ -1952,7 +1762,6 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Pauseallalertscommand(),
 		ereg.Peerstatus(),
 		ereg.Permission(),
-		ereg.Permissiondenied(),
 		ereg.Playlist(),
 		ereg.Playlistdashboard(),
 		ereg.Playlistitemdto(),
@@ -1965,13 +1774,11 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Queryhistorypreference(),
 		ereg.Receiver(),
 		ereg.Recordingrulejson(),
-		ereg.Regexp(),
 		ereg.Reportemaildto(),
 		ereg.Responsedetails(),
 		ereg.Restoredashboardversioncommand(),
 		ereg.Revokeauthtokencmd(),
 		ereg.Scheduledto(),
-		ereg.Settingsbag(),
 		ereg.Setuserrolescommand(),
 		ereg.Silencestatus(),
 		ereg.Slackconfirmationfield(),
@@ -1995,7 +1802,6 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Updateusercommand(),
 		ereg.Updateuserquotacmd(),
 		ereg.Useriddto(),
-		ereg.Userinfo(),
 		ereg.Userlookupdto(),
 		ereg.Userorgdto(),
 		ereg.Userprofiledto(),
@@ -2003,7 +1809,6 @@ func doProvideGeneric(ereg *Static) (*Generic, error) {
 		ereg.Usersearchhitdto(),
 		ereg.Usertoken(),
 		ereg.Validationerror(),
-		ereg.Valuemapping(),
 		ereg.Versioninfo(),
 		ereg.Weekdayrange(),
 		ereg.Yearrange(),

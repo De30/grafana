@@ -9,6 +9,7 @@ seqs: [
 		schemas: [
 			{
 				paused?: bool
+				...
 			},
 		]
 	},

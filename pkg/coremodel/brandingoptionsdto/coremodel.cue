@@ -13,6 +13,7 @@ seqs: [
 				emailFooterText?: string
 				emailLogoUrl?:    string
 				reportLogoUrl?:   string
+				...
 			},
 		]
 	},

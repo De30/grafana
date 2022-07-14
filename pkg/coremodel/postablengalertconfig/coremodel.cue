@@ -10,6 +10,7 @@ seqs: [
 			{
 				alertmanagers?: [...string]
 				alertmanagersChoice?: "all" | "internal" | "external"
+				...
 			},
 		]
 	},

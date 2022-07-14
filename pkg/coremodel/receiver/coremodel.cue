@@ -10,6 +10,7 @@ seqs: [
 			{
 				// name
 				name: string
+				...
 			},
 		]
 	},

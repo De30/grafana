@@ -12,6 +12,7 @@ seqs: [
 				pluginId?: string
 				type?:     string
 				value?:    string
+				...
 			},
 		]
 	},

@@ -11,6 +11,7 @@ seqs: [
 				id?:   int
 				key?:  string
 				name?: string
+				...
 			},
 		]
 	},

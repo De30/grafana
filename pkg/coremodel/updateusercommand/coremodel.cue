@@ -12,6 +12,7 @@ seqs: [
 				login?: string
 				name?:  string
 				theme?: string
+				...
 			},
 		]
 	},

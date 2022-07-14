@@ -19,6 +19,7 @@ seqs: [
 				startDate?:         string
 				timeZone?:          string
 				workdaysOnly?:      bool
+				...
 			},
 		]
 	},

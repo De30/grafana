@@ -11,6 +11,7 @@ seqs: [
 				short?: bool
 				title?: string
 				value?: string
+				...
 			},
 		]
 	},

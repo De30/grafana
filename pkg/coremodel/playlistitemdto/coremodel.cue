@@ -14,6 +14,7 @@ seqs: [
 				title?:      string
 				type?:       string
 				value?:      string
+				...
 			},
 		]
 	},

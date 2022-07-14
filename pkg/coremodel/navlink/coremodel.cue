@@ -12,6 +12,7 @@ seqs: [
 				target?: string
 				text?:   string
 				url?:    string
+				...
 			},
 		]
 	},

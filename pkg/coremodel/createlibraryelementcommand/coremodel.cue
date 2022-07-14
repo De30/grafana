@@ -30,6 +30,7 @@ seqs: [
 				// Name of the library element.
 				name?: string
 				uid?:  string
+				...
 			},
 		]
 	},

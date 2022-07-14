@@ -12,6 +12,7 @@ seqs: [
 					...
 				}
 				message?: string
+				...
 			},
 		]
 	},

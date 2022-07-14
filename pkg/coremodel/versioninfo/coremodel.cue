@@ -25,6 +25,7 @@ seqs: [
 
 				// version
 				version: string
+				...
 			},
 		]
 	},

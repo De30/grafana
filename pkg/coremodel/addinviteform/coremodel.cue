@@ -12,6 +12,7 @@ seqs: [
 				name?:         string
 				role?:         "Viewer" | "Editor" | "Admin"
 				sendEmail?:    bool
+				...
 			},
 		]
 	},

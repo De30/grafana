@@ -13,6 +13,7 @@ seqs: [
 
 				// name
 				name: string
+				...
 			},
 		]
 	},

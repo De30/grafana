@@ -10,6 +10,7 @@ seqs: [
 			{
 				loginOrEmail?: string
 				role?:         "Viewer" | "Editor" | "Admin"
+				...
 			},
 		]
 	},

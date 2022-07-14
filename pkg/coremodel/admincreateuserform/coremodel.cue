@@ -13,6 +13,7 @@ seqs: [
 				name?:     string
 				orgId?:    int
 				password?: string
+				...
 			},
 		]
 	},

@@ -22,6 +22,7 @@ seqs: [
 				orgId?:          int
 				theme?:          string
 				updatedAt?:      string
+				...
 			},
 		]
 	},

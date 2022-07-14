@@ -22,6 +22,7 @@ seqs: [
 				slug?:             string
 				title?:            string
 				uid?:              string
+				...
 			},
 		]
 	},

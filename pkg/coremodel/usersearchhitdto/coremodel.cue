@@ -18,6 +18,7 @@ seqs: [
 				lastSeenAtAge?: string
 				login?:         string
 				name?:          string
+				...
 			},
 		]
 	},

@@ -12,6 +12,7 @@ seqs: [
 				created?: string
 				scope?:   string
 				updated?: string
+				...
 			},
 		]
 	},

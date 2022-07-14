@@ -10,6 +10,7 @@ seqs: [
 			{
 				Begin?: int
 				End?:   int
+				...
 			},
 		]
 	},

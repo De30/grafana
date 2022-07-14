@@ -10,6 +10,7 @@ seqs: [
 			{
 				limit?:  int
 				target?: string
+				...
 			},
 		]
 	},
