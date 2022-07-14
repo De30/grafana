@@ -43,6 +43,8 @@ module.exports = (env = {}) =>
       ],
     },
     optimization: {
+      moduleIds: 'named', // WIP: for debugging federated modules in browser
+      chunkIds: 'named', // WIP: for debugging federated modules in browser
       nodeEnv: 'production',
       minimize: parseInt(env.noMinify, 10) !== 1,
       minimizer: [

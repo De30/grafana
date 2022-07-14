@@ -2,6 +2,10 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
+const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
+const packageJSON = require('../../package.json');
+const deps = packageJSON.dependencies;
+
 const CorsWorkerPlugin = require('./plugins/CorsWorkerPlugin');
 
 module.exports = {
@@ -40,6 +44,38 @@ module.exports = {
     source: false,
   },
   plugins: [
+    new ModuleFederationPlugin({
+      name: 'grafana',
+      filename: 'remoteEntry.js',
+      remotes: {},
+      exposes: {},
+      shared: {
+        '@emotion/css': { singleton: true, requiredVersion: deps['@emotion/css'] },
+        '@emotion/react': { singleton: true, requiredVersion: deps['@emotion/react'] },
+        react: { singleton: true, requiredVersion: deps.react },
+        'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
+        '@grafana/data': {
+          singleton: true,
+          requiredVersion: '^9.0.0',
+        },
+        '@grafana/e2e-selectors': {
+          singleton: true,
+          requiredVersion: '^9.0.0',
+        },
+        '@grafana/runtime': {
+          singleton: true,
+          requiredVersion: '^9.0.0',
+        },
+        '@grafana/schema': {
+          singleton: true,
+          requiredVersion: '^9.0.0',
+        },
+        '@grafana/ui': {
+          singleton: true,
+          requiredVersion: '^9.0.0',
+        },
+      },
+    }),
     new CorsWorkerPlugin(),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
@@ -111,42 +147,5 @@ module.exports = {
   // https://webpack.js.org/plugins/split-chunks-plugin/#split-chunks-example-3
   optimization: {
     runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'all',
-      minChunks: 1,
-      cacheGroups: {
-        unicons: {
-          test: /[\\/]node_modules[\\/]@iconscout[\\/]react-unicons[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 20,
-          enforce: true,
-        },
-        moment: {
-          test: /[\\/]node_modules[\\/]moment[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 20,
-          enforce: true,
-        },
-        angular: {
-          test: /[\\/]node_modules[\\/]angular[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: 50,
-          enforce: true,
-        },
-        defaultVendors: {
-          test: /[\\/]node_modules[\\/].*[jt]sx?$/,
-          chunks: 'initial',
-          priority: -10,
-          reuseExistingChunk: true,
-          enforce: true,
-        },
-        default: {
-          priority: -20,
-          chunks: 'all',
-          test: /.*[jt]sx?$/,
-          reuseExistingChunk: true,
-        },
-      },
-    },
   },
 };
