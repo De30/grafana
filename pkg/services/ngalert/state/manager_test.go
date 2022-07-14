@@ -1926,7 +1926,7 @@ func TestStaleResultsHandler(t *testing.T) {
 	const mainOrgID int64 = 1
 	rule := tests.CreateTestAlertRule(t, ctx, dbstore, int64(interval.Seconds()), mainOrgID)
 	lastEval := evaluationTime.Add(-2 * interval)
-	saveCmd1 := &models.SaveAlertInstanceCommand{
+	saveCmd1 := &models.SaveAlertInstancesCommand{
 		RuleOrgID:         rule.OrgID,
 		RuleUID:           rule.UID,
 		Labels:            models.InstanceLabels{"test1": "testValue1"},
@@ -1938,7 +1938,7 @@ func TestStaleResultsHandler(t *testing.T) {
 
 	_ = dbstore.SaveAlertInstance(ctx, saveCmd1)
 
-	saveCmd2 := &models.SaveAlertInstanceCommand{
+	saveCmd2 := &models.SaveAlertInstancesCommand{
 		RuleOrgID:         rule.OrgID,
 		RuleUID:           rule.UID,
 		Labels:            models.InstanceLabels{"test2": "testValue2"},

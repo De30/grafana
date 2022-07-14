@@ -12,7 +12,7 @@ import (
 type InstanceStore interface {
 	GetAlertInstance(ctx context.Context, cmd *models.GetAlertInstanceQuery) error
 	ListAlertInstances(ctx context.Context, cmd *models.ListAlertInstancesQuery) error
-	SaveAlertInstance(ctx context.Context, cmd *models.SaveAlertInstanceCommand) error
+	SaveAlertInstances(ctx context.Context, cmd *models.SaveAlertInstancesCommand) error
 	FetchOrgIds(ctx context.Context) ([]int64, error)
 	DeleteAlertInstance(ctx context.Context, orgID int64, ruleUID, labelsHash string) error
 }
@@ -87,36 +87,48 @@ func (st DBstore) ListAlertInstances(ctx context.Context, cmd *models.ListAlertI
 	})
 }
 
-// SaveAlertInstance is a handler for saving a new alert instance.
-func (st DBstore) SaveAlertInstance(ctx context.Context, cmd *models.SaveAlertInstanceCommand) error {
+// SaveAlertInstances saves all the provided alert instances in a single write transaction.
+func (st DBstore) SaveAlertInstances(ctx context.Context, cmd *models.SaveAlertInstancesCommand) error {
 	return st.SQLStore.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		labelTupleJSON, labelsHash, err := cmd.Labels.StringAndHash()
+		values := make([][]interface{}, 0, len(cmd.Instances))
+		for _, fields := range cmd.Instances {
+
+			labelTupleJSON, labelsHash, err := fields.Labels.StringAndHash()
+			if err != nil {
+				return err
+			}
+
+			alertInstance := &models.AlertInstance{
+				RuleOrgID:         fields.RuleOrgID,
+				RuleUID:           fields.RuleUID,
+				Labels:            fields.Labels,
+				LabelsHash:        labelsHash,
+				CurrentState:      fields.State,
+				CurrentReason:     fields.StateReason,
+				CurrentStateSince: fields.CurrentStateSince,
+				CurrentStateEnd:   fields.CurrentStateEnd,
+				LastEvalTime:      fields.LastEvalTime,
+			}
+
+			if err := models.ValidateAlertInstance(alertInstance); err != nil {
+				return err
+			}
+
+			params := append(make([]interface{}, 0), alertInstance.RuleOrgID, alertInstance.RuleUID, labelTupleJSON, alertInstance.LabelsHash,
+				alertInstance.CurrentState, alertInstance.CurrentReason, alertInstance.CurrentStateSince.Unix(),
+				alertInstance.CurrentStateEnd.Unix(), alertInstance.LastEvalTime.Unix())
+			values = append(values, params)
+		}
+
+		upsertSQL, err := st.SQLStore.Dialect.UpsertMultipleSQL(
+			"alert_instance",
+			[]string{"rule_org_id", "rule_uid", "labels_hash"},
+			[]string{"rule_org_id", "rule_uid", "labels", "labels_hash", "current_state", "current_reason", "current_state_since", "current_state_end", "last_eval_time"},
+			len(cmd.Instances))
 		if err != nil {
 			return err
 		}
 
-		alertInstance := &models.AlertInstance{
-			RuleOrgID:         cmd.RuleOrgID,
-			RuleUID:           cmd.RuleUID,
-			Labels:            cmd.Labels,
-			LabelsHash:        labelsHash,
-			CurrentState:      cmd.State,
-			CurrentReason:     cmd.StateReason,
-			CurrentStateSince: cmd.CurrentStateSince,
-			CurrentStateEnd:   cmd.CurrentStateEnd,
-			LastEvalTime:      cmd.LastEvalTime,
-		}
-
-		if err := models.ValidateAlertInstance(alertInstance); err != nil {
-			return err
-		}
-
-		params := append(make([]interface{}, 0), alertInstance.RuleOrgID, alertInstance.RuleUID, labelTupleJSON, alertInstance.LabelsHash, alertInstance.CurrentState, alertInstance.CurrentReason, alertInstance.CurrentStateSince.Unix(), alertInstance.CurrentStateEnd.Unix(), alertInstance.LastEvalTime.Unix())
-
-		upsertSQL := st.SQLStore.Dialect.UpsertSQL(
-			"alert_instance",
-			[]string{"rule_org_id", "rule_uid", "labels_hash"},
-			[]string{"rule_org_id", "rule_uid", "labels", "labels_hash", "current_state", "current_reason", "current_state_since", "current_state_end", "last_eval_time"})
 		_, err = sess.SQL(upsertSQL, params...).Query()
 		if err != nil {
 			return err

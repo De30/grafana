@@ -483,7 +483,7 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 func (sch *schedule) saveAlertStates(ctx context.Context, states []*state.State) {
 	sch.log.Debug("saving alert states", "count", len(states))
 	for _, s := range states {
-		cmd := ngmodels.SaveAlertInstanceCommand{
+		cmd := ngmodels.SaveAlertInstancesCommand{
 			RuleOrgID:         s.OrgID,
 			RuleUID:           s.AlertRuleUID,
 			Labels:            ngmodels.InstanceLabels(s.Labels),
@@ -493,10 +493,10 @@ func (sch *schedule) saveAlertStates(ctx context.Context, states []*state.State)
 			CurrentStateSince: s.StartsAt,
 			CurrentStateEnd:   s.EndsAt,
 		}
-		err := sch.instanceStore.SaveAlertInstance(ctx, &cmd)
-		if err != nil {
-			sch.log.Error("failed to save alert state", "uid", s.AlertRuleUID, "orgId", s.OrgID, "labels", s.Labels.String(), "state", s.State.String(), "msg", err.Error())
-		}
+	}
+	err := sch.instanceStore.SaveAlertInstances(ctx, &cmd)
+	if err != nil {
+		sch.log.Error("failed to save alert state", "uid", s.AlertRuleUID, "orgId", s.OrgID, "labels", s.Labels.String(), "state", s.State.String(), "msg", err.Error())
 	}
 }
 

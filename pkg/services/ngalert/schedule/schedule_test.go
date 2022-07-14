@@ -77,7 +77,7 @@ func TestWarmStateCache(t *testing.T) {
 		},
 	}
 
-	saveCmd1 := &models.SaveAlertInstanceCommand{
+	saveCmd1 := &models.SaveAlertInstancesCommand{
 		RuleOrgID:         rule.OrgID,
 		RuleUID:           rule.UID,
 		Labels:            models.InstanceLabels{"test1": "testValue1"},
@@ -89,7 +89,7 @@ func TestWarmStateCache(t *testing.T) {
 
 	_ = dbstore.SaveAlertInstance(ctx, saveCmd1)
 
-	saveCmd2 := &models.SaveAlertInstanceCommand{
+	saveCmd2 := &models.SaveAlertInstancesCommand{
 		RuleOrgID:         rule.OrgID,
 		RuleUID:           rule.UID,
 		Labels:            models.InstanceLabels{"test2": "testValue2"},
