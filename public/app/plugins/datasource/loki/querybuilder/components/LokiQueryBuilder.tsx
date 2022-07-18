@@ -117,7 +117,7 @@ export const LokiQueryBuilder = React.memo<Props>(({ datasource, query, onChange
           query={query}
           onChange={onChange}
           data={sampleData}
-          queryModeller={lokiQueryModeller}
+          buildStringQueryFromVisual={(query: LokiVisualQuery) => lokiQueryModeller.renderQuery(query)}
           buildVisualQueryFromString={buildVisualQueryFromString}
         />
       </OperationsEditorRow>

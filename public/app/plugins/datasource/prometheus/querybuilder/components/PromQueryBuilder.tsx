@@ -114,7 +114,7 @@ export const PromQueryBuilder = React.memo<Props>(({ datasource, query, onChange
           query={query}
           onChange={onChange}
           data={data}
-          queryModeller={promQueryModeller}
+          buildStringQueryFromVisual={(query: PromVisualQuery) => promQueryModeller.renderQuery(query)}
           buildVisualQueryFromString={buildVisualQueryFromString}
         />
       </OperationsEditorRow>

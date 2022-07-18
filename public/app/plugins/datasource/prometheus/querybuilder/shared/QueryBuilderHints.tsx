@@ -7,12 +7,12 @@ import { LokiDatasource } from 'app/plugins/datasource/loki/datasource';
 
 import { PrometheusDatasource } from '../../datasource';
 
-import { LokiAndPromQueryModellerBase, PromLokiVisualQuery } from './LokiAndPromQueryModellerBase';
+import { PromLokiVisualQuery } from './LokiAndPromQueryModellerBase';
 
-export interface Props<T extends PromLokiVisualQuery> {
+export interface Props<T> {
   query: T;
   datasource: PrometheusDatasource | LokiDatasource;
-  queryModeller: LokiAndPromQueryModellerBase;
+  buildStringQueryFromVisual: (query: T) => string;
   buildVisualQueryFromString: (expr: string) => { query: T };
   onChange: (update: T) => void;
   data?: PanelData;
@@ -23,18 +23,18 @@ export const QueryBuilderHints = <T extends PromLokiVisualQuery>({
   query: visualQuery,
   onChange,
   data,
-  queryModeller,
+  buildStringQueryFromVisual,
   buildVisualQueryFromString,
 }: Props<T>) => {
   const [hints, setHints] = useState<QueryHint[]>([]);
   const styles = useStyles2(getStyles);
 
   useEffect(() => {
-    const query = { expr: queryModeller.renderQuery(visualQuery), refId: '' };
+    const query = { expr: buildStringQueryFromVisual(visualQuery), refId: '' };
     // For now show only actionable hints
     const hints = datasource.getQueryHints(query, data?.series || []).filter((hint) => hint.fix?.action);
     setHints(hints);
-  }, [datasource, visualQuery, data, queryModeller]);
+  }, [datasource, visualQuery, data, buildStringQueryFromVisual]);
 
   return (
     <>
@@ -45,10 +45,12 @@ export const QueryBuilderHints = <T extends PromLokiVisualQuery>({
               <Tooltip content={`${hint.label} ${hint.fix?.label}`} key={hint.type}>
                 <Button
                   onClick={() => {
-                    const query = { expr: queryModeller.renderQuery(visualQuery), refId: '' };
-                    const newQuery = datasource.modifyQuery(query, hint!.fix!.action);
-                    const newVisualQuery = buildVisualQueryFromString(newQuery.expr);
-                    return onChange(newVisualQuery.query);
+                    if (hint?.fix?.action) {
+                      const query = { expr: buildStringQueryFromVisual(visualQuery), refId: '' };
+                      const newQuery = datasource.modifyQuery(query, hint.fix.action);
+                      const newVisualQuery = buildVisualQueryFromString(newQuery.expr);
+                      return onChange(newVisualQuery.query);
+                    }
                   }}
                   fill="outline"
                   size="sm"
