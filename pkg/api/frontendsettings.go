@@ -38,8 +38,9 @@ func (hs *HTTPServer) getFrontendSettingsMap(c *models.ReqContext) (map[string]i
 	for _, app := range enabledPlugins[plugins.App] {
 		if app.Preload {
 			pluginsToPreload = append(pluginsToPreload, &plugins.PreloadPlugin{
-				Path:    app.Module,
-				Version: app.Info.Version,
+				Path:         app.Module,
+				Version:      app.Info.Version,
+				ModuleLoader: app.ModuleLoader,
 			})
 		}
 	}
@@ -67,6 +68,7 @@ func (hs *HTTPServer) getFrontendSettingsMap(c *models.ReqContext) (map[string]i
 			Name:          panel.Name,
 			Info:          panel.Info,
 			Module:        panel.Module,
+			ModuleLoader:  panel.ModuleLoader,
 			BaseURL:       panel.BaseURL,
 			SkipDataQuery: panel.SkipDataQuery,
 			HideFromList:  panel.HideFromList,
