@@ -56,23 +56,23 @@ module.exports = {
         'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
         '@grafana/data': {
           singleton: true,
-          requiredVersion: '^9.0.0',
+          requiredVersion: `^${packageJSON.version}`,
         },
         '@grafana/e2e-selectors': {
           singleton: true,
-          requiredVersion: '^9.0.0',
+          requiredVersion: `^${packageJSON.version}`,
         },
         '@grafana/runtime': {
           singleton: true,
-          requiredVersion: '^9.0.0',
+          requiredVersion: `^${packageJSON.version}`,
         },
         '@grafana/schema': {
           singleton: true,
-          requiredVersion: '^9.0.0',
+          requiredVersion: `^${packageJSON.version}`,
         },
         '@grafana/ui': {
           singleton: true,
-          requiredVersion: '^9.0.0',
+          requiredVersion: `^${packageJSON.version}`,
         },
       },
     }),
