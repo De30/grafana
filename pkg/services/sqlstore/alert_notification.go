@@ -345,6 +345,7 @@ func (ss *SQLStore) CreateAlertNotificationCommand(ctx context.Context, cmd *mod
 		}
 
 		if _, err = sess.MustCols("send_reminder").Insert(alertNotification); err != nil {
+			fmt.Println("I am hereeeeeeeeeeeeeeeeee")
 			return err
 		}
 

@@ -475,7 +475,7 @@ func TestIntegrationUserDataAccess(t *testing.T) {
 	})
 
 	t.Run("Testing DB - error on case insensitive conflict", func(t *testing.T) {
-		if ss.engine.Dialect().DBType() == migrator.MySQL {
+		if ss.engine.DriverName() == migrator.MySQL {
 			t.Skip("Skipping on MySQL due to case insensitive indexes")
 		}
 

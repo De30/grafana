@@ -528,7 +528,7 @@ func (ss *SQLStore) GetTeamMembers(ctx context.Context, query *models.GetTeamMem
 	// Note we assume that checking SignedInUser is allowed to see team members for this team has already been performed
 	// If the signed in user is not set no member will be returned
 	if !ac.IsDisabled(ss.Cfg) {
-		sqlID := fmt.Sprintf("%s.%s", ss.engine.Dialect().Quote("user"), ss.engine.Dialect().Quote("id"))
+		sqlID := fmt.Sprintf("%s.%s", ss.engine.Quote("user"), ss.engine.Quote("id"))
 		var filter ac.SQLFilter
 		*acFilter, err = ac.Filter(query.SignedInUser, sqlID, "users:id:", ac.ActionOrgUsersRead)
 		if err != nil {
