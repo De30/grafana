@@ -173,12 +173,13 @@ export async function importPluginModule(
   }
 
   if (moduleLoader === 'federated') {
-    console.log('Federated module found loading...');
+    console.log('Federated module: loading...');
     return importFederatedModule({
       scope: _.camelCase(id),
       url: `/public/${path}.js`,
     });
   }
+
   return grafanaRuntime.SystemJS.import(path);
 }
 

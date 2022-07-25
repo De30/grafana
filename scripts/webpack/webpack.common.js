@@ -3,9 +3,8 @@ const path = require('path');
 const webpack = require('webpack');
 
 const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
-const packageJSON = require('../../package.json');
-const deps = packageJSON.dependencies;
 
+const pluginDependencies = require('./pluginDependencies');
 const CorsWorkerPlugin = require('./plugins/CorsWorkerPlugin');
 
 module.exports = {
@@ -49,32 +48,7 @@ module.exports = {
       filename: 'remoteEntry.js',
       remotes: {},
       exposes: {},
-      shared: {
-        '@emotion/css': { singleton: true, requiredVersion: deps['@emotion/css'] },
-        '@emotion/react': { singleton: true, requiredVersion: deps['@emotion/react'] },
-        react: { singleton: true, requiredVersion: deps.react },
-        'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
-        '@grafana/data': {
-          singleton: true,
-          requiredVersion: `^${packageJSON.version}`,
-        },
-        '@grafana/e2e-selectors': {
-          singleton: true,
-          requiredVersion: `^${packageJSON.version}`,
-        },
-        '@grafana/runtime': {
-          singleton: true,
-          requiredVersion: `^${packageJSON.version}`,
-        },
-        '@grafana/schema': {
-          singleton: true,
-          requiredVersion: `^${packageJSON.version}`,
-        },
-        '@grafana/ui': {
-          singleton: true,
-          requiredVersion: `^${packageJSON.version}`,
-        },
-      },
+      shared: pluginDependencies,
     }),
     new CorsWorkerPlugin(),
     new webpack.ProvidePlugin({
