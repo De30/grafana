@@ -1,6 +1,7 @@
 import { TransformerRegistryItem } from '@grafana/data';
 
 import { filterByValueTransformRegistryItem } from './FilterByValueTransformer/FilterByValueTransformerEditor';
+import { bitwiseTransformRegistryItem } from './bitwise/BitwiseTransformerEditor';
 import { heatmapTransformRegistryItem } from './calculateHeatmap/HeatmapTransformerEditor';
 import { configFromQueryTransformRegistryItem } from './configFromQuery/ConfigFromQueryTransformerEditor';
 import { calculateFieldTransformRegistryItem } from './editors/CalculateFieldTransformerEditor';
@@ -53,5 +54,6 @@ export const getStandardTransformers = (): Array<TransformerRegistryItem<any>> =
     heatmapTransformRegistryItem,
     groupingToMatrixTransformRegistryItem,
     joinByLabelsTransformRegistryItem,
+    bitwiseTransformRegistryItem,
   ];
 };

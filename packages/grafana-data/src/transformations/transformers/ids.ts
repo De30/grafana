@@ -19,6 +19,7 @@ export enum DataTransformerID {
   renameByRegex = 'renameByRegex',
   filterByValue = 'filterByValue',
   noop = 'noop',
+  bitwise = 'bitwise',
   ensureColumns = 'ensureColumns',
   groupBy = 'groupBy',
   sortBy = 'sortBy',
