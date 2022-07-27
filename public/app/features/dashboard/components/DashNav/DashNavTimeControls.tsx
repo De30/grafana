@@ -98,6 +98,8 @@ export class DashNavTimeControls extends Component<Props> {
           onZoom={this.onZoom}
           onChangeTimeZone={this.onChangeTimeZone}
           onChangeFiscalYearStartMonth={this.onChangeFiscalYearStartMonth}
+          //Internationalization
+          timePickerTitleMessage={t({ id: 'time-picker.title.message', message: 'Absolute time range' })}
         />
         <RefreshPicker
           onIntervalChanged={this.onChangeRefreshInterval}

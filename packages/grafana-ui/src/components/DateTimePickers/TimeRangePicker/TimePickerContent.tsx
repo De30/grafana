@@ -32,6 +32,8 @@ interface Props {
   isReversed?: boolean;
   hideQuickRanges?: boolean;
   widthOverride?: number;
+  //Internationalization
+  timePickerTitleMessage?: string;
 }
 
 export interface PropsWithScreenSize extends Props {
@@ -122,7 +124,15 @@ export const TimePickerContent: React.FC<Props> = (props) => {
 };
 
 const NarrowScreenForm: React.FC<FormProps> = (props) => {
-  const { value, hideQuickRanges, onChange, timeZone, historyOptions = [], showHistory } = props;
+  const {
+    value,
+    hideQuickRanges,
+    onChange,
+    timeZone,
+    historyOptions = [],
+    showHistory,
+    timePickerTitleMessage,
+  } = props;
   const theme = useTheme2();
   const styles = getNarrowScreenStyles(theme);
   const isAbsolute = isDateTime(value.raw.from) || isDateTime(value.raw.to);
@@ -148,7 +158,8 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
           aria-expanded={!collapsed}
           aria-controls="expanded-timerange"
         >
-          <TimePickerTitle>Absolute time range</TimePickerTitle>
+          {/* <TimePickerTitle>Absolute time range</TimePickerTitle> */}
+          <TimePickerTitle>{timePickerTitleMessage}</TimePickerTitle>
           {!hideQuickRanges && <Icon name={!collapsed ? 'angle-up' : 'angle-down'} />}
         </button>
       </div>
@@ -172,7 +183,7 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
 };
 
 const FullScreenForm: React.FC<FormProps> = (props) => {
-  const { onChange, value, timeZone, fiscalYearStartMonth, isReversed, historyOptions } = props;
+  const { onChange, value, timeZone, fiscalYearStartMonth, isReversed, historyOptions, timePickerTitleMessage } = props;
   const theme = useTheme2();
   const styles = getFullScreenStyles(theme, props.hideQuickRanges);
   const onChangeTimeOption = (timeOption: TimeOption) => {
@@ -183,7 +194,8 @@ const FullScreenForm: React.FC<FormProps> = (props) => {
     <>
       <div className={styles.container}>
         <div className={styles.title} data-testid={selectors.components.TimePicker.absoluteTimeRangeTitle}>
-          <TimePickerTitle>Absolute time range</TimePickerTitle>
+          {/* <TimePickerTitle>Absolute time range</TimePickerTitle> */}
+          <TimePickerTitle>{timePickerTitleMessage}</TimePickerTitle>
         </div>
         <TimeRangeForm
           value={value}
