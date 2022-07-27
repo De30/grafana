@@ -45,6 +45,7 @@ export interface TimeRangePickerProps extends Themeable {
   widthOverride?: number;
   //Internationalization
   timePickerTitleMessage?: string;
+  timeRangeListTitle?: string;
 }
 
 export interface State {
@@ -70,6 +71,7 @@ export function UnthemedTimeRangePicker(props: TimeRangePickerProps): ReactEleme
     hideQuickRanges,
     widthOverride,
     timePickerTitleMessage,
+    timeRangeListTitle,
   } = props;
 
   const onChange = (timeRange: TimeRange) => {
@@ -137,6 +139,7 @@ export function UnthemedTimeRangePicker(props: TimeRangePickerProps): ReactEleme
               hideQuickRanges={hideQuickRanges}
               //Internationalization
               timePickerTitleMessage={timePickerTitleMessage}
+              timeRangeListTitle={timeRangeListTitle}
             />
           </section>
         </FocusScope>

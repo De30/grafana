@@ -100,6 +100,7 @@ export class DashNavTimeControls extends Component<Props> {
           onChangeFiscalYearStartMonth={this.onChangeFiscalYearStartMonth}
           //Internationalization
           timePickerTitleMessage={t({ id: 'time-picker.title.message', message: 'Absolute time range' })}
+          timeRangeListTitle={t({ id: 'time-picker.list.title', message: 'Recently used absolute ranges' })}
         />
         <RefreshPicker
           onIntervalChanged={this.onChangeRefreshInterval}
