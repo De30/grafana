@@ -25,7 +25,7 @@ import {
 } from '@grafana/data';
 import { getDataSourceSrv, setDataSourceSrv } from '@grafana/runtime';
 import { AxisPlacement, GraphFieldConfig } from '@grafana/ui';
-import { getAllOptionEditors, getAllStandardFieldConfigs } from 'app/core/components/editors/registry';
+import { getAllOptionEditors, getAllStandardFieldConfigs } from 'app/core/components/OptionsUI/registry';
 import { config } from 'app/core/config';
 import {
   DEFAULT_PANEL_SPAN,
@@ -76,7 +76,7 @@ export class DashboardMigrator {
     let i, j, k, n;
     const oldVersion = this.dashboard.schemaVersion;
     const panelUpgrades: PanelSchemeUpgradeHandler[] = [];
-    this.dashboard.schemaVersion = 36;
+    this.dashboard.schemaVersion = 37;
 
     if (oldVersion === this.dashboard.schemaVersion) {
       return;
@@ -761,20 +761,32 @@ export class DashboardMigrator {
             }
 
             for (const target of panel.targets) {
-              if (target.datasource && panelDataSourceWasDefault) {
+              if (target.datasource == null || target.datasource.uid == null) {
+                target.datasource = { ...panel.datasource };
+              }
+
+              if (panelDataSourceWasDefault && target.datasource.uid !== '__expr__') {
                 // We can have situations when default ds changed and the panel level data source is different from the queries
                 // In this case we use the query level data source as source for truth
                 panel.datasource = target.datasource as DataSourceRef;
-              }
-
-              if (target.datasource === null) {
-                target.datasource = getDataSourceRef(defaultDs);
               }
             }
           }
           return panel;
         });
       }
+    }
+
+    if (oldVersion < 37) {
+      panelUpgrades.push((panel: PanelModel) => {
+        if (panel.options?.legend && panel.options.legend.displayMode === 'hidden') {
+          panel.options.legend.displayMode = 'list';
+          panel.options.legend.showLegend = false;
+        } else if (panel.options?.legend) {
+          panel.options.legend = { ...panel.options?.legend, showLegend: true };
+        }
+        return panel;
+      });
     }
 
     if (panelUpgrades.length === 0) {
