@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/gtime"
@@ -65,6 +64,9 @@ func (m *postgresMacroEngine) Interpolate(query *backend.DataQuery, timeRange ba
 	return sql, nil
 }
 
+// Similar to RFC339Nano but with Microsecond resolution
+const pg_timestamp_layout = "2006-01-02T15:04:05.999999Z07:00"
+
 //nolint: gocyclo
 func (m *postgresMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *backend.DataQuery, name string, args []string) (string, error) {
 	switch name {
@@ -83,11 +85,11 @@ func (m *postgresMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *
 			return "", fmt.Errorf("missing time column argument for macro %v", name)
 		}
 
-		return fmt.Sprintf("%s BETWEEN '%s' AND '%s'", args[0], timeRange.From.UTC().Format(time.RFC3339Nano), timeRange.To.UTC().Format(time.RFC3339Nano)), nil
+		return fmt.Sprintf("%s BETWEEN '%s' AND '%s'", args[0], timeRange.From.UTC().Format(pg_timestamp_layout), timeRange.To.UTC().Format(pg_timestamp_layout)), nil
 	case "__timeFrom":
-		return fmt.Sprintf("'%s'", timeRange.From.UTC().Format(time.RFC3339Nano)), nil
+		return fmt.Sprintf("'%s'", timeRange.From.UTC().Format(pg_timestamp_layout)), nil
 	case "__timeTo":
-		return fmt.Sprintf("'%s'", timeRange.To.UTC().Format(time.RFC3339Nano)), nil
+		return fmt.Sprintf("'%s'", timeRange.To.UTC().Format(pg_timestamp_layout)), nil
 	case "__timeGroup":
 		if len(args) < 2 {
 			return "", fmt.Errorf("macro %v needs time column and interval and optional fill value", name)
