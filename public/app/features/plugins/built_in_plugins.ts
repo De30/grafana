@@ -72,6 +72,7 @@ const geomapPanel = async () => await import(/* webpackChunkName: "geomapPanel" 
 const canvasPanel = async () => await import(/* webpackChunkName: "canvasPanel" */ 'app/plugins/panel/canvas/module');
 const iconPanel = async () => await import(/* webpackChunkName: "iconPanel" */ 'app/plugins/panel/icon/module');
 const graphPanel = async () => await import(/* webpackChunkName: "graphPlugin" */ 'app/plugins/panel/graph/module');
+const searchPanel = async () => await import(/* webpackChunkName: "searchPanel" */ 'app/plugins/panel/search/module');
 const heatmapPanel = async () =>
   await import(/* webpackChunkName: "heatmapPanel" */ 'app/plugins/panel/heatmap/module');
 const heatmapPanelOLD = async () =>
@@ -141,6 +142,7 @@ const builtInPlugins: any = {
   'app/plugins/panel/logs/module': logsPanel,
   'app/plugins/panel/traces/module': tracesPanel,
   'app/plugins/panel/welcome/module': welcomeBanner,
+  'app/plugins/panel/search/module': searchPanel,
   'app/plugins/panel/nodeGraph/module': nodeGraph,
   'app/plugins/panel/histogram/module': histogramPanel,
   'app/plugins/panel/alertGroups/module': alertGroupsPanel,
