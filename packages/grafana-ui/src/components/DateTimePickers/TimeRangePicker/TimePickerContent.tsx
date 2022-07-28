@@ -35,6 +35,10 @@ interface Props {
   //Internationalization
   timePickerTitleMessage?: string;
   timeRangeListTitle?: string;
+  timeRangeFormFiscalYear?: string;
+  timeRangeFormFrom?: string;
+  timeRangeFormTo?: string;
+  timeRangeFormApplyButton?: string;
 }
 
 export interface PropsWithScreenSize extends Props {
@@ -134,6 +138,10 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
     showHistory,
     timePickerTitleMessage,
     timeRangeListTitle,
+    timeRangeFormFiscalYear,
+    timeRangeFormFrom,
+    timeRangeFormTo,
+    timeRangeFormApplyButton,
   } = props;
   const theme = useTheme2();
   const styles = getNarrowScreenStyles(theme);
@@ -168,7 +176,16 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
       {!collapsed && (
         <div className={styles.body} id="expanded-timerange">
           <div className={styles.form}>
-            <TimeRangeForm value={value} onApply={onChange} timeZone={timeZone} isFullscreen={false} />
+            <TimeRangeForm
+              value={value}
+              onApply={onChange}
+              timeZone={timeZone}
+              isFullscreen={false}
+              timeRangeFormFiscalYear={timeRangeFormFiscalYear}
+              timeRangeFormFrom={timeRangeFormFrom}
+              timeRangeFormTo={timeRangeFormTo}
+              timeRangeFormApplyButton={timeRangeFormApplyButton}
+            />
           </div>
           {showHistory && (
             <TimeRangeList

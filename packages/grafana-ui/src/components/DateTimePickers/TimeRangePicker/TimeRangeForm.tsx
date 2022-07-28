@@ -31,6 +31,13 @@ interface Props {
   fiscalYearStartMonth?: number;
   roundup?: boolean;
   isReversed?: boolean;
+  //Internationalization
+  // timeRangeFormErrorDefault: string;
+  // timeRangeFormErrorRange: string;
+  timeRangeFormFiscalYear?: string;
+  timeRangeFormFrom?: string;
+  timeRangeFormTo?: string;
+  timeRangeFormApplyButton?: string;
 }
 
 interface InputState {
@@ -45,7 +52,18 @@ const ERROR_MESSAGES = {
 };
 
 export const TimeRangeForm: React.FC<Props> = (props) => {
-  const { value, isFullscreen = false, timeZone, onApply: onApplyFromProps, isReversed, fiscalYearStartMonth } = props;
+  const {
+    value,
+    isFullscreen = false,
+    timeZone,
+    onApply: onApplyFromProps,
+    isReversed,
+    fiscalYearStartMonth,
+    timeRangeFormFiscalYear,
+    timeRangeFormFrom,
+    timeRangeFormTo,
+    timeRangeFormApplyButton,
+  } = props;
   const [fromValue, toValue] = valueToState(value.raw.from, value.raw.to, timeZone);
   const style = useStyles2(getStyles);
 
@@ -97,7 +115,12 @@ export const TimeRangeForm: React.FC<Props> = (props) => {
   const fyTooltip = (
     <div className={style.tooltip}>
       {rangeUtil.isFiscal(value) ? (
-        <Tooltip content={`Fiscal year: ${fiscalYear.from.format('MMM-DD')} - ${fiscalYear.to.format('MMM-DD')}`}>
+        // <Tooltip content={`Fiscal year: ${fiscalYear.from.format('MMM-DD')} - ${fiscalYear.to.format('MMM-DD')}`}>
+        <Tooltip
+          content={`${timeRangeFormFiscalYear}: ${fiscalYear.from.format('MMM-DD')} - ${fiscalYear.to.format(
+            'MMM-DD'
+          )}`}
+        >
           <Icon name="info-circle" />
         </Tooltip>
       ) : null}
@@ -116,7 +139,7 @@ export const TimeRangeForm: React.FC<Props> = (props) => {
   return (
     <div>
       <div className={style.fieldContainer}>
-        <Field label="From" invalid={from.invalid} error={from.errorMessage}>
+        <Field label={timeRangeFormFrom} invalid={from.invalid} error={from.errorMessage}>
           <Input
             onClick={(event) => event.stopPropagation()}
             onChange={(event) => onChange(event.currentTarget.value, to.value)}
@@ -128,7 +151,7 @@ export const TimeRangeForm: React.FC<Props> = (props) => {
         {fyTooltip}
       </div>
       <div className={style.fieldContainer}>
-        <Field label="To" invalid={to.invalid} error={to.errorMessage}>
+        <Field label={timeRangeFormTo} invalid={to.invalid} error={to.errorMessage}>
           <Input
             onClick={(event) => event.stopPropagation()}
             onChange={(event) => onChange(from.value, event.currentTarget.value)}
@@ -140,7 +163,8 @@ export const TimeRangeForm: React.FC<Props> = (props) => {
         {fyTooltip}
       </div>
       <Button data-testid={selectors.components.TimePicker.applyTimeRange} onClick={onApply}>
-        Apply time range
+        {/* Apply time range */}
+        {timeRangeFormApplyButton}
       </Button>
 
       <TimePickerCalendar

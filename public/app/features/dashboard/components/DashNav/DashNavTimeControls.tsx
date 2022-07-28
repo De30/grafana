@@ -101,6 +101,10 @@ export class DashNavTimeControls extends Component<Props> {
           //Internationalization
           timePickerTitleMessage={t({ id: 'time-picker.title.message', message: 'Absolute time range' })}
           timeRangeListTitle={t({ id: 'time-picker.list.title', message: 'Recently used absolute ranges' })}
+          timeRangeFormFiscalYear={t({ id: 'time-picker.form.fiscal-year', message: 'Fiscal year' })}
+          timeRangeFormFrom={t({ id: 'time-picker.form.from', message: 'From' })}
+          timeRangeFormTo={t({ id: 'time-picker.form.to', message: 'To' })}
+          timeRangeFormApplyButton={t({ id: 'time-picker.form.apply-button', message: 'Apply time range' })}
         />
         <RefreshPicker
           onIntervalChanged={this.onChangeRefreshInterval}

@@ -46,6 +46,10 @@ export interface TimeRangePickerProps extends Themeable {
   //Internationalization
   timePickerTitleMessage?: string;
   timeRangeListTitle?: string;
+  timeRangeFormFiscalYear?: string;
+  timeRangeFormFrom?: string;
+  timeRangeFormTo?: string;
+  timeRangeFormApplyButton?: string;
 }
 
 export interface State {
@@ -72,6 +76,10 @@ export function UnthemedTimeRangePicker(props: TimeRangePickerProps): ReactEleme
     widthOverride,
     timePickerTitleMessage,
     timeRangeListTitle,
+    timeRangeFormFiscalYear,
+    timeRangeFormFrom,
+    timeRangeFormTo,
+    timeRangeFormApplyButton,
   } = props;
 
   const onChange = (timeRange: TimeRange) => {
@@ -140,6 +148,10 @@ export function UnthemedTimeRangePicker(props: TimeRangePickerProps): ReactEleme
               //Internationalization
               timePickerTitleMessage={timePickerTitleMessage}
               timeRangeListTitle={timeRangeListTitle}
+              timeRangeFormFiscalYear={timeRangeFormFiscalYear}
+              timeRangeFormFrom={timeRangeFormFrom}
+              timeRangeFormTo={timeRangeFormTo}
+              timeRangeFormApplyButton={timeRangeFormApplyButton}
             />
           </section>
         </FocusScope>
