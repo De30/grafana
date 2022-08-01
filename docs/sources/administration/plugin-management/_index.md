@@ -51,7 +51,7 @@ By default, Viewers, Editors and Admins have access to all App Plugins that thei
 
 > **Note:** Revoking this RBAC role from some users, will prevent them from accessing app plugins. But granting this RBAC role to users will only allow them to see app plugins their organization role allows them to see.
 
-To prevent users from seeing an app plugin, refer to [this permissions scenarios]({{< relref "../roles-and-permissions/access-control/plan-rbac-rollout-strategy#prevent-viewers-from-accessing-an-app-plugin" >}}).
+To prevent users from seeing an app plugin, refer to [permissions scenarios]({{< relref "../roles-and-permissions/access-control/plan-rbac-rollout-strategy#prevent-viewers-from-accessing-an-app-plugin" >}}).
 
 ## Plugin catalog
 
@@ -86,7 +86,7 @@ Currently, there are two entry points to the Plugin catalog.
 
 To browse for available plugins:
 
-1. In Grafana, [navigate to the Plugin catalog](#plugin-catalog-entry) to view installed plugins.
+1. In Grafana, [navigate to the Plugin catalog](({{< ref "#plugin-catalog" >}})) to view installed plugins.
 1. Click the **All** filter to browse all available plugins.
 1. Click the **Data sources**, **Panels**, or **Applications** buttons to filter by plugin type.
 
@@ -96,7 +96,7 @@ To browse for available plugins:
 
 To install a plugin:
 
-1. In Grafana, [navigate to the Plugin catalog](#plugin-catalog-entry) to view installed plugins.
+1. In Grafana, [navigate to the Plugin catalog](({{< ref "#plugin-catalog" >}})) to view installed plugins.
 1. Browse and find a plugin.
 1. Click on the plugin logo.
 1. Click **Install**.
@@ -109,7 +109,7 @@ When the update is complete, you see a confirmation message that the installatio
 
 To update a plugin:
 
-1. In Grafana, [navigate to the Plugin catalog](#plugin-catalog-entry) to view installed plugins.
+1. In Grafana, [navigate to the Plugin catalog](({{< ref "#plugin-catalog" >}})) to view installed plugins.
 1. Click on the plugin logo.
 1. Click **Update**.
 
@@ -121,7 +121,7 @@ When the update is complete, you see a confirmation message that the update was 
 
 To uninstall a plugin:
 
-1. In Grafana, [navigate to the Plugin catalog](#plugin-catalog-entry) to view installed plugins.
+1. In Grafana, [navigate to the Plugin catalog](({{< ref "#plugin-catalog" >}})) to view installed plugins.
 1. Click on the plugin logo.
 1. Click **Uninstall**.
 
@@ -148,7 +148,7 @@ If you are logged in to Grafana Cloud when you add a plugin, log out and back in
 
 Follow the instructions on the Install tab. You can either install the plugin with a Grafana CLI command or by downloading and uncompress a .zip file into the Grafana plugins directory. We recommend using Grafana CLI in most instances. The .zip option is available if your Grafana server does not have access to the internet.
 
-For more information about Grafana CLI plugin commands, refer to [Plugin commands]({{< relref "../../cli/#plugins-commands" >}}).
+For more information about Grafana CLI plugin commands, refer to [Plugin commands]({{< relref "../../../cli/#plugins-commands" >}}).
 
 As of Grafana v8.0, a plugin catalog app was introduced in order to make managing plugins easier. For more information, refer to [Plugin catalog]({{< ref "#plugin-catalog" >}}).
 
