@@ -32,6 +32,9 @@ interface Props {
   isReversed?: boolean;
   hideQuickRanges?: boolean;
   widthOverride?: number;
+  //Internationalization
+  timePickerTitleMessage?: string;
+  timePickerTitleHeaderMessage?: string;
 }
 
 export interface PropsWithScreenSize extends Props {
@@ -122,7 +125,16 @@ export const TimePickerContent: React.FC<Props> = (props) => {
 };
 
 const NarrowScreenForm: React.FC<FormProps> = (props) => {
-  const { value, hideQuickRanges, onChange, timeZone, historyOptions = [], showHistory } = props;
+  const {
+    value,
+    hideQuickRanges,
+    onChange,
+    timeZone,
+    historyOptions = [],
+    showHistory,
+    timePickerTitleMessage,
+    timePickerTitleHeaderMessage,
+  } = props;
   const theme = useTheme2();
   const styles = getNarrowScreenStyles(theme);
   const isAbsolute = isDateTime(value.raw.from) || isDateTime(value.raw.to);
@@ -148,14 +160,20 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
           aria-expanded={!collapsed}
           aria-controls="expanded-timerange"
         >
-          <TimePickerTitle>Absolute time range</TimePickerTitle>
+          <TimePickerTitle>{timePickerTitleMessage || 'Absolute time range'}</TimePickerTitle>
           {!hideQuickRanges && <Icon name={!collapsed ? 'angle-up' : 'angle-down'} />}
         </button>
       </div>
       {!collapsed && (
         <div className={styles.body} id="expanded-timerange">
           <div className={styles.form}>
-            <TimeRangeForm value={value} onApply={onChange} timeZone={timeZone} isFullscreen={false} />
+            <TimeRangeForm
+              value={value}
+              onApply={onChange}
+              timeZone={timeZone}
+              isFullscreen={false}
+              timePickerTitleHeaderMessage={timePickerTitleHeaderMessage}
+            />
           </div>
           {showHistory && (
             <TimeRangeList
@@ -172,7 +190,16 @@ const NarrowScreenForm: React.FC<FormProps> = (props) => {
 };
 
 const FullScreenForm: React.FC<FormProps> = (props) => {
-  const { onChange, value, timeZone, fiscalYearStartMonth, isReversed, historyOptions } = props;
+  const {
+    onChange,
+    value,
+    timeZone,
+    fiscalYearStartMonth,
+    isReversed,
+    historyOptions,
+    timePickerTitleMessage,
+    timePickerTitleHeaderMessage,
+  } = props;
   const theme = useTheme2();
   const styles = getFullScreenStyles(theme, props.hideQuickRanges);
   const onChangeTimeOption = (timeOption: TimeOption) => {
@@ -183,7 +210,7 @@ const FullScreenForm: React.FC<FormProps> = (props) => {
     <>
       <div className={styles.container}>
         <div className={styles.title} data-testid={selectors.components.TimePicker.absoluteTimeRangeTitle}>
-          <TimePickerTitle>Absolute time range</TimePickerTitle>
+          <TimePickerTitle>{timePickerTitleMessage || 'Absolute time range'}</TimePickerTitle>
         </div>
         <TimeRangeForm
           value={value}
@@ -192,6 +219,7 @@ const FullScreenForm: React.FC<FormProps> = (props) => {
           onApply={onChange}
           isFullscreen={true}
           isReversed={isReversed}
+          timePickerTitleHeaderMessage={timePickerTitleHeaderMessage}
         />
       </div>
       {props.showHistory && (
