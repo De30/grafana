@@ -195,7 +195,7 @@ function getLineFilter(expr: string, node: SyntaxNode): { operation?: QueryBuild
     '|=': '__line_contains',
     '!=': '__line_contains_not',
     '|~': '__line_matches_regex',
-    '!~': '"__line_matches_regex"_not',
+    '!~': '__line_matches_regex_not',
   };
   const filter = getString(expr, node.getChild('Filter'));
   const filterExpr = handleQuotes(getString(expr, node.getChild('String')));
