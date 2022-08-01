@@ -14,4 +14,4 @@ export * from './slate-plugins';
 export * from './schema';
 
 // This file is temp for module federation PoC.
-export * from './extras';
+export * from './internal';
