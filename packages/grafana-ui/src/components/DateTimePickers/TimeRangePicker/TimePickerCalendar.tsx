@@ -71,6 +71,8 @@ export interface TimePickerCalendarProps {
   isFullscreen: boolean;
   timeZone?: TimeZone;
   isReversed?: boolean;
+  //Internationalization
+  timePickerTitleHeaderMessage?: string;
 }
 
 const stopPropagation = (event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation();

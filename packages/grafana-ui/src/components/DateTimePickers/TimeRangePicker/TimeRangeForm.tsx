@@ -31,6 +31,7 @@ interface Props {
   fiscalYearStartMonth?: number;
   roundup?: boolean;
   isReversed?: boolean;
+  timePickerTitleHeaderMessage?: string;
 }
 
 interface InputState {
@@ -45,7 +46,15 @@ const ERROR_MESSAGES = {
 };
 
 export const TimeRangeForm: React.FC<Props> = (props) => {
-  const { value, isFullscreen = false, timeZone, onApply: onApplyFromProps, isReversed, fiscalYearStartMonth } = props;
+  const {
+    value,
+    isFullscreen = false,
+    timeZone,
+    onApply: onApplyFromProps,
+    isReversed,
+    fiscalYearStartMonth,
+    timePickerTitleHeaderMessage,
+  } = props;
   const [fromValue, toValue] = valueToState(value.raw.from, value.raw.to, timeZone);
   const style = useStyles2(getStyles);
 
@@ -153,6 +162,7 @@ export const TimeRangeForm: React.FC<Props> = (props) => {
         onChange={onChange}
         timeZone={timeZone}
         isReversed={isReversed}
+        timePickerTitleHeaderMessage={timePickerTitleHeaderMessage}
       />
     </div>
   );
