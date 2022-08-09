@@ -3,7 +3,7 @@ import React from 'react';
 
 import { DataSourcePluginMeta, GrafanaTheme2 } from '@grafana/data';
 import { selectors as e2eSelectors } from '@grafana/e2e-selectors';
-import { Card, LinkButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
+import { Badge, Card, LinkButton, PluginSignatureBadge, useStyles2 } from '@grafana/ui';
 
 export type Props = {
   dataSourcePlugin: DataSourcePluginMeta;
@@ -38,6 +38,7 @@ export function DataSourceTypeCard({ onClick, dataSourcePlugin }: Props) {
       {!isPhantom && (
         <Card.Meta className={styles.meta}>
           <PluginSignatureBadge status={dataSourcePlugin.signature} />
+          {dataSourcePlugin.alerting && <Badge color="green" icon="check-circle" text="Alerting supported" />}
         </Card.Meta>
       )}
 

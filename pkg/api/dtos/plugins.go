@@ -42,6 +42,7 @@ type PluginListItem struct {
 	Signature     plugins.SignatureStatus `json:"signature"`
 	SignatureType plugins.SignatureType   `json:"signatureType"`
 	SignatureOrg  string                  `json:"signatureOrg"`
+	Alerting      bool                    `json:"alerting"`
 }
 
 type PluginList []PluginListItem

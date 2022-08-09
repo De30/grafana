@@ -80,6 +80,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 			Signature:     pluginDef.Signature,
 			SignatureType: pluginDef.SignatureType,
 			SignatureOrg:  pluginDef.SignatureOrg,
+			Alerting:      pluginDef.JSONData.Alerting,
 		}
 
 		update, exists := hs.pluginsUpdateChecker.HasUpdate(c.Req.Context(), pluginDef.ID)
