@@ -15,6 +15,7 @@ export type LokiVisualQueryBinary = VisualQueryBinary<LokiVisualQuery>;
 export interface LokiQueryPattern {
   name: string;
   operations: QueryBuilderOperation[];
+  type?: 'logs' | 'metric';
 }
 
 export enum LokiVisualQueryOperationCategory {

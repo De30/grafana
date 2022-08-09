@@ -239,6 +239,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
       if (QueryEditor) {
         return (
           <QueryEditor
+            onAddQuery={this.props.onAddQuery}
             key={datasource?.name}
             query={query}
             datasource={datasource}

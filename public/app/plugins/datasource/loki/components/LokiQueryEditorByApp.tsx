@@ -11,6 +11,7 @@ import { LokiQueryEditorForAlerting } from './LokiQueryEditorForAlerting';
 import { LokiQueryEditorProps } from './types';
 
 export function LokiQueryEditorByApp(props: LokiQueryEditorProps) {
+  console.log(props);
   const { app } = props;
 
   switch (app) {
