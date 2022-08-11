@@ -134,7 +134,7 @@ func (f *FolderServiceImpl) GetFolderByTitle(ctx context.Context, user *user.Sig
 	return dashFolder, nil
 }
 
-func (f *FolderServiceImpl) CreateFolder(ctx context.Context, user *user.SignedInUser, orgID int64, title, uid string) (*models.Folder, error) {
+func (f *FolderServiceImpl) CreateFolder(ctx context.Context, usr *user.SignedInUser, orgID int64, title, uid string) (*models.Folder, error) {
 	dashFolder := models.NewDashboardFolder(title)
 	dashFolder.OrgId = orgID
 
@@ -144,7 +144,7 @@ func (f *FolderServiceImpl) CreateFolder(ctx context.Context, user *user.SignedI
 	}
 
 	dashFolder.SetUid(trimmedUID)
-	userID := user.UserId
+	userID := usr.UserId
 	if userID == 0 {
 		userID = -1
 	}
@@ -155,7 +155,7 @@ func (f *FolderServiceImpl) CreateFolder(ctx context.Context, user *user.SignedI
 	dto := &dashboards.SaveDashboardDTO{
 		Dashboard: dashFolder,
 		OrgId:     orgID,
-		User:      user,
+		User:      usr,
 	}
 
 	saveDashboardCmd, err := f.dashboardService.BuildSaveDashboardCommand(ctx, dto, false, false)
@@ -177,7 +177,7 @@ func (f *FolderServiceImpl) CreateFolder(ctx context.Context, user *user.SignedI
 	var permissionErr error
 	if !accesscontrol.IsDisabled(f.cfg) {
 		var permissions []accesscontrol.SetResourcePermissionCommand
-		if user.IsRealUser() && !user.IsAnonymous {
+		if usr.IsRealUser() && !usr.IsAnonymous {
 			permissions = append(permissions, accesscontrol.SetResourcePermissionCommand{
 				UserID: userID, Permission: models.PERMISSION_ADMIN.String(),
 			})
@@ -189,7 +189,7 @@ func (f *FolderServiceImpl) CreateFolder(ctx context.Context, user *user.SignedI
 		}...)
 
 		_, permissionErr = f.permissions.SetPermissions(ctx, orgID, folder.Uid, permissions...)
-	} else if f.cfg.EditorsCanAdmin && user.IsRealUser() && !user.IsAnonymous {
+	} else if f.cfg.EditorsCanAdmin && usr.IsRealUser() && !usr.IsAnonymous {
 		permissionErr = f.MakeUserAdmin(ctx, orgID, userID, folder.Id, true)
 	}
 

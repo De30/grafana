@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/login"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // IConnection is interface for LDAP connection manipulation
@@ -422,8 +423,8 @@ func (server *Server) getSearchRequest(
 }
 
 // buildGrafanaUser extracts info from UserInfo model to ExternalUserInfo
-func (server *Server) buildGrafanaUser(user *ldap.Entry) (*models.ExternalUserInfo, error) {
-	memberOf, err := server.getMemberOf(user)
+func (server *Server) buildGrafanaUser(u *ldap.Entry) (*models.ExternalUserInfo, error) {
+	memberOf, err := server.getMemberOf(u)
 	if err != nil {
 		return nil, err
 	}
@@ -431,16 +432,16 @@ func (server *Server) buildGrafanaUser(user *ldap.Entry) (*models.ExternalUserIn
 	attrs := server.Config.Attr
 	extUser := &models.ExternalUserInfo{
 		AuthModule: login.LDAPAuthModule,
-		AuthId:     user.DN,
+		AuthId:     u.DN,
 		Name: strings.TrimSpace(
 			fmt.Sprintf(
 				"%s %s",
-				getAttribute(attrs.Name, user),
-				getAttribute(attrs.Surname, user),
+				getAttribute(attrs.Name, u),
+				getAttribute(attrs.Surname, u),
 			),
 		),
-		Login:    getAttribute(attrs.Username, user),
-		Email:    getAttribute(attrs.Email, user),
+		Login:    getAttribute(attrs.Username, u),
+		Email:    getAttribute(attrs.Email, u),
 		Groups:   memberOf,
 		OrgRoles: map[int64]user.RoleType{},
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -141,8 +142,8 @@ func (hs *HTTPServer) AddOrgInvite(c *models.ReqContext) response.Response {
 
 func (hs *HTTPServer) inviteExistingUserToOrg(c *models.ReqContext, user *user.User, inviteDto *dtos.AddInviteForm) response.Response {
 	// user exists, add org role
-	createOrgUserCmd := models.AddOrgUserCommand{OrgId: c.OrgId, UserId: user.ID, Role: inviteDto.Role}
-	if err := hs.SQLStore.AddOrgUser(c.Req.Context(), &createOrgUserCmd); err != nil {
+	createOrgUserCmd := org.AddOrgUserCommand{OrgId: c.OrgId, UserId: user.ID, Role: inviteDto.Role}
+	if err := hs.orgService.AddOrgUser(c.Req.Context(), &createOrgUserCmd); err != nil {
 		if errors.Is(err, models.ErrOrgUserAlreadyAdded) {
 			return response.Error(412, fmt.Sprintf("User %s is already added to organization", inviteDto.LoginOrEmail), err)
 		}
@@ -287,8 +288,8 @@ func (hs *HTTPServer) updateTempUserStatus(ctx context.Context, code string, sta
 
 func (hs *HTTPServer) applyUserInvite(ctx context.Context, user *user.User, invite *models.TempUserDTO, setActive bool) (bool, response.Response) {
 	// add to org
-	addOrgUserCmd := models.AddOrgUserCommand{OrgId: invite.OrgId, UserId: user.ID, Role: invite.Role}
-	if err := hs.SQLStore.AddOrgUser(ctx, &addOrgUserCmd); err != nil {
+	addOrgUserCmd := org.AddOrgUserCommand{OrgId: invite.OrgId, UserId: user.ID, Role: invite.Role}
+	if err := hs.orgService.AddOrgUser(ctx, &addOrgUserCmd); err != nil {
 		if !errors.Is(err, models.ErrOrgUserAlreadyAdded) {
 			return false, response.Error(500, "Error while trying to create org user", err)
 		}
@@ -301,7 +302,7 @@ func (hs *HTTPServer) applyUserInvite(ctx context.Context, user *user.User, invi
 
 	if setActive {
 		// set org to active
-		if err := hs.SQLStore.SetUsingOrg(ctx, &models.SetUsingOrgCommand{OrgId: invite.OrgId, UserId: user.ID}); err != nil {
+		if err := hs.orgService.SetUsingOrg(ctx, &org.SetUsingOrgCommand{OrgId: invite.OrgId, UserId: user.ID}); err != nil {
 			return false, response.Error(500, "Failed to set org as active", err)
 		}
 	}

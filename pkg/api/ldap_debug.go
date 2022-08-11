@@ -14,7 +14,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/ldap"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/multildap"
-	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -66,17 +66,17 @@ type LDAPServerDTO struct {
 }
 
 // FetchOrgs fetches the organization(s) information by executing a single query to the database. Then, populating the DTO with the information retrieved.
-func (user *LDAPUserDTO) FetchOrgs(ctx context.Context, sqlstore sqlstore.Store) error {
+func (user *LDAPUserDTO) FetchOrgs(ctx context.Context, orgService org.Service) error {
 	orgIds := []int64{}
 
 	for _, or := range user.OrgRoles {
 		orgIds = append(orgIds, or.OrgId)
 	}
 
-	q := &models.SearchOrgsQuery{}
+	q := &org.SearchOrgsQuery{}
 	q.Ids = orgIds
 
-	if err := sqlstore.SearchOrgs(ctx, q); err != nil {
+	if err := orgService.SearchOrgs(ctx, q); err != nil {
 		return err
 	}
 
@@ -309,26 +309,26 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "Validation error. You must specify an username", nil)
 	}
 
-	user, serverConfig, err := multiLDAP.User(username)
-	if user == nil || err != nil {
+	usr, serverConfig, err := multiLDAP.User(username)
+	if usr == nil || err != nil {
 		return response.Error(http.StatusNotFound, "No user was found in the LDAP server(s) with that username", err)
 	}
 
-	ldapLogger.Debug("user found", "user", user)
+	ldapLogger.Debug("user found", "user", usr)
 
-	name, surname := splitName(user.Name)
+	name, surname := splitName(usr.Name)
 
 	u := &LDAPUserDTO{
 		Name:           &LDAPAttribute{serverConfig.Attr.Name, name},
 		Surname:        &LDAPAttribute{serverConfig.Attr.Surname, surname},
-		Email:          &LDAPAttribute{serverConfig.Attr.Email, user.Email},
-		Username:       &LDAPAttribute{serverConfig.Attr.Username, user.Login},
-		IsGrafanaAdmin: user.IsGrafanaAdmin,
-		IsDisabled:     user.IsDisabled,
+		Email:          &LDAPAttribute{serverConfig.Attr.Email, usr.Email},
+		Username:       &LDAPAttribute{serverConfig.Attr.Username, usr.Login},
+		IsGrafanaAdmin: usr.IsGrafanaAdmin,
+		IsDisabled:     usr.IsDisabled,
 	}
 
 	unmappedUserGroups := map[string]struct{}{}
-	for _, userGroup := range user.Groups {
+	for _, userGroup := range usr.Groups {
 		unmappedUserGroups[strings.ToLower(userGroup)] = struct{}{}
 	}
 
@@ -340,7 +340,7 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 			continue
 		}
 
-		if ldap.IsMemberOf(user.Groups, group.GroupDN) {
+		if ldap.IsMemberOf(usr.Groups, group.GroupDN) {
 			orgRolesMap[group.OrgId] = group.OrgRole
 			u.OrgRoles = append(u.OrgRoles, LDAPRoleDTO{GroupDN: group.GroupDN,
 				OrgId: group.OrgId, OrgRole: group.OrgRole})
@@ -354,11 +354,11 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	}
 
 	ldapLogger.Debug("mapping org roles", "orgsRoles", u.OrgRoles)
-	if err := u.FetchOrgs(c.Req.Context(), hs.SQLStore); err != nil {
+	if err := u.FetchOrgs(c.Req.Context(), hs.orgService); err != nil {
 		return response.Error(http.StatusBadRequest, "An organization was not found - Please verify your LDAP configuration", err)
 	}
 
-	u.Teams, err = hs.ldapGroups.GetTeams(user.Groups, orgIDs)
+	u.Teams, err = hs.ldapGroups.GetTeams(usr.Groups, orgIDs)
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "Unable to find the teams for this user", err)
 	}

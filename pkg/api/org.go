@@ -87,9 +87,9 @@ func (hs *HTTPServer) GetOrgByName(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) getOrgHelper(ctx context.Context, orgID int64) response.Response {
-	query := models.GetOrgByIdQuery{Id: orgID}
+	query := org.GetOrgByIdQuery{Id: orgID}
 
-	if err := hs.SQLStore.GetOrgById(ctx, &query); err != nil {
+	if err := hs.orgService.GetOrgById(ctx, &query); err != nil {
 		if errors.Is(err, models.ErrOrgNotFound) {
 			return response.Error(http.StatusNotFound, "Organization not found", err)
 		}
@@ -98,7 +98,7 @@ func (hs *HTTPServer) getOrgHelper(ctx context.Context, orgID int64) response.Re
 
 	org := query.Result
 	result := models.OrgDetailsDTO{
-		Id:   org.Id,
+		Id:   org.ID,
 		Name: org.Name,
 		Address: models.Address{
 			Address1: org.Address1,
@@ -196,8 +196,8 @@ func (hs *HTTPServer) UpdateOrg(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) updateOrgHelper(ctx context.Context, form dtos.UpdateOrgForm, orgID int64) response.Response {
-	cmd := models.UpdateOrgCommand{Name: form.Name, OrgId: orgID}
-	if err := hs.SQLStore.UpdateOrg(ctx, &cmd); err != nil {
+	cmd := org.UpdateOrgCommand{Name: form.Name, OrgId: orgID}
+	if err := hs.orgService.UpdateOrg(ctx, &cmd); err != nil {
 		if errors.Is(err, models.ErrOrgNameTaken) {
 			return response.Error(http.StatusBadRequest, "Organization name taken", err)
 		}
@@ -248,9 +248,9 @@ func (hs *HTTPServer) UpdateOrgAddress(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) updateOrgAddressHelper(ctx context.Context, form dtos.UpdateOrgAddressForm, orgID int64) response.Response {
-	cmd := models.UpdateOrgAddressCommand{
+	cmd := org.UpdateOrgAddressCommand{
 		OrgId: orgID,
-		Address: models.Address{
+		Address: org.Address{
 			Address1: form.Address1,
 			Address2: form.Address2,
 			City:     form.City,
@@ -260,7 +260,7 @@ func (hs *HTTPServer) updateOrgAddressHelper(ctx context.Context, form dtos.Upda
 		},
 	}
 
-	if err := hs.SQLStore.UpdateOrgAddress(ctx, &cmd); err != nil {
+	if err := hs.orgService.UpdateOrgAddress(ctx, &cmd); err != nil {
 		return response.Error(http.StatusInternalServerError, "Failed to update org address", err)
 	}
 
@@ -291,8 +291,8 @@ func (hs *HTTPServer) DeleteOrgByID(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "Can not delete org for current user", nil)
 	}
 
-	if err := hs.SQLStore.DeleteOrg(c.Req.Context(), &models.DeleteOrgCommand{Id: orgID}); err != nil {
-		if errors.Is(err, models.ErrOrgNotFound) {
+	if err := hs.orgService.DeleteOrg(c.Req.Context(), &org.DeleteOrgCommand{Id: orgID}); err != nil {
+		if errors.Is(err, org.ErrOrgNotFound) {
 			return response.Error(http.StatusNotFound, "Failed to delete organization. ID not found", nil)
 		}
 		return response.Error(http.StatusInternalServerError, "Failed to update organization", err)
@@ -321,14 +321,14 @@ func (hs *HTTPServer) SearchOrgs(c *models.ReqContext) response.Response {
 
 	page := c.QueryInt("page")
 
-	query := models.SearchOrgsQuery{
+	query := org.SearchOrgsQuery{
 		Query: c.Query("query"),
 		Name:  c.Query("name"),
 		Page:  page,
 		Limit: perPage,
 	}
 
-	if err := hs.SQLStore.SearchOrgs(c.Req.Context(), &query); err != nil {
+	if err := hs.orgService.SearchOrgs(c.Req.Context(), &query); err != nil {
 		return response.Error(http.StatusInternalServerError, "Failed to search orgs", err)
 	}
 

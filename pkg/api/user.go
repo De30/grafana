@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/login"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -171,9 +172,9 @@ func (hs *HTTPServer) UpdateUserActiveOrg(c *models.ReqContext) response.Respons
 		return response.Error(401, "Not a valid organization", nil)
 	}
 
-	cmd := models.SetUsingOrgCommand{UserId: userID, OrgId: orgID}
+	cmd := org.SetUsingOrgCommand{UserId: userID, OrgId: orgID}
 
-	if err := hs.SQLStore.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
+	if err := hs.orgService.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to change active organization", err)
 	}
 
@@ -285,9 +286,9 @@ func (hs *HTTPServer) GetUserOrgList(c *models.ReqContext) response.Response {
 }
 
 func (hs *HTTPServer) getUserOrgList(ctx context.Context, userID int64) response.Response {
-	query := models.GetUserOrgListQuery{UserId: userID}
+	query := org.GetUserOrgListQuery{UserId: userID}
 
-	if err := hs.SQLStore.GetUserOrgList(ctx, &query); err != nil {
+	if err := hs.orgService.GetUserOrgList(ctx, &query); err != nil {
 		return response.Error(500, "Failed to get user organizations", err)
 	}
 
@@ -295,9 +296,9 @@ func (hs *HTTPServer) getUserOrgList(ctx context.Context, userID int64) response
 }
 
 func (hs *HTTPServer) validateUsingOrg(ctx context.Context, userID int64, orgID int64) bool {
-	query := models.GetUserOrgListQuery{UserId: userID}
+	query := org.GetUserOrgListQuery{UserId: userID}
 
-	if err := hs.SQLStore.GetUserOrgList(ctx, &query); err != nil {
+	if err := hs.orgService.GetUserOrgList(ctx, &query); err != nil {
 		return false
 	}
 
@@ -334,9 +335,9 @@ func (hs *HTTPServer) UserSetUsingOrg(c *models.ReqContext) response.Response {
 		return response.Error(401, "Not a valid organization", nil)
 	}
 
-	cmd := models.SetUsingOrgCommand{UserId: c.UserId, OrgId: orgID}
+	cmd := org.SetUsingOrgCommand{UserId: c.UserId, OrgId: orgID}
 
-	if err := hs.SQLStore.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
+	if err := hs.orgService.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to change active organization", err)
 	}
 
@@ -355,9 +356,9 @@ func (hs *HTTPServer) ChangeActiveOrgAndRedirectToHome(c *models.ReqContext) {
 		hs.NotFoundHandler(c)
 	}
 
-	cmd := models.SetUsingOrgCommand{UserId: c.UserId, OrgId: orgID}
+	cmd := org.SetUsingOrgCommand{UserId: c.UserId, OrgId: orgID}
 
-	if err := hs.SQLStore.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
+	if err := hs.orgService.SetUsingOrg(c.Req.Context(), &cmd); err != nil {
 		hs.NotFoundHandler(c)
 	}
 

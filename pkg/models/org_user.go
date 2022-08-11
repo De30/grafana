@@ -33,17 +33,6 @@ type RemoveOrgUserCommand struct {
 	UserWasDeleted           bool
 }
 
-type AddOrgUserCommand struct {
-	LoginOrEmail string        `json:"loginOrEmail" binding:"Required"`
-	Role         user.RoleType `json:"role" binding:"Required"`
-
-	OrgId  int64 `json:"-"`
-	UserId int64 `json:"-"`
-
-	// internal use: avoid adding service accounts to orgs via user routes
-	AllowAddingServiceAccount bool `json:"-"`
-}
-
 type UpdateOrgUserCommand struct {
 	Role user.RoleType `json:"role" binding:"Required"`
 

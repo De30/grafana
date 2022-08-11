@@ -25,20 +25,20 @@ func (l *LibraryElementService) requireSupportedElementKind(kindAsInt int64) err
 	}
 }
 
-func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(user.RoleEditor) {
+func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Context, usr *user.SignedInUser, folderID int64) error {
+	if isGeneralFolder(folderID) && usr.HasRole(user.RoleEditor) {
 		return nil
 	}
 
-	if isGeneralFolder(folderID) && user.HasRole(user.RoleViewer) {
+	if isGeneralFolder(folderID) && usr.HasRole(user.RoleViewer) {
 		return dashboards.ErrFolderAccessDenied
 	}
-	folder, err := l.folderService.GetFolderByID(ctx, user, folderID, user.OrgId)
+	folder, err := l.folderService.GetFolderByID(ctx, usr, folderID, usr.OrgId)
 	if err != nil {
 		return err
 	}
 
-	g := guardian.New(ctx, folder.Id, user.OrgId, user)
+	g := guardian.New(ctx, folder.Id, usr.OrgId, usr)
 
 	canEdit, err := g.CanEdit()
 	if err != nil {
@@ -51,17 +51,17 @@ func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Conte
 	return nil
 }
 
-func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(user.RoleViewer) {
+func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Context, usr *user.SignedInUser, folderID int64) error {
+	if isGeneralFolder(folderID) && usr.HasRole(user.RoleViewer) {
 		return nil
 	}
 
-	folder, err := l.folderService.GetFolderByID(ctx, user, folderID, user.OrgId)
+	folder, err := l.folderService.GetFolderByID(ctx, usr, folderID, usr.OrgId)
 	if err != nil {
 		return err
 	}
 
-	g := guardian.New(ctx, folder.Id, user.OrgId, user)
+	g := guardian.New(ctx, folder.Id, usr.OrgId, usr)
 
 	canView, err := g.CanView()
 	if err != nil {
