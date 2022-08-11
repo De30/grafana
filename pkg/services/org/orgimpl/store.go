@@ -95,9 +95,9 @@ func (ss *sqlStore) DeleteUserFromAll(ctx context.Context, userID int64) error {
 	})
 }
 
-func (ss *sqlStore) CreateOrg(ctx context.Context, userID int64) error {
+func (ss *sqlStore) CreateOrg(ctx context.Context, cmd *org.CreateOrgCommand) error {
 	return ss.db.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
-		if _, err := sess.Exec("DELETE FROM org_user WHERE user_id = ?", userID); err != nil {
+		if _, err := sess.Exec("DELETE FROM org_user WHERE user_id = ?", cmd.UserID); err != nil {
 			return err
 		}
 		return nil

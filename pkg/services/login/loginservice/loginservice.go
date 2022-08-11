@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/login"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -19,12 +20,14 @@ var (
 func ProvideService(
 	sqlStore sqlstore.Store,
 	userService user.Service,
+	orgService org.Service,
 	quotaService quota.Service,
 	authInfoService login.AuthInfoService,
 ) *Implementation {
 	s := &Implementation{
 		SQLStore:        sqlStore,
 		userService:     userService,
+		orgService:      orgService,
 		QuotaService:    quotaService,
 		AuthInfoService: authInfoService,
 	}
@@ -34,6 +37,7 @@ func ProvideService(
 type Implementation struct {
 	SQLStore        sqlstore.Store
 	userService     user.Service
+	orgService      org.Service
 	AuthInfoService login.AuthInfoService
 	QuotaService    quota.Service
 	TeamSync        login.TeamSyncFunc
@@ -263,8 +267,8 @@ func (ls *Implementation) syncOrgRoles(ctx context.Context, user *user.User, ext
 		return nil
 	}
 
-	orgsQuery := &models.GetUserOrgListQuery{UserId: user.ID}
-	if err := ls.SQLStore.GetUserOrgList(ctx, orgsQuery); err != nil {
+	orgsQuery := &org.GetUserOrgListQuery{UserId: user.ID}
+	if err := ls.orgService.GetUserOrgList(ctx, orgsQuery); err != nil {
 		return err
 	}
 
@@ -272,16 +276,16 @@ func (ls *Implementation) syncOrgRoles(ctx context.Context, user *user.User, ext
 	deleteOrgIds := []int64{}
 
 	// update existing org roles
-	for _, org := range orgsQuery.Result {
-		handledOrgIds[org.OrgId] = true
+	for _, og := range orgsQuery.Result {
+		handledOrgIds[og.OrgId] = true
 
-		extRole := extUser.OrgRoles[org.OrgId]
+		extRole := extUser.OrgRoles[og.OrgId]
 		if extRole == "" {
-			deleteOrgIds = append(deleteOrgIds, org.OrgId)
-		} else if extRole != org.Role {
+			deleteOrgIds = append(deleteOrgIds, og.OrgId)
+		} else if extRole != og.Role {
 			// update role
-			cmd := &models.UpdateOrgUserCommand{OrgId: org.OrgId, UserId: user.ID, Role: extRole}
-			if err := ls.SQLStore.UpdateOrgUser(ctx, cmd); err != nil {
+			cmd := &org.UpdateOrgUserCommand{OrgId: og.OrgId, UserId: user.ID, Role: extRole}
+			if err := ls.orgService.UpdateOrgUser(ctx, cmd); err != nil {
 				return err
 			}
 		}
@@ -294,8 +298,8 @@ func (ls *Implementation) syncOrgRoles(ctx context.Context, user *user.User, ext
 		}
 
 		// add role
-		cmd := &models.AddOrgUserCommand{UserId: user.ID, Role: orgRole, OrgId: orgId}
-		err := ls.SQLStore.AddOrgUser(ctx, cmd)
+		cmd := &org.AddOrgUserCommand{UserId: user.ID, Role: orgRole, OrgId: orgId}
+		err := ls.orgService.AddOrgUser(ctx, cmd)
 		if err != nil && !errors.Is(err, models.ErrOrgNotFound) {
 			return err
 		}
@@ -305,8 +309,8 @@ func (ls *Implementation) syncOrgRoles(ctx context.Context, user *user.User, ext
 	for _, orgId := range deleteOrgIds {
 		logger.Debug("Removing user's organization membership as part of syncing with OAuth login",
 			"userId", user.ID, "orgId", orgId)
-		cmd := &models.RemoveOrgUserCommand{OrgId: orgId, UserId: user.ID}
-		if err := ls.SQLStore.RemoveOrgUser(ctx, cmd); err != nil {
+		cmd := &org.RemoveOrgUserCommand{OrgId: orgId, UserId: user.ID}
+		if err := ls.orgService.RemoveOrgUser(ctx, cmd); err != nil {
 			if errors.Is(err, models.ErrLastOrgAdmin) {
 				logger.Error(err.Error(), "userId", cmd.UserId, "orgId", cmd.OrgId)
 				continue
@@ -323,7 +327,7 @@ func (ls *Implementation) syncOrgRoles(ctx context.Context, user *user.User, ext
 			break
 		}
 
-		return ls.SQLStore.SetUsingOrg(ctx, &models.SetUsingOrgCommand{
+		return ls.orgService.SetUsingOrg(ctx, &org.SetUsingOrgCommand{
 			UserId: user.ID,
 			OrgId:  user.OrgID,
 		})

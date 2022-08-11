@@ -34,6 +34,8 @@ type CreateOrgCommand struct {
 
 	// initial admin user for account
 	UserID int64 `json:"-"`
+
+	Result Org `json:"-"`
 }
 
 type GetOrgIDForNewUserCommand struct {
@@ -88,8 +90,8 @@ type SearchOrgsQuery struct {
 }
 
 type UserOrgDTO struct {
-	OrgId int64    `json:"orgId"`
-	Name  string   `json:"name"`
+	OrgId int64         `json:"orgId"`
+	Name  string        `json:"name"`
 	Role  user.RoleType `json:"role"`
 }
 
@@ -99,7 +101,7 @@ type OrgDTO struct {
 }
 
 type AddOrgUserCommand struct {
-	LoginOrEmail string   `json:"loginOrEmail" binding:"Required"`
+	LoginOrEmail string        `json:"loginOrEmail" binding:"Required"`
 	Role         user.RoleType `json:"role" binding:"Required"`
 
 	OrgId  int64 `json:"-"`

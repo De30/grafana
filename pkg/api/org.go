@@ -136,8 +136,7 @@ func (hs *HTTPServer) CreateOrg(c *models.ReqContext) response.Response {
 	}
 
 	cmd.UserID = c.UserId
-	o, err := hs.orgService.CreateOrg(c.Req.Context(), &cmd)
-	if err != nil {
+	if err := hs.orgService.CreateOrg(c.Req.Context(), &cmd); err != nil {
 		if errors.Is(err, models.ErrOrgNameTaken) {
 			return response.Error(http.StatusConflict, "Organization name taken", err)
 		}
@@ -147,7 +146,7 @@ func (hs *HTTPServer) CreateOrg(c *models.ReqContext) response.Response {
 	metrics.MApiOrgCreate.Inc()
 
 	return response.JSON(http.StatusOK, &util.DynMap{
-		"orgId":   o.ID,
+		"orgId":   cmd.Result.ID,
 		"message": "Organization created",
 	})
 }
