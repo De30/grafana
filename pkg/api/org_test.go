@@ -12,7 +12,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -47,7 +47,7 @@ func TestAPIEndpoint_GetCurrentOrg_LegacyAccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, false)
 	setInitCtxSignedInViewer(sc.initCtx)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", testUserID)
 	require.NoError(t, err)
 
 	t.Run("Viewer can view CurrentOrg", func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestAPIEndpoint_GetCurrentOrg_AccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, true)
 	setInitCtxSignedInViewer(sc.initCtx)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", testUserID)
 	require.NoError(t, err)
 
 	t.Run("AccessControl allows viewing CurrentOrg with correct permissions", func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestAPIEndpoint_GetCurrentOrg_AccessControl(t *testing.T) {
 func TestAPIEndpoint_PutCurrentOrg_LegacyAccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, false)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", testUserID)
 	require.NoError(t, err)
 
 	input := strings.NewReader(testUpdateOrgNameForm)
@@ -111,7 +111,7 @@ func TestAPIEndpoint_PutCurrentOrg_AccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, true)
 	setInitCtxSignedInViewer(sc.initCtx)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", sc.initCtx.UserId)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", sc.initCtx.UserId)
 	require.NoError(t, err)
 
 	input := strings.NewReader(testUpdateOrgNameForm)
@@ -137,7 +137,7 @@ func TestAPIEndpoint_PutCurrentOrg_AccessControl(t *testing.T) {
 func TestAPIEndpoint_PutCurrentOrgAddress_LegacyAccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, false)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", testUserID)
 	require.NoError(t, err)
 
 	input := strings.NewReader(testUpdateOrgAddressForm)
@@ -159,7 +159,7 @@ func TestAPIEndpoint_PutCurrentOrgAddress_AccessControl(t *testing.T) {
 	sc := setupHTTPServer(t, true, true)
 	setInitCtxSignedInViewer(sc.initCtx)
 
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateOrgWithMember("TestOrg", testUserID)
 	require.NoError(t, err)
 
 	input := strings.NewReader(testUpdateOrgAddressForm)
@@ -186,15 +186,15 @@ func TestAPIEndpoint_PutCurrentOrgAddress_AccessControl(t *testing.T) {
 // `/api/orgs/` endpoints test
 
 // setupOrgsDBForAccessControlTests stores users and create specified number of orgs
-func setupOrgsDBForAccessControlTests(t *testing.T, db sqlstore.Store, usr user.SignedInUser, orgsCount int) {
+func setupOrgsDBForAccessControlTests(t *testing.T, userService user.Service, orgService org.Service, usr user.SignedInUser, orgsCount int) {
 	t.Helper()
 
-	_, err := db.CreateUser(context.Background(), user.CreateUserCommand{Email: usr.Email, SkipOrgSetup: true, Login: usr.Login})
+	_, err := userService.Create(context.Background(), &user.CreateUserCommand{Email: usr.Email, SkipOrgSetup: true, Login: usr.Login})
 	require.NoError(t, err)
 
 	// Create `orgsCount` orgs
 	for i := 1; i <= orgsCount; i++ {
-		_, err = db.CreateOrgWithMember(fmt.Sprintf("TestOrg%v", i), 0)
+		_, err = orgService.CreateOrgWithMember(fmt.Sprintf("TestOrg%v", i), 0)
 		require.NoError(t, err)
 		err = db.AddOrgUser(context.Background(), &models.AddOrgUserCommand{LoginOrEmail: usr.Login, Role: usr.OrgRole, OrgId: int64(i), UserId: usr.UserId})
 		require.NoError(t, err)

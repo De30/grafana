@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	"github.com/grafana/grafana/pkg/services/quota/quotatest"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -55,7 +54,7 @@ func TestGetPluginDashboards(t *testing.T) {
 	t.Run("Signed in and not org admin should return 403 Forbidden", func(t *testing.T) {
 		user := &user.SignedInUser{
 			UserId:  1,
-			OrgRole: org.RoleEditor,
+			OrgRole: user.RoleEditor,
 		}
 
 		resp, err := sendGetPluginDashboardsRequestForSignedInUser(t, s, existingPluginID, user)
@@ -68,7 +67,7 @@ func TestGetPluginDashboards(t *testing.T) {
 		user := &user.SignedInUser{
 			UserId:  1,
 			OrgId:   1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 		}
 
 		t.Run("When plugin doesn't exist should return 404 Not Found", func(t *testing.T) {

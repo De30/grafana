@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/stretchr/testify/require"
 )
@@ -72,10 +73,14 @@ func (f *FakeOrgStore) Insert(ctx context.Context, org *org.Org) (int64, error) 
 	return f.ExpectedOrgID, f.ExpectedError
 }
 
-func (f *FakeOrgStore) InsertOrgUser(ctx context.Context, org *org.OrgUser) (int64, error) {
+func (f *FakeOrgStore) InsertOrgUser(ctx context.Context, org *user.OrgUser) (int64, error) {
 	return f.ExpectedUserID, f.ExpectedError
 }
 
 func (f *FakeOrgStore) DeleteUserFromAll(ctx context.Context, userID int64) error {
+	return f.ExpectedError
+}
+
+func (f *FakeOrgStore) CreateOrg(ctx context.Context, cmd *org.CreateOrgCommand) error {
 	return f.ExpectedError
 }

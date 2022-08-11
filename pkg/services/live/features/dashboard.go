@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 )
@@ -52,11 +51,11 @@ func (h *DashboardHandler) GetHandlerForPath(_ string) (models.ChannelHandler, e
 }
 
 // OnSubscribe for now allows anyone to subscribe to any dashboard
-func (h *DashboardHandler) OnSubscribe(ctx context.Context, user *user.SignedInUser, e models.SubscribeEvent) (models.SubscribeReply, backend.SubscribeStreamStatus, error) {
+func (h *DashboardHandler) OnSubscribe(ctx context.Context, u *user.SignedInUser, e models.SubscribeEvent) (models.SubscribeReply, backend.SubscribeStreamStatus, error) {
 	parts := strings.Split(e.Path, "/")
 	if parts[0] == "gitops" {
 		// gitops gets all changes for everything, so lets make sure it is an admin user
-		if !user.HasRole(org.RoleAdmin) {
+		if !u.HasRole(user.RoleAdmin) {
 			return models.SubscribeReply{}, backend.SubscribeStreamStatusPermissionDenied, nil
 		}
 		return models.SubscribeReply{
@@ -66,14 +65,14 @@ func (h *DashboardHandler) OnSubscribe(ctx context.Context, user *user.SignedInU
 
 	// make sure can view this dashboard
 	if len(parts) == 2 && parts[0] == "uid" {
-		query := models.GetDashboardQuery{Uid: parts[1], OrgId: user.OrgId}
+		query := models.GetDashboardQuery{Uid: parts[1], OrgId: u.OrgId}
 		if err := h.DashboardService.GetDashboard(ctx, &query); err != nil {
 			logger.Error("Error getting dashboard", "query", query, "error", err)
 			return models.SubscribeReply{}, backend.SubscribeStreamStatusNotFound, nil
 		}
 
 		dash := query.Result
-		guard := guardian.New(ctx, dash.Id, user.OrgId, user)
+		guard := guardian.New(ctx, dash.Id, u.OrgId, u)
 		if canView, err := guard.CanView(); err != nil || !canView {
 			return models.SubscribeReply{}, backend.SubscribeStreamStatusPermissionDenied, nil
 		}
@@ -90,11 +89,11 @@ func (h *DashboardHandler) OnSubscribe(ctx context.Context, user *user.SignedInU
 }
 
 // OnPublish is called when someone begins to edit a dashboard
-func (h *DashboardHandler) OnPublish(ctx context.Context, user *user.SignedInUser, e models.PublishEvent) (models.PublishReply, backend.PublishStreamStatus, error) {
+func (h *DashboardHandler) OnPublish(ctx context.Context, u *user.SignedInUser, e models.PublishEvent) (models.PublishReply, backend.PublishStreamStatus, error) {
 	parts := strings.Split(e.Path, "/")
 	if parts[0] == "gitops" {
 		// gitops gets all changes for everything, so lets make sure it is an admin user
-		if !user.HasRole(org.RoleAdmin) {
+		if !u.HasRole(user.RoleAdmin) {
 			return models.PublishReply{}, backend.PublishStreamStatusPermissionDenied, nil
 		}
 
@@ -113,13 +112,13 @@ func (h *DashboardHandler) OnPublish(ctx context.Context, user *user.SignedInUse
 			// just ignore the event
 			return models.PublishReply{}, backend.PublishStreamStatusNotFound, fmt.Errorf("ignore???")
 		}
-		query := models.GetDashboardQuery{Uid: parts[1], OrgId: user.OrgId}
+		query := models.GetDashboardQuery{Uid: parts[1], OrgId: u.OrgId}
 		if err := h.DashboardService.GetDashboard(ctx, &query); err != nil {
 			logger.Error("Unknown dashboard", "query", query)
 			return models.PublishReply{}, backend.PublishStreamStatusNotFound, nil
 		}
 
-		guard := guardian.New(ctx, query.Result.Id, user.OrgId, user)
+		guard := guardian.New(ctx, query.Result.Id, u.OrgId, u)
 		canEdit, err := guard.CanEdit()
 		if err != nil {
 			return models.PublishReply{}, backend.PublishStreamStatusNotFound, fmt.Errorf("internal error")
@@ -131,7 +130,7 @@ func (h *DashboardHandler) OnPublish(ctx context.Context, user *user.SignedInUse
 		}
 
 		// Tell everyone who is editing
-		event.User = user.ToUserDisplayDTO()
+		event.User = u.ToUserDisplayDTO()
 
 		msg, err := json.Marshal(event)
 		if err != nil {

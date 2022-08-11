@@ -6,7 +6,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
@@ -27,11 +26,11 @@ func (l *LibraryElementService) requireSupportedElementKind(kindAsInt int64) err
 }
 
 func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(org.RoleEditor) {
+	if isGeneralFolder(folderID) && user.HasRole(user.RoleEditor) {
 		return nil
 	}
 
-	if isGeneralFolder(folderID) && user.HasRole(org.RoleViewer) {
+	if isGeneralFolder(folderID) && user.HasRole(user.RoleViewer) {
 		return dashboards.ErrFolderAccessDenied
 	}
 	folder, err := l.folderService.GetFolderByID(ctx, user, folderID, user.OrgId)
@@ -53,7 +52,7 @@ func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Conte
 }
 
 func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(org.RoleViewer) {
+	if isGeneralFolder(folderID) && user.HasRole(user.RoleViewer) {
 		return nil
 	}
 

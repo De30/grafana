@@ -10,7 +10,6 @@ import (
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/dashboardimport"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -172,7 +171,7 @@ func (du *DashboardUpdater) autoUpdateAppDashboard(ctx context.Context, pluginDa
 		pluginDashInfo.Revision, "oldRev", pluginDashInfo.ImportedRevision)
 	_, err = du.dashboardImportService.ImportDashboard(ctx, &dashboardimport.ImportDashboardRequest{
 		PluginId:  pluginDashInfo.PluginId,
-		User:      &user.SignedInUser{UserId: 0, OrgRole: org.RoleAdmin, OrgId: orgID},
+		User:      &user.SignedInUser{UserId: 0, OrgRole: user.RoleAdmin, OrgId: orgID},
 		Path:      pluginDashInfo.Reference,
 		FolderId:  0,
 		Dashboard: resp.Dashboard.Data,

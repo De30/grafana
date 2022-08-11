@@ -23,7 +23,6 @@ import (
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/notifier"
 	"github.com/grafana/grafana/pkg/services/ngalert/provisioning"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
 	secretsManager "github.com/grafana/grafana/pkg/services/secrets/manager"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -334,7 +333,7 @@ func TestSilenceCreate(t *testing.T) {
 					Req: &http.Request{},
 				},
 				SignedInUser: &user.SignedInUser{
-					OrgRole: org.RoleEditor,
+					OrgRole: user.RoleEditor,
 					OrgId:   1,
 				},
 			}
@@ -355,7 +354,7 @@ func TestRouteCreateSilence(t *testing.T) {
 		name           string
 		silence        func() apimodels.PostableSilence
 		accessControl  func() accesscontrol.AccessControl
-		role           org.RoleType
+		role           user.RoleType
 		expectedStatus int
 	}{
 		{
@@ -382,7 +381,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleViewer,
+			role:           user.RoleViewer,
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
@@ -391,7 +390,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleEditor,
+			role:           user.RoleEditor,
 			expectedStatus: http.StatusAccepted,
 		},
 		{
@@ -400,7 +399,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleAdmin,
+			role:           user.RoleAdmin,
 			expectedStatus: http.StatusAccepted,
 		},
 		{
@@ -427,7 +426,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleViewer,
+			role:           user.RoleViewer,
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
@@ -436,7 +435,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleEditor,
+			role:           user.RoleEditor,
 			expectedStatus: http.StatusAccepted,
 		},
 		{
@@ -445,7 +444,7 @@ func TestRouteCreateSilence(t *testing.T) {
 			accessControl: func() accesscontrol.AccessControl {
 				return acMock.New().WithDisabled()
 			},
-			role:           org.RoleAdmin,
+			role:           user.RoleAdmin,
 			expectedStatus: http.StatusAccepted,
 		},
 	}

@@ -39,7 +39,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/live/pushws"
 	"github.com/grafana/grafana/pkg/services/live/runstream"
 	"github.com/grafana/grafana/pkg/services/live/survey"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/query"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -717,7 +716,7 @@ func (g *GrafanaLive) handleOnSubscribe(ctx context.Context, client *centrifuge.
 func (g *GrafanaLive) handleOnPublish(ctx context.Context, client *centrifuge.Client, e centrifuge.PublishEvent) (centrifuge.PublishReply, error) {
 	logger.Debug("Client wants to publish", "user", client.UserID(), "client", client.ID(), "channel", e.Channel)
 
-	user, ok := livecontext.GetContextSignedUser(client.Context())
+	u, ok := livecontext.GetContextSignedUser(client.Context())
 	if !ok {
 		logger.Error("No user found in context", "user", client.UserID(), "client", client.ID(), "channel", e.Channel)
 		return centrifuge.PublishReply{}, centrifuge.ErrorInternal
@@ -730,20 +729,20 @@ func (g *GrafanaLive) handleOnPublish(ctx context.Context, client *centrifuge.Cl
 		return centrifuge.PublishReply{}, centrifuge.ErrorInternal
 	}
 
-	if user.OrgId != orgID {
+	if u.OrgId != orgID {
 		logger.Info("Error subscribing: wrong orgId", "user", client.UserID(), "client", client.ID(), "channel", e.Channel)
 		return centrifuge.PublishReply{}, centrifuge.ErrorPermissionDenied
 	}
 
 	if g.Pipeline != nil {
-		rule, ok, err := g.Pipeline.Get(user.OrgId, channel)
+		rule, ok, err := g.Pipeline.Get(u.OrgId, channel)
 		if err != nil {
 			logger.Error("Error getting channel rule", "user", client.UserID(), "client", client.ID(), "channel", e.Channel, "error", err)
 			return centrifuge.PublishReply{}, centrifuge.ErrorInternal
 		}
 		if ok {
 			if rule.PublishAuth != nil {
-				ok, err := rule.PublishAuth.CanPublish(client.Context(), user)
+				ok, err := rule.PublishAuth.CanPublish(client.Context(), u)
 				if err != nil {
 					logger.Error("Error checking publish permissions", "user", client.UserID(), "client", client.ID(), "channel", e.Channel, "error", err)
 					return centrifuge.PublishReply{}, centrifuge.ErrorInternal
@@ -754,13 +753,13 @@ func (g *GrafanaLive) handleOnPublish(ctx context.Context, client *centrifuge.Cl
 					return centrifuge.PublishReply{}, &centrifuge.Error{Code: uint32(code), Message: text}
 				}
 			} else {
-				if !user.HasRole(org.RoleAdmin) {
+				if !u.HasRole(user.RoleAdmin) {
 					// using HTTP error codes for WS errors too.
 					code, text := publishStatusToHTTPError(backend.PublishStreamStatusPermissionDenied)
 					return centrifuge.PublishReply{}, &centrifuge.Error{Code: uint32(code), Message: text}
 				}
 			}
-			_, err := g.Pipeline.ProcessInput(client.Context(), user.OrgId, channel, e.Data)
+			_, err := g.Pipeline.ProcessInput(client.Context(), u.OrgId, channel, e.Data)
 			if err != nil {
 				logger.Error("Error processing input", "user", client.UserID(), "client", client.ID(), "channel", e.Channel, "error", err)
 				return centrifuge.PublishReply{}, centrifuge.ErrorInternal
@@ -771,7 +770,7 @@ func (g *GrafanaLive) handleOnPublish(ctx context.Context, client *centrifuge.Cl
 		}
 	}
 
-	handler, addr, err := g.GetChannelHandler(ctx, user, channel)
+	handler, addr, err := g.GetChannelHandler(ctx, u, channel)
 	if err != nil {
 		if errors.Is(err, live.ErrInvalidChannelID) {
 			logger.Info("Invalid channel ID", "user", client.UserID(), "client", client.ID(), "channel", e.Channel)
@@ -780,7 +779,7 @@ func (g *GrafanaLive) handleOnPublish(ctx context.Context, client *centrifuge.Cl
 		logger.Error("Error getting channel handler", "user", client.UserID(), "client", client.ID(), "channel", e.Channel, "error", err)
 		return centrifuge.PublishReply{}, centrifuge.ErrorInternal
 	}
-	reply, status, err := handler.OnPublish(client.Context(), user, models.PublishEvent{
+	reply, status, err := handler.OnPublish(client.Context(), u, models.PublishEvent{
 		Channel: channel,
 		Path:    addr.Path,
 		Data:    e.Data,
@@ -966,33 +965,33 @@ func (g *GrafanaLive) HandleHTTPPublish(ctx *models.ReqContext) response.Respons
 	}
 
 	logger.Debug("Publish API cmd", "user", ctx.SignedInUser.UserId, "channel", cmd.Channel)
-	user := ctx.SignedInUser
+	u := ctx.SignedInUser
 	channel := cmd.Channel
 
 	if g.Pipeline != nil {
-		rule, ok, err := g.Pipeline.Get(user.OrgId, channel)
+		rule, ok, err := g.Pipeline.Get(u.OrgId, channel)
 		if err != nil {
-			logger.Error("Error getting channel rule", "user", user, "channel", channel, "error", err)
+			logger.Error("Error getting channel rule", "user", u, "channel", channel, "error", err)
 			return response.Error(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), nil)
 		}
 		if ok {
 			if rule.PublishAuth != nil {
-				ok, err := rule.PublishAuth.CanPublish(ctx.Req.Context(), user)
+				ok, err := rule.PublishAuth.CanPublish(ctx.Req.Context(), u)
 				if err != nil {
-					logger.Error("Error checking publish permissions", "user", user, "channel", channel, "error", err)
+					logger.Error("Error checking publish permissions", "user", u, "channel", channel, "error", err)
 					return response.Error(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), nil)
 				}
 				if !ok {
 					return response.Error(http.StatusForbidden, http.StatusText(http.StatusForbidden), nil)
 				}
 			} else {
-				if !user.HasRole(org.RoleAdmin) {
+				if !u.HasRole(user.RoleAdmin) {
 					return response.Error(http.StatusForbidden, http.StatusText(http.StatusForbidden), nil)
 				}
 			}
-			_, err := g.Pipeline.ProcessInput(ctx.Req.Context(), user.OrgId, channel, cmd.Data)
+			_, err := g.Pipeline.ProcessInput(ctx.Req.Context(), u.OrgId, channel, cmd.Data)
 			if err != nil {
-				logger.Error("Error processing input", "user", user, "channel", channel, "error", err)
+				logger.Error("Error processing input", "user", u, "channel", channel, "error", err)
 				return response.Error(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), nil)
 			}
 			return response.JSON(http.StatusOK, dtos.LivePublishResponse{})

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
 	"github.com/stretchr/testify/require"
@@ -25,17 +24,17 @@ func TestProvisioning(t *testing.T) {
 
 	// Create a users to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleViewer),
+		DefaultOrgRole: string(user.RoleViewer),
 		Password:       "viewer",
 		Login:          "viewer",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleEditor),
+		DefaultOrgRole: string(user.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleAdmin),
+		DefaultOrgRole: string(user.RoleAdmin),
 		Password:       "admin",
 		Login:          "admin",
 	})

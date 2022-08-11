@@ -7,7 +7,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/registry"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -140,17 +139,17 @@ var ReqGrafanaAdmin = func(c *models.ReqContext) bool {
 	return c.IsGrafanaAdmin
 }
 
-// ReqViewer returns true if the current user has org.RoleViewer. Note: this can be anonymous user as well
+// ReqViewer returns true if the current user has user.RoleViewer. Note: this can be anonymous user as well
 var ReqViewer = func(c *models.ReqContext) bool {
-	return c.OrgRole.Includes(org.RoleViewer)
+	return c.OrgRole.Includes(user.RoleViewer)
 }
 
 var ReqOrgAdmin = func(c *models.ReqContext) bool {
-	return c.OrgRole == org.RoleAdmin
+	return c.OrgRole == user.RoleAdmin
 }
 
 var ReqOrgAdminOrEditor = func(c *models.ReqContext) bool {
-	return c.OrgRole == org.RoleAdmin || c.OrgRole == org.RoleEditor
+	return c.OrgRole == user.RoleAdmin || c.OrgRole == user.RoleEditor
 }
 
 func BuildPermissionsMap(permissions []Permission) map[string]bool {

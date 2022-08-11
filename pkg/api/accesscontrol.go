@@ -8,8 +8,8 @@ import (
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/tsdb/grafanads"
 )
@@ -75,11 +75,11 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			},
 		},
-		Grants: []string{string(org.RoleEditor)},
+		Grants: []string{string(user.RoleEditor)},
 	}
 
 	if setting.ViewersCanEdit {
-		datasourcesExplorerRole.Grants = append(datasourcesExplorerRole.Grants, string(org.RoleViewer))
+		datasourcesExplorerRole.Grants = append(datasourcesExplorerRole.Grants, string(user.RoleViewer))
 	}
 
 	datasourcesReaderRole := ac.RoleRegistration{
@@ -99,7 +99,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			},
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	builtInDatasourceReader := ac.RoleRegistration{
@@ -120,12 +120,12 @@ func (hs *HTTPServer) declareFixedRoles() error {
 			},
 			Hidden: true,
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 
 	// when running oss or enterprise without a license all users should be able to query data sources
 	if !hs.License.FeatureEnabled("accesscontrol.enforcement") {
-		datasourcesReaderRole.Grants = []string{string(org.RoleViewer)}
+		datasourcesReaderRole.Grants = []string{string(user.RoleViewer)}
 	}
 
 	datasourcesWriterRole := ac.RoleRegistration{
@@ -148,7 +148,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			}),
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	datasourcesIdReaderRole := ac.RoleRegistration{
@@ -164,7 +164,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			},
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 
 	apikeyReaderRole := ac.RoleRegistration{
@@ -180,7 +180,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			},
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	apikeyWriterRole := ac.RoleRegistration{
@@ -199,7 +199,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				},
 			}),
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	orgReaderRole := ac.RoleRegistration{
@@ -213,7 +213,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ActionOrgsQuotasRead},
 			},
 		},
-		Grants: []string{string(org.RoleViewer), ac.RoleGrafanaAdmin},
+		Grants: []string{string(user.RoleViewer), ac.RoleGrafanaAdmin},
 	}
 
 	orgWriterRole := ac.RoleRegistration{
@@ -228,7 +228,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ActionOrgsPreferencesWrite},
 			}),
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	orgMaintainerRole := ac.RoleRegistration{
@@ -247,9 +247,9 @@ func (hs *HTTPServer) declareFixedRoles() error {
 		Grants: []string{string(ac.RoleGrafanaAdmin)},
 	}
 
-	teamCreatorGrants := []string{string(org.RoleAdmin)}
+	teamCreatorGrants := []string{string(user.RoleAdmin)}
 	if hs.Cfg.EditorsCanAdmin {
-		teamCreatorGrants = append(teamCreatorGrants, string(org.RoleEditor))
+		teamCreatorGrants = append(teamCreatorGrants, string(user.RoleEditor))
 	}
 	teamsCreatorRole := ac.RoleRegistration{
 		Role: ac.RoleDTO{
@@ -280,7 +280,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ac.ActionTeamsWrite, Scope: ac.ScopeTeamsAll},
 			},
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	annotationsReaderRole := ac.RoleRegistration{
@@ -293,7 +293,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ac.ActionAnnotationsRead, Scope: ac.ScopeAnnotationsAll},
 			},
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 
 	dashboardAnnotationsWriterRole := ac.RoleRegistration{
@@ -308,7 +308,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ac.ActionAnnotationsWrite, Scope: ac.ScopeAnnotationsTypeDashboard},
 			},
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 
 	annotationsWriterRole := ac.RoleRegistration{
@@ -323,7 +323,7 @@ func (hs *HTTPServer) declareFixedRoles() error {
 				{Action: ac.ActionAnnotationsWrite, Scope: ac.ScopeAnnotationsAll},
 			},
 		},
-		Grants: []string{string(org.RoleEditor)},
+		Grants: []string{string(user.RoleEditor)},
 	}
 
 	dashboardsCreatorRole := ac.RoleRegistration{

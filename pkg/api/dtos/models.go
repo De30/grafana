@@ -9,7 +9,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -38,7 +37,7 @@ type CurrentUser struct {
 	OrgCount                   int                `json:"orgCount"`
 	OrgId                      int64              `json:"orgId"`
 	OrgName                    string             `json:"orgName"`
-	OrgRole                    org.RoleType       `json:"orgRole"`
+	OrgRole                    user.RoleType      `json:"orgRole"`
 	IsGrafanaAdmin             bool               `json:"isGrafanaAdmin"`
 	GravatarUrl                string             `json:"gravatarUrl"`
 	Timezone                   string             `json:"timezone"`

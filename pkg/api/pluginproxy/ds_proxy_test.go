@@ -29,7 +29,6 @@ import (
 	datasourceservice "github.com/grafana/grafana/pkg/services/datasources/service"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
 	"github.com/grafana/grafana/pkg/services/secrets/kvstore"
@@ -49,7 +48,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 			{
 				Path:    "api/v4/",
 				URL:     "https://www.google.com",
-				ReqRole: org.RoleEditor,
+				ReqRole: user.RoleEditor,
 				Headers: []plugins.Header{
 					{Name: "x-header", Content: "my secret {{.SecureJsonData.key}}"},
 				},
@@ -57,7 +56,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 			{
 				Path:    "api/admin",
 				URL:     "https://www.google.com",
-				ReqRole: org.RoleAdmin,
+				ReqRole: user.RoleAdmin,
 				Headers: []plugins.Header{
 					{Name: "x-header", Content: "my secret {{.SecureJsonData.key}}"},
 				},
@@ -81,7 +80,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 			},
 			{
 				Path:    "api/restricted",
-				ReqRole: org.RoleAdmin,
+				ReqRole: user.RoleAdmin,
 			},
 			{
 				Path: "api/body",
@@ -128,7 +127,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 			require.NoError(t, err)
 			ctx := &models.ReqContext{
 				Context:      &web.Context{Req: req},
-				SignedInUser: &user.SignedInUser{OrgRole: org.RoleEditor},
+				SignedInUser: &user.SignedInUser{OrgRole: user.RoleEditor},
 			}
 			return ctx, req
 		}
@@ -203,7 +202,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 
 			t.Run("plugin route with admin role and user is admin", func(t *testing.T) {
 				ctx, _ := setUp()
-				ctx.SignedInUser.OrgRole = org.RoleAdmin
+				ctx.SignedInUser.OrgRole = user.RoleAdmin
 				dsService := datasourceservice.ProvideService(nil, secretsService, secretsStore, cfg, featuremgmt.WithFeatures(), acmock.New(), acmock.NewMockedPermissionsService())
 				proxy, err := NewDataSourceProxy(ds, routes, ctx, "api/admin", cfg, httpClientProvider, &oauthtoken.Service{}, dsService, tracer)
 				require.NoError(t, err)
@@ -268,7 +267,7 @@ func TestDataSourceProxy_routeRule(t *testing.T) {
 		require.NoError(t, err)
 		ctx := &models.ReqContext{
 			Context:      &web.Context{Req: req},
-			SignedInUser: &user.SignedInUser{OrgRole: org.RoleEditor},
+			SignedInUser: &user.SignedInUser{OrgRole: user.RoleEditor},
 		}
 
 		t.Run("When creating and caching access tokens", func(t *testing.T) {
@@ -761,7 +760,7 @@ func TestDataSourceProxy_requestHandling(t *testing.T) {
 func TestNewDataSourceProxy_InvalidURL(t *testing.T) {
 	ctx := models.ReqContext{
 		Context:      &web.Context{},
-		SignedInUser: &user.SignedInUser{OrgRole: org.RoleEditor},
+		SignedInUser: &user.SignedInUser{OrgRole: user.RoleEditor},
 	}
 	ds := datasources.DataSource{
 		Type: "test",
@@ -781,7 +780,7 @@ func TestNewDataSourceProxy_InvalidURL(t *testing.T) {
 func TestNewDataSourceProxy_ProtocolLessURL(t *testing.T) {
 	ctx := models.ReqContext{
 		Context:      &web.Context{},
-		SignedInUser: &user.SignedInUser{OrgRole: org.RoleEditor},
+		SignedInUser: &user.SignedInUser{OrgRole: user.RoleEditor},
 	}
 	ds := datasources.DataSource{
 		Type: "test",
@@ -803,7 +802,7 @@ func TestNewDataSourceProxy_ProtocolLessURL(t *testing.T) {
 func TestNewDataSourceProxy_MSSQL(t *testing.T) {
 	ctx := models.ReqContext{
 		Context:      &web.Context{},
-		SignedInUser: &user.SignedInUser{OrgRole: org.RoleEditor},
+		SignedInUser: &user.SignedInUser{OrgRole: user.RoleEditor},
 	}
 	tracer := tracing.InitializeTracerForTest()
 
@@ -999,13 +998,13 @@ func Test_PathCheck(t *testing.T) {
 		{
 			Path:    "a",
 			URL:     "https://www.google.com",
-			ReqRole: org.RoleEditor,
+			ReqRole: user.RoleEditor,
 			Method:  http.MethodGet,
 		},
 		{
 			Path:    "b",
 			URL:     "https://www.google.com",
-			ReqRole: org.RoleViewer,
+			ReqRole: user.RoleViewer,
 			Method:  http.MethodGet,
 		},
 	}
@@ -1016,7 +1015,7 @@ func Test_PathCheck(t *testing.T) {
 		require.NoError(t, err)
 		ctx := &models.ReqContext{
 			Context:      &web.Context{Req: req},
-			SignedInUser: &user.SignedInUser{OrgRole: org.RoleViewer},
+			SignedInUser: &user.SignedInUser{OrgRole: user.RoleViewer},
 		}
 		return ctx, req
 	}

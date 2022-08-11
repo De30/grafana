@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/db"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 const MainOrgName = "Main Org."
@@ -15,8 +16,10 @@ const MainOrgName = "Main Org."
 type store interface {
 	Get(context.Context, int64) (*org.Org, error)
 	Insert(context.Context, *org.Org) (int64, error)
-	InsertOrgUser(context.Context, *org.OrgUser) (int64, error)
+	InsertOrgUser(context.Context, *user.OrgUser) (int64, error)
 	DeleteUserFromAll(context.Context, int64) error
+	CreateOrg(context.Context, *org.CreateOrgCommand) error
+	CreateOrgWithMember(name string, userID int64) (*org.Org, error)
 }
 
 type sqlStore struct {
@@ -68,7 +71,7 @@ func (ss *sqlStore) Insert(ctx context.Context, org *org.Org) (int64, error) {
 	return orgID, nil
 }
 
-func (ss *sqlStore) InsertOrgUser(ctx context.Context, cmd *org.OrgUser) (int64, error) {
+func (ss *sqlStore) InsertOrgUser(ctx context.Context, cmd *user.OrgUser) (int64, error) {
 	var orgID int64
 	var err error
 	err = ss.db.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
@@ -84,6 +87,15 @@ func (ss *sqlStore) InsertOrgUser(ctx context.Context, cmd *org.OrgUser) (int64,
 }
 
 func (ss *sqlStore) DeleteUserFromAll(ctx context.Context, userID int64) error {
+	return ss.db.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		if _, err := sess.Exec("DELETE FROM org_user WHERE user_id = ?", userID); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (ss *sqlStore) CreateOrg(ctx context.Context, userID int64) error {
 	return ss.db.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
 		if _, err := sess.Exec("DELETE FROM org_user WHERE user_id = ?", userID); err != nil {
 			return err

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/infra/log/logtest"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -1064,10 +1064,10 @@ func TestLoader_readPluginJSON(t *testing.T) {
 					},
 				},
 				Includes: []*plugins.Includes{
-					{Name: "Nginx Connections", Path: "dashboards/connections.json", Type: "dashboard", Role: org.RoleViewer},
-					{Name: "Nginx Memory", Path: "dashboards/memory.json", Type: "dashboard", Role: org.RoleViewer},
-					{Name: "Nginx Panel", Type: "panel", Role: org.RoleViewer},
-					{Name: "Nginx Datasource", Type: "datasource", Role: org.RoleViewer},
+					{Name: "Nginx Connections", Path: "dashboards/connections.json", Type: "dashboard", Role: user.RoleViewer},
+					{Name: "Nginx Memory", Path: "dashboards/memory.json", Type: "dashboard", Role: user.RoleViewer},
+					{Name: "Nginx Panel", Type: "panel", Role: user.RoleViewer},
+					{Name: "Nginx Datasource", Type: "datasource", Role: user.RoleViewer},
 				},
 				Backend: false,
 			},

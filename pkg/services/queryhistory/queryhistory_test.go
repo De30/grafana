@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -59,7 +58,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 			Login:      "signed_in_user",
 			Email:      "signed.in.user@test.com",
 			OrgId:      testOrgID,
-			OrgRole:    org.RoleViewer,
+			OrgRole:    user.RoleViewer,
 			LastSeenAt: time.Now(),
 		}
 

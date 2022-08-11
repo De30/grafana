@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations"
 	acmig "github.com/grafana/grafana/pkg/services/sqlstore/migrations/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
@@ -277,35 +276,35 @@ func setupTeams(t *testing.T, x *xorm.Engine) {
 		{
 			OrgId:   1,
 			UserId:  1,
-			Role:    org.RoleViewer,
+			Role:    user.RoleViewer,
 			Created: now,
 			Updated: now,
 		},
 		{
 			OrgId:   1,
 			UserId:  2,
-			Role:    org.RoleViewer,
+			Role:    user.RoleViewer,
 			Created: now,
 			Updated: now,
 		},
 		{
 			OrgId:   1,
 			UserId:  3,
-			Role:    org.RoleEditor,
+			Role:    user.RoleEditor,
 			Created: now,
 			Updated: now,
 		},
 		{
 			OrgId:   1,
 			UserId:  4,
-			Role:    org.RoleAdmin,
+			Role:    user.RoleAdmin,
 			Created: now,
 			Updated: now,
 		},
 		{
 			OrgId:   2,
 			UserId:  5,
-			Role:    org.RoleEditor,
+			Role:    user.RoleEditor,
 			Created: now,
 			Updated: now,
 		},

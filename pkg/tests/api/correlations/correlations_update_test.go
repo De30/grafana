@@ -9,7 +9,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/services/correlations"
 	"github.com/grafana/grafana/pkg/services/datasources"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/require"
 )
@@ -30,12 +29,12 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 	}
 
 	ctx.createUser(user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleEditor),
+		DefaultOrgRole: string(user.RoleEditor),
 		Password:       editorUser.password,
 		Login:          editorUser.username,
 	})
 	ctx.createUser(user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleAdmin),
+		DefaultOrgRole: string(user.RoleAdmin),
 		Password:       adminUser.password,
 		Login:          adminUser.username,
 	})

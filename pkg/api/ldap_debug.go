@@ -14,7 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/ldap"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/multildap"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
@@ -40,10 +39,10 @@ type LDAPAttribute struct {
 
 // RoleDTO is a serializer for mapped roles from LDAP
 type LDAPRoleDTO struct {
-	OrgId   int64        `json:"orgId"`
-	OrgName string       `json:"orgName"`
-	OrgRole org.RoleType `json:"orgRole"`
-	GroupDN string       `json:"groupDN"`
+	OrgId   int64         `json:"orgId"`
+	OrgName string        `json:"orgName"`
+	OrgRole user.RoleType `json:"orgRole"`
+	GroupDN string        `json:"groupDN"`
 }
 
 // LDAPUserDTO is a serializer for users mapped from LDAP
@@ -334,7 +333,7 @@ func (hs *HTTPServer) GetUserFromLDAP(c *models.ReqContext) response.Response {
 	}
 
 	orgIDs := []int64{} // IDs of the orgs the user is a member of
-	orgRolesMap := map[int64]org.RoleType{}
+	orgRolesMap := map[int64]user.RoleType{}
 	for _, group := range serverConfig.Groups {
 		// only use the first match for each org
 		if orgRolesMap[group.OrgId] != "" {

@@ -21,7 +21,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
 	"github.com/grafana/grafana/pkg/services/libraryelements"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -1287,7 +1286,7 @@ type scenarioContext struct {
 }
 
 type folderACLItem struct {
-	roleType   org.RoleType
+	roleType   user.RoleType
 	permission models.PermissionType
 }
 
@@ -1490,7 +1489,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 	t.Run(desc, func(t *testing.T) {
 		cfg := setting.NewCfg()
 		orgID := int64(1)
-		role := org.RoleAdmin
+		role := user.RoleAdmin
 		sqlStore := sqlstore.InitTestDB(t)
 		dashboardStore := database.ProvideDashboardStore(sqlStore, featuremgmt.WithFeatures())
 

@@ -445,7 +445,7 @@ func seedResourcePermissions(t *testing.T, store *AccessControlStore, sql *sqlst
 		if org == nil {
 			addedOrg, err := sql.CreateOrgWithMember("test", int64(i))
 			require.NoError(t, err)
-			org = &addedOrg
+			org = addedOrg
 		}
 
 		u, err := sql.CreateUser(context.Background(), user.CreateUserCommand{

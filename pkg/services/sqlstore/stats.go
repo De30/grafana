@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 const activeUserTimeLimit = time.Hour * 24 * 30
@@ -148,7 +148,7 @@ func viewersPermissionsCounterSQL(statName string, isFolder bool, permission mod
 		FROM ` + dialect.Quote("dashboard_acl") + ` AS acl
 			INNER JOIN ` + dialect.Quote("dashboard") + ` AS d
 			ON d.id = acl.dashboard_id
-		WHERE acl.role = '` + string(org.RoleViewer) + `'
+		WHERE acl.role = '` + string(user.RoleViewer) + `'
 			AND d.is_folder = ` + dialect.BooleanStr(isFolder) + `
 			AND acl.permission = ` + strconv.FormatInt(int64(permission), 10) + `
 	) AS ` + statName + `, `
@@ -306,11 +306,11 @@ GROUP BY active, daily_active, role;`
 
 		memo := memoUserStats{memoized: time.Now()}
 		for _, role := range bitmap {
-			roletype := org.RoleViewer
+			roletype := user.RoleViewer
 			if role.Bitrole&0b100 != 0 {
-				roletype = org.RoleAdmin
+				roletype = user.RoleAdmin
 			} else if role.Bitrole&0b10 != 0 {
-				roletype = org.RoleEditor
+				roletype = user.RoleEditor
 			}
 
 			memo.total = addToStats(memo.total, roletype, role.Count)
@@ -327,13 +327,13 @@ GROUP BY active, daily_active, role;`
 	})
 }
 
-func addToStats(base models.UserStats, role org.RoleType, count int64) models.UserStats {
+func addToStats(base models.UserStats, role user.RoleType, count int64) models.UserStats {
 	base.Users += count
 
 	switch role {
-	case org.RoleAdmin:
+	case user.RoleAdmin:
 		base.Admins += count
-	case org.RoleEditor:
+	case user.RoleEditor:
 		base.Editors += count
 	default:
 		base.Viewers += count

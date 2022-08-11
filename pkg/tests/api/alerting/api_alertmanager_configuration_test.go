@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +32,7 @@ func TestAlertmanagerConfigurationIsTransactional(t *testing.T) {
 
 	// create user under main organisation
 	userID := createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleEditor),
+		DefaultOrgRole: string(user.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
@@ -43,7 +42,7 @@ func TestAlertmanagerConfigurationIsTransactional(t *testing.T) {
 
 	// create user under different organisation
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleEditor),
+		DefaultOrgRole: string(user.RoleEditor),
 		Password:       "editor-42",
 		Login:          "editor-42",
 		OrgID:          orgID,
@@ -141,7 +140,7 @@ func TestAlertmanagerConfigurationPersistSecrets(t *testing.T) {
 	alertConfigURL := fmt.Sprintf("http://editor:editor@%s/api/alertmanager/grafana/config/api/v1/alerts", grafanaListedAddr)
 
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(org.RoleEditor),
+		DefaultOrgRole: string(user.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})

@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/resourcepermissions/types"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -320,7 +319,7 @@ func (s *Service) declareFixedRoles() error {
 				{Action: fmt.Sprintf("%s.permissions:read", s.options.Resource), Scope: scopeAll},
 			},
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	writerRole := accesscontrol.RoleRegistration{
@@ -332,7 +331,7 @@ func (s *Service) declareFixedRoles() error {
 				{Action: fmt.Sprintf("%s.permissions:write", s.options.Resource), Scope: scopeAll},
 			}),
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 
 	return s.ac.DeclareFixedRoles(readerRole, writerRole)

@@ -9,7 +9,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
@@ -294,7 +293,7 @@ func getPluginProxiedRequest(t *testing.T, secretsService secrets.Service, ctx *
 		route = &plugins.Route{
 			Path:    "api/v4/",
 			URL:     "https://www.google.com",
-			ReqRole: org.RoleEditor,
+			ReqRole: user.RoleEditor,
 		}
 	}
 	proxy := NewApiPluginProxy(ctx, "", route, "", cfg, pluginSettingsService, secretsService)

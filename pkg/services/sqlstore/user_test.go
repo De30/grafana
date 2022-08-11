@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/assert"
@@ -353,7 +352,7 @@ func TestIntegrationUserDataAccess(t *testing.T) {
 		})
 
 		err = ss.AddOrgUser(context.Background(), &models.AddOrgUserCommand{
-			LoginOrEmail: users[1].Login, Role: org.RoleViewer,
+			LoginOrEmail: users[1].Login, Role: user.RoleViewer,
 			OrgId: users[0].OrgID, UserId: users[1].ID,
 		})
 		require.Nil(t, err)
@@ -392,7 +391,7 @@ func TestIntegrationUserDataAccess(t *testing.T) {
 			}
 		})
 		err = ss.AddOrgUser(context.Background(), &models.AddOrgUserCommand{
-			LoginOrEmail: users[1].Login, Role: org.RoleViewer,
+			LoginOrEmail: users[1].Login, Role: user.RoleViewer,
 			OrgId: users[0].OrgID, UserId: users[1].ID,
 		})
 		require.Nil(t, err)

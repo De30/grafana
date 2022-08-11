@@ -23,7 +23,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/contexthandler/authproxy"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	"github.com/grafana/grafana/pkg/services/login"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/rendering"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -187,7 +186,7 @@ func (h *ContextHandler) initContextWithAnonymousUser(reqContext *models.ReqCont
 	reqContext.IsSignedIn = false
 	reqContext.AllowAnonymous = true
 	reqContext.SignedInUser = &user.SignedInUser{IsAnonymous: true}
-	reqContext.OrgRole = org.RoleType(h.Cfg.AnonymousOrgRole)
+	reqContext.OrgRole = user.RoleType(h.Cfg.AnonymousOrgRole)
 	reqContext.OrgId = orga.Id
 	reqContext.OrgName = orga.Name
 	return true
@@ -470,7 +469,7 @@ func (h *ContextHandler) initContextWithRenderAuth(reqContext *models.ReqContext
 	reqContext.SignedInUser = &user.SignedInUser{
 		OrgId:   renderUser.OrgID,
 		UserId:  renderUser.UserID,
-		OrgRole: org.RoleType(renderUser.OrgRole),
+		OrgRole: user.RoleType(renderUser.OrgRole),
 	}
 
 	// UserID can be 0 for background tasks and, in this case, there is no user info to retrieve

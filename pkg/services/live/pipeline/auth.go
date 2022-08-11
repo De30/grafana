@@ -3,15 +3,14 @@ package pipeline
 import (
 	"context"
 
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
 type RoleCheckAuthorizer struct {
-	role org.RoleType
+	role user.RoleType
 }
 
-func NewRoleCheckAuthorizer(role org.RoleType) *RoleCheckAuthorizer {
+func NewRoleCheckAuthorizer(role user.RoleType) *RoleCheckAuthorizer {
 	return &RoleCheckAuthorizer{role: role}
 }
 

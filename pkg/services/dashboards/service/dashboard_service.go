@@ -15,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -220,7 +219,7 @@ func (dr *DashboardServiceImpl) SaveProvisionedDashboard(ctx context.Context, dt
 
 	dto.User = &user.SignedInUser{
 		UserId:  0,
-		OrgRole: org.RoleAdmin,
+		OrgRole: user.RoleAdmin,
 		OrgId:   dto.OrgId,
 		Permissions: map[int64]map[string][]string{
 			dto.OrgId: provisionerPermissions,
@@ -270,7 +269,7 @@ func (dr *DashboardServiceImpl) SaveProvisionedDashboard(ctx context.Context, dt
 func (dr *DashboardServiceImpl) SaveFolderForProvisionedDashboards(ctx context.Context, dto *dashboards.SaveDashboardDTO) (*models.Dashboard, error) {
 	dto.User = &user.SignedInUser{
 		UserId:      0,
-		OrgRole:     org.RoleAdmin,
+		OrgRole:     user.RoleAdmin,
 		Permissions: map[int64]map[string][]string{dto.OrgId: provisionerPermissions},
 	}
 	cmd, err := dr.BuildSaveDashboardCommand(ctx, dto, false, false)
@@ -370,8 +369,8 @@ func (dr *DashboardServiceImpl) GetDashboardByPublicUid(ctx context.Context, das
 }
 
 func (dr *DashboardServiceImpl) MakeUserAdmin(ctx context.Context, orgID int64, userID int64, dashboardID int64, setViewAndEditPermissions bool) error {
-	rtEditor := org.RoleEditor
-	rtViewer := org.RoleViewer
+	rtEditor := user.RoleEditor
+	rtViewer := user.RoleViewer
 
 	items := []*models.DashboardACL{
 		{
@@ -480,8 +479,8 @@ func (dr *DashboardServiceImpl) setDefaultPermissions(ctx context.Context, dto *
 
 		if !inFolder {
 			permissions = append(permissions, []accesscontrol.SetResourcePermissionCommand{
-				{BuiltinRole: string(org.RoleEditor), Permission: models.PERMISSION_EDIT.String()},
-				{BuiltinRole: string(org.RoleViewer), Permission: models.PERMISSION_VIEW.String()},
+				{BuiltinRole: string(user.RoleEditor), Permission: models.PERMISSION_EDIT.String()},
+				{BuiltinRole: string(user.RoleViewer), Permission: models.PERMISSION_VIEW.String()},
 			}...)
 		}
 

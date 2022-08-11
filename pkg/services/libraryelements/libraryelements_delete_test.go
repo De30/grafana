@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/web"
 	"github.com/stretchr/testify/require"
 
@@ -36,7 +36,7 @@ func TestDeleteLibraryElement(t *testing.T) {
 		func(t *testing.T, sc scenarioContext) {
 			sc.ctx.Req = web.SetURLParams(sc.ctx.Req, map[string]string{":uid": sc.initialResult.Result.UID})
 			sc.reqContext.SignedInUser.OrgId = 2
-			sc.reqContext.SignedInUser.OrgRole = org.RoleAdmin
+			sc.reqContext.SignedInUser.OrgRole = user.RoleAdmin
 			resp := sc.service.deleteHandler(sc.reqContext)
 			require.Equal(t, 404, resp.Status())
 		})

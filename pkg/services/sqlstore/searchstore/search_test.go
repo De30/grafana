@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/permissions"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
@@ -28,7 +27,7 @@ func TestBuilder_EqualResults_Basic(t *testing.T) {
 	user := &user.SignedInUser{
 		UserId:  1,
 		OrgId:   1,
-		OrgRole: org.RoleEditor,
+		OrgRole: user.RoleEditor,
 	}
 
 	db := setupTestEnvironment(t)
@@ -70,7 +69,7 @@ func TestBuilder_Pagination(t *testing.T) {
 	user := &user.SignedInUser{
 		UserId:  1,
 		OrgId:   1,
-		OrgRole: org.RoleViewer,
+		OrgRole: user.RoleViewer,
 	}
 
 	db := setupTestEnvironment(t)
@@ -116,7 +115,7 @@ func TestBuilder_Permissions(t *testing.T) {
 	user := &user.SignedInUser{
 		UserId:  1,
 		OrgId:   1,
-		OrgRole: org.RoleViewer,
+		OrgRole: user.RoleViewer,
 	}
 
 	db := setupTestEnvironment(t)

@@ -7,10 +7,10 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts/database"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 type CrawlerAuthSetupService interface {
@@ -38,7 +38,7 @@ type OSSCrawlerAuthSetupService struct {
 type CrawlerAuth interface {
 	GetUserId(orgId int64) int64
 	GetLogin(orgId int64) string
-	GetOrgRole() org.RoleType
+	GetOrgRole() user.RoleType
 }
 
 func (o *OSSCrawlerAuthSetupService) findAllOrgIds(ctx context.Context) ([]int64, error) {
@@ -59,10 +59,10 @@ func (o *OSSCrawlerAuthSetupService) findAllOrgIds(ctx context.Context) ([]int64
 type crawlerAuth struct {
 	accountIdByOrgId map[int64]int64
 	loginByOrgId     map[int64]string
-	orgRole          org.RoleType
+	orgRole          user.RoleType
 }
 
-func (o *crawlerAuth) GetOrgRole() org.RoleType {
+func (o *crawlerAuth) GetOrgRole() user.RoleType {
 	return o.orgRole
 }
 
@@ -82,7 +82,7 @@ func (o *OSSCrawlerAuthSetupService) Setup(ctx context.Context) (CrawlerAuth, er
 
 	// userId:0 and RoleAdmin grants the crawler process permissions to view all dashboards in all folders & orgs
 	// the process doesn't and shouldn't actually need to edit/modify any resources from the UI
-	orgRole := org.RoleAdmin
+	orgRole := user.RoleAdmin
 
 	accountIdByOrgId := make(map[int64]int64)
 	loginByOrgId := make(map[int64]string)

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/teamguardian/database"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/mock"
@@ -20,12 +19,12 @@ func TestUpdateTeam(t *testing.T) {
 		admin := user.SignedInUser{
 			UserId:  1,
 			OrgId:   1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 		}
 		editor := user.SignedInUser{
 			UserId:  2,
 			OrgId:   1,
-			OrgRole: org.RoleEditor,
+			OrgRole: user.RoleEditor,
 		}
 		testTeam := models.Team{
 			Id:    1,

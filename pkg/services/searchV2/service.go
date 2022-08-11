@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/store"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -134,7 +133,7 @@ func (s *StandardSearchService) getUser(ctx context.Context, backendUser *backen
 		usr = &user.SignedInUser{
 			OrgId:       orga.Id,
 			OrgName:     orga.Name,
-			OrgRole:     org.RoleType(s.cfg.AnonymousOrgRole),
+			OrgRole:     user.RoleType(s.cfg.AnonymousOrgRole),
 			IsAnonymous: true,
 		}
 	} else {

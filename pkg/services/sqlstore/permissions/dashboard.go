@@ -6,14 +6,13 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
 type DashboardPermissionFilter struct {
-	OrgRole         org.RoleType
+	OrgRole         user.RoleType
 	Dialect         migrator.Dialect
 	UserId          int64
 	OrgId           int64
@@ -21,13 +20,13 @@ type DashboardPermissionFilter struct {
 }
 
 func (d DashboardPermissionFilter) Where() (string, []interface{}) {
-	if d.OrgRole == org.RoleAdmin {
+	if d.OrgRole == user.RoleAdmin {
 		return "", nil
 	}
 
 	okRoles := []interface{}{d.OrgRole}
-	if d.OrgRole == org.RoleEditor {
-		okRoles = append(okRoles, org.RoleViewer)
+	if d.OrgRole == user.RoleEditor {
+		okRoles = append(okRoles, user.RoleViewer)
 	}
 
 	falseStr := d.Dialect.BooleanStr(false)

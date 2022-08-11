@@ -21,7 +21,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/publicdashboards"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -77,7 +76,7 @@ func setupTestServer(
 			Logger:     log.New("publicdashboards-test"),
 
 			// Set signed in user. We might not actually need to do this.
-			SignedInUser: &user.SignedInUser{UserId: 1, OrgId: 1, OrgRole: org.RoleAdmin, Login: "testUser"},
+			SignedInUser: &user.SignedInUser{UserId: 1, OrgId: 1, OrgRole: user.RoleAdmin, Login: "testUser"},
 		}
 		c.Req = c.Req.WithContext(ctxkey.Set(c.Req.Context(), ctx))
 	})

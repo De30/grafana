@@ -11,7 +11,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 func TestServer_getSearchRequest(t *testing.T) {
@@ -127,7 +127,7 @@ func TestSerializeUsers(t *testing.T) {
 				Groups: []*GroupToOrgRole{{
 					GroupDN: "foo",
 					OrgId:   1,
-					OrgRole: org.RoleEditor,
+					OrgRole: user.RoleEditor,
 				}},
 			},
 			Connection: &MockConnection{},
@@ -181,7 +181,7 @@ func TestServer_validateGrafanaUser(t *testing.T) {
 
 		user := &models.ExternalUserInfo{
 			Login: "markelog",
-			OrgRoles: map[int64]org.RoleType{
+			OrgRoles: map[int64]user.RoleType{
 				1: "test",
 			},
 		}

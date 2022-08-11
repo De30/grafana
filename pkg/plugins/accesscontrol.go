@@ -2,7 +2,7 @@ package plugins
 
 import (
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 const (
@@ -24,7 +24,7 @@ func DeclareRBACRoles(acService ac.AccessControl) error {
 				{Action: ActionAppAccess, Scope: ScopeProvider.GetResourceAllScope()},
 			},
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 	return acService.DeclareFixedRoles(AppPluginsReader)
 }

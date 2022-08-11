@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 type FakeOrgService struct {
@@ -19,11 +20,11 @@ func (f *FakeOrgService) GetIDForNewUser(ctx context.Context, cmd org.GetOrgIDFo
 	return f.ExpectedOrgUserID, f.ExpectedError
 }
 
-func (f *FakeOrgService) Insert(ctx context.Context, cmd *org.OrgUser) (int64, error) {
+func (f *FakeOrgService) Insert(ctx context.Context, cmd *user.OrgUser) (int64, error) {
 	return f.ExpectedOrgUserID, f.ExpectedError
 }
 
-func (f *FakeOrgService) InsertOrgUser(ctx context.Context, cmd *org.OrgUser) (int64, error) {
+func (f *FakeOrgService) InsertOrgUser(ctx context.Context, cmd *user.OrgUser) (int64, error) {
 	return f.ExpectedOrgUserID, f.ExpectedError
 }
 

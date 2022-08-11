@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
@@ -20,7 +19,7 @@ type APIKey struct {
 	OrgId            int64
 	Name             string
 	Key              string
-	Role             org.RoleType
+	Role             user.RoleType
 	Created          time.Time
 	Updated          time.Time
 	LastUsedAt       *time.Time `xorm:"last_used_at"`
@@ -32,12 +31,12 @@ func (k APIKey) TableName() string { return "api_key" }
 
 // swagger:model
 type AddCommand struct {
-	Name          string       `json:"name" binding:"Required"`
-	Role          org.RoleType `json:"role" binding:"Required"`
-	OrgId         int64        `json:"-"`
-	Key           string       `json:"-"`
-	SecondsToLive int64        `json:"secondsToLive"`
-	Result        *APIKey      `json:"-"`
+	Name          string        `json:"name" binding:"Required"`
+	Role          user.RoleType `json:"role" binding:"Required"`
+	OrgId         int64         `json:"-"`
+	Key           string        `json:"-"`
+	SecondsToLive int64         `json:"secondsToLive"`
+	Result        *APIKey       `json:"-"`
 }
 
 type DeleteCommand struct {

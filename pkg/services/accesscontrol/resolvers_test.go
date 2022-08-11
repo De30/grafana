@@ -8,7 +8,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/datasources"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
@@ -55,7 +54,7 @@ var testUser = &user.SignedInUser{
 	UserId:  2,
 	OrgId:   3,
 	OrgName: "TestOrg",
-	OrgRole: org.RoleViewer,
+	OrgRole: user.RoleViewer,
 	Login:   "testUser",
 	Name:    "Test User",
 	Email:   "testuser@example.org",

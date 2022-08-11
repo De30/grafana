@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/db"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -73,10 +74,18 @@ func (s *Service) GetIDForNewUser(ctx context.Context, cmd org.GetOrgIDForNewUse
 	return s.store.Insert(ctx, &orga)
 }
 
-func (s *Service) InsertOrgUser(ctx context.Context, orguser *org.OrgUser) (int64, error) {
+func (s *Service) InsertOrgUser(ctx context.Context, orguser *user.OrgUser) (int64, error) {
 	return s.store.InsertOrgUser(ctx, orguser)
 }
 
 func (s *Service) DeleteUserFromAll(ctx context.Context, userID int64) error {
 	return s.store.DeleteUserFromAll(ctx, userID)
+}
+
+func (s *Service) CreateOrg(ctx context.Context, cmd *org.CreateOrgCommand) error {
+	return s.store.CreateOrg(ctx, cmd)
+}
+
+func (s *Service) CreateOrgWithMember(ctx context.Context, name string, userID int64) (*org.Org, error) {
+	return s.store.CreateOrgWithMember(name, userID)
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -184,9 +183,9 @@ func (a *AccessControlDashboardGuardian) GetACL() ([]*models.DashboardACLInfoDTO
 			continue
 		}
 
-		var role *org.RoleType
+		var role *user.RoleType
 		if p.BuiltInRole != "" {
-			tmp := org.RoleType(p.BuiltInRole)
+			tmp := user.RoleType(p.BuiltInRole)
 			role = &tmp
 		}
 

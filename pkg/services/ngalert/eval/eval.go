@@ -17,7 +17,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -198,7 +197,7 @@ func getExprRequest(ctx AlertExecCtx, data []models.AlertQuery, now time.Time, d
 			} else {
 				ds, err = dsCacheService.GetDatasourceByUID(ctx.Ctx, q.DatasourceUID, &user.SignedInUser{
 					OrgId:   ctx.OrgID,
-					OrgRole: org.RoleAdmin, // Get DS as admin for service, API calls (test/post) must check permissions based on user.
+					OrgRole: user.RoleAdmin, // Get DS as admin for service, API calls (test/post) must check permissions based on user.
 				}, true)
 				if err != nil {
 					return nil, err

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // swagger:model
@@ -20,7 +20,7 @@ type NewApiKeyResult struct {
 type ApiKeyDTO struct {
 	Id            int64                  `json:"id"`
 	Name          string                 `json:"name"`
-	Role          org.RoleType           `json:"role"`
+	Role          user.RoleType          `json:"role"`
 	Expiration    *time.Time             `json:"expiration,omitempty"`
 	AccessControl accesscontrol.Metadata `json:"accessControl,omitempty"`
 }

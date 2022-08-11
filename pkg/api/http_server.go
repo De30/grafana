@@ -59,6 +59,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/ngalert"
 	"github.com/grafana/grafana/pkg/services/notifications"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/playlist"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"
@@ -177,6 +178,7 @@ type HTTPServer struct {
 	kvStore                      kvstore.KVStore
 	secretsMigrator              secrets.Migrator
 	userService                  user.Service
+	orgService                   org.Service
 }
 
 type ServerOptions struct {
@@ -212,7 +214,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	dashboardPermissionsService accesscontrol.DashboardPermissionsService, dashboardVersionService dashver.Service,
 	starService star.Service, csrfService csrf.Service, coremodels *registry.Base,
 	playlistService playlist.Service, apiKeyService apikey.Service, kvStore kvstore.KVStore, secretsMigrator secrets.Migrator, remoteSecretsCheck secretsKV.UseRemoteSecretsPluginCheck,
-	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service) (*HTTPServer, error) {
+	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, orgService org.Service) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
 

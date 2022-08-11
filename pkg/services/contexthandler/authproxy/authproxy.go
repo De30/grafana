@@ -19,7 +19,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/ldap"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/multildap"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -286,9 +285,9 @@ func (auth *AuthProxy) loginViaHeader(reqCtx *models.ReqContext) (int64, error) 
 		case "Role":
 			// If Role header is specified, we update the user role of the default org
 			if header != "" {
-				rt := org.RoleType(header)
+				rt := user.RoleType(header)
 				if rt.IsValid() {
-					extUser.OrgRoles = map[int64]org.RoleType{}
+					extUser.OrgRoles = map[int64]user.RoleType{}
 					orgID := int64(1)
 					if setting.AutoAssignOrg && setting.AutoAssignOrgId > 0 {
 						orgID = int64(setting.AutoAssignOrgId)

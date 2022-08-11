@@ -7,7 +7,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -99,7 +98,7 @@ func (g *dashboardGuardianImpl) CanCreate(_ int64, _ bool) (bool, error) {
 }
 
 func (g *dashboardGuardianImpl) HasPermission(permission models.PermissionType) (bool, error) {
-	if g.user.OrgRole == org.RoleAdmin {
+	if g.user.OrgRole == user.RoleAdmin {
 		return g.logHasPermissionResult(permission, true, nil)
 	}
 
@@ -176,7 +175,7 @@ func (g *dashboardGuardianImpl) checkACL(permission models.PermissionType, acl [
 
 func (g *dashboardGuardianImpl) CheckPermissionBeforeUpdate(permission models.PermissionType, updatePermissions []*models.DashboardACL) (bool, error) {
 	acl := []*models.DashboardACLInfoDTO{}
-	adminRole := org.RoleAdmin
+	adminRole := user.RoleAdmin
 	everyoneWithAdminRole := &models.DashboardACLInfoDTO{DashboardId: g.dashId, UserId: 0, TeamId: 0, Role: &adminRole, Permission: models.PERMISSION_ADMIN}
 
 	// validate that duplicate permissions don't exists
@@ -213,7 +212,7 @@ func (g *dashboardGuardianImpl) CheckPermissionBeforeUpdate(permission models.Pe
 		}
 	}
 
-	if g.user.OrgRole == org.RoleAdmin {
+	if g.user.OrgRole == user.RoleAdmin {
 		return true, nil
 	}
 

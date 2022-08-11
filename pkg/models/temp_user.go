@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // Typed errors
@@ -29,7 +29,7 @@ type TempUser struct {
 	Version         int
 	Email           string
 	Name            string
-	Role            org.RoleType
+	Role            user.RoleType
 	InvitedByUserId int64
 	Status          TempUserStatus
 
@@ -52,7 +52,7 @@ type CreateTempUserCommand struct {
 	InvitedByUserId int64
 	Status          TempUserStatus
 	Code            string
-	Role            org.RoleType
+	Role            user.RoleType
 	RemoteAddr      string
 
 	Result *TempUser
@@ -92,7 +92,7 @@ type TempUserDTO struct {
 	OrgId          int64          `json:"orgId"`
 	Name           string         `json:"name"`
 	Email          string         `json:"email"`
-	Role           org.RoleType   `json:"role"`
+	Role           user.RoleType  `json:"role"`
 	InvitedByLogin string         `json:"invitedByLogin"`
 	InvitedByEmail string         `json:"invitedByEmail"`
 	InvitedByName  string         `json:"invitedByName"`

@@ -5,7 +5,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
@@ -79,7 +78,7 @@ func (ctx *ReqContext) JsonApiErr(status int, message string, err error) {
 	ctx.JSON(status, resp)
 }
 
-func (ctx *ReqContext) HasUserRole(role org.RoleType) bool {
+func (ctx *ReqContext) HasUserRole(role user.RoleType) bool {
 	return ctx.OrgRole.Includes(role)
 }
 

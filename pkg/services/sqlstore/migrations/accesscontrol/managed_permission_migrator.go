@@ -14,8 +14,8 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/services/user"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"xorm.io/xorm"
@@ -80,7 +80,7 @@ func (sp *managedPermissionMigrator) Exec(sess *xorm.Session, mg *migrator.Migra
 
 		// Add parent roles + permissions to the map as "true" -- need to be inserted
 		basicRoleName := ParseRoleFromName(roleName)
-		for _, parent := range org.RoleType(basicRoleName).Parents() {
+		for _, parent := range user.RoleType(basicRoleName).Parents() {
 			parentManagedRoleName := "managed:builtins:" + strings.ToLower(string(parent)) + ":permissions"
 
 			if _, ok := permissionMap[p.OrgID][parentManagedRoleName]; !ok {

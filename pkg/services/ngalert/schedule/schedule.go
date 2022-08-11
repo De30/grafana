@@ -16,7 +16,6 @@ import (
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/state"
 	"github.com/grafana/grafana/pkg/services/ngalert/store"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 
@@ -471,7 +470,7 @@ func (sch *schedule) getRuleExtraLabels(ctx context.Context, alertRule *ngmodels
 
 	user := &user.SignedInUser{
 		UserId:  0,
-		OrgRole: org.RoleAdmin,
+		OrgRole: user.RoleAdmin,
 		OrgId:   alertRule.OrgID,
 	}
 

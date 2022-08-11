@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/grafana/pkg/components/simplejson"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/web"
 	"github.com/stretchr/testify/require"
 
@@ -184,7 +184,7 @@ func TestGetLibraryElement(t *testing.T) {
 	scenarioWithPanel(t, "When an admin tries to get a library panel that exists in an other org, it should fail",
 		func(t *testing.T, sc scenarioContext) {
 			sc.reqContext.SignedInUser.OrgId = 2
-			sc.reqContext.SignedInUser.OrgRole = org.RoleAdmin
+			sc.reqContext.SignedInUser.OrgRole = user.RoleAdmin
 
 			// by uid
 			sc.ctx.Req = web.SetURLParams(sc.ctx.Req, map[string]string{":uid": sc.initialResult.Result.UID})

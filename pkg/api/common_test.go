@@ -39,7 +39,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/licensing"
 	"github.com/grafana/grafana/pkg/services/login/loginservice"
 	"github.com/grafana/grafana/pkg/services/login/logintest"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/preference/preftest"
 	"github.com/grafana/grafana/pkg/services/quota/quotaimpl"
 	"github.com/grafana/grafana/pkg/services/rendering"
@@ -56,10 +55,10 @@ import (
 )
 
 func loggedInUserScenario(t *testing.T, desc string, url string, routePattern string, fn scenarioFunc, sqlStore sqlstore.Store) {
-	loggedInUserScenarioWithRole(t, desc, "GET", url, routePattern, org.RoleEditor, fn, sqlStore)
+	loggedInUserScenarioWithRole(t, desc, "GET", url, routePattern, user.RoleEditor, fn, sqlStore)
 }
 
-func loggedInUserScenarioWithRole(t *testing.T, desc string, method string, url string, routePattern string, role org.RoleType, fn scenarioFunc, sqlStore sqlstore.Store) {
+func loggedInUserScenarioWithRole(t *testing.T, desc string, method string, url string, routePattern string, role user.RoleType, fn scenarioFunc, sqlStore sqlstore.Store) {
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		sc := setupScenarioContext(t, url)
 		sc.sqlStore = sqlStore
@@ -312,17 +311,17 @@ func setInitCtxSignedInUser(initCtx *models.ReqContext, user user.SignedInUser) 
 
 func setInitCtxSignedInViewer(initCtx *models.ReqContext) {
 	initCtx.IsSignedIn = true
-	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: org.RoleViewer, Login: testUserLogin}
+	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: user.RoleViewer, Login: testUserLogin}
 }
 
 func setInitCtxSignedInEditor(initCtx *models.ReqContext) {
 	initCtx.IsSignedIn = true
-	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: org.RoleEditor, Login: testUserLogin}
+	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: user.RoleEditor, Login: testUserLogin}
 }
 
 func setInitCtxSignedInOrgAdmin(initCtx *models.ReqContext) {
 	initCtx.IsSignedIn = true
-	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: org.RoleAdmin, Login: testUserLogin}
+	initCtx.SignedInUser = &user.SignedInUser{UserId: testUserID, OrgId: 1, OrgRole: user.RoleAdmin, Login: testUserLogin}
 }
 
 func setupSimpleHTTPServer(features *featuremgmt.FeatureManager) *HTTPServer {
@@ -480,8 +479,8 @@ func SetupAPITestServer(t *testing.T, opts ...APITestServerOption) *webtest.Serv
 }
 
 var (
-	viewerRole = org.RoleViewer
-	editorRole = org.RoleEditor
+	viewerRole = user.RoleViewer
+	editorRole = user.RoleEditor
 )
 
 type setUpConf struct {

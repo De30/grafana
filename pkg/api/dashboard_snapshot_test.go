@@ -18,8 +18,8 @@ import (
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboardsnapshots"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
@@ -66,7 +66,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 
 	t.Run("When user has editor role and is not in the ACL", func(t *testing.T) {
 		loggedInUserScenarioWithRole(t, "Should not be able to delete snapshot when calling DELETE on",
-			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				hs := &HTTPServer{dashboardsnapshotsService: setUpSnapshotTest(t, 0, "")}
 				sc.handlerFunc = hs.DeleteDashboardSnapshot
 
@@ -117,7 +117,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 		}).Return(nil)
 
 		loggedInUserScenarioWithRole(t, "Should be able to delete a snapshot when calling DELETE on", "DELETE",
-			"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				guardian.InitLegacyGuardian(sc.sqlStore, dashSvc)
 				var externalRequest *http.Request
 				ts := setupRemoteServer(func(rw http.ResponseWriter, req *http.Request) {
@@ -141,7 +141,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 
 	t.Run("When user is editor and creator of the snapshot", func(t *testing.T) {
 		loggedInUserScenarioWithRole(t, "Should be able to delete a snapshot when calling DELETE on",
-			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				d := setUpSnapshotTest(t, testUserID, "")
 				hs := &HTTPServer{dashboardsnapshotsService: d}
 
@@ -160,7 +160,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 	t.Run("When deleting an external snapshot", func(t *testing.T) {
 		loggedInUserScenarioWithRole(t,
 			"Should gracefully delete local snapshot when remote snapshot has already been removed when calling DELETE on",
-			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				var writeErr error
 				ts := setupRemoteServer(func(rw http.ResponseWriter, req *http.Request) {
 					rw.WriteHeader(500)
@@ -181,7 +181,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 
 		loggedInUserScenarioWithRole(t,
 			"Should fail to delete local snapshot when an unexpected 500 error occurs when calling DELETE on", "DELETE",
-			"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				var writeErr error
 				ts := setupRemoteServer(func(rw http.ResponseWriter, req *http.Request) {
 					rw.WriteHeader(500)
@@ -197,7 +197,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 
 		loggedInUserScenarioWithRole(t,
 			"Should fail to delete local snapshot when an unexpected remote error occurs when calling DELETE on",
-			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"DELETE", "/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				ts := setupRemoteServer(func(rw http.ResponseWriter, req *http.Request) {
 					rw.WriteHeader(404)
 				})
@@ -209,7 +209,7 @@ func TestDashboardSnapshotAPIEndpoint_singleSnapshot(t *testing.T) {
 			}, sqlmock)
 
 		loggedInUserScenarioWithRole(t, "Should be able to read a snapshot's unencrypted data when calling GET on",
-			"GET", "/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+			"GET", "/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 				hs := &HTTPServer{dashboardsnapshotsService: setUpSnapshotTest(t, 0, "")}
 				sc.handlerFunc = hs.GetDashboardSnapshot
 				sc.fakeReqWithParams("GET", sc.url, map[string]string{"key": "12345"}).exec()
@@ -244,7 +244,7 @@ func TestGetDashboardSnapshotNotFound(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"GET /snapshots/{key} should return 404 when the snapshot does not exist", "GET",
-		"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.GetDashboardSnapshot
@@ -255,7 +255,7 @@ func TestGetDashboardSnapshotNotFound(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"DELETE /snapshots/{key} should return 404 when the snapshot does not exist", "DELETE",
-		"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.DeleteDashboardSnapshot
@@ -266,7 +266,7 @@ func TestGetDashboardSnapshotNotFound(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"GET /snapshots-delete/{deleteKey} should return 404 when the snapshot does not exist", "DELETE",
-		"/api/snapshots-delete/12345", "/api/snapshots-delete/:deleteKey", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots-delete/12345", "/api/snapshots-delete/:deleteKey", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.DeleteDashboardSnapshotByDeleteKey
@@ -294,7 +294,7 @@ func TestGetDashboardSnapshotFailure(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"GET /snapshots/{key} should return 404 when the snapshot does not exist", "GET",
-		"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.GetDashboardSnapshot
@@ -305,7 +305,7 @@ func TestGetDashboardSnapshotFailure(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"DELETE /snapshots/{key} should return 404 when the snapshot does not exist", "DELETE",
-		"/api/snapshots/12345", "/api/snapshots/:key", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots/12345", "/api/snapshots/:key", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.DeleteDashboardSnapshot
@@ -316,7 +316,7 @@ func TestGetDashboardSnapshotFailure(t *testing.T) {
 
 	loggedInUserScenarioWithRole(t,
 		"GET /snapshots-delete/{deleteKey} should return 404 when the snapshot does not exist", "DELETE",
-		"/api/snapshots-delete/12345", "/api/snapshots-delete/:deleteKey", org.RoleEditor, func(sc *scenarioContext) {
+		"/api/snapshots-delete/12345", "/api/snapshots-delete/:deleteKey", user.RoleEditor, func(sc *scenarioContext) {
 			d := setUpSnapshotTest(t)
 			hs := &HTTPServer{dashboardsnapshotsService: d}
 			sc.handlerFunc = hs.DeleteDashboardSnapshotByDeleteKey

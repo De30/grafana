@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -54,7 +53,7 @@ type evaluatingPermissionsTestCase struct {
 
 type userTestCase struct {
 	name           string
-	orgRole        org.RoleType
+	orgRole        user.RoleType
 	isGrafanaAdmin bool
 }
 
@@ -68,7 +67,7 @@ func TestEvaluatingPermissions(t *testing.T) {
 			desc: "should successfully evaluate access to the endpoint",
 			user: userTestCase{
 				name:           "testuser",
-				orgRole:        org.RoleViewer,
+				orgRole:        user.RoleViewer,
 				isGrafanaAdmin: true,
 			},
 			endpoints: []endpointTestCase{
@@ -81,7 +80,7 @@ func TestEvaluatingPermissions(t *testing.T) {
 			desc: "should restrict access to the unauthorized endpoints",
 			user: userTestCase{
 				name:           "testuser",
-				orgRole:        org.RoleViewer,
+				orgRole:        user.RoleViewer,
 				isGrafanaAdmin: false,
 			},
 			endpoints: []endpointTestCase{
@@ -363,7 +362,7 @@ func TestOSSAccessControlService_GetUserPermissions(t *testing.T) {
 		UserId:  2,
 		OrgId:   3,
 		OrgName: "TestOrg",
-		OrgRole: org.RoleViewer,
+		OrgRole: user.RoleViewer,
 		Login:   "testUser",
 		Name:    "Test User",
 		Email:   "testuser@example.org",
@@ -425,7 +424,7 @@ func TestOSSAccessControlService_Evaluate(t *testing.T) {
 		UserId:  2,
 		OrgId:   3,
 		OrgName: "TestOrg",
-		OrgRole: org.RoleViewer,
+		OrgRole: user.RoleViewer,
 		Login:   "testUser",
 		Name:    "Test User",
 		Email:   "testuser@example.org",

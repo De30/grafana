@@ -14,7 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/annotations"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -506,7 +505,7 @@ func (hs *HTTPServer) canSaveAnnotation(c *models.ReqContext, annotation *annota
 		return canEditDashboard(c, annotation.DashboardId)
 	} else {
 		if hs.AccessControl.IsDisabled() {
-			return c.SignedInUser.HasRole(org.RoleEditor), nil
+			return c.SignedInUser.HasRole(user.RoleEditor), nil
 		}
 		return true, nil
 	}
@@ -622,7 +621,7 @@ func (hs *HTTPServer) canCreateAnnotation(c *models.ReqContext, dashboardId int6
 			evaluator := accesscontrol.EvalPermission(accesscontrol.ActionAnnotationsCreate, accesscontrol.ScopeAnnotationsTypeOrganization)
 			return hs.AccessControl.Evaluate(c.Req.Context(), c.SignedInUser, evaluator)
 		} else {
-			return c.SignedInUser.HasRole(org.RoleEditor), nil
+			return c.SignedInUser.HasRole(user.RoleEditor), nil
 		}
 	}
 }

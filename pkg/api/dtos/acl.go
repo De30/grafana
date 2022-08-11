@@ -2,7 +2,7 @@ package dtos
 
 import (
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // swagger:model
@@ -12,9 +12,9 @@ type UpdateDashboardACLCommand struct {
 
 // swagger:model
 type DashboardACLUpdateItem struct {
-	UserID int64         `json:"userId"`
-	TeamID int64         `json:"teamId"`
-	Role   *org.RoleType `json:"role,omitempty"`
+	UserID int64          `json:"userId"`
+	TeamID int64          `json:"teamId"`
+	Role   *user.RoleType `json:"role,omitempty"`
 	// Permission level
 	// Description:
 	// * `1` - View

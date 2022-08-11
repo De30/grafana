@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/services/annotations"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // RoleRegistration stores a role and its assignments to built-in roles
@@ -410,7 +410,7 @@ func BuiltInRolesWithParents(builtInRoles []string) map[string]struct{} {
 	for _, br := range builtInRoles {
 		res[br] = struct{}{}
 		if br != RoleGrafanaAdmin {
-			for _, parent := range org.RoleType(br).Parents() {
+			for _, parent := range user.RoleType(br).Parents() {
 				res[string(parent)] = struct{}{}
 			}
 		}

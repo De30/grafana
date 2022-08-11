@@ -4,7 +4,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 const AlertRolesGroup = "Alerting"
@@ -140,7 +140,7 @@ var (
 			Group:       AlertRolesGroup,
 			Permissions: accesscontrol.ConcatPermissions(rulesReaderRole.Role.Permissions, instancesReaderRole.Role.Permissions, notificationsReaderRole.Role.Permissions),
 		},
-		Grants: []string{string(org.RoleViewer)},
+		Grants: []string{string(user.RoleViewer)},
 	}
 
 	alertingWriterRole = accesscontrol.RoleRegistration{
@@ -151,7 +151,7 @@ var (
 			Group:       AlertRolesGroup,
 			Permissions: accesscontrol.ConcatPermissions(rulesWriterRole.Role.Permissions, instancesWriterRole.Role.Permissions, notificationsWriterRole.Role.Permissions),
 		},
-		Grants: []string{string(org.RoleEditor), string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleEditor), string(user.RoleAdmin)},
 	}
 
 	alertingProvisionerRole = accesscontrol.RoleRegistration{
@@ -169,7 +169,7 @@ var (
 				},
 			},
 		},
-		Grants: []string{string(org.RoleAdmin)},
+		Grants: []string{string(user.RoleAdmin)},
 	}
 )
 

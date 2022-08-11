@@ -10,7 +10,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/resourcepermissions/types"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 )
@@ -91,10 +90,10 @@ func TestAccessControlStore_GetUserPermissions(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			store, sql := setupTestEnv(t)
 
-			user, team := createUserAndTeam(t, sql, tt.orgID)
+			u, team := createUserAndTeam(t, sql, tt.orgID)
 
 			for _, id := range tt.userPermissions {
-				_, err := store.SetUserResourcePermission(context.Background(), tt.orgID, accesscontrol.User{ID: user.ID}, types.SetResourcePermissionCommand{
+				_, err := store.SetUserResourcePermission(context.Background(), tt.orgID, accesscontrol.User{ID: u.ID}, types.SetResourcePermissionCommand{
 					Actions:    []string{"dashboards:write"},
 					Resource:   "dashboards",
 					ResourceID: id,
@@ -121,7 +120,7 @@ func TestAccessControlStore_GetUserPermissions(t *testing.T) {
 			}
 
 			var roles []string
-			role := org.RoleType(tt.role)
+			role := user.RoleType(tt.role)
 
 			if role.IsValid() {
 				roles = append(roles, string(role))
@@ -130,7 +129,7 @@ func TestAccessControlStore_GetUserPermissions(t *testing.T) {
 				}
 			}
 
-			userID := user.ID
+			userID := u.ID
 			if tt.anonymousUser {
 				userID = 0
 			}

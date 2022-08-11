@@ -14,7 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
 	"github.com/grafana/grafana/pkg/services/star"
@@ -309,7 +308,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			OrgId: 1,
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionFoldersRead: []string{dashboards.ScopeFoldersAll}},
 				},
@@ -333,7 +332,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			Limit: 1,
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionFoldersRead: []string{dashboards.ScopeFoldersAll}},
 				},
@@ -355,7 +354,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			Page:  2,
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {
 						dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll},
@@ -380,7 +379,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			Tags:  []string{"prod"},
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 				},
@@ -401,7 +400,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			FolderIds: []int64{savedFolder.Id},
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 				},
@@ -427,7 +426,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			DashboardIds: []int64{savedDash.Id, savedDash2.Id},
 			SignedInUser: &user.SignedInUser{
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 				},
@@ -465,7 +464,7 @@ func TestIntegrationDashboardDataAccess(t *testing.T) {
 			SignedInUser: &user.SignedInUser{
 				UserId:  10,
 				OrgId:   1,
-				OrgRole: org.RoleEditor,
+				OrgRole: user.RoleEditor,
 				Permissions: map[int64]map[string][]string{
 					1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 				},
@@ -517,7 +516,7 @@ func TestIntegrationDashboard_SortingOptions(t *testing.T) {
 		SignedInUser: &user.SignedInUser{
 			OrgId:   1,
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 			Permissions: map[int64]map[string][]string{
 				1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 			},
@@ -533,7 +532,7 @@ func TestIntegrationDashboard_SortingOptions(t *testing.T) {
 		SignedInUser: &user.SignedInUser{
 			OrgId:   1,
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 			Permissions: map[int64]map[string][]string{
 				1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 			},
@@ -563,7 +562,7 @@ func TestIntegrationDashboard_Filter(t *testing.T) {
 		SignedInUser: &user.SignedInUser{
 			OrgId:   1,
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 			Permissions: map[int64]map[string][]string{
 				1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 			},
@@ -577,7 +576,7 @@ func TestIntegrationDashboard_Filter(t *testing.T) {
 		SignedInUser: &user.SignedInUser{
 			OrgId:   1,
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 			Permissions: map[int64]map[string][]string{
 				1: {dashboards.ActionDashboardsRead: []string{dashboards.ScopeDashboardsAll}},
 			},
@@ -679,7 +678,7 @@ func CreateUser(t *testing.T, sqlStore *sqlstore.SQLStore, name string, role str
 	q1 := models.GetUserOrgListQuery{UserId: currentUser.ID}
 	err = sqlStore.GetUserOrgList(context.Background(), &q1)
 	require.NoError(t, err)
-	require.Equal(t, org.RoleType(role), q1.Result[0].Role)
+	require.Equal(t, user.RoleType(role), q1.Result[0].Role)
 	return *currentUser
 }
 

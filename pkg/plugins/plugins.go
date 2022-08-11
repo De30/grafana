@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 type Plugin struct {
@@ -158,7 +158,7 @@ func (d JSONData) DashboardIncludes() []*Includes {
 type Route struct {
 	Path         string          `json:"path"`
 	Method       string          `json:"method"`
-	ReqRole      org.RoleType    `json:"reqRole"`
+	ReqRole      user.RoleType    `json:"reqRole"`
 	URL          string          `json:"url"`
 	URLParams    []URLParam      `json:"urlParams"`
 	Headers      []Header        `json:"headers"`

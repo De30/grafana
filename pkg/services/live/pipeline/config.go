@@ -2,12 +2,12 @@ package pipeline
 
 import (
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // ChannelAuthCheckConfig is used to define auth rules for a channel.
 type ChannelAuthCheckConfig struct {
-	RequireRole org.RoleType `json:"role,omitempty"`
+	RequireRole user.RoleType `json:"role,omitempty"`
 }
 
 type ChannelAuthConfig struct {

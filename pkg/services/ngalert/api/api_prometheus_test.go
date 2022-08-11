@@ -21,7 +21,6 @@ import (
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/state"
 	"github.com/grafana/grafana/pkg/services/ngalert/store"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -257,7 +256,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "/api/v1/rules", nil)
 	require.NoError(t, err)
-	c := &models.ReqContext{Context: &web.Context{Req: req}, SignedInUser: &user.SignedInUser{OrgId: orgID, OrgRole: org.RoleViewer}}
+	c := &models.ReqContext{Context: &web.Context{Req: req}, SignedInUser: &user.SignedInUser{OrgId: orgID, OrgRole: user.RoleViewer}}
 
 	t.Run("with no rules", func(t *testing.T) {
 		_, _, _, api := setupAPI(t)
@@ -327,7 +326,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/api/v1/rules?includeInternalLabels=true", nil)
 		require.NoError(t, err)
-		c := &models.ReqContext{Context: &web.Context{Req: req}, SignedInUser: &user.SignedInUser{OrgId: orgID, OrgRole: org.RoleViewer}}
+		c := &models.ReqContext{Context: &web.Context{Req: req}, SignedInUser: &user.SignedInUser{OrgId: orgID, OrgRole: user.RoleViewer}}
 
 		r := api.RouteGetRuleStatuses(c)
 		require.Equal(t, http.StatusOK, r.Status())

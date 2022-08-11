@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/login/logintest"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/quota/quotaimpl"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -128,17 +127,17 @@ func createUserOrgDTO() []*models.UserOrgDTO {
 		{
 			OrgId: 1,
 			Name:  "Bar",
-			Role:  org.RoleViewer,
+			Role:  user.RoleViewer,
 		},
 		{
 			OrgId: 10,
 			Name:  "Foo",
-			Role:  org.RoleAdmin,
+			Role:  user.RoleAdmin,
 		},
 		{
 			OrgId: 11,
 			Name:  "Stuff",
-			Role:  org.RoleViewer,
+			Role:  user.RoleViewer,
 		},
 	}
 	return users
@@ -147,8 +146,8 @@ func createUserOrgDTO() []*models.UserOrgDTO {
 func createSimpleExternalUser() models.ExternalUserInfo {
 	externalUser := models.ExternalUserInfo{
 		AuthModule: login.LDAPAuthModule,
-		OrgRoles: map[int64]org.RoleType{
-			1: org.RoleViewer,
+		OrgRoles: map[int64]user.RoleType{
+			1: user.RoleViewer,
 		},
 	}
 

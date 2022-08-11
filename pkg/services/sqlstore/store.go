@@ -19,20 +19,20 @@ type Store interface {
 	GetDialect() migrator.Dialect
 	GetSystemStats(ctx context.Context, query *models.GetSystemStatsQuery) error
 	GetOrgByName(name string) (*models.Org, error)
-	CreateOrg(ctx context.Context, cmd *models.CreateOrgCommand) error
-	CreateOrgWithMember(name string, userID int64) (models.Org, error)
-	UpdateOrg(ctx context.Context, cmd *models.UpdateOrgCommand) error
-	UpdateOrgAddress(ctx context.Context, cmd *models.UpdateOrgAddressCommand) error
-	DeleteOrg(ctx context.Context, cmd *models.DeleteOrgCommand) error
-	GetOrgById(context.Context, *models.GetOrgByIdQuery) error
-	GetOrgByNameHandler(ctx context.Context, query *models.GetOrgByNameQuery) error
+	//CreateOrg(ctx context.Context, cmd *models.CreateOrgCommand) error
+	//CreateOrgWithMember(name string, userID int64) (*org.Org, error)
+	// UpdateOrg(ctx context.Context, cmd *models.UpdateOrgCommand) error
+	// UpdateOrgAddress(ctx context.Context, cmd *models.UpdateOrgAddressCommand) error
+	// DeleteOrg(ctx context.Context, cmd *models.DeleteOrgCommand) error
+	// GetOrgById(context.Context, *models.GetOrgByIdQuery) error
+	// GetOrgByNameHandler(ctx context.Context, query *models.GetOrgByNameQuery) error
 	CreateLoginAttempt(ctx context.Context, cmd *models.CreateLoginAttemptCommand) error
 	GetUserLoginAttemptCount(ctx context.Context, query *models.GetUserLoginAttemptCountQuery) error
 	DeleteOldLoginAttempts(ctx context.Context, cmd *models.DeleteOldLoginAttemptsCommand) error
 	CreateUser(ctx context.Context, cmd user.CreateUserCommand) (*user.User, error)
-	SetUsingOrg(ctx context.Context, cmd *models.SetUsingOrgCommand) error
+	//SetUsingOrg(ctx context.Context, cmd *models.SetUsingOrgCommand) error
 	GetUserProfile(ctx context.Context, query *models.GetUserProfileQuery) error
-	GetUserOrgList(ctx context.Context, query *models.GetUserOrgListQuery) error
+	//GetUserOrgList(ctx context.Context, query *models.GetUserOrgListQuery) error
 	GetSignedInUserWithCacheCtx(ctx context.Context, query *models.GetSignedInUserQuery) error
 	GetSignedInUser(ctx context.Context, query *models.GetSignedInUserQuery) error
 	SearchUsers(ctx context.Context, query *models.SearchUsersQuery) error
@@ -64,11 +64,11 @@ type Store interface {
 	GetGlobalQuotaByTarget(ctx context.Context, query *models.GetGlobalQuotaByTargetQuery) error
 	WithTransactionalDbSession(ctx context.Context, callback DBTransactionFunc) error
 	InTransaction(ctx context.Context, fn func(ctx context.Context) error) error
-	AddOrgUser(ctx context.Context, cmd *models.AddOrgUserCommand) error
-	UpdateOrgUser(ctx context.Context, cmd *models.UpdateOrgUserCommand) error
-	GetOrgUsers(ctx context.Context, query *models.GetOrgUsersQuery) error
-	SearchOrgUsers(ctx context.Context, query *models.SearchOrgUsersQuery) error
-	RemoveOrgUser(ctx context.Context, cmd *models.RemoveOrgUserCommand) error
+	//AddOrgUser(ctx context.Context, cmd *models.AddOrgUserCommand) error
+	//UpdateOrgUser(ctx context.Context, cmd *models.UpdateOrgUserCommand) error
+	// GetOrgUsers(ctx context.Context, query *models.GetOrgUsersQuery) error
+	// SearchOrgUsers(ctx context.Context, query *models.SearchOrgUsersQuery) error
+	// RemoveOrgUser(ctx context.Context, cmd *models.RemoveOrgUserCommand) error
 	Migrate(bool) error
 	Sync() error
 	Reset() error
@@ -80,6 +80,6 @@ type Store interface {
 	GetTempUserByCode(ctx context.Context, query *models.GetTempUserByCodeQuery) error
 	ExpireOldUserInvites(ctx context.Context, cmd *models.ExpireTempUsersCommand) error
 	GetDBHealthQuery(ctx context.Context, query *models.GetDBHealthQuery) error
-	SearchOrgs(ctx context.Context, query *models.SearchOrgsQuery) error
+	//SearchOrgs(ctx context.Context, query *models.SearchOrgsQuery) error
 	IsAdminOfTeams(ctx context.Context, query *models.IsAdminOfTeamsQuery) error
 }

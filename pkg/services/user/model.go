@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/grafana/grafana/pkg/services/org"
 )
 
 type HelpFlags1 uint64
@@ -122,7 +120,7 @@ type SignedInUser struct {
 	UserId             int64
 	OrgId              int64
 	OrgName            string
-	OrgRole            org.RoleType
+	OrgRole            RoleType
 	ExternalAuthModule string
 	ExternalAuthId     string
 	Login              string
@@ -138,6 +136,78 @@ type SignedInUser struct {
 	Teams              []int64
 	// Permissions grouped by orgID and actions
 	Permissions map[int64]map[string][]string `json:"-"`
+}
+
+// swagger:enum RoleType
+type RoleType string
+
+const (
+	RoleViewer RoleType = "Viewer"
+	RoleEditor RoleType = "Editor"
+	RoleAdmin  RoleType = "Admin"
+)
+
+func (r RoleType) IsValid() bool {
+	return r == RoleViewer || r == RoleAdmin || r == RoleEditor
+}
+
+func (r RoleType) Includes(other RoleType) bool {
+	if r == RoleAdmin {
+		return true
+	}
+
+	if r == RoleEditor {
+		return other != RoleAdmin
+	}
+
+	return r == other
+}
+
+func (r RoleType) Children() []RoleType {
+	switch r {
+	case RoleAdmin:
+		return []RoleType{RoleEditor, RoleViewer}
+	case RoleEditor:
+		return []RoleType{RoleViewer}
+	default:
+		return nil
+	}
+}
+
+func (r RoleType) Parents() []RoleType {
+	switch r {
+	case RoleEditor:
+		return []RoleType{RoleAdmin}
+	case RoleViewer:
+		return []RoleType{RoleEditor, RoleAdmin}
+	default:
+		return nil
+	}
+}
+
+func (r *RoleType) UnmarshalText(data []byte) error {
+	// make sure "viewer" and "Viewer" are both correct
+	str := strings.Title(string(data))
+
+	*r = RoleType(str)
+	if !r.IsValid() {
+		if (*r) != "" {
+			return fmt.Errorf("invalid role value: %s", *r)
+		}
+
+		*r = RoleViewer
+	}
+
+	return nil
+}
+
+type OrgUser struct {
+	ID      int64 `xorm:"pk autoincr 'id'"`
+	OrgID   int64 `xorm:"org_id"`
+	UserID  int64 `xorm:"user_id"`
+	Role    RoleType
+	Created time.Time
+	Updated time.Time
 }
 
 type UserDisplayDTO struct {
@@ -171,7 +241,7 @@ func (u *SignedInUser) ToUserDisplayDTO() *UserDisplayDTO {
 		Name:  u.Name,
 	}
 }
-func (u *SignedInUser) HasRole(role org.RoleType) bool {
+func (u *SignedInUser) HasRole(role RoleType) bool {
 	if u.IsGrafanaAdmin {
 		return true
 	}

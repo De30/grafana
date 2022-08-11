@@ -22,7 +22,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/apikey/apikeyimpl"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	"github.com/grafana/grafana/pkg/services/licensing"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts/database"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts/tests"
@@ -291,7 +290,7 @@ func setupTestServer(t *testing.T, svc *tests.ServiceAccountMock,
 	signedUser := &user.SignedInUser{
 		OrgId:   1,
 		UserId:  1,
-		OrgRole: org.RoleViewer,
+		OrgRole: user.RoleViewer,
 	}
 
 	m.Use(func(c *web.Context) {
@@ -414,9 +413,9 @@ func TestServiceAccountsAPI_UpdateServiceAccount(t *testing.T) {
 		Id           int
 	}
 
-	viewerRole := org.RoleViewer
-	editorRole := org.RoleEditor
-	var invalidRole org.RoleType = "InvalidRole"
+	viewerRole := user.RoleViewer
+	editorRole := user.RoleEditor
+	var invalidRole user.RoleType = "InvalidRole"
 	testCases := []testUpdateSATestCase{
 		{
 			desc: "should be ok to update serviceaccount with permissions",

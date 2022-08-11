@@ -9,8 +9,8 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 const (
@@ -210,7 +210,7 @@ func (p *teamPermissionMigrator) generateAssociatedPermissions(teamMemberships [
 		// only admins or editors (when editorsCanAdmin option is enabled)
 		// can access team administration endpoints
 		if m.Permission == models.PERMISSION_ADMIN {
-			if userRolesByOrg[m.OrgId][m.UserId] == string(org.RoleViewer) || (userRolesByOrg[m.OrgId][m.UserId] == string(org.RoleEditor) && !p.editorsCanAdmin) {
+			if userRolesByOrg[m.OrgId][m.UserId] == string(user.RoleViewer) || (userRolesByOrg[m.OrgId][m.UserId] == string(user.RoleEditor) && !p.editorsCanAdmin) {
 				m.Permission = 0
 
 				if _, err := p.sess.Cols("permission").Where("org_id=? and team_id=? and user_id=?", m.OrgId, m.TeamId, m.UserId).Update(m); err != nil {

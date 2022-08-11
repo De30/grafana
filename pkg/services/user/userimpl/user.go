@@ -138,19 +138,19 @@ func (s *Service) Create(ctx context.Context, cmd *user.CreateUserCommand) (*use
 
 	// create org user link
 	if !cmd.SkipOrgSetup {
-		orgUser := org.OrgUser{
+		orgUser := user.OrgUser{
 			OrgID:   orgID,
 			UserID:  usr.ID,
-			Role:    org.RoleAdmin,
+			Role:    user.RoleAdmin,
 			Created: time.Now(),
 			Updated: time.Now(),
 		}
 
 		if setting.AutoAssignOrg && !usr.IsAdmin {
 			if len(cmd.DefaultOrgRole) > 0 {
-				orgUser.Role = org.RoleType(cmd.DefaultOrgRole)
+				orgUser.Role = user.RoleType(cmd.DefaultOrgRole)
 			} else {
-				orgUser.Role = org.RoleType(setting.AutoAssignOrgRole)
+				orgUser.Role = user.RoleType(setting.AutoAssignOrgRole)
 			}
 		}
 		_, err = s.orgService.InsertOrgUser(ctx, &orgUser)

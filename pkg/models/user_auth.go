@@ -3,7 +3,6 @@ package models
 import (
 	"time"
 
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 
@@ -32,7 +31,7 @@ type ExternalUserInfo struct {
 	Login          string
 	Name           string
 	Groups         []string
-	OrgRoles       map[int64]org.RoleType
+	OrgRoles       map[int64]user.RoleType
 	IsGrafanaAdmin *bool // This is a pointer to know if we should sync this or not (nil = ignore sync)
 	IsDisabled     bool
 }

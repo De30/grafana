@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"golang.org/x/oauth2"
 	"gopkg.in/square/go-jose.v2/jwt"
 )
@@ -82,7 +82,7 @@ func (s *SocialOkta) UserInfo(client *http.Client, token *oauth2.Token) (*BasicU
 	if err != nil {
 		s.log.Error("Failed to extract role", "error", err)
 	}
-	if s.roleAttributeStrict && !org.RoleType(role).IsValid() {
+	if s.roleAttributeStrict && !user.RoleType(role).IsValid() {
 		return nil, errors.New("invalid role")
 	}
 

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/services/apikey"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 	"xorm.io/xorm"
 )
 
@@ -51,7 +51,7 @@ func (s *ServiceAccountsStoreImpl) AddServiceAccountToken(ctx context.Context, s
 		token := apikey.APIKey{
 			OrgId:            cmd.OrgId,
 			Name:             cmd.Name,
-			Role:             org.RoleViewer,
+			Role:             user.RoleViewer,
 			Key:              cmd.Key,
 			Created:          updated,
 			Updated:          updated,

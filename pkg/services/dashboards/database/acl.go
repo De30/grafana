@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // GetDashboardACLInfoList returns a list of permissions for a dashboard. They can be fetched from three
@@ -98,7 +98,7 @@ func (d *DashboardStore) GetDashboardACLInfoList(ctx context.Context, query *mod
 // HasEditPermissionInFolders validates that an user have access to a certain folder
 func (d *DashboardStore) HasEditPermissionInFolders(ctx context.Context, query *models.HasEditPermissionInFoldersQuery) error {
 	return d.sqlStore.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
-		if query.SignedInUser.HasRole(org.RoleEditor) {
+		if query.SignedInUser.HasRole(user.RoleEditor) {
 			query.Result = true
 			return nil
 		}
@@ -126,7 +126,7 @@ func (d *DashboardStore) HasEditPermissionInFolders(ctx context.Context, query *
 
 func (d *DashboardStore) HasAdminPermissionInDashboardsOrFolders(ctx context.Context, query *models.HasAdminPermissionInDashboardsOrFoldersQuery) error {
 	return d.sqlStore.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
-		if query.SignedInUser.HasRole(org.RoleAdmin) {
+		if query.SignedInUser.HasRole(user.RoleAdmin) {
 			query.Result = true
 			return nil
 		}

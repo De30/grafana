@@ -9,7 +9,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,29 +52,29 @@ func TestIntegrationSQLBuilder(t *testing.T) {
 		t.Run("role ACL", func(t *testing.T) {
 			test(t,
 				DashboardProps{},
-				&DashboardPermission{Role: org.RoleViewer, Permission: models.PERMISSION_VIEW},
-				Search{UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
+				&DashboardPermission{Role: user.RoleViewer, Permission: models.PERMISSION_VIEW},
+				Search{UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
 				shouldFind,
 			)
 
 			test(t,
 				DashboardProps{},
-				&DashboardPermission{Role: org.RoleViewer, Permission: models.PERMISSION_VIEW},
-				Search{UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_EDIT},
+				&DashboardPermission{Role: user.RoleViewer, Permission: models.PERMISSION_VIEW},
+				Search{UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_EDIT},
 				shouldNotFind,
 			)
 
 			test(t,
 				DashboardProps{},
-				&DashboardPermission{Role: org.RoleEditor, Permission: models.PERMISSION_VIEW},
-				Search{UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
+				&DashboardPermission{Role: user.RoleEditor, Permission: models.PERMISSION_VIEW},
+				Search{UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
 				shouldNotFind,
 			)
 
 			test(t,
 				DashboardProps{},
-				&DashboardPermission{Role: org.RoleEditor, Permission: models.PERMISSION_VIEW},
-				Search{UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
+				&DashboardPermission{Role: user.RoleEditor, Permission: models.PERMISSION_VIEW},
+				Search{UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
 				shouldNotFind,
 			)
 		})
@@ -114,28 +113,28 @@ func TestIntegrationSQLBuilder(t *testing.T) {
 			test(t,
 				DashboardProps{},
 				nil,
-				Search{OrgId: -1, UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
+				Search{OrgId: -1, UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
 				shouldNotFind,
 			)
 
 			test(t,
 				DashboardProps{OrgId: -1},
 				nil,
-				Search{OrgId: -1, UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
+				Search{OrgId: -1, UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_VIEW},
 				shouldFind,
 			)
 
 			test(t,
 				DashboardProps{OrgId: -1},
 				nil,
-				Search{OrgId: -1, UsersOrgRole: org.RoleEditor, RequiredPermission: models.PERMISSION_EDIT},
+				Search{OrgId: -1, UsersOrgRole: user.RoleEditor, RequiredPermission: models.PERMISSION_EDIT},
 				shouldFind,
 			)
 
 			test(t,
 				DashboardProps{OrgId: -1},
 				nil,
-				Search{OrgId: -1, UsersOrgRole: org.RoleViewer, RequiredPermission: models.PERMISSION_EDIT},
+				Search{OrgId: -1, UsersOrgRole: user.RoleViewer, RequiredPermission: models.PERMISSION_EDIT},
 				shouldNotFind,
 			)
 		})
@@ -152,12 +151,12 @@ type DashboardProps struct {
 type DashboardPermission struct {
 	User       bool
 	Team       bool
-	Role       org.RoleType
+	Role       user.RoleType
 	Permission models.PermissionType
 }
 
 type Search struct {
-	UsersOrgRole       org.RoleType
+	UsersOrgRole       user.RoleType
 	UserFromACL        bool
 	RequiredPermission models.PermissionType
 	OrgId              int64
@@ -206,7 +205,7 @@ func createDummyUser(t *testing.T, sqlStore *SQLStore) *user.User {
 		EmailVerified:  true,
 		IsAdmin:        false,
 		SkipOrgSetup:   false,
-		DefaultOrgRole: string(org.RoleViewer),
+		DefaultOrgRole: string(user.RoleViewer),
 	}
 	user, err := sqlStore.CreateUser(context.Background(), createUserCmd)
 	require.NoError(t, err)
@@ -320,7 +319,7 @@ func getDashboards(t *testing.T, sqlStore *SQLStore, search Search, aclUserID in
 	if len(string(search.UsersOrgRole)) > 0 {
 		signedInUser.OrgRole = search.UsersOrgRole
 	} else {
-		signedInUser.OrgRole = org.RoleViewer
+		signedInUser.OrgRole = user.RoleViewer
 	}
 	if search.UserFromACL {
 		signedInUser.UserId = aclUserID

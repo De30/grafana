@@ -15,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/licensing"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/teamguardian/database"
@@ -67,7 +66,7 @@ func TestTeamMembersAPIEndpoint_userLoggedIn(t *testing.T) {
 	mock := mockstore.NewSQLStoreMock()
 
 	loggedInUserScenarioWithRole(t, "When calling GET on", "GET", "api/teams/1/members",
-		"api/teams/:teamId/members", org.RoleAdmin, func(sc *scenarioContext) {
+		"api/teams/:teamId/members", user.RoleAdmin, func(sc *scenarioContext) {
 			setUpGetTeamMembersHandler(t, sqlStore)
 
 			sc.handlerFunc = hs.GetTeamMembers
@@ -89,7 +88,7 @@ func TestTeamMembersAPIEndpoint_userLoggedIn(t *testing.T) {
 		t.Cleanup(func() { settings.HiddenUsers = make(map[string]struct{}) })
 
 		loggedInUserScenarioWithRole(t, "When calling GET on", "GET", "api/teams/1/members",
-			"api/teams/:teamId/members", org.RoleAdmin, func(sc *scenarioContext) {
+			"api/teams/:teamId/members", user.RoleAdmin, func(sc *scenarioContext) {
 				setUpGetTeamMembersHandler(t, sqlStore)
 
 				sc.handlerFunc = hs.GetTeamMembers

@@ -15,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/dashboards/database"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -920,7 +919,7 @@ func saveTestDashboard(t *testing.T, title string, orgID, folderID int64, sqlSto
 		Dashboard: cmd.GetDashboardModel(),
 		User: &user.SignedInUser{
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 		},
 	}
 
@@ -957,7 +956,7 @@ func saveTestFolder(t *testing.T, title string, orgID int64, sqlStore *sqlstore.
 		Dashboard: cmd.GetDashboardModel(),
 		User: &user.SignedInUser{
 			UserId:  1,
-			OrgRole: org.RoleAdmin,
+			OrgRole: user.RoleAdmin,
 		},
 	}
 

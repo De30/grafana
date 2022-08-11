@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/events"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"xorm.io/xorm"
 )
 
@@ -103,8 +104,8 @@ func isOrgNameTaken(name string, existingId int64, sess *DBSession) (bool, error
 	return false, nil
 }
 
-func (ss *SQLStore) createOrg(ctx context.Context, name string, userID int64, engine *xorm.Engine) (models.Org, error) {
-	orga := models.Org{
+func (ss *SQLStore) createOrg(ctx context.Context, name string, userID int64, engine *xorm.Engine) (*org.Org, error) {
+	orga := &org.Org{
 		Name:    name,
 		Created: time.Now(),
 		Updated: time.Now(),
@@ -120,10 +121,10 @@ func (ss *SQLStore) createOrg(ctx context.Context, name string, userID int64, en
 			return err
 		}
 
-		user := models.OrgUser{
-			OrgId:   orga.Id,
-			UserId:  userID,
-			Role:    org.RoleAdmin,
+		user := user.OrgUser{
+			OrgID:   orga.ID,
+			UserID:  userID,
+			Role:    user.RoleAdmin,
 			Created: time.Now(),
 			Updated: time.Now(),
 		}
@@ -132,7 +133,7 @@ func (ss *SQLStore) createOrg(ctx context.Context, name string, userID int64, en
 
 		sess.publishAfterCommit(&events.OrgCreated{
 			Timestamp: orga.Created,
-			Id:        orga.Id,
+			Id:        orga.ID,
 			Name:      orga.Name,
 		})
 
@@ -145,18 +146,17 @@ func (ss *SQLStore) createOrg(ctx context.Context, name string, userID int64, en
 }
 
 // CreateOrgWithMember creates an organization with a certain name and a certain user as member.
-func (ss *SQLStore) CreateOrgWithMember(name string, userID int64) (models.Org, error) {
+func (ss *SQLStore) CreateOrgWithMember(name string, userID int64) (*org.Org, error) {
 	return ss.createOrg(context.Background(), name, userID, ss.engine)
 }
 
-func (ss *SQLStore) CreateOrg(ctx context.Context, cmd *models.CreateOrgCommand) error {
-	org, err := ss.createOrg(ctx, cmd.Name, cmd.UserId, ss.engine)
+func (ss *SQLStore) CreateOrg(ctx context.Context, cmd *org.CreateOrgCommand) (*org.Org, error) {
+	org, err := ss.createOrg(ctx, cmd.Name, cmd.UserID, ss.engine)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	cmd.Result = org
-	return nil
+	return org, nil
 }
 
 func (ss *SQLStore) UpdateOrg(ctx context.Context, cmd *models.UpdateOrgCommand) error {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
@@ -19,7 +18,7 @@ type OrgUser struct {
 	Id      int64
 	OrgId   int64
 	UserId  int64
-	Role    org.RoleType
+	Role    user.RoleType
 	Created time.Time
 	Updated time.Time
 }
@@ -35,8 +34,8 @@ type RemoveOrgUserCommand struct {
 }
 
 type AddOrgUserCommand struct {
-	LoginOrEmail string       `json:"loginOrEmail" binding:"Required"`
-	Role         org.RoleType `json:"role" binding:"Required"`
+	LoginOrEmail string        `json:"loginOrEmail" binding:"Required"`
+	Role         user.RoleType `json:"role" binding:"Required"`
 
 	OrgId  int64 `json:"-"`
 	UserId int64 `json:"-"`
@@ -46,7 +45,7 @@ type AddOrgUserCommand struct {
 }
 
 type UpdateOrgUserCommand struct {
-	Role org.RoleType `json:"role" binding:"Required"`
+	Role user.RoleType `json:"role" binding:"Required"`
 
 	OrgId  int64 `json:"-"`
 	UserId int64 `json:"-"`

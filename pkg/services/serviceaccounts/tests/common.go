@@ -8,7 +8,6 @@ import (
 	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/apikey"
 	"github.com/grafana/grafana/pkg/services/apikey/apikeyimpl"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -24,14 +23,14 @@ type TestUser struct {
 
 type TestApiKey struct {
 	Name      string
-	Role      org.RoleType
+	Role      user.RoleType
 	OrgId     int64
 	Key       string
 	IsExpired bool
 }
 
 func SetupUserServiceAccount(t *testing.T, sqlStore *sqlstore.SQLStore, testUser TestUser) *user.User {
-	role := string(org.RoleViewer)
+	role := string(user.RoleViewer)
 	if testUser.Role != "" {
 		role = testUser.Role
 	}
@@ -47,7 +46,7 @@ func SetupUserServiceAccount(t *testing.T, sqlStore *sqlstore.SQLStore, testUser
 }
 
 func SetupApiKey(t *testing.T, sqlStore *sqlstore.SQLStore, testKey TestApiKey) *apikey.APIKey {
-	role := org.RoleViewer
+	role := user.RoleViewer
 	if testKey.Role != "" {
 		role = testKey.Role
 	}

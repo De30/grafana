@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/events"
 	"github.com/grafana/grafana/pkg/models"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -158,16 +157,16 @@ func (ss *SQLStore) createUser(ctx context.Context, sess *DBSession, args user.C
 		orgUser := models.OrgUser{
 			OrgId:   orgID,
 			UserId:  usr.ID,
-			Role:    org.RoleAdmin,
+			Role:    user.RoleAdmin,
 			Created: time.Now(),
 			Updated: time.Now(),
 		}
 
 		if ss.Cfg.AutoAssignOrg && !usr.IsAdmin {
 			if len(args.DefaultOrgRole) > 0 {
-				orgUser.Role = org.RoleType(args.DefaultOrgRole)
+				orgUser.Role = user.RoleType(args.DefaultOrgRole)
 			} else {
-				orgUser.Role = org.RoleType(ss.Cfg.AutoAssignOrgRole)
+				orgUser.Role = user.RoleType(ss.Cfg.AutoAssignOrgRole)
 			}
 		}
 

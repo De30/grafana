@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/apikey"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -40,7 +39,7 @@ func (s *ServiceAccountsStoreImpl) CreateServiceAccount(ctx context.Context, org
 	generatedLogin := "sa-" + strings.ToLower(saForm.Name)
 	generatedLogin = strings.ReplaceAll(generatedLogin, " ", "-")
 	isDisabled := false
-	role := org.RoleViewer
+	role := user.RoleViewer
 	if saForm.IsDisabled != nil {
 		isDisabled = *saForm.IsDisabled
 	}

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 // Roles definition
@@ -181,11 +181,11 @@ func DeclareFixedRoles(ac AccessControl) error {
 	}
 	orgUsersReader := RoleRegistration{
 		Role:   orgUsersReaderRole,
-		Grants: []string{RoleGrafanaAdmin, string(org.RoleAdmin)},
+		Grants: []string{RoleGrafanaAdmin, string(user.RoleAdmin)},
 	}
 	orgUsersWriter := RoleRegistration{
 		Role:   orgUsersWriterRole,
-		Grants: []string{RoleGrafanaAdmin, string(org.RoleAdmin)},
+		Grants: []string{RoleGrafanaAdmin, string(user.RoleAdmin)},
 	}
 	settingsReader := RoleRegistration{
 		Role:   SettingsReaderRole,
@@ -232,7 +232,7 @@ func ValidateFixedRole(role RoleDTO) error {
 // ValidateBuiltInRoles errors when a built-in role does not match expected pattern
 func ValidateBuiltInRoles(builtInRoles []string) error {
 	for _, br := range builtInRoles {
-		if !org.RoleType(br).IsValid() && br != RoleGrafanaAdmin {
+		if !user.RoleType(br).IsValid() && br != RoleGrafanaAdmin {
 			return fmt.Errorf("'%s' %w", br, ErrInvalidBuiltinRole)
 		}
 	}
@@ -262,34 +262,34 @@ func (m *RegistrationList) Range(f func(registration RoleRegistration) bool) {
 
 func BuildBasicRoleDefinitions() map[string]*RoleDTO {
 	return map[string]*RoleDTO{
-		string(org.RoleAdmin): {
+		string(user.RoleAdmin): {
 			Name:        BasicRolePrefix + "admin",
 			UID:         BasicRoleUIDPrefix + "admin",
 			OrgID:       GlobalOrgID,
 			Version:     1,
-			DisplayName: string(org.RoleAdmin),
+			DisplayName: string(user.RoleAdmin),
 			Description: "Admin role",
 			Group:       "Basic",
 			Permissions: []Permission{},
 			Hidden:      true,
 		},
-		string(org.RoleEditor): {
+		string(user.RoleEditor): {
 			Name:        BasicRolePrefix + "editor",
 			UID:         BasicRoleUIDPrefix + "editor",
 			OrgID:       GlobalOrgID,
 			Version:     1,
-			DisplayName: string(org.RoleEditor),
+			DisplayName: string(user.RoleEditor),
 			Description: "Editor role",
 			Group:       "Basic",
 			Permissions: []Permission{},
 			Hidden:      true,
 		},
-		string(org.RoleViewer): {
+		string(user.RoleViewer): {
 			Name:        BasicRolePrefix + "viewer",
 			UID:         BasicRoleUIDPrefix + "viewer",
 			OrgID:       GlobalOrgID,
 			Version:     1,
-			DisplayName: string(org.RoleViewer),
+			DisplayName: string(user.RoleViewer),
 			Description: "Viewer role",
 			Group:       "Basic",
 			Permissions: []Permission{},

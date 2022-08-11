@@ -12,7 +12,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/user"
 )
@@ -34,7 +33,7 @@ type scenarioContext struct {
 
 type scenarioFunc func(c *scenarioContext)
 
-func orgRoleScenario(desc string, t *testing.T, role org.RoleType, fn scenarioFunc) {
+func orgRoleScenario(desc string, t *testing.T, role user.RoleType, fn scenarioFunc) {
 	t.Run(desc, func(t *testing.T) {
 		user := &user.SignedInUser{
 			UserId:  userID,
@@ -55,7 +54,7 @@ func orgRoleScenario(desc string, t *testing.T, role org.RoleType, fn scenarioFu
 	})
 }
 
-func apiKeyScenario(desc string, t *testing.T, role org.RoleType, fn scenarioFunc) {
+func apiKeyScenario(desc string, t *testing.T, role user.RoleType, fn scenarioFunc) {
 	t.Run(desc, func(t *testing.T) {
 		user := &user.SignedInUser{
 			UserId:   0,

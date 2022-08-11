@@ -20,7 +20,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/login/loginservice"
 	"github.com/grafana/grafana/pkg/services/login/logintest"
 	"github.com/grafana/grafana/pkg/services/multildap"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/services/user/usertest"
@@ -108,7 +107,7 @@ func TestGetUserFromLDAPAPIEndpoint_OrgNotfound(t *testing.T) {
 		Email:          "john.doe@example.com",
 		Login:          "johndoe",
 		Groups:         []string{"cn=admins,ou=groups,dc=grafana,dc=org"},
-		OrgRoles:       map[int64]org.RoleType{1: org.RoleAdmin, 2: org.RoleViewer},
+		OrgRoles:       map[int64]user.RoleType{1: user.RoleAdmin, 2: user.RoleViewer},
 		IsGrafanaAdmin: &isAdmin,
 	}
 
@@ -123,12 +122,12 @@ func TestGetUserFromLDAPAPIEndpoint_OrgNotfound(t *testing.T) {
 			{
 				GroupDN: "cn=admins,ou=groups,dc=grafana,dc=org",
 				OrgId:   1,
-				OrgRole: org.RoleAdmin,
+				OrgRole: user.RoleAdmin,
 			},
 			{
 				GroupDN: "cn=admins,ou=groups,dc=grafana,dc=org",
 				OrgId:   2,
-				OrgRole: org.RoleViewer,
+				OrgRole: user.RoleViewer,
 			},
 		},
 	}
@@ -163,7 +162,7 @@ func TestGetUserFromLDAPAPIEndpoint(t *testing.T) {
 		Email:          "john.doe@example.com",
 		Login:          "johndoe",
 		Groups:         []string{"cn=admins,ou=groups,dc=grafana,dc=org", "another-group-not-matched"},
-		OrgRoles:       map[int64]org.RoleType{1: org.RoleAdmin},
+		OrgRoles:       map[int64]user.RoleType{1: user.RoleAdmin},
 		IsGrafanaAdmin: &isAdmin,
 	}
 
@@ -178,12 +177,12 @@ func TestGetUserFromLDAPAPIEndpoint(t *testing.T) {
 			{
 				GroupDN: "cn=admins,ou=groups,dc=grafana,dc=org",
 				OrgId:   1,
-				OrgRole: org.RoleAdmin,
+				OrgRole: user.RoleAdmin,
 			},
 			{
 				GroupDN: "cn=admins2,ou=groups,dc=grafana,dc=org",
 				OrgId:   1,
-				OrgRole: org.RoleAdmin,
+				OrgRole: user.RoleAdmin,
 			},
 		},
 	}
@@ -238,7 +237,7 @@ func TestGetUserFromLDAPAPIEndpoint_WithTeamHandler(t *testing.T) {
 		Email:          "john.doe@example.com",
 		Login:          "johndoe",
 		Groups:         []string{"cn=admins,ou=groups,dc=grafana,dc=org"},
-		OrgRoles:       map[int64]org.RoleType{1: org.RoleAdmin},
+		OrgRoles:       map[int64]user.RoleType{1: user.RoleAdmin},
 		IsGrafanaAdmin: &isAdmin,
 	}
 
@@ -253,7 +252,7 @@ func TestGetUserFromLDAPAPIEndpoint_WithTeamHandler(t *testing.T) {
 			{
 				GroupDN: "cn=admins,ou=groups,dc=grafana,dc=org",
 				OrgId:   1,
-				OrgRole: org.RoleAdmin,
+				OrgRole: user.RoleAdmin,
 			},
 		},
 	}

@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/dashboardimport"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/librarypanels"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/require"
@@ -65,7 +64,7 @@ func TestImportDashboardService(t *testing.T) {
 			Inputs: []dashboardimport.ImportDashboardInput{
 				{Name: "*", Type: "datasource", Value: "prom"},
 			},
-			User:     &user.SignedInUser{UserId: 2, OrgRole: org.RoleAdmin, OrgId: 3},
+			User:     &user.SignedInUser{UserId: 2, OrgRole: user.RoleAdmin, OrgId: 3},
 			FolderId: 5,
 		}
 		resp, err := s.ImportDashboard(context.Background(), req)
@@ -122,7 +121,7 @@ func TestImportDashboardService(t *testing.T) {
 			Inputs: []dashboardimport.ImportDashboardInput{
 				{Name: "*", Type: "datasource", Value: "prom"},
 			},
-			User:     &user.SignedInUser{UserId: 2, OrgRole: org.RoleAdmin, OrgId: 3},
+			User:     &user.SignedInUser{UserId: 2, OrgRole: user.RoleAdmin, OrgId: 3},
 			FolderId: 5,
 		}
 		resp, err := s.ImportDashboard(context.Background(), req)

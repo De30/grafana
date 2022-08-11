@@ -14,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -311,10 +311,10 @@ type groupStruct struct {
 	Groups []string `json:"groups"`
 }
 
-func (s *SocialBase) extractRole(rawJSON []byte, groups []string) (org.RoleType, error) {
+func (s *SocialBase) extractRole(rawJSON []byte, groups []string) (user.RoleType, error) {
 	if s.roleAttributePath == "" {
 		if s.autoAssignOrgRole != "" {
-			return org.RoleType(s.autoAssignOrgRole), nil
+			return user.RoleType(s.autoAssignOrgRole), nil
 		}
 
 		return "", nil
@@ -322,13 +322,13 @@ func (s *SocialBase) extractRole(rawJSON []byte, groups []string) (org.RoleType,
 
 	role, err := s.searchJSONForStringAttr(s.roleAttributePath, rawJSON)
 	if err == nil && role != "" {
-		return org.RoleType(role), nil
+		return user.RoleType(role), nil
 	}
 
 	if groupBytes, err := json.Marshal(groupStruct{groups}); err == nil {
 		if role, err := s.searchJSONForStringAttr(
 			s.roleAttributePath, groupBytes); err == nil && role != "" {
-			return org.RoleType(role), nil
+			return user.RoleType(role), nil
 		}
 	}
 

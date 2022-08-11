@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 var ErrTimeout = errors.New("timeout error - you can set timeout in seconds with &timeout url parameter")
@@ -28,7 +28,7 @@ type TimeoutOpts struct {
 type AuthOpts struct {
 	OrgID   int64
 	UserID  int64
-	OrgRole org.RoleType
+	OrgRole user.RoleType
 }
 
 func getRequestTimeout(opt TimeoutOpts) time.Duration {

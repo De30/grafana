@@ -10,8 +10,8 @@ import (
 	"github.com/grafana/grafana/pkg/middleware/cookies"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -76,12 +76,12 @@ func removeForceLoginParams(str string) string {
 }
 
 func EnsureEditorOrViewerCanEdit(c *models.ReqContext) {
-	if !c.SignedInUser.HasRole(org.RoleEditor) && !setting.ViewersCanEdit {
+	if !c.SignedInUser.HasRole(user.RoleEditor) && !setting.ViewersCanEdit {
 		accessForbidden(c)
 	}
 }
 
-func RoleAuth(roles ...org.RoleType) web.Handler {
+func RoleAuth(roles ...user.RoleType) web.Handler {
 	return func(c *models.ReqContext) {
 		ok := false
 		for _, role := range roles {
@@ -137,11 +137,11 @@ func Auth(options *AuthOptions) web.Handler {
 // are otherwise only available to admins.
 func AdminOrEditorAndFeatureEnabled(enabled bool) web.Handler {
 	return func(c *models.ReqContext) {
-		if c.OrgRole == org.RoleAdmin {
+		if c.OrgRole == user.RoleAdmin {
 			return
 		}
 
-		if c.OrgRole == org.RoleEditor && enabled {
+		if c.OrgRole == user.RoleEditor && enabled {
 			return
 		}
 
@@ -195,7 +195,7 @@ func shouldForceLogin(c *models.ReqContext) bool {
 
 func OrgAdminDashOrFolderAdminOrTeamAdmin(ss sqlstore.Store, ds dashboards.DashboardService) func(c *models.ReqContext) {
 	return func(c *models.ReqContext) {
-		if c.OrgRole == org.RoleAdmin {
+		if c.OrgRole == user.RoleAdmin {
 			return
 		}
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/require"
 )
 
@@ -66,7 +67,7 @@ func TestIntegrationOrgUserDataAccess(t *testing.T) {
 	}
 
 	t.Run("org user inserted", func(t *testing.T) {
-		_, err := orgUserStore.InsertOrgUser(context.Background(), &org.OrgUser{
+		_, err := orgUserStore.InsertOrgUser(context.Background(), &user.OrgUser{
 			ID:      1,
 			OrgID:   1,
 			UserID:  1,

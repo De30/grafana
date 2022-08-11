@@ -10,7 +10,7 @@ import (
 	fakeDatasources "github.com/grafana/grafana/pkg/services/datasources/fakes"
 	"github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 	"github.com/grafana/grafana/pkg/services/ngalert/store"
-	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/require"
 )
 
@@ -89,7 +89,7 @@ func TestExternalAlertmanagerChoice(t *testing.T) {
 		},
 	}
 	ctx := createRequestCtxInOrg(1)
-	ctx.OrgRole = org.RoleAdmin
+	ctx.OrgRole = user.RoleAdmin
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			sut := createAPIAdminSut(t, test.datasources)

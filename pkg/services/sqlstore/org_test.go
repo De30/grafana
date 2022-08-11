@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	dashver "github.com/grafana/grafana/pkg/services/dashboardversion"
-	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -194,7 +193,7 @@ func TestIntegrationAccountDataAccess(t *testing.T) {
 				cmd := models.AddOrgUserCommand{
 					OrgId:  ac1.OrgID,
 					UserId: ac2.ID,
-					Role:   org.RoleViewer,
+					Role:   user.RoleViewer,
 				}
 
 				err := sqlStore.AddOrgUser(context.Background(), &cmd)
@@ -203,7 +202,7 @@ func TestIntegrationAccountDataAccess(t *testing.T) {
 				})
 
 				t.Run("Can update org user role", func(t *testing.T) {
-					updateCmd := models.UpdateOrgUserCommand{OrgId: ac1.OrgID, UserId: ac2.ID, Role: org.RoleAdmin}
+					updateCmd := models.UpdateOrgUserCommand{OrgId: ac1.OrgID, UserId: ac2.ID, Role: user.RoleAdmin}
 					err = sqlStore.UpdateOrgUser(context.Background(), &updateCmd)
 					require.NoError(t, err)
 
@@ -217,7 +216,7 @@ func TestIntegrationAccountDataAccess(t *testing.T) {
 					err = sqlStore.GetOrgUsers(context.Background(), &orgUsersQuery)
 					require.NoError(t, err)
 
-					require.EqualValues(t, orgUsersQuery.Result[1].Role, org.RoleAdmin)
+					require.EqualValues(t, orgUsersQuery.Result[1].Role, user.RoleAdmin)
 				})
 
 				t.Run("Can get logged in user projection", func(t *testing.T) {
@@ -342,7 +341,7 @@ func TestIntegrationAccountDataAccess(t *testing.T) {
 				})
 
 				t.Run("Cannot update role so no one is admin user", func(t *testing.T) {
-					cmd := models.UpdateOrgUserCommand{OrgId: ac1.OrgID, UserId: ac1.ID, Role: org.RoleViewer}
+					cmd := models.UpdateOrgUserCommand{OrgId: ac1.OrgID, UserId: ac1.ID, Role: user.RoleViewer}
 					err := sqlStore.UpdateOrgUser(context.Background(), &cmd)
 					require.Equal(t, err, models.ErrLastOrgAdmin)
 				})
@@ -355,7 +354,7 @@ func TestIntegrationAccountDataAccess(t *testing.T) {
 					orgUserCmd := models.AddOrgUserCommand{
 						OrgId:  ac1.OrgID,
 						UserId: ac3.ID,
-						Role:   org.RoleViewer,
+						Role:   user.RoleViewer,
 					}
 
 					err = sqlStore.AddOrgUser(context.Background(), &orgUserCmd)

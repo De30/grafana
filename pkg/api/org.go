@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -125,7 +126,7 @@ func (hs *HTTPServer) getOrgHelper(ctx context.Context, orgID int64) response.Re
 // 409: conflictError
 // 500: internalServerError
 func (hs *HTTPServer) CreateOrg(c *models.ReqContext) response.Response {
-	cmd := models.CreateOrgCommand{}
+	cmd := org.CreateOrgCommand{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
@@ -134,8 +135,9 @@ func (hs *HTTPServer) CreateOrg(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusForbidden, "Access denied", nil)
 	}
 
-	cmd.UserId = c.UserId
-	if err := hs.SQLStore.CreateOrg(c.Req.Context(), &cmd); err != nil {
+	cmd.UserID = c.UserId
+	o, err := hs.orgService.CreateOrg(c.Req.Context(), &cmd)
+	if err != nil {
 		if errors.Is(err, models.ErrOrgNameTaken) {
 			return response.Error(http.StatusConflict, "Organization name taken", err)
 		}
@@ -145,7 +147,7 @@ func (hs *HTTPServer) CreateOrg(c *models.ReqContext) response.Response {
 	metrics.MApiOrgCreate.Inc()
 
 	return response.JSON(http.StatusOK, &util.DynMap{
-		"orgId":   cmd.Result.Id,
+		"orgId":   o.ID,
 		"message": "Organization created",
 	})
 }
