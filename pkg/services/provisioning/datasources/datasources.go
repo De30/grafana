@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/correlations"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/provisioning/utils"
 )
 
@@ -32,7 +33,7 @@ var (
 
 // Provision scans a directory for provisioning config files
 // and provisions the datasource in those files.
-func Provision(ctx context.Context, configDirectory string, store Store, correlationsStore CorrelationsStore, orgStore utils.OrgStore) error {
+func Provision(ctx context.Context, configDirectory string, store Store, correlationsStore CorrelationsStore, orgStore org.Service) error {
 	dc := newDatasourceProvisioner(log.New("provisioning.datasources"), store, correlationsStore, orgStore)
 	return dc.applyChanges(ctx, configDirectory)
 }

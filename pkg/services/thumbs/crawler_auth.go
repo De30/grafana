@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts/database"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -17,7 +17,7 @@ type CrawlerAuthSetupService interface {
 	Setup(ctx context.Context) (CrawlerAuth, error)
 }
 
-func ProvideCrawlerAuthSetupService(serviceAccounts serviceaccounts.Service, serviceAccountsStore serviceaccounts.Store, sqlStore *sqlstore.SQLStore) *OSSCrawlerAuthSetupService {
+func ProvideCrawlerAuthSetupService(serviceAccounts serviceaccounts.Service, serviceAccountsStore serviceaccounts.Store, sqlStore *sqlstore.SQLStore, orgService org.Service) *OSSCrawlerAuthSetupService {
 	return &OSSCrawlerAuthSetupService{
 		serviceAccountNamePrefix: "dashboard-previews-crawler-org-",
 		serviceAccounts:          serviceAccounts,
@@ -33,6 +33,7 @@ type OSSCrawlerAuthSetupService struct {
 	serviceAccounts          serviceaccounts.Service
 	serviceAccountsStore     serviceaccounts.Store
 	sqlStore                 *sqlstore.SQLStore
+	orgService               org.Service
 }
 
 type CrawlerAuth interface {
@@ -42,8 +43,8 @@ type CrawlerAuth interface {
 }
 
 func (o *OSSCrawlerAuthSetupService) findAllOrgIds(ctx context.Context) ([]int64, error) {
-	searchAllOrgsQuery := &models.SearchOrgsQuery{}
-	if err := o.sqlStore.SearchOrgs(ctx, searchAllOrgsQuery); err != nil {
+	searchAllOrgsQuery := &org.SearchOrgsQuery{}
+	if err := o.orgService.SearchOrgs(ctx, searchAllOrgsQuery); err != nil {
 		o.log.Error("Error when searching for orgs", "err", err)
 		return nil, err
 	}

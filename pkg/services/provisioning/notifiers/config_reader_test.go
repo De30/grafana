@@ -66,7 +66,7 @@ func TestNotificationAsConfig(t *testing.T) {
 			setup()
 			_ = os.Setenv("TEST_VAR", "default")
 			cfgProvider := &configReader{
-				orgStore:          sqlStore,
+				orgService:        sqlStore,
 				encryptionService: encryptionService,
 				log:               log.New("test logger"),
 			}
@@ -284,7 +284,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		t.Run("Broken yaml should return error", func(t *testing.T) {
 			reader := &configReader{
-				orgStore:          sqlStore,
+				orgService:        sqlStore,
 				encryptionService: encryptionService,
 				log:               log.New("test logger"),
 			}
@@ -295,7 +295,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		t.Run("Skip invalid directory", func(t *testing.T) {
 			cfgProvider := &configReader{
-				orgStore:          sqlStore,
+				orgService:        sqlStore,
 				encryptionService: encryptionService,
 				log:               log.New("test logger"),
 			}
@@ -309,7 +309,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		t.Run("Unknown notifier should return error", func(t *testing.T) {
 			cfgProvider := &configReader{
-				orgStore:          sqlStore,
+				orgService:        sqlStore,
 				encryptionService: encryptionService,
 				log:               log.New("test logger"),
 			}
@@ -320,7 +320,7 @@ func TestNotificationAsConfig(t *testing.T) {
 
 		t.Run("Read incorrect properties", func(t *testing.T) {
 			cfgProvider := &configReader{
-				orgStore:          sqlStore,
+				orgService:        sqlStore,
 				encryptionService: encryptionService,
 				log:               log.New("test logger"),
 			}

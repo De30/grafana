@@ -12,8 +12,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/dashboardsnapshots"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/playlist"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
@@ -26,6 +26,7 @@ type gitExportJob struct {
 	dashboardsnapshotsService dashboardsnapshots.Service
 	playlistService           playlist.Service
 	rootDir                   string
+	orgService                org.Service
 
 	statusMu    sync.Mutex
 	status      ExportStatus
@@ -36,7 +37,7 @@ type gitExportJob struct {
 
 func startGitExportJob(cfg ExportConfig, sql *sqlstore.SQLStore,
 	dashboardsnapshotsService dashboardsnapshots.Service, rootDir string, orgID int64,
-	broadcaster statusBroadcaster, playlistService playlist.Service) (Job, error) {
+	broadcaster statusBroadcaster, playlistService playlist.Service, orgService org.Service) (Job, error) {
 	job := &gitExportJob{
 		logger:                    log.New("git_export_job"),
 		cfg:                       cfg,
@@ -45,6 +46,7 @@ func startGitExportJob(cfg ExportConfig, sql *sqlstore.SQLStore,
 		playlistService:           playlistService,
 		rootDir:                   rootDir,
 		broadcaster:               broadcaster,
+		orgService:                orgService,
 		status: ExportStatus{
 			Running: true,
 			Target:  "git export",
@@ -139,8 +141,8 @@ func (e *gitExportJob) doExportWithHistory() error {
 		},
 	}
 
-	cmd := &models.SearchOrgsQuery{}
-	err = e.sql.SearchOrgs(e.helper.ctx, cmd)
+	cmd := &org.SearchOrgsQuery{}
+	err = e.orgService.SearchOrgs(e.helper.ctx, cmd)
 	if err != nil {
 		return err
 	}

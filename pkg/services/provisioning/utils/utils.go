@@ -6,10 +6,11 @@ import (
 	"fmt"
 
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/org"
 )
 
 type OrgStore interface {
-	GetOrgById(context.Context, *models.GetOrgByIdQuery) error
+	GetOrgById(context.Context, *org.GetOrgByIdQuery) error
 }
 
 type DashboardStore interface {
@@ -17,7 +18,7 @@ type DashboardStore interface {
 }
 
 func CheckOrgExists(ctx context.Context, store OrgStore, orgID int64) error {
-	query := models.GetOrgByIdQuery{Id: orgID}
+	query := org.GetOrgByIdQuery{Id: orgID}
 	if err := store.GetOrgById(ctx, &query); err != nil {
 		if errors.Is(err, models.ErrOrgNotFound) {
 			return err

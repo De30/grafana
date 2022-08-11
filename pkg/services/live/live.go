@@ -39,6 +39,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/live/pushws"
 	"github.com/grafana/grafana/pkg/services/live/runstream"
 	"github.com/grafana/grafana/pkg/services/live/survey"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/query"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -73,7 +74,7 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 	pluginStore plugins.Store, cacheService *localcache.CacheService,
 	dataSourceCache datasources.CacheService, sqlStore *sqlstore.SQLStore, secretsService secrets.Service,
 	usageStatsService usagestats.Service, queryDataService *query.Service, toggles featuremgmt.FeatureToggles,
-	accessControl accesscontrol.AccessControl, dashboardService dashboards.DashboardService) (*GrafanaLive, error) {
+	accessControl accesscontrol.AccessControl, dashboardService dashboards.DashboardService, orgService org.Service) (*GrafanaLive, error) {
 	g := &GrafanaLive{
 		Cfg:                   cfg,
 		Features:              toggles,
@@ -90,6 +91,7 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 			Features: make(map[string]models.ChannelHandlerFactory),
 		},
 		usageStatsService: usageStatsService,
+		orgService:        orgService,
 	}
 
 	logger.Debug("GrafanaLive initialization", "ha", g.IsHA())
@@ -210,9 +212,9 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 		// Pre-build/validate channel rules for all organizations on start.
 		// This can be unreasonable to have in production scenario with many
 		// organizations.
-		orgQuery := &models.SearchOrgsQuery{}
+		orgQuery := &org.SearchOrgsQuery{}
 
-		err := sqlStore.SearchOrgs(context.Background(), orgQuery)
+		err := g.orgService.SearchOrgs(context.Background(), orgQuery)
 		if err != nil {
 			return nil, fmt.Errorf("can't get org list: %w", err)
 		}
@@ -436,6 +438,8 @@ type GrafanaLive struct {
 
 	usageStatsService usagestats.Service
 	usageStats        usageStats
+
+	orgService org.Service
 }
 
 func (g *GrafanaLive) getStreamPlugin(ctx context.Context, pluginID string) (backend.StreamHandler, error) {

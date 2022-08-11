@@ -202,15 +202,137 @@ func isOrgNameTaken(name string, existingId int64, sess *sqlstore.DBSession) (bo
 	return false, nil
 }
 
-func (ss *sqlStore) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error
-func (ss *sqlStore) DeleteOrg(ctx context.Context, cmd *org.DeleteOrgCommand) error
-func (ss *sqlStore) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error
-func (ss *sqlStore) GetOrgByNameHandler(ctx context.Context, query org.GetOrgByNameQuery) error
+func (ss *sqlStore) SearchOrgs(ctx context.Context, query *org.SearchOrgsQuery) error {
+	return ss.db.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
+		query.Result = make([]*org.OrgDTO, 0)
+		sess := dbSession.Table("org")
+		if query.Query != "" {
+			sess.Where("name LIKE ?", query.Query+"%")
+		}
+		if query.Name != "" {
+			sess.Where("name=?", query.Name)
+		}
+
+		if len(query.Ids) > 0 {
+			sess.In("id", query.Ids)
+		}
+
+		if query.Limit > 0 {
+			sess.Limit(query.Limit, query.Limit*query.Page)
+		}
+
+		sess.Cols("id", "name")
+		err := sess.Find(&query.Result)
+		return err
+	})
+}
+
+func (ss *sqlStore) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error {
+	return ss.db.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
+		var org org.Org
+		exists, err := dbSession.ID(query.Id).Get(&org)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return models.ErrOrgNotFound
+		}
+
+		query.Result = &org
+		return nil
+	})
+}
+
+func (ss *sqlStore) GetOrgByNameHandler(ctx context.Context, query *org.GetOrgByNameQuery) error {
+	return ss.db.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
+		var org org.Org
+		exists, err := dbSession.Where("name=?", query.Name).Get(&org)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return models.ErrOrgNotFound
+		}
+
+		query.Result = &org
+		return nil
+	})
+}
+
+func (ss *sqlStore) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error {
+	return ss.db.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		org := org.Org{
+			Address1: cmd.Address1,
+			Address2: cmd.Address2,
+			City:     cmd.City,
+			ZipCode:  cmd.ZipCode,
+			State:    cmd.State,
+			Country:  cmd.Country,
+
+			Updated: time.Now(),
+		}
+
+		if _, err := sess.ID(cmd.OrgId).Update(&org); err != nil {
+			return err
+		}
+
+		sess.PublishAfterCommit(&events.OrgUpdated{
+			Timestamp: org.Updated,
+			Id:        org.ID,
+			Name:      org.Name,
+		})
+
+		return nil
+	})
+}
+
+func (ss *sqlStore) DeleteOrg(ctx context.Context, cmd *models.DeleteOrgCommand) error {
+	return ss.db.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		if res, err := sess.Query("SELECT 1 from org WHERE id=?", cmd.Id); err != nil {
+			return err
+		} else if len(res) != 1 {
+			return models.ErrOrgNotFound
+		}
+
+		deletes := []string{
+			"DELETE FROM star WHERE EXISTS (SELECT 1 FROM dashboard WHERE org_id = ? AND star.dashboard_id = dashboard.id)",
+			"DELETE FROM dashboard_tag WHERE EXISTS (SELECT 1 FROM dashboard WHERE org_id = ? AND dashboard_tag.dashboard_id = dashboard.id)",
+			"DELETE FROM dashboard WHERE org_id = ?",
+			"DELETE FROM api_key WHERE org_id = ?",
+			"DELETE FROM data_source WHERE org_id = ?",
+			"DELETE FROM org_user WHERE org_id = ?",
+			"DELETE FROM org WHERE id = ?",
+			"DELETE FROM temp_user WHERE org_id = ?",
+			"DELETE FROM ngalert_configuration WHERE org_id = ?",
+			"DELETE FROM alert_configuration WHERE org_id = ?",
+			"DELETE FROM alert_instance WHERE rule_org_id = ?",
+			"DELETE FROM alert_notification WHERE org_id = ?",
+			"DELETE FROM alert_notification_state WHERE org_id = ?",
+			"DELETE FROM alert_rule WHERE org_id = ?",
+			"DELETE FROM alert_rule_tag WHERE EXISTS (SELECT 1 FROM alert WHERE alert.org_id = ? AND alert.id = alert_rule_tag.alert_id)",
+			"DELETE FROM alert_rule_version WHERE rule_org_id = ?",
+			"DELETE FROM alert WHERE org_id = ?",
+			"DELETE FROM annotation WHERE org_id = ?",
+			"DELETE FROM kv_store WHERE org_id = ?",
+		}
+
+		for _, sql := range deletes {
+			_, err := sess.Exec(sql, cmd.Id)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
 func (ss *sqlStore) AddOrgUser(ctx context.Context, cmd *org.AddOrgUserCommand) error
 func (ss *sqlStore) UpdateOrgUser(ctx context.Context, cmd *org.UpdateOrgUserCommand) error
 func (ss *sqlStore) GetOrgUsers(ctx context.Context, query *org.GetOrgUsersQuery) error
 func (ss *sqlStore) SearchOrgUsers(ctx context.Context, query *org.SearchOrgUsersQuery) error
 func (ss *sqlStore) RemoveOrgUser(ctx context.Context, cmd *org.RemoveOrgUserCommand) error
-func (ss *sqlStore) SearchOrgs(ctx context.Context, query *org.SearchOrgsQuery) error
 func (ss *sqlStore) GetUserOrgList(ctx context.Context, query *org.GetUserOrgListQuery) error
 func (ss *sqlStore) SetUsingOrg(ctx context.Context, cmd *org.SetUsingOrgCommand) error

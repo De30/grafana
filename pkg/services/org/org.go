@@ -16,7 +16,7 @@ type Service interface {
 	UpdateOrgAddress(context.Context, *UpdateOrgAddressCommand) error
 	DeleteOrg(context.Context, *DeleteOrgCommand) error
 	GetOrgById(context.Context, *GetOrgByIdQuery) error
-	GetOrgByNameHandler(context.Context, GetOrgByNameQuery) error
+	GetOrgByNameHandler(context.Context, *GetOrgByNameQuery) error
 	AddOrgUser(context.Context, *AddOrgUserCommand) error
 	UpdateOrgUser(context.Context, *UpdateOrgUserCommand) error
 	GetOrgUsers(context.Context, *GetOrgUsersQuery) error

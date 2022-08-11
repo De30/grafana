@@ -7,11 +7,12 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 )
 
 type Store interface {
-	GetOrgByNameHandler(ctx context.Context, query *models.GetOrgByNameQuery) error
+	GetOrgByNameHandler(ctx context.Context, query *org.GetOrgByNameQuery) error
 }
 
 // Provision scans a directory for provisioning config files
@@ -39,11 +40,11 @@ type PluginProvisioner struct {
 func (ap *PluginProvisioner) apply(ctx context.Context, cfg *pluginsAsConfig) error {
 	for _, app := range cfg.Apps {
 		if app.OrgID == 0 && app.OrgName != "" {
-			getOrgQuery := &models.GetOrgByNameQuery{Name: app.OrgName}
+			getOrgQuery := &org.GetOrgByNameQuery{Name: app.OrgName}
 			if err := ap.store.GetOrgByNameHandler(ctx, getOrgQuery); err != nil {
 				return err
 			}
-			app.OrgID = getOrgQuery.Result.Id
+			app.OrgID = getOrgQuery.Result.ID
 		} else if app.OrgID < 0 {
 			app.OrgID = 1
 		}

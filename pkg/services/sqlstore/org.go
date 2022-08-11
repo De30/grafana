@@ -1,7 +1,6 @@
 package sqlstore
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -11,65 +10,6 @@ import (
 
 // MainOrgName is the name of the main organization.
 const MainOrgName = "Main Org."
-
-func (ss *SQLStore) SearchOrgs(ctx context.Context, query *models.SearchOrgsQuery) error {
-	return ss.WithDbSession(ctx, func(dbSession *DBSession) error {
-		query.Result = make([]*models.OrgDTO, 0)
-		sess := dbSession.Table("org")
-		if query.Query != "" {
-			sess.Where("name LIKE ?", query.Query+"%")
-		}
-		if query.Name != "" {
-			sess.Where("name=?", query.Name)
-		}
-
-		if len(query.Ids) > 0 {
-			sess.In("id", query.Ids)
-		}
-
-		if query.Limit > 0 {
-			sess.Limit(query.Limit, query.Limit*query.Page)
-		}
-
-		sess.Cols("id", "name")
-		err := sess.Find(&query.Result)
-		return err
-	})
-}
-
-func (ss *SQLStore) GetOrgById(ctx context.Context, query *models.GetOrgByIdQuery) error {
-	return ss.WithDbSession(ctx, func(dbSession *DBSession) error {
-		var org models.Org
-		exists, err := dbSession.ID(query.Id).Get(&org)
-		if err != nil {
-			return err
-		}
-
-		if !exists {
-			return models.ErrOrgNotFound
-		}
-
-		query.Result = &org
-		return nil
-	})
-}
-
-func (ss *SQLStore) GetOrgByNameHandler(ctx context.Context, query *models.GetOrgByNameQuery) error {
-	return ss.WithDbSession(ctx, func(dbSession *DBSession) error {
-		var org models.Org
-		exists, err := dbSession.Where("name=?", query.Name).Get(&org)
-		if err != nil {
-			return err
-		}
-
-		if !exists {
-			return models.ErrOrgNotFound
-		}
-
-		query.Result = &org
-		return nil
-	})
-}
 
 // GetOrgByName gets an organization by name.
 func (ss *SQLStore) GetOrgByName(name string) (*models.Org, error) {
@@ -83,74 +23,6 @@ func (ss *SQLStore) GetOrgByName(name string) (*models.Org, error) {
 	}
 
 	return &org, nil
-}
-
-func (ss *SQLStore) UpdateOrgAddress(ctx context.Context, cmd *models.UpdateOrgAddressCommand) error {
-	return ss.WithTransactionalDbSession(ctx, func(sess *DBSession) error {
-		org := models.Org{
-			Address1: cmd.Address1,
-			Address2: cmd.Address2,
-			City:     cmd.City,
-			ZipCode:  cmd.ZipCode,
-			State:    cmd.State,
-			Country:  cmd.Country,
-
-			Updated: time.Now(),
-		}
-
-		if _, err := sess.ID(cmd.OrgId).Update(&org); err != nil {
-			return err
-		}
-
-		sess.publishAfterCommit(&events.OrgUpdated{
-			Timestamp: org.Updated,
-			Id:        org.Id,
-			Name:      org.Name,
-		})
-
-		return nil
-	})
-}
-
-func (ss *SQLStore) DeleteOrg(ctx context.Context, cmd *models.DeleteOrgCommand) error {
-	return ss.WithTransactionalDbSession(ctx, func(sess *DBSession) error {
-		if res, err := sess.Query("SELECT 1 from org WHERE id=?", cmd.Id); err != nil {
-			return err
-		} else if len(res) != 1 {
-			return models.ErrOrgNotFound
-		}
-
-		deletes := []string{
-			"DELETE FROM star WHERE EXISTS (SELECT 1 FROM dashboard WHERE org_id = ? AND star.dashboard_id = dashboard.id)",
-			"DELETE FROM dashboard_tag WHERE EXISTS (SELECT 1 FROM dashboard WHERE org_id = ? AND dashboard_tag.dashboard_id = dashboard.id)",
-			"DELETE FROM dashboard WHERE org_id = ?",
-			"DELETE FROM api_key WHERE org_id = ?",
-			"DELETE FROM data_source WHERE org_id = ?",
-			"DELETE FROM org_user WHERE org_id = ?",
-			"DELETE FROM org WHERE id = ?",
-			"DELETE FROM temp_user WHERE org_id = ?",
-			"DELETE FROM ngalert_configuration WHERE org_id = ?",
-			"DELETE FROM alert_configuration WHERE org_id = ?",
-			"DELETE FROM alert_instance WHERE rule_org_id = ?",
-			"DELETE FROM alert_notification WHERE org_id = ?",
-			"DELETE FROM alert_notification_state WHERE org_id = ?",
-			"DELETE FROM alert_rule WHERE org_id = ?",
-			"DELETE FROM alert_rule_tag WHERE EXISTS (SELECT 1 FROM alert WHERE alert.org_id = ? AND alert.id = alert_rule_tag.alert_id)",
-			"DELETE FROM alert_rule_version WHERE rule_org_id = ?",
-			"DELETE FROM alert WHERE org_id = ?",
-			"DELETE FROM annotation WHERE org_id = ?",
-			"DELETE FROM kv_store WHERE org_id = ?",
-		}
-
-		for _, sql := range deletes {
-			_, err := sess.Exec(sql, cmd.Id)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
 }
 
 func verifyExistingOrg(sess *DBSession, orgId int64) error {

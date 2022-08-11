@@ -97,7 +97,7 @@ func (s *Service) UpdateOrg(ctx context.Context, cmd *org.UpdateOrgCommand) erro
 func (s *Service) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error
 func (s *Service) DeleteOrg(ctx context.Context, cmd *org.DeleteOrgCommand) error
 func (s *Service) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error
-func (s *Service) GetOrgByNameHandler(ctx context.Context, query org.GetOrgByNameQuery) error
+func (s *Service) GetOrgByNameHandler(ctx context.Context, query *org.GetOrgByNameQuery) error
 func (s *Service) AddOrgUser(ctx context.Context, cmd *org.AddOrgUserCommand) error
 func (s *Service) UpdateOrgUser(ctx context.Context, cmd *org.UpdateOrgUserCommand) error
 func (s *Service) GetOrgUsers(ctx context.Context, query *org.GetOrgUsersQuery) error
