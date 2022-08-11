@@ -94,15 +94,36 @@ func (s *Service) UpdateOrg(ctx context.Context, cmd *org.UpdateOrgCommand) erro
 	return s.store.UpdateOrg(ctx, cmd)
 }
 
-func (s *Service) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error
-func (s *Service) DeleteOrg(ctx context.Context, cmd *org.DeleteOrgCommand) error
-func (s *Service) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error
-func (s *Service) GetOrgByNameHandler(ctx context.Context, query *org.GetOrgByNameQuery) error
-func (s *Service) AddOrgUser(ctx context.Context, cmd *org.AddOrgUserCommand) error
-func (s *Service) UpdateOrgUser(ctx context.Context, cmd *org.UpdateOrgUserCommand) error
+func (s *Service) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error {
+	return s.store.UpdateOrgAddress(ctx, cmd)
+}
+
+func (s *Service) DeleteOrg(ctx context.Context, cmd *org.DeleteOrgCommand) error {
+	return s.store.DeleteOrg(ctx, cmd)
+}
+
+func (s *Service) GetOrgByNameHandler(ctx context.Context, query *org.GetOrgByNameQuery) error {
+	return s.store.GetOrgByNameHandler(ctx, query)
+}
+
+func (s *Service) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error {
+	return s.store.GetOrgById(ctx, query)
+}
+
+func (s *Service) SearchOrgs(ctx context.Context, query *org.SearchOrgsQuery) error {
+	return s.store.SearchOrgs(ctx, query)
+}
+
+func (s *Service) AddOrgUser(ctx context.Context, cmd *org.AddOrgUserCommand) error {
+	return s.store.AddOrgUser(ctx, cmd)
+}
+
+func (s *Service) UpdateOrgUser(ctx context.Context, cmd *org.UpdateOrgUserCommand) error {
+	return s.store.UpdateOrgUser(ctx, cmd)
+}
+
 func (s *Service) GetOrgUsers(ctx context.Context, query *org.GetOrgUsersQuery) error
 func (s *Service) SearchOrgUsers(ctx context.Context, query *org.SearchOrgUsersQuery) error
 func (s *Service) RemoveOrgUser(ctx context.Context, cmd *org.RemoveOrgUserCommand) error
-func (s *Service) SearchOrgs(ctx context.Context, query *org.SearchOrgsQuery) error
 func (s *Service) GetUserOrgList(ctx context.Context, query *org.GetUserOrgListQuery) error
 func (s *Service) SetUsingOrg(ctx context.Context, cmd *org.SetUsingOrgCommand) error
