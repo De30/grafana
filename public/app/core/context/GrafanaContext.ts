@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 
 import { GrafanaConfig } from '@grafana/data';
-import { LocationService } from '@grafana/runtime/src/services/LocationService';
-import { BackendSrv } from '@grafana/runtime/src/services/backendSrv';
+import { BackendSrv, LocationService } from '@grafana/runtime';
 
 import { AppChromeService } from '../components/AppChrome/AppChromeService';
 

@@ -48,6 +48,7 @@ export type { RenameByRegexTransformerOptions } from './transformations/transfor
 export type { SeriesToColumnsOptions } from './transformations/transformers/seriesToColumns';
 export type { SeriesToRowsTransformerOptions } from './transformations/transformers/seriesToRows';
 export type { SortByField, SortByTransformerOptions } from './transformations/transformers/sortBy';
+export type { LimitTransformerOptions } from './transformations/transformers/limit';
 export type { PanelData } from './types';
 export { GrafanaEdition, type SentryConfig } from './types/config';
 export { LoadingState } from './types/data';

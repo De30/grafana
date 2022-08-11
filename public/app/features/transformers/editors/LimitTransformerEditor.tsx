@@ -1,7 +1,12 @@
 import React, { FormEvent, useCallback } from 'react';
 
-import { DataTransformerID, standardTransformers, TransformerRegistryItem, TransformerUIProps } from '@grafana/data';
-import { LimitTransformerOptions } from '@grafana/data/src/transformations/transformers/limit';
+import {
+  DataTransformerID,
+  LimitTransformerOptions,
+  standardTransformers,
+  TransformerRegistryItem,
+  TransformerUIProps,
+} from '@grafana/data';
 import { InlineField, InlineFieldRow, Input } from '@grafana/ui';
 
 export const LimitTransformerEditor: React.FC<TransformerUIProps<LimitTransformerOptions>> = ({

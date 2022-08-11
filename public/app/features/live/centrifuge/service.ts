@@ -10,6 +10,7 @@ import {
   toLiveChannelId,
 } from '@grafana/data';
 import {
+  BackendDataSourceResponse,
   FetchResponse,
   GrafanaLiveSrv,
   LiveDataStreamOptions,
@@ -17,7 +18,6 @@ import {
   StreamingFrameAction,
   StreamingFrameOptions,
 } from '@grafana/runtime';
-import { BackendDataSourceResponse } from '@grafana/runtime/src/utils/queryResponse';
 import { loadUrlToken } from 'app/core/utils/urlToken';
 
 import { StreamingResponseData } from '../data/utils';
