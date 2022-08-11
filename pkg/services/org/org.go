@@ -11,7 +11,7 @@ type Service interface {
 	InsertOrgUser(context.Context, *user.OrgUser) (int64, error)
 	DeleteUserFromAll(context.Context, int64) error
 	CreateOrg(context.Context, *CreateOrgCommand) error
-	CreateOrgWithMember(ctx context.Context, name string, userID int64) (*Org, error)
+	CreateOrgWithMember(ctx context.Context, name string, userID int64) (Org, error)
 	UpdateOrg(context.Context, *UpdateOrgCommand) error
 	UpdateOrgAddress(context.Context, *UpdateOrgAddressCommand) error
 	DeleteOrg(context.Context, *DeleteOrgCommand) error

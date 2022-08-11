@@ -339,10 +339,6 @@ func (m *SQLStoreMock) GetAlertStatesForDashboard(ctx context.Context, query *mo
 	return m.ExpectedError
 }
 
-func (m *SQLStoreMock) AddOrgUser(ctx context.Context, cmd *models.AddOrgUserCommand) error {
-	return m.ExpectedError
-}
-
 func (m *SQLStoreMock) UpdateOrgUser(ctx context.Context, cmd *models.UpdateOrgUserCommand) error {
 	return m.ExpectedError
 }

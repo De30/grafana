@@ -86,11 +86,14 @@ func (s *Service) CreateOrg(ctx context.Context, cmd *org.CreateOrgCommand) erro
 	return s.store.CreateOrg(ctx, cmd)
 }
 
-func (s *Service) CreateOrgWithMember(ctx context.Context, name string, userID int64) (*org.Org, error) {
-	return s.store.CreateOrgWithMember(name, userID)
+func (s *Service) CreateOrgWithMember(ctx context.Context, name string, userID int64) (org.Org, error) {
+	return s.store.CreateOrgWithMember(ctx, name, userID)
 }
 
-func (s *Service) UpdateOrg(ctx context.Context, cmd *org.UpdateOrgCommand) error
+func (s *Service) UpdateOrg(ctx context.Context, cmd *org.UpdateOrgCommand) error {
+	return s.store.UpdateOrg(ctx, cmd)
+}
+
 func (s *Service) UpdateOrgAddress(ctx context.Context, cmd *org.UpdateOrgAddressCommand) error
 func (s *Service) DeleteOrg(ctx context.Context, cmd *org.DeleteOrgCommand) error
 func (s *Service) GetOrgById(ctx context.Context, query *org.GetOrgByIdQuery) error

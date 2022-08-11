@@ -8,11 +8,12 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 )
 
-func (ss *SQLStore) AddOrgUser(ctx context.Context, cmd *models.AddOrgUserCommand) error {
+func (ss *SQLStore) AddOrgUser(ctx context.Context, cmd *org.AddOrgUserCommand) error {
 	return ss.WithTransactionalDbSession(ctx, func(sess *DBSession) error {
 		// check if user exists
 		var usr user.User

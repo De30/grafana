@@ -13,6 +13,7 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/apikey"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -21,14 +22,16 @@ import (
 type ServiceAccountsStoreImpl struct {
 	sqlStore      *sqlstore.SQLStore
 	apiKeyService apikey.Service
+	orgService    org.Service
 	kvStore       kvstore.KVStore
 	log           log.Logger
 }
 
-func ProvideServiceAccountsStore(store *sqlstore.SQLStore, apiKeyService apikey.Service, kvStore kvstore.KVStore) *ServiceAccountsStoreImpl {
+func ProvideServiceAccountsStore(store *sqlstore.SQLStore, apiKeyService apikey.Service, kvStore kvstore.KVStore, orgService org.Service) *ServiceAccountsStoreImpl {
 	return &ServiceAccountsStoreImpl{
 		sqlStore:      store,
 		apiKeyService: apiKeyService,
+		orgService:    orgService,
 		kvStore:       kvStore,
 		log:           log.New("serviceaccounts.store"),
 	}
@@ -61,7 +64,7 @@ func (s *ServiceAccountsStoreImpl) CreateServiceAccount(ctx context.Context, org
 			return errUser
 		}
 
-		errAddOrgUser := s.sqlStore.AddOrgUser(ctx, &models.AddOrgUserCommand{
+		errAddOrgUser := s.orgService.AddOrgUser(ctx, &org.AddOrgUserCommand{
 			Role:                      role,
 			OrgId:                     orgId,
 			UserId:                    newSA.ID,

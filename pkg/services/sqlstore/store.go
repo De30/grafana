@@ -19,7 +19,6 @@ type Store interface {
 	GetDialect() migrator.Dialect
 	GetSystemStats(ctx context.Context, query *models.GetSystemStatsQuery) error
 	GetOrgByName(name string) (*models.Org, error)
-	//CreateOrg(ctx context.Context, cmd *models.CreateOrgCommand) error
 	//CreateOrgWithMember(name string, userID int64) (*org.Org, error)
 	// UpdateOrg(ctx context.Context, cmd *models.UpdateOrgCommand) error
 	// UpdateOrgAddress(ctx context.Context, cmd *models.UpdateOrgAddressCommand) error
@@ -64,6 +63,7 @@ type Store interface {
 	GetGlobalQuotaByTarget(ctx context.Context, query *models.GetGlobalQuotaByTargetQuery) error
 	WithTransactionalDbSession(ctx context.Context, callback DBTransactionFunc) error
 	InTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+	
 	//AddOrgUser(ctx context.Context, cmd *models.AddOrgUserCommand) error
 	//UpdateOrgUser(ctx context.Context, cmd *models.UpdateOrgUserCommand) error
 	// GetOrgUsers(ctx context.Context, query *models.GetOrgUsersQuery) error
