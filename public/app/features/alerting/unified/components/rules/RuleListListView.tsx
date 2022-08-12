@@ -3,11 +3,13 @@ import React, { FC } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { Stack } from '@grafana/experimental';
-import { Button, Icon, Pagination, Tag, useStyles2 } from '@grafana/ui';
+import { Button, ButtonGroup, Icon, Pagination, Tag, useStyles2 } from '@grafana/ui';
 import { AlertingRule, CombinedRule, CombinedRuleNamespace } from 'app/types/unified-alerting';
 import { GrafanaAlertState, PromAlertingRuleState, PromRuleType } from 'app/types/unified-alerting-dto';
 
 import { isGrafanaRulesSource } from '../../utils/datasource';
+
+import { AlertInstanceHoverPreview } from './AlertInstancesHoverPreview';
 
 interface Props {
   namespaces: CombinedRuleNamespace[];
@@ -115,21 +117,20 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                   <Stack alignItems={'center'}>
                     {hasAlertInstances(rule.promRule) && (
                       <Stack gap={0.25} alignItems={'center'}>
-                        <Muted>
-                          <Icon name="layer-group" /> <small>{rule.promRule?.alerts?.length}</small>
-                        </Muted>
+                        <AlertInstanceHoverPreview instances={rule.promRule?.alerts ?? []}>
+                          <Muted>
+                            <Icon name="layer-group" /> <small>{rule.promRule?.alerts?.length}</small>
+                          </Muted>
+                        </AlertInstanceHoverPreview>
                       </Stack>
                     )}
                     <Stack gap={0.5} alignItems={'center'}>
-                      <Button icon="book" size="sm">
-                        View runbook
-                      </Button>
-                      <Button icon="apps" size="sm">
-                        View panel
-                      </Button>
-                      <Button icon="eye" size="sm">
-                        Details
-                      </Button>
+                      <ButtonGroup>
+                        <Button icon="eye" size="sm">
+                          View
+                        </Button>
+                        <Button size="sm" icon="angle-down" />
+                      </ButtonGroup>
                     </Stack>
                   </Stack>
                 </Stack>
