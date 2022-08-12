@@ -133,44 +133,45 @@ func (hs *HTTPServer) GetPluginSettingByID(c *models.ReqContext) response.Respon
 	}
 
 	dto := &dtos.PluginSetting{
-		Type:          string(plugin.Type),
 		Id:            plugin.ID,
+		Type:          string(plugin.Type),
 		Name:          plugin.Name,
+		Enabled:       true,
 		Info:          plugin.Info,
 		Dependencies:  plugin.Dependencies,
 		Includes:      plugin.Includes,
 		BaseUrl:       plugin.BaseURL,
 		Module:        plugin.Module,
-		DefaultNavUrl: path.Join(hs.Cfg.AppSubURL, plugin.DefaultNavURL),
 		State:         plugin.State,
 		Signature:     plugin.Signature,
 		SignatureType: plugin.SignatureType,
 		SignatureOrg:  plugin.SignatureOrg,
 	}
 
-	if plugin.IsApp() {
-		dto.Enabled = plugin.AutoEnabled
-		dto.Pinned = plugin.AutoEnabled
-	}
-
-	ps, err := hs.PluginSettings.GetPluginSettingByPluginID(c.Req.Context(), &pluginsettings.GetByPluginIDArgs{
-		PluginID: pluginID,
-		OrgID:    c.OrgID,
-	})
-	if err != nil {
-		if !errors.Is(err, models.ErrPluginSettingNotFound) {
-			return response.Error(http.StatusInternalServerError, "Failed to get plugin settings", nil)
-		}
-	} else {
-		dto.Enabled = ps.Enabled
-		dto.Pinned = ps.Pinned
-		dto.JsonData = ps.JSONData
-	}
-
 	update, exists := hs.pluginsUpdateChecker.HasUpdate(c.Req.Context(), plugin.ID)
 	if exists {
 		dto.LatestVersion = update
 		dto.HasUpdate = true
+	}
+
+	if plugin.IsApp() {
+		dto.Enabled = plugin.AutoEnabled
+		dto.Pinned = plugin.AutoEnabled
+		dto.DefaultNavUrl = path.Join(hs.Cfg.AppSubURL, plugin.DefaultNavURL)
+
+		ps, err := hs.PluginSettings.GetPluginSettingByPluginID(c.Req.Context(), &pluginsettings.GetByPluginIDArgs{
+			PluginID: pluginID,
+			OrgID:    c.OrgID,
+		})
+		if err != nil {
+			if !errors.Is(err, models.ErrPluginSettingNotFound) {
+				return response.Error(http.StatusInternalServerError, "Failed to get plugin settings", nil)
+			}
+		} else {
+			dto.Enabled = ps.Enabled
+			dto.Pinned = ps.Pinned
+			dto.JsonData = ps.JSONData
+		}
 	}
 
 	return response.JSON(http.StatusOK, dto)
