@@ -43,12 +43,12 @@ export function SecondaryActions(props: Props) {
         {!props.richHistoryRowButtonHidden && (
           <Button
             variant="secondary"
-            aria-label="Rich history button"
+            aria-label="Saved items button"
             className={cx({ ['explore-active-button']: props.richHistoryButtonActive })}
             onClick={props.onClickRichHistoryButton}
-            icon="history"
+            icon="save"
           >
-            Query history
+            Saved Items
           </Button>
         )}
         <Button

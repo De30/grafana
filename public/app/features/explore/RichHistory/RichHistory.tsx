@@ -11,11 +11,13 @@ import { supportedFeatures } from '../../../core/history/richHistoryStorageProvi
 import { RichHistoryQueriesTab } from './RichHistoryQueriesTab';
 import { RichHistorySettingsTab } from './RichHistorySettingsTab';
 import { RichHistoryStarredTab } from './RichHistoryStarredTab';
+import { SavedItemsVariablesTab } from './SavedItemsVariablesTab';
 
 export enum Tabs {
   RichHistory = 'Query history',
   Starred = 'Starred',
   Settings = 'Settings',
+  Variables = 'Variables',
 }
 
 export const getSortOrderOptions = () =>
@@ -111,6 +113,13 @@ class UnThemedRichHistory extends PureComponent<RichHistoryProps> {
     } = this.props;
     const { loading } = this.state;
 
+    const VariablesTab: TabConfig = {
+      label: 'Variables',
+      value: Tabs.Variables,
+      content: <SavedItemsVariablesTab />,
+      icon: 'x',
+    };
+
     const QueriesTab: TabConfig = {
       label: 'Query history',
       value: Tabs.RichHistory,
@@ -133,7 +142,7 @@ class UnThemedRichHistory extends PureComponent<RichHistoryProps> {
     };
 
     const StarredTab: TabConfig = {
-      label: 'Starred',
+      label: 'Saved Queries',
       value: Tabs.Starred,
       content: (
         <RichHistoryStarredTab
@@ -169,7 +178,7 @@ class UnThemedRichHistory extends PureComponent<RichHistoryProps> {
       icon: 'sliders-v-alt',
     };
 
-    let tabs = [QueriesTab, StarredTab, SettingsTab];
+    let tabs = [StarredTab, VariablesTab, QueriesTab, SettingsTab];
     return (
       <TabbedContainer tabs={tabs} onClose={onClose} defaultTab={firstTab} closeIconTooltip="Close query history" />
     );
