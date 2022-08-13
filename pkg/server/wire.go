@@ -62,6 +62,7 @@ import (
 	datasourceservice "github.com/grafana/grafana/pkg/services/datasources/service"
 	"github.com/grafana/grafana/pkg/services/encryption"
 	encryptionservice "github.com/grafana/grafana/pkg/services/encryption/service"
+	"github.com/grafana/grafana/pkg/services/explorevariables"
 	"github.com/grafana/grafana/pkg/services/export"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
@@ -192,6 +193,8 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(shorturls.Service), new(*shorturls.ShortURLService)),
 	queryhistory.ProvideService,
 	wire.Bind(new(queryhistory.Service), new(*queryhistory.QueryHistoryService)),
+	explorevariables.ProvideService,
+	wire.Bind(new(explorevariables.Service), new(*explorevariables.ExploreVariableService)),
 	correlations.ProvideService,
 	wire.Bind(new(correlations.Service), new(*correlations.CorrelationsService)),
 	quotaimpl.ProvideService,

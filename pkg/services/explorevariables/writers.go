@@ -8,9 +8,9 @@ import (
 )
 
 func writeFiltersSQL(query SearchInExploreVariableQuery, user *user.SignedInUser, sqlStore *sqlstore.SQLStore, builder *sqlstore.SQLBuilder) {
-	params := []interface{}{user.OrgID, user.UserID, query.From, query.To, "%" + query.SearchString + "%", "%" + query.SearchString + "%"}
+	params := []interface{}{user.OrgID, query.From, query.To, "%" + query.SearchString + "%", "%" + query.SearchString + "%"}
 	var sql bytes.Buffer
-	sql.WriteString(" WHERE explore_variable.org_id = ? AND explore_variable.created_by = ? AND explore_variable.created_at >= ? AND explore_variable.created_at <= ? AND (explore_variable.queries " + sqlStore.Dialect.LikeStr() + " ? OR explore_variable.comment " + sqlStore.Dialect.LikeStr() + " ?) ")
+	sql.WriteString(" WHERE explore_variable.org_id = ? AND explore_variable.created_at >= ? AND explore_variable.created_at <= ? AND (explore_variable.name " + sqlStore.Dialect.LikeStr() + " ? OR explore_variable.comment " + sqlStore.Dialect.LikeStr() + " ?) ")
 
 	builder.Write(sql.String(), params...)
 }

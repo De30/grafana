@@ -10,13 +10,15 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-func ProvideService(cfg *setting.Cfg, sqlStore *sqlstore.SQLStore, routeRegister routing.RouteRegister) *ExploreVariablesService {
-	s := &ExploreVariablesService{
+func ProvideService(cfg *setting.Cfg, sqlStore *sqlstore.SQLStore, routeRegister routing.RouteRegister) *ExploreVariableService {
+	s := &ExploreVariableService{
 		SQLStore:      sqlStore,
 		Cfg:           cfg,
 		RouteRegister: routeRegister,
-		log:           log.New("explore-variables"),
+		log:           log.New("explore-variable"),
 	}
+
+	s.registerAPIEndpoints()
 
 	return s
 }
@@ -27,25 +29,25 @@ type Service interface {
 	PatchVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, UID string, cmd PatchVariableInExploreVariableCommand) (ExploreVariableDTO, error)
 }
 
-type ExploreVariablesService struct {
+type ExploreVariableService struct {
 	SQLStore      *sqlstore.SQLStore
 	Cfg           *setting.Cfg
 	RouteRegister routing.RouteRegister
 	log           log.Logger
 }
 
-func (s ExploreVariablesService) CreateVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, cmd CreateVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
+func (s ExploreVariableService) CreateVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, cmd CreateVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
 	return s.createVariable(ctx, user, cmd)
 }
 
-func (s ExploreVariablesService) SearchInExploreVariables(ctx context.Context, user *user.SignedInUser, query SearchInExploreVariableQuery) (ExploreVariableSearchResult, error) {
+func (s ExploreVariableService) SearchInExploreVariable(ctx context.Context, user *user.SignedInUser, query SearchInExploreVariableQuery) (ExploreVariableSearchResult, error) {
 	return s.searchVariables(ctx, user, query)
 }
 
-func (s ExploreVariablesService) DeleteVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, UID string) (int64, error) {
+func (s ExploreVariableService) DeleteVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, UID string) (int64, error) {
 	return s.deleteVariable(ctx, user, UID)
 }
 
-func (s ExploreVariablesService) PatchVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, UID string, cmd PatchVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
+func (s ExploreVariableService) PatchVariableInExploreVariable(ctx context.Context, user *user.SignedInUser, UID string, cmd PatchVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
 	return s.patchVariable(ctx, user, UID, cmd)
 }

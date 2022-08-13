@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrVariableNotFound = errors.New("Explore variable not found")
+	ErrVariableNotFound = errors.New("explore variable not found")
 )
 
 // ExploreVariable is the model for explore variable definitions

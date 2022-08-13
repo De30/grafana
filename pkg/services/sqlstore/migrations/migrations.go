@@ -67,15 +67,17 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 	addKVStoreMigrations(mg)
 	ualert.AddDashboardUIDPanelIDMigration(mg)
 	accesscontrol.AddMigration(mg)
-	addQueryHistoryMigrations(mg)
 
 	accesscontrol.AddTeamMembershipMigrations(mg)
 	accesscontrol.AddDashboardPermissionsMigrator(mg)
 	accesscontrol.AddAlertingPermissionsMigrator(mg)
 
+	addQueryHistoryMigrations(mg)
 	addQueryHistoryStarMigrations(mg)
 
 	addCorrelationsMigrations(mg)
+
+	addExploreVariableMigrations(mg)
 
 	if mg.Cfg != nil && mg.Cfg.IsFeatureToggleEnabled != nil {
 		if mg.Cfg.IsFeatureToggleEnabled(featuremgmt.FlagDashboardComments) || mg.Cfg.IsFeatureToggleEnabled(featuremgmt.FlagAnnotationComments) {

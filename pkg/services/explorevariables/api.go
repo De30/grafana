@@ -12,8 +12,8 @@ import (
 	"github.com/grafana/grafana/pkg/web"
 )
 
-func (s *ExploreVariablesService) registerAPIEndpoints() {
-	s.RouteRegister.Group("/api/explore-variables", func(entities routing.RouteRegister) {
+func (s *ExploreVariableService) registerAPIEndpoints() {
+	s.RouteRegister.Group("/api/explore-variable", func(entities routing.RouteRegister) {
 		entities.Post("/", middleware.ReqSignedIn, routing.Wrap(s.createHandler))
 		entities.Get("/", middleware.ReqSignedIn, routing.Wrap(s.searchHandler))
 		entities.Delete("/:uid", middleware.ReqSignedIn, routing.Wrap(s.deleteHandler))
@@ -28,11 +28,11 @@ func (s *ExploreVariablesService) registerAPIEndpoints() {
 // Adds new variable to explore variables.
 //
 // Responses:
-// 200: getExploreVariablesResponse
+// 200: getExploreVariableResponse
 // 400: badRequestError
 // 401: unauthorisedError
 // 500: internalServerError
-func (s *ExploreVariablesService) createHandler(c *models.ReqContext) response.Response {
+func (s *ExploreVariableService) createHandler(c *models.ReqContext) response.Response {
 	cmd := CreateVariableInExploreVariableCommand{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
@@ -58,7 +58,7 @@ func (s *ExploreVariablesService) createHandler(c *models.ReqContext) response.R
 // 200: getExploreVariableSearchResponse
 // 401: unauthorisedError
 // 500: internalServerError
-func (s *ExploreVariablesService) searchHandler(c *models.ReqContext) response.Response {
+func (s *ExploreVariableService) searchHandler(c *models.ReqContext) response.Response {
 	timeRange := legacydata.NewDataTimeRange(c.Query("from"), c.Query("to"))
 
 	variable := SearchInExploreVariableQuery{
@@ -70,7 +70,7 @@ func (s *ExploreVariablesService) searchHandler(c *models.ReqContext) response.R
 		To:           timeRange.GetToAsSecondsEpoch(),
 	}
 
-	result, err := s.SearchInExploreVariables(c.Req.Context(), c.SignedInUser, variable)
+	result, err := s.SearchInExploreVariable(c.Req.Context(), c.SignedInUser, variable)
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "Failed to get explore variables", err)
 	}
@@ -88,7 +88,7 @@ func (s *ExploreVariablesService) searchHandler(c *models.ReqContext) response.R
 // 200: getExploreVariableDeleteVariableResponse
 // 401: unauthorisedError
 // 500: internalServerError
-func (s *ExploreVariablesService) deleteHandler(c *models.ReqContext) response.Response {
+func (s *ExploreVariableService) deleteHandler(c *models.ReqContext) response.Response {
 	variableUID := web.Params(c.Req)[":uid"]
 	if len(variableUID) > 0 && !util.IsValidShortUID(variableUID) {
 		return response.Error(http.StatusNotFound, "Variable in explore variable not found", nil)
@@ -116,7 +116,7 @@ func (s *ExploreVariablesService) deleteHandler(c *models.ReqContext) response.R
 // 400: badRequestError
 // 401: unauthorisedError
 // 500: internalServerError
-func (s *ExploreVariablesService) patchVariableHandler(c *models.ReqContext) response.Response {
+func (s *ExploreVariableService) patchVariableHandler(c *models.ReqContext) response.Response {
 	variableUID := web.Params(c.Req)[":uid"]
 	if len(variableUID) > 0 && !util.IsValidShortUID(variableUID) {
 		return response.Error(http.StatusNotFound, "Variable in explore variable not found", nil)

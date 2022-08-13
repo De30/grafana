@@ -10,8 +10,8 @@ import (
 )
 
 // createVariable adds a variable into explore variable
-func (s ExploreVariablesService) createVariable(ctx context.Context, user *user.SignedInUser, cmd CreateVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
-	exploreVariable := ExploreVariable{
+func (s ExploreVariableService) createVariable(ctx context.Context, user *user.SignedInUser, cmd CreateVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
+	exploreVariables := ExploreVariable{
 		OrgID:     user.OrgID,
 		UID:       util.GenerateShortUID(),
 		Values:    cmd.Values,
@@ -23,7 +23,7 @@ func (s ExploreVariablesService) createVariable(ctx context.Context, user *user.
 	}
 
 	err := s.SQLStore.WithDbSession(ctx, func(session *sqlstore.DBSession) error {
-		_, err := session.Insert(&exploreVariable)
+		_, err := session.Insert(&exploreVariables)
 		return err
 	})
 	if err != nil {
@@ -31,20 +31,20 @@ func (s ExploreVariablesService) createVariable(ctx context.Context, user *user.
 	}
 
 	dto := ExploreVariableDTO{
-		UID:       exploreVariable.UID,
-		CreatedBy: exploreVariable.CreatedBy,
-		CreatedAt: exploreVariable.CreatedAt,
-		Name:      exploreVariable.Name,
-		Label:     exploreVariable.Label,
-		Desc:      exploreVariable.Desc,
-		Values:    exploreVariable.Values,
+		UID:       exploreVariables.UID,
+		CreatedBy: exploreVariables.CreatedBy,
+		CreatedAt: exploreVariables.CreatedAt,
+		Name:      exploreVariables.Name,
+		Label:     exploreVariables.Label,
+		Desc:      exploreVariables.Desc,
+		Values:    exploreVariables.Values,
 	}
 
 	return dto, nil
 }
 
 // searchQueries searches for queries in explore variable based on provided parameters
-func (s ExploreVariablesService) searchVariables(ctx context.Context, user *user.SignedInUser, query SearchInExploreVariableQuery) (ExploreVariableSearchResult, error) {
+func (s ExploreVariableService) searchVariables(ctx context.Context, user *user.SignedInUser, query SearchInExploreVariableQuery) (ExploreVariableSearchResult, error) {
 	var dtos []ExploreVariableDTO
 	var allQueries []interface{}
 
@@ -106,7 +106,7 @@ func (s ExploreVariablesService) searchVariables(ctx context.Context, user *user
 	return response, nil
 }
 
-func (s ExploreVariablesService) deleteVariable(ctx context.Context, user *user.SignedInUser, UID string) (int64, error) {
+func (s ExploreVariableService) deleteVariable(ctx context.Context, user *user.SignedInUser, UID string) (int64, error) {
 	var queryID int64
 	err := s.SQLStore.WithTransactionalDbSession(ctx, func(session *sqlstore.DBSession) error {
 		id, err := session.Where("org_id = ? AND created_by = ? AND uid = ?", user.OrgID, user.UserID, UID).Delete(ExploreVariable{})
@@ -125,7 +125,7 @@ func (s ExploreVariablesService) deleteVariable(ctx context.Context, user *user.
 }
 
 // patchQueryComment searches updates comment for query in explore variable
-func (s ExploreVariablesService) patchVariable(ctx context.Context, user *user.SignedInUser, UID string, cmd PatchVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
+func (s ExploreVariableService) patchVariable(ctx context.Context, user *user.SignedInUser, UID string, cmd PatchVariableInExploreVariableCommand) (ExploreVariableDTO, error) {
 	var exploreVariable ExploreVariable
 
 	err := s.SQLStore.WithTransactionalDbSession(ctx, func(session *sqlstore.DBSession) error {
