@@ -20,13 +20,16 @@ type Service struct {
 }
 
 func ProvideService(db db.DB, cfg *setting.Cfg) org.Service {
+	log := log.New("org service")
 	return &Service{
 		store: &sqlStore{
 			db:      db,
 			dialect: db.GetDialect(),
+			cfg:     cfg,
+			log:     log,
 		},
 		cfg: cfg,
-		log: log.New("org service"),
+		log: log,
 	}
 }
 
@@ -122,8 +125,17 @@ func (s *Service) UpdateOrgUser(ctx context.Context, cmd *org.UpdateOrgUserComma
 	return s.store.UpdateOrgUser(ctx, cmd)
 }
 
-func (s *Service) GetOrgUsers(ctx context.Context, query *org.GetOrgUsersQuery) error
-func (s *Service) SearchOrgUsers(ctx context.Context, query *org.SearchOrgUsersQuery) error
-func (s *Service) RemoveOrgUser(ctx context.Context, cmd *org.RemoveOrgUserCommand) error
+func (s *Service) SearchOrgUsers(ctx context.Context, query *org.SearchOrgUsersQuery) error {
+	return s.store.SearchOrgUsers(ctx, query)
+}
+
+func (s *Service) GetOrgUsers(ctx context.Context, query *org.GetOrgUsersQuery) error {
+	return s.store.GetOrgUsers(ctx, query)
+}
+
+func (s *Service) RemoveOrgUser(ctx context.Context, cmd *org.RemoveOrgUserCommand) error {
+	return s.store.RemoveOrgUser(ctx, cmd)
+}
+
 func (s *Service) GetUserOrgList(ctx context.Context, query *org.GetUserOrgListQuery) error
 func (s *Service) SetUsingOrg(ctx context.Context, cmd *org.SetUsingOrgCommand) error
