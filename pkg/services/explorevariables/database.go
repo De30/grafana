@@ -46,7 +46,7 @@ func (s ExploreVariableService) createVariable(ctx context.Context, user *user.S
 // searchQueries searches for queries in explore variable based on provided parameters
 func (s ExploreVariableService) searchVariables(ctx context.Context, user *user.SignedInUser, query SearchInExploreVariableQuery) (ExploreVariableSearchResult, error) {
 	var dtos []ExploreVariableDTO
-	var allQueries []interface{}
+	var allQueries ExploreVariableSearchCount
 
 	if query.To <= 0 {
 		query.To = time.Now().Unix()
@@ -68,27 +68,25 @@ func (s ExploreVariableService) searchVariables(ctx context.Context, user *user.
 		dtosBuilder := sqlstore.SQLBuilder{}
 		dtosBuilder.Write(`SELECT
 			explore_variable.uid,
-			explore_variable.datasource_uid,
 			explore_variable.created_by,
 			explore_variable.created_at AS created_at,
-			explore_variable.comment,
-			explore_variable.queries,
+			explore_variable.label,
+			explore_variable.name,
+			explore_variable.desc,
+			explore_variable.'values'
+			FROM explore_variable
 		`)
 		writeFiltersSQL(query, user, s.SQLStore, &dtosBuilder)
-		writeSortSQL(query, s.SQLStore, &dtosBuilder)
-		writeLimitSQL(query, s.SQLStore, &dtosBuilder)
-		writeOffsetSQL(query, s.SQLStore, &dtosBuilder)
-
+		//writeSortSQL(query, s.SQLStore, &dtosBuilder)
+		//writeLimitSQL(query, s.SQLStore, &dtosBuilder)
+		//writeOffsetSQL(query, s.SQLStore, &dtosBuilder)
 		err := session.SQL(dtosBuilder.GetSQLString(), dtosBuilder.GetParams()...).Find(&dtos)
 		if err != nil {
 			return err
 		}
 
-		countBuilder := sqlstore.SQLBuilder{}
-		countBuilder.Write(`SELECT
-		`)
-		writeFiltersSQL(query, user, s.SQLStore, &countBuilder)
-		err = session.SQL(countBuilder.GetSQLString(), countBuilder.GetParams()...).Find(&allQueries)
+		rawSQL := `SELECT (SELECT COUNT(*) FROM explore_variable) as all_record_count`
+		_, err = session.SQL(rawSQL).Get(&allQueries)
 		return err
 	})
 
@@ -98,7 +96,7 @@ func (s ExploreVariableService) searchVariables(ctx context.Context, user *user.
 
 	response := ExploreVariableSearchResult{
 		ExploreVariable: dtos,
-		TotalCount:      len(allQueries),
+		TotalCount:      allQueries.AllRecordCount,
 		Page:            query.Page,
 		PerPage:         query.Limit,
 	}

@@ -40,11 +40,12 @@ type ExploreVariableResponse struct {
 
 type SearchInExploreVariableQuery struct {
 	SearchString string `json:"searchString"`
-	Sort         string `json:"sort"`
-	Page         int    `json:"page"`
-	Limit        int    `json:"limit"`
-	From         int64  `json:"from"`
-	To           int64  `json:"to"`
+
+	Sort  string `json:"sort"`
+	Page  int    `json:"page"`
+	Limit int    `json:"limit"`
+	From  int64  `json:"from"`
+	To    int64  `json:"to"`
 }
 
 type ExploreVariableSearchResult struct {
@@ -56,6 +57,10 @@ type ExploreVariableSearchResult struct {
 
 type ExploreVariableSearchResponse struct {
 	Result ExploreVariableSearchResult `json:"result"`
+}
+
+type ExploreVariableSearchCount struct {
+	AllRecordCount int `xorm:"all_record_count"`
 }
 
 // ExploreVariableDeleteVariableResponse is the response struct for deleting a variable from explore variable
