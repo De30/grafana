@@ -38,6 +38,8 @@ export interface PanelContext {
   onAnnotationUpdate?: (annotation: AnnotationEventUIModel) => void;
   onAnnotationDelete?: (id: string) => void;
 
+  canCorrelate?: () => boolean;
+
   /**
    * Enables modifying thresholds directly from the panel
    *

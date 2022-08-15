@@ -145,6 +145,7 @@ export function ExploreGraph({
       setBaseStructureRev((r) => r + 1);
       setFieldConfig(seriesVisibilityConfigFactory(label, mode, fieldConfig, data));
     },
+    canCorrelate: () => true,
   };
 
   return (

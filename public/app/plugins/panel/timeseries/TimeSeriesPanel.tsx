@@ -10,6 +10,7 @@ import { getFieldLinksForExplore } from 'app/features/explore/utils/links';
 import { AnnotationEditorPlugin } from './plugins/AnnotationEditorPlugin';
 import { AnnotationsPlugin } from './plugins/AnnotationsPlugin';
 import { ContextMenuPlugin } from './plugins/ContextMenuPlugin';
+import { CorrelationsPlugin } from './plugins/CorrelationsPlugin';
 import { ExemplarsPlugin } from './plugins/ExemplarsPlugin';
 import { OutsideRangePlugin } from './plugins/OutsideRangePlugin';
 import { ThresholdControlsPlugin } from './plugins/ThresholdControlsPlugin';
@@ -30,7 +31,8 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
   replaceVariables,
   id,
 }) => {
-  const { sync, canAddAnnotations, onThresholdsChange, canEditThresholds, onSplitOpen } = usePanelContext();
+  const { sync, canAddAnnotations, canCorrelate, onThresholdsChange, canEditThresholds, onSplitOpen } =
+    usePanelContext();
 
   const getFieldLinks = (field: Field, rowIndex: number) => {
     return getFieldLinksForExplore({ field, rowIndex, splitOpenFn: onSplitOpen, range: timeRange });
@@ -51,6 +53,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
     );
   }
 
+  const enableCorrelation = Boolean(canCorrelate && canCorrelate());
   const enableAnnotationCreation = Boolean(canAddAnnotations && canAddAnnotations());
 
   return (
@@ -84,6 +87,39 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
             {data.annotations && (
               <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
             )}
+            {enableCorrelation && onSplitOpen ? (
+              <CorrelationsPlugin data={alignedDataFrame} timeZone={timeZone} config={config} splitOpenFn={onSplitOpen}>
+                {({ startCorrelating, onOpen, onClose }) => {
+                  return (
+                    <ContextMenuPlugin
+                      data={alignedDataFrame}
+                      config={config}
+                      timeZone={timeZone}
+                      replaceVariables={replaceVariables}
+                      onOpen={onOpen}
+                      onClose={onClose}
+                      defaultItems={[
+                        {
+                          items: [
+                            {
+                              label: 'Correlate series',
+                              ariaLabel: 'Correlate series',
+                              icon: 'graph-bar',
+                              onClick: (e, p) => {
+                                if (!p) {
+                                  return;
+                                }
+                                startCorrelating({ coords: p.coords });
+                              },
+                            },
+                          ],
+                        },
+                      ]}
+                    />
+                  );
+                }}
+              </CorrelationsPlugin>
+            ) : null}
             {/* Enables annotations creation*/}
             {enableAnnotationCreation ? (
               <AnnotationEditorPlugin data={alignedDataFrame} timeZone={timeZone} config={config}>
@@ -115,16 +151,15 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
                   );
                 }}
               </AnnotationEditorPlugin>
-            ) : (
-              <ContextMenuPlugin
-                data={alignedDataFrame}
-                frames={frames}
-                config={config}
-                timeZone={timeZone}
-                replaceVariables={replaceVariables}
-                defaultItems={[]}
-              />
-            )}
+            ) : // <ContextMenuPlugin
+            //   data={alignedDataFrame}
+            //   frames={frames}
+            //   config={config}
+            //   timeZone={timeZone}
+            //   replaceVariables={replaceVariables}
+            //   defaultItems={[]}
+            // />
+            null}
             {data.annotations && (
               <ExemplarsPlugin
                 config={config}
