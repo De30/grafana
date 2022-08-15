@@ -184,6 +184,8 @@ export interface ExploreItemState {
   /* explore graph style */
   graphStyle: ExploreGraphStyle;
   panelsState: ExplorePanelsState;
+
+  variables: string[];
 }
 
 export interface ExploreUpdateState {

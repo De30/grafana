@@ -69,6 +69,7 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   logsVolumeData: undefined,
   graphStyle: loadGraphStyle(),
   panelsState: {},
+  variables: [],
 });
 
 export const createEmptyQueryResponse = (): ExplorePanelData => ({

@@ -248,6 +248,17 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
   };
 }
 
+export interface ChangeVariableListPayload {
+  variables: string[];
+}
+export const changeVariableListAction = createAction<ChangeVariableListPayload>('explore/changeVariableList');
+
+export function updateVariables(variables: string[]): ThunkResult<void> {
+  return async (dispatch, getState) => {
+    dispatch(changeVariableListAction({ variables }));
+  };
+}
+
 /**
  * Reducer for an Explore area, to be used by the global Explore reducer.
  */
@@ -276,6 +287,14 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
     return {
       ...state,
       richHistorySearchFilters,
+    };
+  }
+
+  if (changeVariableListAction.match(action)) {
+    const variableList = action.payload.variables;
+    return {
+      ...state,
+      variables: variableList,
     };
   }
 

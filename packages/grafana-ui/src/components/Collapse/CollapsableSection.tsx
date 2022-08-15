@@ -34,7 +34,11 @@ export const CollapsableSection: FC<Props> = ({
   const styles = useStyles2(collapsableSectionStyles);
 
   const onClick = (e: React.MouseEvent) => {
-    if (e.target instanceof HTMLElement && e.target.tagName === 'A') {
+    //Hackathon note - disabling span is prob a bad call here, but there's a span over the checkbox to style it and I don't know how to isolate this scenario better
+    if (
+      e.target instanceof HTMLElement &&
+      (e.target.tagName === 'A' || e.target.tagName === 'SPAN' || e.target.tagName === 'INPUT')
+    ) {
       return;
     }
 

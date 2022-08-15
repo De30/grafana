@@ -116,7 +116,7 @@ class UnThemedRichHistory extends PureComponent<RichHistoryProps> {
     const VariablesTab: TabConfig = {
       label: 'Variables',
       value: Tabs.Variables,
-      content: <SavedItemsVariablesTab />,
+      content: <SavedItemsVariablesTab exploreId={this.props.exploreId} />,
       icon: 'x',
     };
 

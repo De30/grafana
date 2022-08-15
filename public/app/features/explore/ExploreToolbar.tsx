@@ -117,6 +117,7 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       onChangeTimeZone,
       onChangeFiscalYearStartMonth,
       topOfViewRef,
+      variables,
     } = this.props;
 
     const showSmallDataSourcePicker = (splitted ? containerWidth < 700 : containerWidth < 800) || false;
@@ -125,6 +126,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
     const showExploreToDashboard =
       contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
       contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
+
+    console.log('toolbar', variables);
 
     return (
       <div ref={topOfViewRef}>
@@ -151,6 +154,7 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
                 width={showSmallDataSourcePicker ? 8 : undefined}
               />
             ),
+            variables.length > 0 && variables.toString(),
           ].filter(Boolean)}
         >
           <ToolbarButtonRow>
@@ -226,8 +230,17 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
 const mapStateToProps = (state: StoreState, { exploreId }: OwnProps) => {
   const { syncedTimes } = state.explore;
   const exploreItem = state.explore[exploreId]!;
-  const { datasourceInstance, datasourceMissing, range, refreshInterval, loading, isLive, isPaused, containerWidth } =
-    exploreItem;
+  const {
+    datasourceInstance,
+    datasourceMissing,
+    range,
+    refreshInterval,
+    loading,
+    isLive,
+    isPaused,
+    containerWidth,
+    variables,
+  } = exploreItem;
 
   const hasLiveOption = !!datasourceInstance?.meta?.streaming;
 
@@ -246,6 +259,7 @@ const mapStateToProps = (state: StoreState, { exploreId }: OwnProps) => {
     isPaused,
     syncedTimes,
     containerWidth,
+    variables,
   };
 };
 
