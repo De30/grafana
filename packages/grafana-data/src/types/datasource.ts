@@ -124,6 +124,7 @@ export interface DataSourcePluginMeta<T extends KeyValue = {}> extends PluginMet
   metrics?: boolean;
   logs?: boolean;
   annotations?: boolean;
+  correlations?: boolean;
   alerting?: boolean;
   tracing?: boolean;
   mixed?: boolean;
@@ -300,6 +301,11 @@ abstract class DataSourceApi<
    * Used in explore
    */
   modifyQuery?(query: TQuery, action: QueryFixAction): TQuery;
+
+  /**
+   * Create a correlation request for a series.
+   */
+  createCorrelationQuery?(refId: string, frame: DataFrame, seriesIdx: number): TQuery | null;
 
   /**
    * @deprecated since version 8.2.0

@@ -55,6 +55,9 @@ export interface GetDataSourceListFilters {
   /** Only filter data sources that support alerting */
   alerting?: boolean;
 
+  /** Only filter data sources that support correlations */
+  correlations?: boolean;
+
   /**
    * By default only data sources that can be queried will be returned. Meaning they have tracing,
    * metrics, logs or annotations flag set in plugin.json file

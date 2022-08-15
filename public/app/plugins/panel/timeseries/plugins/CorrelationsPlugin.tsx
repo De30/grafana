@@ -2,17 +2,18 @@ import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMountedState } from 'react-use';
 import uPlot from 'uplot';
 
-import { CartesianCoords2D, DataFrame, SplitOpen, TimeZone } from '@grafana/data';
+import { CartesianCoords2D, DataFrame, DataSourceInstanceSettings, SplitOpen } from '@grafana/data';
+import { getDataSourceSrv } from '@grafana/runtime';
 import { UPlotConfigBuilder } from '@grafana/ui';
 
 type StartCorrelatingFn = (props: {
   // pixel coordinates of the clicked point on the uPlot canvas
   coords: { viewport: CartesianCoords2D; plotCanvas: CartesianCoords2D } | null;
-}) => void;
+  datasource: DataSourceInstanceSettings;
+}) => Promise<void>;
 
 interface CorrelationsPluginProps {
   data: DataFrame;
-  timeZone: TimeZone;
   config: UPlotConfigBuilder;
   splitOpenFn: SplitOpen;
   children?: (props: {
@@ -25,13 +26,7 @@ interface CorrelationsPluginProps {
 /**
  * @alpha
  */
-export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({
-  data,
-  splitOpenFn,
-  timeZone,
-  config,
-  children,
-}) => {
+export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({ data, splitOpenFn, config, children }) => {
   const plotInstance = useRef<uPlot>();
   let isOpenRef = useRef(false);
   const onOpen = () => {
@@ -65,7 +60,7 @@ export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({
   }, [config, setBbox, isMounted, isOpenRef, setSeriesIdx]);
 
   const startCorrelating = useCallback<StartCorrelatingFn>(
-    ({ coords }) => {
+    async ({ coords, datasource }) => {
       if (!plotInstance.current || !bbox || !coords) {
         return;
       }
@@ -76,28 +71,27 @@ export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({
         return;
       }
 
+      const ds = await getDataSourceSrv().get(datasource.uid);
+
       if (seriesIdx !== null) {
         const field = data.fields[seriesIdx];
+        if (ds.createCorrelationQuery === undefined) {
+          console.log(`Requested datasource with uid ${datasource.uid} cannot run correlations.`);
+          return;
+        }
         console.log(`Starting correlating series ${JSON.stringify(field.labels)}`);
+        const query = ds.createCorrelationQuery(`Correlated with ${data.refId}`, data, seriesIdx);
+        if (query === null) {
+          console.log('Could not create correlations query');
+          return;
+        }
         splitOpenFn({
-          query: {
-            refId: 'Correlated',
-            // TODO: handle other data sources by defining a new 'type' of
-            // target where the data is passed directly to the backend.
-            target: {
-              type: 'prometheus',
-              expr: field.config.displayNameFromDS,
-              // extraLabels: field.labels,
-            },
-          },
-          // TODO: fetch this from somewhere?
-          // Maybe it should be configured globally, or maybe there should
-          // be a context menu item for each possible correlations data source?
-          datasourceUid: 'gpf6oFm4k',
+          query,
+          datasourceUid: datasource.uid,
         });
       }
     },
-    [bbox, splitOpenFn, seriesIdx, data.fields]
+    [bbox, splitOpenFn, seriesIdx, data]
   );
 
   return <>{children ? children({ startCorrelating, onOpen, onClose }) : null};</>;

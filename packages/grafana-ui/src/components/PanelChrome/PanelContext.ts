@@ -38,6 +38,9 @@ export interface PanelContext {
   onAnnotationUpdate?: (annotation: AnnotationEventUIModel) => void;
   onAnnotationDelete?: (id: string) => void;
 
+  /**
+   * Enables the 'Correlate series' button when a series in the panel is clicked.
+   */
   canCorrelate?: () => boolean;
 
   /**

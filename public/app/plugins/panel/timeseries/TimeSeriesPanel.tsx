@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { Field, PanelProps } from '@grafana/data';
-import { PanelDataErrorView } from '@grafana/runtime';
+import { getDataSourceSrv, PanelDataErrorView } from '@grafana/runtime';
 import { TooltipDisplayMode } from '@grafana/schema';
 import { usePanelContext, TimeSeries, TooltipPlugin, ZoomPlugin, KeyboardPlugin } from '@grafana/ui';
 import { config } from 'app/core/config';
@@ -54,6 +54,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
   }
 
   const enableCorrelation = Boolean(canCorrelate && canCorrelate());
+  const correlationDataSources = enableCorrelation ? getDataSourceSrv().getList({ correlations: true }) : [];
   const enableAnnotationCreation = Boolean(canAddAnnotations && canAddAnnotations());
 
   return (
@@ -88,7 +89,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
               <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
             )}
             {enableCorrelation && onSplitOpen ? (
-              <CorrelationsPlugin data={alignedDataFrame} timeZone={timeZone} config={config} splitOpenFn={onSplitOpen}>
+              <CorrelationsPlugin data={alignedDataFrame} config={config} splitOpenFn={onSplitOpen}>
                 {({ startCorrelating, onOpen, onClose }) => {
                   return (
                     <ContextMenuPlugin
@@ -100,19 +101,17 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
                       onClose={onClose}
                       defaultItems={[
                         {
-                          items: [
-                            {
-                              label: 'Correlate series',
-                              ariaLabel: 'Correlate series',
-                              icon: 'graph-bar',
-                              onClick: (e, p) => {
-                                if (!p) {
-                                  return;
-                                }
-                                startCorrelating({ coords: p.coords });
-                              },
+                          items: correlationDataSources.map((datasource) => ({
+                            label: `Find correlated series using ${datasource.name}`,
+                            ariaLabel: `Find correlated series using ${datasource.name}`,
+                            icon: 'graph-bar',
+                            onClick: (e, p) => {
+                              if (!p) {
+                                return;
+                              }
+                              startCorrelating({ coords: p.coords, datasource });
                             },
-                          ],
+                          })),
                         },
                       ]}
                     />

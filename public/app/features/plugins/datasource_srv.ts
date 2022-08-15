@@ -217,6 +217,9 @@ export class DatasourceSrv implements DataSourceService {
       if (filters.annotations && !x.meta.annotations) {
         return false;
       }
+      if (filters.correlations && !x.meta.correlations) {
+        return false;
+      }
       if (filters.alerting && !x.meta.alerting) {
         return false;
       }
@@ -233,6 +236,7 @@ export class DatasourceSrv implements DataSourceService {
         !filters.all &&
         x.meta.metrics !== true &&
         x.meta.annotations !== true &&
+        x.meta.correlations !== true &&
         x.meta.tracing !== true &&
         x.meta.logs !== true &&
         x.meta.alerting !== true
@@ -275,7 +279,7 @@ export class DatasourceSrv implements DataSourceService {
       return 0;
     });
 
-    if (!filters.pluginId && !filters.alerting) {
+    if (!filters.pluginId && !(filters.alerting || filters.correlations)) {
       if (filters.mixed) {
         const mixedInstanceSettings = this.getInstanceSettings('-- Mixed --');
         if (mixedInstanceSettings) {
