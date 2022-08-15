@@ -10,16 +10,16 @@ interface FetchWorkEntry {
   options: BackendSrvRequest;
 }
 
-interface FetchResponsesEntry<T> {
+interface FetchResponsesEntry<T, R = FetchResponse<T>> {
   id: string;
-  observable: Observable<FetchResponse<T>>;
+  observable: Observable<R>;
 }
 
-export class ResponseQueue {
+export class ResponseQueue<T, R = FetchResponse<T>> {
   private queue: Subject<FetchWorkEntry> = new Subject<FetchWorkEntry>(); // internal stream for requests that are to be executed
-  private responses: Subject<FetchResponsesEntry<any>> = new Subject<FetchResponsesEntry<any>>(); // external stream with responses from fetch
+  private responses: Subject<FetchResponsesEntry<T, R>> = new Subject<FetchResponsesEntry<T, R>>(); // external stream with responses from fetch
 
-  constructor(fetchQueue: FetchQueue, fetch: <T>(options: BackendSrvRequest) => Observable<FetchResponse<T>>) {
+  constructor(fetchQueue: FetchQueue, fetch: (options: BackendSrvRequest) => Observable<R>) {
     // This will create an implicit live subscription for as long as this class lives.
     // But as FetchQueue is used by the singleton backendSrv that also lives for as long as Grafana app lives
     // I think this ok. We could add some disposable pattern later if the need arises.
@@ -37,6 +37,6 @@ export class ResponseQueue {
     this.queue.next({ id, options });
   };
 
-  getResponses = <T>(id: string): Observable<FetchResponsesEntry<T>> =>
+  getResponses = <T>(id: string): Observable<FetchResponsesEntry<T, R>> =>
     this.responses.asObservable().pipe(filter((entry) => entry.id === id));
 }

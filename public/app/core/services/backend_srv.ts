@@ -6,11 +6,23 @@ import {
   Observable,
   of,
   Subject,
+  Subscriber,
   Subscription,
   throwError,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { catchError, filter, map, mergeMap, retryWhen, share, takeUntil, tap, throwIfEmpty } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  filter,
+  map,
+  mergeMap,
+  retryWhen,
+  share,
+  takeUntil,
+  tap,
+  throwIfEmpty,
+} from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AppEvents, DataQueryErrorType } from '@grafana/data';
@@ -56,7 +68,9 @@ export class BackendSrv implements BackendService {
   private noBackendCache: boolean;
   private inspectorStream: Subject<FetchResponse | FetchError> = new Subject<FetchResponse | FetchError>();
   private readonly fetchQueue: FetchQueue;
-  private readonly responseQueue: ResponseQueue;
+  private readonly responseQueue: ResponseQueue<unknown>;
+  private readonly fetchStreamQueue: FetchQueue;
+  private readonly responseStreamQueue: ResponseQueue<unknown>;
 
   private dependencies: BackendSrvDependencies = {
     fromFetch: fromFetch,
@@ -78,9 +92,13 @@ export class BackendSrv implements BackendService {
 
     this.noBackendCache = false;
     this.internalFetch = this.internalFetch.bind(this);
+    this.internalStream = this.internalStream.bind(this);
     this.fetchQueue = new FetchQueue();
     this.responseQueue = new ResponseQueue(this.fetchQueue, this.internalFetch);
+    this.fetchStreamQueue = new FetchQueue();
+    this.responseStreamQueue = new ResponseQueue(this.fetchStreamQueue, this.internalStream);
     new FetchQueueWorker(this.fetchQueue, this.responseQueue, getConfig());
+    new FetchQueueWorker(this.fetchStreamQueue, this.responseStreamQueue, getConfig());
   }
 
   async request<T = any>(options: BackendSrvRequest): Promise<T> {
@@ -122,6 +140,41 @@ export class BackendSrv implements BackendService {
     });
   }
 
+  stream(options: BackendSrvRequest): Observable<{ response: Response; stream: Uint8Array }> {
+    // We need to match an entry added to the queue stream with the entry that is eventually added to the response stream
+    const id = uuidv4();
+    const streamQueue = this.fetchStreamQueue;
+
+    return new Observable((observer) => {
+      // Subscription is an object that is returned whenever you subscribe to an Observable.
+      // You can also use it as a container of many subscriptions and when it is unsubscribed all subscriptions within are also unsubscribed.
+      const subscriptions: Subscription = new Subscription();
+
+      // We're using the subscriptions.add function to add the subscription implicitly returned by this.responseQueue.getResponses<T>(id).subscribe below.
+      subscriptions.add(
+        this.responseStreamQueue.getResponses(id).subscribe((result) => {
+          // The one liner below can seem magical if you're not accustomed to RxJs.
+          // Firstly, we're subscribing to the result from the result.observable and we're passing in the outer observer object.
+          // By passing the outer observer object then any updates on result.observable are passed through to any subscriber of the fetch<T> function.
+          // Secondly, we're adding the subscription implicitly returned by result.observable.subscribe(observer).
+          subscriptions.add(result.observable.subscribe(observer));
+        })
+      );
+
+      // Let the streamQueue know that this id needs to start data fetching.
+      streamQueue.add(id, options);
+
+      // This returned function will be called whenever the returned Observable from the stream function is unsubscribed/errored/completed/canceled.
+      return function unsubscribe() {
+        // Change status to Done moved here from ResponseQueue because this unsubscribe was called before the responseQueue produced a result
+        streamQueue.setDone(id);
+
+        // When subscriptions is unsubscribed all the implicitly added subscriptions above are also unsubscribed.
+        subscriptions.unsubscribe();
+      };
+    });
+  }
+
   private internalFetch<T>(options: BackendSrvRequest): Observable<FetchResponse<T>> {
     if (options.requestId) {
       this.inFlightRequests.next(options.requestId);
@@ -154,6 +207,27 @@ export class BackendSrv implements BackendService {
       catchError((err: FetchError) => throwError(this.processRequestError(options, err))),
       this.handleStreamCancellation(options)
     );
+  }
+
+  private internalStream(options: BackendSrvRequest): Observable<{ response: Response; stream: Uint8Array } | null> {
+    if (options.requestId) {
+      this.inFlightRequests.next(options.requestId);
+    }
+
+    options = this.parseRequestOptions(options);
+
+    const token = loadUrlToken();
+    if (token !== null && token !== '') {
+      if (!options.headers) {
+        options.headers = {};
+      }
+
+      if (config.jwtUrlLogin && config.jwtHeaderName) {
+        options.headers[config.jwtHeaderName] = `${token}`;
+      }
+    }
+
+    return this.getStreamFromFetchStream(options);
   }
 
   resolveCancelerIfExists(requestId: string) {
@@ -229,6 +303,21 @@ export class BackendSrv implements BackendService {
       }),
       share() // sharing this so we can split into success and failure and then merge back
     );
+  }
+
+  private getStreamFromFetchStream(
+    options: BackendSrvRequest
+  ): Observable<{ response: Response; stream: Uint8Array } | null> {
+    const url = parseUrlFromOptions(options);
+    const init = parseInitFromOptions(options);
+    return this.dependencies
+      .fromFetch(url, init)
+      .pipe(
+        concatMap(
+          (response: Response) =>
+            fromReadableStream(response.body!).pipe(map((stream) => ({ response, stream }))) ?? null
+        )
+      );
   }
 
   private toFailureStream<T>(options: BackendSrvRequest): MonoTypeOperatorFunction<FetchResponse<T>> {
@@ -467,3 +556,82 @@ export class BackendSrv implements BackendService {
 // Used for testing and things that really need BackendSrv
 export const backendSrv = new BackendSrv();
 export const getBackendSrv = (): BackendSrv => backendSrv;
+
+/**
+ * Creates an Observable source from a ReadableStream source that will emit any
+ * values emitted by the stream.
+ *
+ * @category Streams
+ *
+ * @see {@link https://stackblitz.com/edit/rxjs-readable-stream|StreamAPI Number Stream}
+ * @see {@link https://stackblitz.com/edit/rxjs-readable-stream-fetch|Fetch + StreamAPI Demo}
+ *
+ * @param stream The ReadableStream to subscribe to
+ * @param signal Optional {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal|AbortSignal} to provide
+ *   to the underlying stream
+ * @param queueStrategy Optional strategy for backpressure queueing
+ * @param throwEndAsError Optional to return an error when the `AbortSignal` has been fired instead of just closing
+ *
+ * @example Create a ReadableStream of `0` to `100` and convert to an Observable
+ * ```ts
+ * const stream = new ReadableStream({
+ *   start: (controller) => {
+ *    for (let i = 0; i <100; i++) {
+ *      controller.enqueue(i)
+ *    }
+ *    controller.close();
+ *   }
+ * });
+ *
+ * fromReadableStream(stream).pipe(reduce((a, b) => a + b)).subscribe();
+ * ```
+ * Output: `4950`
+ *
+ * @returns Observable that emits from a ReadableStream source
+ */
+export function fromReadableStream<T extends unknown>(
+  stream: ReadableStream<T>,
+  signal?: AbortSignal,
+  queueStrategy?: QueuingStrategy,
+  throwEndAsError = false
+): Observable<T> {
+  /**
+   * @private
+   * @internal
+   * @param subscriber
+   */
+  function createStream(subscriber: Subscriber<T>) {
+    return new WritableStream<T>(
+      {
+        write: (value) => subscriber.next(value),
+        abort: (error) => {
+          if (throwEndAsError) {
+            subscriber.error(error);
+            /* istanbul ignore next-line */
+          } else if (!subscriber.closed) {
+            subscriber.complete();
+          }
+        },
+        close: () => {
+          /* istanbul ignore next-line */
+          if (!subscriber.closed) {
+            subscriber.complete();
+          }
+        },
+      },
+      queueStrategy
+    );
+  }
+
+  return new Observable<T>((subscriber) => {
+    stream
+      .pipeTo(createStream(subscriber), { signal })
+      .then(() => {
+        /* istanbul ignore next-line */
+        return !subscriber.closed && subscriber.complete();
+      })
+      .catch((error) => subscriber.error(error));
+
+    return () => !stream.locked && stream.cancel();
+  });
+}

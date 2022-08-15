@@ -12,8 +12,8 @@ interface WorkerEntry {
   options: BackendSrvRequest;
 }
 
-export class FetchQueueWorker {
-  constructor(fetchQueue: FetchQueue, responseQueue: ResponseQueue, config: GrafanaBootConfig) {
+export class FetchQueueWorker<T> {
+  constructor(fetchQueue: FetchQueue, responseQueue: ResponseQueue<T>, config: GrafanaBootConfig) {
     const maxParallelRequests = config?.http2Enabled ? 1000 : 5; // for tests that don't mock GrafanaBootConfig the config param will be undefined
 
     // This will create an implicit live subscription for as long as this class lives.

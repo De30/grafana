@@ -169,6 +169,11 @@ export interface BackendSrv {
    * Observable http request interface
    */
   fetch<T>(options: BackendSrvRequest): Observable<FetchResponse<T>>;
+
+  /**
+   * Observable http request interface, streams response body after parsing each line as JSON.
+   */
+  stream(options: BackendSrvRequest): Observable<{ response: Response; stream: Uint8Array }>;
 }
 
 let singletonInstance: BackendSrv;
