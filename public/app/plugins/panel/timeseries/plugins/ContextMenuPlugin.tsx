@@ -37,6 +37,7 @@ export const ContextMenuPlugin: React.FC<ContextMenuPluginProps> = ({
   data,
   config,
   onClose,
+  onOpen,
   timeZone,
   replaceVariables,
   ...otherProps
@@ -47,12 +48,18 @@ export const ContextMenuPlugin: React.FC<ContextMenuPluginProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const openMenu = useCallback(() => {
+    if (onOpen) {
+      onOpen();
+    }
     setIsOpen(true);
-  }, [setIsOpen]);
+  }, [setIsOpen, onOpen]);
 
   const closeMenu = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
     setIsOpen(false);
-  }, [setIsOpen]);
+  }, [setIsOpen, onClose]);
 
   const clearSelection = useCallback(() => {
     pluginLog('ContextMenuPlugin', false, 'clearing click selection');
