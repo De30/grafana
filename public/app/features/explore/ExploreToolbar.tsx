@@ -29,9 +29,9 @@ import { DashNavButton } from '../dashboard/components/DashNav/DashNavButton';
 import { getTimeSrv } from '../dashboard/services/TimeSrv';
 import { updateFiscalYearStartMonthForSession, updateTimeZoneForSession } from '../profile/state/reducers';
 import { getFiscalYearStartMonth, getTimeZone } from '../profile/state/selectors';
-import { PickerRenderer } from '../variables/pickers/PickerRenderer';
 
 import { ExploreTimeControls } from './ExploreTimeControls';
+import { ExploreVariablePicker } from './ExploreVariablePicker';
 import { LiveTailButton } from './LiveTailButton';
 import { Variable } from './RichHistory/SavedItemsVariablesTab';
 import { changeDatasource } from './state/datasource';
@@ -71,11 +71,13 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
   }
 
   async componentDidUpdate(prevProps: Props) {
-    if (this.props.variables.length === 0) {
-      this.setState({ variablesAllData: [] });
-    } else if (!isEqual(prevProps.variables, this.props.variables)) {
-      const allVarData = await api.loadVariables({ uids: this.props.variables });
-      this.setState({ variablesAllData: allVarData.result.exploreVariables });
+    if (!isEqual(prevProps.variables, this.props.variables)) {
+      if (this.props.variables.length === 0) {
+        this.setState({ variablesAllData: [] });
+      } else {
+        const allVarData = await api.loadVariables({ uids: this.props.variables });
+        this.setState({ variablesAllData: allVarData.result.exploreVariables });
+      }
     }
   }
 
@@ -192,34 +194,7 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
             ),
             this.state.variablesAllData.length > 0 &&
               this.state.variablesAllData.map((variable, i) => {
-                const pickerVariable: CustomVariableModel = {
-                  name: variable.name,
-                  id: variable.name,
-                  label: variable.label,
-                  rootStateKey: variable.uid,
-                  global: true,
-                  hide: VariableHide.dontHide,
-                  skipUrlSync: true,
-                  index: i,
-                  state: LoadingState.Done,
-                  description: variable.desc,
-                  error: null,
-                  type: 'custom',
-                  multi: false,
-                  includeAll: false,
-                  allValue: null,
-                  query: '',
-                  options: variable.values.map((val: string) => {
-                    return {
-                      selected: false,
-                      text: val,
-                      value: val,
-                    };
-                  }),
-                  current: {} as VariableOption,
-                };
-
-                return <PickerRenderer key={variable.uid} variable={pickerVariable} readOnly={false} />;
+                return <ExploreVariablePicker key={`variable-${i}`} variable={variable} index={i} />;
               }),
           ].filter(Boolean)}
         >

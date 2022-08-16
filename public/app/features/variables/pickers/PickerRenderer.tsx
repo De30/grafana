@@ -28,7 +28,7 @@ export const PickerRenderer: FunctionComponent<Props> = (props) => {
   );
 };
 
-function PickerLabel({ variable }: PropsWithChildren<Props>): ReactElement | null {
+export function PickerLabel({ variable }: PropsWithChildren<Props>): ReactElement | null {
   const labelOrName = useMemo(() => variable.label || variable.name, [variable]);
 
   if (variable.hide !== VariableHide.dontHide) {
