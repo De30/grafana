@@ -1,11 +1,10 @@
 // Libraries
-import React, { PureComponent, FormEvent } from 'react';
 import { css } from '@emotion/css';
-
-import { ButtonGroup, ClickOutsideWrapper, Label, Select, Slider, ToolbarButton, withTheme2 } from '@grafana/ui';
+import React, { PureComponent, FormEvent } from 'react';
 
 // Types
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { ButtonGroup, ClickOutsideWrapper, Label, Select, Slider, ToolbarButton, withTheme2 } from '@grafana/ui';
 import getSonifier from 'app/core/services/Sonifier';
 
 export interface State {
@@ -25,7 +24,10 @@ export class UnthemedSonifierControls extends PureComponent<{ theme: GrafanaThem
     instruments: [],
   };
 
-  onChangeVolume = (value: number) => {
+  onChangeVolume = (value?: number) => {
+    if( !value ) {
+      return
+    }
     const sonifier = getSonifier();
     sonifier.setVolume(value * GAIN_FACTOR);
   };
