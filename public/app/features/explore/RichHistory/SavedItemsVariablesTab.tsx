@@ -38,7 +38,7 @@ export interface Variable {
   name: string;
   label: string;
   desc: string;
-  values: string;
+  values: string[];
 }
 
 interface DispatchProps {

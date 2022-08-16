@@ -2,7 +2,14 @@ import { isEqual } from 'lodash';
 import React, { lazy, PureComponent, RefObject, Suspense } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
+import {
+  DataSourceInstanceSettings,
+  LoadingState,
+  RawTimeRange,
+  VariableHide,
+  VariableOption,
+  CustomVariableModel,
+} from '@grafana/data';
 import { config, DataSourcePicker, reportInteraction } from '@grafana/runtime';
 import {
   defaultIntervals,
@@ -22,7 +29,7 @@ import { DashNavButton } from '../dashboard/components/DashNav/DashNavButton';
 import { getTimeSrv } from '../dashboard/services/TimeSrv';
 import { updateFiscalYearStartMonthForSession, updateTimeZoneForSession } from '../profile/state/reducers';
 import { getFiscalYearStartMonth, getTimeZone } from '../profile/state/selectors';
-//import { PickerRenderer } from '../variables/pickers/PickerRenderer';
+import { PickerRenderer } from '../variables/pickers/PickerRenderer';
 
 import { ExploreTimeControls } from './ExploreTimeControls';
 import { LiveTailButton } from './LiveTailButton';
@@ -57,12 +64,16 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
   };
 
   async componentDidMount() {
-    const allVarData = await api.loadVariables({ uids: this.props.variables });
-    this.setState({ variablesAllData: allVarData.result.exploreVariables });
+    if (this.props.variables.length > 0) {
+      const allVarData = await api.loadVariables({ uids: this.props.variables });
+      this.setState({ variablesAllData: allVarData.result.exploreVariables });
+    }
   }
 
   async componentDidUpdate(prevProps: Props) {
-    if (!isEqual(prevProps.variables, this.props.variables)) {
+    if (this.props.variables.length === 0) {
+      this.setState({ variablesAllData: [] });
+    } else if (!isEqual(prevProps.variables, this.props.variables)) {
       const allVarData = await api.loadVariables({ uids: this.props.variables });
       this.setState({ variablesAllData: allVarData.result.exploreVariables });
     }
@@ -179,13 +190,36 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
                 width={showSmallDataSourcePicker ? 8 : undefined}
               />
             ),
-            variables.length > 0 &&
-              variables.map((variable) => {
-                return (
-                  <div key={variable} className="submenu-item gf-form-inline">
-                    {variable}
-                  </div>
-                );
+            this.state.variablesAllData.length > 0 &&
+              this.state.variablesAllData.map((variable, i) => {
+                const pickerVariable: CustomVariableModel = {
+                  name: variable.name,
+                  id: variable.name,
+                  label: variable.label,
+                  rootStateKey: variable.uid,
+                  global: true,
+                  hide: VariableHide.dontHide,
+                  skipUrlSync: true,
+                  index: i,
+                  state: LoadingState.Done,
+                  description: variable.desc,
+                  error: null,
+                  type: 'custom',
+                  multi: false,
+                  includeAll: false,
+                  allValue: null,
+                  query: '',
+                  options: variable.values.map((val: string) => {
+                    return {
+                      selected: false,
+                      text: val,
+                      value: val,
+                    };
+                  }),
+                  current: {} as VariableOption,
+                };
+
+                return <PickerRenderer key={variable.uid} variable={pickerVariable} readOnly={false} />;
               }),
           ].filter(Boolean)}
         >
