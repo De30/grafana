@@ -119,6 +119,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/updatechecker"
 	"github.com/grafana/grafana/pkg/services/user/userimpl"
 	"github.com/grafana/grafana/pkg/services/userauth/userauthimpl"
+	"github.com/grafana/grafana/pkg/services/outgoingevents"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/tsdb/azuremonitor"
 	"github.com/grafana/grafana/pkg/tsdb/cloudmonitoring"
@@ -318,6 +319,8 @@ var wireBasicSet = wire.NewSet(
 	secretsMigrations.ProvideSecretMigrationService,
 	wire.Bind(new(secretsMigrations.SecretMigrationService), new(*secretsMigrations.SecretMigrationServiceImpl)),
 	userauthimpl.ProvideService,
+	outgoingevents.ProvideService,
+	wire.Bind(new(outgoingevents.Service), new(*outgoingevents.OutgoingEventsService)),
 )
 
 var wireSet = wire.NewSet(
