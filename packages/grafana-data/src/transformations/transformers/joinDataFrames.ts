@@ -214,7 +214,7 @@ export function outerJoinDataFrames(options: JoinOptions): DataFrame | undefined
   const joined = join(allData, nullModes);
 
   return {
-    // ...options.data[0], // keep name, meta?
+    ...options.frames[0], // keep name, meta?
     length: joined[0].length,
     fields: originalFields.map((f, index) => ({
       ...f,
