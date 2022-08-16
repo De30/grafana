@@ -52,15 +52,15 @@ export const EventActionsPageUnconnected = ({
   updateEventAction,
 }: Props): JSX.Element => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [hideCodebox, setHideCodebox] = useState<boolean | null>(null);
+  const [isCode, setIsCode] = useState<boolean | null>(null);
   const styles = useStyles2(getStyles);
   const eventActionId = parseInt(match.params.id, 10);
 
-  const isCodeboxHidden = (defaultEventAction: EventActionsDTO) => {
-    if (hideCodebox === null) {
-      return defaultEventAction.type !== EventActionStateFilter.Code;
+  const isTypeCode = (defaultEventAction: EventActionsDTO) => {
+    if (isCode === null) {
+      return defaultEventAction.type === EventActionStateFilter.Code;
     }
-    return hideCodebox;
+    return isCode;
   };
 
   const onSubmit = useCallback(
@@ -134,11 +134,11 @@ export const EventActionsPageUnconnected = ({
                       <InputControl
                         name="type"
                         control={control}
-                        render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={typeOptions} onChange={(e) => { onChange(e); setHideCodebox(e !== EventActionStateFilter.Code) }} />}
+                        render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={typeOptions} onChange={(e) => { onChange(e); setIsCode(e === EventActionStateFilter.Code) }} />}
                       />
                     </Field>
                     <Field
-                      label="URL"
+                      label={isTypeCode(eventAction) ? "Code Runner URL" : "Webhook URL"}
                       required
                       invalid={!!errors.url}
                       error={errors.url ? 'URL is required' : undefined}
@@ -148,7 +148,7 @@ export const EventActionsPageUnconnected = ({
                     <Field
                       label="Code"
                       required
-                      style={{ display: isCodeboxHidden(eventAction) ? 'none' : 'block' }}
+                      style={{ display: isTypeCode(eventAction) ? 'block' : 'none' }}
                     >
                       <InputControl
                         name="script"
