@@ -54,7 +54,27 @@ type discordAttachment struct {
 
 const DiscordMaxEmbeds = 10
 
-func NewDiscordConfig(config *NotificationChannelConfig) (*DiscordConfig, error) {
+func NewDiscordNotifier() Channel {
+	return Channel{
+		Type:        "discord",
+		Name:        "Discord",
+		Desc:        "Sends notifications to Discord",
+		ImplFactory: DiscordFactory,
+	}
+}
+
+func DiscordFactory(fc FactoryConfig) (NotificationChannel, error) {
+	cfg, err := newDiscordConfig(fc.Config)
+	if err != nil {
+		return nil, receiverInitError{
+			Reason: err.Error(),
+			Cfg:    *fc.Config,
+		}
+	}
+	return newDiscordNotifier(cfg, fc.NotificationService, fc.ImageStore, fc.Template), nil
+}
+
+func newDiscordConfig(config *NotificationChannelConfig) (*DiscordConfig, error) {
 	discordURL := config.Settings.Get("url").MustString()
 	if discordURL == "" {
 		return nil, errors.New("could not find webhook url property in settings")
@@ -68,18 +88,7 @@ func NewDiscordConfig(config *NotificationChannelConfig) (*DiscordConfig, error)
 	}, nil
 }
 
-func DiscordFactory(fc FactoryConfig) (NotificationChannel, error) {
-	cfg, err := NewDiscordConfig(fc.Config)
-	if err != nil {
-		return nil, receiverInitError{
-			Reason: err.Error(),
-			Cfg:    *fc.Config,
-		}
-	}
-	return NewDiscordNotifier(cfg, fc.NotificationService, fc.ImageStore, fc.Template), nil
-}
-
-func NewDiscordNotifier(config *DiscordConfig, ns notifications.WebhookSender, images ImageStore, t *template.Template) *DiscordNotifier {
+func newDiscordNotifier(config *DiscordConfig, ns notifications.WebhookSender, images ImageStore, t *template.Template) *DiscordNotifier {
 	return &DiscordNotifier{
 		Base: NewBase(&models.AlertNotification{
 			Uid:                   config.UID,

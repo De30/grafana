@@ -270,7 +270,7 @@ func TestDiscordNotifier(t *testing.T) {
 			}
 
 			webhookSender := mockNotificationService()
-			cfg, err := NewDiscordConfig(m)
+			cfg, err := newDiscordConfig(m)
 			if c.expInitError != "" {
 				require.Equal(t, c.expInitError, err.Error())
 				return
@@ -280,7 +280,7 @@ func TestDiscordNotifier(t *testing.T) {
 
 			ctx := notify.WithGroupKey(context.Background(), "alertname")
 			ctx = notify.WithGroupLabels(ctx, model.LabelSet{"alertname": ""})
-			dn := NewDiscordNotifier(cfg, webhookSender, imageStore, tmpl)
+			dn := newDiscordNotifier(cfg, webhookSender, imageStore, tmpl)
 			ok, err := dn.Notify(ctx, c.alerts...)
 			if c.expMsgError != nil {
 				require.False(t, ok)
