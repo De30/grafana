@@ -8,7 +8,6 @@ import { AlertingPageWrapper } from './components/AlertingPageWrapper';
 import { RuleListErrors } from './components/rules/RuleListErrors';
 import { RuleListGroupView } from './components/rules/RuleListGroupView';
 import { RuleListListView } from './components/rules/RuleListListView';
-import { RuleListStateView } from './components/rules/RuleListStateView';
 import { useCombinedRuleNamespaces } from './hooks/useCombinedRuleNamespaces';
 import { useFilteredRules } from './hooks/useFilteredRules';
 import { useUnifiedAlertingSelector } from './hooks/useUnifiedAlertingSelector';
@@ -19,7 +18,6 @@ import { getAllRulesSourceNames } from './utils/datasource';
 const VIEWS = {
   list: RuleListListView,
   groups: RuleListGroupView,
-  state: RuleListStateView,
 };
 
 const RuleList = withErrorBoundary(
@@ -31,7 +29,7 @@ const RuleList = withErrorBoundary(
 
     const view = VIEWS[queryParams['view'] as keyof typeof VIEWS]
       ? (queryParams['view'] as keyof typeof VIEWS)
-      : 'groups';
+      : 'list';
 
     const ViewComponent = VIEWS[view];
 
