@@ -8128,6 +8128,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/colors@npm:^0.1.8":
+  version: 0.1.8
+  resolution: "@radix-ui/colors@npm:0.1.8"
+  checksum: 35fb8e48b1333e0a800ee55ce554d29016c10d2cb23aa161c6476c32b8231ec78f0ae57535ad482aa35adf0b64c957d92da88ef7f3a3f4a2f8c06870208c7ed1
+  languageName: node
+  linkType: hard
+
 "@reach/observe-rect@npm:^1.1.0":
   version: 1.2.0
   resolution: "@reach/observe-rect@npm:1.2.0"
@@ -12621,6 +12628,70 @@ __metadata:
   version: 1.1.2
   resolution: "@ungap/promise-all-settled@npm:1.1.2"
   checksum: 08d37fdfa23a6fe8139f1305313562ebad973f3fac01bcce2773b2bda5bcb0146dfdcf3cb6a722cf0a5f2ca0bc56a827eac8f1e7b3beddc548f654addf1fc34c
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/css@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@vanilla-extract/css@npm:1.7.2"
+  dependencies:
+    "@emotion/hash": ^0.8.0
+    "@vanilla-extract/private": ^1.0.3
+    chalk: ^4.1.1
+    css-what: ^5.0.1
+    cssesc: ^3.0.0
+    csstype: ^3.0.7
+    deep-object-diff: ^1.1.0
+    deepmerge: ^4.2.2
+    escape-string-regexp: ^4.0.0
+    media-query-parser: ^2.0.2
+    outdent: ^0.8.0
+  checksum: 7e0f4b77532ae6c42de14237eea0f3a0269648f1515c7bf52bcbc45205179060b18530d44452fcf4031e990d60c450c6673b27fadf1d16fe8c202503e809fffd
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/integration@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@vanilla-extract/integration@npm:5.0.0"
+  dependencies:
+    "@vanilla-extract/css": ^1.7.2
+    esbuild: ^0.11.16
+    eval: 0.1.6
+    find-up: ^5.0.0
+    javascript-stringify: ^2.0.1
+    lodash: ^4.17.21
+    outdent: ^0.8.0
+  checksum: fc8d6ea3a36be1520b66f8bb4e060bc3d4d40256a8c0f8a8e8153b1ee346adba7ab3e9772ca2901c3f80531786468de377ef02a1d4dc7edc56b0c0a6a85fd373
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/private@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@vanilla-extract/private@npm:1.0.3"
+  checksum: 866a71ba6804edeb0735684e7723ba78f5cf0bb40d4fb538fe6bf7d73928099e341312337b2a510ac0ce96ff8a4b39eb7f7a5fad0c842532353dd20e7278f29b
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/sprinkles@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "@vanilla-extract/sprinkles@npm:1.4.1"
+  peerDependencies:
+    "@vanilla-extract/css": ^1.0.0
+  checksum: e72407ca6afad27c9e609ec3b23f8216c17374f40728ed8f8fc4decc0ea65216d9fb0f74daf31b846dffc7a90c0fe8f40a16d0b468c8f81a0600eea570a437bf
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/webpack-plugin@npm:^2.1.11":
+  version: 2.1.11
+  resolution: "@vanilla-extract/webpack-plugin@npm:2.1.11"
+  dependencies:
+    "@vanilla-extract/integration": ^5.0.0
+    chalk: ^4.1.1
+    debug: ^4.3.1
+    loader-utils: ^2.0.0
+  peerDependencies:
+    webpack: ^4.30.0 || ^5.20.2
+  checksum: 7104ef7a8809442bb586be417021c52d9c02cfa3c7b6aa182f95d9c6cab2da1c4b9aa2f4500f75e2c465715f989c0795acd2ccad56ec3b0936cf86617b9a69ef
   languageName: node
   linkType: hard
 
@@ -17276,7 +17347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:3.1.0":
+"csstype@npm:3.1.0, csstype@npm:^3.0.7":
   version: 3.1.0
   resolution: "csstype@npm:3.1.0"
   checksum: 644e986cefab86525f0b674a06889cfdbb1f117e5b7d1ce0fc55b0423ecc58807a1ea42ecc75c4f18999d14fc42d1d255f84662a45003a52bb5840e977eb2ffd
@@ -19244,6 +19315,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild@npm:^0.11.16":
+  version: 0.11.23
+  resolution: "esbuild@npm:0.11.23"
+  bin:
+    esbuild: bin/esbuild
+  checksum: d55bea84f94e7854fa6fb013ffc63747f2286001b3d73c2a7beb605e6e4847c24ff2cde0660f03045d06d083695c8082423b007a9ee8687e70b52719458bfdd6
+  languageName: node
+  linkType: hard
+
 "esbuild@npm:^0.14.47":
   version: 0.14.47
   resolution: "esbuild@npm:0.14.47"
@@ -19803,6 +19883,15 @@ __metadata:
   version: 1.8.1
   resolution: "etag@npm:1.8.1"
   checksum: 571aeb3dbe0f2bbd4e4fadbdb44f325fc75335cd5f6f6b6a091e6a06a9f25ed5392f0863c5442acb0646787446e816f13cbfc6edce5b07658541dff573cab1ff
+  languageName: node
+  linkType: hard
+
+"eval@npm:0.1.6":
+  version: 0.1.6
+  resolution: "eval@npm:0.1.6"
+  dependencies:
+    require-like: ">= 0.1.1"
+  checksum: 0e9246bb16256eef07afa7f31408310a784407d2fec2ddd2d7fe1f885a45b7cf37e30739e658a65d000c3dcff8d5b5c96f9819188b00e1f667b6638e75eaf23c
   languageName: node
   linkType: hard
 
@@ -21586,6 +21675,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": 1.5.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.7
     "@popperjs/core": 2.11.5
+    "@radix-ui/colors": ^0.1.8
     "@react-aria/button": 3.5.1
     "@react-aria/dialog": 3.2.1
     "@react-aria/focus": 3.6.1
@@ -21670,6 +21760,9 @@ __metadata:
     "@types/webpack-env": ^1.17.0
     "@typescript-eslint/eslint-plugin": 5.31.0
     "@typescript-eslint/parser": 5.31.0
+    "@vanilla-extract/css": ^1.7.2
+    "@vanilla-extract/sprinkles": ^1.4.1
+    "@vanilla-extract/webpack-plugin": ^2.1.11
     "@visx/event": 2.6.0
     "@visx/gradient": 2.10.0
     "@visx/group": 2.10.0
@@ -23982,6 +24075,13 @@ __metadata:
     es-get-iterator: ^1.0.2
     iterate-iterator: ^1.0.1
   checksum: 446a4181657df1872e5020713206806757157db6ab375dee05eb4565b66e1244d7a99cd36ce06862261ad4bd059e66ba8192f62b5d1ff41d788c3b61953af6c3
+  languageName: node
+  linkType: hard
+
+"javascript-stringify@npm:^2.0.1":
+  version: 2.1.0
+  resolution: "javascript-stringify@npm:2.1.0"
+  checksum: 009981ec84299da88795fc764221ed213e3d52251cc93a396430a7a02ae09f1163a9be36a36808689681a8e6113cf00fe97ec2eea2552df48111f79be59e9358
   languageName: node
   linkType: hard
 
@@ -26642,6 +26742,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"media-query-parser@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "media-query-parser@npm:2.0.2"
+  dependencies:
+    "@babel/runtime": ^7.12.5
+  checksum: 8ef956d9e63fe6f4041988beda69843b3a6bb48228ea2923a066f6e7c8f7c5dba75fae357318c48a97ed5beae840b8425cb7e727fc1bb77acc65f2005f8945ab
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -28535,6 +28644,13 @@ __metadata:
   version: 1.2.2
   resolution: "ospath@npm:1.2.2"
   checksum: 505f48a4f4f1c557d6c656ec985707726e3714721680139be037613e903aa8c8fa4ddd8d1342006f9b2dc0065e6e20f8b7bea2ee05354f31257044790367b347
+  languageName: node
+  linkType: hard
+
+"outdent@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "outdent@npm:0.8.0"
+  checksum: 72b7c1a287674317ea477999ec24e73a9eda21de35eb9429218f4a5bab899e964afaee7508265898118fee5cbee1d79397916b66dd8aeee285cd948ea5b1f562
   languageName: node
   linkType: hard
 
@@ -33065,6 +33181,13 @@ __metadata:
   version: 2.0.2
   resolution: "require-from-string@npm:2.0.2"
   checksum: a03ef6895445f33a4015300c426699bc66b2b044ba7b670aa238610381b56d3f07c686251740d575e22f4c87531ba662d06937508f0f3c0f1ddc04db3130560b
+  languageName: node
+  linkType: hard
+
+"require-like@npm:>= 0.1.1":
+  version: 0.1.2
+  resolution: "require-like@npm:0.1.2"
+  checksum: edb8331f05fd807381a75b76f6cca9f0ce8acaa2e910b7e116541799aa970bfbc64fde5fd6adb3a6917dba346f8386ebbddb81614c24e8dad1b4290c7af9535e
   languageName: node
   linkType: hard
 

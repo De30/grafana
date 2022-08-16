@@ -7,8 +7,10 @@ import { Card, Tag, useStyles } from '@grafana/ui';
 import EmptyListCTA from 'app/core/components/EmptyListCTA/EmptyListCTA';
 import PageLoader from 'app/core/components/PageLoader/PageLoader';
 import { contextSrv } from 'app/core/core';
+import Stack from 'app/gui/Stack/Stack';
 import { StoreState, AccessControlAction } from 'app/types';
 
+import GuiCard from '../../../gui/Card/Card';
 import { getDataSources, getDataSourcesCount, useDataSourcesRoutes, useLoadDataSources } from '../state';
 
 import { DataSourcesListHeader } from './DataSourcesListHeader';
@@ -64,6 +66,16 @@ export function DataSourcesListView({ dataSources, dataSourcesCount, isLoading, 
 
   return (
     <>
+      <Stack direction="row" gap="medium">
+        {dataSources.map((datasource) => (
+          <GuiCard key={datasource.uid} title={datasource.name} description={datasource.typeName} />
+        ))}
+      </Stack>
+
+      <div style={{ marginTop: 32, marginBottom: 32 }}>
+        <hr />
+      </div>
+
       {/* List Header */}
       <DataSourcesListHeader />
 

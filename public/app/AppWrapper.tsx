@@ -23,6 +23,8 @@ import { contextSrv } from './core/services/context_srv';
 import { ThemeProvider } from './core/utils/ConfigProvider';
 import { CommandPalette } from './features/commandPalette/CommandPalette';
 import { LiveConnectionWarning } from './features/live/LiveConnectionWarning';
+import { themeClass } from './gui/theme.css';
+import { container } from './styles.css';
 
 interface AppWrapperProps {
   app: GrafanaApp;
@@ -126,7 +128,8 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
                     <ModalsProvider>
                       <GlobalStyles />
                       {this.commandPaletteEnabled() && <CommandPalette />}
-                      <div className="grafana-app">
+
+                      <div className={container + ' ' + themeClass}>
                         <Router history={locationService.getHistory()}>
                           {this.renderNavBar()}
                           <AppChrome>
@@ -144,6 +147,7 @@ export class AppWrapper extends React.Component<AppWrapperProps, AppWrapperState
                           </AppChrome>
                         </Router>
                       </div>
+
                       <LiveConnectionWarning />
                       <ModalRoot />
                       <PortalContainer />

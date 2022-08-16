@@ -7,16 +7,6 @@ export function getPageStyles(theme: GrafanaTheme2) {
     theme.breakpoints.values.xxl + theme.spacing.gridSize * 2 + theme.components.sidemenu.width;
 
   return css`
-    .grafana-app {
-      display: flex;
-      align-items: stretch;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-    }
-
     .main-view {
       position: relative;
       display: flex;

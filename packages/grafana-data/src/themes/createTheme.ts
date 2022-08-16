@@ -58,6 +58,8 @@ export function createTheme(options: NewThemeOptions = {}): GrafanaTheme2 {
     flags: {},
   };
 
+  console.log('theme', theme);
+
   return {
     ...theme,
     v1: createV1Theme(theme),

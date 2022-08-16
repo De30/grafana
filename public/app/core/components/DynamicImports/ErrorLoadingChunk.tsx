@@ -20,7 +20,8 @@ export const ErrorLoadingChunk: FunctionComponent<Props> = ({ error }) => {
 
   if (!params.get('chunkNotFound')) {
     updateUrlParams({ chunkNotFound: true }, true);
-    window.location.reload();
+    console.warn('it does not have chunk not found apparently');
+    // window.location.reload();
   }
 
   return (
