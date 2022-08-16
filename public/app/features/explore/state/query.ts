@@ -353,6 +353,7 @@ export const runQueries = (
     }
 
     const exploreItemState = getState().explore[exploreId]!;
+    console.log('run queries', exploreItemState.variables);
     const {
       datasourceInstance,
       containerWidth,

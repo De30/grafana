@@ -25,7 +25,7 @@ import {
 } from 'app/core/utils/explore';
 import { getFiscalYearStartMonth, getTimeZone } from 'app/features/profile/state/selectors';
 import { ThunkResult } from 'app/types';
-import { ExploreGraphStyle, ExploreId, ExploreItemState } from 'app/types/explore';
+import { ExploreGraphStyle, ExploreId, ExploreItemState, VariableValue } from 'app/types/explore';
 
 import { datasourceReducer } from './datasource';
 import { historyReducer } from './history';
@@ -252,11 +252,25 @@ export interface ChangeVariableListPayload {
   exploreId: ExploreId;
   variables: string[];
 }
+
 export const changeVariableListAction = createAction<ChangeVariableListPayload>('explore/changeVariableList');
 
-export function updateVariables(exploreId: ExploreId, variables: string[]): ThunkResult<void> {
+export function updateVariablesList(exploreId: ExploreId, variables: string[]): ThunkResult<void> {
   return async (dispatch, getState) => {
     dispatch(changeVariableListAction({ variables, exploreId }));
+  };
+}
+
+export interface ChangeVariableActionPayload {
+  exploreId: ExploreId;
+  variable: VariableValue;
+}
+
+export const changeVariableValuesAction = createAction<ChangeVariableActionPayload>('explore/changeVariableValue');
+
+export function updateVariableValue(exploreId: ExploreId, variable: VariableValue): ThunkResult<void> {
+  return async (dispatch, getState) => {
+    dispatch(changeVariableValuesAction({ variable, exploreId }));
   };
 }
 
@@ -297,7 +311,28 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
     const variableList = action.payload.variables;
     return {
       ...state,
-      variables: variableList,
+      variablesList: variableList,
+    };
+  }
+
+  if (changeVariableValuesAction.match(action)) {
+    const variableIn = action.payload.variable;
+    const variables = [...state.variables];
+
+    const foundIdx = variables.findIndex((varItr: VariableValue) => varItr.key === variableIn.key);
+    if (variableIn.value === undefined && foundIdx !== -1) {
+      // remove from list
+      variables.splice(foundIdx, 1);
+    } else if (foundIdx !== -1) {
+      // found, update value
+      variables[foundIdx].value = variableIn.value;
+    } else if (variableIn.value !== undefined) {
+      variables.push(variableIn);
+    }
+
+    return {
+      ...state,
+      variables: variables,
     };
   }
 

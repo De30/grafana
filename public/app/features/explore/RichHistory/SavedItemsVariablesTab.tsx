@@ -1,13 +1,11 @@
 import { css } from '@emotion/css';
 import React, { useState, FormEvent, useEffect } from 'react';
-//import { connect, ConnectedProps } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { Checkbox, CollapsableSection, useStyles2 } from '@grafana/ui';
 import { ExploreId, StoreState } from 'app/types';
 
-//import { updateVariables } from '../state/explorePane';
 import { changeVariableListAction } from '../state/explorePane';
 import { api } from '../variables.api';
 
@@ -45,15 +43,10 @@ interface DispatchProps {
   exploreId: ExploreId;
 }
 
-//type Props = DispatchProps & ConnectedProps<typeof connector>;
-
 export function SavedItemsVariablesTab(props: DispatchProps) {
   const styles = useStyles2(getStyles);
   const dispatch = useDispatch();
-  const checkedVariablesList = useSelector((state: StoreState) => state.explore[props.exploreId]?.variables || []);
-  //const checkedVariablesList: string[] = props.variables || [];
-  //props.checkedVariables || [];
-  //const checkedVariablesList: string[] = [];
+  const checkedVariablesList = useSelector((state: StoreState) => state.explore[props.exploreId]?.variablesList || []);
 
   const [variablesList, setVariablesList] = useState([]);
   const [totalVariablesCount, setTotalVariablesCount] = useState(undefined);
@@ -111,23 +104,4 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
   );
 }
 
-/*function mapStateToProps(state: StoreState, { exploreId }: { exploreId: ExploreId }) {
-  const explore = state.explore;
-  const item: ExploreItemState = explore[exploreId]!;
-  const { variables } = item;
-
-  return {
-    variables
-  };
-}
-
-const mapDispatchToProps = {
-  updateVariables,
-}; 
-
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
-
-export default connector(SavedItemsVariablesTab);
-*/
 export default SavedItemsVariablesTab;

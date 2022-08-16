@@ -1,8 +1,10 @@
 import { id } from 'common-tags';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { CustomVariableModel, LoadingState, VariableHide, VariableOption } from '@grafana/data';
 import { ClickOutsideWrapper } from '@grafana/ui';
+import { ExploreId, VariableValue } from 'app/types';
 
 import { PickerLabel } from '../variables/pickers/PickerRenderer';
 import { VariableInput } from '../variables/pickers/shared/VariableInput';
@@ -10,16 +12,24 @@ import { VariableLink } from '../variables/pickers/shared/VariableLink';
 import { VariableOptions } from '../variables/pickers/shared/VariableOptions';
 
 import { Variable } from './RichHistory/SavedItemsVariablesTab';
+import { changeVariableValuesAction } from './state/explorePane';
 
 export interface Props {
+  exploreId: ExploreId;
   variable: Variable;
   index: number;
 }
 
 export function ExploreVariablePicker(props: Props) {
   const { variable, index } = props;
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
+
+  useEffect(() => {
+    const variableValue: VariableValue = { key: variable.name, value: variable.values[selectedIdx] };
+    dispatch(changeVariableValuesAction({ exploreId: props.exploreId, variable: variableValue }));
+  }, [dispatch, props.exploreId, selectedIdx, variable.name, variable.values]);
 
   const renderOptions = (variable: CustomVariableModel) => {
     return (

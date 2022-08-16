@@ -194,7 +194,9 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
             ),
             this.state.variablesAllData.length > 0 &&
               this.state.variablesAllData.map((variable, i) => {
-                return <ExploreVariablePicker key={`variable-${i}`} variable={variable} index={i} />;
+                return (
+                  <ExploreVariablePicker key={`variable-${i}`} exploreId={exploreId} variable={variable} index={i} />
+                );
               }),
           ].filter(Boolean)}
         >
@@ -280,7 +282,7 @@ const mapStateToProps = (state: StoreState, { exploreId }: OwnProps) => {
     isLive,
     isPaused,
     containerWidth,
-    variables,
+    variablesList,
   } = exploreItem;
 
   const hasLiveOption = !!datasourceInstance?.meta?.streaming;
@@ -300,7 +302,7 @@ const mapStateToProps = (state: StoreState, { exploreId }: OwnProps) => {
     isPaused,
     syncedTimes,
     containerWidth,
-    variables,
+    variables: variablesList,
   };
 };
 

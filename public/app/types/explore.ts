@@ -28,6 +28,11 @@ export type ExploreQueryParams = {
   right: string;
 };
 
+export type VariableValue = {
+  key: string;
+  value?: string; // if undefined, remove variable from list
+};
+
 /**
  * Global Explore state
  */
@@ -185,7 +190,8 @@ export interface ExploreItemState {
   graphStyle: ExploreGraphStyle;
   panelsState: ExplorePanelsState;
 
-  variables: string[];
+  variablesList: string[];
+  variables: VariableValue[];
 }
 
 export interface ExploreUpdateState {
