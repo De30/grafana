@@ -11,7 +11,7 @@ import { supportedFeatures } from '../../../core/history/richHistoryStorageProvi
 import { RichHistoryQueriesTab } from './RichHistoryQueriesTab';
 import { RichHistorySettingsTab } from './RichHistorySettingsTab';
 import { RichHistoryStarredTab } from './RichHistoryStarredTab';
-import { SavedItemsVariablesTab } from './SavedItemsVariablesTab';
+import SavedItemsVariablesTab from './SavedItemsVariablesTab';
 
 export enum Tabs {
   RichHistory = 'Query history',

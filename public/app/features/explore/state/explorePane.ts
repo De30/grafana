@@ -249,13 +249,14 @@ export function refreshExplore(exploreId: ExploreId, newUrlQuery: string): Thunk
 }
 
 export interface ChangeVariableListPayload {
+  exploreId: ExploreId;
   variables: string[];
 }
 export const changeVariableListAction = createAction<ChangeVariableListPayload>('explore/changeVariableList');
 
-export function updateVariables(variables: string[]): ThunkResult<void> {
+export function updateVariables(exploreId: ExploreId, variables: string[]): ThunkResult<void> {
   return async (dispatch, getState) => {
-    dispatch(changeVariableListAction({ variables }));
+    dispatch(changeVariableListAction({ variables, exploreId }));
   };
 }
 
@@ -272,6 +273,8 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
   state = datasourceReducer(state, action);
   state = timeReducer(state, action);
   state = historyReducer(state, action);
+
+  console.log(action.type);
 
   if (richHistoryUpdatedAction.match(action)) {
     const { richHistory, total } = action.payload.richHistoryResults;

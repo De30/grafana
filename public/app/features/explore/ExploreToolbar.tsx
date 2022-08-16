@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import React, { lazy, PureComponent, RefObject, Suspense } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -21,15 +22,18 @@ import { DashNavButton } from '../dashboard/components/DashNav/DashNavButton';
 import { getTimeSrv } from '../dashboard/services/TimeSrv';
 import { updateFiscalYearStartMonthForSession, updateTimeZoneForSession } from '../profile/state/reducers';
 import { getFiscalYearStartMonth, getTimeZone } from '../profile/state/selectors';
+//import { PickerRenderer } from '../variables/pickers/PickerRenderer';
 
 import { ExploreTimeControls } from './ExploreTimeControls';
 import { LiveTailButton } from './LiveTailButton';
+import { Variable } from './RichHistory/SavedItemsVariablesTab';
 import { changeDatasource } from './state/datasource';
 import { splitClose, splitOpen } from './state/main';
 import { cancelQueries, runQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { syncTimes, changeRefreshInterval } from './state/time';
 import { LiveTailControls } from './useLiveTailControls';
+import { api } from './variables.api';
 
 const AddToDashboard = lazy(() =>
   import('./AddToDashboard').then(({ AddToDashboard }) => ({ default: AddToDashboard }))
@@ -43,7 +47,27 @@ interface OwnProps {
 
 type Props = OwnProps & ConnectedProps<typeof connector>;
 
+interface State {
+  variablesAllData: Variable[];
+}
+
 class UnConnectedExploreToolbar extends PureComponent<Props> {
+  state: State = {
+    variablesAllData: [],
+  };
+
+  async componentDidMount() {
+    const allVarData = await api.loadVariables({ uids: this.props.variables });
+    this.setState({ variablesAllData: allVarData.result.exploreVariables });
+  }
+
+  async componentDidUpdate(prevProps: Props) {
+    if (!isEqual(prevProps.variables, this.props.variables)) {
+      const allVarData = await api.loadVariables({ uids: this.props.variables });
+      this.setState({ variablesAllData: allVarData.result.exploreVariables });
+    }
+  }
+
   onChangeDatasource = async (dsSettings: DataSourceInstanceSettings) => {
     this.props.changeDatasource(this.props.exploreId, dsSettings.uid, { importQueries: true });
   };
@@ -127,7 +151,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
       contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
 
-    console.log('toolbar', variables);
+    console.log('toolbar', variables, this.state.variablesAllData);
+    //<PickerRenderer variable={variable} readOnly={readOnly} />
 
     return (
       <div ref={topOfViewRef}>
@@ -154,7 +179,14 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
                 width={showSmallDataSourcePicker ? 8 : undefined}
               />
             ),
-            variables.length > 0 && variables.toString(),
+            variables.length > 0 &&
+              variables.map((variable) => {
+                return (
+                  <div key={variable} className="submenu-item gf-form-inline">
+                    {variable}
+                  </div>
+                );
+              }),
           ].filter(Boolean)}
         >
           <ToolbarButtonRow>

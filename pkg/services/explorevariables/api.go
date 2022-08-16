@@ -63,6 +63,7 @@ func (s *ExploreVariableService) searchHandler(c *models.ReqContext) response.Re
 
 	variable := SearchInExploreVariableQuery{
 		SearchString: c.Query("searchString"),
+		Uids:         c.QueryStrings("uid"),
 		Sort:         c.Query("sort"),
 		Page:         c.QueryInt("page"),
 		Limit:        c.QueryInt("limit"),

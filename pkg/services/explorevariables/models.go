@@ -39,13 +39,13 @@ type ExploreVariableResponse struct {
 }
 
 type SearchInExploreVariableQuery struct {
-	SearchString string `json:"searchString"`
-
-	Sort  string `json:"sort"`
-	Page  int    `json:"page"`
-	Limit int    `json:"limit"`
-	From  int64  `json:"from"`
-	To    int64  `json:"to"`
+	SearchString string   `json:"searchString"`
+	Uids         []string `json:"uids"`
+	Sort         string   `json:"sort"`
+	Page         int      `json:"page"`
+	Limit        int      `json:"limit"`
+	From         int64    `json:"from"`
+	To           int64    `json:"to"`
 }
 
 type ExploreVariableSearchResult struct {

@@ -1,8 +1,21 @@
 import { getBackendSrv } from '@grafana/runtime';
 
-const loadVariables = async (payload?: { searchString?: string }) => {
+const loadVariables = async (payload?: { searchString?: string; uids?: string[] }) => {
   try {
-    return await getBackendSrv().get('/api/explore-variable', payload);
+    let paramStr = '?searchString';
+    if (payload?.searchString) {
+      paramStr += `=${payload.searchString}`;
+    }
+
+    let uidFilter = '';
+    if (payload && payload.uids && payload.uids.length > 0) {
+      payload.uids.forEach((uid) => {
+        uidFilter += `&uid=${uid}`;
+      });
+    }
+
+    paramStr += uidFilter;
+    return await getBackendSrv().get(`/api/explore-variable${paramStr}`);
   } catch (err) {
     console.error(err);
   }
