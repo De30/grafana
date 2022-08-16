@@ -10,6 +10,8 @@ import {
   compareDataFrameStructures,
   createFieldConfigRegistry,
   DataFrame,
+  DataQuery,
+  DataSourceApi,
   dateTime,
   FieldColorModeId,
   FieldConfigSource,
@@ -53,6 +55,8 @@ interface Props {
   splitOpenFn?: SplitOpen;
   onChangeTime: (timeRange: AbsoluteTimeRange) => void;
   graphStyle: ExploreGraphStyle;
+  queries?: DataQuery[];
+  datasourceInstance?: DataSourceApi | null;
 }
 
 export function ExploreGraph({
@@ -67,6 +71,8 @@ export function ExploreGraph({
   onHiddenSeriesChanged,
   splitOpenFn,
   graphStyle,
+  queries,
+  datasourceInstance,
   tooltipDisplayMode = TooltipDisplayMode.Single,
 }: Props) {
   const theme = useTheme2();
@@ -182,6 +188,8 @@ export function ExploreGraph({
             },
           } as TimeSeriesOptions
         }
+        queries={queries}
+        datasourceInstance={datasourceInstance}
       />
     </PanelContextProvider>
   );

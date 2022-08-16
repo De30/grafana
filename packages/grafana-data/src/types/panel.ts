@@ -10,10 +10,11 @@ import { AlertStateInfo } from './alerts';
 import { PanelModel } from './dashboard';
 import { LoadingState, PreferredVisualisationType } from './data';
 import { DataFrame, FieldType } from './dataFrame';
-import { DataQueryError, DataQueryRequest, DataQueryTimings } from './datasource';
+import { DataQueryError, DataQueryRequest, DataQueryTimings, DataSourceApi } from './datasource';
 import { FieldConfigSource } from './fieldOverrides';
 import { OptionEditorConfig } from './options';
 import { PluginMeta } from './plugin';
+import { DataQuery } from './query';
 import { AbsoluteTimeRange, TimeRange, TimeZone } from './time';
 import { DataTransformerConfig } from './transformations';
 
@@ -110,6 +111,10 @@ export interface PanelProps<T = any> {
 
   /** Time range change handler */
   onChangeTimeRange: (timeRange: AbsoluteTimeRange) => void;
+
+  queries?: DataQuery[];
+
+  datasourceInstance?: DataSourceApi | null;
 }
 
 export interface PanelEditorProps<T = any> {

@@ -2,7 +2,14 @@ import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMountedState } from 'react-use';
 import uPlot from 'uplot';
 
-import { CartesianCoords2D, DataFrame, DataSourceInstanceSettings, SplitOpen } from '@grafana/data';
+import {
+  CartesianCoords2D,
+  DataFrame,
+  DataQuery,
+  DataSourceApi,
+  DataSourceInstanceSettings,
+  SplitOpen,
+} from '@grafana/data';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { UPlotConfigBuilder } from '@grafana/ui';
 
@@ -16,6 +23,8 @@ interface CorrelationsPluginProps {
   data: DataFrame;
   config: UPlotConfigBuilder;
   splitOpenFn: SplitOpen;
+  queries?: DataQuery[];
+  originalDatasource?: DataSourceApi | null;
   children?: (props: {
     startCorrelating: StartCorrelatingFn;
     onOpen: () => void;
@@ -26,7 +35,14 @@ interface CorrelationsPluginProps {
 /**
  * @alpha
  */
-export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({ data, splitOpenFn, config, children }) => {
+export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({
+  data,
+  splitOpenFn,
+  config,
+  queries,
+  originalDatasource,
+  children,
+}) => {
   const plotInstance = useRef<uPlot>();
   let isOpenRef = useRef(false);
   const onOpen = () => {
@@ -71,7 +87,8 @@ export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({ data, sp
         return;
       }
 
-      const ds = await getDataSourceSrv().get(datasource.uid);
+      const dataSourceSrv = getDataSourceSrv();
+      const ds = await dataSourceSrv.get(datasource.uid);
 
       if (seriesIdx !== null) {
         const field = data.fields[seriesIdx];
@@ -80,7 +97,14 @@ export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({ data, sp
           return;
         }
         console.log(`Starting correlating series ${JSON.stringify(field.labels)}`);
-        const query = ds.createCorrelationQuery(`Correlated with ${data.refId}`, data, seriesIdx);
+        const originalQuery = queries?.find((x) => x.refId === data.refId);
+        const query = await ds.createCorrelationQuery(
+          `Correlated with ${data.refId}`,
+          data,
+          seriesIdx,
+          originalDatasource ?? undefined,
+          originalQuery
+        );
         if (query === null) {
           console.log('Could not create correlations query');
           return;
@@ -91,7 +115,7 @@ export const CorrelationsPlugin: React.FC<CorrelationsPluginProps> = ({ data, sp
         });
       }
     },
-    [bbox, splitOpenFn, seriesIdx, data]
+    [bbox, splitOpenFn, seriesIdx, data, queries, originalDatasource]
   );
 
   return <>{children ? children({ startCorrelating, onOpen, onClose }) : null};</>;

@@ -228,7 +228,18 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   }
 
   renderGraphPanel(width: number) {
-    const { graphResult, absoluteRange, timeZone, splitOpen, queryResponse, loading, theme, graphStyle } = this.props;
+    const {
+      graphResult,
+      absoluteRange,
+      timeZone,
+      splitOpen,
+      queryResponse,
+      loading,
+      theme,
+      graphStyle,
+      queries,
+      datasourceInstance,
+    } = this.props;
     const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
     const label = <ExploreGraphLabel graphStyle={graphStyle} onChangeGraphStyle={this.onChangeGraphStyle} />;
     return (
@@ -244,6 +255,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
           annotations={queryResponse.annotations}
           splitOpenFn={splitOpen}
           loadingState={queryResponse.state}
+          queries={queries}
+          datasourceInstance={datasourceInstance}
         />
       </Collapse>
     );
@@ -441,6 +454,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showNodeGraph,
     loading,
     graphStyle,
+    queries,
   } = item;
 
   return {
@@ -461,6 +475,7 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     showNodeGraph,
     loading,
     graphStyle,
+    queries,
   };
 }
 

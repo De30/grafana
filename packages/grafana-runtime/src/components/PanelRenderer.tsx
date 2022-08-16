@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AbsoluteTimeRange, FieldConfigSource, PanelData } from '@grafana/data';
+import { AbsoluteTimeRange, DataQuery, DataSourceApi, FieldConfigSource, PanelData } from '@grafana/data';
 
 /**
  * Describes the properties that can be passed to the PanelRenderer.
@@ -22,6 +22,8 @@ export interface PanelRendererProps<P extends object = any, F extends object = a
   timeZone?: string;
   width: number;
   height: number;
+  queries?: DataQuery[];
+  datasourceInstance?: DataSourceApi | null;
 }
 
 /**

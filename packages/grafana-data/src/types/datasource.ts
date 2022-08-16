@@ -305,7 +305,13 @@ abstract class DataSourceApi<
   /**
    * Create a correlation request for a series.
    */
-  createCorrelationQuery?(refId: string, frame: DataFrame, seriesIdx: number): TQuery | null;
+  createCorrelationQuery?(
+    refId: string,
+    frame: DataFrame,
+    seriesIdx: number,
+    originalDataSource?: DataSourceApi,
+    originalQuery?: DataQuery
+  ): Promise<TQuery | null>;
 
   /**
    * @deprecated since version 8.2.0

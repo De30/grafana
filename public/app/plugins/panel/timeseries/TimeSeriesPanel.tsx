@@ -30,6 +30,8 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
   onChangeTimeRange,
   replaceVariables,
   id,
+  queries,
+  datasourceInstance,
 }) => {
   const { sync, canAddAnnotations, canCorrelate, onThresholdsChange, canEditThresholds, onSplitOpen } =
     usePanelContext();
@@ -89,7 +91,13 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
               <AnnotationsPlugin annotations={data.annotations} config={config} timeZone={timeZone} />
             )}
             {enableCorrelation && onSplitOpen ? (
-              <CorrelationsPlugin data={alignedDataFrame} config={config} splitOpenFn={onSplitOpen}>
+              <CorrelationsPlugin
+                data={alignedDataFrame}
+                config={config}
+                splitOpenFn={onSplitOpen}
+                queries={queries}
+                originalDatasource={datasourceInstance}
+              >
                 {({ startCorrelating, onOpen, onClose }) => {
                   return (
                     <ContextMenuPlugin

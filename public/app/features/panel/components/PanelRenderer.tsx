@@ -23,6 +23,8 @@ export function PanelRenderer<P extends object = any, F extends object = any>(pr
     onChangeTimeRange = () => {},
     onFieldConfigChange = () => {},
     fieldConfig = defaultFieldConfig,
+    queries = undefined,
+    datasourceInstance = undefined,
   } = props;
 
   const [plugin, setPlugin] = useState(syncGetPanelPlugin(pluginId));
@@ -81,6 +83,8 @@ export function PanelRenderer<P extends object = any, F extends object = any>(pr
         onFieldConfigChange={onFieldConfigChange}
         onChangeTimeRange={onChangeTimeRange}
         eventBus={appEvents}
+        queries={queries}
+        datasourceInstance={datasourceInstance}
       />
     </ErrorBoundaryAlert>
   );
