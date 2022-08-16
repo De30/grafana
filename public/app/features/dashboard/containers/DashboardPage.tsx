@@ -12,6 +12,7 @@ import { PageLayoutType } from 'app/core/components/Page/types';
 import { createErrorNotification } from 'app/core/copy/appNotification';
 import { getKioskMode } from 'app/core/navigation/kiosk';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
+import { CommentManager } from 'app/features/comments/CommentManager';
 import { DashboardModel, PanelModel } from 'app/features/dashboard/state';
 import { dashboardWatcher } from 'app/features/live/dashboard/dashboardWatcher';
 import { getPageNavFromSlug, getRootContentNavModel } from 'app/features/storage/StorageFolderPage';
@@ -399,12 +400,22 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
     const renderDashboard = (): JSX.Element => {
       return (
         <>
+          {showSubMenu && (
+            <section aria-label={selectors.pages.Dashboard.SubMenu.submenu}>
+              <SubMenu dashboard={dashboard} annotations={dashboard.annotations.list} links={dashboard.links} />
+            </section>
+          )}
+
           <DashboardGrid dashboard={dashboard} viewPanel={viewPanel} editPanel={editPanel} />
           {inspectPanel && <PanelInspector dashboard={dashboard} panel={inspectPanel} />}
           {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} tab={this.props.queryParams.tab} />}
           {queryParams.editview && <DashboardSettings dashboard={dashboard} editview={queryParams.editview} />}
         </>
       );
+    };
+
+    const renderDiscussions = (): JSX.Element => {
+      return <CommentManager objectType={'dashboard'} objectId={dashboard.uid} />;
     };
 
     return (
@@ -419,19 +430,13 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
         <DashboardPrompt dashboard={dashboard} />
 
         {initError && <DashboardFailed />}
-        {showSubMenu && (
-          <section aria-label={selectors.pages.Dashboard.SubMenu.submenu}>
-            <SubMenu dashboard={dashboard} annotations={dashboard.annotations.list} links={dashboard.links} />
-          </section>
-        )}
-
         <TabsBar>
           <Tab key={0} label="Dashboard" onChangeTab={onChangeTab} active={this.state.activeTab === 'Dashboard'} />
           <Tab key={1} label="Discussion" onChangeTab={onChangeTab} active={this.state.activeTab === 'Discussion'} />
         </TabsBar>
         <TabContent>
           {this.state.activeTab === 'Dashboard' && renderDashboard()}
-          {this.state.activeTab === 'Discussion' && <div>Discussions here!</div>}
+          {this.state.activeTab === 'Discussion' && renderDiscussions()}
         </TabContent>
       </Page>
     );
