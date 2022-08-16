@@ -48,6 +48,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/datasources/permissions"
 	"github.com/grafana/grafana/pkg/services/encryption"
+	"github.com/grafana/grafana/pkg/services/eventactions"
 	"github.com/grafana/grafana/pkg/services/export"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/hooks"
@@ -180,6 +181,7 @@ type HTTPServer struct {
 	userService                  user.Service
 	tempUserService              tempUser.Service
 	loginAttemptService          loginAttempt.Service
+	eventActionsService          eventactions.Service
 }
 
 type ServerOptions struct {
@@ -215,7 +217,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	dashboardPermissionsService accesscontrol.DashboardPermissionsService, dashboardVersionService dashver.Service,
 	starService star.Service, csrfService csrf.Service, coremodels *registry.Base,
 	playlistService playlist.Service, apiKeyService apikey.Service, kvStore kvstore.KVStore, secretsMigrator secrets.Migrator, secretsPluginManager plugins.SecretsPluginManager,
-	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service, loginAttemptService loginAttempt.Service) (*HTTPServer, error) {
+	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service, loginAttemptService loginAttempt.Service, eventActionsService eventactions.Service) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
 

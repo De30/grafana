@@ -134,12 +134,12 @@ export function getAppRoutes(): RouteDescriptor[] {
       component:
         config.rbacEnabled && contextSrv.hasPermission(AccessControlAction.FoldersPermissionsRead)
           ? SafeDynamicImport(
-              () =>
-                import(/* webpackChunkName: "FolderPermissions"*/ 'app/features/folders/AccessControlFolderPermissions')
-            )
+            () =>
+              import(/* webpackChunkName: "FolderPermissions"*/ 'app/features/folders/AccessControlFolderPermissions')
+          )
           : SafeDynamicImport(
-              () => import(/* webpackChunkName: "FolderPermissions"*/ 'app/features/folders/FolderPermissions')
-            ),
+            () => import(/* webpackChunkName: "FolderPermissions"*/ 'app/features/folders/FolderPermissions')
+          ),
     },
     {
       path: '/dashboards/f/:uid/:slug/settings',
@@ -234,6 +234,41 @@ export function getAppRoutes(): RouteDescriptor[] {
     {
       path: '/org/serviceaccounts/:id',
       component: ServiceAccountPage,
+    },
+    {
+      path: '/org/eventactions',
+      roles: () =>
+        contextSrv.evaluatePermission(
+          () => ['Admin'],
+          [AccessControlAction.EventActionsRead]
+        ),
+      component: SafeDynamicImport(
+        () =>
+          import(/* webpackChunkName: "EventActionsListPage" */ 'app/features/eventactions/EventActionsListPage')
+      ),
+    },
+    {
+      path: '/org/eventactions/create',
+      roles: () =>
+        contextSrv.evaluatePermission(
+          () => ['Admin'],
+          [AccessControlAction.EventActionsCreate]
+        ),
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "EventActionsCreatePage" */ 'app/features/eventactions/EventActionsCreatePage')
+      ),
+    },
+    {
+      path: '/org/eventactions/:id',
+      roles: () =>
+        contextSrv.evaluatePermission(
+          () => ['Admin'],
+          // [AccessControlAction.EventActionsRead]
+          [AccessControlAction.ServiceAccountsRead]
+        ),
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "EventActionsPage" */ 'app/features/eventactions/EventActionsPage')
+      ),
     },
     {
       path: '/org/teams',
@@ -344,8 +379,8 @@ export function getAppRoutes(): RouteDescriptor[] {
       component: !config.verifyEmailEnabled
         ? () => <Redirect to="/signup" />
         : SafeDynamicImport(
-            () => import(/* webpackChunkName "VerifyEmailPage"*/ 'app/core/components/Signup/VerifyEmailPage')
-          ),
+          () => import(/* webpackChunkName "VerifyEmailPage"*/ 'app/core/components/Signup/VerifyEmailPage')
+        ),
       pageClass: 'login-page sidemenu-hidden',
       chromeless: true,
     },

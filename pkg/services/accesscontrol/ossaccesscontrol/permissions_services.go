@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/resourcepermissions"
 	"github.com/grafana/grafana/pkg/services/dashboards"
+	"github.com/grafana/grafana/pkg/services/eventactions"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -299,4 +300,46 @@ func ProvideServiceAccountPermissions(
 		return nil, err
 	}
 	return &ServiceAccountPermissionsService{srv}, nil
+}
+
+type EventActionPermissionsService struct {
+	*resourcepermissions.Service
+}
+
+func ProvideEventActionPermissions(
+	cfg *setting.Cfg, router routing.RouteRegister, sql *sqlstore.SQLStore,
+	ac accesscontrol.AccessControl, store resourcepermissions.Store,
+	license models.Licensing, eventActionStore eventactions.Store,
+) (*EventActionPermissionsService, error) {
+	options := resourcepermissions.Options{
+		Resource:          "eventactions",
+		ResourceAttribute: "id",
+		ResourceValidator: func(ctx context.Context, orgID int64, resourceID string) error {
+			id, err := strconv.ParseInt(resourceID, 10, 64)
+			if err != nil {
+				return err
+			}
+			_, err = eventActionStore.RetrieveEventAction(ctx, orgID, id)
+			return err
+		},
+		Assignments: resourcepermissions.Assignments{
+			Users:        true,
+			Teams:        true,
+			BuiltInRoles: true,
+		},
+		PermissionsToActions: map[string][]string{
+			"View":  {eventactions.ActionRead},
+			"Edit":  {eventactions.ActionRead, eventactions.ActionWrite},
+			"Admin": {eventactions.ActionRead, eventactions.ActionWrite, eventactions.ActionCreate, eventactions.ActionDelete, eventactions.ActionPermissionsRead, eventactions.ActionPermissionsWrite},
+		},
+		ReaderRoleName: "Event action permission reader",
+		WriterRoleName: "Event action permission writer",
+		RoleGroup:      "Event actions",
+	}
+
+	srv, err := resourcepermissions.New(options, cfg, router, license, ac, store, sql)
+	if err != nil {
+		return nil, err
+	}
+	return &EventActionPermissionsService{srv}, nil
 }

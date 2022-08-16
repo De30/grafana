@@ -328,6 +328,16 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool, prefs *
 		})
 	}
 
+	if hasAccess(ac.ReqOrgAdmin, eventActionsAccessEvaluator) {
+		configNodes = append(configNodes, &dtos.NavLink{
+			Text:        "Event Actions",
+			Id:          "eventactions",
+			Description: "Manage actions triggered from events",
+			Icon:        "brackets-curly",
+			Url:         hs.Cfg.AppSubURL + "/org/eventactions",
+		})
+	}
+
 	if hs.Features.IsEnabled(featuremgmt.FlagLivePipeline) {
 		liveNavLinks := []*dtos.NavLink{}
 

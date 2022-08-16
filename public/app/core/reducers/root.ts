@@ -7,6 +7,7 @@ import apiKeysReducers from 'app/features/api-keys/state/reducers';
 import panelEditorReducers from 'app/features/dashboard/components/PanelEditor/state/reducers';
 import dashboardReducers from 'app/features/dashboard/state/reducers';
 import dataSourcesReducers from 'app/features/datasources/state/reducers';
+import eventActionsReducer from 'app/features/eventactions/state/reducers';
 import exploreReducers from 'app/features/explore/state/main';
 import foldersReducers from 'app/features/folders/state/reducers';
 import invitesReducers from 'app/features/invites/state/reducers';
@@ -42,6 +43,7 @@ const rootReducers = {
   ...panelEditorReducers,
   ...panelsReducers,
   ...templatingReducers,
+  ...eventActionsReducer,
   plugins: pluginsReducer,
   [alertingApi.reducerPath]: alertingApi.reducer,
 };

@@ -71,6 +71,10 @@ type ServiceAccountPermissionsService interface {
 	PermissionsService
 }
 
+type EventActionPermissionsService interface {
+	PermissionsService
+}
+
 type PermissionsService interface {
 	// GetPermissions returns all permissions for given resourceID
 	GetPermissions(ctx context.Context, user *user.SignedInUser, resourceID string) ([]ResourcePermission, error)

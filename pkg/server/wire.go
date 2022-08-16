@@ -62,6 +62,9 @@ import (
 	datasourceservice "github.com/grafana/grafana/pkg/services/datasources/service"
 	"github.com/grafana/grafana/pkg/services/encryption"
 	encryptionservice "github.com/grafana/grafana/pkg/services/encryption/service"
+	"github.com/grafana/grafana/pkg/services/eventactions"
+	eventactionsdatabase "github.com/grafana/grafana/pkg/services/eventactions/database"
+	eventactionsmanager "github.com/grafana/grafana/pkg/services/eventactions/manager"
 	"github.com/grafana/grafana/pkg/services/export"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
@@ -320,6 +323,12 @@ var wireBasicSet = wire.NewSet(
 	secretsMigrations.ProvideSecretMigrationService,
 	wire.Bind(new(secretsMigrations.SecretMigrationService), new(*secretsMigrations.SecretMigrationServiceImpl)),
 	userauthimpl.ProvideService,
+	eventactionsdatabase.ProvideEventActionsStore,
+	wire.Bind(new(eventactions.Store), new(*eventactionsdatabase.EventActionsStoreImpl)),
+	ossaccesscontrol.ProvideEventActionPermissions,
+	wire.Bind(new(accesscontrol.EventActionPermissionsService), new(*ossaccesscontrol.EventActionPermissionsService)),
+	eventactionsmanager.ProvideEventActionsService,
+	wire.Bind(new(eventactions.Service), new(*eventactionsmanager.EventActionsService)),
 )
 
 var wireSet = wire.NewSet(

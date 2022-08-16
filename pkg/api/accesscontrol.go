@@ -8,6 +8,7 @@ import (
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/eventactions"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/setting"
@@ -485,6 +486,9 @@ var serviceAccountAccessEvaluator = ac.EvalAny(
 	ac.EvalPermission(serviceaccounts.ActionRead),
 	ac.EvalPermission(serviceaccounts.ActionCreate),
 )
+
+// apiKeyAccessEvaluator is used to protect the "Configuration > Event Actions" page access
+var eventActionsAccessEvaluator = ac.EvalPermission(eventactions.ActionRead)
 
 // Metadata helpers
 // getAccessControlMetadata returns the accesscontrol metadata associated with a given resource

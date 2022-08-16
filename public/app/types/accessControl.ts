@@ -115,6 +115,11 @@ export enum AccessControlAction {
   ActionAPIKeysRead = 'apikeys:read',
   ActionAPIKeysCreate = 'apikeys:create',
   ActionAPIKeysDelete = 'apikeys:delete',
+
+  EventActionsRead = 'eventactions:read',
+  EventActionsCreate = 'eventactions:create',
+  EventActionsDelete = 'eventactions:delete',
+  EventActionsWrite = 'eventactions:write',
 }
 
 export interface Role {
