@@ -23,23 +23,26 @@ const EventActionListItem = memo(
     const editUrl = `org/eventactions/${eventAction.id}`;
     const styles = useStyles2(getStyles);
 
+    const linkedColumn = (content: string) =>
+      <a
+        className="ellipsis"
+        href={editUrl}
+        title={eventAction.name}
+        aria-label={getEventActionsAriaLabel(eventAction.name)}
+      >
+        {content}
+      </a>
+
     return (
       <tr key={eventAction.id} className={cx({})}>
         <td className="link-td max-width-10">
-          <a
-            className="ellipsis"
-            href={editUrl}
-            title={eventAction.name}
-            aria-label={getEventActionsAriaLabel(eventAction.name)}
-          >
-            {eventAction.name}
-          </a>
+          {linkedColumn(eventAction.name)}
         </td>
         <td>
-          {eventAction.type}
+          {linkedColumn(eventAction.type)}
         </td>
         <td>
-          {eventAction.url}
+          {linkedColumn(eventAction.url)}
         </td>
         <td>
           <HorizontalGroup justify="flex-end">
