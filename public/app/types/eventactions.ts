@@ -8,6 +8,7 @@ export interface EventActionsDTO extends WithAccessControlMetadata {
   type: string;
   url: string;
   script: string;
+  scriptLanguage: string;
 }
 
 

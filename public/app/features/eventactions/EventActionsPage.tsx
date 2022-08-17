@@ -21,6 +21,14 @@ const typeOptions = [
   { label: 'Code', value: EventActionStateFilter.Code },
 ];
 
+const languageOptions = [
+  { label: 'Javascript', value: 'js' },
+  { label: 'Go', value: 'go' },
+  { label: 'Python 3', value: 'python' },
+  { label: 'Ruby', value: 'ruby' },
+  { label: 'Rust', value: 'rust' },
+];
+
 interface OwnProps extends GrafanaRouteComponentProps<{ id: string }> {
   eventAction?: EventActionsDTO;
   isLoading: boolean;
@@ -52,16 +60,9 @@ export const EventActionsPageUnconnected = ({
   updateEventAction,
 }: Props): JSX.Element => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isCode, setIsCode] = useState<boolean | null>(null);
+  const [currentEventAction, setCurrentEventAction] = useState<EventActionsDTO>(eventAction);
   const styles = useStyles2(getStyles);
   const eventActionId = parseInt(match.params.id, 10);
-
-  const isTypeCode = (defaultEventAction: EventActionsDTO) => {
-    if (isCode === null) {
-      return defaultEventAction.type === EventActionStateFilter.Code;
-    }
-    return isCode;
-  };
 
   const onSubmit = useCallback(
     async (data: EventActionsDTO) => {
@@ -116,6 +117,9 @@ export const EventActionsPageUnconnected = ({
         <div className={styles.pageBody}>
           <Form onSubmit={onSubmit} validateOn="onSubmit" defaultValues={{ ...eventAction }}>
             {({ register, control, errors }) => {
+              if (!isLoading && currentEventAction.id !== eventActionId) {
+                setCurrentEventAction(eventAction);
+              }
               return (
                 <>
                   <FieldSet>
@@ -134,11 +138,11 @@ export const EventActionsPageUnconnected = ({
                       <InputControl
                         name="type"
                         control={control}
-                        render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={typeOptions} onChange={(e) => { onChange(e); setIsCode(e === EventActionStateFilter.Code) }} />}
+                        render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={typeOptions} onChange={(e) => { onChange(e); setCurrentEventAction({ ...currentEventAction, type: e }) }} />}
                       />
                     </Field>
                     <Field
-                      label={isTypeCode(eventAction) ? "Code Runner URL" : "Webhook URL"}
+                      label={currentEventAction.type === EventActionStateFilter.Code ? "Code Runner URL" : "Webhook URL"}
                       required
                       invalid={!!errors.url}
                       error={errors.url ? 'URL is required' : undefined}
@@ -146,9 +150,20 @@ export const EventActionsPageUnconnected = ({
                       <Input id="url-input" {...register("url")} autoFocus />
                     </Field>
                     <Field
+                      label="Code Language"
+                      required
+                      style={{ display: currentEventAction.type === EventActionStateFilter.Code ? 'block' : 'none' }}
+                    >
+                      <InputControl
+                        name="scriptLanguage"
+                        control={control}
+                        render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={languageOptions} onChange={(e) => { onChange(e); setCurrentEventAction({ ...currentEventAction, scriptLanguage: e }) }} />}
+                      />
+                    </Field>
+                    <Field
                       label="Code"
                       required
-                      style={{ display: isTypeCode(eventAction) ? 'block' : 'none' }}
+                      style={{ display: currentEventAction.type === EventActionStateFilter.Code ? 'block' : 'none' }}
                     >
                       <InputControl
                         name="script"
@@ -158,7 +173,7 @@ export const EventActionsPageUnconnected = ({
                             <CodeEditor
                               width={width}
                               height={height}
-                              language="python"
+                              language={currentEventAction.scriptLanguage}
                               showLineNumbers={true}
                               showMiniMap={true}
                               onSave={onChange}
