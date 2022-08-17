@@ -166,3 +166,39 @@ func (s *EventActionsStoreImpl) SearchOrgEventActions(ctx context.Context, orgId
 
 	return searchResult, err
 }
+
+const eventTable = "event"
+
+type EventStoreImpl struct {
+	store *sqlstore.SQLStore
+	log   log.Logger
+}
+
+func ProvideEventStore(store *sqlstore.SQLStore) *EventStoreImpl {
+	return &EventStoreImpl{
+		store: store,
+		log:   log.New("events.store"),
+	}
+}
+
+func (s *EventStoreImpl) CreateEvent(ctx context.Context, form *eventactions.RegisterEventForm) (*eventactions.EventDTO, error) {
+	event := &eventactions.EventDTO{
+		Name:        form.Name,
+		Description: form.Description,
+	}
+
+	err := s.store.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		id, err := sess.Incr("id").Insert(event)
+		if err != nil {
+			return err
+		}
+
+		event.Id = id
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return event, nil
+}

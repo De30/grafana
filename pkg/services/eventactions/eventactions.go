@@ -21,3 +21,11 @@ type Store interface {
 	GetUsageMetrics(ctx context.Context) (map[string]interface{}, error)
 	RunMetricsCollection(ctx context.Context) error
 }
+
+type EventsService interface {
+	Register(ctx context.Context, event *RegisterEventForm) (*EventDTO, error)
+}
+
+type EventStore interface {
+	CreateEvent(ctx context.Context, event *RegisterEventForm) (*EventDTO, error)
+}

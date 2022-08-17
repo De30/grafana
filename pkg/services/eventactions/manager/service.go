@@ -62,3 +62,23 @@ func (sa *EventActionsService) DeleteEventAction(ctx context.Context, orgID, eve
 func (sa *EventActionsService) RetrieveEventActionByName(ctx context.Context, orgID int64, name string) (*eventactions.EventActionDetailsDTO, error) {
 	return sa.store.RetrieveEventActionByName(ctx, orgID, name)
 }
+
+type EventsService struct {
+	log   log.Logger
+	store eventactions.EventStore
+}
+
+func ProvideEventsService(store eventactions.EventStore) (*EventsService, error) {
+	s := &EventsService{
+		log:   log.New("events"),
+		store: store,
+	}
+
+	s.log.Info("Registering events service")
+
+	return s, nil
+}
+
+func (s *EventsService) Register(ctx context.Context, form *eventactions.RegisterEventForm) (*eventactions.EventDTO, error) {
+	return s.store.CreateEvent(ctx, form)
+}
