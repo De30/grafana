@@ -3,10 +3,9 @@ package database
 //nolint:goimports
 import (
 	"context"
+	"fmt"
 
-	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/services/apikey"
 	"github.com/grafana/grafana/pkg/services/eventactions"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
@@ -14,18 +13,16 @@ import (
 const eventActionTable = "event_action"
 
 type EventActionsStoreImpl struct {
-	sqlStore      *sqlstore.SQLStore
-	apiKeyService apikey.Service
-	kvStore       kvstore.KVStore
-	log           log.Logger
+	sqlStore     *sqlstore.SQLStore
+	eventService eventactions.EventsService
+	log          log.Logger
 }
 
-func ProvideEventActionsStore(store *sqlstore.SQLStore, apiKeyService apikey.Service, kvStore kvstore.KVStore) *EventActionsStoreImpl {
+func ProvideEventActionsStore(store *sqlstore.SQLStore, eventService eventactions.EventsService) *EventActionsStoreImpl {
 	return &EventActionsStoreImpl{
-		sqlStore:      store,
-		apiKeyService: apiKeyService,
-		kvStore:       kvStore,
-		log:           log.New("eventactions.store"),
+		sqlStore:     store,
+		eventService: eventService,
+		log:          log.New("eventactions.store"),
 	}
 }
 
@@ -58,6 +55,10 @@ func (s *EventActionsStoreImpl) UpdateEventAction(ctx context.Context, orgId, ev
 
 	if updateErr != nil {
 		return nil, updateErr
+	}
+
+	if err := s.updateEventRegistration(ctx, eventActionId, form.EventRegistration); err != nil {
+		return nil, err
 	}
 
 	return s.RetrieveEventAction(ctx, orgId, eventActionId)
@@ -94,6 +95,14 @@ func (s *EventActionsStoreImpl) RetrieveEventAction(ctx context.Context, orgId, 
 
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	eventAction.EventRegistration, err = s.retrieveEventRegistration(ctx, eventAction.Id)
+	if err != nil {
+		return nil, err
+	}
 
 	return eventAction, err
 }
@@ -110,7 +119,11 @@ func (s *EventActionsStoreImpl) RetrieveEventActionByName(ctx context.Context, o
 
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
+	eventAction.EventRegistration, err = s.retrieveEventRegistration(ctx, eventAction.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -169,6 +182,111 @@ func (s *EventActionsStoreImpl) SearchOrgEventActions(ctx context.Context, orgId
 
 func (s *EventActionsStoreImpl) RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*eventactions.EventActionDetailsDTO, error) {
 	return nil, nil
+}
+
+type registrationRecord struct {
+	EventActionId int64 `xorm:"event_action_id"`
+	EventId       int64 `xorm:"event_id"`
+}
+
+func (r *registrationRecord) TableName() string {
+	return "event_action_registration"
+}
+
+func (s *EventActionsStoreImpl) retrieveEventRegistration(ctx context.Context, eventActionId int64) ([]eventactions.EventRegistrationDTO, error) {
+	events, err := s.eventService.ListEvents(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	registrations := make([]eventactions.EventRegistrationDTO, 0)
+	err = s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		var dbRegistrations []registrationRecord
+		if err := sess.Table("event_action_registration").Where("event_action_id = ?", eventActionId).Find(&dbRegistrations); err != nil {
+			return err
+		}
+		for _, event := range events {
+			enabled := false
+			for _, dbRegistration := range dbRegistrations {
+				if dbRegistration.EventId == event.Id {
+					enabled = true
+					break
+				}
+			}
+			registrations = append(registrations, eventactions.EventRegistrationDTO{
+				EventDTO: eventactions.EventDTO{
+					Id:          event.Id,
+					Name:        event.Name,
+					Description: event.Description,
+				},
+				Enabled: enabled,
+			})
+		}
+
+		return nil
+	})
+
+	return registrations, err
+}
+
+func (s *EventActionsStoreImpl) updateEventRegistration(ctx context.Context, eventActionId int64, newRegistrations []eventactions.EventRegistrationDTO) error {
+	err := s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		var currentRegistrations []registrationRecord
+		if err := sess.Table("event_action_registration").Where("event_action_id = ?", eventActionId).Find(&currentRegistrations); err != nil {
+			return err
+		}
+
+		// Remove current registrations that are not in the new list
+		for _, currentRegistration := range currentRegistrations {
+			toRemove := true
+			for _, newRegistration := range newRegistrations {
+				if currentRegistration.EventId == newRegistration.Id {
+					toRemove = false
+				}
+			}
+
+			if toRemove {
+				if _, err := sess.Delete(&currentRegistration); err != nil {
+					return fmt.Errorf("failed to delete registration for event %d: %w", currentRegistration.EventId, err)
+				}
+			}
+		}
+
+		// Add registrations if they are not in the current list
+		// Remove registrations if they are in the current list but disabled in the new list
+		for _, newRegistration := range newRegistrations {
+			var toRemove *registrationRecord
+			toAdd := newRegistration.Enabled
+			for _, currentRegistration := range currentRegistrations {
+				if currentRegistration.EventId == newRegistration.Id {
+					toAdd = false
+					if !newRegistration.Enabled {
+						toRemove = &currentRegistration
+					}
+					break
+				}
+			}
+
+			if toAdd {
+				if _, err := sess.Insert(&registrationRecord{
+					EventActionId: eventActionId,
+					EventId:       newRegistration.Id,
+				}); err != nil {
+					return fmt.Errorf("failed to insert registration for event %d: %w", newRegistration.Id, err)
+				}
+			}
+			if toRemove != nil {
+				if _, err := sess.Delete(toRemove); err != nil {
+					return fmt.Errorf("failed to delete registration for event %d: %w", newRegistration.Id, err)
+				}
+			}
+
+		}
+
+		return nil
+	})
+
+	return err
 }
 
 const eventTable = "event"

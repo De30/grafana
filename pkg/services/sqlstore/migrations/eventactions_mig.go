@@ -58,4 +58,20 @@ func addEventActionsMigrations(mg *Migrator) {
 	}
 	mg.AddMigration("create event table", NewAddTableMigration(eventsTable))
 	addTableIndicesMigrations(mg, "v1", eventsTable)
+
+	// create event registration table
+	eventActionsRegistrationTable := Table{
+		Name: "event_action_registration",
+		Columns: []*Column{
+			{Name: "event_action_id", Type: DB_BigInt},
+			{Name: "event_id", Type: DB_BigInt, Nullable: false},
+		},
+		Indices: []*Index{
+			{Cols: []string{"event_action_id"}},
+			{Cols: []string{"event_id"}},
+			{Cols: []string{"event_action_id", "event_id"}, Type: UniqueIndex},
+		},
+	}
+	mg.AddMigration("create event_action_registration table", NewAddTableMigration(eventActionsRegistrationTable))
+	addTableIndicesMigrations(mg, "v1", eventActionsRegistrationTable)
 }

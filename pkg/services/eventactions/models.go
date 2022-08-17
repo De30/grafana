@@ -59,6 +59,8 @@ type EventActionDetailsDTO struct {
 	Script         string `json:"script" xorm:"script"`
 	ScriptLanguage string `json:"scriptLanguage" xorm:"script_language"`
 	RunnerSecret   string `json:"runnerSecret" xorm:"runner_secret"` // This would probably need to be hashed both ways in normal circumstances (not hackathon)
+
+	EventRegistration []EventRegistrationDTO `xorm:"-" json:"eventRegistration"`
 }
 
 func (e *EventActionDetailsDTO) TableName() string {
@@ -90,6 +92,11 @@ type EventDTO struct {
 	Name string `json:"name" xorm:"name"`
 	// example:A new user has been added
 	Description string `json:"description" xorm:"description"`
+}
+
+type EventRegistrationDTO struct {
+	EventDTO
+	Enabled bool `json:"enabled" xorm:"-"`
 }
 
 type RegisterEventForm struct {

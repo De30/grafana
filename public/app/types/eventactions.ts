@@ -1,5 +1,11 @@
 import { WithAccessControlMetadata } from '@grafana/data';
 
+export interface EventDTO {
+  id: number;
+  name: string;
+  description: string;
+  enabled?: boolean;
+}
 
 export interface EventActionsDTO extends WithAccessControlMetadata {
   id: number;
@@ -11,6 +17,7 @@ export interface EventActionsDTO extends WithAccessControlMetadata {
   script: string;
   scriptLanguage: string;
   runnerSecret: string;
+  eventRegistration: EventDTO[];
 }
 
 

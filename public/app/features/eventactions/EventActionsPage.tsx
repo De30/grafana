@@ -4,7 +4,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Alert, Button, CodeEditor, ConfirmModal, IconButton, useStyles2, Form, Field, FieldSet, RadioButtonGroup, Input, InputControl } from '@grafana/ui';
+import { Alert, Button, Checkbox, CodeEditor, ConfirmModal, IconButton, useStyles2, Form, Field, FieldSet, RadioButtonGroup, Input, InputControl } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { contextSrv } from 'app/core/core';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
@@ -187,6 +187,23 @@ export const EventActionsPageUnconnected = ({
                         control={control}
                         render={({ field: { onChange, ...field } }) => <RadioButtonGroup {...field} options={typeOptions} onChange={(e) => { onChange(e); setCurrentEventAction({ ...currentEventAction, type: e }) }} />}
                       />
+                    </Field>
+                    <Field label="Events">
+                      <div>
+                        {currentEventAction.eventRegistration === undefined ? [] : currentEventAction.eventRegistration.map((e, i) =>
+                          <div key={'checkbox-div-' + i} style={{ margin: '10px', display: 'inline-block' }}>
+                            <div style={{ display: 'none' }}>
+                              <Input  {...register(`eventRegistration.${i}.id`)} />
+                              <Input {...register(`eventRegistration.${i}.description`)} />
+                              <Input {...register(`eventRegistration.${i}.name`)} />
+                            </div>
+
+                            <Checkbox key={'checkbox-' + i} label={e.name}
+                              description={e.description}  {...register(`eventRegistration.${i}.enabled`)}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </Field>
                     <Field
                       label={currentEventAction.type === EventActionStateFilter.Code ? "Code Runner URL" : "Webhook URL"}
