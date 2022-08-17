@@ -28,6 +28,7 @@ type EventsService interface {
 	Register(ctx context.Context, event *RegisterEventForm) (*EventDTO, error)
 	Unregister(ctx context.Context, eventName string) error
 	ListEvents(ctx context.Context) ([]*EventDTO, error)
+	Publish(ctx context.Context, orgID int64, eventName string, eventPayload interface{}) error
 }
 
 type EventStore interface {
