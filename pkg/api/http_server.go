@@ -182,6 +182,7 @@ type HTTPServer struct {
 	tempUserService              tempUser.Service
 	loginAttemptService          loginAttempt.Service
 	eventActionsService          eventactions.Service
+	eventsService                eventactions.EventsService
 }
 
 type ServerOptions struct {
@@ -217,7 +218,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	dashboardPermissionsService accesscontrol.DashboardPermissionsService, dashboardVersionService dashver.Service,
 	starService star.Service, csrfService csrf.Service, coremodels *registry.Base,
 	playlistService playlist.Service, apiKeyService apikey.Service, kvStore kvstore.KVStore, secretsMigrator secrets.Migrator, secretsPluginManager plugins.SecretsPluginManager,
-	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service, loginAttemptService loginAttempt.Service, eventActionsService eventactions.Service) (*HTTPServer, error) {
+	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service, loginAttemptService loginAttempt.Service, eventActionsService eventactions.Service, eventsService eventactions.EventsService) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
 
