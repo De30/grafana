@@ -63,6 +63,10 @@ func (sa *EventActionsService) RetrieveEventActionByName(ctx context.Context, or
 	return sa.store.RetrieveEventActionByName(ctx, orgID, name)
 }
 
+func (sa *EventActionsService) RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*eventactions.EventActionDetailsDTO, error) {
+	return sa.store.RetrieveEventActionsByRegisteredEvent(ctx, orgID, eventName)
+}
+
 type EventsService struct {
 	log   log.Logger
 	store eventactions.EventStore

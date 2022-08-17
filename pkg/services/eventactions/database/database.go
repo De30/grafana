@@ -167,6 +167,10 @@ func (s *EventActionsStoreImpl) SearchOrgEventActions(ctx context.Context, orgId
 	return searchResult, err
 }
 
+func (s *EventActionsStoreImpl) RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*eventactions.EventActionDetailsDTO, error) {
+	return nil, nil
+}
+
 const eventTable = "event"
 
 type EventStoreImpl struct {

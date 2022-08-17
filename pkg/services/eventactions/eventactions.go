@@ -9,6 +9,7 @@ type Service interface {
 	CreateEventAction(ctx context.Context, orgID int64, form *CreateEventActionForm) (*EventActionDetailsDTO, error)
 	DeleteEventAction(ctx context.Context, orgID, EventActionID int64) error
 	RetrieveEventActionByName(ctx context.Context, orgID int64, name string) (*EventActionDetailsDTO, error)
+	RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*EventActionDetailsDTO, error)
 }
 
 type Store interface {
@@ -17,6 +18,7 @@ type Store interface {
 	UpdateEventAction(ctx context.Context, orgID, EventActionID int64, form *EventActionDetailsDTO) (*EventActionDetailsDTO, error)
 	RetrieveEventAction(ctx context.Context, orgID, EventActionID int64) (*EventActionDetailsDTO, error)
 	RetrieveEventActionByName(ctx context.Context, orgID int64, name string) (*EventActionDetailsDTO, error)
+	RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*EventActionDetailsDTO, error)
 	DeleteEventAction(ctx context.Context, orgID, EventActionID int64) error
 	GetUsageMetrics(ctx context.Context) (map[string]interface{}, error)
 	RunMetricsCollection(ctx context.Context) error
