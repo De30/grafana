@@ -132,6 +132,28 @@ export const EventActionsPageUnconnected = ({
                       <Input id="name-input" {...register("name")} autoFocus />
                     </Field>
                     <Field
+                      label="Description"
+                    >
+                      <InputControl
+                        name="description"
+                        control={control}
+                        render={({ field: { onBlur, onChange, ...field } }) => <AutoSizer style={{ height: '100px', width: '100%' }}>
+                          {({ width, height }) => (
+                            <CodeEditor
+                              width={width}
+                              height={height}
+                              language="text"
+                              showLineNumbers={false}
+                              showMiniMap={false}
+                              onSave={onChange}
+                              onBlur={onChange}
+                              {...field}
+                            />
+                          )}
+                        </AutoSizer>}
+                      />
+                    </Field>
+                    <Field
                       label="Type"
                       required
                     >

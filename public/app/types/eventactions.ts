@@ -5,6 +5,7 @@ export interface EventActionsDTO extends WithAccessControlMetadata {
   id: number;
   orgId: number;
   name: string;
+  description: string;
   type: string;
   url: string;
   script: string;
