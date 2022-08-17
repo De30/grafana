@@ -308,6 +308,8 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 		userService:                  userService,
 		tempUserService:              tempUserService,
 		loginAttemptService:          loginAttemptService,
+		eventActionsService:          eventActionsService,
+		eventsService:                eventsService,
 	}
 	if hs.Listener != nil {
 		hs.log.Debug("Using provided listener")
