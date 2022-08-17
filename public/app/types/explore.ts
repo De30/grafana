@@ -31,6 +31,7 @@ export type ExploreQueryParams = {
 export type VariableValue = {
   key: string;
   value?: string; // if undefined, remove variable from list
+  uid?: string; // for removal
 };
 
 /**

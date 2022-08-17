@@ -89,7 +89,12 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
             isOpen={false}
             label={
               <>
-                <Checkbox onChange={checkVariable} className={styles.checkbox} htmlValue={variable.uid} />
+                <Checkbox
+                  onChange={checkVariable}
+                  value={checkedVariablesList.includes(variable.uid)}
+                  className={styles.checkbox}
+                  htmlValue={variable.uid}
+                />
                 {displayText}
               </>
             }

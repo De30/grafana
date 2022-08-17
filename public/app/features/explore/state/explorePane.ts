@@ -316,21 +316,28 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
   if (changeVariableValuesAction.match(action)) {
     const variableIn = action.payload.variable;
     const variables = [...state.variables];
+    const variablesList = [...state.variablesList];
 
     const foundIdx = variables.findIndex((varItr: VariableValue) => varItr.key === variableIn.key);
     if (variableIn.value === undefined && foundIdx !== -1) {
-      // remove from list
+      // remove from both variable key/value state (variables), and the list of variables to display as dropdowns (variablesList)
       variables.splice(foundIdx, 1);
+      if (variableIn.uid) {
+        const foundListIdx = variablesList.findIndex((varUid: string) => varUid === variableIn.uid);
+        variablesList.splice(foundListIdx, 1);
+      }
     } else if (foundIdx !== -1) {
       // found, update value
       variables[foundIdx].value = variableIn.value;
     } else if (variableIn.value !== undefined) {
+      //if not found but has value, add
       variables.push(variableIn);
     }
 
     return {
       ...state,
       variables: variables,
+      variablesList: variablesList,
     };
   }
 
