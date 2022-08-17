@@ -365,6 +365,7 @@ export const runQueries = (
       refreshInterval,
       absoluteRange,
       cache,
+      variables,
     } = exploreItemState;
     let newQuerySub;
 
@@ -434,7 +435,7 @@ export const runQueries = (
       };
 
       const timeZone = getTimeZone(getState().user);
-      const transaction = buildQueryTransaction(exploreId, queries, queryOptions, range, scanning, timeZone);
+      const transaction = buildQueryTransaction(exploreId, queries, queryOptions, range, scanning, timeZone, variables);
 
       dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Loading }));
 

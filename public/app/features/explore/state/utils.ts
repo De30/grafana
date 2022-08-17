@@ -70,6 +70,7 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   graphStyle: loadGraphStyle(),
   panelsState: {},
   variables: [],
+  variablesList: [],
 });
 
 export const createEmptyQueryResponse = (): ExplorePanelData => ({

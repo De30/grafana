@@ -18,6 +18,7 @@ import {
   LogsSortOrder,
   rangeUtil,
   RawTimeRange,
+  ScopedVars,
   TimeFragment,
   TimeRange,
   TimeZone,
@@ -29,7 +30,14 @@ import { RefreshPicker } from '@grafana/ui';
 import store from 'app/core/store';
 import { TimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { PanelModel } from 'app/features/dashboard/state';
-import { EXPLORE_GRAPH_STYLES, ExploreGraphStyle, ExploreId, QueryOptions, QueryTransaction } from 'app/types/explore';
+import {
+  EXPLORE_GRAPH_STYLES,
+  ExploreGraphStyle,
+  ExploreId,
+  QueryOptions,
+  QueryTransaction,
+  VariableValue,
+} from 'app/types/explore';
 
 import { config } from '../config';
 
@@ -116,7 +124,8 @@ export function buildQueryTransaction(
   queryOptions: QueryOptions,
   range: TimeRange,
   scanning: boolean,
-  timeZone?: TimeZone
+  timeZone?: TimeZone,
+  variables?: VariableValue[]
 ): QueryTransaction {
   const key = queries.reduce((combinedKey, query) => {
     combinedKey += query.key;
@@ -124,6 +133,16 @@ export function buildQueryTransaction(
   }, '');
 
   const { interval, intervalMs } = getIntervals(range, queryOptions.minInterval, queryOptions.maxDataPoints);
+  let scopedVars: ScopedVars = {
+    __interval: { text: interval, value: interval },
+    __interval_ms: { text: intervalMs, value: intervalMs },
+  };
+
+  variables?.forEach((variable: VariableValue) => {
+    if (variable.value) {
+      scopedVars[`${variable.key}`] = { text: variable.key, value: variable.value };
+    }
+  });
 
   // Most datasource is using `panelId + query.refId` for cancellation logic.
   // Using `format` here because it relates to the view panel that the request is for.
@@ -146,10 +165,7 @@ export function buildQueryTransaction(
     range,
     requestId: 'explore_' + exploreId,
     rangeRaw: range.raw,
-    scopedVars: {
-      __interval: { text: interval, value: interval },
-      __interval_ms: { text: intervalMs, value: intervalMs },
-    },
+    scopedVars: scopedVars,
     maxDataPoints: queryOptions.maxDataPoints,
     liveStreaming: queryOptions.liveStreaming,
   };

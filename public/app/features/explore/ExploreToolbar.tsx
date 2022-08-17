@@ -2,14 +2,7 @@ import { isEqual } from 'lodash';
 import React, { lazy, PureComponent, RefObject, Suspense } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import {
-  DataSourceInstanceSettings,
-  LoadingState,
-  RawTimeRange,
-  VariableHide,
-  VariableOption,
-  CustomVariableModel,
-} from '@grafana/data';
+import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
 import { config, DataSourcePicker, reportInteraction } from '@grafana/runtime';
 import {
   defaultIntervals,
