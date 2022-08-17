@@ -57,6 +57,8 @@ func (api *EventActionsAPI) RegisterAPIEndpoints() {
 	api.RouterRegister.Group("/api/eventactions", func(eventActionsRoute routing.RouteRegister) {
 		eventActionsRoute.Get("/search", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionRead)), routing.Wrap(api.SearchOrgEventActionsWithPaging))
+		eventActionsRoute.Get("/byEvent/:eventName", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionRead)), routing.Wrap(api.RetrieveEventActionsByRegisteredEvent))
 		eventActionsRoute.Post("/", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionCreate)), routing.Wrap(api.CreateEventAction))
 		eventActionsRoute.Post("/challenge", auth(middleware.ReqOrgAdmin,
@@ -325,6 +327,29 @@ func challengeRunner(eventAction eventactions.EventActionDetailsDTO) response.Re
 		return response.Error(http.StatusBadRequest, "Runner did not respond with an OK status", err)
 	}
 	return response.Empty(http.StatusOK)
+}
+
+// swagger:route GET /eventactions/byEventName/{eventName} event_actions retrieveEventAction
+//
+// # Get single eventaction by Id
+//
+// Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/eventaction/#service-account-api) for an explanation):
+// action: `eventactions:read` scope: `eventactions:id:1` (single event action)
+//
+// Responses:
+// 200: retrieveEventActionResponse
+// 400: badRequestError
+// 401: unauthorisedError
+// 403: forbiddenError
+// 404: notFoundError
+// 500: internalServerError
+func (api *EventActionsAPI) RetrieveEventActionsByRegisteredEvent(ctx *models.ReqContext) response.Response {
+	eventActions, err := api.store.RetrieveEventActionsByRegisteredEvent(ctx.Req.Context(), ctx.OrgID, web.Params(ctx.Req)[":eventName"])
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "Failed to retrieve event action", err)
+	}
+
+	return response.JSON(http.StatusOK, eventActions)
 }
 
 // swagger:parameters searchOrgEventActionsWithPaging

@@ -181,7 +181,31 @@ func (s *EventActionsStoreImpl) SearchOrgEventActions(ctx context.Context, orgId
 }
 
 func (s *EventActionsStoreImpl) RetrieveEventActionsByRegisteredEvent(ctx context.Context, orgID int64, eventName string) ([]*eventactions.EventActionDetailsDTO, error) {
-	return nil, nil
+	var eventActionIds []int64
+	err := s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		err := sess.Table("event_action_registration").
+			Join("INNER", s.sqlStore.Dialect.Quote("event"), "event_action_registration.event_id = event.id").
+			Join("INNER", s.sqlStore.Dialect.Quote("event_action"), "event_action_registration.event_action_id = event_action.id").
+			Where("event.name = ?", eventName).
+			And("event_action.org_id = ?", orgID).
+			Select("event_action_id").Find(&eventActionIds)
+
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	eventActions := make([]*eventactions.EventActionDetailsDTO, 0)
+	for _, eventActionId := range eventActionIds {
+		eventAction, err := s.RetrieveEventAction(ctx, orgID, eventActionId)
+		if err != nil {
+			return nil, err
+		}
+		eventActions = append(eventActions, eventAction)
+	}
+	return eventActions, nil
+
 }
 
 type registrationRecord struct {
