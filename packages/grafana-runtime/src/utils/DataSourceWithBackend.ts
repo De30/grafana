@@ -139,6 +139,8 @@ class DataSourceWithBackend<
         datasourceId = ds.id;
       }
 
+      console.log('ds w be vars', q, request.scopedVars);
+
       return {
         ...this.applyTemplateVariables(q, request.scopedVars),
         datasource,
@@ -167,6 +169,8 @@ class DataSourceWithBackend<
         body,
       });
     }
+
+    console.log('query', body);
 
     return getBackendSrv()
       .fetch<BackendDataSourceResponse>({

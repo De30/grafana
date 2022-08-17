@@ -215,8 +215,6 @@ export function getProcessedDataFrames(results?: DataQueryResponseData[]): DataF
 export function preProcessPanelData(data: PanelData, lastResult?: PanelData): PanelData {
   const { series, annotations } = data;
 
-  console.log('prepro', data.request?.targets);
-
   //  for loading states with no data, use last result
   if (data.state === LoadingState.Loading && series.length === 0) {
     if (!lastResult) {

@@ -54,7 +54,6 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
   useEffect(() => {
     async function fetchVariables() {
       const variables = await api.loadVariables();
-      console.log(variables);
       setVariablesList(variables.result.exploreVariables);
       setTotalVariablesCount(variables.result.totalCount);
     }

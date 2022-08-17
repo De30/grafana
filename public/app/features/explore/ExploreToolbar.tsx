@@ -154,7 +154,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       onChangeTimeZone,
       onChangeFiscalYearStartMonth,
       topOfViewRef,
-      variables,
     } = this.props;
 
     const showSmallDataSourcePicker = (splitted ? containerWidth < 700 : containerWidth < 800) || false;
@@ -163,9 +162,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
     const showExploreToDashboard =
       contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
       contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
-
-    console.log('toolbar', variables, this.state.variablesAllData);
-    //<PickerRenderer variable={variable} readOnly={readOnly} />
 
     return (
       <div ref={topOfViewRef}>

@@ -288,8 +288,6 @@ export const paneReducer = (state: ExploreItemState = makeExplorePaneState(), ac
   state = timeReducer(state, action);
   state = historyReducer(state, action);
 
-  console.log(action.type);
-
   if (richHistoryUpdatedAction.match(action)) {
     const { richHistory, total } = action.payload.richHistoryResults;
     return {
