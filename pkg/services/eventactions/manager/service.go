@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
@@ -127,6 +128,7 @@ type runnerMetadata struct {
 func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName string, eventPayload interface{}) error {
 	actions, err := s.actions.RetrieveEventActionsByRegisteredEvent(ctx, orgID, eventName)
 	if err != nil {
+		s.log.Error("retrieving event actions by registered event", "err", err, "orgID", orgID, "event", eventName)
 		return err
 	}
 
@@ -152,18 +154,18 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 
 			req, err := createRequest(eventName, eventPayload, action)
 			if err != nil {
-				s.log.Error("failed to create request for event action %d", action.Id)
+				s.log.Error("failed to create request", "err", err)
 				continue
 			}
 
-			res, err := s.client.Do(req)
+			_, err = s.client.Do(req)
 			if err != nil {
-				s.log.Error("Failed to execute event action %d for event %d/%s: %w", action.Id, action.OrgId, action.Name)
-				continue
+				s.log.Error("failed to perform request", "err", err)
 			}
-			s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
 		}
 	}
+
+	start := time.Now()
 
 	jobs := make(chan *eventactions.EventActionDetailsDTO, len(actions))
 	for w := 0; w < numWorkers; w++ {
@@ -175,6 +177,8 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 	close(jobs)
 
 	wg.Wait()
+
+	s.log.Info("event published successfully", "event", eventName, "orgID", orgID, "actions", len(actions), "workers", numWorkers, "duration", time.Since(start))
 
 	return nil
 }
