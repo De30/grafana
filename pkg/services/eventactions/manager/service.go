@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/grafana/grafana/pkg/api/routing"
@@ -117,6 +118,12 @@ type webhookEvent struct {
 	Payload   interface{} `json:"payload"`
 }
 
+type runnerMetadata struct {
+	Name  string `json:"name"`
+	Lang  string `json:"lang"`
+	Entry string `json:"entrypoint"`
+}
+
 func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName string, eventPayload interface{}) error {
 	actions, err := s.actions.RetrieveEventActionsByRegisteredEvent(ctx, orgID, eventName)
 	if err != nil {
@@ -145,6 +152,34 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 		for a := range jobs {
 			switch a.Type {
 			case string(eventactions.ActionTypeCode):
+				metadata, err := json.Marshal(runnerMetadata{
+					Name: a.Name,
+					Lang: a.ScriptLanguage,
+					// TODO missing entrypoint
+				})
+				if err != nil {
+					s.log.Error("cannot serialize runner metadata: %v", err)
+					continue
+				}
+
+				var body url.Values
+				body.Add("metadata", string(metadata))
+				body.Add("file1", a.Script)
+
+				req, err := http.NewRequest(http.MethodPost, runnerURL, bytes.NewBufferString(body.Encode()))
+				if err == nil {
+					s.log.Error("cannot serialize POST body: %v", err)
+					continue
+				}
+
+				req.Header.Set("Authorization", "Bearer "+a.RunnerSecret)
+
+				res, err := s.client.Do(req)
+				if err != nil {
+					s.log.Error("Failed to execute event action %d for event %d/%s: %w", a.Id, a.OrgId, a.Name)
+					continue
+				}
+				s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
 
 			case string(eventactions.ActionTypeWebhook):
 				body := bytes.NewReader(webhookPayload)
