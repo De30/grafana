@@ -191,12 +191,12 @@ func createRunnerRequest(eventName string, eventPayload interface{}, action *eve
 		return nil, fmt.Errorf("cannot serialize runner metadata: %w", err)
 	}
 
-	var body url.Values
+	body := url.Values{}
 	body.Add("metadata", string(metadata))
 	body.Add("file1", action.Script)
 
 	req, err := http.NewRequest(http.MethodPost, action.URL, bytes.NewBufferString(body.Encode()))
-	if err == nil {
+	if err != nil {
 		return nil, fmt.Errorf("cannot create runner request: %w", err)
 	}
 
