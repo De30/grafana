@@ -10,6 +10,7 @@ export interface EventActionsDTO extends WithAccessControlMetadata {
   url: string;
   script: string;
   scriptLanguage: string;
+  runnerSecret: string;
 }
 
 

@@ -2,11 +2,16 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
@@ -54,8 +59,12 @@ func (api *EventActionsAPI) RegisterAPIEndpoints() {
 			accesscontrol.EvalPermission(eventactions.ActionRead)), routing.Wrap(api.SearchOrgEventActionsWithPaging))
 		eventActionsRoute.Post("/", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionCreate)), routing.Wrap(api.CreateEventAction))
+		eventActionsRoute.Post("/challenge", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionCreate)), routing.Wrap(api.ChallengeAdhocRunner))
 		eventActionsRoute.Get("/:eventActionId", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionRead, eventactions.ScopeID)), routing.Wrap(api.RetrieveEventAction))
+		eventActionsRoute.Post("/:eventActionId/challenge", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionWrite, eventactions.ScopeID)), routing.Wrap(api.ChallengeEventActionRunner))
 		eventActionsRoute.Patch("/:eventActionId", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionWrite, eventactions.ScopeID)), routing.Wrap(api.UpdateEventAction))
 		eventActionsRoute.Delete("/:eventActionId", auth(middleware.ReqOrgAdmin,
@@ -63,7 +72,7 @@ func (api *EventActionsAPI) RegisterAPIEndpoints() {
 	})
 }
 
-// swagger:route POST /eventactions service_accounts createEventAction
+// swagger:route POST /eventactions event_actions createEventAction
 //
 // # Create event action
 //
@@ -95,7 +104,7 @@ func (api *EventActionsAPI) CreateEventAction(c *models.ReqContext) response.Res
 	return response.JSON(http.StatusCreated, eventAction)
 }
 
-// swagger:route GET /eventactions/{eventActionId} service_accounts retrieveEventAction
+// swagger:route GET /eventactions/{eventActionId} event_actions retrieveEventAction
 //
 // # Get single eventaction by Id
 //
@@ -128,7 +137,7 @@ func (api *EventActionsAPI) RetrieveEventAction(ctx *models.ReqContext) response
 	return response.JSON(http.StatusOK, eventAction)
 }
 
-// swagger:route PATCH /eventactions/{eventActionId} service_accounts updateEventAction
+// swagger:route PATCH /eventactions/{eventActionId} event_actions updateEventAction
 //
 // # Update event action
 //
@@ -171,7 +180,7 @@ func (api *EventActionsAPI) UpdateEventAction(c *models.ReqContext) response.Res
 	})
 }
 
-// swagger:route DELETE /eventactions/{eventActionId} service_accounts deleteEventAction
+// swagger:route DELETE /eventactions/{eventActionId} event_actions deleteEventAction
 //
 // # Delete event action
 //
@@ -196,7 +205,7 @@ func (api *EventActionsAPI) DeleteEventAction(ctx *models.ReqContext) response.R
 	return response.Success("Event action deleted")
 }
 
-// swagger:route GET /eventactions/search service_accounts searchOrgEventActionsWithPaging
+// swagger:route GET /eventactions/search event_actions searchOrgEventActionsWithPaging
 //
 // # Search event actions with paging
 //
@@ -224,6 +233,98 @@ func (api *EventActionsAPI) SearchOrgEventActionsWithPaging(c *models.ReqContext
 	}
 
 	return response.JSON(http.StatusOK, eventActionSearch)
+}
+
+// swagger:route POST /eventactions/challenge event_actions
+//
+// # Chechk that an event action
+//
+// Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/eventaction/#service-account-api) for an explanation):
+// action: `eventactions:read` scope: `eventactions:*`
+//
+// Responses:
+// 200: valid
+// 204: this is not an event action pointing to a runner
+// 400: error reaching runner
+// 401: unauthorisedError
+// 403: forbiddenError
+// 500: internalServerError
+func (api *EventActionsAPI) ChallengeAdhocRunner(ctx *models.ReqContext) response.Response {
+	eventAction := eventactions.EventActionDetailsDTO{}
+	if err := web.Bind(ctx.Req, &eventAction); err != nil {
+		return response.Error(http.StatusBadRequest, "Bad request data", err)
+	}
+
+	return challengeRunner(eventAction)
+}
+
+// swagger:route POST /eventactions/{eventActionId}/challenge event_actions
+//
+// # Chechk that an event action
+//
+// Required permissions (See note in the [introduction](https://grafana.com/docs/grafana/latest/developers/http_api/eventaction/#service-account-api) for an explanation):
+// action: `eventactions:read` scope: `eventactions:*`
+//
+// Responses:
+// 200: valid
+// 204: this is not an event action pointing to a runner
+// 400: error reaching runner
+// 401: unauthorisedError
+// 403: forbiddenError
+// 500: internalServerError
+func (api *EventActionsAPI) ChallengeEventActionRunner(ctx *models.ReqContext) response.Response {
+	scopeID, err := strconv.ParseInt(web.Params(ctx.Req)[":eventActionId"], 10, 64)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Event action ID is invalid", err)
+	}
+
+	eventAction, err := api.store.RetrieveEventAction(ctx.Req.Context(), ctx.OrgID, scopeID)
+	if err != nil {
+		switch {
+		case errors.Is(err, eventactions.ErrEventActionNotFound):
+			return response.Error(http.StatusNotFound, "Failed to retrieve event action", err)
+		default:
+			return response.Error(http.StatusInternalServerError, "Failed to retrieve event action", err)
+		}
+	}
+
+	return challengeRunner(*eventAction)
+}
+
+func challengeRunner(eventAction eventactions.EventActionDetailsDTO) response.Response {
+	if eventAction.Type != string(eventactions.ActionTypeCode) {
+		return response.Empty(http.StatusNoContent)
+	}
+
+	client, err := httpclient.NewProvider().New()
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "Failed to create http client", err)
+	}
+	client.Timeout = time.Second * 2
+	url, err := url.JoinPath(eventAction.URL, "challenge")
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Failed to create challenge url from provided runner URL", err)
+	}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "Failed to create http request", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+eventAction.RunnerSecret)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Failed to reach runner", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return response.Error(http.StatusBadRequest, fmt.Sprintf("Failed to read runner response. Status code: %d", resp.StatusCode), err)
+		}
+		err = fmt.Errorf("runner returned status code %d. Message: %s", resp.StatusCode, string(body))
+		return response.Error(http.StatusBadRequest, "Runner did not respond with an OK status", err)
+	}
+	return response.Empty(http.StatusOK)
 }
 
 // swagger:parameters searchOrgEventActionsWithPaging

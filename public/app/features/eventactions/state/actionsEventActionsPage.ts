@@ -10,6 +10,11 @@ import {
 
 const BASE_URL = `/api/eventactions`;
 
+
+export async function challengeEventAction(eventAction: EventActionsDTO): Promise<Response> {
+  return fetch(`${BASE_URL}/challenge`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(eventAction) });
+}
+
 export function loadEventAction(id: number): ThunkResult<void> {
   return async (dispatch) => {
     dispatch(eventActionFetchBegin());

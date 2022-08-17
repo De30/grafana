@@ -17,6 +17,7 @@ func addEventActionsMigrations(mg *Migrator) {
 			{Name: "script", Type: DB_Text, Nullable: false},
 			{Name: "script_language", Type: DB_NVarchar, Length: 60, Nullable: false},
 			{Name: "url", Type: DB_NVarchar, Length: 255, Nullable: false},
+			{Name: "runner_secret", Type: DB_NVarchar, Length: 255, Nullable: false},
 		},
 		Indices: []*Index{
 			{Cols: []string{"org_id"}},

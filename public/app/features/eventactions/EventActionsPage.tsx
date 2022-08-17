@@ -4,13 +4,14 @@ import { connect, ConnectedProps } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, CodeEditor, ConfirmModal, IconButton, useStyles2, Form, Field, FieldSet, RadioButtonGroup, Input, InputControl } from '@grafana/ui';
+import { Alert, Button, CodeEditor, ConfirmModal, IconButton, useStyles2, Form, Field, FieldSet, RadioButtonGroup, Input, InputControl } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { contextSrv } from 'app/core/core';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { EventActionsDTO, StoreState, AccessControlAction, EventActionStateFilter } from 'app/types';
 
 import {
+  challengeEventAction,
   deleteEventAction,
   loadEventAction,
   updateEventAction,
@@ -51,6 +52,11 @@ const connector = connect(mapStateToProps, mapDispatchToProps);
 
 export type Props = OwnProps & ConnectedProps<typeof connector>;
 
+interface TestStatus {
+  status: 'success' | 'error' | 'info';
+  message: string;
+}
+
 export const EventActionsPageUnconnected = ({
   match,
   eventAction,
@@ -61,6 +67,7 @@ export const EventActionsPageUnconnected = ({
 }: Props): JSX.Element => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentEventAction, setCurrentEventAction] = useState<EventActionsDTO>(eventAction);
+  const [testStatus, setTestStatus] = useState<TestStatus | null>(null);
   const styles = useStyles2(getStyles);
   const eventActionId = parseInt(match.params.id, 10);
 
@@ -75,6 +82,24 @@ export const EventActionsPageUnconnected = ({
     },
     [updateEventAction, eventActionId]
   );
+
+  const onTest = useCallback(async () => {
+    setTestStatus({ status: 'info', message: 'Sending challenge request...' });
+    try {
+      console.log(currentEventAction);
+      const response = await challengeEventAction(currentEventAction);
+      console.log(response)
+      if (response.status === 200) {
+        setTestStatus({ status: 'success', message: 'Challenge request sent successfully' });
+      } else {
+        const body = await response.json();
+        setTestStatus({ status: 'error', message: body.error });
+      }
+    } catch (e) {
+      setTestStatus({ status: 'error', message: 'Unexpected error: ' + e });
+    }
+  }, [currentEventAction]);
+
 
   useEffect(() => {
     loadEventAction(eventActionId);
@@ -169,7 +194,27 @@ export const EventActionsPageUnconnected = ({
                       invalid={!!errors.url}
                       error={errors.url ? 'URL is required' : undefined}
                     >
-                      <Input id="url-input" {...register("url")} autoFocus />
+                      <Input id="url-input" {...register("url")} autoFocus onBlur={(e) => { const target = e.target as HTMLInputElement; setCurrentEventAction({ ...currentEventAction, url: target.value }) }} />
+                    </Field>
+                    <Field
+                      label="Runner Secret"
+                      style={{ display: currentEventAction.type === EventActionStateFilter.Code ? 'block' : 'none' }}
+                    >
+                      <Input id="runner-secret-input" {...register("runnerSecret")} autoFocus onBlur={(e) => { const target = e.target as HTMLInputElement; setCurrentEventAction({ ...currentEventAction, runnerSecret: target.value }) }} />
+                    </Field>
+                    <Field
+                      label="Send a test request to the runner"
+                    >
+                      <div >
+                        <Button onClick={onTest}>Test</Button>
+                        <Alert
+                          style={{ marginTop: '10px', display: testStatus !== null ? 'flex' : 'none' }}
+                          severity={testStatus !== null ? testStatus?.status : "info"}
+                          title={testStatus !== null ? testStatus?.message : ""}
+                          onRemove={(e) => setTestStatus(null)}
+                        >
+                        </Alert>
+                      </div>
                     </Field>
                     <Field
                       label="Code Language"
@@ -225,7 +270,7 @@ export const EventActionsPageUnconnected = ({
           onDismiss={showDeleteEventActionsModal(false)}
         />
       </Page.Contents>
-    </Page>
+    </Page >
   );
 };
 

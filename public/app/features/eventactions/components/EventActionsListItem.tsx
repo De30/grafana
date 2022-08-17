@@ -79,14 +79,6 @@ const getStyles = (theme: GrafanaTheme2) => {
     deleteButton: css`
       color: ${theme.colors.text.secondary};
     `,
-    tokensInfo: css`
-      span {
-        margin-right: ${theme.spacing(1)};
-      }
-    `,
-    tokensInfoSecondary: css`
-      color: ${theme.colors.text.secondary};
-    `,
     disabled: css`
       td a {
         color: ${theme.colors.text.secondary};
