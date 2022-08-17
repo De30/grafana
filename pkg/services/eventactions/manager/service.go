@@ -136,60 +136,35 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 
 	var wg sync.WaitGroup
 
-	webhookPayload, err := json.Marshal(webhookEvent{
-		EventName: eventName,
-		OrgId:     orgID,
-		Payload:   eventPayload,
-	})
-	if err != nil {
-		return fmt.Errorf("cannot serialize external webhook payload: %w", err)
-	}
-
 	worker := func(jobs <-chan *eventactions.EventActionDetailsDTO) {
 		defer wg.Done()
 		wg.Add(1)
 
 		for a := range jobs {
+			var (
+				req *http.Request
+				err error
+			)
+
 			switch a.Type {
 			case string(eventactions.ActionTypeCode):
-				metadata, err := json.Marshal(runnerMetadata{
-					Name: a.Name,
-					Lang: a.ScriptLanguage,
-					// TODO missing entrypoint
-				})
-				if err != nil {
-					s.log.Error("cannot serialize runner metadata: %v", err)
-					continue
-				}
-
-				var body url.Values
-				body.Add("metadata", string(metadata))
-				body.Add("file1", a.Script)
-
-				req, err := http.NewRequest(http.MethodPost, runnerURL, bytes.NewBufferString(body.Encode()))
-				if err == nil {
-					s.log.Error("cannot serialize POST body: %v", err)
-					continue
-				}
-
-				req.Header.Set("Authorization", "Bearer "+a.RunnerSecret)
-
-				res, err := s.client.Do(req)
-				if err != nil {
-					s.log.Error("Failed to execute event action %d for event %d/%s: %w", a.Id, a.OrgId, a.Name)
-					continue
-				}
-				s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
+				req, err = createRunnerRequest(runnerURL, a)
 
 			case string(eventactions.ActionTypeWebhook):
-				body := bytes.NewReader(webhookPayload)
-				res, err := s.client.Post(a.URL, "application/json", body)
-				if err != nil {
-					s.log.Error("Failed to execute event action %d for event %d/%s: %w", a.Id, a.OrgId, a.Name)
-					continue
-				}
-				s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
+				req, err = createWebhookRequest(eventName, eventPayload, a)
 			}
+
+			if err != nil {
+				s.log.Error("failed to create request for event action %d", a.Id)
+				continue
+			}
+
+			res, err := s.client.Do(req)
+			if err != nil {
+				s.log.Error("Failed to execute event action %d for event %d/%s: %w", a.Id, a.OrgId, a.Name)
+				continue
+			}
+			s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
 		}
 	}
 
@@ -205,4 +180,48 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 	wg.Wait()
 
 	return nil
+}
+
+func createRunnerRequest(runnerURL string, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
+	metadata, err := json.Marshal(runnerMetadata{
+		Name: action.Name,
+		Lang: action.ScriptLanguage,
+		// TODO missing entrypoint
+	})
+	if err != nil {
+		return nil, fmt.Errorf("cannot serialize runner metadata: %w", err)
+	}
+
+	var body url.Values
+	body.Add("metadata", string(metadata))
+	body.Add("file1", action.Script)
+
+	req, err := http.NewRequest(http.MethodPost, runnerURL, bytes.NewBufferString(body.Encode()))
+	if err == nil {
+		return nil, fmt.Errorf("cannot create runner request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+action.RunnerSecret)
+
+	return req, nil
+}
+
+func createWebhookRequest(eventName string, eventPayload interface{}, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
+	body, err := json.Marshal(webhookEvent{
+		EventName: eventName,
+		OrgId:     action.OrgId,
+		Payload:   eventPayload,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("cannot serialize external webhook payload: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, action.URL, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("cannot create webhook request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	return req, nil
 }
