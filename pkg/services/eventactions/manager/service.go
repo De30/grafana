@@ -132,7 +132,6 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 
 	// TODO these values should be configurable
 	const numWorkers = 3
-	const runnerURL = "http://localhost:8076"
 
 	var wg sync.WaitGroup
 
@@ -140,28 +139,26 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 		defer wg.Done()
 		wg.Add(1)
 
-		for a := range jobs {
-			var (
-				req *http.Request
-				err error
-			)
+		for action := range jobs {
+			var createRequest createRequestFunc
 
-			switch a.Type {
+			switch action.Type {
 			case string(eventactions.ActionTypeCode):
-				req, err = createRunnerRequest(runnerURL, a)
+				createRequest = createRunnerRequest
 
 			case string(eventactions.ActionTypeWebhook):
-				req, err = createWebhookRequest(eventName, eventPayload, a)
+				createRequest = createWebhookRequest
 			}
 
+			req, err := createRequest(eventName, eventPayload, action)
 			if err != nil {
-				s.log.Error("failed to create request for event action %d", a.Id)
+				s.log.Error("failed to create request for event action %d", action.Id)
 				continue
 			}
 
 			res, err := s.client.Do(req)
 			if err != nil {
-				s.log.Error("Failed to execute event action %d for event %d/%s: %w", a.Id, a.OrgId, a.Name)
+				s.log.Error("Failed to execute event action %d for event %d/%s: %w", action.Id, action.OrgId, action.Name)
 				continue
 			}
 			s.log.Info("Event action %d for event %d/%s responded with %d", res.StatusCode)
@@ -182,7 +179,9 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 	return nil
 }
 
-func createRunnerRequest(runnerURL string, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
+type createRequestFunc func(eventName string, eventPayload interface{}, action *eventactions.EventActionDetailsDTO) (*http.Request, error)
+
+func createRunnerRequest(eventName string, eventPayload interface{}, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
 	metadata, err := json.Marshal(runnerMetadata{
 		Name: action.Name,
 		Lang: action.ScriptLanguage,
@@ -196,7 +195,7 @@ func createRunnerRequest(runnerURL string, action *eventactions.EventActionDetai
 	body.Add("metadata", string(metadata))
 	body.Add("file1", action.Script)
 
-	req, err := http.NewRequest(http.MethodPost, runnerURL, bytes.NewBufferString(body.Encode()))
+	req, err := http.NewRequest(http.MethodPost, action.URL, bytes.NewBufferString(body.Encode()))
 	if err == nil {
 		return nil, fmt.Errorf("cannot create runner request: %w", err)
 	}
