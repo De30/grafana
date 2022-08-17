@@ -94,6 +94,10 @@ type EventDTO struct {
 	Description string `json:"description" xorm:"description"`
 }
 
+func (e *EventDTO) TableName() string {
+	return "event"
+}
+
 type EventRegistrationDTO struct {
 	EventDTO
 	Enabled bool `json:"enabled" xorm:"-"`
