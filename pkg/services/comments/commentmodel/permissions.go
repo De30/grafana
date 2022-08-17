@@ -24,7 +24,7 @@ type PermissionChecker struct {
 func NewPermissionChecker(sqlStore *sqlstore.SQLStore, features featuremgmt.FeatureToggles,
 	accessControl accesscontrol.AccessControl, dashboardService dashboards.DashboardService,
 ) *PermissionChecker {
-	return &PermissionChecker{sqlStore: sqlStore, features: features, accessControl: accessControl}
+	return &PermissionChecker{sqlStore: sqlStore, features: features, accessControl: accessControl, dashboardService: dashboardService}
 }
 
 func (c *PermissionChecker) getDashboardByUid(ctx context.Context, orgID int64, uid string) (*models.Dashboard, error) {
