@@ -56,15 +56,18 @@ func (s *StandardEntityStoreServer) doGetEntity(c *models.ReqContext) {
 
 	// regular get
 	req := &entity.GetEntityRequest{
-		Path:        params["*"],
-		Version:     urlParams.Get("version"), // URL parameter
-		WithPayload: true,
+		Path:            params["*"],
+		Version:         urlParams.Get("version"), // URL parameter
+		WithPayload:     true,
+		WithStorageMeta: true,
+		WithACL:         true,
+		WithPRs:         true,
 	}
-	withMeta := isTrue(urlParams, "meta")
-	if withMeta {
-		req.WithStorageMeta = true
-		req.WithACL = true
-		req.WithPRs = true
+	isRaw := isTrue(urlParams, "raw")
+	if isRaw {
+		req.WithStorageMeta = false
+		req.WithACL = false
+		req.WithPRs = false
 	}
 
 	rsp, err := s.GetEntity(ctx, req)
@@ -76,8 +79,8 @@ func (s *StandardEntityStoreServer) doGetEntity(c *models.ReqContext) {
 	// Check for ETag updates
 	if rsp.Meta != nil && rsp.Meta.Etag != "" {
 		currentETag := rsp.Meta.Etag
-		if withMeta {
-			currentETag += "-meta"
+		if isRaw {
+			currentETag += "-raw"
 		}
 		c.Resp.Header().Set("ETag", currentETag)
 
@@ -88,9 +91,7 @@ func (s *StandardEntityStoreServer) doGetEntity(c *models.ReqContext) {
 		}
 	}
 
-	if withMeta {
-		c.JSON(http.StatusOK, rsp)
-	} else {
+	if isRaw {
 		ct := "application/json"
 		k := s.kinds.Get(rsp.Kind)
 		if k != nil {
@@ -106,6 +107,8 @@ func (s *StandardEntityStoreServer) doGetEntity(c *models.ReqContext) {
 			logger.Warn("Error writing to response", "err", err)
 		}
 		c.Resp.Flush()
+	} else {
+		c.JSON(http.StatusOK, rsp)
 	}
 }
 
