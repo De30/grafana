@@ -1,6 +1,6 @@
 import { defineProperties, createSprinkles } from '@vanilla-extract/sprinkles';
 
-import { themeContract } from './themeContract.css';
+import { theme } from './themeContract.css';
 
 /**
  * We have two different concepts (or we will/show):
@@ -14,26 +14,15 @@ import { themeContract } from './themeContract.css';
  * Most (basic?) styles should be written using spinkles, or via Box (which
  * exposes Sprinkles as a react component)
  */
-
-const backgroundColors = {
-  secondary: '#F4F5F5',
-} as const;
-
-const borderRadius = {
-  small: 2,
-  medium: 4,
-  large: 8,
-} as const;
-
 const properties = defineProperties({
   properties: {
-    padding: themeContract.space,
-    margin: themeContract.space,
-    background: backgroundColors,
-    borderRadius: borderRadius,
+    padding: theme.space,
+    margin: theme.space,
+    background: theme.colors.background,
+    borderRadius: theme.borderRadius,
     gridAutoFlow: ['row', 'column'],
     display: ['none', 'block', 'inline', 'inline-block', 'flex', 'grid'],
-    gap: themeContract.space,
+    gap: theme.space,
   },
 });
 
