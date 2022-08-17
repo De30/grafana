@@ -22,7 +22,7 @@ const typeOptions = [
 ];
 
 const languageOptions = [
-  { label: 'Javascript', value: 'js' },
+  { label: 'Javascript', value: 'javascript' },
   { label: 'Go', value: 'go' },
   { label: 'Python 3', value: 'python' },
   { label: 'Ruby', value: 'ruby' },
@@ -168,7 +168,7 @@ export const EventActionsPageUnconnected = ({
                       <InputControl
                         name="script"
                         control={control}
-                        render={({ field: { onChange, ...field } }) => <AutoSizer style={{ height: '600px', width: '100%' }}>
+                        render={({ field: { onBlur, onChange, ...field } }) => <AutoSizer style={{ height: '600px', width: '100%' }}>
                           {({ width, height }) => (
                             <CodeEditor
                               width={width}
@@ -177,6 +177,7 @@ export const EventActionsPageUnconnected = ({
                               showLineNumbers={true}
                               showMiniMap={true}
                               onSave={onChange}
+                              onBlur={onChange}
                               {...field}
                             />
                           )}
