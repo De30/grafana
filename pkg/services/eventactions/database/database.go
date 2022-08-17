@@ -13,16 +13,16 @@ import (
 const eventActionTable = "event_action"
 
 type EventActionsStoreImpl struct {
-	sqlStore     *sqlstore.SQLStore
-	eventService eventactions.EventsService
-	log          log.Logger
+	sqlStore   *sqlstore.SQLStore
+	eventStore eventactions.EventStore
+	log        log.Logger
 }
 
-func ProvideEventActionsStore(store *sqlstore.SQLStore, eventService eventactions.EventsService) *EventActionsStoreImpl {
+func ProvideEventActionsStore(store *sqlstore.SQLStore, eventStore eventactions.EventStore) *EventActionsStoreImpl {
 	return &EventActionsStoreImpl{
-		sqlStore:     store,
-		eventService: eventService,
-		log:          log.New("eventactions.store"),
+		sqlStore:   store,
+		eventStore: eventStore,
+		log:        log.New("eventactions.store"),
 	}
 }
 
@@ -218,7 +218,7 @@ func (r *registrationRecord) TableName() string {
 }
 
 func (s *EventActionsStoreImpl) retrieveEventRegistration(ctx context.Context, eventActionId int64) ([]eventactions.EventRegistrationDTO, error) {
-	events, err := s.eventService.ListEvents(ctx)
+	events, err := s.eventStore.ListEvents(ctx)
 	if err != nil {
 		return nil, err
 	}
