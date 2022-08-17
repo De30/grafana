@@ -202,3 +202,16 @@ func (s *EventStoreImpl) CreateEvent(ctx context.Context, form *eventactions.Reg
 
 	return event, nil
 }
+
+func (s *EventStoreImpl) ListEvents(ctx context.Context) ([]*eventactions.EventDTO, error) {
+	var events []*eventactions.EventDTO
+
+	err := s.store.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		return sess.Table(eventTable).OrderBy("name").Find(&events)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}

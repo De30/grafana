@@ -24,8 +24,10 @@ type Store interface {
 
 type EventsService interface {
 	Register(ctx context.Context, event *RegisterEventForm) (*EventDTO, error)
+	ListEvents(ctx context.Context) ([]*EventDTO, error)
 }
 
 type EventStore interface {
 	CreateEvent(ctx context.Context, event *RegisterEventForm) (*EventDTO, error)
+	ListEvents(ctx context.Context) ([]*EventDTO, error)
 }
