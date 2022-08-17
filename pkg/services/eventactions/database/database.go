@@ -334,6 +334,16 @@ func (s *EventStoreImpl) CreateEvent(ctx context.Context, form *eventactions.Reg
 	}
 
 	err := s.store.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		cur := &eventactions.EventDTO{Name: form.Name}
+		has, err := sess.Get(cur)
+		if err != nil {
+			return err
+		}
+		if has {
+			event = cur
+			return nil
+		}
+
 		id, err := sess.Incr("id").Insert(event)
 		if err != nil {
 			return err
