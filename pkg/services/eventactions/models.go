@@ -81,3 +81,19 @@ const (
 	ActionTypeWebhook EventActionType = "webhook"
 	ActionTypeCode    EventActionType = "code"
 )
+
+// swagger:model
+type EventDTO struct {
+	Id int64 `json:"id" xorm:"id"`
+	// example:grafana.user.added
+	Name string `json:"name" xorm:"name"`
+	// example:A new user has been added
+	Description string `json:"description" xorm:"description"`
+}
+
+type RegisterEventForm struct {
+	// example: grafana
+	Name string `json:"name" binding:"Required"`
+	// example:A new user has been added
+	Description string `json:"description" binding:"Required"`
+}

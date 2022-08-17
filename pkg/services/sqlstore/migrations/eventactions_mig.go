@@ -42,4 +42,19 @@ func addEventActionsMigrations(mg *Migrator) {
 	}
 	mg.AddMigration("create event_action_handled_event table", NewAddTableMigration(handledEventsTable))
 	addTableIndicesMigrations(mg, "v1", handledEventsTable)
+
+	// create events table
+	eventsTable := Table{
+		Name: "event",
+		Columns: []*Column{
+			{Name: "id", Type: DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "name", Type: DB_NVarchar, Length: 190, Nullable: false},
+			{Name: "description", Type: DB_NVarchar, Length: 255, Nullable: false},
+		},
+		Indices: []*Index{
+			{Cols: []string{"name"}, Type: UniqueIndex},
+		},
+	}
+	mg.AddMigration("create event table", NewAddTableMigration(eventsTable))
+	addTableIndicesMigrations(mg, "v1", eventsTable)
 }
