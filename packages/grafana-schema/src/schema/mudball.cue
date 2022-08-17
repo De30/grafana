@@ -200,7 +200,7 @@ BigValueTextMode: "auto" | "value" | "value_and_name" | "name" | "none" @cuetsy(
 FieldTextAlignment: "auto" | "left" | "right" | "center" @cuetsy(kind="type")
 
 // TODO docs
-TableCellDisplayMode: "auto" | "color-text" | "color-background" | "color-background-solid" | "gradient-gauge" | "lcd-gauge" | "json-view" | "basic" | "image" @cuetsy(kind="enum",memberNames="Auto|ColorText|ColorBackground|ColorBackgroundSolid|GradientGauge|LcdGauge|JSONView|BasicGauge|Image")
+TableCellDisplayMode: "auto" | "color-text" | "color-background" | "color-background-solid" | "gradient-gauge" | "lcd-gauge" | "json-view" | "basic" | "image" | "area-chart" | "bar-chart" @cuetsy(kind="enum",memberNames="Auto|ColorText|ColorBackground|ColorBackgroundSolid|GradientGauge|LcdGauge|JSONView|BasicGauge|Image|AreaChart|BarChart")
 
 // TODO docs
 VizTextDisplayOptions: {

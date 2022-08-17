@@ -247,7 +247,9 @@ export enum BigValueTextMode {
 export type FieldTextAlignment = ('auto' | 'left' | 'right' | 'center');
 
 export enum TableCellDisplayMode {
+  AreaChart = 'area-chart',
   Auto = 'auto',
+  BarChart = 'bar-chart',
   BasicGauge = 'basic',
   ColorBackground = 'color-background',
   ColorBackgroundSolid = 'color-background-solid',
@@ -256,8 +258,6 @@ export enum TableCellDisplayMode {
   Image = 'image',
   JSONView = 'json-view',
   LcdGauge = 'lcd-gauge',
-  AreaChart = 'area-chart',
-  BarChart = 'bar-chart',
 }
 
 export interface VizTextDisplayOptions {
