@@ -15,6 +15,7 @@ func addEventActionsMigrations(mg *Migrator) {
 			{Name: "type", Type: DB_NVarchar, Length: 60, Nullable: false},
 			{Name: "description", Type: DB_Text, Nullable: false},
 			{Name: "script", Type: DB_Text, Nullable: false},
+			{Name: "script_language", Type: DB_NVarchar, Length: 60, Nullable: false},
 			{Name: "url", Type: DB_NVarchar, Length: 255, Nullable: false},
 		},
 		Indices: []*Index{
@@ -24,4 +25,21 @@ func addEventActionsMigrations(mg *Migrator) {
 	}
 	mg.AddMigration("create event_action table", NewAddTableMigration(table))
 	addTableIndicesMigrations(mg, "v1", table)
+
+	// create handled events table
+	handledEventsTable := Table{
+		Name: "event_action_handled_event",
+		Columns: []*Column{
+			{Name: "id", Type: DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "org_id", Type: DB_BigInt, Nullable: false},
+			{Name: "event_action_id", Type: DB_BigInt, Nullable: false},
+			{Name: "payload", Type: DB_Text, Nullable: false},
+		},
+		Indices: []*Index{
+			{Cols: []string{"org_id"}},
+			{Cols: []string{"event_action_id"}},
+		},
+	}
+	mg.AddMigration("create event_action_handled_event table", NewAddTableMigration(handledEventsTable))
+	addTableIndicesMigrations(mg, "v1", handledEventsTable)
 }

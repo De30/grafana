@@ -55,8 +55,9 @@ type EventActionDetailsDTO struct {
 	URL string `json:"url" xorm:"url"`
 
 	// Detailed fields
-	Description string `json:"description" xorm:"description"`
-	Script      string `json:"script" xorm:"script"`
+	Description    string `json:"description" xorm:"description"`
+	Script         string `json:"script" xorm:"script"`
+	ScriptLanguage string `json:"scriptLanguage" xorm:"script_language"`
 }
 
 func (e *EventActionDetailsDTO) TableName() string {
