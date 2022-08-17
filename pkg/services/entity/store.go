@@ -8,10 +8,10 @@ import (
 	"github.com/gogo/status"
 	"github.com/grafana/grafana-plugin-sdk-go/experimental/entity"
 	"github.com/grafana/grafana/pkg/api/routing"
-	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/entity/kind"
 	"github.com/grafana/grafana/pkg/services/searchV2"
 	"github.com/grafana/grafana/pkg/services/store"
+	"github.com/grafana/grafana/pkg/services/user"
 	"google.golang.org/grpc/codes"
 )
 
@@ -91,7 +91,7 @@ func (s *StandardEntityStoreServer) GetKinds() entity.KindRegistry {
 }
 
 func (s *StandardEntityStoreServer) GetEntity(ctx context.Context, req *entity.GetEntityRequest) (*entity.EntityMessage, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 
 	path := req.Path
 	kind := s.kinds.GetFromSuffix(path)
@@ -134,25 +134,25 @@ func (s *StandardEntityStoreServer) GetEntity(ctx context.Context, req *entity.G
 }
 
 func (s *StandardEntityStoreServer) ListFolder(ctx context.Context, req *entity.ListFolderRequest) (*entity.FolderListing, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 	fmt.Printf("TODO: %v/%v\n", user, req)
 	return nil, status.Errorf(codes.Unimplemented, "method ListFolder not implemented")
 }
 
 func (s *StandardEntityStoreServer) SaveEntity(ctx context.Context, req *entity.SaveEntityRequest) (*entity.EntityMessage, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 	fmt.Printf("TODO: %v/%v\n", user, req)
 	return nil, status.Errorf(codes.Unimplemented, "method SaveEntity not implemented")
 }
 
 func (s *StandardEntityStoreServer) DeleteEntity(ctx context.Context, req *entity.DeleteEntityRequest) (*entity.DeleteResponse, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 	fmt.Printf("TODO: %v/%v\n", user, req)
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEntity not implemented")
 }
 
 func (s *StandardEntityStoreServer) GetEntityHistory(ctx context.Context, req *entity.GetHistoryRequest) (*entity.EntityHistoryResponse, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 	fmt.Printf("TODO: %v/%v\n", user, req)
 
 	rsp := &entity.EntityHistoryResponse{
@@ -170,7 +170,7 @@ func (s *StandardEntityStoreServer) GetEntityHistory(ctx context.Context, req *e
 }
 
 func (s *StandardEntityStoreServer) CreatePR(ctx context.Context, req *entity.CreatePullRequest) (*entity.EntityMessage, error) {
-	user := ctx.Value(tempSignedInUserKey).(*models.SignedInUser)
+	user := ctx.Value(tempSignedInUserKey).(*user.SignedInUser)
 	fmt.Printf("TODO: %v/%v\n", user, req)
 
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePR not implemented")
