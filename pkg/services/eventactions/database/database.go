@@ -361,3 +361,18 @@ func (s *EventStoreImpl) ListEvents(ctx context.Context) ([]*eventactions.EventD
 
 	return events, nil
 }
+
+func (s *EventStoreImpl) DeleteEvent(ctx context.Context, eventName string) error {
+	return s.store.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+		event := eventactions.EventDTO{}
+		has, err := sess.Where(`name = ?`, eventName).Get(&event)
+		if err != nil {
+			return err
+		}
+		if has {
+			_, err = sess.Delete(&event)
+			return err
+		}
+		return nil
+	})
+}

@@ -90,3 +90,7 @@ func (s *EventsService) Register(ctx context.Context, form *eventactions.Registe
 func (s *EventsService) ListEvents(ctx context.Context) ([]*eventactions.EventDTO, error) {
 	return s.store.ListEvents(ctx)
 }
+
+func (s *EventsService) Unregister(ctx context.Context, eventName string) error {
+	return s.store.DeleteEvent(ctx, eventName)
+}
