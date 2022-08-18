@@ -40,7 +40,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {...inputProps}
           ref={ref}
         />
-        <span className={styles.checkmark} />
+        <span className={styles.checkmark} data-collapsable-ignore={true} />
         {label && <span className={styles.label}>{label}</span>}
         {description && <span className={styles.description}>{description}</span>}
       </label>

@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { uniqueId } from 'lodash';
-import React, { FC, ReactNode, useRef, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 
@@ -35,11 +35,19 @@ export const CollapsableSection: FC<Props> = ({
   const [open, toggleOpen] = useState<boolean>(isOpen);
   const styles = useStyles2(collapsableSectionStyles);
 
+  useEffect(() => {
+    if (openOverride) {
+      toggleOpen(isOpen);
+    }
+  }, [isOpen, openOverride]);
+
   const onClick = (e: React.MouseEvent) => {
     //Hackathon note - disabling span is prob a bad call here, but there's a span over the checkbox to style it and I don't know how to isolate this scenario better
     if (
       e.target instanceof HTMLElement &&
-      (e.target.tagName === 'A' || e.target.tagName === 'SPAN' || e.target.tagName === 'INPUT')
+      (Boolean(e.target?.attributes?.getNamedItem('data-collapsable-ignore')?.value || false) ||
+        e.target.tagName === 'A' ||
+        e.target.tagName === 'INPUT')
     ) {
       return;
     }

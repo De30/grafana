@@ -164,7 +164,12 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
             variant="secondary"
             icon="pen"
             disabled={disableActions}
-            onClick={() => setVariableInEdit(variable)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setVariableInEdit(variable);
+              onToggle(true, variable.uid);
+            }}
           >
             Edit
           </Button>
@@ -422,13 +427,14 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
       </div>
       {variableToAdd && displayNewVariable()}
       {variablesList.map((variable: Variable) => {
+        const varInEdit = variableInEdit && variable.uid === variableInEdit.uid;
         return (
           <CollapsableSection
             key={`collapsable-${variable.uid}`}
             isOpen={openVariables.includes(variable.uid)}
             onToggle={(isOpen) => onToggle(isOpen, variable.uid)}
             className={styles.collapsableContainer}
-            openOverride={variableInEdit && variable.uid === variableInEdit.uid}
+            openOverride={varInEdit}
             contentClassName={styles.collapsableValuesContainer}
             label={
               <>
