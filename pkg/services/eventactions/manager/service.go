@@ -106,7 +106,14 @@ func ProvideEventsService(store eventactions.EventStore, actionsStore eventactio
 }
 
 func (s *EventsService) Register(ctx context.Context, form *eventactions.RegisterEventForm) (*eventactions.EventDTO, error) {
-	return s.store.CreateEvent(ctx, form)
+	evt, err := s.store.CreateEvent(ctx, form)
+	if err != nil {
+		s.log.Error("creating event", "name", form.Name, "err", err)
+		return nil, err
+	}
+
+	s.log.Info("event registered", "name", form.Name)
+	return evt, nil
 }
 
 func (s *EventsService) ListEvents(ctx context.Context) ([]*eventactions.EventDTO, error) {
