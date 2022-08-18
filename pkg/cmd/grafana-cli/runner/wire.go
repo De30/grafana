@@ -329,6 +329,10 @@ var wireSet = wire.NewSet(
 	wire.Bind(new(accesscontrol.EventActionPermissionsService), new(*ossaccesscontrol.EventActionPermissionsService)),
 	eventactionsmanager.ProvideEventActionsService,
 	wire.Bind(new(eventactions.Service), new(*eventactionsmanager.EventActionsService)),
+	eventactionsdatabase.ProvideEventStore,
+	wire.Bind(new(eventactions.EventStore), new(*eventactionsdatabase.EventStoreImpl)),
+	eventactionsmanager.ProvideEventsService,
+	wire.Bind(new(eventactions.EventsService), new(*eventactionsmanager.EventsService)),
 )
 
 func Initialize(cfg *setting.Cfg) (Runner, error) {
