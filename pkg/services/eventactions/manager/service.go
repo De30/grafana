@@ -229,7 +229,7 @@ func createRunnerRequest(eventName string, eventPayload interface{}, action *eve
 	}
 
 	req.Header.Set("Authorization", "Bearer "+action.RunnerSecret)
-	req.Header.Set("Content-Type", "multipart/form-data")
+	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	return req, nil
 }
