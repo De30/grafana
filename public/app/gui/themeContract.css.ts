@@ -8,14 +8,34 @@ export const theme = createThemeContract({
     medium: '',
     large: '',
   },
+
   borderRadius: {
     small: '',
     medium: '',
     large: '',
   },
+
   colors: {
     background: {
+      page: '',
+      content: '',
       secondary: '',
+    },
+    primary: {
+      main: '',
+      contrastText: '',
+    },
+    secondary: {
+      main: '',
+      contrastText: '',
+    },
+    success: {
+      main: '',
+      contrastText: '',
+    },
+    critical: {
+      main: '',
+      contrastText: '',
     },
   },
 });

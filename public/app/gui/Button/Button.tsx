@@ -1,19 +1,18 @@
-enum ButtonVibe {
-  Primary,
-  Secondary,
-  Success,
-  Critical,
+import cx from 'classnames';
+import React from 'react';
+
+import { vibeVariants } from './button.css';
+import { ButtonSize, ButtonVariant, ButtonVibe } from './types';
+
+interface ButtonProps {
+  variant: ButtonVariant;
+  vibe: ButtonVibe;
+  size: ButtonSize;
+  children: React.ReactNode;
 }
 
-enum ButtonVariant {
-  Solid,
-  Outline,
-  Transparent,
-}
+export function Button({ variant, vibe, children }: ButtonProps) {
+  const vibeClass = vibeVariants[variant][vibe];
 
-enum ButtonSize {
-  Small,
-  Standard,
+  return <button className={cx(vibeClass)}>{children}</button>;
 }
-
-export function Button() {}
