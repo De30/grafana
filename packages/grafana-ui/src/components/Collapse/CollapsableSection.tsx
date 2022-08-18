@@ -36,13 +36,13 @@ export const CollapsableSection: FC<Props> = ({
   const styles = useStyles2(collapsableSectionStyles);
 
   useEffect(() => {
+    // if we are overriding the open toggle in here, use isOpen attribute to set open status
     if (openOverride) {
       toggleOpen(isOpen);
     }
   }, [isOpen, openOverride]);
 
   const onClick = (e: React.MouseEvent) => {
-    //Hackathon note - disabling span is prob a bad call here, but there's a span over the checkbox to style it and I don't know how to isolate this scenario better
     if (
       e.target instanceof HTMLElement &&
       (Boolean(e.target?.attributes?.getNamedItem('data-collapsable-ignore')?.value || false) ||

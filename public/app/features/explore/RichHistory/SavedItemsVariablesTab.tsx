@@ -390,6 +390,7 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
     );
   };
 
+  // We use the openVariables array to keep track of what is open or not, to work with the override
   const onToggle = (isOpen: boolean, uid: string) => {
     // if the uid is in edit mode, be sure it is open and keep it that way
     if (variableInEdit && uid === variableInEdit.uid) {
@@ -427,6 +428,7 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
       </div>
       {variableToAdd && displayNewVariable()}
       {variablesList.map((variable: Variable) => {
+        // If var is being edited, we keep it open and disable the toggle
         const varInEdit = variableInEdit && variable.uid === variableInEdit.uid;
         return (
           <CollapsableSection
