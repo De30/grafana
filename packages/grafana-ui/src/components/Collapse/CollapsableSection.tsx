@@ -18,6 +18,7 @@ export interface Props {
   contentClassName?: string;
   loading?: boolean;
   labelId?: string;
+  openOverride?: boolean;
 }
 
 export const CollapsableSection: FC<Props> = ({
@@ -29,6 +30,7 @@ export const CollapsableSection: FC<Props> = ({
   children,
   labelId,
   loading = false,
+  openOverride = false,
 }) => {
   const [open, toggleOpen] = useState<boolean>(isOpen);
   const styles = useStyles2(collapsableSectionStyles);
@@ -46,7 +48,9 @@ export const CollapsableSection: FC<Props> = ({
     e.stopPropagation();
 
     onToggle?.(!open);
-    toggleOpen(!open);
+    if (!openOverride) {
+      toggleOpen(!open);
+    }
   };
   const { current: id } = useRef(uniqueId());
 

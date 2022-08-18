@@ -1,5 +1,7 @@
 import { getBackendSrv } from '@grafana/runtime';
 
+import { NewVariable, Variable } from './RichHistory/SavedItemsVariablesTab';
+
 const loadVariables = async (payload?: { searchString?: string; uids?: string[] }) => {
   try {
     let paramStr = '?searchString';
@@ -20,9 +22,30 @@ const loadVariables = async (payload?: { searchString?: string; uids?: string[] 
     console.error(err);
   }
 };
-const updateVariable = async () => {};
-const addVariable = async () => {};
-const deleteVariable = async () => {};
+
+const updateVariable = async (variable: Variable) => {
+  try {
+    return await getBackendSrv().patch(`/api/explore-variable/${variable.uid}`, variable);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const addVariable = async (variable: NewVariable) => {
+  try {
+    return await getBackendSrv().post(`/api/explore-variable/`, variable);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const deleteVariable = async (uid: string) => {
+  try {
+    return await getBackendSrv().delete(`/api/explore-variable/${uid}`);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export const api = {
   loadVariables,

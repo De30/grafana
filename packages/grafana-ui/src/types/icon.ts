@@ -185,6 +185,7 @@ export const getAvailableIcons = () =>
     'wrap-text',
     'rss',
     'x',
+    'x-add',
   ] as const;
 
 type BrandIconNames = 'google' | 'microsoft' | 'github' | 'gitlab' | 'okta';
