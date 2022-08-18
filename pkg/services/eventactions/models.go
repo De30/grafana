@@ -115,3 +115,8 @@ type RegisterEventForm struct {
 	// example:A new user has been added
 	Description string `json:"description" binding:"Required"`
 }
+
+type RunResponse struct {
+	Code int    `json:"code"`
+	Body string `json:"body"`
+}

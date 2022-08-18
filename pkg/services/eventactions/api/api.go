@@ -77,6 +77,8 @@ func (api *EventActionsAPI) RegisterAPIEndpoints() {
 			accesscontrol.EvalPermission(eventactions.ActionRead, eventactions.ScopeID)), routing.Wrap(api.RetrieveEventAction))
 		eventActionsRoute.Post("/:eventActionId/challenge", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionWrite, eventactions.ScopeID)), routing.Wrap(api.ChallengeEventActionRunner))
+		eventActionsRoute.Post("/:eventActionId/execute", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionWrite, eventactions.ScopeID)), routing.Wrap(api.ExecuteEventAction))
 		eventActionsRoute.Patch("/:eventActionId", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionWrite, eventactions.ScopeID)), routing.Wrap(api.UpdateEventAction))
 		eventActionsRoute.Delete("/:eventActionId", auth(middleware.ReqOrgAdmin,
@@ -384,6 +386,35 @@ func (api *EventActionsAPI) RegisterEvent(ctx *models.ReqContext) response.Respo
 	resp, err := api.eventService.Register(ctx.Req.Context(), &eventForm)
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "Failed to publish event", err)
+	}
+
+	return response.JSON(http.StatusOK, resp)
+}
+
+func (api *EventActionsAPI) ExecuteEventAction(ctx *models.ReqContext) response.Response {
+	scopeID, err := strconv.ParseInt(web.Params(ctx.Req)[":eventActionId"], 10, 64)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Event action ID is invalid", err)
+	}
+
+	eventAction, err := api.store.RetrieveEventAction(ctx.Req.Context(), ctx.OrgID, scopeID)
+	if err != nil {
+		switch {
+		case errors.Is(err, eventactions.ErrEventActionNotFound):
+			return response.Error(http.StatusNotFound, "Failed to retrieve event action", err)
+		default:
+			return response.Error(http.StatusInternalServerError, "Failed to retrieve event action", err)
+		}
+	}
+
+	publishForm := eventactions.PublishEvent{}
+	if err := web.Bind(ctx.Req, &publishForm); err != nil {
+		return response.Error(http.StatusBadRequest, "Bad request data", err)
+	}
+
+	resp, err := api.eventService.RunEventAction(ctx.Req.Context(), eventAction, publishForm.EventName, publishForm.Payload)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Error running the action", err)
 	}
 
 	return response.JSON(http.StatusOK, resp)

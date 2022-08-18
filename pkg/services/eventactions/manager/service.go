@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"sync"
 	"time"
@@ -137,25 +140,8 @@ func (s *EventsService) Publish(ctx context.Context, orgID int64, eventName stri
 		wg.Add(1)
 
 		for action := range jobs {
-			var createRequest createRequestFunc
-
-			switch action.Type {
-			case string(eventactions.ActionTypeCode):
-				createRequest = createRunnerRequest
-
-			case string(eventactions.ActionTypeWebhook):
-				createRequest = createWebhookRequest
-			}
-
-			req, err := createRequest(eventName, eventPayload, action)
-			if err != nil {
-				s.log.Error("failed to create request", "err", err)
-				continue
-			}
-
-			_, err = s.client.Do(req)
-			if err != nil {
-				s.log.Error("failed to perform request", "err", err)
+			if _, err := s.RunEventAction(ctx, action, eventName, eventPayload); err != nil {
+				s.log.Error("running event action", "err", err, "action", action.Name, "event", eventName)
 			}
 		}
 	}
@@ -182,24 +168,68 @@ type createRequestFunc func(eventName string, eventPayload interface{}, action *
 
 func createRunnerRequest(eventName string, eventPayload interface{}, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
 	metadata, err := json.Marshal(runnerMetadata{
-		Name: action.Name,
-		Lang: action.ScriptLanguage,
+		Name:  action.Name,
+		Lang:  action.ScriptLanguage,
+		Entry: "file1",
 		// TODO missing entrypoint
 	})
 	if err != nil {
 		return nil, fmt.Errorf("cannot serialize runner metadata: %w", err)
 	}
 
-	body := url.Values{}
-	body.Add("metadata", string(metadata))
-	body.Add("file1", action.Script)
+	marshalledPayload, err := json.Marshal(eventPayload)
+	if err != nil {
+		return nil, fmt.Errorf("cannot serialize event payload: %w", err)
+	}
 
-	req, err := http.NewRequest(http.MethodPost, action.URL, bytes.NewBufferString(body.Encode()))
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	scriptFile, err := w.CreateFormFile("file1", "file1")
+	if err != nil {
+		return nil, err
+	}
+	if _, err := io.WriteString(scriptFile, action.Script); err != nil {
+		return nil, err
+	}
+
+	metadataHeaders := make(textproto.MIMEHeader)
+	metadataHeaders.Set("Content-Disposition", `form-data; name="metadata"`)
+	metadataHeaders.Set("Content-Type", "application/json")
+	metadataPart, err := w.CreatePart(metadataHeaders)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := metadataPart.Write(metadata); err != nil {
+		return nil, err
+	}
+
+	payloadHeaders := make(textproto.MIMEHeader)
+	payloadHeaders.Set("Content-Disposition", `form-data; name="event"`)
+	payloadHeaders.Set("Content-Type", "application/json")
+	payloadPart, err := w.CreatePart(payloadHeaders)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := payloadPart.Write(marshalledPayload); err != nil {
+		return nil, err
+	}
+
+	if err := w.Close(); err != nil {
+		return nil, err
+	}
+
+	url, err := url.JoinPath(action.URL, "execute")
+	if err != nil {
+		return nil, fmt.Errorf("cannot create runner URL: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, url, &b)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create runner request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+action.RunnerSecret)
+	req.Header.Set("Content-Type", "multipart/form-data")
 
 	return req, nil
 }
@@ -222,4 +252,37 @@ func createWebhookRequest(eventName string, eventPayload interface{}, action *ev
 	req.Header.Set("Content-Type", "application/json")
 
 	return req, nil
+}
+
+func (s *EventsService) RunEventAction(ctx context.Context, action *eventactions.EventActionDetailsDTO, eventName string, eventPayload interface{}) (*eventactions.RunResponse, error) {
+	var createRequest createRequestFunc
+
+	switch action.Type {
+	case string(eventactions.ActionTypeCode):
+		createRequest = createRunnerRequest
+
+	case string(eventactions.ActionTypeWebhook):
+		createRequest = createWebhookRequest
+	}
+
+	req, err := createRequest(eventName, eventPayload, action)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create request: %w", err)
+	}
+
+	response, err := s.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("cannot perform request: %w", err)
+	}
+	defer response.Body.Close()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read response body: %w", err)
+	}
+
+	return &eventactions.RunResponse{
+		Code: response.StatusCode,
+		Body: string(body),
+	}, nil
 }
