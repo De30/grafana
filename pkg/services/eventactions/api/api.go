@@ -372,7 +372,7 @@ func (api *EventActionsAPI) PublishEvent(ctx *models.ReqContext) response.Respon
 		return response.Error(http.StatusBadRequest, "Failed to publish event", err)
 	}
 
-	return nil
+	return response.Empty(http.StatusOK)
 }
 
 func (api *EventActionsAPI) RegisterEvent(ctx *models.ReqContext) response.Response {
