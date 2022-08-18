@@ -95,3 +95,10 @@ export function changePage(page: number): ThunkResult<void> {
   };
 }
 
+export async function executeEventAction(eventAction: EventActionsDTO, payload: string): Promise<Response> {
+  return fetch(`${BASE_URL}/${eventAction.id}/execute`,
+    {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+}

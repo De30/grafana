@@ -220,10 +220,11 @@ export const EventActionsPageUnconnected = ({
                       <Input id="runner-secret-input" {...register("runnerSecret")} autoFocus onBlur={(e) => { const target = e.target as HTMLInputElement; setCurrentEventAction({ ...currentEventAction, runnerSecret: target.value }) }} />
                     </Field>
                     <Field
-                      label="Send a test request to the runner"
+                      label="Send a challenge request to the runner"
                     >
                       <div >
-                        <Button onClick={onTest}>Test</Button>
+                        <p>This sends a request to the `/challenge` endpoint of the runner. If the runner responds with a 200 status code, the URL and secret are correct.</p>
+                        <Button onClick={onTest}>Challenge</Button>
                         <Alert
                           style={{ marginTop: '10px', display: testStatus !== null ? 'flex' : 'none' }}
                           severity={testStatus !== null ? testStatus?.status : "info"}

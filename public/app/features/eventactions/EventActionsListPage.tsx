@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { ConfirmModal, FilterInput, LinkButton, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import { CodeEditor, TextArea, Button, Modal, ConfirmModal, FilterInput, LinkButton, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import EmptyListCTA from 'app/core/components/EmptyListCTA/EmptyListCTA';
 import { Page } from 'app/core/components/Page/Page';
 import PageLoader from 'app/core/components/PageLoader/PageLoader';
@@ -17,6 +17,7 @@ import {
   deleteEventAction,
   updateEventAction,
   changeStateFilter,
+  executeEventAction,
 } from './state/actions';
 
 interface OwnProps { }
@@ -39,6 +40,12 @@ const mapDispatchToProps = {
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
+interface ExecuteModalStatus {
+  isOpen: boolean;
+  data: string;
+  result: string;
+}
+
 export const EventActionsListPageUnconnected = ({
   eventActions,
   isLoading,
@@ -52,6 +59,7 @@ export const EventActionsListPageUnconnected = ({
 }: Props): JSX.Element => {
   const styles = useStyles2(getStyles);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+  const [executeModalStatus, setExecuteModalStatus] = useState<ExecuteModalStatus>({ isOpen: false, data: '', result: '' });
   const [currentEventAction, setCurrentEventAction] = useState<EventActionsDTO | null>(null);
 
   useEffect(() => {
@@ -83,6 +91,34 @@ export const EventActionsListPageUnconnected = ({
 
   const onRemoveModalClose = () => {
     setIsRemoveModalOpen(false);
+    setCurrentEventAction(null);
+  };
+
+  const onExecuteButtonClick = (eventAction: EventActionsDTO) => {
+    setCurrentEventAction(eventAction);
+    setExecuteModalStatus({ isOpen: true, data: '', result: '' });
+  };
+
+  const onExecuteModalDo = async () => {
+    if (currentEventAction) {
+      try {
+        const response = await executeEventAction(currentEventAction, executeModalStatus.data);
+        if (response.status === 200) {
+          setExecuteModalStatus({ ...executeModalStatus, result: JSON.stringify(await response.json(), null, 4) });
+        } else {
+          setExecuteModalStatus({ ...executeModalStatus, result: `error executing\nCode: ${response.status}\nData: ${await response.text()}` });
+        }
+
+      } catch (error) {
+        setExecuteModalStatus({ isOpen: true, data: '', result: `error running the action: ${error}` });
+      }
+    } else {
+      setExecuteModalStatus({ ...executeModalStatus, result: 'Error: No event action selected' });
+    }
+  };
+
+  const onExecuteModalClose = () => {
+    setExecuteModalStatus({ isOpen: false, data: '', result: '' });
     setCurrentEventAction(null);
   };
 
@@ -170,12 +206,33 @@ export const EventActionsListPageUnconnected = ({
                       eventAction={eventAction}
                       key={eventAction.id}
                       onRemoveButtonClick={onRemoveButtonClick}
+                      onExecuteButtonClick={onExecuteButtonClick}
                     />
                   ))}
                 </tbody>
               </table>
             </div>
           </>
+        )}
+        {currentEventAction && (
+          <Modal
+            title={`Run event action "${currentEventAction.name}"`}
+            isOpen={executeModalStatus.isOpen}
+            closeOnBackdropClick={false}
+            onDismiss={onExecuteModalClose}
+          >
+            <TextArea readOnly style={{ marginBottom: '20px', height: "200px", display: executeModalStatus.result !== "" ? "block" : "none" }} value={"Result:\n" + executeModalStatus.result}></TextArea>
+            <CodeEditor
+              width="100%"
+              height="300px"
+              language="json"
+              showLineNumbers={true}
+              showMiniMap={true}
+              onBlur={(e) => { setExecuteModalStatus({ ...executeModalStatus, data: e }) }}
+              value={executeModalStatus.data}
+            />
+            <Button style={{ marginTop: "20px" }} onClick={onExecuteModalDo}>Run</Button>
+          </Modal>
         )}
         {currentEventAction && (
           <>

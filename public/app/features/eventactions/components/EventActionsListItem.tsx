@@ -9,6 +9,7 @@ import { AccessControlAction, EventActionsDTO } from 'app/types';
 type EventActionListItemProps = {
   eventAction: EventActionsDTO;
   onRemoveButtonClick: (eventAction: EventActionsDTO) => void;
+  onExecuteButtonClick: (eventAction: EventActionsDTO) => void;
 };
 
 const getEventActionsAriaLabel = (name: string) => {
@@ -19,6 +20,7 @@ const EventActionListItem = memo(
   ({
     eventAction,
     onRemoveButtonClick,
+    onExecuteButtonClick,
   }: EventActionListItemProps) => {
     const editUrl = `org/eventactions/${eventAction.id}`;
     const styles = useStyles2(getStyles);
@@ -46,6 +48,15 @@ const EventActionListItem = memo(
         </td>
         <td>
           <HorizontalGroup justify="flex-end">
+            {contextSrv.hasPermission(AccessControlAction.EventActionsWrite) && (
+              <IconButton
+                className={styles.deleteButton}
+                name="rocket"
+                size="md"
+                onClick={() => onExecuteButtonClick(eventAction)}
+                aria-label={`Execute event action ${eventAction.name}`}
+              />
+            )}
             {contextSrv.hasPermission(AccessControlAction.EventActionsDelete) && (
               <IconButton
                 className={styles.deleteButton}
