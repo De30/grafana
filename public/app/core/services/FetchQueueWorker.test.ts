@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 
-import { FetchResponse, GrafanaBootConfig } from '@grafana/runtime';
+import { GrafanaBootConfig } from '@grafana/runtime';
 
 import { FetchQueue, FetchQueueUpdate, FetchStatus } from './FetchQueue';
 import { FetchQueueWorker } from './FetchQueueWorker';
@@ -20,10 +20,10 @@ const getTestContext = (http2Enabled = false) => {
   } as unknown as FetchQueue;
 
   const addMock = jest.fn();
-  const responseQueueMock: ResponseQueue<FetchResponse> = {
+  const responseQueueMock: ResponseQueue = {
     add: addMock,
     getResponses: jest.fn(),
-  } as unknown as ResponseQueue<FetchResponse>;
+  } as unknown as ResponseQueue;
 
   new FetchQueueWorker(queueMock, responseQueueMock, config);
 
