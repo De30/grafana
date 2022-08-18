@@ -98,6 +98,12 @@ func (e *EventDTO) TableName() string {
 	return "event"
 }
 
+type PublishEvent struct {
+	EventName string      `json:"event"`
+	OrgId     int64       `json:"org_id"`
+	Payload   interface{} `json:"payload"`
+}
+
 type EventRegistrationDTO struct {
 	EventDTO
 	Enabled bool `json:"enabled" xorm:"-"`

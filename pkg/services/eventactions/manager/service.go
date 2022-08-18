@@ -32,6 +32,7 @@ func ProvideEventActionsService(
 	routeRegister routing.RouteRegister,
 	usageStats usagestats.Service,
 	eventActionsStore eventactions.Store,
+	eventService eventactions.EventsService,
 	permissionService accesscontrol.EventActionPermissionsService,
 ) (*EventActionsService, error) {
 	database.InitMetrics()
@@ -48,7 +49,7 @@ func ProvideEventActionsService(
 
 	usageStats.RegisterMetricsFunc(s.store.GetUsageMetrics)
 
-	eventactionsAPI := api.NewEventActionsAPI(cfg, s, ac, routeRegister, s.store, permissionService)
+	eventactionsAPI := api.NewEventActionsAPI(cfg, s, eventService, ac, routeRegister, s.store, permissionService)
 	eventactionsAPI.RegisterAPIEndpoints()
 
 	return s, nil
@@ -111,12 +112,6 @@ func (s *EventsService) ListEvents(ctx context.Context) ([]*eventactions.EventDT
 
 func (s *EventsService) Unregister(ctx context.Context, eventName string) error {
 	return s.store.DeleteEvent(ctx, eventName)
-}
-
-type webhookEvent struct {
-	EventName string      `json:"event"`
-	OrgId     int64       `json:"org_id"`
-	Payload   interface{} `json:"payload"`
 }
 
 type runnerMetadata struct {
@@ -210,7 +205,7 @@ func createRunnerRequest(eventName string, eventPayload interface{}, action *eve
 }
 
 func createWebhookRequest(eventName string, eventPayload interface{}, action *eventactions.EventActionDetailsDTO) (*http.Request, error) {
-	body, err := json.Marshal(webhookEvent{
+	body, err := json.Marshal(eventactions.PublishEvent{
 		EventName: eventName,
 		OrgId:     action.OrgId,
 		Payload:   eventPayload,

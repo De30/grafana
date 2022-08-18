@@ -26,6 +26,7 @@ import (
 type EventActionsAPI struct {
 	cfg               *setting.Cfg
 	service           eventactions.Service
+	eventService      eventactions.EventsService
 	accesscontrol     accesscontrol.AccessControl
 	RouterRegister    routing.RouteRegister
 	store             eventactions.Store
@@ -36,6 +37,7 @@ type EventActionsAPI struct {
 func NewEventActionsAPI(
 	cfg *setting.Cfg,
 	service eventactions.Service,
+	eventService eventactions.EventsService,
 	accesscontrol accesscontrol.AccessControl,
 	routerRegister routing.RouteRegister,
 	store eventactions.Store,
@@ -44,6 +46,7 @@ func NewEventActionsAPI(
 	return &EventActionsAPI{
 		cfg:               cfg,
 		service:           service,
+		eventService:      eventService,
 		accesscontrol:     accesscontrol,
 		RouterRegister:    routerRegister,
 		store:             store,
@@ -54,6 +57,13 @@ func NewEventActionsAPI(
 
 func (api *EventActionsAPI) RegisterAPIEndpoints() {
 	auth := accesscontrol.Middleware(api.accesscontrol)
+	api.RouterRegister.Group("/api/events", func(eventRoute routing.RouteRegister) {
+		eventRoute.Post("/publish", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionCreate)), routing.Wrap(api.PublishEvent))
+		eventRoute.Post("/register", auth(middleware.ReqOrgAdmin,
+			accesscontrol.EvalPermission(eventactions.ActionCreate)), routing.Wrap(api.RegisterEvent))
+	})
+
 	api.RouterRegister.Group("/api/eventactions", func(eventActionsRoute routing.RouteRegister) {
 		eventActionsRoute.Get("/search", auth(middleware.ReqOrgAdmin,
 			accesscontrol.EvalPermission(eventactions.ActionRead)), routing.Wrap(api.SearchOrgEventActionsWithPaging))
@@ -350,6 +360,33 @@ func (api *EventActionsAPI) RetrieveEventActionsByRegisteredEvent(ctx *models.Re
 	}
 
 	return response.JSON(http.StatusOK, eventActions)
+}
+
+func (api *EventActionsAPI) PublishEvent(ctx *models.ReqContext) response.Response {
+	event := eventactions.PublishEvent{}
+	if err := web.Bind(ctx.Req, &event); err != nil {
+		return response.Error(http.StatusBadRequest, "Bad request data", err)
+	}
+	err := api.eventService.Publish(ctx.Req.Context(), event.OrgId, event.EventName, event.Payload)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Failed to publish event", err)
+	}
+
+	return nil
+}
+
+func (api *EventActionsAPI) RegisterEvent(ctx *models.ReqContext) response.Response {
+	eventForm := eventactions.RegisterEventForm{}
+	if err := web.Bind(ctx.Req, &eventForm); err != nil {
+		return response.Error(http.StatusBadRequest, "Bad request data", err)
+	}
+
+	resp, err := api.eventService.Register(ctx.Req.Context(), &eventForm)
+	if err != nil {
+		return response.Error(http.StatusBadRequest, "Failed to publish event", err)
+	}
+
+	return response.JSON(http.StatusOK, resp)
 }
 
 // swagger:parameters searchOrgEventActionsWithPaging
