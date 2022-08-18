@@ -94,7 +94,9 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
               <CorrelationsPlugin
                 data={alignedDataFrame}
                 config={config}
+                timeZone={timeZone}
                 splitOpenFn={onSplitOpen}
+                correlationDataSources={correlationDataSources}
                 queries={queries}
                 originalDatasource={datasourceInstance}
               >
