@@ -95,7 +95,7 @@ export const parseBody = (options: BackendSrvRequest, isAppJson: boolean) => {
 
 export async function parseResponseBody<T>(
   response: Response,
-  responseType?: 'json' | 'text' | 'arraybuffer' | 'blob'
+  responseType?: 'json' | 'text' | 'arraybuffer' | 'blob' | 'readablestream'
 ): Promise<T> {
   if (responseType) {
     switch (responseType) {
@@ -117,6 +117,8 @@ export async function parseResponseBody<T>(
 
       case 'text':
         return response.text() as any;
+      case 'readablestream':
+        return response.body as any;
     }
   }
 
