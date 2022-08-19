@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -315,7 +314,7 @@ func challengeRunner(eventAction eventactions.EventActionDetailsDTO) response.Re
 		return response.Error(http.StatusInternalServerError, "Failed to create http client", err)
 	}
 	client.Timeout = time.Second * 2
-	url, err := url.JoinPath(eventAction.URL, "challenge")
+	url, err := util.URLJoinPath(eventAction.URL, "challenge")
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "Failed to create challenge url from provided runner URL", err)
 	}

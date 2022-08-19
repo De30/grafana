@@ -9,7 +9,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"net/url"
 	"sync"
 	"time"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/eventactions/api"
 	"github.com/grafana/grafana/pkg/services/eventactions/database"
 	"github.com/grafana/grafana/pkg/setting"
+	"github.com/grafana/grafana/pkg/util"
 )
 
 type EventActionsService struct {
@@ -225,7 +225,7 @@ func createRunnerRequest(eventName string, eventPayload interface{}, action *eve
 		return nil, err
 	}
 
-	url, err := url.JoinPath(action.URL, "execute")
+	url, err := util.URLJoinPath(action.URL, "execute")
 	if err != nil {
 		return nil, fmt.Errorf("cannot create runner URL: %w", err)
 	}
