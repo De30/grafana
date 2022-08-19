@@ -8,7 +8,7 @@ import { Button, ButtonGroup, Icon, Input, Pagination, RadioButtonGroup, Tag, us
 import { AlertingRule, CombinedRule, CombinedRuleNamespace } from 'app/types/unified-alerting';
 import { PromAlertingRuleState } from 'app/types/unified-alerting-dto';
 
-import { isGrafanaRulesSource } from '../../utils/datasource';
+import { isCloudRulesSource, isGrafanaRulesSource } from '../../utils/datasource';
 import { createViewLink } from '../../utils/misc';
 import { isAlertingRule } from '../../utils/rules';
 
@@ -57,7 +57,7 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
   const searchParams = new URLSearchParams(search);
 
   const FILTERS: Filters = {
-    state: (searchParams.get('alertState') as PromAlertingRuleState) ?? PromAlertingRuleState.Firing,
+    state: (searchParams.get('alertState') as PromAlertingRuleState) ?? 'all',
     type: searchParams.get('ruleType'),
     dataSource: searchParams.get('dataSource'),
     labels: searchParams.get('queryString'),
@@ -104,7 +104,7 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
         <Stack direction="row" gap={1}>
           <Input
             name="search-input"
-            placeholder={createPlaceholder(FILTERS)}
+            value={createFilterValue(FILTERS)}
             prefix={<Icon name="search" />}
             loading={false}
             className={styles.flexGrowAndShrink}
@@ -115,6 +115,11 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
         <div className={styles.list.wrapper}>
           <div className={styles.list.header}>
             <Stack direction="row" gap={2}>
+              <Stack alignItems={'center'} gap={0.5}>
+                <Link to={setFilter(pathname, searchParams, 'alertState', null)}>
+                  <strong>All</strong>
+                </Link>
+              </Stack>
               <Stack alignItems={'center'} gap={0.5}>
                 <Link to={setFilter(pathname, searchParams, 'alertState', 'firing')}>
                   <Icon name="fire" size="sm" />{' '}
@@ -152,13 +157,10 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
           <div className={styles.list.body.wrapper}>
             <Stack direction="column" gap={0}>
               {/* start row item */}
-              {(GROUPED_BY_STATE[FILTERS.state] ?? []).map((rule) => (
+              {(GROUPED_BY_STATE[FILTERS.state] ?? alertRules).map((rule) => (
                 <div key={rule.namespace.name + rule.group.name + rule.name} className={styles.list.body.row}>
                   <Stack alignItems={'baseline'}>
-                    {/* // TODO make this a separate icon component probably */}
-                    {rule.promRule?.state === PromAlertingRuleState.Firing && <Icon name="fire" />}
-                    {rule.promRule?.state === PromAlertingRuleState.Inactive && <Icon name="check-circle" />}
-                    {rule.promRule?.state === PromAlertingRuleState.Pending && <Icon name="circle" />}
+                    <AlertStateIcon state={rule.promRule?.state} />
                     <Stack direction="column" gap={0.25}>
                       {/* Name and tags */}
 
@@ -169,7 +171,7 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                       </Link>
 
                       <Stack alignItems={'center'} gap={1}>
-                        {!isGrafanaRulesSource(rule.namespace.rulesSource) && (
+                        {isCloudRulesSource(rule.namespace.rulesSource) && (
                           <Stack gap={0.5} alignItems={'center'}>
                             <img
                               src="public/app/plugins/datasource/prometheus/img/prometheus_logo.svg"
@@ -201,7 +203,7 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
                     <Spacer />
                     <Stack alignItems={'center'}>
                       <Stack gap={0.5} alignItems={'center'}>
-                        <Icon name="clock-nine" size="sm" /> <small>for 4 minutes</small>
+                        <Icon name="clock-nine" size="sm" /> <small>{rule.promRule?.state} for 4 minutes</small>
                       </Stack>
                       {hasAlertInstances(rule.promRule) && (
                         <Stack gap={0.25} alignItems={'center'}>
@@ -237,7 +239,7 @@ export const RuleListListView: FC<Props> = ({ namespaces }) => {
   );
 };
 
-function createPlaceholder(filters: Filters) {
+function createFilterValue(filters: Filters) {
   return Object.entries(filters)
     .filter(([_, value]) => value !== null)
     .map(([key, value]) => key + ':' + value)
@@ -245,8 +247,13 @@ function createPlaceholder(filters: Filters) {
 }
 
 // TODO do not use mutation here, could be bad
-function setFilter(pathname: string, search: URLSearchParams, key: string, value: string): string {
-  search.set(key, value);
+function setFilter(pathname: string, search: URLSearchParams, key: string, value: string | null): string {
+  if (value !== null) {
+    search.set(key, value);
+  } else if (value === null) {
+    search.delete(key);
+  }
+
   return pathname + '?' + search.toString();
 }
 
@@ -295,6 +302,25 @@ const Shiny: FC = ({ children }) => {
   );
 };
 
+interface AlertStateIconProps {
+  state: PromAlertingRuleState | undefined;
+}
+
+const AlertStateIcon: FC<AlertStateIconProps> = ({ state }) => {
+  const styles = useStyles2(getStyles);
+
+  switch (state) {
+    case PromAlertingRuleState.Firing:
+      return <Icon name="fire" className={styles.icons[state]} />;
+    case PromAlertingRuleState.Inactive:
+      return <Icon name="check-circle" className={styles.icons[state]} />;
+    case PromAlertingRuleState.Pending:
+      return <Icon name="circle" className={styles.icons[state]} />;
+    default:
+      return <Icon name="question-circle" />;
+  }
+};
+
 const getStyles = (theme: GrafanaTheme2) => ({
   list: {
     wrapper: css`
@@ -320,6 +346,17 @@ const getStyles = (theme: GrafanaTheme2) => ({
       `,
     },
     footer: css``,
+  },
+  icons: {
+    [PromAlertingRuleState.Firing]: css`
+      fill: ${theme.colors.error.text};
+    `,
+    [PromAlertingRuleState.Inactive]: css`
+      fill: ${theme.colors.success.text};
+    `,
+    [PromAlertingRuleState.Pending]: css`
+      fill: ${theme.colors.warning.text};
+    `,
   },
   pagination: css`
     margin: ${theme.spacing(1)} 0;

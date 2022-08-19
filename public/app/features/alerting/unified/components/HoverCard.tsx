@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
 import { Placement } from '@popperjs/core';
-import classnames from 'classnames';
 import React, { FC, ReactElement, useRef } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
@@ -12,11 +11,12 @@ export interface HoverCardProps {
   wrapperClassName?: string;
   placement?: Placement;
   disabled?: boolean;
+  padding?: number;
 }
 
-export const HoverCard: FC<HoverCardProps> = ({ children, content, disabled = false, ...rest }) => {
+export const HoverCard: FC<HoverCardProps> = ({ children, content, disabled = false, padding, ...rest }) => {
   const popoverRef = useRef<HTMLElement>(null);
-  const styles = useStyles2(getStyles);
+  const styles = useStyles2(getStyles({ padding }));
 
   if (disabled) {
     return children;
@@ -31,7 +31,7 @@ export const HoverCard: FC<HoverCardProps> = ({ children, content, disabled = fa
               <GrafanaPopover
                 {...popperProps}
                 {...rest}
-                wrapperClassName={classnames(styles.popover)}
+                wrapperClassName={styles.popover}
                 onMouseLeave={hidePopper}
                 onMouseEnter={showPopper}
                 referenceElement={popoverRef.current}
@@ -50,13 +50,17 @@ export const HoverCard: FC<HoverCardProps> = ({ children, content, disabled = fa
   );
 };
 
-const getStyles = (theme: GrafanaTheme2) => ({
+interface StyleProps {
+  padding?: number;
+}
+
+const getStyles = (props: StyleProps) => (theme: GrafanaTheme2) => ({
   popover: css`
     border-radius: ${theme.shape.borderRadius()};
     box-shadow: ${theme.shadows.z3};
     background: ${theme.colors.background.primary};
     border: 1px solid ${theme.colors.border.medium};
 
-    padding: ${theme.spacing(1)};
+    padding: ${theme.spacing(props.padding ?? 1)};
   `,
 });
