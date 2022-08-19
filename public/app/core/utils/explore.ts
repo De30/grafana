@@ -94,7 +94,7 @@ export async function getExploreUrl(args: GetExploreUrlArguments): Promise<strin
   if (exploreDatasource) {
     const range = timeSrv.timeRangeForUrl();
     let state: Partial<ExploreUrlState> = { range };
-    if (exploreDatasource.interpolateVariablesInQueries) {
+    /*if (exploreDatasource.interpolateVariablesInQueries) {
       const scopedVars = panel.scopedVars || {};
       state = {
         ...state,
@@ -102,14 +102,14 @@ export async function getExploreUrl(args: GetExploreUrlArguments): Promise<strin
         context: 'explore',
         queries: exploreDatasource.interpolateVariablesInQueries(exploreTargets, scopedVars),
       };
-    } else {
-      state = {
-        ...state,
-        datasource: exploreDatasource.name,
-        context: 'explore',
-        queries: exploreTargets.map((t) => ({ ...t, datasource: exploreDatasource.getRef() })),
-      };
-    }
+    } else {*/
+    state = {
+      ...state,
+      datasource: exploreDatasource.name,
+      context: 'explore',
+      queries: exploreTargets.map((t) => ({ ...t, datasource: exploreDatasource.getRef() })),
+    };
+    // }
 
     const exploreState = JSON.stringify(state);
     url = urlUtil.renderUrl('/explore', { left: exploreState });

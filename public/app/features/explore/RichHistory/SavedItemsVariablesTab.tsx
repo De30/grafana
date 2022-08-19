@@ -141,10 +141,17 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
 
   const addVariable = async () => {
     if (variableToAdd) {
-      //TODO make sure name exists
-      await api.addVariable(variableToAdd);
-      await fetchVariables();
-      setVariableToAdd(undefined);
+      //validation
+      let values = variableToAdd.values ? [...variableToAdd.values] : [];
+      values = values.filter((value) => value && value !== '');
+
+      if (variableToAdd.name && values.length > 0) {
+        const filteredVarToAdd = { ...variableToAdd };
+        filteredVarToAdd.values = values;
+        await api.addVariable(filteredVarToAdd);
+        await fetchVariables();
+        setVariableToAdd(undefined);
+      }
     }
   };
 
@@ -316,7 +323,7 @@ export function SavedItemsVariablesTab(props: DispatchProps) {
             variant="secondary"
             icon="minus"
             onClick={() => {
-              if (variableToAdd?.values?.[index]) {
+              if (variableToAdd?.values?.[index] !== undefined) {
                 const variable = { ...variableToAdd };
                 variable!.values!.splice(index, 1);
                 setVariableToAdd({ ...variableToAdd, values: variable.values });
