@@ -1,7 +1,7 @@
 import cx from 'classnames';
 import React from 'react';
 
-import { vibeVariants } from './button.css';
+import { base, stylesForVariant, stylesForVibe } from './button.css';
 import { ButtonSize, ButtonVariant, ButtonVibe } from './types';
 
 interface ButtonProps {
@@ -12,7 +12,8 @@ interface ButtonProps {
 }
 
 export function Button({ variant, vibe, children }: ButtonProps) {
-  const vibeClass = vibeVariants[variant][vibe];
+  const vibeClass = stylesForVibe[variant][vibe];
+  const variantClass = stylesForVariant[variant];
 
-  return <button className={cx(vibeClass)}>{children}</button>;
+  return <button className={cx(base, variantClass, vibeClass)}>{children}</button>;
 }

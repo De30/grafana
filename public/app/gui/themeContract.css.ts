@@ -9,6 +9,17 @@ export const theme = createThemeContract({
     large: '',
   },
 
+  typography: {
+    standard: {
+      fontSize: '',
+      lineHeight: '',
+    },
+  },
+
+  size: {
+    formControls: '',
+  },
+
   borderRadius: {
     small: '',
     medium: '',
@@ -23,18 +34,26 @@ export const theme = createThemeContract({
     },
     primary: {
       main: '',
+      shade: '',
+      text: '',
       contrastText: '',
     },
-    secondary: {
+    neutral: {
       main: '',
+      shade: '',
+      text: '',
       contrastText: '',
     },
     success: {
       main: '',
+      shade: '',
+      text: '',
       contrastText: '',
     },
     critical: {
       main: '',
+      shade: '',
+      text: '',
       contrastText: '',
     },
   },

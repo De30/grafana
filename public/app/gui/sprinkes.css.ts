@@ -21,6 +21,8 @@ const properties = defineProperties({
     background: theme.colors.background,
     borderRadius: theme.borderRadius,
     gridAutoFlow: ['row', 'column'],
+    flexDirection: ['row', 'column'],
+    flexWrap: ['wrap', 'nowrap'],
     display: ['none', 'block', 'inline', 'inline-block', 'flex', 'grid'],
     gap: theme.space,
   },

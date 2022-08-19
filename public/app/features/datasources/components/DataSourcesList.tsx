@@ -9,6 +9,7 @@ import PageLoader from 'app/core/components/PageLoader/PageLoader';
 import { contextSrv } from 'app/core/core';
 import { Button } from 'app/gui/Button/Button';
 import { ButtonSize, ButtonVariant, ButtonVibe } from 'app/gui/Button/types';
+import Inline from 'app/gui/Inline/Inline';
 import Stack from 'app/gui/Stack/Stack';
 import { StoreState, AccessControlAction } from 'app/types';
 
@@ -68,41 +69,43 @@ export function DataSourcesListView({ dataSources, dataSourcesCount, isLoading, 
 
   return (
     <>
-      <div>
-        <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Primary} size={ButtonSize.Standard}>
-          Solid / Primary / Standard
-        </Button>
+      <Stack gap="medium">
+        <Stack gap="medium">
+          <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Primary} size={ButtonSize.Standard}>
+            Solid / Primary / Standard
+          </Button>
 
-        <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Secondary} size={ButtonSize.Standard}>
-          Solid / Secondary / Standard
-        </Button>
+          <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Neutral} size={ButtonSize.Standard}>
+            Solid / Secondary / Standard
+          </Button>
 
-        <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Success} size={ButtonSize.Standard}>
-          Solid / Success / Standard
-        </Button>
+          <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Success} size={ButtonSize.Standard}>
+            Solid / Success / Standard
+          </Button>
 
-        <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Critical} size={ButtonSize.Standard}>
-          Solid / Critical / Standard
-        </Button>
+          <Button variant={ButtonVariant.Solid} vibe={ButtonVibe.Critical} size={ButtonSize.Standard}>
+            Solid / Critical / Standard
+          </Button>
+        </Stack>
 
-        <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Primary} size={ButtonSize.Standard}>
-          Outline / Primary / Standard
-        </Button>
+        <Inline gap="medium">
+          <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Primary} size={ButtonSize.Standard}>
+            Outline / Primary / Standard
+          </Button>
 
-        <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Secondary} size={ButtonSize.Standard}>
-          Outline / Secondary / Standard
-        </Button>
+          <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Neutral} size={ButtonSize.Standard}>
+            Outline / Secondary / Standard
+          </Button>
+          <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Success} size={ButtonSize.Standard}>
+            Outline / Success / Standard
+          </Button>
+          <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Critical} size={ButtonSize.Standard}>
+            Outline / Critical / Standard
+          </Button>
+        </Inline>
+      </Stack>
 
-        <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Success} size={ButtonSize.Standard}>
-          Outline / Success / Standard
-        </Button>
-
-        <Button variant={ButtonVariant.Outline} vibe={ButtonVibe.Critical} size={ButtonSize.Standard}>
-          Outline / Critical / Standard
-        </Button>
-      </div>
-
-      <Stack direction="row" gap="medium">
+      <Stack gap="medium">
         {dataSources.map((datasource) => (
           <GuiCard key={datasource.uid} title={datasource.name} description={datasource.typeName} />
         ))}

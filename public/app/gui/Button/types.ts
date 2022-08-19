@@ -6,7 +6,7 @@ export enum ButtonVariant {
 
 export enum ButtonVibe {
   Primary,
-  Secondary,
+  Neutral,
   Success,
   Critical,
 }
