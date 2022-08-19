@@ -27,7 +27,7 @@ const AlertInstanceHoverPreview: FC<AlertInstanceHoverPreviewProps> = ({ childre
             <Card key={index} className={styles.cardReset}>
               <Card.Heading>
                 <Stack>
-                  <AlertStateTag state={alert.state} /> {alert.annotations['summary']}
+                  <AlertStateTag state={alert.state} /> {alert.annotations?.summary}
                 </Stack>
                 <span>
                   <Icon name="clock-nine" /> {formatRelative(new Date(alert.activeAt), new Date())}
