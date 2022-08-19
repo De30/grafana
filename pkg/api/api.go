@@ -571,6 +571,7 @@ func (hs *HTTPServer) registerRoutes() {
 		apiRoute.Group("/comments", func(commentRoute routing.RouteRegister) {
 			commentRoute.Post("/get", routing.Wrap(hs.commentsGet))
 			commentRoute.Post("/create", routing.Wrap(hs.commentsCreate))
+			commentRoute.Post("/update", routing.Wrap(hs.commentsUpdate))
 		})
 	}, reqSignedIn)
 

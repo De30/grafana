@@ -14,7 +14,6 @@ export interface Props {
 
 export interface State {
   messages: Message[];
-  value: string;
 }
 
 export class CommentManager extends PureComponent<Props, State> {
@@ -26,7 +25,6 @@ export class CommentManager extends PureComponent<Props, State> {
 
     this.state = {
       messages: [],
-      value: '',
     };
   }
 
@@ -35,6 +33,7 @@ export class CommentManager extends PureComponent<Props, State> {
       objectType: this.props.objectType,
       objectId: this.props.objectId,
     });
+    console.log('resp', resp);
     this.packetCounter++;
     this.setState({
       messages: resp.comments,
@@ -102,9 +101,31 @@ export class CommentManager extends PureComponent<Props, State> {
     return true;
   };
 
+  updateRating = async (index: number, id: number, rating: number) => {
+    const { messages } = this.state;
+    if (messages[index]) {
+      const response = await getBackendSrv().post('/api/comments/update', {
+        objectType: this.props.objectType,
+        objectId: this.props.objectId,
+        id,
+        rating,
+      });
+
+      messages[index].rating = response.comment.rating;
+      this.setState({
+        messages,
+      });
+    }
+  };
+
   render() {
     return (
-      <CommentView comments={this.state.messages} packetCounter={this.packetCounter} addComment={this.addComment} />
+      <CommentView
+        comments={this.state.messages}
+        packetCounter={this.packetCounter}
+        addComment={this.addComment}
+        updateRating={this.updateRating}
+      />
     );
   }
 }

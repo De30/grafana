@@ -21,7 +21,7 @@ func checkObjectID(objectID string) bool {
 	return objectID != ""
 }
 
-func (s *sqlStorage) Create(ctx context.Context, orgID int64, objectType string, objectID string, userID int64, content string) (*commentmodel.Comment, error) {
+func (s *sqlStorage) Create(ctx context.Context, orgID int64, objectType string, objectID string, userID int64, rating int64, content string) (*commentmodel.Comment, error) {
 	if !checkObjectType(objectType) {
 		return nil, errUnknownObjectType
 	}
@@ -64,10 +64,37 @@ func (s *sqlStorage) Create(ctx context.Context, orgID int64, objectType string,
 			GroupId: groupID,
 			UserId:  userID,
 			Content: content,
+			Rating:  rating,
 			Created: nowUnix,
 			Updated: nowUnix,
 		}
 		_, err = dbSession.Insert(&message)
+		if err != nil {
+			return err
+		}
+		result = &message
+		return nil
+	})
+}
+
+func (s *sqlStorage) Update(ctx context.Context, orgID int64, objectType string, objectID string, ID int64, userID int64, rating int64) (*commentmodel.Update, error) {
+	if !checkObjectType(objectType) {
+		return nil, errUnknownObjectType
+	}
+	if !checkObjectID(objectID) {
+		return nil, errEmptyObjectID
+	}
+
+	var result *commentmodel.Update
+
+	return result, s.sql.WithTransactionalDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
+		nowUnix := time.Now().Unix()
+		message := commentmodel.Update{
+			Id:      ID,
+			Rating:  rating,
+			Updated: nowUnix,
+		}
+		_, err := dbSession.NoAutoCondition().Where("id=?", ID).Update(&message)
 		if err != nil {
 			return err
 		}

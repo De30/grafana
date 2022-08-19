@@ -85,6 +85,13 @@ type CreateCmd struct {
 	Content    string `json:"content"`
 }
 
+type UpdateCmd struct {
+	ObjectType string `json:"objectType"`
+	ObjectID   string `json:"objectId"`
+	Id         int64  `json:"id"`
+	Rating     int64  `json:"rating"`
+}
+
 var ErrPermissionDenied = errors.New("permission denied")
 
 func (s *Service) Create(ctx context.Context, orgID int64, signedInUser *user.SignedInUser, cmd CreateCmd) (*commentmodel.CommentDto, error) {
@@ -107,7 +114,7 @@ func (s *Service) Create(ctx context.Context, orgID int64, signedInUser *user.Si
 		}
 	}
 
-	m, err := s.storage.Create(ctx, orgID, cmd.ObjectType, cmd.ObjectID, signedInUser.UserID, cmd.Content)
+	m, err := s.storage.Create(ctx, orgID, cmd.ObjectType, cmd.ObjectID, signedInUser.UserID, 0, cmd.Content)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +126,40 @@ func (s *Service) Create(ctx context.Context, orgID int64, signedInUser *user.Si
 	eventJSON, _ := json.Marshal(e)
 	_ = s.live.Publish(orgID, fmt.Sprintf("grafana/comment/%s/%s", cmd.ObjectType, cmd.ObjectID), eventJSON)
 	return mDto, nil
+}
+
+func (s *Service) Update(ctx context.Context, orgID int64, signedInUser *user.SignedInUser, cmd UpdateCmd) (*commentmodel.CommentUpdate, error) {
+	ok, err := s.permissions.CheckWritePermissions(ctx, orgID, signedInUser, cmd.ObjectType, cmd.ObjectID)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, ErrPermissionDenied
+	}
+
+	userMap := make(map[int64]*commentmodel.CommentUser, 1)
+	if signedInUser.UserID > 0 {
+		userMap[signedInUser.UserID] = &commentmodel.CommentUser{
+			Id:        signedInUser.UserID,
+			Name:      signedInUser.Name,
+			Login:     signedInUser.Login,
+			Email:     signedInUser.Email,
+			AvatarUrl: dtos.GetGravatarUrl(signedInUser.Email),
+		}
+	}
+
+	m, err := s.storage.Update(ctx, orgID, cmd.ObjectType, cmd.ObjectID, cmd.Id, signedInUser.UserID, cmd.Rating)
+	if err != nil {
+		return nil, err
+	}
+	mUpdate := m.ToUpdate()
+	e := commentmodel.Event{
+		Event:          commentmodel.EventCommentUpdated,
+		CommentUpdated: mUpdate,
+	}
+	eventJSON, _ := json.Marshal(e)
+	_ = s.live.Publish(orgID, fmt.Sprintf("grafana/comment/%s/%s", cmd.ObjectType, cmd.ObjectID), eventJSON)
+	return mUpdate, nil
 }
 
 func (s *Service) Get(ctx context.Context, orgID int64, signedInUser *user.SignedInUser, cmd GetCmd) ([]*commentmodel.CommentDto, error) {

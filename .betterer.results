@@ -3892,7 +3892,7 @@ exports[`better eslint`] = {
       [0, 0, 0, "Do not use any type assertions.", "0"],
       [0, 0, 0, "Do not use any type assertions.", "1"]
     ],
-    "public/app/features/comments/CommentView.tsx:5381": [
+    "public/app/features/comments/AddComment.tsx:5381": [
       [0, 0, 0, "Do not use any type assertions.", "0"]
     ],
     "public/app/features/dashboard/components/AddPanelWidget/AddPanelWidget.test.tsx:5381": [

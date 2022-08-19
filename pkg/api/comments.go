@@ -48,3 +48,23 @@ func (hs *HTTPServer) commentsCreate(c *models.ReqContext) response.Response {
 		"comment": comment,
 	})
 }
+
+func (hs *HTTPServer) commentsUpdate(c *models.ReqContext) response.Response {
+	cmd := comments.UpdateCmd{}
+	if err := web.Bind(c.Req, &cmd); err != nil {
+		return response.Error(http.StatusBadRequest, "bad request data", err)
+	}
+	if c.SignedInUser.UserID == 0 && !c.SignedInUser.HasRole(org.RoleAdmin) {
+		return response.Error(http.StatusForbidden, "admin role required", nil)
+	}
+	comment, err := hs.commentsService.Update(c.Req.Context(), c.OrgID, c.SignedInUser, cmd)
+	if err != nil {
+		if errors.Is(err, comments.ErrPermissionDenied) {
+			return response.Error(http.StatusForbidden, "permission denied", err)
+		}
+		return response.Error(http.StatusInternalServerError, "internal error", err)
+	}
+	return response.JSON(http.StatusOK, util.DynMap{
+		"comment": comment,
+	})
+}

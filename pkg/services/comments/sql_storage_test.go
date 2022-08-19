@@ -29,7 +29,7 @@ func TestSqlStorage(t *testing.T) {
 	numComments := 10
 
 	for i := 0; i < numComments; i++ {
-		comment, err := s.Create(ctx, 1, commentmodel.ObjectTypeOrg, "2", 1, "test"+strconv.Itoa(i))
+		comment, err := s.Create(ctx, 1, commentmodel.ObjectTypeOrg, "2", 1, 0, "test"+strconv.Itoa(i))
 		require.NoError(t, err)
 		require.NotNil(t, comment)
 		require.True(t, comment.Id > 0)

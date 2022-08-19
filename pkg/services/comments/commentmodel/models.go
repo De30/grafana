@@ -65,12 +65,22 @@ func (s *Settings) Scan(value interface{}) error {
 }
 
 type Comment struct {
-	Id      int64
-	GroupId int64
-	UserId  int64
-	Content string
+	Id       int64
+	GroupId  int64
+	UserId   int64
+	ParentId int64
+	ChildId  int64
+	Rating   int64
+	Content  string
 
 	Created int64
+	Updated int64
+}
+
+type Update struct {
+	Id     int64
+	Rating int64
+
 	Updated int64
 }
 
@@ -83,11 +93,20 @@ type CommentUser struct {
 }
 
 type CommentDto struct {
-	Id      int64        `json:"id"`
-	UserId  int64        `json:"userId"`
-	Content string       `json:"content"`
-	Created int64        `json:"created"`
-	User    *CommentUser `json:"user,omitempty"`
+	Id       int64        `json:"id"`
+	UserId   int64        `json:"userId"`
+	ParentId int64        `json:"parentId,omitempty"`
+	ChildId  int64        `json:"childId,omitempty"`
+	Content  string       `json:"content"`
+	Created  int64        `json:"created"`
+	Rating   int64        `json:"rating"`
+	User     *CommentUser `json:"user,omitempty"`
+}
+
+type CommentUpdate struct {
+	Id     int64 `json:"id"`
+	UserId int64 `json:"userId"`
+	Rating int64 `json:"rating"`
 }
 
 func (i Comment) ToDTO(user *CommentUser) *CommentDto {
@@ -96,10 +115,22 @@ func (i Comment) ToDTO(user *CommentUser) *CommentDto {
 		UserId:  i.UserId,
 		Content: i.Content,
 		Created: i.Created,
+		Rating:  i.Rating,
 		User:    user,
 	}
 }
 
 func (i Comment) TableName() string {
 	return "comment"
+}
+
+func (i Update) TableName() string {
+	return "comment"
+}
+
+func (i Update) ToUpdate() *CommentUpdate {
+	return &CommentUpdate{
+		Id:     i.Id,
+		Rating: i.Rating,
+	}
 }

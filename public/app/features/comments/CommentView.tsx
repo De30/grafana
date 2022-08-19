@@ -1,9 +1,10 @@
 import { css } from '@emotion/css';
-import React, { FormEvent, useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { CustomScrollbar, TextArea, useStyles2 } from '@grafana/ui';
+import { CustomScrollbar, useStyles2 } from '@grafana/ui';
 
+import { AddComment } from './AddComment';
 import { Comment } from './Comment';
 import { Message } from './types';
 
@@ -11,12 +12,12 @@ type Props = {
   comments: Message[];
   packetCounter: number;
   addComment: (comment: string) => Promise<boolean>;
+  updateRating: (index: number, id: number, rating: number) => void;
 };
 
-export const CommentView = ({ comments, packetCounter, addComment }: Props) => {
+export const CommentView = ({ comments, packetCounter, addComment, updateRating }: Props) => {
   const styles = useStyles2(getStyles);
 
-  const [comment, setComment] = useState('');
   const [scrollTop, setScrollTop] = useState(0);
   const commentViewContainer = useRef<HTMLDivElement>(null);
 
@@ -28,37 +29,13 @@ export const CommentView = ({ comments, packetCounter, addComment }: Props) => {
     }
   }, [packetCounter]);
 
-  const onUpdateComment = (event: FormEvent<HTMLTextAreaElement>) => {
-    const element = event.target as HTMLInputElement;
-    setComment(element.value);
-  };
-
-  const onKeyPress = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event?.key === 'Enter' && !event?.shiftKey) {
-      event.preventDefault();
-
-      if (comment.length > 0) {
-        const result = await addComment(comment);
-        if (result) {
-          setComment('');
-        }
-      }
-    }
-  };
-
   return (
     <CustomScrollbar scrollTop={scrollTop}>
       <div ref={commentViewContainer} className={styles.commentViewContainer}>
-        {comments.map((msg) => (
-          <Comment key={msg.id} message={msg} />
+        {comments.map((msg, i) => (
+          <Comment key={msg.id} message={msg} updateRating={(id, rating) => updateRating(i, id, rating)} />
         ))}
-        <TextArea
-          placeholder="Write a comment"
-          value={comment}
-          onChange={onUpdateComment}
-          onKeyPress={onKeyPress}
-          autoFocus={true}
-        />
+        <AddComment addComment={addComment} />
       </div>
     </CustomScrollbar>
   );

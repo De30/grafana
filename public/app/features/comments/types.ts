@@ -8,6 +8,7 @@ export interface Message {
   content: string;
   created: number;
   userId: number;
+  rating: number;
   user: User;
 }
 
