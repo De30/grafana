@@ -13,17 +13,17 @@ import (
 
 type Service struct {
 	store            store
-	AuthTokenService models.UserTokenService
+	authTokenService models.ActiveTokenService
 	Cfg              *setting.Cfg
 	SQLStore         sqlstore.Store
 	Logger           log.Logger
 }
 
-func ProvideService(db db.DB, cfg *setting.Cfg, tokenService models.UserTokenService, ss *sqlstore.SQLStore) quota.Service {
+func ProvideService(db db.DB, cfg *setting.Cfg, tokenService models.ActiveTokenService, ss *sqlstore.SQLStore) quota.Service {
 	return &Service{
 		store:            &sqlStore{db: db},
 		Cfg:              cfg,
-		AuthTokenService: tokenService,
+		authTokenService: tokenService,
 		SQLStore:         ss,
 		Logger:           log.New("quota_service"),
 	}
@@ -42,8 +42,8 @@ func (s *Service) QuotaReached(c *models.ReqContext, target string) (bool, error
 	var params *quota.ScopeParameters
 	if c.IsSignedIn {
 		params = &quota.ScopeParameters{
-			OrgID:  c.OrgId,
-			UserID: c.UserId,
+			OrgID:  c.OrgID,
+			UserID: c.UserID,
 		}
 	}
 	return s.CheckQuotaReached(c.Req.Context(), target, params)
@@ -71,7 +71,7 @@ func (s *Service) CheckQuotaReached(ctx context.Context, target string, scopePar
 				return true, nil
 			}
 			if target == "session" {
-				usedSessions, err := s.AuthTokenService.ActiveTokenCount(ctx)
+				usedSessions, err := s.authTokenService.ActiveTokenCount(ctx)
 				if err != nil {
 					return false, err
 				}
@@ -188,6 +188,11 @@ func (s *Service) getQuotaScopes(target string) ([]models.QuotaScope, error) {
 		scopes = append(scopes,
 			models.QuotaScope{Name: "global", Target: target, DefaultLimit: s.Cfg.Quota.Global.AlertRule},
 			models.QuotaScope{Name: "org", Target: target, DefaultLimit: s.Cfg.Quota.Org.AlertRule},
+		)
+		return scopes, nil
+	case "file":
+		scopes = append(scopes,
+			models.QuotaScope{Name: "global", Target: target, DefaultLimit: s.Cfg.Quota.Global.File},
 		)
 		return scopes, nil
 	default:

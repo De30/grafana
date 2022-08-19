@@ -63,21 +63,10 @@ var (
 			State:       FeatureStateAlpha,
 		},
 		{
-			Name:         "tempoServiceGraph",
-			Description:  "show service",
-			State:        FeatureStateBeta,
-			FrontendOnly: true,
-		},
-		{
 			Name:         "tempoApmTable",
 			Description:  "Show APM table",
 			State:        FeatureStateAlpha,
 			FrontendOnly: true,
-		},
-		{
-			Name:        "prometheus_azure_auth",
-			Description: "Experimental. Azure authentication for Prometheus datasource",
-			State:       FeatureStateBeta,
 		},
 		{
 			Name:        "prometheusAzureOverrideAudience",
@@ -142,19 +131,14 @@ var (
 			State:       FeatureStateAlpha,
 		},
 		{
-			Name:        "dashboardsFromStorage",
-			Description: "Load dashboards from the generic storage interface",
-			State:       FeatureStateAlpha,
+			Name:            "dashboardsFromStorage",
+			Description:     "Load dashboards from the generic storage interface",
+			State:           FeatureStateAlpha,
+			RequiresDevMode: true, // Also a gate on automatic git storage (for now)
 		},
 		{
 			Name:            "export",
 			Description:     "Export grafana instance (to git, etc)",
-			State:           FeatureStateAlpha,
-			RequiresDevMode: true,
-		},
-		{
-			Name:            "storageLocalUpload",
-			Description:     "allow uploads to local storage",
 			State:           FeatureStateAlpha,
 			RequiresDevMode: true,
 		},
@@ -201,6 +185,11 @@ var (
 		{
 			Name:        "prometheusStreamingJSONParser",
 			Description: "Enable streaming JSON parser for Prometheus datasource",
+			State:       FeatureStateBeta,
+		},
+		{
+			Name:        "prometheusStreamingJSONParserTest",
+			Description: "Run both old and streaming requests and log differences",
 			State:       FeatureStateBeta,
 		},
 		{
