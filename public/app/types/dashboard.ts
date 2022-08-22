@@ -44,6 +44,7 @@ export interface DashboardMeta {
   publicDashboardAccessToken?: string;
   publicDashboardUid?: string;
   publicDashboardEnabled?: boolean;
+  dashboardNotFound?: boolean;
 }
 
 export interface AnnotationActions {

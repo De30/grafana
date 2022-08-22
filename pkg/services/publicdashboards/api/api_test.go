@@ -31,6 +31,7 @@ import (
 	. "github.com/grafana/grafana/pkg/services/publicdashboards/models"
 	publicdashboardsService "github.com/grafana/grafana/pkg/services/publicdashboards/service"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -38,6 +39,7 @@ import (
 func TestAPIGetPublicDashboard(t *testing.T) {
 	t.Run("It should 404 if featureflag is not enabled", func(t *testing.T) {
 		cfg := setting.NewCfg()
+		cfg.RBACEnabled = false
 		qs := buildQueryDataService(t, nil, nil, nil)
 		service := publicdashboards.NewFakePublicDashboardService(t)
 		service.On("GetPublicDashboard", mock.Anything, mock.AnythingOfType("string")).
@@ -99,9 +101,12 @@ func TestAPIGetPublicDashboard(t *testing.T) {
 			service.On("GetPublicDashboardConfig", mock.Anything, mock.AnythingOfType("int64"), mock.AnythingOfType("string")).
 				Return(&PublicDashboard{}, nil).Maybe()
 
+			cfg := setting.NewCfg()
+			cfg.RBACEnabled = false
+
 			testServer := setupTestServer(
 				t,
-				setting.NewCfg(),
+				cfg,
 				buildQueryDataService(t, nil, nil, nil),
 				featuremgmt.WithFeatures(featuremgmt.FlagPublicDashboards),
 				service,
@@ -176,9 +181,12 @@ func TestAPIGetPublicDashboardConfig(t *testing.T) {
 			service.On("GetPublicDashboardConfig", mock.Anything, mock.AnythingOfType("int64"), mock.AnythingOfType("string")).
 				Return(test.PublicDashboardResult, test.PublicDashboardErr)
 
+			cfg := setting.NewCfg()
+			cfg.RBACEnabled = false
+
 			testServer := setupTestServer(
 				t,
-				setting.NewCfg(),
+				cfg,
 				buildQueryDataService(t, nil, nil, nil),
 				featuremgmt.WithFeatures(featuremgmt.FlagPublicDashboards),
 				service,
@@ -240,9 +248,12 @@ func TestApiSavePublicDashboardConfig(t *testing.T) {
 			service.On("SavePublicDashboardConfig", mock.Anything, mock.AnythingOfType("*models.SavePublicDashboardConfigDTO")).
 				Return(&PublicDashboard{IsEnabled: true}, test.SaveDashboardErr)
 
+			cfg := setting.NewCfg()
+			cfg.RBACEnabled = false
+
 			testServer := setupTestServer(
 				t,
-				setting.NewCfg(),
+				cfg,
 				buildQueryDataService(t, nil, nil, nil),
 				featuremgmt.WithFeatures(featuremgmt.FlagPublicDashboards),
 				service,
@@ -308,10 +319,12 @@ func TestAPIQueryPublicDashboard(t *testing.T) {
 
 	setup := func(enabled bool) (*web.Mux, *publicdashboards.FakePublicDashboardService) {
 		service := publicdashboards.NewFakePublicDashboardService(t)
+		cfg := setting.NewCfg()
+		cfg.RBACEnabled = false
 
 		testServer := setupTestServer(
 			t,
-			setting.NewCfg(),
+			cfg,
 			qds,
 			featuremgmt.WithFeatures(featuremgmt.FlagPublicDashboards, enabled),
 			service,
@@ -338,7 +351,7 @@ func TestAPIQueryPublicDashboard(t *testing.T) {
 
 		fakeDashboardService.On("GetPublicDashboard", mock.Anything, mock.Anything).Return(&models.Dashboard{}, nil)
 		fakeDashboardService.On("GetPublicDashboardConfig", mock.Anything, mock.Anything, mock.Anything).Return(&PublicDashboard{}, nil)
-		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&models.SignedInUser{}, nil)
+		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&user.SignedInUser{}, nil)
 		fakeDashboardService.On("BuildPublicDashboardMetricRequest", mock.Anything, mock.Anything, mock.Anything, int64(2)).Return(dtos.MetricRequest{
 			Queries: []*simplejson.Json{
 				simplejson.MustJson([]byte(`
@@ -389,7 +402,7 @@ func TestAPIQueryPublicDashboard(t *testing.T) {
 
 		fakeDashboardService.On("GetPublicDashboard", mock.Anything, mock.Anything).Return(&models.Dashboard{}, nil)
 		fakeDashboardService.On("GetPublicDashboardConfig", mock.Anything, mock.Anything, mock.Anything).Return(&PublicDashboard{}, nil)
-		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&models.SignedInUser{}, nil)
+		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&user.SignedInUser{}, nil)
 		fakeDashboardService.On("BuildPublicDashboardMetricRequest", mock.Anything, mock.Anything, mock.Anything, int64(2)).Return(dtos.MetricRequest{
 			Queries: []*simplejson.Json{
 				simplejson.MustJson([]byte(`
@@ -419,7 +432,7 @@ func TestAPIQueryPublicDashboard(t *testing.T) {
 
 		fakeDashboardService.On("GetPublicDashboard", mock.Anything, mock.Anything).Return(&models.Dashboard{}, nil)
 		fakeDashboardService.On("GetPublicDashboardConfig", mock.Anything, mock.Anything, mock.Anything).Return(&PublicDashboard{}, nil)
-		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&models.SignedInUser{}, nil)
+		fakeDashboardService.On("BuildAnonymousUser", mock.Anything, mock.Anything, mock.Anything).Return(&user.SignedInUser{}, nil)
 		fakeDashboardService.On("BuildPublicDashboardMetricRequest", mock.Anything, mock.Anything, mock.Anything, int64(2)).Return(dtos.MetricRequest{
 			Queries: []*simplejson.Json{
 				simplejson.MustJson([]byte(`
@@ -535,7 +548,7 @@ func TestIntegrationUnauthenticatedUserCanGetPubdashPanelQueryData(t *testing.T)
 	}
 
 	// create dashboard
-	dashboardStore := dashboardStore.ProvideDashboardStore(db)
+	dashboardStore := dashboardStore.ProvideDashboardStore(db, featuremgmt.WithFeatures())
 	dashboard, err := dashboardStore.SaveDashboard(saveDashboardCmd)
 	require.NoError(t, err)
 
@@ -550,13 +563,15 @@ func TestIntegrationUnauthenticatedUserCanGetPubdashPanelQueryData(t *testing.T)
 
 	// create public dashboard
 	store := publicdashboardsStore.ProvideStore(db)
-	service := publicdashboardsService.ProvideService(setting.NewCfg(), store)
+	cfg := setting.NewCfg()
+	cfg.RBACEnabled = false
+	service := publicdashboardsService.ProvideService(cfg, store)
 	pubdash, err := service.SavePublicDashboardConfig(context.Background(), savePubDashboardCmd)
 	require.NoError(t, err)
 
 	// setup test server
 	server := setupTestServer(t,
-		setting.NewCfg(),
+		cfg,
 		qds,
 		featuremgmt.WithFeatures(featuremgmt.FlagPublicDashboards),
 		service,
