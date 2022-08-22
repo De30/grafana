@@ -16,7 +16,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/tsdb/prometheus/buffered"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/models"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/querydata"
 	apiv1 "github.com/prometheus/client_golang/api/prometheus/v1"
@@ -338,6 +337,22 @@ func TestPrometheus_parseTimeSeriesResponse(t *testing.T) {
 		require.Equal(t, "UTC", testValue.(time.Time).Location().String())
 		require.Equal(t, int64(123), testValue.(time.Time).UnixMilli())
 	})
+
+	t.Run("add azure credentials if configured", func(t *testing.T) {
+		settings := backend.DataSourceInstanceSettings{
+			BasicAuthEnabled: false,
+			BasicAuthUser:    "",
+			JSONData: []byte(`{
+				"azureCredentials": {
+					"authType": "msi"
+				}
+			}`),
+			DecryptedSecureJSONData: map[string]string{},
+		}
+		opts, err := querydata.CreateTransportOptions(settings, &setting.Cfg{AzureAuthEnabled: true, Azure: &azsettings.AzureSettings{}}, &logtest.Fake{})
+		require.NoError(t, err)
+		require.Equal(t, 3, len(opts.Middlewares))
+	})
 }
 
 type queryResult struct {
@@ -415,7 +430,7 @@ func setup(wideFrames bool) (*testContext, error) {
 
 	features := &fakeFeatureToggles{flags: map[string]bool{"prometheusStreamingJSONParser": true, "prometheusWideSeries": wideFrames}}
 
-	opts, err := buffered.CreateTransportOptions(settings, &setting.Cfg{}, &fakeLogger{})
+	opts, err := querydata.CreateTransportOptions(settings, &setting.Cfg{}, &fakeLogger{})
 	if err != nil {
 		return nil, err
 	}

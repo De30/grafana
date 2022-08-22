@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
+	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
@@ -16,8 +16,12 @@ import (
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/tsdb/prometheus/buffered"
+	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+	"github.com/grafana/grafana/pkg/tsdb/prometheus/middleware"
+	"github.com/grafana/grafana/pkg/tsdb/prometheus/utils"
+	"github.com/grafana/grafana/pkg/util/maputil"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/querydata"
+	"github.com/grafana/grafana/pkg/tsdb/prometheus/querydata/azureauth"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/resource"
 	apiv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/yudai/gojsondiff"
@@ -32,7 +36,6 @@ type Service struct {
 }
 
 type instance struct {
-	buffered  *buffered.Buffered
 	queryData *querydata.QueryData
 	resource  *resource.Resource
 }
@@ -47,8 +50,8 @@ func ProvideService(httpClientProvider httpclient.Provider, cfg *setting.Cfg, fe
 
 func newInstanceSettings(httpClientProvider httpclient.Provider, cfg *setting.Cfg, features featuremgmt.FeatureToggles, tracer tracing.Tracer) datasource.InstanceFactoryFunc {
 	return func(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-		// Creates a http roundTripper. Probably should be used for both buffered and streaming/querydata instances.
-		opts, err := buffered.CreateTransportOptions(settings, cfg, plog)
+		// Creates a http roundTripper.
+		opts, err := CreateTransportOptions(settings, cfg, plog)
 		if err != nil {
 			return nil, fmt.Errorf("error creating transport options: %v", err)
 		}
@@ -56,13 +59,8 @@ func newInstanceSettings(httpClientProvider httpclient.Provider, cfg *setting.Cf
 		if err != nil {
 			return nil, fmt.Errorf("error creating http client: %v", err)
 		}
-		// Older version using standard Go Prometheus client
-		b, err := buffered.New(httpClient.Transport, tracer, settings, plog)
-		if err != nil {
-			return nil, err
-		}
 
-		// New version using custom client and better response parsing
+		// Custom client for better timing and parsing response
 		qd, err := querydata.New(httpClient, features, tracer, settings, plog)
 		if err != nil {
 			return nil, err
@@ -75,7 +73,6 @@ func newInstanceSettings(httpClientProvider httpclient.Provider, cfg *setting.Cf
 		}
 
 		return instance{
-			buffered:  b,
 			queryData: qd,
 			resource:  r,
 		}, nil
@@ -92,41 +89,7 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 		return nil, err
 	}
 
-	if s.features.IsEnabled(featuremgmt.FlagPrometheusStreamingJSONParser) || s.features.IsEnabled(featuremgmt.FlagPrometheusWideSeries) {
-		return i.queryData.Execute(ctx, req)
-	}
-
-	// To test the new client implementation this can be run and we do 2 requests and compare.
-	if s.features.IsEnabled(featuremgmt.FlagPrometheusStreamingJSONParserTest) {
-		var wg sync.WaitGroup
-		var streamData *backend.QueryDataResponse
-		var streamError error
-
-		var data *backend.QueryDataResponse
-		var err error
-
-		plog.Debug("PrometheusStreamingJSONParserTest", "req", req)
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			streamData, streamError = i.queryData.Execute(ctx, req)
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			data, err = i.buffered.ExecuteTimeSeriesQuery(ctx, req)
-		}()
-
-		wg.Wait()
-
-		// Report can take a while and we don't really need to wait for it.
-		go reportDiff(data, err, streamData, streamError)
-		return data, err
-	}
-
-	return i.buffered.ExecuteTimeSeriesQuery(ctx, req)
+	return i.queryData.Execute(ctx, req)
 }
 
 func (s *Service) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
@@ -165,6 +128,51 @@ func ConvertAPIError(err error) error {
 		return fmt.Errorf("%s: %s", e.Msg, e.Detail)
 	}
 	return err
+}
+
+func CreateTransportOptions(settings backend.DataSourceInstanceSettings, cfg *setting.Cfg, logger log.Logger) (*sdkhttpclient.Options, error) {
+	opts, err := settings.HTTPClientOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	jsonData, err := utils.GetJsonData(settings)
+	if err != nil {
+		return nil, fmt.Errorf("error reading settings: %w", err)
+	}
+	httpMethod, _ := maputil.GetStringOptional(jsonData, "httpMethod")
+
+	opts.Middlewares = middlewares(logger, httpMethod)
+
+	// Set SigV4 service namespace
+	if opts.SigV4 != nil {
+		opts.SigV4.Service = "aps"
+	}
+
+	// Set Azure authentication
+	if cfg.AzureAuthEnabled {
+		err = azureauth.ConfigureAzureAuthentication(settings, cfg.Azure, &opts)
+		if err != nil {
+			return nil, fmt.Errorf("error configuring Azure auth: %v", err)
+		}
+	}
+
+	return &opts, nil
+}
+
+func middlewares(logger log.Logger, httpMethod string) []sdkhttpclient.Middleware {
+	middlewares := []sdkhttpclient.Middleware{
+		// TODO: probably isn't needed anymore and should by done by http infra code
+		middleware.CustomQueryParameters(logger),
+		sdkhttpclient.CustomHeadersMiddleware(),
+	}
+
+	// Needed to control GET vs POST method of the requests
+	if strings.ToLower(httpMethod) == "get" {
+		middlewares = append(middlewares, middleware.ForceHttpGet(logger))
+	}
+
+	return middlewares
 }
 
 func reportDiff(data *backend.QueryDataResponse, err error, streamData *backend.QueryDataResponse, streamError error) {
