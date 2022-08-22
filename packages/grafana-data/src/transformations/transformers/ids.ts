@@ -30,6 +30,7 @@ export enum DataTransformerID {
   fieldLookup = 'fieldLookup',
   heatmap = 'heatmap',
   spatial = 'spatial',
+  scramble = 'scramble',
   joinByLabels = 'joinByLabels',
   extractFields = 'extractFields',
   groupingToMatrix = 'groupingToMatrix',
