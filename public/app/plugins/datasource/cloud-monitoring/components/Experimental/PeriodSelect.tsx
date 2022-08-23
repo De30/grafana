@@ -36,7 +36,6 @@ export function PeriodSelect({
 
   return (
     <Select
-      width="auto"
       onChange={({ value }) => onChange(value!)}
       value={[...options, ...templateVariableOptions].find((s) => s.value === current)}
       options={[
