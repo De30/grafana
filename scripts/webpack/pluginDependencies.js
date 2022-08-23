@@ -7,7 +7,13 @@ const deps = packageJSON.dependencies;
 const listOfDepsToExpose = [
   '@emotion/css',
   '@emotion/react',
+  '@grafana/data',
+  '@grafana/e2e-selectors',
+  '@grafana/runtime',
+  '@grafana/schema',
   '@grafana/slate-react',
+  '@grafana/ui',
+  'angular',
   'd3',
   'jquery',
   'lodash',
@@ -24,44 +30,16 @@ const listOfDepsToExpose = [
   'slate',
 ];
 
-const exposedDependencies = Object.keys(deps)
+const pluginDependencies = Object.keys(deps)
   .filter((key) => listOfDepsToExpose.includes(key))
   .reduce((acc, key) => {
     return {
       ...acc,
       [key]: {
         singleton: true, // For now we force plugins to use the runtime versions core depends on
-        requiredVersion: `^${deps[key]}`,
+        requiredVersion: false,
       },
     };
   }, {});
-
-const grafanaDependencies = {
-  '@grafana/data': {
-    singleton: true,
-    requiredVersion: `^${packageJSON.version}`,
-  },
-  '@grafana/e2e-selectors': {
-    singleton: true,
-    requiredVersion: `^${packageJSON.version}`,
-  },
-  '@grafana/runtime': {
-    singleton: true,
-    requiredVersion: `^${packageJSON.version}`,
-  },
-  '@grafana/schema': {
-    singleton: true,
-    requiredVersion: `^${packageJSON.version}`,
-  },
-  '@grafana/ui': {
-    singleton: true,
-    requiredVersion: `^${packageJSON.version}`,
-  },
-};
-
-const pluginDependencies = {
-  ...exposedDependencies,
-  ...grafanaDependencies,
-};
 
 module.exports = pluginDependencies;
