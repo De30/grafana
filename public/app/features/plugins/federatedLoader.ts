@@ -1,59 +1,68 @@
 // Dynamically load plugins using Module Federation
+type Scope = unknown;
+type Factory = () => any;
 
-// @ts-ignore
-declare let __webpack_init_sharing__;
-// @ts-ignore
-declare let __webpack_share_scopes__;
+type Container = {
+  init(shareScope: Scope): void;
+  get(module: string): Factory;
+};
+
+declare const __webpack_init_sharing__: (shareScope: string) => Promise<void>;
+declare const __webpack_share_scopes__: { default: Scope };
 
 type FederatedModule = {
   path: string;
-  baseURL: string;
   scope: string;
 };
 
-// plugins can contain nested plugins which live on a subpath to the root plugin.
-// This function naively attempts to resolve the module by comparing against baseUrl.
-function getModuleName(path: string, baseURL: string) {
-  const strippedPath = path.replace('/module', '');
-  const strippedBaseURL = baseURL.replace('public/', '');
+const moduleMap: Record<string, boolean> = {};
+let initialSharingScopeCreated = false;
 
-  if (strippedPath === strippedBaseURL) {
-    return './plugin';
-  }
-
-  const moduleName = `.${strippedPath.replace(strippedBaseURL, '')}/plugin`;
-  return moduleName;
+export async function getFederatedModule({ path, scope }: FederatedModule) {
+  await loadModule(path);
+  return await getExposedModule(scope);
 }
 
-export async function importFederatedModule({ path, baseURL, scope }: FederatedModule) {
-  // @ts-ignore
-  if (!window[scope]) {
-    await new Promise<void>((resolve, reject) => {
-      const element = document.createElement('script');
+function loadModule(path: string) {
+  return new Promise<void>((resolve, reject) => {
+    if (moduleMap[path]) {
+      resolve();
+      return;
+    }
 
-      element.src = `/public/${path}.js`;
-      element.type = 'text/javascript';
-      element.async = true;
+    try {
+      const script = document.createElement('script');
 
-      element.onload = () => {
+      script.src = `/public/${path}.js`;
+      script.type = 'text/javascript';
+      script.async = true;
+
+      script.onload = () => {
         console.log(`Federated Module Loaded: ${path}`);
+        moduleMap[path] = true;
         resolve();
       };
 
-      element.onerror = (err) => {
+      script.onerror = (err) => {
         console.error(`Federated Module Error: ${path}`);
         reject(err);
       };
 
-      document.body.appendChild(element);
-    });
-  }
+      document.head.appendChild(script);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
-  await __webpack_init_sharing__('default');
-  // @ts-ignore
-  const container = window[scope];
+async function getExposedModule(moduleId: string) {
+  if (!initialSharingScopeCreated) {
+    initialSharingScopeCreated = true;
+    await __webpack_init_sharing__('default');
+  }
+  const container: Container = (window as any)[moduleId];
   await container.init(__webpack_share_scopes__.default);
-  const module = getModuleName(path, baseURL);
+  const module = './plugin';
   const factory = await container.get(module);
   const Module = factory();
 

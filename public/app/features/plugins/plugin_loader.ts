@@ -31,7 +31,7 @@ import * as ticks from 'app/core/utils/ticks';
 import { GenericDataSourcePlugin } from '../datasources/types';
 
 import builtInPlugins from './built_in_plugins';
-import { importFederatedModule } from './federatedLoader';
+import { getFederatedModule } from './federatedLoader';
 import { locateWithCache, registerPluginInCache } from './pluginCacheBuster';
 
 // Help the 6.4 to 6.5 migration
@@ -154,7 +154,6 @@ for (const flotDep of flotDeps) {
 
 export async function importPluginModule(
   path: string,
-  baseURL: string,
   id: string,
   version?: string,
   moduleLoader?: string
@@ -177,9 +176,8 @@ export async function importPluginModule(
   // as we could attempt to load with systemjs, catch and then attempt to load with federated
   if (moduleLoader === 'federated') {
     console.log(`Federated Module: found with id: ${id}. Loading...`);
-    return importFederatedModule({
+    return getFederatedModule({
       path,
-      baseURL,
       scope: _.camelCase(id),
     });
   }
@@ -188,40 +186,34 @@ export async function importPluginModule(
 }
 
 export function importDataSourcePlugin(meta: grafanaData.DataSourcePluginMeta): Promise<GenericDataSourcePlugin> {
-  return importPluginModule(meta.module, meta.baseUrl, meta.id, meta.info?.version, meta?.moduleLoader).then(
-    (pluginExports) => {
-      if (pluginExports.plugin) {
-        const dsPlugin = pluginExports.plugin as GenericDataSourcePlugin;
-        dsPlugin.meta = meta;
-        return dsPlugin;
-      }
-
-      if (pluginExports.Datasource) {
-        const dsPlugin = new grafanaData.DataSourcePlugin<
-          grafanaData.DataSourceApi<grafanaData.DataQuery, grafanaData.DataSourceJsonData>,
-          grafanaData.DataQuery,
-          grafanaData.DataSourceJsonData
-        >(pluginExports.Datasource);
-        dsPlugin.setComponentsFromLegacyExports(pluginExports);
-        dsPlugin.meta = meta;
-        return dsPlugin;
-      }
-
-      throw new Error('Plugin module is missing DataSourcePlugin or Datasource constructor export');
+  return importPluginModule(meta.module, meta.id, meta.info?.version, meta?.moduleLoader).then((pluginExports) => {
+    if (pluginExports.plugin) {
+      const dsPlugin = pluginExports.plugin as GenericDataSourcePlugin;
+      dsPlugin.meta = meta;
+      return dsPlugin;
     }
-  );
+
+    if (pluginExports.Datasource) {
+      const dsPlugin = new grafanaData.DataSourcePlugin<
+        grafanaData.DataSourceApi<grafanaData.DataQuery, grafanaData.DataSourceJsonData>,
+        grafanaData.DataQuery,
+        grafanaData.DataSourceJsonData
+      >(pluginExports.Datasource);
+      dsPlugin.setComponentsFromLegacyExports(pluginExports);
+      dsPlugin.meta = meta;
+      return dsPlugin;
+    }
+
+    throw new Error('Plugin module is missing DataSourcePlugin or Datasource constructor export');
+  });
 }
 
 export function importAppPlugin(meta: grafanaData.PluginMeta): Promise<grafanaData.AppPlugin> {
-  return importPluginModule(meta.module, meta.baseUrl, meta.id, meta.info?.version, meta.moduleLoader).then(
-    (pluginExports) => {
-      const plugin = pluginExports.plugin
-        ? (pluginExports.plugin as grafanaData.AppPlugin)
-        : new grafanaData.AppPlugin();
-      plugin.init(meta);
-      plugin.meta = meta;
-      plugin.setComponentsFromLegacyExports(pluginExports);
-      return plugin;
-    }
-  );
+  return importPluginModule(meta.module, meta.id, meta.info?.version, meta.moduleLoader).then((pluginExports) => {
+    const plugin = pluginExports.plugin ? (pluginExports.plugin as grafanaData.AppPlugin) : new grafanaData.AppPlugin();
+    plugin.init(meta);
+    plugin.meta = meta;
+    plugin.setComponentsFromLegacyExports(pluginExports);
+    return plugin;
+  });
 }
