@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/hashicorp/go-plugin"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/grpcplugin"
 	"github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
@@ -13,9 +17,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
-	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 )
 
 type ClientV2 struct {
@@ -25,9 +27,11 @@ type ClientV2 struct {
 	grpcplugin.StreamClient
 	pluginextensionv2.RendererPlugin
 	secretsmanagerplugin.SecretsManagerPlugin
+
+	ac *acplugins.AccessHandler
 }
 
-func newClientV2(descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
+func newClientV2(ac *acplugins.AccessHandler, descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
 	rawDiagnostics, err := rpcClient.Dispense("diagnostics")
 	if err != nil {
 		return nil, err
@@ -58,7 +62,7 @@ func newClientV2(descriptor PluginDescriptor, logger log.Logger, rpcClient plugi
 		return nil, err
 	}
 
-	c := ClientV2{}
+	c := ClientV2{ac: ac}
 	if rawDiagnostics != nil {
 		if diagnosticsClient, ok := rawDiagnostics.(grpcplugin.DiagnosticsClient); ok {
 			c.DiagnosticsClient = diagnosticsClient
@@ -154,7 +158,7 @@ func (c *ClientV2) QueryData(ctx context.Context, req *backend.QueryDataRequest)
 	}
 
 	protoReq := backend.ToProto().QueryDataRequest(req)
-	protoResp, err := c.DataClient.QueryData(ctx, protoReq)
+	protoResp, err := c.DataClient.QueryData(ctx, protoReq, backend.NewAccesscontrolSDKAdpater(c.ac))
 
 	if err != nil {
 		if status.Code(err) == codes.Unimplemented {

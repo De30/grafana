@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
+	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 	"github.com/grafana/grafana/pkg/services/org"
 )
 
@@ -41,6 +42,9 @@ type Plugin struct {
 	SecretsManager secretsmanagerplugin.SecretsManagerPlugin
 	client         backendplugin.Plugin
 	log            log.Logger
+
+	// AccessHandler
+	AccessHandler *acplugins.AccessHandler
 }
 
 type PluginDTO struct {

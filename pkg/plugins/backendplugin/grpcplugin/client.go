@@ -3,12 +3,14 @@ package grpcplugin
 import (
 	"os/exec"
 
+	goplugin "github.com/hashicorp/go-plugin"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend/grpcplugin"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
-	goplugin "github.com/hashicorp/go-plugin"
+	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 )
 
 // Handshake is the HandshakeConfig used to configure clients and servers.
@@ -68,8 +70,8 @@ func getV2PluginSet() goplugin.PluginSet {
 }
 
 // NewBackendPlugin creates a new backend plugin factory used for registering a backend plugin.
-func NewBackendPlugin(pluginID, executablePath string) backendplugin.PluginFactoryFunc {
-	return newPlugin(PluginDescriptor{
+func NewBackendPlugin(ac *acplugins.AccessHandler, pluginID, executablePath string) backendplugin.PluginFactoryFunc {
+	return newPlugin(ac, PluginDescriptor{
 		pluginID:       pluginID,
 		executablePath: executablePath,
 		managed:        true,
@@ -81,7 +83,7 @@ func NewBackendPlugin(pluginID, executablePath string) backendplugin.PluginFacto
 
 // NewRendererPlugin creates a new renderer plugin factory used for registering a backend renderer plugin.
 func NewRendererPlugin(pluginID, executablePath string, startFn StartRendererFunc) backendplugin.PluginFactoryFunc {
-	return newPlugin(PluginDescriptor{
+	return newPlugin(nil, PluginDescriptor{
 		pluginID:       pluginID,
 		executablePath: executablePath,
 		managed:        false,
@@ -94,7 +96,7 @@ func NewRendererPlugin(pluginID, executablePath string, startFn StartRendererFun
 
 // NewSecetsManagerPlugin creates a new secrets manager plugin factory used for registering a backend secrets manager plugin.
 func NewSecretsManagerPlugin(pluginID, executablePath string, startFn StartSecretsManagerFunc) backendplugin.PluginFactoryFunc {
-	return newPlugin(PluginDescriptor{
+	return newPlugin(nil, PluginDescriptor{
 		pluginID:       pluginID,
 		executablePath: executablePath,
 		managed:        false,

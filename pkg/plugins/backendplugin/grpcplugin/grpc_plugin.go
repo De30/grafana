@@ -5,11 +5,13 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/hashicorp/go-plugin"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/process"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
-	"github.com/hashicorp/go-plugin"
+	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 )
 
 type pluginClient interface {
@@ -21,6 +23,7 @@ type pluginClient interface {
 }
 
 type grpcPlugin struct {
+	ac             *acplugins.AccessHandler
 	descriptor     PluginDescriptor
 	clientFactory  func() *plugin.Client
 	client         *plugin.Client
@@ -31,9 +34,10 @@ type grpcPlugin struct {
 }
 
 // newPlugin allocates and returns a new gRPC (external) backendplugin.Plugin.
-func newPlugin(descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
+func newPlugin(ac *acplugins.AccessHandler, descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
 	return func(pluginID string, logger log.Logger, env []string) (backendplugin.Plugin, error) {
 		return &grpcPlugin{
+			ac:         ac,
 			descriptor: descriptor,
 			logger:     logger,
 			clientFactory: func() *plugin.Client {
@@ -64,7 +68,7 @@ func (p *grpcPlugin) Start(ctx context.Context) error {
 	if p.client.NegotiatedVersion() < 2 {
 		return errors.New("plugin protocol version not supported")
 	}
-	p.pluginClient, err = newClientV2(p.descriptor, p.logger, rpcClient)
+	p.pluginClient, err = newClientV2(p.ac, p.descriptor, p.logger, rpcClient)
 	if err != nil {
 		return err
 	}

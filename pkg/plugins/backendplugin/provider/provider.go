@@ -71,7 +71,9 @@ var SecretsManagerProvider PluginBackendProvider = func(_ context.Context, p *pl
 
 var DefaultProvider PluginBackendProvider = func(_ context.Context, p *plugins.Plugin) backendplugin.PluginFactoryFunc {
 	// TODO check for executable
-	return grpcplugin.NewBackendPlugin(p.ID, filepath.Join(p.PluginDir, pluginStartCmd(p.Executable)))
+	return grpcplugin.NewBackendPlugin(
+		p.AccessHandler, p.ID, filepath.Join(p.PluginDir, pluginStartCmd(p.Executable)),
+	)
 }
 
 func pluginStartCmd(executable string) string {

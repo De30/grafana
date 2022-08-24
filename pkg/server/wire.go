@@ -41,6 +41,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/repo"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/ossaccesscontrol"
+	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 	"github.com/grafana/grafana/pkg/services/alerting"
 	"github.com/grafana/grafana/pkg/services/apikey/apikeyimpl"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
@@ -178,6 +179,7 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(plugins.RendererManager), new(*manager.PluginManager)),
 	wire.Bind(new(plugins.SecretsPluginManager), new(*manager.PluginManager)),
 	coreplugin.ProvideCoreRegistry,
+	// acplugins.ProvidePluginsHandler,
 	loader.ProvideService,
 	wire.Bind(new(loader.Service), new(*loader.Loader)),
 	wire.Bind(new(plugins.ErrorResolver), new(*loader.Loader)),
