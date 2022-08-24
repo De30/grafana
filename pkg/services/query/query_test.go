@@ -14,7 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/plugins"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	dsSvc "github.com/grafana/grafana/pkg/services/datasources/service"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -109,7 +108,7 @@ func setup(t *testing.T) *testContext {
 
 	ss := kvstore.SetupTestService(t)
 	ssvc := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
-	ds := dsSvc.ProvideService(nil, ssvc, ss, nil, featuremgmt.WithFeatures(), actest.New(), acmock.NewMockedPermissionsService())
+	ds := dsSvc.ProvideService(nil, ssvc, ss, nil, featuremgmt.WithFeatures(), actest.New(), actest.NewMockedPermissionsService())
 
 	return &testContext{
 		pluginContext:          pc,

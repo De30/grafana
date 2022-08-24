@@ -14,7 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	dashboardservice "github.com/grafana/grafana/pkg/services/dashboards/service"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -34,8 +33,8 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 		features := featuremgmt.WithFeatures()
 		mockSQLStore := mockstore.NewSQLStoreMock()
 		ac := actest.New()
-		folderPermissions := accesscontrolmock.NewMockedPermissionsService()
-		dashboardPermissions := accesscontrolmock.NewMockedPermissionsService()
+		folderPermissions := actest.NewMockedPermissionsService()
+		dashboardPermissions := actest.NewMockedPermissionsService()
 
 		hs := &HTTPServer{
 			Cfg:      settings,

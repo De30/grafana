@@ -16,7 +16,6 @@ import (
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/ossaccesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	dashdb "github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -562,7 +561,7 @@ func TestAccessControlDashboardGuardian_GetHiddenACL(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			guardian, _ := setupAccessControlGuardianTest(t, "1", nil, testDashSvc(t))
 
-			mocked := accesscontrolmock.NewMockedPermissionsService()
+			mocked := actest.NewMockedPermissionsService()
 			guardian.dashboardPermissionsService = mocked
 			mocked.On("MapActions", mock.Anything).Return("View")
 			mocked.On("GetPermissions", mock.Anything, mock.Anything, mock.Anything).Return(tt.permissions, nil)

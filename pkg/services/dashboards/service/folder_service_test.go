@@ -13,7 +13,6 @@ import (
 	busmock "github.com/grafana/grafana/pkg/bus/mock"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
@@ -49,8 +48,8 @@ func TestIntegrationFolderService(t *testing.T) {
 		cfg.RBACEnabled = false
 		features := featuremgmt.WithFeatures()
 		cfg.IsFeatureToggleEnabled = features.IsEnabled
-		folderPermissions := acmock.NewMockedPermissionsService()
-		dashboardPermissions := acmock.NewMockedPermissionsService()
+		folderPermissions := actest.NewMockedPermissionsService()
+		dashboardPermissions := actest.NewMockedPermissionsService()
 		dashboardService := ProvideDashboardService(cfg, store, nil, features, folderPermissions, dashboardPermissions, actest.New())
 
 		service := FolderServiceImpl{

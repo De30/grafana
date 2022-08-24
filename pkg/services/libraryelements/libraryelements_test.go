@@ -17,7 +17,6 @@ import (
 	busmock "github.com/grafana/grafana/pkg/bus/mock"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/alerting"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboards/database"
@@ -278,8 +277,8 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user user.Signed
 	cfg.RBACEnabled = false
 	cfg.IsFeatureToggleEnabled = features.IsEnabled
 	ac := actest.New()
-	folderPermissions := acmock.NewMockedPermissionsService()
-	dashboardPermissions := acmock.NewMockedPermissionsService()
+	folderPermissions := actest.NewMockedPermissionsService()
+	dashboardPermissions := actest.NewMockedPermissionsService()
 	service := dashboardservice.ProvideDashboardService(
 		cfg, dashboardStore, dashAlertExtractor,
 		features, folderPermissions, dashboardPermissions, ac,
@@ -299,8 +298,8 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	features := featuremgmt.WithFeatures()
 	cfg.IsFeatureToggleEnabled = features.IsEnabled
 	ac := actest.New()
-	folderPermissions := acmock.NewMockedPermissionsService()
-	dashboardPermissions := acmock.NewMockedPermissionsService()
+	folderPermissions := actest.NewMockedPermissionsService()
+	dashboardPermissions := actest.NewMockedPermissionsService()
 	dashboardStore := database.ProvideDashboardStore(sqlStore, featuremgmt.WithFeatures())
 
 	d := dashboardservice.ProvideDashboardService(
@@ -410,8 +409,8 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 		ac := actest.New().WithDisabled()
 		// TODO: Update tests to work with rbac
 		sqlStore.Cfg.RBACEnabled = false
-		folderPermissions := acmock.NewMockedPermissionsService()
-		dashboardPermissions := acmock.NewMockedPermissionsService()
+		folderPermissions := actest.NewMockedPermissionsService()
+		dashboardPermissions := actest.NewMockedPermissionsService()
 		dashboardService := dashboardservice.ProvideDashboardService(
 			sqlStore.Cfg, dashboardStore, nil,
 			features, folderPermissions, dashboardPermissions, ac,

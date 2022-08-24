@@ -10,7 +10,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/plugins"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	datasourceservice "github.com/grafana/grafana/pkg/services/datasources/service"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -43,7 +42,7 @@ func TestHandleRequest(t *testing.T) {
 		}
 		secretsStore := kvstore.SetupTestService(t)
 		secretsService := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
-		datasourcePermissions := acmock.NewMockedPermissionsService()
+		datasourcePermissions := actest.NewMockedPermissionsService()
 		dsService := datasourceservice.ProvideService(nil, secretsService, secretsStore, cfg, featuremgmt.WithFeatures(), actest.New(), datasourcePermissions)
 		s := ProvideService(client, nil, dsService)
 
