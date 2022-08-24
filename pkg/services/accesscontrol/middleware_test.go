@@ -5,12 +5,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	"github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/web"
@@ -28,13 +28,13 @@ func TestMiddleware(t *testing.T) {
 	tests := []middlewareTestCase{
 		{
 			desc:           "should use fallback if access control is disabled",
-			ac:             mock.New().WithDisabled(),
+			ac:             actest.New().WithDisabled(),
 			expectFallback: true,
 			expectEndpoint: true,
 		},
 		{
 			desc: "should pass middleware for correct permissions",
-			ac: mock.New().WithPermissions(
+			ac: actest.New().WithPermissions(
 				[]accesscontrol.Permission{{Action: "users:read", Scope: "users:*"}},
 			),
 			evaluator:      accesscontrol.EvalPermission("users:read", "users:*"),
@@ -43,7 +43,7 @@ func TestMiddleware(t *testing.T) {
 		},
 		{
 			desc: "should not reach endpoint when missing permissions",
-			ac: mock.New().WithPermissions(
+			ac: actest.New().WithPermissions(
 				[]accesscontrol.Permission{{Action: "users:read", Scope: "users:1"}},
 			),
 			evaluator:      accesscontrol.EvalPermission("users:read", "users:*"),

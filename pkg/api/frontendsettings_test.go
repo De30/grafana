@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/licensing"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"

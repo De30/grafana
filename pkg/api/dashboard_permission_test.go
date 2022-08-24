@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -32,7 +33,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 
 		features := featuremgmt.WithFeatures()
 		mockSQLStore := mockstore.NewSQLStoreMock()
-		ac := accesscontrolmock.New()
+		ac := actest.New()
 		folderPermissions := accesscontrolmock.NewMockedPermissionsService()
 		dashboardPermissions := accesscontrolmock.NewMockedPermissionsService()
 
@@ -43,7 +44,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 			DashboardService: dashboardservice.ProvideDashboardService(
 				settings, dashboardStore, nil, features, folderPermissions, dashboardPermissions, ac,
 			),
-			AccessControl: accesscontrolmock.New().WithDisabled(),
+			AccessControl: actest.New().WithDisabled(),
 		}
 
 		t.Run("Given user has no admin permissions", func(t *testing.T) {

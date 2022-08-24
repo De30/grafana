@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,7 @@ func TestIntegrationProvideFolderService(t *testing.T) {
 	}
 	t.Run("should register scope resolvers", func(t *testing.T) {
 		cfg := setting.NewCfg()
-		ac := acmock.New()
+		ac := actest.New()
 
 		ProvideFolderService(cfg, nil, nil, nil, nil, nil, ac, busmock.New())
 
@@ -50,7 +51,7 @@ func TestIntegrationFolderService(t *testing.T) {
 		cfg.IsFeatureToggleEnabled = features.IsEnabled
 		folderPermissions := acmock.NewMockedPermissionsService()
 		dashboardPermissions := acmock.NewMockedPermissionsService()
-		dashboardService := ProvideDashboardService(cfg, store, nil, features, folderPermissions, dashboardPermissions, acmock.New())
+		dashboardService := ProvideDashboardService(cfg, store, nil, features, folderPermissions, dashboardPermissions, actest.New())
 
 		service := FolderServiceImpl{
 			cfg:              cfg,

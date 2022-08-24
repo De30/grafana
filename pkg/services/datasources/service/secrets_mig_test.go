@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/grafana/grafana/pkg/infra/kvstore"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -24,7 +25,7 @@ func SetupTestMigrationService(t *testing.T, sqlStore *sqlstore.SQLStore, kvStor
 		features = featuremgmt.WithFeatures(featuremgmt.FlagDisableSecretsCompatibility, true)
 	}
 	secretsService := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
-	dsService := ProvideService(sqlStore, secretsService, secretsStore, cfg, features, acmock.New().WithDisabled(), acmock.NewMockedPermissionsService())
+	dsService := ProvideService(sqlStore, secretsService, secretsStore, cfg, features, actest.New().WithDisabled(), acmock.NewMockedPermissionsService())
 	migService := ProvideDataSourceMigrationService(dsService, kvStore, features)
 	return migService
 }

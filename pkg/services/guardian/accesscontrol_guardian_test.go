@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/user"
 
@@ -596,7 +597,7 @@ func setupAccessControlGuardianTest(t *testing.T, uid string, permissions []acce
 		OrgId:     1,
 	})
 	require.NoError(t, err)
-	ac := accesscontrolmock.New().WithPermissions(permissions)
+	ac := actest.New().WithPermissions(permissions)
 	ac.RegisterScopeAttributeResolver(dashboards.NewDashboardUIDScopeResolver(dashStore))
 	license := licensingtest.NewFakeLicensing()
 	license.On("FeatureEnabled", "accesscontrol.enforcement").Return(true).Maybe()

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/grafana/grafana/pkg/services/accesscontrol/mock"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/org/orgtest"
 	"github.com/grafana/grafana/pkg/services/preference/preftest"
@@ -28,7 +28,7 @@ func TestUserService(t *testing.T) {
 	teamMemberService := manager.NewTeamGuardianMock()
 	userAuthService := userauthtest.NewFakeUserAuthService()
 	quotaService := quotatest.NewQuotaServiceFake()
-	accessControlStore := mock.New()
+	accessControlStore := actest.New()
 	userService := Service{
 		store:              userStore,
 		orgService:         orgService,

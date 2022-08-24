@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -109,7 +110,7 @@ func newTestLive(t *testing.T, store *sqlstore.SQLStore) *live.GrafanaLive {
 		nil,
 		&usagestats.UsageStatsMock{T: t},
 		nil,
-		features, accesscontrolmock.New(), &dashboards.FakeDashboardService{})
+		features, actest.New(), &dashboards.FakeDashboardService{})
 	require.NoError(t, err)
 	return gLive
 }
@@ -139,7 +140,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			Cfg:                     setting.NewCfg(),
 			pluginStore:             &fakePluginStore{},
 			SQLStore:                mockSQLStore,
-			AccessControl:           accesscontrolmock.New(),
+			AccessControl:           actest.New(),
 			Features:                featuremgmt.WithFeatures(),
 			DashboardService:        dashboardService,
 			dashboardVersionService: fakeDashboardVersionService,
@@ -260,7 +261,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			LibraryPanelService:     &mockLibraryPanelService{},
 			LibraryElementService:   &mockLibraryElementService{},
 			SQLStore:                mockSQLStore,
-			AccessControl:           accesscontrolmock.New(),
+			AccessControl:           actest.New(),
 			DashboardService:        dashboardService,
 			dashboardVersionService: fakeDashboardVersionService,
 			Features:                featuremgmt.WithFeatures(),
@@ -902,7 +903,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 				LibraryElementService:        &mockLibraryElementService{},
 				dashboardProvisioningService: mockDashboardProvisioningService{},
 				SQLStore:                     mockSQLStore,
-				AccessControl:                accesscontrolmock.New(),
+				AccessControl:                actest.New(),
 				DashboardService:             dashboardService,
 				Features:                     featuremgmt.WithFeatures(),
 				Coremodels:                   registry.NewBase(),
@@ -935,7 +936,7 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 	libraryPanelsService := mockLibraryPanelService{}
 	libraryElementsService := mockLibraryElementService{}
 	cfg := setting.NewCfg()
-	ac := accesscontrolmock.New()
+	ac := actest.New()
 	folderPermissions := accesscontrolmock.NewMockedPermissionsService()
 	dashboardPermissions := accesscontrolmock.NewMockedPermissionsService()
 	features := featuremgmt.WithFeatures()
@@ -953,7 +954,7 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 		LibraryElementService: &libraryElementsService,
 		SQLStore:              sc.sqlStore,
 		ProvisioningService:   provisioningService,
-		AccessControl:         accesscontrolmock.New(),
+		AccessControl:         actest.New(),
 		dashboardProvisioningService: service.ProvideDashboardService(
 			cfg, dashboardStore, nil, features,
 			folderPermissions, dashboardPermissions, ac,
