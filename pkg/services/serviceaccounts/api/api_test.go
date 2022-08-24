@@ -16,7 +16,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/ossaccesscontrol"
 	"github.com/grafana/grafana/pkg/services/apikey/apikeyimpl"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
@@ -61,7 +61,7 @@ func TestServiceAccountsAPI_CreateServiceAccount(t *testing.T) {
 		expectedCode int
 		wantID       string
 		wantError    string
-		acmock       *accesscontrolmock.Mock
+		acmock       *actest.Mock
 	}
 	testCases := []testCreateSATestCase{
 		{
@@ -221,7 +221,7 @@ func TestServiceAccountsAPI_DeleteServiceAccount(t *testing.T) {
 	t.Run("should be able to delete serviceaccount for with permissions", func(t *testing.T) {
 		testcase := struct {
 			user         tests.TestUser
-			acmock       *accesscontrolmock.Mock
+			acmock       *actest.Mock
 			expectedCode int
 		}{
 
@@ -246,7 +246,7 @@ func TestServiceAccountsAPI_DeleteServiceAccount(t *testing.T) {
 	t.Run("should be forbidden to delete serviceaccount via accesscontrol on endpoint", func(t *testing.T) {
 		testcase := struct {
 			user         tests.TestUser
-			acmock       *accesscontrolmock.Mock
+			acmock       *actest.Mock
 			expectedCode int
 		}{
 			user: tests.TestUser{Login: "servicetest2@admin", IsServiceAccount: true},
@@ -275,7 +275,7 @@ func serviceAccountRequestScenario(t *testing.T, httpMethod string, endpoint str
 
 func setupTestServer(t *testing.T, svc *tests.ServiceAccountMock,
 	routerRegister routing.RouteRegister,
-	acmock *accesscontrolmock.Mock,
+	acmock *actest.Mock,
 	sqlStore *sqlstore.SQLStore, saStore serviceaccounts.Store) (*web.Mux, *ServiceAccountsAPI) {
 	cfg := setting.NewCfg()
 	saPermissionService, err := ossaccesscontrol.ProvideServiceAccountPermissions(cfg, routing.NewRouteRegister(), sqlStore, acmock, &licensing.OSSLicensingService{}, saStore, acmock)
@@ -316,7 +316,7 @@ func TestServiceAccountsAPI_RetrieveServiceAccount(t *testing.T) {
 		desc         string
 		user         *tests.TestUser
 		expectedCode int
-		acmock       *accesscontrolmock.Mock
+		acmock       *actest.Mock
 		Id           int
 	}
 	testCases := []testRetrieveSATestCase{
@@ -408,7 +408,7 @@ func TestServiceAccountsAPI_UpdateServiceAccount(t *testing.T) {
 		desc         string
 		user         *tests.TestUser
 		expectedCode int
-		acmock       *accesscontrolmock.Mock
+		acmock       *actest.Mock
 		body         *serviceaccounts.UpdateServiceAccountForm
 		Id           int
 	}

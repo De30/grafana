@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"testing"
 
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
@@ -55,8 +55,8 @@ func TestAlertingProxy_createProxyContext(t *testing.T) {
 	}
 
 	t.Run("should create a copy of request context", func(t *testing.T) {
-		for _, mock := range []*accesscontrolmock.Mock{
-			accesscontrolmock.New(), accesscontrolmock.New().WithDisabled(),
+		for _, mock := range []*actest.Mock{
+			actest.New(), actest.New().WithDisabled(),
 		} {
 			proxy := AlertingProxy{
 				DataProxy: nil,
@@ -82,7 +82,7 @@ func TestAlertingProxy_createProxyContext(t *testing.T) {
 	t.Run("should overwrite response writer", func(t *testing.T) {
 		proxy := AlertingProxy{
 			DataProxy: nil,
-			ac:        accesscontrolmock.New(),
+			ac:        actest.New(),
 		}
 
 		req := &http.Request{}
@@ -101,7 +101,7 @@ func TestAlertingProxy_createProxyContext(t *testing.T) {
 		t.Run("should elevate permissions to Editor for Viewer", func(t *testing.T) {
 			proxy := AlertingProxy{
 				DataProxy: nil,
-				ac:        accesscontrolmock.New(),
+				ac:        actest.New(),
 			}
 
 			req := &http.Request{}
@@ -119,7 +119,7 @@ func TestAlertingProxy_createProxyContext(t *testing.T) {
 		t.Run("should not alter user if it is Editor", func(t *testing.T) {
 			proxy := AlertingProxy{
 				DataProxy: nil,
-				ac:        accesscontrolmock.New(),
+				ac:        actest.New(),
 			}
 
 			req := &http.Request{}
@@ -139,7 +139,7 @@ func TestAlertingProxy_createProxyContext(t *testing.T) {
 		t.Run("should not alter user", func(t *testing.T) {
 			proxy := AlertingProxy{
 				DataProxy: nil,
-				ac:        accesscontrolmock.New().WithDisabled(),
+				ac:        actest.New().WithDisabled(),
 			}
 
 			req := &http.Request{}

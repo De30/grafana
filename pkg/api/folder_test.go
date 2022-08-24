@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -17,6 +16,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
@@ -144,7 +144,7 @@ func TestHTTPServer_FolderMetadata(t *testing.T) {
 	folderService := dashboards.NewFakeFolderService(t)
 	server := SetupAPITestServer(t, func(hs *HTTPServer) {
 		hs.folderService = folderService
-		hs.AccessControl = acmock.New()
+		hs.AccessControl = actest.New()
 		hs.QuotaService = quotatest.NewQuotaServiceFake()
 	})
 
@@ -245,7 +245,7 @@ func createFolderScenario(t *testing.T, desc string, url string, routePattern st
 		store := mockstore.NewSQLStoreMock()
 		guardian.InitLegacyGuardian(store, dashSvc)
 		hs := HTTPServer{
-			AccessControl: acmock.New(),
+			AccessControl: actest.New(),
 			folderService: folderService,
 			Cfg:           setting.NewCfg(),
 			Features:      featuremgmt.WithFeatures(),
@@ -277,7 +277,7 @@ func updateFolderScenario(t *testing.T, desc string, url string, routePattern st
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		hs := HTTPServer{
 			Cfg:           setting.NewCfg(),
-			AccessControl: acmock.New(),
+			AccessControl: actest.New(),
 			folderService: folderService,
 		}
 

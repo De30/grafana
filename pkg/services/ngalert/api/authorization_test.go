@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/go-openapi/loads"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/expr"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
@@ -51,7 +51,7 @@ func TestAuthorize(t *testing.T) {
 	}
 	require.Len(t, paths, 39)
 
-	ac := acmock.New()
+	ac := actest.New()
 	api := &API{AccessControl: ac}
 
 	t.Run("should not panic on known routes", func(t *testing.T) {

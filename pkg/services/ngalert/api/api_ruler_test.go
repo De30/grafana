@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"testing"
 
-	acMock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -17,6 +16,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	models2 "github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
@@ -83,7 +83,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything).Panic("should not be called")
 
-			ac := acMock.New().WithDisabled()
+			ac := actest.New().WithDisabled()
 			request := createRequestContext(orgID, org.RoleViewer, nil)
 			response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, "")
 			require.Equalf(t, 401, response.Status(), "Expected 403 but got %d: %v", response.Status(), string(response.Body()))
@@ -103,7 +103,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything)
 
-			ac := acMock.New().WithDisabled()
+			ac := actest.New().WithDisabled()
 			request := createRequestContext(orgID, org.RoleEditor, nil)
 			response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, "")
 			require.Equalf(t, 202, response.Status(), "Expected 202 but got %d: %v", response.Status(), string(response.Body()))
@@ -125,7 +125,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything)
 
-			ac := acMock.New().WithDisabled()
+			ac := actest.New().WithDisabled()
 			request := createRequestContext(orgID, org.RoleEditor, nil)
 			response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, groupName)
 			require.Equalf(t, 202, response.Status(), "Expected 202 but got %d: %v", response.Status(), string(response.Body()))
@@ -143,7 +143,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything)
 
-			ac := acMock.New().WithDisabled()
+			ac := actest.New().WithDisabled()
 
 			svc := createService(ac, ruleStore, scheduler)
 
@@ -168,7 +168,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 			scheduler := &schedule.FakeScheduleService{}
 			scheduler.On("DeleteAlertRule", mock.Anything).Panic("should not be called")
 
-			ac := acMock.New()
+			ac := actest.New()
 			request := createRequestContext(orgID, "None", nil)
 			response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, "")
 			require.Equalf(t, 401, response.Status(), "Expected 403 but got %d: %v", response.Status(), string(response.Body()))
@@ -189,7 +189,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := acMock.New().WithPermissions(createPermissionsForRules(rulesInFolder))
+				ac := actest.New().WithPermissions(createPermissionsForRules(rulesInFolder))
 				request := createRequestContext(orgID, "None", nil)
 
 				response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, "")
@@ -208,7 +208,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := acMock.New().WithPermissions(createPermissionsForRules(rulesInFolder))
+				ac := actest.New().WithPermissions(createPermissionsForRules(rulesInFolder))
 				svc := createService(ac, ruleStore, scheduler)
 
 				err := svc.provenanceStore.SetProvenance(context.Background(), rulesInFolder[0], orgID, models.ProvenanceAPI)
@@ -236,7 +236,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := acMock.New().WithPermissions(createPermissionsForRules(authorizedRulesInFolder))
+				ac := actest.New().WithPermissions(createPermissionsForRules(authorizedRulesInFolder))
 				request := createRequestContext(orgID, "None", nil)
 
 				response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, "")
@@ -261,7 +261,7 @@ func TestRouteDeleteAlertRules(t *testing.T) {
 				scheduler := &schedule.FakeScheduleService{}
 				scheduler.On("DeleteAlertRule", mock.Anything)
 
-				ac := acMock.New().WithPermissions(createPermissionsForRules(authorizedRulesInGroup))
+				ac := actest.New().WithPermissions(createPermissionsForRules(authorizedRulesInGroup))
 				request := createRequestContext(orgID, "None", nil)
 				response := createService(ac, ruleStore, scheduler).RouteDeleteAlertRules(request, folder.Title, groupName)
 				require.Equalf(t, 202, response.Status(), "Expected 202 but got %d: %v", response.Status(), string(response.Body()))
@@ -281,7 +281,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 			expectedRules := models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))
 			ruleStore.PutRule(context.Background(), expectedRules...)
 			ruleStore.PutRule(context.Background(), models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))...)
-			ac := acMock.New().WithPermissions(createPermissionsForRules(expectedRules))
+			ac := actest.New().WithPermissions(createPermissionsForRules(expectedRules))
 
 			req := createRequestContext(orgID, "", nil)
 			response := createService(ac, ruleStore, nil).RouteGetNamespaceRulesConfig(req, folder.Title)
@@ -316,7 +316,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 			ruleStore.Folders[orgID] = append(ruleStore.Folders[orgID], folder)
 			expectedRules := models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))
 			ruleStore.PutRule(context.Background(), expectedRules...)
-			ac := acMock.New().WithDisabled()
+			ac := actest.New().WithDisabled()
 
 			req := createRequestContext(orgID, org.RoleViewer, nil)
 			response := createService(ac, ruleStore, nil).RouteGetNamespaceRulesConfig(req, folder.Title)
@@ -350,7 +350,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 		ruleStore.Folders[orgID] = append(ruleStore.Folders[orgID], folder)
 		expectedRules := models.GenerateAlertRules(rand.Intn(4)+2, models.AlertRuleGen(withOrgID(orgID), withNamespace(folder)))
 		ruleStore.PutRule(context.Background(), expectedRules...)
-		ac := acMock.New().WithDisabled()
+		ac := actest.New().WithDisabled()
 
 		svc := createService(ac, ruleStore, nil)
 
@@ -394,7 +394,7 @@ func TestRouteGetNamespaceRulesConfig(t *testing.T) {
 
 		expectedRules := models.GenerateAlertRules(rand.Intn(5)+5, models.AlertRuleGen(withGroupKey(groupKey), models.WithUniqueGroupIndex()))
 		ruleStore.PutRule(context.Background(), expectedRules...)
-		ac := acMock.New().WithDisabled()
+		ac := actest.New().WithDisabled()
 
 		response := createService(ac, ruleStore, nil).RouteGetNamespaceRulesConfig(createRequestContext(orgID, org.RoleViewer, nil), folder.Title)
 
@@ -447,7 +447,7 @@ func TestRouteGetRulesConfig(t *testing.T) {
 
 			request := createRequestContext(orgID, "", nil)
 			t.Run("and do not return group if user does not have access to one of rules", func(t *testing.T) {
-				ac := acMock.New().WithPermissions(createPermissionsForRules(append(group1, group2[1:]...)))
+				ac := actest.New().WithPermissions(createPermissionsForRules(append(group1, group2[1:]...)))
 				response := createService(ac, ruleStore, nil).RouteGetRulesConfig(request)
 				require.Equal(t, http.StatusOK, response.Status())
 
@@ -476,7 +476,7 @@ func TestRouteGetRulesConfig(t *testing.T) {
 
 		expectedRules := models.GenerateAlertRules(rand.Intn(5)+5, models.AlertRuleGen(withGroupKey(groupKey), models.WithUniqueGroupIndex()))
 		ruleStore.PutRule(context.Background(), expectedRules...)
-		ac := acMock.New().WithDisabled()
+		ac := actest.New().WithDisabled()
 
 		response := createService(ac, ruleStore, nil).RouteGetRulesConfig(createRequestContext(orgID, org.RoleViewer, nil))
 
@@ -528,13 +528,13 @@ func TestRouteGetRulesGroupConfig(t *testing.T) {
 			})
 
 			t.Run("and return 401 if user does not have access one of rules", func(t *testing.T) {
-				ac := acMock.New().WithPermissions(createPermissionsForRules(expectedRules[1:]))
+				ac := actest.New().WithPermissions(createPermissionsForRules(expectedRules[1:]))
 				response := createService(ac, ruleStore, nil).RouteGetRulesGroupConfig(request, folder.Title, groupKey.RuleGroup)
 				require.Equal(t, http.StatusUnauthorized, response.Status())
 			})
 
 			t.Run("and return rules if user has access to all of them", func(t *testing.T) {
-				ac := acMock.New().WithPermissions(createPermissionsForRules(expectedRules))
+				ac := actest.New().WithPermissions(createPermissionsForRules(expectedRules))
 				response := createService(ac, ruleStore, nil).RouteGetRulesGroupConfig(request, folder.Title, groupKey.RuleGroup)
 
 				require.Equal(t, http.StatusAccepted, response.Status())
@@ -556,7 +556,7 @@ func TestRouteGetRulesGroupConfig(t *testing.T) {
 
 		expectedRules := models.GenerateAlertRules(rand.Intn(5)+5, models.AlertRuleGen(withGroupKey(groupKey), models.WithUniqueGroupIndex()))
 		ruleStore.PutRule(context.Background(), expectedRules...)
-		ac := acMock.New().WithDisabled()
+		ac := actest.New().WithDisabled()
 
 		response := createService(ac, ruleStore, nil).RouteGetRulesGroupConfig(createRequestContext(orgID, org.RoleViewer, nil), folder.Title, groupKey.RuleGroup)
 
@@ -645,7 +645,7 @@ func TestVerifyProvisionedRulesNotAffected(t *testing.T) {
 	})
 }
 
-func createService(ac *acMock.Mock, store *store.FakeRuleStore, scheduler schedule.ScheduleService) *RulerSrv {
+func createService(ac *actest.Mock, store *store.FakeRuleStore, scheduler schedule.ScheduleService) *RulerSrv {
 	return &RulerSrv{
 		xactManager:     store,
 		store:           store,

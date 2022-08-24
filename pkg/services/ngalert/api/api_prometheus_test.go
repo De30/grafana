@@ -10,12 +10,13 @@ import (
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 	"github.com/grafana/grafana/pkg/services/ngalert/eval"
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
@@ -433,7 +434,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 				log:     log.NewNopLogger(),
 				manager: fakeAIM,
 				store:   ruleStore,
-				ac:      acmock.New().WithDisabled(),
+				ac:      actest.New().WithDisabled(),
 			}
 
 			response := api.RouteGetRuleStatuses(c)
@@ -473,7 +474,7 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 			ruleStore.PutRule(context.Background(), rules...)
 			ruleStore.PutRule(context.Background(), ngmodels.GenerateAlertRules(rand.Intn(4)+2, ngmodels.AlertRuleGen(withOrgID(orgID)))...)
 
-			acMock := acmock.New().WithPermissions(createPermissionsForRules(rules))
+			acMock := actest.New().WithPermissions(createPermissionsForRules(rules))
 
 			api := PrometheusSrv{
 				log:     log.NewNopLogger(),
@@ -503,10 +504,10 @@ func TestRouteGetRuleStatuses(t *testing.T) {
 	})
 }
 
-func setupAPI(t *testing.T) (*store.FakeRuleStore, *fakeAlertInstanceManager, *acmock.Mock, PrometheusSrv) {
+func setupAPI(t *testing.T) (*store.FakeRuleStore, *fakeAlertInstanceManager, *actest.Mock, PrometheusSrv) {
 	fakeStore := store.NewFakeRuleStore(t)
 	fakeAIM := NewFakeAlertInstanceManager(t)
-	acMock := acmock.New().WithDisabled()
+	acMock := actest.New().WithDisabled()
 
 	api := PrometheusSrv{
 		log:     log.NewNopLogger(),

@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
-	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/dashboardimport"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/web/webtest"
@@ -27,7 +27,7 @@ func TestImportDashboardAPI(t *testing.T) {
 			},
 		}
 
-		importDashboardAPI := New(service, quotaServiceFunc(quotaNotReached), nil, acmock.New().WithDisabled())
+		importDashboardAPI := New(service, quotaServiceFunc(quotaNotReached), nil, actest.New().WithDisabled())
 		routeRegister := routing.NewRouteRegister()
 		importDashboardAPI.RegisterAPIEndpoints(routeRegister)
 		s := webtest.NewServer(t, routeRegister)
@@ -104,7 +104,7 @@ func TestImportDashboardAPI(t *testing.T) {
 			},
 		}
 
-		importDashboardAPI := New(service, quotaServiceFunc(quotaNotReached), nil, acmock.New().WithDisabled())
+		importDashboardAPI := New(service, quotaServiceFunc(quotaNotReached), nil, actest.New().WithDisabled())
 		routeRegister := routing.NewRouteRegister()
 		importDashboardAPI.RegisterAPIEndpoints(routeRegister)
 		s := webtest.NewServer(t, routeRegister)
@@ -129,7 +129,7 @@ func TestImportDashboardAPI(t *testing.T) {
 
 	t.Run("Quota reached", func(t *testing.T) {
 		service := &serviceMock{}
-		importDashboardAPI := New(service, quotaServiceFunc(quotaReached), nil, acmock.New().WithDisabled())
+		importDashboardAPI := New(service, quotaServiceFunc(quotaReached), nil, actest.New().WithDisabled())
 
 		routeRegister := routing.NewRouteRegister()
 		importDashboardAPI.RegisterAPIEndpoints(routeRegister)

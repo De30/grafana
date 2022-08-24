@@ -16,7 +16,7 @@ import (
 	apikeygenprefix "github.com/grafana/grafana/pkg/components/apikeygenprefixed"
 	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
-	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/actest"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/apikey"
 	"github.com/grafana/grafana/pkg/services/apikey/apikeyimpl"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
@@ -63,7 +63,7 @@ func TestServiceAccountsAPI_CreateToken(t *testing.T) {
 		desc         string
 		expectedCode int
 		body         map[string]interface{}
-		acmock       *accesscontrolmock.Mock
+		acmock       *actest.Mock
 	}
 
 	testCases := []testCreateSAToken{
@@ -180,7 +180,7 @@ func TestServiceAccountsAPI_DeleteToken(t *testing.T) {
 		desc         string
 		keyName      string
 		expectedCode int
-		acmock       *accesscontrolmock.Mock
+		acmock       *actest.Mock
 	}
 
 	testCases := []testCreateSAToken{
@@ -277,7 +277,7 @@ func TestServiceAccountsAPI_ListTokens(t *testing.T) {
 		expectedHasExpired        bool
 		expectedResponseBodyField string
 		expectedCode              int
-		acmock                    *accesscontrolmock.Mock
+		acmock                    *actest.Mock
 	}
 
 	var saId int64 = 1
