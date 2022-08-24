@@ -70,7 +70,7 @@ func getV2PluginSet() goplugin.PluginSet {
 }
 
 // NewBackendPlugin creates a new backend plugin factory used for registering a backend plugin.
-func NewBackendPlugin(ac *acplugins.AccessHandler, pluginID, executablePath string) backendplugin.PluginFactoryFunc {
+func NewBackendPlugin(ac *acplugins.AccessHandlerFactory, pluginID, executablePath string) backendplugin.PluginFactoryFunc {
 	return newPlugin(ac, PluginDescriptor{
 		pluginID:       pluginID,
 		executablePath: executablePath,

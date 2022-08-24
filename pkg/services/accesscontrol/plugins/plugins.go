@@ -11,46 +11,49 @@ import (
 )
 
 var (
-	_ backend.AccessControl = &AccessHandler{}
-
 	deny = &backend.HasAccessResponse{HasAccess: false}
 )
 
-type AccessHandler struct {
+type AccessHandlerFactory struct {
 	acService   accesscontrol.AccessControl
 	userService user.Service
 	log         log.Logger
 }
 
-func ProvideHasAccessHandler(ac accesscontrol.AccessControl, userService user.Service) *AccessHandler {
-	return &AccessHandler{
+func ProvideHasAccessHandler(ac accesscontrol.AccessControl, userService user.Service) *AccessHandlerFactory {
+	return &AccessHandlerFactory{
 		acService:   ac,
 		userService: userService,
 		log:         log.New("accesscontrol.plugins"),
 	}
 }
 
-func (ph *AccessHandler) HasAccess(ctx context.Context, req *backend.HasAccessRequest) (*backend.HasAccessResponse, error) {
-	if req.User == nil {
-		return deny, user.ErrUserNotFound
+func (ph *AccessHandlerFactory) NewAccessHandler() func(user *user.SignedInUser) backend.AccessControl {
+	return func(user *user.SignedInUser) backend.AccessControl {
+		return &AccessHandler{
+			ac:   ph.acService,
+			user: user,
+			log:  ph.log,
+		}
 	}
+}
 
-	// TODO figure out how to get the Org
-	user, err := ph.userService.GetSignedInUser(ctx, &user.GetSignedInUserQuery{Login: req.User.Login, Email: req.User.Email, OrgID: 1})
-	if err != nil {
-		ph.log.Error("could not retrieve user", "user", fmt.Sprintf("%v", user), "error", err)
-		return deny, nil
-	}
+type AccessHandler struct {
+	ac   accesscontrol.AccessControl
+	user *user.SignedInUser
+	log  log.Logger
+}
 
+func (ah *AccessHandler) HasAccess(ctx context.Context, req *backend.HasAccessRequest) (*backend.HasAccessResponse, error) {
 	ev, err := toEvaluator(req.Evaluator)
 	if err != nil {
-		ph.log.Error("could not convert evaluator", "ev", fmt.Sprintf("%v", ev), "error", err)
+		ah.log.Error("could not convert evaluator", "ev", fmt.Sprintf("%v", ev), "error", err)
 		return deny, nil
 	}
 
-	hasAccess, err := ph.acService.Evaluate(ctx, user, ev)
+	hasAccess, err := ah.ac.Evaluate(ctx, ah.user, ev)
 	if err != nil {
-		ph.log.Error("error evaluating user rights", "error", err)
+		ah.log.Error("error evaluating user rights", "error", err)
 		return deny, nil
 	}
 

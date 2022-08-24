@@ -36,7 +36,7 @@ var (
 var _ plugins.ErrorResolver = (*Loader)(nil)
 
 type Loader struct {
-	ac                 *acplugins.AccessHandler
+	ac                 *acplugins.AccessHandlerFactory
 	cfg                *plugins.Cfg
 	pluginFinder       finder.Finder
 	pluginInitializer  initializer.Initializer
@@ -47,12 +47,12 @@ type Loader struct {
 }
 
 func ProvideService(cfg *setting.Cfg, license models.Licensing, authorizer plugins.PluginLoaderAuthorizer,
-	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandler) (*Loader, error) {
+	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandlerFactory) (*Loader, error) {
 	return New(plugins.FromGrafanaCfg(cfg), license, authorizer, backendProvider, ac), nil
 }
 
 func New(cfg *plugins.Cfg, license models.Licensing, authorizer plugins.PluginLoaderAuthorizer,
-	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandler) *Loader {
+	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandlerFactory) *Loader {
 	return &Loader{
 		ac:                 ac,
 		cfg:                cfg,

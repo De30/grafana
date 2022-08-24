@@ -23,7 +23,7 @@ type pluginClient interface {
 }
 
 type grpcPlugin struct {
-	ac             *acplugins.AccessHandler
+	ac             *acplugins.AccessHandlerFactory
 	descriptor     PluginDescriptor
 	clientFactory  func() *plugin.Client
 	client         *plugin.Client
@@ -34,7 +34,7 @@ type grpcPlugin struct {
 }
 
 // newPlugin allocates and returns a new gRPC (external) backendplugin.Plugin.
-func newPlugin(ac *acplugins.AccessHandler, descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
+func newPlugin(ac *acplugins.AccessHandlerFactory, descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
 	return func(pluginID string, logger log.Logger, env []string) (backendplugin.Plugin, error) {
 		return &grpcPlugin{
 			ac:         ac,

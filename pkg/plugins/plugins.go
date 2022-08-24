@@ -44,7 +44,7 @@ type Plugin struct {
 	log            log.Logger
 
 	// AccessHandler
-	AccessHandler *acplugins.AccessHandler
+	AccessHandler *acplugins.AccessHandlerFactory
 }
 
 type PluginDTO struct {

@@ -28,10 +28,10 @@ type ClientV2 struct {
 	pluginextensionv2.RendererPlugin
 	secretsmanagerplugin.SecretsManagerPlugin
 
-	ac *acplugins.AccessHandler
+	ac *acplugins.AccessHandlerFactory
 }
 
-func newClientV2(ac *acplugins.AccessHandler, descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
+func newClientV2(ac *acplugins.AccessHandlerFactory, descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
 	rawDiagnostics, err := rpcClient.Dispense("diagnostics")
 	if err != nil {
 		return nil, err
