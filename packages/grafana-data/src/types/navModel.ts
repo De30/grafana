@@ -17,6 +17,7 @@ export interface NavLinkDTO {
   children?: NavLinkDTO[];
   highlightText?: string;
   emptyMessageId?: string;
+  hideFromBreadcrumbs?: boolean;
 }
 
 export interface NavModelItem extends NavLinkDTO {
