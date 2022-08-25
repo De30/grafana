@@ -1,5 +1,5 @@
   influxdb012:
-    image: influxdb:0.12.2
+    image: influxdb:0.12
     container_name: influxdb012
     ports:
       - '18096:8086'
