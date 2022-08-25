@@ -374,6 +374,15 @@ func doSearchQuery(
 	}
 	defer cancel()
 
+	if true {
+		response.Frames = data.Frames{
+			&data.Frame{
+				Name: "loading",
+			},
+		}
+		return response
+	}
+
 	hasConstraints := false
 	fullQuery := bluge.NewBooleanQuery()
 	fullQuery.AddMust(newPermissionFilter(filter, logger))

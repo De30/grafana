@@ -6,6 +6,7 @@ import { TermCount } from 'app/core/components/TagFilter/TagFilter';
 import { getGrafanaDatasource } from 'app/plugins/datasource/grafana/datasource';
 import { GrafanaQueryType } from 'app/plugins/datasource/grafana/types';
 
+import { SQLSearcher } from './sql';
 import { replaceCurrentFolderQuery } from './utils';
 
 import { DashboardQueryResult, GrafanaSearcher, QueryResponse, SearchQuery, SearchResultMeta } from '.';
@@ -104,6 +105,13 @@ async function doSearchQuery(query: SearchQuery): Promise<QueryResponse> {
   );
 
   const first = (rsp.data?.[0] as DataFrame) ?? { fields: [], length: 0 };
+
+  // Temporary workaround / fallback to SQL when the bluge index is still loading
+  if (first.length === 0 && first.name === 'loading') {
+    // TODO? report interaction??
+    return new SQLSearcher().search(query);
+  }
+
   for (const field of first.fields) {
     field.display = getDisplayProcessor({ field, theme: config.theme2 });
   }
