@@ -1,10 +1,10 @@
-  influxdb1:
+  influxdb012:
     image: influxdb:0.12.2
     container_name: influxdb012
     ports:
-      - '18086:8086'
-      - '12004:2004'
-      - '18083:8083'
+      - '18096:8086'
+      - '12014:2004'
+      - '18093:8083'
     environment:
       INFLUXDB_ADMIN_USER: grafana
       INFLUXDB_ADMIN_PASSWORD: grafana
@@ -13,20 +13,20 @@
       - ./docker/blocks/influxdb012/influxdb.conf:/etc/influxdb/influxdb.conf
 
 
-  fake-influxdb1-data:
+  fake-influxdb012-data:
     image: grafana/fake-data-gen
     links:
-      - influxdb1
+      - influxdb012
     environment:
-      FD_SERVER: influxdb1
+      FD_SERVER: influxdb012
       FD_DATASOURCE: influxdb
       FD_PORT: 8086
 
-  telegraf-influxdb1:
+  telegraf-influxdb012:
     image: telegraf:latest
     links:
-      - influxdb1
+      - influxdb012
     volumes:
-      - ./docker/blocks/influxdb1/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./docker/blocks/influxdb012/telegraf.conf:/etc/telegraf/telegraf.conf:ro
       - /var/log:/var/log/host
       - ../data/log:/var/log/grafana
