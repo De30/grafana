@@ -22,6 +22,8 @@ export type TypedVariableModel =
   | OrgVariableModel
   | DashboardVariableModel;
 
+export type VariableWithQuery = Extract<TypedVariableModel, { query: unknown }>;
+
 export enum VariableRefresh {
   never, // removed from the UI
   onDashboardLoad,
@@ -70,16 +72,19 @@ export interface IntervalVariableModel extends VariableWithOptions {
   auto_min: string;
   auto_count: number;
   refresh: VariableRefresh;
+  query: string;
 }
 
 export interface CustomVariableModel extends VariableWithMultiSupport {
   type: 'custom';
+  query: string;
 }
 
 export interface DataSourceVariableModel extends VariableWithMultiSupport {
   type: 'datasource';
   regex: string;
   refresh: VariableRefresh;
+  query: string;
 }
 
 export interface QueryVariableModel extends VariableWithMultiSupport {
@@ -88,18 +93,20 @@ export interface QueryVariableModel extends VariableWithMultiSupport {
   definition: string;
   sort: VariableSort;
   queryValue?: string;
-  query: any;
   regex: string;
   refresh: VariableRefresh;
+  query: unknown; // was any previously
 }
 
 export interface TextBoxVariableModel extends VariableWithOptions {
   type: 'textbox';
   originalQuery: string | null;
+  query: string;
 }
 
 export interface ConstantVariableModel extends VariableWithOptions {
   type: 'constant';
+  query: string;
 }
 
 export interface VariableWithMultiSupport extends VariableWithOptions {
@@ -111,7 +118,7 @@ export interface VariableWithMultiSupport extends VariableWithOptions {
 export interface VariableWithOptions extends BaseVariableModel {
   current: VariableOption;
   options: VariableOption[];
-  query: string;
+  // query: string;
 }
 
 export interface DashboardProps {
