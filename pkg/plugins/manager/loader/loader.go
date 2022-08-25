@@ -22,6 +22,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/manager/loader/finder"
 	"github.com/grafana/grafana/pkg/plugins/manager/loader/initializer"
 	"github.com/grafana/grafana/pkg/plugins/manager/signature"
+	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	acplugins "github.com/grafana/grafana/pkg/services/accesscontrol/plugins"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/setting"
@@ -36,7 +37,7 @@ var (
 var _ plugins.ErrorResolver = (*Loader)(nil)
 
 type Loader struct {
-	ac                 *acplugins.AccessHandlerFactory
+	newAccessHandlerFn acplugins.AccessHandlerFactory
 	cfg                *plugins.Cfg
 	pluginFinder       finder.Finder
 	pluginInitializer  initializer.Initializer
@@ -47,14 +48,14 @@ type Loader struct {
 }
 
 func ProvideService(cfg *setting.Cfg, license models.Licensing, authorizer plugins.PluginLoaderAuthorizer,
-	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandlerFactory) (*Loader, error) {
+	backendProvider plugins.BackendFactoryProvider, ac accesscontrol.AccessControl) (*Loader, error) {
 	return New(plugins.FromGrafanaCfg(cfg), license, authorizer, backendProvider, ac), nil
 }
 
 func New(cfg *plugins.Cfg, license models.Licensing, authorizer plugins.PluginLoaderAuthorizer,
-	backendProvider plugins.BackendFactoryProvider, ac *acplugins.AccessHandlerFactory) *Loader {
+	backendProvider plugins.BackendFactoryProvider, ac accesscontrol.AccessControl) *Loader {
 	return &Loader{
-		ac:                 ac,
+		newAccessHandlerFn: acplugins.NewAccessHandlerFactory(ac),
 		cfg:                cfg,
 		pluginFinder:       finder.New(),
 		pluginInitializer:  initializer.New(cfg, backendProvider, license),
@@ -177,7 +178,7 @@ func (l *Loader) loadPlugins(ctx context.Context, class plugins.Class, pluginJSO
 	}
 
 	for _, p := range verifiedPlugins {
-		p.AccessHandler = l.ac
+		p.AccessHandlerFactory = l.newAccessHandlerFn
 		err := l.pluginInitializer.Initialize(ctx, p)
 		if err != nil {
 			return nil, err

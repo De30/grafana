@@ -14,26 +14,14 @@ var (
 	deny = &backend.HasAccessResponse{HasAccess: false}
 )
 
-type AccessHandlerFactory struct {
-	acService   accesscontrol.AccessControl
-	userService user.Service
-	log         log.Logger
-}
+type AccessHandlerFactory func(user *user.SignedInUser) backend.AccessControl
 
-func ProvideHasAccessHandler(ac accesscontrol.AccessControl, userService user.Service) *AccessHandlerFactory {
-	return &AccessHandlerFactory{
-		acService:   ac,
-		userService: userService,
-		log:         log.New("accesscontrol.plugins"),
-	}
-}
-
-func (ph *AccessHandlerFactory) NewAccessHandler() func(user *user.SignedInUser) backend.AccessControl {
+func NewAccessHandlerFactory(acService accesscontrol.AccessControl) AccessHandlerFactory {
 	return func(user *user.SignedInUser) backend.AccessControl {
 		return &AccessHandler{
-			ac:   ph.acService,
+			ac:   acService,
 			user: user,
-			log:  ph.log,
+			log:  log.New("accesscontrol.plugins"),
 		}
 	}
 }

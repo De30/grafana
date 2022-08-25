@@ -28,10 +28,10 @@ type ClientV2 struct {
 	pluginextensionv2.RendererPlugin
 	secretsmanagerplugin.SecretsManagerPlugin
 
-	ac *acplugins.AccessHandlerFactory
+	newAccessHandlerFn acplugins.AccessHandlerFactory
 }
 
-func newClientV2(ac *acplugins.AccessHandlerFactory, descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
+func newClientV2(newAccessHandlerFn acplugins.AccessHandlerFactory, descriptor PluginDescriptor, logger log.Logger, rpcClient plugin.ClientProtocol) (pluginClient, error) {
 	rawDiagnostics, err := rpcClient.Dispense("diagnostics")
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func newClientV2(ac *acplugins.AccessHandlerFactory, descriptor PluginDescriptor
 		return nil, err
 	}
 
-	c := ClientV2{ac: ac}
+	c := ClientV2{newAccessHandlerFn: newAccessHandlerFn}
 	if rawDiagnostics != nil {
 		if diagnosticsClient, ok := rawDiagnostics.(grpcplugin.DiagnosticsClient); ok {
 			c.DiagnosticsClient = diagnosticsClient
@@ -158,7 +158,7 @@ func (c *ClientV2) QueryData(ctx context.Context, req *backend.QueryDataRequest)
 	}
 
 	protoReq := backend.ToProto().QueryDataRequest(req)
-	protoResp, err := c.DataClient.QueryData(ctx, protoReq, backend.NewAccesscontrolSDKAdpater(c.ac))
+	protoResp, err := c.DataClient.QueryData(ctx, protoReq, backend.NewAccesscontrolSDKAdpater(c.newAccessHandlerFn(nil)))
 
 	if err != nil {
 		if status.Code(err) == codes.Unimplemented {
@@ -177,7 +177,7 @@ func (c *ClientV2) CallResource(ctx context.Context, req *backend.CallResourceRe
 	}
 
 	protoReq := backend.ToProto().CallResourceRequest(req)
-	protoStream, err := c.ResourceClient.CallResource(ctx, protoReq)
+	protoStream, err := c.ResourceClient.CallResource(ctx, protoReq, backend.NewAccesscontrolSDKAdpater(c.newAccessHandlerFn(nil)))
 	if err != nil {
 		if status.Code(err) == codes.Unimplemented {
 			return backendplugin.ErrMethodNotImplemented

@@ -43,8 +43,8 @@ type Plugin struct {
 	client         backendplugin.Plugin
 	log            log.Logger
 
-	// AccessHandler
-	AccessHandler *acplugins.AccessHandlerFactory
+	// AccessHandlerFactory
+	AccessHandlerFactory acplugins.AccessHandlerFactory
 }
 
 type PluginDTO struct {

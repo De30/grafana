@@ -23,23 +23,23 @@ type pluginClient interface {
 }
 
 type grpcPlugin struct {
-	ac             *acplugins.AccessHandlerFactory
-	descriptor     PluginDescriptor
-	clientFactory  func() *plugin.Client
-	client         *plugin.Client
-	pluginClient   pluginClient
-	logger         log.Logger
-	mutex          sync.RWMutex
-	decommissioned bool
+	newAccessHandlerFn acplugins.AccessHandlerFactory
+	descriptor         PluginDescriptor
+	clientFactory      func() *plugin.Client
+	client             *plugin.Client
+	pluginClient       pluginClient
+	logger             log.Logger
+	mutex              sync.RWMutex
+	decommissioned     bool
 }
 
 // newPlugin allocates and returns a new gRPC (external) backendplugin.Plugin.
-func newPlugin(ac *acplugins.AccessHandlerFactory, descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
+func newPlugin(newAccessHandlerFn acplugins.AccessHandlerFactory, descriptor PluginDescriptor) backendplugin.PluginFactoryFunc {
 	return func(pluginID string, logger log.Logger, env []string) (backendplugin.Plugin, error) {
 		return &grpcPlugin{
-			ac:         ac,
-			descriptor: descriptor,
-			logger:     logger,
+			newAccessHandlerFn: newAccessHandlerFn,
+			descriptor:         descriptor,
+			logger:             logger,
 			clientFactory: func() *plugin.Client {
 				return plugin.NewClient(newClientConfig(descriptor.executablePath, env, logger, descriptor.versionedPlugins))
 			},
@@ -68,7 +68,7 @@ func (p *grpcPlugin) Start(ctx context.Context) error {
 	if p.client.NegotiatedVersion() < 2 {
 		return errors.New("plugin protocol version not supported")
 	}
-	p.pluginClient, err = newClientV2(p.ac, p.descriptor, p.logger, rpcClient)
+	p.pluginClient, err = newClientV2(p.newAccessHandlerFn, p.descriptor, p.logger, rpcClient)
 	if err != nil {
 		return err
 	}
