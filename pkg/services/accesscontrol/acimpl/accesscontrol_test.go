@@ -79,3 +79,15 @@ func TestAccessControl_Evaluate(t *testing.T) {
 		})
 	}
 }
+
+func TestAccessControl_GenerateChecker(t *testing.T) {
+	type testCase struct {
+		desc string
+	}
+	tests := []testCase{}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+
+		})
+	}
+}
