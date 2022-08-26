@@ -109,13 +109,12 @@ export const TimeRangeForm = (props: Props) => {
       aria-label={selectors.components.TimePicker.calendar.openButton}
       icon="calendar-alt"
       variant="secondary"
-      type="button"
       onClick={onOpen}
     />
   );
 
   return (
-    <form>
+    <div>
       <div className={style.fieldContainer}>
         <Field label="From" invalid={from.invalid} error={from.errorMessage}>
           <Input
@@ -140,7 +139,7 @@ export const TimeRangeForm = (props: Props) => {
         </Field>
         {fyTooltip}
       </div>
-      <Button data-testid={selectors.components.TimePicker.applyTimeRange} type="submit" onClick={onApply}>
+      <Button data-testid={selectors.components.TimePicker.applyTimeRange} onClick={onApply}>
         Apply time range
       </Button>
 
@@ -155,7 +154,7 @@ export const TimeRangeForm = (props: Props) => {
         timeZone={timeZone}
         isReversed={isReversed}
       />
-    </form>
+    </div>
   );
 };
 
