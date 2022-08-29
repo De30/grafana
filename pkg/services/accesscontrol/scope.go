@@ -91,6 +91,10 @@ func ScopePrefix(scope string) string {
 	return strings.Join(parts, ":")
 }
 
+func GetRootScope(scope string) string {
+	return strings.Split(scope, ":")[0]
+}
+
 // ScopeProvider provides methods that construct scopes
 type ScopeProvider interface {
 	GetResourceScope(resourceID string) string
