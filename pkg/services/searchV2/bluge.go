@@ -24,7 +24,7 @@ const (
 	documentFieldName        = "name"
 	documentFieldName_sort   = "name_sort"
 	documentFieldName_ngram  = "name_ngram"
-	documentFieldName_nows   = "name_nows" // no whitespace
+	documentFieldName_no_ws  = "name_nows" // no whitespace
 	documentFieldDescription = "description"
 	documentFieldLocation    = "location" // parent path
 	documentFieldPanelType   = "panel_type"
@@ -231,7 +231,7 @@ func newSearchDocument(uid string, name string, descr string, url string) *bluge
 	if name != "" {
 		doc.AddField(bluge.NewTextField(documentFieldName, name).StoreValue().SearchTermPositions())
 		doc.AddField(bluge.NewTextField(documentFieldName_ngram, name).WithAnalyzer(ngramIndexAnalyzer))
-		doc.AddField(bluge.NewTextField(documentFieldName_nows, strings.ReplaceAll(name, " ", "")).StoreValue().SearchTermPositions())
+		doc.AddField(bluge.NewTextField(documentFieldName_no_ws, strings.ReplaceAll(name, " ", "")).StoreValue().SearchTermPositions())
 
 		// Don't add a field for empty names
 		sortStr := strings.Trim(strings.ToUpper(name), " ")
@@ -451,7 +451,7 @@ func doSearchQuery(
 		}
 
 		if len(q.Query) > ngramEdgeFilterMaxLength {
-			bq.AddShould(bluge.NewPrefixQuery(strings.ReplaceAll(q.Query, " ", "")).SetField(documentFieldName_nows)).SetBoost(6)
+			bq.AddShould(bluge.NewPrefixQuery(strings.ReplaceAll(q.Query, " ", "")).SetField(documentFieldName_no_ws)).SetBoost(6)
 		}
 		fullQuery.AddMust(bq)
 	}
