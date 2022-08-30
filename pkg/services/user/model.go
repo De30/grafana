@@ -30,19 +30,20 @@ var (
 )
 
 type User struct {
-	ID            int64 `xorm:"pk autoincr 'id'"`
-	Version       int
-	Email         string
-	Name          string
-	Login         string
-	Password      string
-	Salt          string
-	Rands         string
-	Company       string
-	EmailVerified bool
-	Theme         string
-	HelpFlags1    HelpFlags1
-	IsDisabled    bool
+	ID             int64 `xorm:"pk autoincr 'id'"`
+	Version        int
+	Email          string
+	Name           string
+	Login          string
+	Password       string
+	Salt           string
+	Rands          string
+	Company        string
+	EmailVerified  bool
+	Theme          string
+	HelpFlags1     HelpFlags1
+	IsDisabled     bool
+	WebauthnHandle int64
 
 	IsAdmin          bool
 	IsServiceAccount bool
@@ -67,6 +68,7 @@ type CreateUserCommand struct {
 	SkipOrgSetup     bool
 	DefaultOrgRole   string
 	IsServiceAccount bool
+	WebauthnHandle   int64
 }
 
 type GetUserByLoginQuery struct {

@@ -69,6 +69,15 @@ func (hs *HTTPServer) getUserUserProfile(c *models.ReqContext, userID int64) res
 	query.Result.AccessControl = hs.getAccessControlMetadata(c, c.OrgID, "global.users:id:", strconv.FormatInt(userID, 10))
 	query.Result.AvatarUrl = dtos.GetGravatarUrl(query.Result.Email)
 
+	if hs.Cfg.WebAuthnEnabled {
+		creds, err := hs.webauthService.GetUserCredentials(c, userID)
+		if err != nil {
+			return response.Error(http.StatusInternalServerError, "Failed to get user credentials", err)
+		}
+
+		query.Result.Credentials = creds
+	}
+
 	return response.JSON(http.StatusOK, query.Result)
 }
 

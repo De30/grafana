@@ -139,6 +139,10 @@ func addUserMigrations(mg *Migrator) {
 			SQLite(migSQLITEisServiceAccountNullable).
 			Postgres("ALTER TABLE `user` ALTER COLUMN is_service_account DROP NOT NULL;").
 			Mysql("ALTER TABLE user MODIFY is_service_account BOOLEAN DEFAULT 0;"))
+
+	mg.AddMigration("Add webauthn_handle column to user", NewAddColumnMigration(userV2, &Column{
+		Name: "webauthn_handle", Type: DB_BigInt, Nullable: true,
+	}))
 }
 
 const migSQLITEisServiceAccountNullable = `ALTER TABLE user ADD COLUMN tmp_service_account BOOLEAN DEFAULT 0;

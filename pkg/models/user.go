@@ -108,21 +108,28 @@ type UpdateUserLastSeenAtCommand struct {
 	UserId int64
 }
 
+type CredentialInfoDTO struct {
+	Name      string    `json:"name"`
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
 type UserProfileDTO struct {
-	Id             int64           `json:"id"`
-	Email          string          `json:"email"`
-	Name           string          `json:"name"`
-	Login          string          `json:"login"`
-	Theme          string          `json:"theme"`
-	OrgId          int64           `json:"orgId,omitempty"`
-	IsGrafanaAdmin bool            `json:"isGrafanaAdmin"`
-	IsDisabled     bool            `json:"isDisabled"`
-	IsExternal     bool            `json:"isExternal"`
-	AuthLabels     []string        `json:"authLabels"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	AvatarUrl      string          `json:"avatarUrl"`
-	AccessControl  map[string]bool `json:"accessControl,omitempty"`
+	Id             int64               `json:"id"`
+	Email          string              `json:"email"`
+	Name           string              `json:"name"`
+	Login          string              `json:"login"`
+	Theme          string              `json:"theme"`
+	OrgId          int64               `json:"orgId,omitempty"`
+	IsGrafanaAdmin bool                `json:"isGrafanaAdmin"`
+	IsDisabled     bool                `json:"isDisabled"`
+	IsExternal     bool                `json:"isExternal"`
+	AuthLabels     []string            `json:"authLabels"`
+	UpdatedAt      time.Time           `json:"updatedAt"`
+	CreatedAt      time.Time           `json:"createdAt"`
+	AvatarUrl      string              `json:"avatarUrl"`
+	AccessControl  map[string]bool     `json:"accessControl,omitempty"`
+	Credentials    []CredentialInfoDTO `json:"credentials,omitempty"`
 }
 
 type UserSearchHitDTO struct {

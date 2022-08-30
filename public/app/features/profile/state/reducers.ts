@@ -94,6 +94,11 @@ export const slice = createSlice({
       });
       state.isUpdating = false;
     },
+    setCredentials: (state, action: PayloadAction<Array<{ name: string; id: number; createdAt: string }>>) => {
+      if (state.user) {
+        state.user.credentials = action.payload;
+      }
+    },
   },
 });
 
@@ -140,6 +145,7 @@ export const {
   updateTimeZone,
   updateWeekStart,
   updateFiscalYearStartMonth,
+  setCredentials,
 } = slice.actions;
 
 export const userReducer = slice.reducer;

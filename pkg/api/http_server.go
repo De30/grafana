@@ -65,6 +65,7 @@ import (
 	pref "github.com/grafana/grafana/pkg/services/preference"
 	"github.com/grafana/grafana/pkg/services/provisioning"
 	"github.com/grafana/grafana/pkg/services/quota"
+	"github.com/grafana/grafana/pkg/services/webauth"
 
 	"github.com/grafana/grafana/pkg/services/correlations"
 	publicdashboardsApi "github.com/grafana/grafana/pkg/services/publicdashboards/api"
@@ -177,6 +178,7 @@ type HTTPServer struct {
 	kvStore                      kvstore.KVStore
 	secretsMigrator              secrets.Migrator
 	userService                  user.Service
+	webauthService               webauth.Service
 	tempUserService              tempUser.Service
 }
 
@@ -213,7 +215,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	dashboardPermissionsService accesscontrol.DashboardPermissionsService, dashboardVersionService dashver.Service,
 	starService star.Service, csrfService csrf.Service, coremodels *registry.Base,
 	playlistService playlist.Service, apiKeyService apikey.Service, kvStore kvstore.KVStore, secretsMigrator secrets.Migrator, secretsPluginManager plugins.SecretsPluginManager,
-	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service) (*HTTPServer, error) {
+	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, webauthService webauth.Service, tempUserService tempUser.Service) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
 
@@ -264,6 +266,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 		tracer:                       tracer,
 		log:                          log.New("http.server"),
 		web:                          m,
+		webauthService:               webauthService,
 		Listener:                     opts.Listener,
 		SocialService:                socialService,
 		EncryptionService:            encryptionService,

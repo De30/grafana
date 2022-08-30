@@ -10,9 +10,9 @@ import config from 'app/core/config';
 import { ChangePassword } from '../ForgottenPassword/ChangePassword';
 
 import LoginCtrl from './LoginCtrl';
-import { LoginForm } from './LoginForm';
 import { LoginLayout, InnerBox } from './LoginLayout';
 import { LoginServiceButtons } from './LoginServiceButtons';
+import { NewLoginForm } from './NewLoginForm';
 import { UserSignup } from './UserSignup';
 
 const forgottenPasswordStyles = css`
@@ -40,7 +40,7 @@ export const LoginPage: FC = () => {
             {!isChangingPassword && (
               <InnerBox>
                 {!disableLoginForm && (
-                  <LoginForm
+                  <NewLoginForm
                     onSubmit={login}
                     loginHint={loginHint}
                     passwordHint={passwordHint}
@@ -55,7 +55,7 @@ export const LoginPage: FC = () => {
                         Forgot your password?
                       </LinkButton>
                     </HorizontalGroup>
-                  </LoginForm>
+                  </NewLoginForm>
                 )}
                 <LoginServiceButtons />
                 {!disableUserSignUp && <UserSignup />}

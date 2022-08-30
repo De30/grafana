@@ -45,6 +45,7 @@ export interface UserDTO extends WithAccessControlMetadata {
   permissions?: string[];
   teams?: Unit[];
   orgs?: Unit[];
+  credentials?: Array<{ name: string; id: number; createdAt: string }>;
 }
 
 export interface Invitee {

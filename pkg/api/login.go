@@ -262,6 +262,62 @@ func (hs *HTTPServer) LoginPost(c *models.ReqContext) response.Response {
 	return resp
 }
 
+func (hs *HTTPServer) WebAuthnLogin(c *models.ReqContext) response.Response {
+	usr, err := hs.webauthService.LogIn(c)
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "error logging in", err)
+	}
+
+	var resp *response.NormalResponse
+	defer func() {
+		err := resp.Err()
+		if err == nil && resp.ErrMessage() != "" {
+			err = errors.New(resp.ErrMessage())
+		}
+
+		hs.HooksService.RunLoginHook(&models.LoginInfo{
+			AuthModule:    "",
+			User:          usr,
+			LoginUsername: usr.Email,
+			HTTPStatus:    resp.Status(),
+			Error:         err,
+		}, c)
+	}()
+
+	if setting.DisableLoginForm {
+		return response.Error(http.StatusUnauthorized, "Login is disabled", nil)
+	}
+
+	if err = hs.loginUserWithUser(usr, c); err != nil {
+		var createTokenErr *models.CreateTokenErr
+		if errors.As(err, &createTokenErr) {
+			resp = response.Error(createTokenErr.StatusCode, createTokenErr.ExternalErr, createTokenErr.InternalErr)
+		} else {
+			resp = response.Error(http.StatusInternalServerError, "Error while signing in user", err)
+		}
+		return resp
+	}
+
+	cookies.DeleteCookie(c.Resp, "webauthn-session", nil)
+
+	result := map[string]interface{}{
+		"message": "Logged in",
+	}
+
+	if redirectTo := c.GetCookie("redirect_to"); len(redirectTo) > 0 {
+		if err := hs.ValidateRedirectTo(redirectTo); err == nil {
+			result["redirectUrl"] = redirectTo
+		} else {
+			c.Logger.Info("Ignored invalid redirect_to cookie value.", "url", redirectTo)
+		}
+		cookies.DeleteCookie(c.Resp, "redirect_to", hs.CookieOptionsFromCfg)
+	}
+
+	metrics.MApiLoginPost.Inc()
+	resp = response.JSON(http.StatusOK, result)
+	return resp
+}
+
 func (hs *HTTPServer) loginUserWithUser(user *user.User, c *models.ReqContext) error {
 	if user == nil {
 		return errors.New("could not login user")

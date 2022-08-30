@@ -167,6 +167,11 @@ func (hs *HTTPServer) registerRoutes() {
 	r.Post("/api/user/signup", quota("user"), routing.Wrap(hs.SignUp))
 	r.Post("/api/user/signup/step2", routing.Wrap(hs.SignUpStep2))
 
+	r.Post("/api/user/signup/webauthn/options", routing.Wrap(hs.CreateCredentialCreationOptions))
+	r.Post("/api/user/signup/webauthn/signup", routing.Wrap(hs.WebAuthnSignUp))
+	r.Get("/api/webauthn/credentials/:user", routing.Wrap(hs.GetCredentialRequestOptions))
+	r.Post("/api/webauthn/login/:user", quota("session"), routing.Wrap(hs.WebAuthnLogin))
+
 	// invited
 	r.Get("/api/user/invite/:code", routing.Wrap(hs.GetInviteInfoByCode))
 	r.Post("/api/user/invite/complete", routing.Wrap(hs.CompleteInvite))
@@ -219,6 +224,10 @@ func (hs *HTTPServer) registerRoutes() {
 
 			userRoute.Get("/auth-tokens", routing.Wrap(hs.GetUserAuthTokens))
 			userRoute.Post("/revoke-auth-token", routing.Wrap(hs.RevokeUserAuthToken))
+
+			userRoute.Get("/credentials/options", routing.Wrap(hs.GetCreationOptions))
+			userRoute.Post("/credentials", routing.Wrap(hs.RegisterNewCredential))
+			userRoute.Delete("/credentials/:id", routing.Wrap(hs.DeleteUserCredential))
 		}, reqSignedInNoAnonymous)
 
 		apiRoute.Group("/users", func(usersRoute routing.RouteRegister) {

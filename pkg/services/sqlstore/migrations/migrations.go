@@ -97,6 +97,8 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 
 	ualert.UpdateRuleGroupIndexMigration(mg)
 	accesscontrol.AddManagedFolderAlertActionsRepeatMigration(mg)
+
+	addWebAuthnMigrations(mg)
 }
 
 func addMigrationLogMigrations(mg *Migrator) {
@@ -130,4 +132,28 @@ func addStarMigrations(mg *Migrator) {
 
 	mg.AddMigration("create star table", NewAddTableMigration(starV1))
 	mg.AddMigration("add unique index star.user_id_dashboard_id", NewAddIndexMigration(starV1, starV1.Indices[0]))
+}
+
+func addWebAuthnMigrations(mg *Migrator) {
+	WebauthnCredentialV1 := Table{
+		Name: "webauthn_credential",
+		Columns: []*Column{
+			{Name: "id", Type: DB_BigInt, IsPrimaryKey: true, Nullable: false},
+			{Name: "name", Type: DB_Text, Nullable: false},
+			{Name: "credential_id", Type: DB_Bytea, Nullable: false},
+			{Name: "user_id", Type: DB_BigInt, Nullable: false},
+			{Name: "public_key", Type: DB_Bytea, Nullable: false},
+			{Name: "attestation_type", Type: DB_Text, Nullable: false},
+			{Name: "aaguid", Type: DB_Bytea, Nullable: false},
+			{Name: "sign_count", Type: DB_BigInt, Nullable: false},
+			{Name: "clone_warning", Type: DB_Bool},
+			{Name: "created", Type: DB_DateTime, Nullable: false},
+		},
+		Indices: []*Index{
+			{Cols: []string{"user_id"}, Type: IndexType},
+		},
+	}
+
+	mg.AddMigration("create webauthn_credential table", NewAddTableMigration(WebauthnCredentialV1))
+	mg.AddMigration("add index webauthn_credential.user_handle", NewAddIndexMigration(WebauthnCredentialV1, WebauthnCredentialV1.Indices[0]))
 }

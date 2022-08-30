@@ -126,6 +126,8 @@ var (
 	// Basic Auth
 	BasicAuthEnabled bool
 
+	WebAuthnEnabled bool
+
 	// Global setting objects.
 	Raw *ini.File
 
@@ -327,6 +329,9 @@ type Cfg struct {
 	JWTAuthKeyFile       string
 	JWTAuthJWKSetFile    string
 	JWTAuthAutoSignUp    bool
+
+	// WebAuthn Auth
+	WebAuthnEnabled bool
 
 	// Dataproxy
 	SendUserHeader                 bool
@@ -1322,6 +1327,11 @@ func readAuthSettings(iniFile *ini.File, cfg *Cfg) (err error) {
 	cfg.JWTAuthKeyFile = valueAsString(authJWT, "key_file", "")
 	cfg.JWTAuthJWKSetFile = valueAsString(authJWT, "jwk_set_file", "")
 	cfg.JWTAuthAutoSignUp = authJWT.Key("auto_sign_up").MustBool(false)
+
+	// WebAuthn auth
+	authWebAuthn := iniFile.Section(("auth.webauthn"))
+	WebAuthnEnabled = authWebAuthn.Key("enabled").MustBool(false)
+	cfg.WebAuthnEnabled = WebAuthnEnabled
 
 	authProxy := iniFile.Section("auth.proxy")
 	AuthProxyEnabled = authProxy.Key("enabled").MustBool(false)

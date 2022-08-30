@@ -194,4 +194,8 @@ const (
 	// FlagCustomBranding
 	// Replaces whitelabeling with the new custom branding feature
 	FlagCustomBranding = "customBranding"
+
+	// FlagWebauthn
+	// Enables Webauthn for registration and login
+	FlagWebauthn = "webauthn"
 )

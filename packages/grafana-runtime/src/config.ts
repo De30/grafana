@@ -32,6 +32,7 @@ export class GrafanaBootConfig implements GrafanaConfig {
   appSubUrl = '';
   windowTitlePrefix = '';
   buildInfo: BuildInfo;
+  webAuthnEnabled = false;
   newPanelTitle = '';
   bootData: BootData;
   externalUserMngLinkUrl = '';

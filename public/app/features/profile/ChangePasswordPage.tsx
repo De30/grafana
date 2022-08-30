@@ -6,6 +6,7 @@ import { Page } from 'app/core/components/Page/Page';
 import { StoreState } from 'app/types';
 
 import { ChangePasswordForm } from './ChangePasswordForm';
+import { CredentialsForm } from './CredentialsForm';
 import { changePassword, loadUser } from './state/actions';
 
 export interface OwnProps {}
@@ -37,9 +38,12 @@ export function ChangePasswordPage({ loadUser, isUpdating, user, changePassword 
         {user ? (
           <>
             <Page.OldNavOnly>
-              <h3 className="page-sub-heading">Change Your Password</h3>
+              <h3 className="page-sub-heading">Security</h3>
             </Page.OldNavOnly>
-            <ChangePasswordForm user={user} onChangePassword={changePassword} isSaving={isUpdating} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <ChangePasswordForm user={user} onChangePassword={changePassword} isSaving={isUpdating} />
+              <CredentialsForm />
+            </div>
           </>
         ) : null}
       </Page.Contents>

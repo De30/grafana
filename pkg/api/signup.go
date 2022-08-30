@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/services/webauth"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -131,6 +132,75 @@ func (hs *HTTPServer) SignUpStep2(c *models.ReqContext) response.Response {
 	err = hs.loginUserWithUser(usr, c)
 	if err != nil {
 		return response.Error(500, "failed to login user", err)
+	}
+
+	metrics.MApiUserSignUpCompleted.Inc()
+
+	return response.JSON(http.StatusOK, apiResponse)
+}
+
+func (hs *HTTPServer) CreateCredentialCreationOptions(c *models.ReqContext) response.Response {
+	creationOptions := webauth.CreationOptions{}
+	if err := web.Bind(c.Req, &creationOptions); err != nil {
+		return response.Error(http.StatusBadRequest, "bad request data", err)
+	}
+
+	options, err := hs.webauthService.GenerateCredentialCreationOptions(c, &creationOptions)
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "Could not generate credential creation options", err)
+	}
+
+	return response.JSON(http.StatusOK, options)
+}
+
+func (hs *HTTPServer) GetCredentialRequestOptions(c *models.ReqContext) response.Response {
+	loginOrEmail := web.Params(c.Req)[":user"]
+
+	usr, err := hs.userService.GetByLogin(c.Req.Context(), &user.GetUserByLoginQuery{LoginOrEmail: loginOrEmail})
+	if err != nil {
+		return response.Error(http.StatusNotFound, "user not found", err)
+	}
+
+	options, err := hs.webauthService.GenerateCredentialRequestOptions(c, usr)
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "Could not generate credential request options", err)
+	}
+
+	return response.JSON(http.StatusOK, options)
+}
+
+func (hs *HTTPServer) WebAuthnSignUp(c *models.ReqContext) response.Response {
+	signUpRequest := webauth.SignUpRequestDTO{}
+	if err := web.Bind(c.Req, &signUpRequest); err != nil {
+		return response.Error(http.StatusBadRequest, "bad request data", err)
+	}
+
+	credentialCreationData, err := hs.webauthService.ValidateClientRequest(c.Req.Context(), &signUpRequest)
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "could not validate client request data", err)
+	}
+
+	newUser, err := hs.webauthService.SignUp(c, &webauth.WebAuthnSignUpCommand{
+		CredentialCreationData: credentialCreationData,
+		Name:                   signUpRequest.Name,
+		Email:                  signUpRequest.Email,
+	})
+	if err != nil {
+		return response.Error(http.StatusInternalServerError, "could not enroll new user", err)
+	}
+
+	// publish signup event
+	if err := hs.bus.Publish(c.Req.Context(), &events.SignUpCompleted{
+		Email: newUser.Email,
+		Name:  newUser.NameOrFallback(),
+	}); err != nil {
+		return response.Error(http.StatusInternalServerError, "Failed to publish event", err)
+	}
+
+	apiResponse := util.DynMap{"message": "User sign up completed successfully", "code": "redirect-to-landing-page"}
+
+	if err = hs.loginUserWithUser(newUser, c); err != nil {
+		return response.Error(http.StatusInternalServerError, "failed to login user", err)
 	}
 
 	metrics.MApiUserSignUpCompleted.Inc()
