@@ -54,7 +54,8 @@
     "postinstall": "husky install",
     "betterer": "betterer",
     "betterer:merge": "betterer merge",
-    "betterer:stats": "ts-node --transpile-only --project ./scripts/cli/tsconfig.json ./scripts/cli/reportBettererStats.ts"
+    "betterer:stats": "ts-node --transpile-only --project ./scripts/cli/tsconfig.json ./scripts/cli/reportBettererStats.ts",
+    "i18n:stats": "ts-node --transpile-only --project ./scripts/cli/tsconfig.json ./scripts/cli/countUntranslatedStrings.ts"
   },
   "grafana": {
     "whatsNewUrl": "https://grafana.com/docs/grafana/next/whatsnew/whats-new-in-v9-1/",
