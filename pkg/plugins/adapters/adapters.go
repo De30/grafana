@@ -50,9 +50,10 @@ func BackendUserFromSignedInUser(su *user.SignedInUser) *backend.User {
 		return nil
 	}
 	return &backend.User{
-		Login: su.Login,
-		Name:  su.Name,
-		Email: su.Email,
-		Role:  string(su.OrgRole),
+		Login:       su.Login,
+		Name:        su.Name,
+		Email:       su.Email,
+		Role:        string(su.OrgRole),
+		Permissions: su.Permissions[su.OrgID], // TODO filter
 	}
 }
