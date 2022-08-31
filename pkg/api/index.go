@@ -56,12 +56,12 @@ func (hs *HTTPServer) getProfileNode(c *models.ReqContext) *dtos.NavLink {
 	if !setting.DisableSignoutMenu {
 		// add sign out first
 		children = append(children, &dtos.NavLink{
-			Text:         "Sign out",
-			Id:           "sign-out",
-			Url:          hs.Cfg.AppSubURL + "/logout",
-			Icon:         "arrow-from-right",
-			Target:       "_self",
-			HideFromTabs: true,
+			Text:   "Sign out",
+			Id:     "sign-out",
+			Url:    hs.Cfg.AppSubURL + "/logout",
+			Icon:   "arrow-from-right",
+			Target: "_self",
+			Flags:  dtos.SetMany(dtos.NavFlagHideFromTabs),
 		})
 	}
 
@@ -74,6 +74,7 @@ func (hs *HTTPServer) getProfileNode(c *models.ReqContext) *dtos.NavLink {
 		Section:    dtos.NavSectionConfig,
 		SortWeight: dtos.WeightProfile,
 		Children:   children,
+		Flags:      dtos.SetMany(dtos.NavFlagRoundIcon),
 	}
 }
 
@@ -272,14 +273,14 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool, prefs *
 			Text: "Cloud", Id: "live-cloud", Url: hs.Cfg.AppSubURL + "/live/cloud", Icon: "cloud-upload",
 		})
 		navTree = append(navTree, &dtos.NavLink{
-			Id:           "live",
-			Text:         "Live",
-			SubTitle:     "Event streaming",
-			Icon:         "exchange-alt",
-			Url:          hs.Cfg.AppSubURL + "/live",
-			Children:     liveNavLinks,
-			Section:      dtos.NavSectionConfig,
-			HideFromTabs: true,
+			Id:       "live",
+			Text:     "Live",
+			SubTitle: "Event streaming",
+			Icon:     "exchange-alt",
+			Url:      hs.Cfg.AppSubURL + "/live",
+			Children: liveNavLinks,
+			Section:  dtos.NavSectionConfig,
+			Flags:    dtos.SetMany(dtos.NavFlagHideFromTabs),
 		})
 	}
 
@@ -530,26 +531,31 @@ func (hs *HTTPServer) buildDashboardNavLinks(c *models.ReqContext, hasEditPerm b
 
 	if hasEditPerm {
 		dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-			Text: "Divider", Divider: true, Id: "divider", HideFromTabs: true,
+			Text:  "Divider",
+			Id:    "divider",
+			Flags: dtos.SetMany(dtos.NavFlagIsDivider, dtos.NavFlagHideFromTabs),
 		})
 
 		if hasAccess(hasEditPermInAnyFolder, ac.EvalPermission(dashboards.ActionDashboardsCreate)) {
 			dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-				Text: "New dashboard", Icon: "plus", Url: hs.Cfg.AppSubURL + "/dashboard/new", HideFromTabs: true, Id: "dashboards/new", ShowIconInNavbar: true,
+				Text: "New dashboard", Icon: "plus", Url: hs.Cfg.AppSubURL + "/dashboard/new", Id: "dashboards/new",
+				Flags: dtos.SetMany(dtos.NavFlagHideFromTabs, dtos.NavFlagShowIconInNavbar),
 			})
 		}
 
 		if hasAccess(ac.ReqOrgAdminOrEditor, ac.EvalPermission(dashboards.ActionFoldersCreate)) {
 			dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
 				Text: "New folder", SubTitle: "Create a new folder to organize your dashboards", Id: "dashboards/folder/new",
-				Icon: "plus", Url: hs.Cfg.AppSubURL + "/dashboards/folder/new", HideFromTabs: true, ShowIconInNavbar: true,
+				Icon: "plus", Url: hs.Cfg.AppSubURL + "/dashboards/folder/new",
+				Flags: dtos.SetMany(dtos.NavFlagHideFromTabs, dtos.NavFlagShowIconInNavbar),
 			})
 		}
 
 		if hasAccess(hasEditPermInAnyFolder, ac.EvalPermission(dashboards.ActionDashboardsCreate)) {
 			dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
 				Text: "Import", SubTitle: "Import dashboard from file or Grafana.com", Id: "dashboards/import", Icon: "plus",
-				Url: hs.Cfg.AppSubURL + "/dashboard/import", HideFromTabs: true, ShowIconInNavbar: true,
+				Url:   hs.Cfg.AppSubURL + "/dashboard/import",
+				Flags: dtos.SetMany(dtos.NavFlagHideFromTabs, dtos.NavFlagShowIconInNavbar),
 			})
 		}
 	}
@@ -615,12 +621,14 @@ func (hs *HTTPServer) buildAlertNavLinks(c *models.ReqContext) []*dtos.NavLink {
 
 	if hasAccess(hs.editorInAnyFolder, ac.EvalAny(ac.EvalPermission(ac.ActionAlertingRuleCreate), ac.EvalPermission(ac.ActionAlertingRuleExternalWrite))) {
 		alertChildNavs = append(alertChildNavs, &dtos.NavLink{
-			Text: "Divider", Divider: true, Id: "divider", HideFromTabs: true,
+			Text: "Divider", Id: "divider",
+			Flags: dtos.SetMany(dtos.NavFlagIsDivider, dtos.NavFlagHideFromTabs),
 		})
 
 		alertChildNavs = append(alertChildNavs, &dtos.NavLink{
 			Text: "New alert rule", SubTitle: "Create an alert rule", Id: "alert",
-			Icon: "plus", Url: hs.Cfg.AppSubURL + "/alerting/new", HideFromTabs: true, ShowIconInNavbar: true,
+			Icon: "plus", Url: hs.Cfg.AppSubURL + "/alerting/new",
+			Flags: dtos.SetMany(dtos.NavFlagHideFromTabs, dtos.NavFlagShowIconInNavbar),
 		})
 	}
 

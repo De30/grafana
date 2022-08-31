@@ -7,7 +7,7 @@ import React, { useRef } from 'react';
 import CSSTransition from 'react-transition-group/CSSTransition';
 import { useLocalStorage } from 'react-use';
 
-import { GrafanaTheme2, NavModelItem } from '@grafana/data';
+import { GrafanaTheme2, hasFlag, NavFlag, NavModelItem } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 import { CollapsableSection, CustomScrollbar, Icon, IconButton, IconName, useStyles2, useTheme2 } from '@grafana/ui';
 
@@ -238,12 +238,12 @@ export function NavItem({
         <ul className={styles.children}>
           {link.children.map(
             (childLink) =>
-              !childLink.divider && (
+              !hasFlag(childLink.flags, NavFlag.IsDivider) && (
                 <NavBarMenuItem
                   key={`${link.text}-${childLink.text}`}
                   isActive={activeItem === childLink}
-                  isDivider={childLink.divider}
-                  icon={childLink.showIconInNavbar ? (childLink.icon as IconName) : undefined}
+                  isDivider={true}
+                  icon={hasFlag(childLink.flags, NavFlag.ShowIconInNavbar) ? (childLink.icon as IconName) : undefined}
                   onClick={() => {
                     childLink.onClick?.();
                     onClose();

@@ -50,6 +50,7 @@ export const enrichConfigItems = (
       target: '_self',
       text: 'Sign in',
       url: forcedLoginUrl,
+      flags: 0,
     });
   }
 

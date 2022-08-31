@@ -56,25 +56,50 @@ const (
 	NavSectionConfig string = "config"
 )
 
+type NavFlag uint8
+
+const (
+	NavFlagIsDivider NavFlag = 1 << iota
+	NavFlagHideFromMenu
+	NavFlagHideFromTabs
+	NavFlagShowIconInNavbar
+	NavFlagRoundIcon
+)
+
+func Set(b, flag NavFlag) NavFlag { return b | flag }
+func SetMany(flags ...NavFlag) NavFlag {
+	var flag NavFlag
+
+	for _, f := range flags {
+		flag = Set(flag, f)
+	}
+
+	return flag
+}
+func Clear(b, flag NavFlag) NavFlag  { return b &^ flag }
+func Toggle(b, flag NavFlag) NavFlag { return b ^ flag }
+func Has(b, flag NavFlag) bool       { return b&flag != 0 }
+
 type NavLink struct {
-	Id               string     `json:"id,omitempty"`
-	Text             string     `json:"text"`
-	Description      string     `json:"description,omitempty"`
-	Section          string     `json:"section,omitempty"`
-	SubTitle         string     `json:"subTitle,omitempty"`
-	Icon             string     `json:"icon,omitempty"` // Available icons can be browsed in Storybook: https://developers.grafana.com/ui/latest/index.html?path=/story/docs-overview-icon--icons-overview
-	Img              string     `json:"img,omitempty"`
-	Url              string     `json:"url,omitempty"`
-	Target           string     `json:"target,omitempty"`
-	SortWeight       int64      `json:"sortWeight,omitempty"`
-	Divider          bool       `json:"divider,omitempty"`
-	HideFromMenu     bool       `json:"hideFromMenu,omitempty"`
-	HideFromTabs     bool       `json:"hideFromTabs,omitempty"`
-	ShowIconInNavbar bool       `json:"showIconInNavbar,omitempty"`
-	Children         []*NavLink `json:"children,omitempty"`
-	HighlightText    string     `json:"highlightText,omitempty"`
-	HighlightID      string     `json:"highlightId,omitempty"`
-	EmptyMessageId   string     `json:"emptyMessageId,omitempty"`
+	Id          string `json:"id,omitempty"`
+	Text        string `json:"text"`
+	Description string `json:"description,omitempty"`
+	Section     string `json:"section,omitempty"`
+	SubTitle    string `json:"subTitle,omitempty"`
+	Icon        string `json:"icon,omitempty"` // Available icons can be browsed in Storybook: https://developers.grafana.com/ui/latest/index.html?path=/story/docs-overview-icon--icons-overview
+	Img         string `json:"img,omitempty"`
+	Url         string `json:"url,omitempty"`
+	Target      string `json:"target,omitempty"`
+	SortWeight  int64  `json:"sortWeight,omitempty"`
+	// Divider          bool       `json:"divider,omitempty"`
+	// HideFromMenu     bool       `json:"hideFromMenu,omitempty"`
+	// HideFromTabs     bool       `json:"hideFromTabs,omitempty"`
+	// ShowIconInNavbar bool       `json:"showIconInNavbar,omitempty"`
+	Children       []*NavLink `json:"children,omitempty"`
+	HighlightText  string     `json:"highlightText,omitempty"`
+	HighlightID    string     `json:"highlightId,omitempty"`
+	EmptyMessageId string     `json:"emptyMessageId,omitempty"`
+	Flags          NavFlag    `json:"flags"`
 }
 
 // NavIDCfg is the id for org configuration navigation node

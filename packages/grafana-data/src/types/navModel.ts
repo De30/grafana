@@ -1,5 +1,18 @@
 import { ComponentType } from 'react';
 
+export enum NavFlag {
+  IsDivider = 0,
+  HideFromMenu = 1 << 1,
+  HideFromTabs = 1 << 2,
+  ShowIconInNavbar = 1 << 3,
+  RoundIcon = 1 << 3,
+}
+
+export function hasFlag(value: number, flag: NavFlag) {
+  // yes, this is a bitwise AND
+  return flag === (value & flag);
+}
+
 export interface NavLinkDTO {
   id?: string;
   text: string;
@@ -11,12 +24,14 @@ export interface NavLinkDTO {
   url?: string;
   target?: string;
   sortWeight?: number;
-  divider?: boolean;
-  hideFromMenu?: boolean;
-  hideFromTabs?: boolean;
+  // divider?: boolean;
+  // hideFromMenu?: boolean;
+  // hideFromTabs?: boolean;
+  // showIconInNavbar?: boolean;
   children?: NavLinkDTO[];
   highlightText?: string;
   emptyMessageId?: string;
+  flags: number;
 }
 
 export interface NavModelItem extends NavLinkDTO {
@@ -30,7 +45,6 @@ export interface NavModelItem extends NavLinkDTO {
   highlightText?: string;
   highlightId?: string;
   tabSuffix?: ComponentType<{ className?: string }>;
-  showIconInNavbar?: boolean;
   hideFromBreadcrumbs?: boolean;
 }
 
