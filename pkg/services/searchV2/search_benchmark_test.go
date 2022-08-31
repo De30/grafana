@@ -61,13 +61,20 @@ func BenchmarkSearch(b *testing.B) {
 		"eu",
 	}
 
+	types := []string{
+		"wildcard",
+		"standard",
+		"substring",
+	}
+
 	for _, phrase := range phrases {
-		b.Run(fmt.Sprintf("[%s], with wildcard query", phrase), searchScenario(index, true, phrase))
-		b.Run(fmt.Sprintf("[%s], without wildcard query", phrase), searchScenario(index, false, phrase))
+		for _, t := range types {
+			b.Run(fmt.Sprintf("[%s], %s search", phrase, t), searchScenario(index, t, phrase))
+		}
 	}
 }
 
-func searchScenario(index *orgIndex, includeSubstring bool, phrase string) func(b *testing.B) {
+func searchScenario(index *orgIndex, searchType string, phrase string) func(b *testing.B) {
 	return func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			resp := doSearchQuery(
@@ -76,9 +83,9 @@ func searchScenario(index *orgIndex, includeSubstring bool, phrase string) func(
 				index,
 				testAllowAllFilter,
 				DashboardQuery{
-					Query:                   phrase,
-					IncludeSubstringMatches: includeSubstring,
-					Limit:                   1000,
+					Query: phrase,
+					Type:  searchType,
+					Limit: 1000,
 					Kind: []string{
 						string(entityKindDashboard),
 						string(entityKindFolder),

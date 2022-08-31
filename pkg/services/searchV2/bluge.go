@@ -17,21 +17,22 @@ import (
 )
 
 const (
-	documentFieldUID         = "_id" // actually UID!! but bluge likes "_id"
-	documentFieldKind        = "kind"
-	documentFieldTag         = "tag"
-	documentFieldURL         = "url"
-	documentFieldName        = "name"
-	documentFieldName_sort   = "name_sort"
-	documentFieldName_ngram  = "name_ngram"
-	documentFieldDescription = "description"
-	documentFieldLocation    = "location" // parent path
-	documentFieldPanelType   = "panel_type"
-	documentFieldTransformer = "transformer"
-	documentFieldDSUID       = "ds_uid"
-	documentFieldDSType      = "ds_type"
-	DocumentFieldCreatedAt   = "created_at"
-	DocumentFieldUpdatedAt   = "updated_at"
+	documentFieldUID          = "_id" // actually UID!! but bluge likes "_id"
+	documentFieldKind         = "kind"
+	documentFieldTag          = "tag"
+	documentFieldURL          = "url"
+	documentFieldName         = "name"
+	documentFieldName_sort    = "name_sort"
+	documentFieldName_ngram   = "name_ngram"
+	documentFieldName_keyword = "name_keyword"
+	documentFieldDescription  = "description"
+	documentFieldLocation     = "location" // parent path
+	documentFieldPanelType    = "panel_type"
+	documentFieldTransformer  = "transformer"
+	documentFieldDSUID        = "ds_uid"
+	documentFieldDSType       = "ds_type"
+	DocumentFieldCreatedAt    = "created_at"
+	DocumentFieldUpdatedAt    = "updated_at"
 )
 
 func initOrgIndex(dashboards []dashboard, logger log.Logger, extendDoc ExtendDashboardFunc) (*orgIndex, error) {
@@ -229,6 +230,7 @@ func newSearchDocument(uid string, name string, descr string, url string) *bluge
 
 	if name != "" {
 		doc.AddField(bluge.NewTextField(documentFieldName, name).StoreValue().SearchTermPositions())
+		doc.AddField(bluge.NewKeywordField(documentFieldName_keyword, strings.ToLower(name)).StoreValue().SearchTermPositions())
 		doc.AddField(bluge.NewTextField(documentFieldName_ngram, name).WithAnalyzer(ngramIndexAnalyzer))
 
 		// Don't add a field for empty names
@@ -435,28 +437,35 @@ func doSearchQuery(
 			fullQuery.AddShould(bluge.NewMatchAllQuery())
 		}
 	} else {
-		// The actual se
-		bq := bluge.NewBooleanQuery().
-			AddShould(bluge.NewMatchQuery(q.Query).SetField(documentFieldName).SetBoost(6)).
-			AddShould(bluge.NewMatchQuery(q.Query).SetField(documentFieldDescription).SetBoost(3)).
-			AddShould(bluge.NewMatchQuery(q.Query).
-				SetField(documentFieldName_ngram).
-				SetOperator(bluge.MatchQueryOperatorAnd). // all terms must match
-				SetAnalyzer(ngramQueryAnalyzer).SetBoost(1))
+		bq := bluge.NewBooleanQuery()
 
-		if q.IncludeSubstringMatches {
+		if q.Type == "wildcard" {
 			bq.AddShould(
-				bluge.NewWildcardQuery(fmt.Sprintf("*%s*", q.Query)).
-					SetField(documentFieldName).
+				bluge.NewWildcardQuery(fmt.Sprintf("*%s*", strings.ToLower(q.Query))).
+					SetField(documentFieldName_keyword).
 					SetBoost(1))
+		} else if q.Type == "substring" {
+			bq.AddShould(
+				NewSubstringQuery(q.Query).
+					SetField(documentFieldName_keyword).
+					SetBoost(1))
+		} else {
+			// The actual se
+			bq.AddShould(bluge.NewMatchQuery(q.Query).SetField(documentFieldName).SetBoost(6)).
+				AddShould(bluge.NewMatchQuery(q.Query).SetField(documentFieldDescription).SetBoost(3)).
+				AddShould(bluge.NewMatchQuery(q.Query).
+					SetField(documentFieldName_ngram).
+					SetOperator(bluge.MatchQueryOperatorAnd). // all terms must match
+					SetAnalyzer(ngramQueryAnalyzer).SetBoost(1))
+
+			if len(q.Query) > 4 {
+				bq.AddShould(bluge.NewFuzzyQuery(q.Query).SetField(documentFieldName)).SetBoost(1.5)
+			}
+			if len(q.Query) > ngramEdgeFilterMaxLength && !strings.Contains(q.Query, " ") {
+				bq.AddShould(bluge.NewPrefixQuery(strings.ToLower(q.Query)).SetField(documentFieldName)).SetBoost(6)
+			}
 		}
 
-		if len(q.Query) > 4 {
-			bq.AddShould(bluge.NewFuzzyQuery(q.Query).SetField(documentFieldName)).SetBoost(1.5)
-		}
-		if len(q.Query) > ngramEdgeFilterMaxLength && !strings.Contains(q.Query, " ") {
-			bq.AddShould(bluge.NewPrefixQuery(strings.ToLower(q.Query)).SetField(documentFieldName)).SetBoost(6)
-		}
 		fullQuery.AddMust(bq)
 	}
 
