@@ -50,6 +50,7 @@ type Opts struct {
 	Timezone          string
 	ConcurrentLimit   int
 	DeviceScaleFactor float64
+	PageNumber        int
 	Headers           map[string][]string
 	Theme             models.Theme
 }

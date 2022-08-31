@@ -58,6 +58,7 @@ func (rs *RenderingService) renderViaHTTP(ctx context.Context, renderKey string,
 	queryParams.Add("encoding", opts.Encoding)
 	queryParams.Add("timeout", strconv.Itoa(int(opts.Timeout.Seconds())))
 	queryParams.Add("deviceScaleFactor", fmt.Sprintf("%f", opts.DeviceScaleFactor))
+	queryParams.Add("pageNumber", fmt.Sprintf("%d", opts.PageNumber))
 
 	rendererURL.RawQuery = queryParams.Encode()
 
