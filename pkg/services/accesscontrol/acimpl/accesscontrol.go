@@ -33,6 +33,10 @@ func (a *AccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, e
 	defer timer.ObserveDuration()
 	metrics.MAccessEvaluationCount.Inc()
 
+	if !verifyPermissionsSet(user) {
+		user.Permissions = make(map[int64]map[string][]string)
+	}
+
 	if !verifyPermissions(user) {
 		a.log.Warn("no permissions set for user", "userID", user.UserID, "orgID", user.OrgID, "login", user.Login)
 		return false, nil
@@ -98,6 +102,10 @@ func (a *AccessControl) IsDisabled() bool {
 	return accesscontrol.IsDisabled(a.cfg)
 }
 
+func verifyPermissionsSet(u *user.SignedInUser) bool {
+	return u.Permissions != nil
+}
+
 func verifyPermissions(u *user.SignedInUser) bool {
-	return u.Permissions != nil || u.Permissions[u.OrgID] != nil
+	return verifyPermissionsSet(u) || u.Permissions[u.OrgID] != nil
 }
