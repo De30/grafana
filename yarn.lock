@@ -4839,7 +4839,7 @@ __metadata:
     lodash: 4.17.21
     marked: 4.0.18
     moment: 2.29.4
-    moment-timezone: 0.5.34
+    moment-timezone: 0.5.35
     ol: 6.15.1
     papaparse: 5.3.2
     react: 17.0.2
@@ -4981,12 +4981,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grafana/lezer-logql@npm:0.0.15":
-  version: 0.0.15
-  resolution: "@grafana/lezer-logql@npm:0.0.15"
+"@grafana/lezer-logql@npm:0.0.17":
+  version: 0.0.17
+  resolution: "@grafana/lezer-logql@npm:0.0.17"
   peerDependencies:
     "@lezer/lr": ^1.0.0
-  checksum: 2dac2654b46ee255ae56f12e2c23ecb71a0eda2753f98117d61b79a10dd0f0b443420aa34dd3cbc243a92cd8983411823cb2bebfe04d5b86cf9c72236c054de1
+  checksum: c792128fdf0ea43a8fc10258bedc7141d72d7d9f682d31864019b37f4c606107c23f762692685f4236182a440bb1559778ffbb09f3b7a96ca3c7235e22eb43d7
   languageName: node
   linkType: hard
 
@@ -5494,7 +5494,7 @@ __metadata:
     lru-memoize: ^1.1.0
     memoize-one: 6.0.0
     moment: 2.29.4
-    moment-timezone: 0.5.34
+    moment-timezone: 0.5.35
     prop-types: 15.8.1
     react: 17.0.2
     react-dom: 17.0.2
@@ -7916,10 +7916,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@opentelemetry/semantic-conventions@npm:1.5.0"
-  checksum: 455298a5037bd34e7fa687a4485bb66b6fead60647570fa5fd9cc8981feba4d5ff083b3c79f6d87ef2cd64df8502b8b3c9dbd337beb2dbbb23ffc98cb081d57c
+"@opentelemetry/semantic-conventions@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.6.0"
+  checksum: e73d452a4c83f220860b00b7e42a34bc8bebeb70a7e0278abe0d3f6dfbfd69ed3f367accf6bb448effcdd998f402b82bfa80b4d902ae1bfa8d51b13ab0b2bd55
   languageName: node
   linkType: hard
 
@@ -8686,6 +8686,16 @@ __metadata:
     "@daybrush/utils": 1.6.0
     "@scena/event-emitter": ^1.0.2
   checksum: aacb33587034a216aadca035e837e831029c73e37961217e2a3b910527f0798efc491a604088b979144ab0172cb978cd8e8cd2b2a7b91532312459a533f6bc2b
+  languageName: node
+  linkType: hard
+
+"@scena/dragscroll@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@scena/dragscroll@npm:1.2.1"
+  dependencies:
+    "@daybrush/utils": 1.6.0
+    "@scena/event-emitter": ^1.0.2
+  checksum: 217b0612b0b5d2e721cd41b7534cc1b831aca236a4256b30bdeb965b3b0b7cf9f3934801a7158cb38483242e2568f8b734eeccfaee43b5df4e5df9ead7653dd5
   languageName: node
   linkType: hard
 
@@ -21265,6 +21275,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gesto@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "gesto@npm:1.13.0"
+  dependencies:
+    "@daybrush/utils": ^1.7.1
+    "@scena/event-emitter": ^1.0.2
+  checksum: 6042fffce17853e7d2c7df64ffa5a310e02a3be77171c58bb82aa83381e92e0c284750b34634a4c80cc30fc1dd446bbbb71110eafeb8307a07566f9792765cec
+  languageName: node
+  linkType: hard
+
 "gesto@npm:^1.9.0":
   version: 1.9.0
   resolution: "gesto@npm:1.9.0"
@@ -21767,7 +21787,7 @@ __metadata:
     "@grafana/eslint-config": 5.0.0
     "@grafana/experimental": ^0.0.2-canary.36
     "@grafana/google-sdk": 0.0.3
-    "@grafana/lezer-logql": 0.0.15
+    "@grafana/lezer-logql": 0.0.17
     "@grafana/runtime": "workspace:*"
     "@grafana/schema": "workspace:*"
     "@grafana/slate-react": 0.22.10-grafana
@@ -21786,7 +21806,7 @@ __metadata:
     "@microsoft/api-extractor": 7.29.5
     "@opentelemetry/api": 1.1.0
     "@opentelemetry/exporter-collector": 0.25.0
-    "@opentelemetry/semantic-conventions": 1.5.0
+    "@opentelemetry/semantic-conventions": 1.6.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.7
     "@popperjs/core": 2.11.5
     "@prometheus-io/lezer-promql": ^0.37.0-rc.1
@@ -21960,7 +21980,7 @@ __metadata:
     memoize-one: 6.0.0
     mini-css-extract-plugin: 2.6.1
     moment: 2.29.4
-    moment-timezone: 0.5.34
+    moment-timezone: 0.5.35
     monaco-editor: 0.34.0
     monaco-promql: 1.7.4
     mousetrap: 1.6.5
@@ -22026,7 +22046,7 @@ __metadata:
     rxjs: 7.5.6
     sass: 1.54.0
     sass-loader: 13.0.2
-    selecto: 1.17.0
+    selecto: 1.19.0
     semver: 7.3.7
     sinon: 14.0.0
     slate: 0.47.8
@@ -22056,6 +22076,7 @@ __metadata:
     webpack-bundle-analyzer: 4.5.0
     webpack-cli: 4.10.0
     webpack-dev-server: 4.9.3
+    webpack-manifest-plugin: 5.0.0
     webpack-merge: 5.8.0
     whatwg-fetch: 3.6.2
   languageName: unknown
@@ -27490,12 +27511,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:0.5.34":
-  version: 0.5.34
-  resolution: "moment-timezone@npm:0.5.34"
+"moment-timezone@npm:0.5.35":
+  version: 0.5.35
+  resolution: "moment-timezone@npm:0.5.35"
   dependencies:
     moment: ">= 2.9.0"
-  checksum: 12a1d3d52e4ba509cf1fa36bbda59d898a08fa80ab35f6c358747e93aec1f07e617cec647eaf2e8acf5f9132e581d4704d34a9edffa9a80c5cd04bf23b277595
+  checksum: 0f3907282dc9ae3d405fefaccf486dc4222945ff479127fd269e6c4ddc25e526e7ca9e849d6bf941c871bd17e875b256bdb276137a55db9fce4177c792a003df
   languageName: node
   linkType: hard
 
@@ -34027,21 +34048,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selecto@npm:1.17.0":
-  version: 1.17.0
-  resolution: "selecto@npm:1.17.0"
+"selecto@npm:1.19.0":
+  version: 1.19.0
+  resolution: "selecto@npm:1.19.0"
   dependencies:
     "@daybrush/utils": ^1.7.1
     "@egjs/children-differ": ^1.0.1
-    "@scena/dragscroll": ^1.1.1
+    "@scena/dragscroll": ^1.2.1
     "@scena/event-emitter": ^1.0.5
     css-styled: ^1.0.0
     css-to-mat: ^1.0.3
     framework-utils: ^1.1.0
-    gesto: ^1.9.0
+    gesto: ^1.13.0
     keycon: ^1.2.0
     overlap-area: ^1.1.0
-  checksum: ad288ee4be3bc2610925010a5a215370e0664f2075d7157ef2c020d08ac7244e9d6818fccb67998dbd655be8c5b9f2912cac329b8a9961787c9e86873adba47d
+  checksum: ab07175404fda0218d09b9ff122bb66cdad30a46b11447d9c1fee6e6edf5be7f7af0941ad4a7adecbe02938f59a52d148615af9992d7b7a74a5acbc0e3e71b48
   languageName: node
   linkType: hard
 
@@ -34722,7 +34743,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-list-map@npm:^2.0.0":
+"source-list-map@npm:^2.0.0, source-list-map@npm:^2.0.1":
   version: 2.0.1
   resolution: "source-list-map@npm:2.0.1"
   checksum: 806efc6f75e7cd31e4815e7a3aaf75a45c704871ea4075cb2eb49882c6fca28998f44fc5ac91adb6de03b2882ee6fb02f951fdc85e6a22b338c32bfe19557938
@@ -37973,6 +37994,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"webpack-manifest-plugin@npm:5.0.0":
+  version: 5.0.0
+  resolution: "webpack-manifest-plugin@npm:5.0.0"
+  dependencies:
+    tapable: ^2.0.0
+    webpack-sources: ^2.2.0
+  peerDependencies:
+    webpack: ^5.47.0
+  checksum: 864d68f90870e194074756e71caf3df36b777d687a50286ba27eb1958480642b125c2cf47a2787beac52eba4b1ccf1fe8141f017c81f1e87e953481f852a7c48
+  languageName: node
+  linkType: hard
+
 "webpack-merge@npm:5.8.0, webpack-merge@npm:^5.7.3":
   version: 5.8.0
   resolution: "webpack-merge@npm:5.8.0"
@@ -37990,6 +38023,16 @@ __metadata:
     source-list-map: ^2.0.0
     source-map: ~0.6.1
   checksum: 37463dad8d08114930f4bc4882a9602941f07c9f0efa9b6bc78738cd936275b990a596d801ef450d022bb005b109b9f451dd087db2f3c9baf53e8e22cf388f79
+  languageName: node
+  linkType: hard
+
+"webpack-sources@npm:^2.2.0":
+  version: 2.3.1
+  resolution: "webpack-sources@npm:2.3.1"
+  dependencies:
+    source-list-map: ^2.0.1
+    source-map: ^0.6.1
+  checksum: 6fd67f2274a84c5f51ad89767112ec8b47727134bf0f2ba0cff458c970f18966939a24128bdbddba621cd66eeb2bef0552642a9333cd8e54514f7b2a71776346
   languageName: node
   linkType: hard
 
