@@ -57,9 +57,7 @@ func (a *AccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, e
 	return resolvedEvaluator.Evaluate(user.Permissions[user.OrgID]), nil
 }
 
-type Checker func(scopes ...string) bool
-
-func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) Checker {
+func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(scopes ...string) bool {
 	if !verifyPermissions(user) {
 		return func(scope ...string) bool { return false }
 	}
@@ -69,10 +67,9 @@ func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, ac
 		return func(scope ...string) bool { return false }
 	}
 
-	checkers := map[string]Checker{}
 	scopes, ok := permissions[action]
 	if !ok {
-		checkers[action] = func(scope ...string) bool { return false }
+		return func(scope ...string) bool { return false }
 	}
 
 	wildcards := accesscontrol.WildcardsFromPrefixes(prefixes...)
