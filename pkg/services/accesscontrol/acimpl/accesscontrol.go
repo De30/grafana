@@ -71,7 +71,7 @@ func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, ac
 		checkers[action] = func(scope ...string) bool { return false }
 	}
 
-	wildcards := accesscontrol.WildcardsFromPrefix()
+	wildcards := accesscontrol.WildcardsFromPrefixes(prefixes...)
 	lookup := make(map[string]bool, len(scopes)-1)
 	for _, s := range scopes {
 		if wildcards.Contains(s) {

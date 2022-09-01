@@ -11,7 +11,7 @@ type Metadata map[string]bool
 
 // GetResourcesMetadata returns a map of accesscontrol metadata, listing for each resource, users available actions
 func GetResourcesMetadata(ctx context.Context, permissions map[string][]string, prefix string, resourceIDs map[string]bool) map[string]Metadata {
-	wildcards := WildcardsFromPrefix(prefix)
+	wildcards := WildcardsFromPrefixes(prefix)
 
 	// index of the prefix in the scope
 	prefixIndex := len(prefix)
