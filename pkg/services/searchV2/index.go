@@ -59,7 +59,8 @@ type buildSignal struct {
 }
 
 type orgIndex struct {
-	writers map[indexType]*bluge.Writer
+	writers    map[indexType]*bluge.Writer
+	dashboards []dashboard
 }
 
 type indexType string

@@ -127,6 +127,7 @@ func initOrgIndex(dashboards []dashboard, logger log.Logger, extendDoc ExtendDas
 	logger.Info("Finish inserting docs into index", "elapsed", time.Since(label))
 	logger.Info("Finish building index", "totalElapsed", time.Since(start))
 	return &orgIndex{
+		dashboards: dashboards,
 		writers: map[indexType]*bluge.Writer{
 			indexTypeDashboard: dashboardWriter,
 		},
@@ -367,6 +368,7 @@ func doSearchQuery(
 ) *backend.DataResponse {
 	response := &backend.DataResponse{}
 	header := &customMeta{}
+	isMatchAllQuery := q.Query == "*" || q.Query == ""
 
 	reader, cancel, err := index.readerForIndex(indexTypeDashboard)
 	if err != nil {
@@ -375,6 +377,106 @@ func doSearchQuery(
 		return response
 	}
 	defer cancel()
+
+	if q.Type == "no-bluge" {
+		fScore := data.NewFieldFromFieldType(data.FieldTypeFloat64, 0)
+		fUID := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fKind := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fPType := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fName := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fURL := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fLocation := data.NewFieldFromFieldType(data.FieldTypeString, 0)
+		fTags := data.NewFieldFromFieldType(data.FieldTypeNullableJSON, 0)
+		fDSUIDs := data.NewFieldFromFieldType(data.FieldTypeJSON, 0)
+		fExplain := data.NewFieldFromFieldType(data.FieldTypeNullableJSON, 0)
+		fScore.Name = "score"
+		fUID.Name = "uid"
+		fKind.Name = "kind"
+		fName.Name = "name"
+		fLocation.Name = "location"
+		fURL.Name = "url"
+		fURL.Config = &data.FieldConfig{
+			Links: []data.DataLink{
+				{Title: "link", URL: "${__value.text}"},
+			},
+		}
+		fPType.Name = "panel_type"
+		fDSUIDs.Name = "ds_uid"
+		fTags.Name = "tags"
+		fExplain.Name = "explain"
+
+		frame := data.NewFrame("Query results", fKind, fUID, fName, fPType, fURL, fTags, fDSUIDs, fLocation)
+		if q.Explain {
+			frame.Fields = append(frame.Fields, fScore, fExplain)
+		}
+		frame.SetMeta(&data.FrameMeta{
+			Type:   "search-results",
+			Custom: header,
+		})
+		locationItems := make(map[string]bool, 50)
+
+		fieldLen := 0
+
+		for _, dash := range index.dashboards {
+			if !isMatchAllQuery && !strings.Contains(strings.ToLower(dash.info.Title), strings.ToLower(q.Query)) {
+				continue
+			}
+
+			header.Count += 1
+
+			kind := entityKindDashboard
+			if dash.isFolder {
+				kind = entityKindFolder
+			}
+			fKind.Append(string(kind))
+			fUID.Append(dash.uid)
+			fPType.Append("")
+			fName.Append(dash.info.Title)
+
+			loc := ""
+			fURL.Append(appSubUrl + loc)
+			fLocation.Append("")
+
+			// set a key for all path parts we return
+			if !q.SkipLocation {
+				for _, v := range strings.Split(loc, "/") {
+					locationItems[v] = true
+				}
+			}
+
+			if len(dash.info.Tags) > 0 {
+				js, _ := json.Marshal(dash.info.Tags)
+				jsb := json.RawMessage(js)
+				fTags.Append(&jsb)
+			} else {
+				fTags.Append(nil)
+			}
+
+			dsUIDs := make([]string, 0)
+			for _, dsRef := range dash.info.Datasource {
+				dsUIDs = append(dsUIDs, dsRef.UID)
+			}
+			js, _ := json.Marshal(dsUIDs)
+			jsb := json.RawMessage(js)
+			fDSUIDs.Append(jsb)
+
+			// extend fields to match the longest field
+			fieldLen++
+			for _, f := range frame.Fields {
+				if fieldLen > f.Len() {
+					f.Extend(fieldLen - f.Len())
+				}
+			}
+
+		}
+		response.Frames = append(response.Frames, frame)
+
+		if len(locationItems) > 0 && !q.SkipLocation {
+			header.Locations = getLocationLookupInfo(ctx, reader, locationItems)
+		}
+
+		return response
+	}
 
 	hasConstraints := false
 	fullQuery := bluge.NewBooleanQuery()
@@ -431,7 +533,6 @@ func doSearchQuery(
 		hasConstraints = true
 	}
 
-	isMatchAllQuery := q.Query == "*" || q.Query == ""
 	if isMatchAllQuery {
 		if !hasConstraints {
 			fullQuery.AddShould(bluge.NewMatchAllQuery())

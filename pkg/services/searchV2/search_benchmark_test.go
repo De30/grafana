@@ -65,6 +65,7 @@ func BenchmarkSearch(b *testing.B) {
 		"wildcard",
 		"standard",
 		"substring",
+		"no-bluge",
 	}
 
 	for _, phrase := range phrases {
@@ -89,7 +90,6 @@ func searchScenario(index *orgIndex, searchType string, phrase string) func(b *t
 					Kind: []string{
 						string(entityKindDashboard),
 						string(entityKindFolder),
-						string(entityKindPanel),
 					},
 				},
 				&NoopQueryExtender{},
