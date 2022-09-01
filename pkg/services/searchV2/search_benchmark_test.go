@@ -66,6 +66,7 @@ func BenchmarkSearch(b *testing.B) {
 		"standard",
 		"substring",
 		"no-bluge",
+		"name-contains",
 	}
 
 	for _, phrase := range phrases {

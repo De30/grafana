@@ -540,7 +540,10 @@ func doSearchQuery(
 	} else {
 		bq := bluge.NewBooleanQuery()
 
-		if q.Type == "wildcard" {
+		if q.Type == "name-contains" {
+			bq.AddShould(NewNameContainsQuery(q.Query, documentFieldName))
+
+		} else if q.Type == "wildcard" {
 			bq.AddShould(
 				bluge.NewWildcardQuery(fmt.Sprintf("*%s*", strings.ToLower(q.Query))).
 					SetField(documentFieldName_keyword).
