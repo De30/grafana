@@ -93,7 +93,7 @@ func ParseScopes(prefix string, scopes []string) (ids map[interface{}]struct{}, 
 		parser = parseIntAttribute
 	}
 
-	wildcards := WildcardsFromPrefix(prefix)
+	wildcards := WildcardsFromPrefixes(prefix)
 
 	for _, scope := range scopes {
 		if wildcards.Contains(scope) {

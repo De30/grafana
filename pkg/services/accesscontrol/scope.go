@@ -142,9 +142,9 @@ func (s scopeProviderImpl) GetResourceAllIDScope() string {
 	return GetResourceAllIDScope(s.root)
 }
 
-// WildcardsFromPrefix generates valid wildcards from prefix
+// WildcardsFromPrefixes generates valid wildcards from prefix
 // datasource:uid: => "*", "datasource:*", "datasource:uid:*"
-func WildcardsFromPrefix(prefix string) Wildcards {
+func WildcardsFromPrefixes(prefix string) Wildcards {
 	var b strings.Builder
 	wildcards := Wildcards{"*"}
 	parts := strings.Split(prefix, ":")

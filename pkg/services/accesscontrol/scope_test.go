@@ -79,7 +79,7 @@ func TestWildcardsFromPrefix(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			wildcards := WildcardsFromPrefix(tt.prefix)
+			wildcards := WildcardsFromPrefixes(tt.prefix)
 			assert.Equal(t, tt.expected, wildcards)
 		})
 	}
