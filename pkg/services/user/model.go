@@ -343,3 +343,33 @@ type SearchUserFilter interface {
 }
 
 type FilterHandler func(params []string) (Filter, error)
+
+type StatsKind string
+
+var (
+	StatsKindTotal  StatsKind = "total"
+	StatsKindActive StatsKind = "active"
+	StatsKindDaily  StatsKind = "dailyActive"
+)
+
+type RoleStats struct {
+	Users   int64
+	Admins  int64
+	Editors int64
+	Viewers int64
+}
+
+func (s RoleStats) Add(count int64, roleType org.RoleType) RoleStats {
+	s.Users += count
+
+	switch roleType {
+	case org.RoleAdmin:
+		s.Admins += count
+	case org.RoleEditor:
+		s.Editors += count
+	default:
+		s.Viewers += count
+	}
+
+	return s
+}

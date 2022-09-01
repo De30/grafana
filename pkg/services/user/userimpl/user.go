@@ -36,7 +36,8 @@ type Service struct {
 	// TODO remove sqlstore
 	sqlStore *sqlstore.SQLStore
 
-	cfg *setting.Cfg
+	cfg           *setting.Cfg
+	memoizedStats memoizedStats
 }
 
 func ProvideService(
