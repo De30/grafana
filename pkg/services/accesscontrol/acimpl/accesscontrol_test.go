@@ -2,6 +2,7 @@ package acimpl
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -80,14 +81,75 @@ func TestAccessControl_Evaluate(t *testing.T) {
 	}
 }
 
-func TestAccessControl_GenerateChecker(t *testing.T) {
-	type testCase struct {
-		desc string
+type testData struct {
+	uid string
+}
+
+func generateTestData() []testData {
+	var data []testData
+	for i := 1; i <= 100; i++ {
+		data = append(data, testData{uid: strconv.Itoa(i)})
 	}
-	tests := []testCase{}
+	return data
+}
+
+func TestAccessControl_Checker(t *testing.T) {
+	data := generateTestData()
+	type testCase struct {
+		desc        string
+		action      string
+		prefixes    []string
+		scopePrefix string
+		user        *user.SignedInUser
+		expectedLen int
+	}
+	tests := []testCase{
+		{
+			desc:        "should pass for every entity with wildcard scope for action",
+			action:      "dashboards:read",
+			prefixes:    []string{"dashboards:uid", "folders:uid"},
+			scopePrefix: "dashboards:uid:",
+			user: &user.SignedInUser{
+				OrgID:       1,
+				Permissions: map[int64]map[string][]string{1: {"dashboards:read": {"dashboards:*"}}},
+			},
+			expectedLen: len(data),
+		},
+		{
+			desc:        "should only pass for for 3 scopes",
+			action:      "dashboards:read",
+			prefixes:    []string{"dashboards:uid", "folders:uid"},
+			scopePrefix: "dashboards:uid",
+			user: &user.SignedInUser{
+				OrgID:       1,
+				Permissions: map[int64]map[string][]string{1: {"dashboards:read": {"dashboards:uid:4", "dashboards:uid:50", "dashboards:uid:99"}}},
+			},
+			expectedLen: 3,
+		},
+		{
+			desc:        "should pass none for missing action",
+			action:      "dashboards:read",
+			prefixes:    []string{"dashboards:uid", "folders:uid"},
+			scopePrefix: "dashboards:uid",
+			user: &user.SignedInUser{
+				OrgID:       1,
+				Permissions: map[int64]map[string][]string{1: {}},
+			},
+			expectedLen: 0,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-
+			fakeService := actest.FakeService{}
+			ac := ProvideAccessControl(setting.NewCfg(), fakeService)
+			check := ac.Checker(context.Background(), tt.user, tt.action, tt.prefixes...)
+			numPasses := 0
+			for _, d := range data {
+				if ok := check(accesscontrol.Scope(tt.scopePrefix, d.uid)); ok {
+					numPasses++
+				}
+			}
+			assert.Equal(t, tt.expectedLen, numPasses)
 		})
 	}
 }
