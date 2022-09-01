@@ -3,7 +3,6 @@ package acimpl
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -56,7 +55,7 @@ func (a *AccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, e
 
 type Checker func(scopes ...string) bool
 
-func (a *AccessControl) GenerateChecker(ctx context.Context, user *user.SignedInUser, prefixes []string, action string) Checker {
+func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) Checker {
 	if !verifyPermissions(user) {
 		return func(scope ...string) bool { return false }
 	}
@@ -72,7 +71,7 @@ func (a *AccessControl) GenerateChecker(ctx context.Context, user *user.SignedIn
 		checkers[action] = func(scope ...string) bool { return false }
 	}
 
-	wildcards := generatePossibleWildcards(prefixes)
+	wildcards := accesscontrol.WildcardsFromPrefix()
 	lookup := make(map[string]bool, len(scopes)-1)
 	for _, s := range scopes {
 		if wildcards.Contains(s) {
@@ -101,26 +100,4 @@ func (a *AccessControl) IsDisabled() bool {
 
 func verifyPermissions(u *user.SignedInUser) bool {
 	return u.Permissions != nil || u.Permissions[u.OrgID] != nil
-}
-
-type Wildcards []string
-
-func (wildcards Wildcards) Contains(scope string) bool {
-	for _, wildcard := range wildcards {
-		if scope == wildcard {
-			return true
-		}
-	}
-	return false
-}
-
-func generatePossibleWildcards(prefixes []string) Wildcards {
-	wildcards := Wildcards{"*"}
-	for _, prefix := range prefixes {
-		parts := strings.Split(prefix, ":")
-		for _, p := range parts {
-			wildcards = append(wildcards, p+":*")
-		}
-	}
-	return wildcards
 }
