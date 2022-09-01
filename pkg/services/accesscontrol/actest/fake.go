@@ -44,12 +44,17 @@ var _ accesscontrol.AccessControl = new(FakeAccessControl)
 
 type FakeAccessControl struct {
 	ExpectedErr      error
+	ExpectedChecker  func(resource accesscontrol.Resource) bool
 	ExpectedDisabled bool
 	ExpectedEvaluate bool
 }
 
 func (f FakeAccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, evaluator accesscontrol.Evaluator) (bool, error) {
 	return f.ExpectedEvaluate, f.ExpectedErr
+}
+
+func (f FakeAccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(resource accesscontrol.Resource) bool {
+	return f.ExpectedChecker
 }
 
 func (f FakeAccessControl) RegisterScopeAttributeResolver(prefix string, resolver accesscontrol.ScopeAttributeResolver) {
