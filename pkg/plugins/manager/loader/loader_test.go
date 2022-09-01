@@ -25,7 +25,7 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var compareOpts = cmpopts.IgnoreFields(plugins.Plugin{}, "client", "log")
+var compareOpts = cmpopts.IgnoreFields(plugins.Plugin{}, "client", "log", "mu")
 
 func TestLoader_Load(t *testing.T) {
 	corePluginDir, err := filepath.Abs("./../../../../public")

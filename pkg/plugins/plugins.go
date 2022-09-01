@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -41,6 +42,8 @@ type Plugin struct {
 	SecretsManager secretsmanagerplugin.SecretsManagerPlugin
 	client         backendplugin.Plugin
 	log            log.Logger
+
+	mu sync.RWMutex
 }
 
 type PluginDTO struct {
@@ -203,6 +206,8 @@ func (p *Plugin) SetLogger(l log.Logger) {
 }
 
 func (p *Plugin) Start(ctx context.Context) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	if p.client == nil {
 		return fmt.Errorf("could not start plugin %s as no plugin client exists", p.ID)
 	}
@@ -210,13 +215,29 @@ func (p *Plugin) Start(ctx context.Context) error {
 }
 
 func (p *Plugin) Stop(ctx context.Context) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	if p.client == nil {
 		return nil
 	}
 	return p.client.Stop(ctx)
 }
 
+func (p *Plugin) HasBackend() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Backend
+}
+
+func (p *Plugin) HasSignatureError() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.SignatureError != nil
+}
+
 func (p *Plugin) IsManaged() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	if p.client != nil {
 		return p.client.IsManaged()
 	}
@@ -224,6 +245,8 @@ func (p *Plugin) IsManaged() bool {
 }
 
 func (p *Plugin) Decommission() error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	if p.client != nil {
 		return p.client.Decommission()
 	}
@@ -231,6 +254,8 @@ func (p *Plugin) Decommission() error {
 }
 
 func (p *Plugin) IsDecommissioned() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	if p.client != nil {
 		return p.client.IsDecommissioned()
 	}
@@ -238,6 +263,8 @@ func (p *Plugin) IsDecommissioned() bool {
 }
 
 func (p *Plugin) Exited() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	if p.client != nil {
 		return p.client.Exited()
 	}
@@ -301,10 +328,14 @@ func (p *Plugin) RunStream(ctx context.Context, req *backend.RunStreamRequest, s
 }
 
 func (p *Plugin) RegisterClient(c backendplugin.Plugin) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.client = c
 }
 
 func (p *Plugin) Client() (PluginClient, bool) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	if p.client != nil {
 		return p.client, true
 	}
@@ -320,6 +351,8 @@ type PluginClient interface {
 }
 
 func (p *Plugin) ToDTO() PluginDTO {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	c, _ := p.Client()
 
 	return PluginDTO{
@@ -341,6 +374,8 @@ func (p *Plugin) ToDTO() PluginDTO {
 }
 
 func (p *Plugin) StaticRoute() *StaticRoute {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	if p.IsCorePlugin() {
 		return nil
 	}
@@ -349,34 +384,50 @@ func (p *Plugin) StaticRoute() *StaticRoute {
 }
 
 func (p *Plugin) IsRenderer() bool {
-	return p.Type == "renderer"
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Type == Renderer
 }
 
 func (p *Plugin) IsSecretsManager() bool {
-	return p.Type == "secretsmanager"
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Type == SecretsManager
 }
 
 func (p *Plugin) IsDataSource() bool {
-	return p.Type == "datasource"
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Type == DataSource
 }
 
 func (p *Plugin) IsPanel() bool {
-	return p.Type == "panel"
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Type == Panel
 }
 
 func (p *Plugin) IsApp() bool {
-	return p.Type == "app"
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Type == App
 }
 
 func (p *Plugin) IsCorePlugin() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	return p.Class == Core
 }
 
 func (p *Plugin) IsBundledPlugin() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	return p.Class == Bundled
 }
 
 func (p *Plugin) IsExternalPlugin() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	return p.Class == External
 }
 

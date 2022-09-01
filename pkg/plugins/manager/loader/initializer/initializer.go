@@ -31,7 +31,7 @@ func New(cfg *plugins.Cfg, backendProvider plugins.BackendFactoryProvider, licen
 }
 
 func (i *Initializer) Initialize(ctx context.Context, p *plugins.Plugin) error {
-	if p.Backend {
+	if p.HasBackend() {
 		backendFactory := i.backendProvider.BackendFactory(ctx, p)
 		if backendFactory == nil {
 			return fmt.Errorf("could not find backend factory for plugin")

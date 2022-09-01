@@ -17,7 +17,6 @@ var _ Service = (*Manager)(nil)
 type Manager struct {
 	pluginRegistry registry.Service
 
-	mu  sync.Mutex
 	log log.Logger
 }
 
@@ -44,7 +43,7 @@ func (m *Manager) Start(ctx context.Context, pluginID string) error {
 		return backendplugin.ErrPluginNotRegistered
 	}
 
-	if !p.IsManaged() || !p.Backend || p.SignatureError != nil {
+	if !p.IsManaged() || !p.HasBackend() || p.HasSignatureError() {
 		return nil
 	}
 
@@ -53,8 +52,6 @@ func (m *Manager) Start(ctx context.Context, pluginID string) error {
 	}
 
 	m.log.Info("Plugin registered", "pluginID", p.ID)
-	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	if err := startPluginAndRestartKilledProcesses(ctx, p); err != nil {
 		return err
@@ -70,8 +67,6 @@ func (m *Manager) Stop(ctx context.Context, pluginID string) error {
 		return backendplugin.ErrPluginNotRegistered
 	}
 	m.log.Debug("Stopping plugin process", "pluginID", p.ID)
-	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	if err := p.Decommission(); err != nil {
 		return err
@@ -89,7 +84,7 @@ func (m *Manager) shutdown(ctx context.Context) {
 	var wg sync.WaitGroup
 	for _, p := range m.pluginRegistry.Plugins(ctx) {
 		wg.Add(1)
-		go func(p backendplugin.Plugin, ctx context.Context) {
+		go func(p *plugins.Plugin, ctx context.Context) {
 			defer wg.Done()
 			p.Logger().Debug("Stopping plugin")
 			if err := p.Stop(ctx); err != nil {
