@@ -31,6 +31,11 @@ func (s *Service) Stats(ctx context.Context) map[string]interface{} {
 	var stats map[string]interface{}
 	if time.Now().After(s.memoizedStats.expire) {
 		stats = make(map[string]interface{})
+
+		const roleCounterTimeout = 20 * time.Second
+		ctx, cancel := context.WithTimeout(ctx, roleCounterTimeout)
+		defer cancel()
+
 		roles, err := s.store.CountUserRoles(ctx)
 		if err != nil {
 			// FIXME: Log this
