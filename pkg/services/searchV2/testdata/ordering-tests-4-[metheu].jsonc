@@ -3,20 +3,20 @@
 //  Frame[0] 
 //  Name: ordering frame
 //  Dimensions: 2 Fields by 8 Rows
-//  +------------------------+--------------------+
-//  | Name: name             | Name: score        |
-//  | Labels:                | Labels:            |
-//  | Type: []string         | Type: []float64    |
-//  +------------------------+--------------------+
-//  | metheus test           | 6.252198336239545  |
-//  | Prometheus 2.0         | 2.3542913198995272 |
-//  | Prometheus 20.0        | 2.3542913198995272 |
-//  | Prometheus Stats       | 2.3542913198995272 |
-//  | prometheus histogram   | 2.3542913198995272 |
-//  | prometheus histogram2  | 2.3542913198995272 |
-//  | Prometheus 2.0 Stats   | 2.1531036135045496 |
-//  | PromeTHeus Second Word | 2.1531036135045496 |
-//  +------------------------+--------------------+
+//  +------------------------+-------------------+
+//  | Name: name             | Name: score       |
+//  | Labels:                | Labels:           |
+//  | Type: []string         | Type: []float64   |
+//  +------------------------+-------------------+
+//  | metheus test           | 5.864925129213869 |
+//  | Prometheus 2.0         | 2.5               |
+//  | Prometheus 2.0 Stats   | 2.5               |
+//  | Prometheus 20.0        | 2.5               |
+//  | PromeTHeus Second Word | 2.5               |
+//  | Prometheus Stats       | 2.5               |
+//  | prometheus histogram   | 2.5               |
+//  | prometheus histogram2  | 2.5               |
+//  +------------------------+-------------------+
 //  
 //  
 //  🌟 This was machine generated.  Do not edit. 🌟
@@ -47,22 +47,22 @@
           [
             "metheus test",
             "Prometheus 2.0",
+            "Prometheus 2.0 Stats",
             "Prometheus 20.0",
+            "PromeTHeus Second Word",
             "Prometheus Stats",
             "prometheus histogram",
-            "prometheus histogram2",
-            "Prometheus 2.0 Stats",
-            "PromeTHeus Second Word"
+            "prometheus histogram2"
           ],
           [
-            6.252198336239545,
-            2.3542913198995272,
-            2.3542913198995272,
-            2.3542913198995272,
-            2.3542913198995272,
-            2.3542913198995272,
-            2.1531036135045496,
-            2.1531036135045496
+            5.864925129213869,
+            2.5,
+            2.5,
+            2.5,
+            2.5,
+            2.5,
+            2.5,
+            2.5
           ]
         ]
       }
