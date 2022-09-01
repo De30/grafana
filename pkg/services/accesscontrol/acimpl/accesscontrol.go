@@ -62,12 +62,7 @@ func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, ac
 		return func(resource accesscontrol.Resource) bool { return false }
 	}
 
-	permissions, ok := user.Permissions[user.OrgID]
-	if !ok {
-		return func(resource accesscontrol.Resource) bool { return false }
-	}
-
-	scopes, ok := permissions[action]
+	scopes, ok := user.Permissions[user.OrgID][action]
 	if !ok {
 		return func(resource accesscontrol.Resource) bool { return false }
 	}
