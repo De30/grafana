@@ -57,32 +57,32 @@ func (a *AccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, e
 	return resolvedEvaluator.Evaluate(user.Permissions[user.OrgID]), nil
 }
 
-func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(scopes ...string) bool {
+func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(resource accesscontrol.Resource) bool {
 	if !verifyPermissions(user) {
-		return func(scope ...string) bool { return false }
+		return func(resource accesscontrol.Resource) bool { return false }
 	}
 
 	permissions, ok := user.Permissions[user.OrgID]
 	if !ok {
-		return func(scope ...string) bool { return false }
+		return func(resource accesscontrol.Resource) bool { return false }
 	}
 
 	scopes, ok := permissions[action]
 	if !ok {
-		return func(scope ...string) bool { return false }
+		return func(resource accesscontrol.Resource) bool { return false }
 	}
 
 	wildcards := accesscontrol.WildcardsFromPrefixes(prefixes...)
 	lookup := make(map[string]bool, len(scopes)-1)
 	for _, s := range scopes {
 		if wildcards.Contains(s) {
-			return func(scope ...string) bool { return true }
+			return func(resource accesscontrol.Resource) bool { return true }
 		}
 		lookup[s] = true
 	}
 
-	return func(scopes ...string) bool {
-		for _, s := range scopes {
+	return func(resource accesscontrol.Resource) bool {
+		for _, s := range resource.Scopes() {
 			if lookup[s] {
 				return true
 			}
