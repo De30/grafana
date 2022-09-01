@@ -15,6 +15,8 @@ import (
 type AccessControl interface {
 	// Evaluate evaluates access to the given resources.
 	Evaluate(ctx context.Context, user *user.SignedInUser, evaluator Evaluator) (bool, error)
+	// Metadata construct a callable function to get all metadata for given resource
+	Metadata(ctx context.Context, user *user.SignedInUser, prefixes ...string) func(resource Resource) Metadata
 	// RegisterScopeAttributeResolver allows the caller to register a scope resolver for a
 	// specific scope prefix (ex: datasources:name:)
 	RegisterScopeAttributeResolver(prefix string, resolver ScopeAttributeResolver)
@@ -85,6 +87,23 @@ type PermissionsService interface {
 	SetPermissions(ctx context.Context, orgID int64, resourceID string, commands ...SetResourcePermissionCommand) ([]ResourcePermission, error)
 	// MapActions will map actions for a ResourcePermissions to it's "friendly" name configured in PermissionsToActions map.
 	MapActions(permission ResourcePermission) string
+}
+
+type Resource interface {
+	Scopes() []string
+}
+
+func WrapResourceID(prefix, id string) WrappedResourceID {
+	return WrappedResourceID{prefix, id}
+}
+
+type WrappedResourceID struct {
+	prefix string
+	id     string
+}
+
+func (w WrappedResourceID) Scopes() []string {
+	return []string{w.prefix + w.id}
 }
 
 type User struct {
