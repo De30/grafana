@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blugelabs/bluge/search/searcher"
+	"github.com/blugelabs/bluge/search/similarity"
+
 	"github.com/blugelabs/bluge"
 	"github.com/blugelabs/bluge/search"
 	"github.com/blugelabs/bluge/search/aggregations"
@@ -353,6 +356,34 @@ func getDashboardLocation(index *orgIndex, dashboardUID string) (string, bool, e
 	return dashboardLocation, found, err
 }
 
+type NameContainsQuery struct {
+	term string
+}
+
+func NewNameContainsQuery(term string) *NameContainsQuery {
+	return &NameContainsQuery{
+		term: strings.ToLower(term),
+	}
+}
+
+func (c NameContainsQuery) Searcher(i search.Reader, options search.SearcherOptions) (search.Searcher, error) {
+	s, err := searcher.NewMatchAllSearcher(i, 1, similarity.ConstantScorer(1), options)
+	if err != nil {
+		return nil, err
+	}
+	return searcher.NewFilteringSearcher(s, func(d *search.DocumentMatch) bool {
+		var name string
+		err = d.VisitStoredFields(func(field string, value []byte) bool {
+			if field == documentFieldName {
+				name = strings.ToLower(string(value))
+				return false
+			}
+			return true
+		})
+		return strings.Contains(name, c.term)
+	}), err
+}
+
 //nolint: gocyclo
 func doSearchQuery(
 	ctx context.Context,
@@ -444,10 +475,12 @@ func doSearchQuery(
 				SetOperator(bluge.MatchQueryOperatorAnd). // all terms must match
 				SetAnalyzer(ngramQueryAnalyzer).SetBoost(1))
 
-		bq.AddShould(
-			bluge.NewWildcardQuery(fmt.Sprintf("*%s*", q.Query)).
-				SetField(documentFieldName).
-				SetBoost(1))
+		bq.AddShould(NewNameContainsQuery(q.Query))
+
+		//bq.AddShould(
+		//	bluge.NewWildcardQuery(fmt.Sprintf("*%s*", q.Query)).
+		//		SetField(documentFieldName).
+		//		SetBoost(1))
 
 		if len(q.Query) > 4 {
 			bq.AddShould(bluge.NewFuzzyQuery(q.Query).SetField(documentFieldName)).SetBoost(1.5)

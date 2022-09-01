@@ -38,7 +38,7 @@ var testDisallowAllFilter = func(uid string) bool {
 
 var testOrgID int64 = 1
 
-func initTestOrgIndexFromDashes(t *testing.T, dashboards []dashboard) *orgIndex {
+func initTestOrgIndexFromDashes(t testing.TB, dashboards []dashboard) *orgIndex {
 	t.Helper()
 	searchIdx := initTestIndexFromDashesExtended(t, dashboards, &NoopDocumentExtender{})
 	return searchIdx.perOrgIndex[testOrgID]
@@ -55,7 +55,7 @@ func initTestIndexFromDashes(t *testing.T, dashboards []dashboard) *searchIndex 
 	return initTestIndexFromDashesExtended(t, dashboards, &NoopDocumentExtender{})
 }
 
-func initTestIndexFromDashesExtended(t *testing.T, dashboards []dashboard, extender DocumentExtender) *searchIndex {
+func initTestIndexFromDashesExtended(t testing.TB, dashboards []dashboard, extender DocumentExtender) *searchIndex {
 	t.Helper()
 	dashboardLoader := &testDashboardLoader{
 		dashboards: dashboards,
@@ -709,5 +709,44 @@ func TestDashboardIndex_MultiTermPrefixMatch(t *testing.T) {
 				DashboardQuery{Query: tt.query},
 			)
 		})
+	}
+}
+
+func TestDashboardIndex_ExactSubstring(t *testing.T) {
+	dashboards := dashboardsWithTitles(
+		"asml - test",
+		"Elasticsearch dashboard Test - Naushad",
+		"test",
+		"test123",
+		"this-is-a-test",
+		"thisisatest",
+		"wellsfargotest",
+		"boom",
+	)
+	index := initTestOrgIndexFromDashes(t, dashboards)
+	checkSearchResponse(t, filepath.Base("exact_substring"), index, testAllowAllFilter,
+		DashboardQuery{Query: "test"},
+	)
+}
+
+var benchDataResponse *backend.DataResponse
+
+func Benchmark_ExactSubstring(b *testing.B) {
+	dashboards := dashboardsWithTitles(
+		"asml - test",
+		"Elasticsearch dashboard Test - Naushad",
+		"test",
+		"test123",
+		"this-is-a-test",
+		"thisisatest",
+		"wellsfargotest",
+		"boom",
+	)
+	index := initTestOrgIndexFromDashes(b, dashboards)
+	for i := 0; i < b.N; i++ {
+		benchDataResponse = doSearchQuery(context.Background(), testLogger, index, testAllowAllFilter, DashboardQuery{Query: "test"}, &NoopQueryExtender{}, "")
+		if benchDataResponse == nil {
+			b.Fail()
+		}
 	}
 }
