@@ -12846,6 +12846,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/yargs@npm:^17.0.12":
+  version: 17.0.12
+  resolution: "@types/yargs@npm:17.0.12"
+  dependencies:
+    "@types/yargs-parser": "*"
+  checksum: 5b41d21d8624199f89db82209b2adab2e47867b3677e852fde65698be2ca48364b14c2e70cb0adc9bca4a2102c93dad2409cae0ad666ea36ae031ae1cb08a7b5
+  languageName: node
+  linkType: hard
+
 "@types/yargs@npm:^17.0.8":
   version: 17.0.10
   resolution: "@types/yargs@npm:17.0.10"
@@ -23325,6 +23334,7 @@ __metadata:
     "@types/tinycolor2": 1.4.3
     "@types/uuid": 8.3.4
     "@types/webpack-env": 1.18.0
+    "@types/yargs": ^17.0.12
     "@typescript-eslint/eslint-plugin": 5.36.2
     "@typescript-eslint/parser": 5.36.2
     "@visx/event": 2.6.0
@@ -23524,6 +23534,7 @@ __metadata:
     webpack-manifest-plugin: 5.0.0
     webpack-merge: 5.8.0
     whatwg-fetch: 3.6.2
+    yargs: ^17.5.1
   languageName: unknown
   linkType: soft
 
@@ -41588,7 +41599,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.3.1, yargs@npm:^17.4.0":
+"yargs@npm:^17.3.1, yargs@npm:^17.4.0, yargs@npm:^17.5.1":
   version: 17.5.1
   resolution: "yargs@npm:17.5.1"
   dependencies:
