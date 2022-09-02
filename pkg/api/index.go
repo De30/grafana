@@ -106,7 +106,13 @@ func (hs *HTTPServer) getAppLinks(c *models.ReqContext) ([]*dtos.NavLink, error)
 		}
 
 		for _, include := range plugin.Includes {
-			if !c.HasUserRole(include.Role) {
+			fallback := func(rc *models.ReqContext) bool { return c.HasUserRole(include.Role) }
+			if include.IsRBACReady() && !hasAccess(fallback, ac.EvalPermission(include.Action)) {
+				hs.log.Debug("plugin include is covered by RBAC, user doesn't have access",
+					"plugin", plugin.ID,
+					"include", include.Name)
+				continue
+			} else if !include.IsRBACReady() && !fallback(c) {
 				continue
 			}
 

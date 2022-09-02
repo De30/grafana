@@ -136,6 +136,31 @@ func (s *Service) RegisterFixedRoles(ctx context.Context) error {
 	return nil
 }
 
+// DeclarePluginRoles allow the caller to declare, to the service, plugin roles and their assignments
+// to organization roles ("Viewer", "Editor", "Admin") or "Grafana Admin"
+func (s *Service) DeclarePluginRoles(pluginID string, registrations ...accesscontrol.RoleRegistration) error {
+	// If accesscontrol is disabled no need to register roles
+	if accesscontrol.IsDisabled(s.cfg) {
+		return nil
+	}
+
+	for _, r := range registrations {
+		err := accesscontrol.ValidatePluginRole(pluginID, r.Role)
+		if err != nil {
+			return err
+		}
+
+		err = accesscontrol.ValidateBuiltInRoles(r.Grants)
+		if err != nil {
+			return err
+		}
+
+		s.registrations.Append(r)
+	}
+
+	return nil
+}
+
 func (s *Service) IsDisabled() bool {
 	return accesscontrol.IsDisabled(s.cfg)
 }

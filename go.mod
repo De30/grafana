@@ -359,3 +359,5 @@ replace github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday
 // happen, for example, during a read when the sqlite db is under heavy write load.
 // This patch cherry picks compatible fixes from upstream xorm PR#1998 and can be reverted on upgrade to xorm v1.2.0+.
 replace xorm.io/xorm => github.com/grafana/xorm v0.8.3-0.20220614223926-2fcda7565af6
+
+replace github.com/grafana/grafana-plugin-sdk-go => /home/gabriel/go/src/github.com/grafana/grafana-plugin-sdk-go

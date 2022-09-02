@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/pluginextensionv2"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
+	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/org"
 )
 
@@ -102,6 +103,10 @@ func (p PluginDTO) IncludedInSignature(file string) bool {
 	return true
 }
 
+func (p PluginDTO) IsRBACReady() bool {
+	return len(p.Roles) > 0
+}
+
 // JSONData represents the plugin's plugin.json
 type JSONData struct {
 	// Common settings
@@ -117,6 +122,9 @@ type JSONData struct {
 	Preload      bool         `json:"preload"`
 	Backend      bool         `json:"backend"`
 	Routes       []*Route     `json:"routes"`
+
+	// AccessControl settings
+	Roles []accesscontrol.RoleRegistration `json:"roles,omitempty"`
 
 	// Panel settings
 	SkipDataQuery bool `json:"skipDataQuery"`
