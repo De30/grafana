@@ -1,4 +1,5 @@
 import { css, cx } from '@emotion/css';
+import { Trans } from '@lingui/macro';
 import React, { FormEvent, useCallback, useState } from 'react';
 
 import { RelativeTimeRange, GrafanaTheme2, TimeOption } from '@grafana/data';
@@ -92,15 +93,18 @@ export function RelativeTimeRangePicker(props: RelativeTimeRangePickerProps) {
     setIsOpen(false);
   };
 
+  const selectedRangeFrom = timeOption.from;
+  const selectedRangeTo = timeOption.to;
+
   return (
     <div className={styles.container}>
       <div tabIndex={0} className={styles.pickerInput} onClick={onOpen}>
         <span className={styles.clockIcon}>
           <Icon name="clock-nine" />
         </span>
-        <span>
-          {timeOption.from} to {timeOption.to}
-        </span>
+        <Trans id="grafana-ui.relative-time-picker.selected-range">
+          {selectedRangeFrom} to {selectedRangeTo}
+        </Trans>
         <span className={styles.caretIcon}>
           <Icon name={isOpen ? 'angle-up' : 'angle-down'} size="lg" />
         </span>

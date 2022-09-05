@@ -1,3 +1,4 @@
+import { babel } from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import path from 'path';
 import dts from 'rollup-plugin-dts';
@@ -10,7 +11,13 @@ const pkg = require('./package.json');
 export default [
   {
     input: 'src/index.ts',
-    plugins: [externals({ deps: true, packagePath: './package.json' }), resolve(), svg({ stringify: true }), esbuild()],
+    plugins: [
+      externals({ deps: true, packagePath: './package.json' }),
+      resolve(),
+      svg({ stringify: true }),
+      babel({ babelHelpers: 'inline' }),
+      esbuild(),
+    ],
     output: [
       {
         format: 'cjs',
