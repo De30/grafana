@@ -51,6 +51,7 @@ export interface Props {
   isInView: boolean;
   width: number;
   height: number;
+  titleFontSize?: string;
   onInstanceStateChange: (value: any) => void;
 }
 
@@ -503,7 +504,7 @@ export class PanelChrome extends PureComponent<Props, State> {
   }
 
   render() {
-    const { dashboard, panel, isViewing, isEditing, width, height, plugin } = this.props;
+    const { dashboard, panel, isViewing, isEditing, width, height, plugin, titleFontSize } = this.props;
     const { errorMessage, data } = this.state;
     const { transparent } = panel;
 
@@ -533,6 +534,7 @@ export class PanelChrome extends PureComponent<Props, State> {
           isViewing={isViewing}
           alertState={alertState}
           data={data}
+          titleFontSize={titleFontSize}
         />
         <ErrorBoundary
           dependencies={[data, plugin, panel.getOptions()]}

@@ -25,13 +25,26 @@ export interface Props {
   isViewing: boolean;
   isEditing: boolean;
   data: PanelData;
+  titleFontSize?: string;
 }
 
-export const PanelHeader: FC<Props> = ({ panel, error, isViewing, isEditing, data, alertState, dashboard }) => {
+export const PanelHeader: FC<Props> = ({
+  panel,
+  error,
+  isViewing,
+  isEditing,
+  data,
+  alertState,
+  dashboard,
+  titleFontSize,
+}) => {
   const onCancelQuery = () => panel.getQueryRunner().cancelQuery();
   const title = panel.getDisplayTitle();
   const className = cx('panel-header', !(isViewing || isEditing) ? 'grid-drag-handle' : '');
   const styles = useStyles2(panelStyles);
+
+  const font = titleFontSize || 'medium';
+  const titleClasses = `${styles.titleText} ${font}`;
 
   return (
     <>
@@ -59,7 +72,7 @@ export const PanelHeader: FC<Props> = ({ panel, error, isViewing, isEditing, dat
                       size="sm"
                     />
                   ) : null}
-                  <h2 className={styles.titleText}>{title}</h2>
+                  <h2 className={titleClasses}>{title}</h2>
                   {!dashboard.meta.publicDashboardAccessToken && (
                     <div data-testid="panel-dropdown">
                       <Icon name="angle-down" className="panel-menu-toggle" />
@@ -92,7 +105,6 @@ const panelStyles = (theme: GrafanaTheme2) => {
       max-width: calc(100% - 38px);
       cursor: pointer;
       font-weight: ${theme.typography.fontWeightMedium};
-      font-size: ${theme.typography.body.fontSize};
       margin: 0;
 
       &:hover {
@@ -100,6 +112,16 @@ const panelStyles = (theme: GrafanaTheme2) => {
       }
       .panel-has-alert & {
         max-width: calc(100% - 54px);
+      }
+
+      &.medium {
+        font-size: ${theme.typography.body.fontSize};
+      }
+      &.small {
+        font-size: ${theme.typography.bodySmall.fontSize};
+      }
+      &.big {
+        font-size: ${theme.typography.h4.fontSize};
       }
     `,
   };

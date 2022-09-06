@@ -20,6 +20,7 @@ export interface OwnProps {
   width: number;
   height: number;
   lazy?: boolean;
+  titleFontSize?: string;
 }
 
 const mapStateToProps = (state: StoreState, props: OwnProps) => {
@@ -70,7 +71,7 @@ export class DashboardPanelUnconnected extends PureComponent<Props> {
   };
 
   render() {
-    const { dashboard, panel, isViewing, isEditing, width, height, lazy, plugin } = this.props;
+    const { dashboard, panel, isViewing, isEditing, width, height, lazy, plugin, titleFontSize } = this.props;
 
     const renderPanelChrome = (isInView: boolean) =>
       plugin &&
@@ -84,6 +85,7 @@ export class DashboardPanelUnconnected extends PureComponent<Props> {
           isInView={isInView}
           width={width}
           height={height}
+          titleFontSize={titleFontSize}
         />
       ) : (
         <PanelChrome
@@ -95,6 +97,7 @@ export class DashboardPanelUnconnected extends PureComponent<Props> {
           isInView={isInView}
           width={width}
           height={height}
+          titleFontSize={titleFontSize}
           onInstanceStateChange={this.onInstanceStateChange}
         />
       ));

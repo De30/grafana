@@ -25,7 +25,7 @@ const mapDispatchToProps = {
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
-export type Props = GrafanaRouteComponentProps<DashboardPageRouteParams, { panelId: string }> &
+export type Props = GrafanaRouteComponentProps<DashboardPageRouteParams, { panelId: string; titleFontSize: string }> &
   ConnectedProps<typeof connector>;
 
 export interface State {
@@ -82,6 +82,7 @@ export class SoloPanelPage extends Component<Props, State> {
         notFound={this.state.notFound}
         panel={this.state.panel}
         panelId={this.getPanelId()}
+        titleFontSize={this.props.queryParams.titleFontSize}
       />
     );
   }
@@ -90,9 +91,10 @@ export class SoloPanelPage extends Component<Props, State> {
 export interface SoloPanelProps extends State {
   dashboard: DashboardModel | null;
   panelId: number;
+  fontSize?: string;
 }
 
-export const SoloPanel = ({ dashboard, notFound, panel, panelId }: SoloPanelProps) => {
+export const SoloPanel = ({ dashboard, notFound, panel, panelId, titleFontSize }: SoloPanelProps) => {
   if (notFound) {
     return <div className="alert alert-error">Panel with id {panelId} not found</div>;
   }
@@ -108,6 +110,7 @@ export const SoloPanel = ({ dashboard, notFound, panel, panelId }: SoloPanelProp
           if (width === 0) {
             return null;
           }
+
           return (
             <DashboardPanel
               stateKey={panel.key}
@@ -118,6 +121,7 @@ export const SoloPanel = ({ dashboard, notFound, panel, panelId }: SoloPanelProp
               isEditing={false}
               isViewing={false}
               lazy={false}
+              titleFontSize={titleFontSize}
             />
           );
         }}

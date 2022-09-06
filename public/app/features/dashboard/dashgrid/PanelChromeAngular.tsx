@@ -27,6 +27,7 @@ interface OwnProps {
   isInView: boolean;
   width: number;
   height: number;
+  titleFontSize?: string;
 }
 
 interface ConnectedProps {
@@ -173,7 +174,7 @@ export class PanelChromeAngularUnconnected extends PureComponent<Props, State> {
   }
 
   render() {
-    const { dashboard, panel, isViewing, isEditing, plugin } = this.props;
+    const { dashboard, panel, isViewing, isEditing, plugin, titleFontSize } = this.props;
     const { errorMessage, data } = this.state;
     const { transparent } = panel;
 
@@ -206,6 +207,7 @@ export class PanelChromeAngularUnconnected extends PureComponent<Props, State> {
           isEditing={isEditing}
           data={data}
           alertState={alertState}
+          titleFontSize={titleFontSize}
         />
         <div className={panelContentClassNames}>
           <div ref={(element) => (this.element = element)} className="panel-height-helper" />
