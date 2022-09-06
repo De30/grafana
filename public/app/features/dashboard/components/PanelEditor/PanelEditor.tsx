@@ -519,7 +519,6 @@ export const getStyles = stylesFactory((theme: GrafanaTheme2, props: Props) => {
       flexGrow: 1,
       minHeight: 0,
       display: 'flex',
-      paddingTop: config.featureToggles.topnav ? theme.spacing(2) : 0,
     }),
     verticalSplitPanesWrapper: css`
       display: flex;
@@ -534,6 +533,7 @@ export const getStyles = stylesFactory((theme: GrafanaTheme2, props: Props) => {
       height: 100%;
       width: 100%;
       padding-right: ${uiState.isPanelOptionsVisible ? 0 : paneSpacing};
+      padding-top: ${config.featureToggles.topnav ? theme.spacing(2) : 0};
     `,
     variablesWrapper: css`
       label: variablesWrapper;

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { GrafanaTheme } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
-import { useStyles } from '@grafana/ui';
+import { Field, useStyles } from '@grafana/ui';
 import { StoreState } from 'app/types';
 
 import { OptionsPaneOptions } from './OptionsPaneOptions';
@@ -30,10 +30,12 @@ export const OptionsPane: React.FC<OptionPaneRenderProps> = ({
     <div className={styles.wrapper} aria-label={selectors.components.PanelEditor.OptionsPane.content}>
       {!isVizPickerOpen && (
         <>
-          <div className={styles.vizButtonWrapper}>
-            <VisualizationButton panel={panel} />
-          </div>
           <div className={styles.optionsWrapper}>
+            <div className={styles.vizButtonWrapper}>
+              <Field label="Visualization">
+                <VisualizationButton panel={panel} />
+              </Field>
+            </div>
             <OptionsPaneOptions
               panel={panel}
               dashboard={dashboard}
@@ -60,14 +62,16 @@ const getStyles = (theme: GrafanaTheme) => {
       display: flex;
       flex: 1 1 0;
       flex-direction: column;
-      padding: 0;
+      border-left: 1px solid ${theme.colors.border1};
+      background: ${theme.colors.bg1};
+      padding-top: ${theme.spacing.sm};
     `,
     optionsWrapper: css`
       flex-grow: 1;
       min-height: 0;
     `,
     vizButtonWrapper: css`
-      padding: 0 ${theme.spacing.md} ${theme.spacing.md} 0;
+      padding: ${theme.spacing.sm};
     `,
     legacyOptions: css`
       label: legacy-options;

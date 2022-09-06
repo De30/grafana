@@ -103,11 +103,6 @@ export const OptionsPaneOptions: React.FC<OptionPaneRenderProps> = (props) => {
         <div className={styles.formRow}>
           <FilterInput width={0} value={searchQuery} onChange={setSearchQuery} placeholder={'Search options'} />
         </div>
-        {showSearchRadioButtons && (
-          <div className={styles.formRow}>
-            <RadioButtonGroup options={optionRadioFilters} value={listMode} fullWidth onChange={setListMode} />
-          </div>
-        )}
       </div>
       <div className={styles.scrollWrapper}>
         <CustomScrollbar autoHeightMin="100%">
@@ -176,10 +171,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
   formBox: css`
     padding: ${theme.spacing(1)};
-    background: ${theme.colors.background.primary};
-    border: 1px solid ${theme.components.panel.borderColor};
-    border-top-left-radius: ${theme.shape.borderRadius(1.5)};
-    border-bottom: none;
   `,
   closeButton: css`
     margin-left: ${theme.spacing(1)};
@@ -198,9 +189,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     text-align: center;
   `,
   mainBox: css`
-    background: ${theme.colors.background.primary};
-    border: 1px solid ${theme.components.panel.borderColor};
-    border-top: none;
     flex-grow: 1;
   `,
 });
