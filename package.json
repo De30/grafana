@@ -117,6 +117,7 @@
     "@testing-library/user-event": "14.4.3",
     "@types/angular": "1.8.4",
     "@types/angular-route": "1.7.2",
+    "@types/babel__generator": "^7",
     "@types/babel__traverse": "^7",
     "@types/classnames": "2.3.0",
     "@types/common-tags": "^1.8.0",
@@ -249,6 +250,8 @@
     "webpack-merge": "5.8.0"
   },
   "dependencies": {
+    "@babel/generator": "^7.19.0",
+    "@babel/types": "^7.19.0",
     "@daybrush/utils": "^1.9.1",
     "@emotion/css": "11.9.0",
     "@emotion/react": "11.9.3",
