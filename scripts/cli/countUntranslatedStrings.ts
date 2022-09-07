@@ -32,7 +32,16 @@ async function findFiles(dir: string, excludeFilter: RegExp): Promise<string[]> 
 
 const FILE_EXCLUDE_FILTER = /node_modules|docs|\.git|\.yarn|e2e\/tmp/;
 
-const TRANSLATED_PROP_NAMES = ['title', 'label', 'description', 'aria-label', 'body', 'buttonTitle', 'confirmText', 'content'];
+const TRANSLATED_PROP_NAMES = [
+  'title',
+  'label',
+  'description',
+  'aria-label',
+  'body',
+  'buttonTitle',
+  'confirmText',
+  'content',
+];
 
 function generate(node: any) {
   return generator(node).code;
@@ -43,8 +52,9 @@ async function main() {
   const files = await findFiles(root, FILE_EXCLUDE_FILTER);
 
   const codeFiles = files
-    .filter((v) => v.match(/\.tsx?/) && !v.match(/\.(test|spec)\.tsx?/))
-    .filter((v) => v.includes('ExternalAlertmanagers.tsx'));
+    .filter((v) => v.match(/\.tsx/) && !v.match(/\.(test|spec|story|story\.internal)\.tsx/))
+    .slice(0, 50);
+  // .filter((v) => v.includes('ExternalAlertmanagers.tsx'));
 
   const countsPerFile: Record<string, number> = {};
 
@@ -52,7 +62,8 @@ async function main() {
   const visitedNodes: any[] = [];
 
   for (const codeFilePath of codeFiles) {
-    countsPerFile[codeFilePath] = 0;
+    const projectFilePath = codeFilePath.replace(root, '');
+    countsPerFile[projectFilePath] = 0;
     const source = await readFile(codeFilePath);
 
     const ast = parser.parse(source.toString(), {
@@ -80,7 +91,7 @@ async function main() {
         if (isString || isTemplateString) {
           if (TRANSLATED_PROP_NAMES.includes(node.name.name)) {
             console.log('translating prop', { name: node.name.name, value: generate(node.value) });
-            countsPerFile[codeFilePath] += 1;
+            countsPerFile[projectFilePath] += 1;
           } else if (!alreadyLoggedNotTranslatable.includes(node.name.name)) {
             console.log('prop not translatable', { name: node.name.name, value: generate(node.value) });
             alreadyLoggedNotTranslatable.push(node.name.name);
@@ -102,13 +113,14 @@ async function main() {
         if (isTrans) {
           return;
         }
+
         const hasTextChildren = node.children.some(
           (child) => child.type === 'JSXText' && child.value.trim().length > 0
         );
 
         if (hasTextChildren) {
           visitedNodes.push(...node.children);
-          countsPerFile[codeFilePath] += 1;
+          countsPerFile[projectFilePath] += 1;
         }
       },
     });
