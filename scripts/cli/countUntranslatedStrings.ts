@@ -32,7 +32,7 @@ async function findFiles(dir: string, excludeFilter: RegExp): Promise<string[]> 
 
 const FILE_EXCLUDE_FILTER = /node_modules|docs|\.git|\.yarn|e2e\/tmp/;
 
-const TRANSLATED_PROP_NAMES = ['title', 'label', 'description', 'aria-label', 'body', 'buttonTitle', 'confirmText'];
+const TRANSLATED_PROP_NAMES = ['title', 'label', 'description', 'aria-label', 'body', 'buttonTitle', 'confirmText', 'content'];
 
 function generate(node: any) {
   return generator(node).code;
@@ -97,6 +97,11 @@ async function main() {
           return;
         }
 
+        const isTrans = node.openingElement.name.type === 'JSXIdentifier' && node.openingElement.name.name === 'Trans';
+
+        if (isTrans) {
+          return;
+        }
         const hasTextChildren = node.children.some(
           (child) => child.type === 'JSXText' && child.value.trim().length > 0
         );
