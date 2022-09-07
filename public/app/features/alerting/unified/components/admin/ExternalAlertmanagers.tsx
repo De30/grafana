@@ -142,9 +142,6 @@ export const ExternalAlertmanagers = () => {
   return (
     <div>
       <h4>External Alertmanagers</h4>
-      <p>
-        no not <a href="">commit this</a> please!!!
-      </p>
 
       <Alert title="External Alertmanager changes" severity="info">
         The way you configure external Alertmanagers has changed.

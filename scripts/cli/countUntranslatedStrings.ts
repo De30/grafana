@@ -1,9 +1,16 @@
-import generator from '@babel/generator';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
-import * as t from '@babel/types';
 import { readdir, readFile, stat } from 'fs/promises';
 import path from 'path';
+
+function logStat(filePath: string, value: number) {
+  // Note that this output format must match the parsing in ci-frontend-metrics.sh
+  // which expects the two values to be separated by a space
+  const name = filePath.replace(/\./g, '_').replace(/\//g, '.');
+  console.log(`${name} ${value}`);
+}
+
+
 
 async function findFiles(dir: string, excludeFilter: RegExp): Promise<string[]> {
   const matched: string[] = [];
@@ -47,26 +54,20 @@ const TRANSLATED_PROP_NAMES = [
   'tooltip',
 ];
 
-function generate(node: any) {
-  return generator(node).code;
-}
 
 async function main() {
   const root = path.resolve('./');
   const files = await findFiles(root, FILE_EXCLUDE_FILTER);
 
   const codeFiles = files
-    .filter((v) => v.match(/\.tsx/) && !v.match(/\.(test|spec|story|story\.internal)\.tsx/))
-    .slice(0, 5000);
-  // .filter((v) => v.includes('ExternalAlertmanagers.tsx'));
+    .filter((v) => v.match(/\.tsx/) && !v.match(/\.(test|spec|story|story\.internal)\.tsx/));
 
   const countsPerFile: Record<string, number> = {};
 
-  const alreadyLoggedNotTranslatable: string[] = [];
   const visitedNodes: any[] = [];
 
   for (const codeFilePath of codeFiles) {
-    const projectFilePath = codeFilePath.replace(root, '');
+    const projectFilePath = codeFilePath.replace(root + path.sep, '');
     countsPerFile[projectFilePath] = 0;
     const source = await readFile(codeFilePath);
 
@@ -99,14 +100,8 @@ async function main() {
           const stringMatches = isTemplateString || trimmedString.length > 0;
 
           if (propNameMatches && stringMatches) {
-            if (propName.includes('tooltip')) {
-              console.log('✅', { name: node.name.name, value: generate(node.value) });
-            }
             countsPerFile[projectFilePath] += 1;
-          } else if (!alreadyLoggedNotTranslatable.includes(node.name.name)) {
-            console.log('❌', { name: node.name.name, value: generate(node.value) });
-            alreadyLoggedNotTranslatable.push(node.name.name);
-          }
+          } 
         }
       },
 
@@ -114,8 +109,6 @@ async function main() {
         const { node } = path;
 
         if (visitedNodes.includes(node)) {
-          console.log('already visited node as child, not counting', generator(node).code);
-
           return;
         }
 
@@ -137,7 +130,9 @@ async function main() {
     });
   }
 
-  console.log(countsPerFile);
+  for (const [metricName, count] of Object.entries<number>(countsPerFile)) {
+    logStat(metricName, count);
+  }
 }
 
 main().catch(console.error);

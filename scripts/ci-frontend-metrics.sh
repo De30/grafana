@@ -35,8 +35,16 @@ do
   BETTERER_STATS+="\"grafana.ci-code.betterer.${name}\": \"${value}\","
 done <<< "$(yarn betterer:stats)"
 
+I18N_STATS=""
+while read -r name value
+do
+  I18N_STATS+=$'\n  '
+  I18N_STATS+="\"grafana.ci-code.i18n.${name}\": \"${value}\","
+done <<< "$(yarn i18n:stats)"
+
 echo "Metrics: {
   $BETTERER_STATS
+  $I18N_STATS
   \"grafana.ci-code.strictErrors\": \"${ERROR_COUNT}\",
   \"grafana.ci-code.accessibilityErrors\": \"${ACCESSIBILITY_ERRORS}\",
   \"grafana.ci-code.directives\": \"${DIRECTIVES}\",
