@@ -1,21 +1,31 @@
-package api
+package starimpl
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/grafana/grafana/pkg/api/response"
+	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/grafana/grafana/pkg/web"
 )
 
-func (hs *HTTPServer) GetStars(c *models.ReqContext) response.Response {
+func (s *Service) registerAPIEndpoints() {
+	s.routeRegister.Group("/api/user", func(userRoute routing.RouteRegister) {
+		userRoute.Get("/stars", routing.Wrap(s.GetStars))
+		userRoute.Post("/stars/dashboard/:id", routing.Wrap(s.StarDashboard))
+		userRoute.Delete("/stars/dashboard/:id", routing.Wrap(s.UnstarDashboard))
+	}, middleware.ReqSignedInNoAnonymous)
+}
+
+func (s *Service) GetStars(c *models.ReqContext) response.Response {
 	query := star.GetUserStarsQuery{
 		UserID: c.SignedInUser.UserID,
 	}
 
-	iuserstars, err := hs.starService.GetByUser(c.Req.Context(), &query)
+	iuserstars, err := s.GetByUser(c.Req.Context(), &query)
 	if err != nil {
 		return response.Error(500, "Failed to get user stars", err)
 	}
@@ -26,7 +36,7 @@ func (hs *HTTPServer) GetStars(c *models.ReqContext) response.Response {
 			Id:    dashboardId,
 			OrgId: c.OrgID,
 		}
-		err := hs.DashboardService.GetDashboard(c.Req.Context(), query)
+		err := s.dashboardService.GetDashboard(c.Req.Context(), query)
 
 		// Grafana admin users may have starred dashboards in multiple orgs.  This will avoid returning errors when the dashboard is in another org
 		if err == nil {
@@ -48,7 +58,7 @@ func (hs *HTTPServer) GetStars(c *models.ReqContext) response.Response {
 // 401: unauthorisedError
 // 403: forbiddenError
 // 500: internalServerError
-func (hs *HTTPServer) StarDashboard(c *models.ReqContext) response.Response {
+func (s *Service) StarDashboard(c *models.ReqContext) response.Response {
 	id, err := strconv.ParseInt(web.Params(c.Req)[":id"], 10, 64)
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
@@ -59,7 +69,7 @@ func (hs *HTTPServer) StarDashboard(c *models.ReqContext) response.Response {
 		return response.Error(400, "Missing dashboard id", nil)
 	}
 
-	if err := hs.starService.Add(c.Req.Context(), &cmd); err != nil {
+	if err := s.Add(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to star dashboard", err)
 	}
 
@@ -78,7 +88,7 @@ func (hs *HTTPServer) StarDashboard(c *models.ReqContext) response.Response {
 // 401: unauthorisedError
 // 403: forbiddenError
 // 500: internalServerError
-func (hs *HTTPServer) UnstarDashboard(c *models.ReqContext) response.Response {
+func (s *Service) UnstarDashboard(c *models.ReqContext) response.Response {
 	id, err := strconv.ParseInt(web.Params(c.Req)[":id"], 10, 64)
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
@@ -89,7 +99,7 @@ func (hs *HTTPServer) UnstarDashboard(c *models.ReqContext) response.Response {
 		return response.Error(400, "Missing dashboard id", nil)
 	}
 
-	if err := hs.starService.Delete(c.Req.Context(), &cmd); err != nil {
+	if err := s.Delete(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to unstar dashboard", err)
 	}
 

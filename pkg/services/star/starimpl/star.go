@@ -3,28 +3,35 @@ package starimpl
 import (
 	"context"
 
+	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/sqlstore/db"
 	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
 type Service struct {
-	store store
+	store            store
+	dashboardService dashboards.DashboardService
+	routeRegister    routing.RouteRegister
 }
 
-func ProvideService(db db.DB, cfg *setting.Cfg) star.Service {
+func ProvideService(db db.DB, cfg *setting.Cfg, dashboardService dashboards.DashboardService, routeRegister routing.RouteRegister) star.Service {
+	var s store = &sqlStore{
+		db: db,
+	}
 	if cfg.IsFeatureToggleEnabled("newDBLibrary") {
-		return &Service{
-			store: &sqlxStore{
-				sess: db.GetSqlxSession(),
-			},
+		s = &sqlxStore{
+			sess: db.GetSqlxSession(),
 		}
 	}
-	return &Service{
-		store: &sqlStore{
-			db: db,
-		},
+	srv := &Service{
+		store:            s,
+		dashboardService: dashboardService,
+		routeRegister:    routeRegister,
 	}
+	srv.registerAPIEndpoints()
+	return srv
 }
 
 func (s *Service) Add(ctx context.Context, cmd *star.StarDashboardCommand) error {
