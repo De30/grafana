@@ -32,15 +32,19 @@ async function findFiles(dir: string, excludeFilter: RegExp): Promise<string[]> 
 
 const FILE_EXCLUDE_FILTER = /node_modules|docs|\.git|\.yarn|e2e\/tmp/;
 
+// should be all lowercase
 const TRANSLATED_PROP_NAMES = [
   'title',
   'label',
   'description',
-  'aria-label',
   'body',
-  'buttonTitle',
-  'confirmText',
+  'text',
   'content',
+  'placeholder',
+  'message',
+  'error',
+  'alt',
+  'tooltip',
 ];
 
 function generate(node: any) {
@@ -53,7 +57,7 @@ async function main() {
 
   const codeFiles = files
     .filter((v) => v.match(/\.tsx/) && !v.match(/\.(test|spec|story|story\.internal)\.tsx/))
-    .slice(0, 50);
+    .slice(0, 5000);
   // .filter((v) => v.includes('ExternalAlertmanagers.tsx'));
 
   const countsPerFile: Record<string, number> = {};
@@ -89,11 +93,18 @@ async function main() {
           node.value.type === 'JSXExpressionContainer' && node.value.expression.type === 'TemplateLiteral';
 
         if (isString || isTemplateString) {
-          if (TRANSLATED_PROP_NAMES.includes(node.name.name)) {
-            console.log('translating prop', { name: node.name.name, value: generate(node.value) });
+          const propName = node.name.name.toLowerCase();
+          const propNameMatches = TRANSLATED_PROP_NAMES.some((v) => propName.includes(v));
+          const trimmedString = (node.value.type === 'StringLiteral' && node.value.value?.trim()) || '';
+          const stringMatches = isTemplateString || trimmedString.length > 0;
+
+          if (propNameMatches && stringMatches) {
+            if (propName.includes('tooltip')) {
+              console.log('✅', { name: node.name.name, value: generate(node.value) });
+            }
             countsPerFile[projectFilePath] += 1;
           } else if (!alreadyLoggedNotTranslatable.includes(node.name.name)) {
-            console.log('prop not translatable', { name: node.name.name, value: generate(node.value) });
+            console.log('❌', { name: node.name.name, value: generate(node.value) });
             alreadyLoggedNotTranslatable.push(node.name.name);
           }
         }
