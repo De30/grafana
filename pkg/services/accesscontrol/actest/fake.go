@@ -53,7 +53,7 @@ func (f FakeAccessControl) Evaluate(ctx context.Context, user *user.SignedInUser
 	return f.ExpectedEvaluate, f.ExpectedErr
 }
 
-func (f FakeAccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(resource accesscontrol.Resource) bool {
+func (f FakeAccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string) func(resource accesscontrol.Resource) bool {
 	return f.ExpectedChecker
 }
 

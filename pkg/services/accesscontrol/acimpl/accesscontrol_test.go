@@ -157,7 +157,7 @@ func TestAccessControl_Checker(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			fakeService := actest.FakeService{}
 			ac := ProvideAccessControl(setting.NewCfg(), fakeService)
-			check := ac.Checker(context.Background(), tt.user, "dashboards:read", "dashboards:uid", "folders:uid")
+			check := ac.Checker(context.Background(), tt.user, "dashboards:read")
 			numPasses := 0
 			for _, d := range data {
 				if ok := check(d); ok {
