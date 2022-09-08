@@ -33,19 +33,19 @@ type Role struct {
 	Created time.Time `json:"created"`
 }
 
-func (r *Role) Global() bool {
+func (r Role) Global() bool {
 	return r.OrgID == GlobalOrgID
 }
 
-func (r *Role) IsFixed() bool {
+func (r Role) IsFixed() bool {
 	return strings.HasPrefix(r.Name, FixedRolePrefix)
 }
 
-func (r *Role) IsBasic() bool {
+func (r Role) IsBasic() bool {
 	return strings.HasPrefix(r.Name, BasicRolePrefix) || strings.HasPrefix(r.UID, BasicRoleUIDPrefix)
 }
 
-func (r *Role) GetDisplayName() string {
+func (r Role) GetDisplayName() string {
 	if r.IsFixed() && r.DisplayName == "" {
 		r.DisplayName = fallbackDisplayName(r.Name)
 	}
@@ -83,7 +83,12 @@ type RoleDTO struct {
 	Created time.Time `json:"created"`
 }
 
-func (r *RoleDTO) LogID() string {
+// Scopes implements Resource interface
+func (r RoleDTO) Scopes() []string {
+	return []string{"roles:uid:" + r.UID}
+}
+
+func (r RoleDTO) LogID() string {
 	var org string
 
 	if r.Global() {
@@ -98,7 +103,7 @@ func (r *RoleDTO) LogID() string {
 	return fmt.Sprintf("[%s Role:%v]", org, r.Name)
 }
 
-func (r *RoleDTO) Role() Role {
+func (r RoleDTO) Role() Role {
 	return Role{
 		ID:          r.ID,
 		OrgID:       r.OrgID,
@@ -114,19 +119,19 @@ func (r *RoleDTO) Role() Role {
 	}
 }
 
-func (r *RoleDTO) Global() bool {
+func (r RoleDTO) Global() bool {
 	return r.OrgID == GlobalOrgID
 }
 
-func (r *RoleDTO) IsFixed() bool {
+func (r RoleDTO) IsFixed() bool {
 	return strings.HasPrefix(r.Name, FixedRolePrefix)
 }
 
-func (r *RoleDTO) IsBasic() bool {
+func (r RoleDTO) IsBasic() bool {
 	return strings.HasPrefix(r.Name, BasicRolePrefix) || strings.HasPrefix(r.UID, BasicRoleUIDPrefix)
 }
 
-func (r *RoleDTO) GetDisplayName() string {
+func (r RoleDTO) GetDisplayName() string {
 	if r.IsFixed() && r.DisplayName == "" {
 		r.DisplayName = fallbackDisplayName(r.Name)
 	}
