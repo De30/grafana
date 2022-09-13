@@ -26,6 +26,7 @@ import { ErrorBoundary, PanelContext, PanelContextProvider, SeriesVisibilityChan
 import { PANEL_BORDER } from 'app/core/constants';
 import { profiler } from 'app/core/profiler';
 import { applyPanelTimeOverrides } from 'app/features/dashboard/utils/panel';
+import { getPanelVars } from 'app/features/variables/inspect/utils';
 import { changeSeriesColorConfigFactory } from 'app/plugins/panel/timeseries/overrides/colorSeriesConfigFactory';
 import { RenderEvent } from 'app/types/events';
 
@@ -502,6 +503,33 @@ export class PanelChrome extends PureComponent<Props, State> {
     return !panel.hasTitle();
   }
 
+  /**
+   * This method will validate if the panel is using a multi DS variable with multiple values selected. 
+   * It will return an error message.
+   */
+  validateDSVariable(dashboard: DashboardModel, panel: PanelModel){
+    let isUsingMultiVariables = false
+    
+    // Get the list of all multi DS variables
+    const dsMultiVariables = dashboard.templating.list.filter(({type, multi}) => {
+      // TODO: Use proper types for VariableModel.type and VariableModel.multi
+      return type === 'datasource' && multi
+    })
+    
+    // If the dashboard defines multi DS variables, check if this panel is using any of them
+    if(dsMultiVariables.length > 0){
+      const panelVars = Object.keys(getPanelVars([panel])); // ['var_name_1']
+      isUsingMultiVariables = dsMultiVariables.some(({name})=> panelVars.includes(name));
+    }
+    
+    // If using DS multi value, get the value to see if it has selected more than one value
+    if(isUsingMultiVariables){
+      // TODO: Get the variable object from variable name
+      // dashboard.getSelectedVariableOptions(we dont have the variable object, only the name)
+    }
+    return '';
+  }
+
   render() {
     const { dashboard, panel, isViewing, isEditing, width, height, plugin } = this.props;
     const { errorMessage, data } = this.state;
@@ -517,6 +545,8 @@ export class PanelChrome extends PureComponent<Props, State> {
       [`panel-alert-state--${alertState}`]: alertState !== undefined,
     });
 
+    const validationError: string = this.validateDSVariable(dashboard, panel);
+
     return (
       <section
         className={containerClassNames}
@@ -528,7 +558,7 @@ export class PanelChrome extends PureComponent<Props, State> {
           title={panel.title}
           description={panel.description}
           links={panel.links}
-          error={errorMessage}
+          error={validationError || errorMessage}
           isEditing={isEditing}
           isViewing={isViewing}
           alertState={alertState}
