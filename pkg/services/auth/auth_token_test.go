@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
+	"github.com/grafana/grafana/pkg/infra/localcache"
 	"github.com/grafana/grafana/pkg/setting"
 
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -545,6 +546,7 @@ func createTestContext(t *testing.T) *testContext {
 		SQLStore: sqlstore,
 		Cfg:      cfg,
 		log:      log.New("test-logger"),
+		cache:    localcache.ProvideService(),
 	}
 
 	activeTokenService := &ActiveAuthTokenService{

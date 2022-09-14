@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/grafana/pkg/infra/serverlock"
-
+	"github.com/grafana/grafana/pkg/infra/localcache"
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/infra/serverlock"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -24,13 +24,16 @@ var getTime = time.Now
 
 const urgentRotateTime = 1 * time.Minute
 
-func ProvideUserAuthTokenService(sqlStore *sqlstore.SQLStore, serverLockService *serverlock.ServerLockService,
-	cfg *setting.Cfg) *UserAuthTokenService {
+func ProvideUserAuthTokenService(
+	sqlStore *sqlstore.SQLStore, serverLockService *serverlock.ServerLockService,
+	cfg *setting.Cfg, cache *localcache.CacheService,
+) *UserAuthTokenService {
 	s := &UserAuthTokenService{
 		SQLStore:          sqlStore,
 		ServerLockService: serverLockService,
 		Cfg:               cfg,
 		log:               log.New("auth"),
+		cache:             cache,
 	}
 	return s
 }
@@ -40,6 +43,7 @@ type UserAuthTokenService struct {
 	ServerLockService *serverlock.ServerLockService
 	Cfg               *setting.Cfg
 	log               log.Logger
+	cache             *localcache.CacheService
 }
 
 type ActiveAuthTokenService struct {
