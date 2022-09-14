@@ -8,6 +8,7 @@ import {
   AnnotationEventUIModel,
   CoreApp,
   DashboardCursorSync,
+  DataSourceVariableModel,
   EventFilterOptions,
   FieldConfigSource,
   getDefaultTimeRange,
@@ -16,6 +17,7 @@ import {
   PanelPlugin,
   PanelPluginMeta,
   TimeRange,
+  TypedVariableModel,
   toDataFrameDTO,
   toUtc,
 } from '@grafana/data';
@@ -27,7 +29,6 @@ import { PANEL_BORDER } from 'app/core/constants';
 import { profiler } from 'app/core/profiler';
 import { applyPanelTimeOverrides } from 'app/features/dashboard/utils/panel';
 import { getPanelVars } from 'app/features/variables/inspect/utils';
-import { getVariableWithName } from 'app/features/variables/state/selectors';
 import { changeSeriesColorConfigFactory } from 'app/plugins/panel/timeseries/overrides/colorSeriesConfigFactory';
 import { RenderEvent } from 'app/types/events';
 
@@ -509,23 +510,33 @@ export class PanelChrome extends PureComponent<Props, State> {
    * It will return an error message.
    */
   validateDSVariable(dashboard: DashboardModel, panel: PanelModel) {
-    let dsVarNames = [];
+    let panelVariables: TypedVariableModel[] = [];
     // Get the list of all multi DS variables
-    const dsMultiVariables = dashboard.templating.list.filter(({ type, multi }) => {
+    const dsMultiVariables = dashboard.getVariables().filter((variable) => {
       // TODO: Use proper types for VariableModel.type and VariableModel.multi
-      return type === 'datasource' && multi;
+      return variable.type === 'datasource' && variable.multi;
     });
 
     // If the dashboard defines multi DS variables, check if this panel is using any of them
     if (dsMultiVariables.length > 0) {
       const panelVars = Object.keys(getPanelVars([panel])); // ['var_name_1']
-      dsVarNames = dsMultiVariables.filter(({ name }) => panelVars.includes(name));
+      panelVariables = dsMultiVariables.filter(({ name }) => panelVars.includes(name));
     }
-
+    debugger
     // If using DS multi value, get the value to see if it has selected more than one value
-    if (dsVarNames.length > 0) {
+    if (panelVariables.length > 0) {
       // TODO: Get the variable object from variable name
-      dashboard.getSelectedVariableOptions();
+      const hasDSVariablesMultiSelected = panelVariables.some((variable) => {
+        const selectedOptions = dashboard.getSelectedVariableOptions(variable)
+        console.log(">>>>>",panel.title);
+        console.log(selectedOptions);
+
+        return selectedOptions.length > 1;
+      });
+
+      if(hasDSVariablesMultiSelected) {
+        return 'This panel is using a multi datasource variable with more than one value selected';
+      }
     }
     return '';
   }
