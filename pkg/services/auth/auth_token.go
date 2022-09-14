@@ -147,7 +147,7 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 	}
 
 	if model.AuthToken != hashedToken && model.PrevAuthToken == hashedToken && model.AuthTokenSeen {
-		modelCopy := model
+		modelCopy := *model
 		modelCopy.AuthTokenSeen = false
 		expireBefore := getTime().Add(-urgentRotateTime).Unix()
 
@@ -174,7 +174,7 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 	}
 
 	if !model.AuthTokenSeen && model.AuthToken == hashedToken {
-		modelCopy := model
+		modelCopy := *model
 		modelCopy.AuthTokenSeen = true
 		modelCopy.SeenAt = getTime().Unix()
 
@@ -193,7 +193,7 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 		}
 
 		if affectedRows == 1 {
-			model = modelCopy
+			model = &modelCopy
 		}
 
 		if affectedRows == 0 {
