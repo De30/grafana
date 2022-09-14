@@ -126,6 +126,9 @@ func (s *UserAuthTokenService) CreateToken(ctx context.Context, user *user.User,
 
 func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken string) (*models.UserToken, error) {
 	model, hashedToken, err := s.lookupCachedToken(ctx, unhashedToken)
+	if err != nil {
+		return nil, err
+	}
 
 	if model.RevokedAt > 0 {
 		s.log.Debug("user token has been revoked", "user ID", model.UserId, "token ID", model.Id)
