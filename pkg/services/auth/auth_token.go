@@ -122,25 +122,7 @@ func (s *UserAuthTokenService) CreateToken(ctx context.Context, user *user.User,
 }
 
 func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken string) (*models.UserToken, error) {
-	hashedToken := hashToken(unhashedToken)
-	var model userAuthToken
-	var exists bool
-	var err error
-	err = s.SQLStore.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
-		exists, err = dbSession.Where("(auth_token = ? OR prev_auth_token = ?)",
-			hashedToken,
-			hashedToken).
-			Get(&model)
-
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, models.ErrUserTokenNotFound
-	}
+	model, hashedToken, err := s.lookupToken(ctx, unhashedToken)
 
 	if model.RevokedAt > 0 {
 		s.log.Debug("user token has been revoked", "user ID", model.UserId, "token ID", model.Id)
@@ -221,6 +203,30 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 	err = model.toUserToken(&userToken)
 
 	return &userToken, err
+}
+
+func (s *UserAuthTokenService) lookupToken(ctx context.Context, rawToken string) (*userAuthToken, string, error) {
+	hashedToken := hashToken(rawToken)
+
+	var err error
+	var exists bool
+	var model userAuthToken
+	err = s.SQLStore.WithDbSession(ctx, func(dbSession *sqlstore.DBSession) error {
+		exists, err = dbSession.Where("(auth_token = ? OR prev_auth_token = ?)",
+			hashedToken,
+			hashedToken).
+			Get(&model)
+		return err
+	})
+	if err != nil {
+		return nil, "", err
+	}
+
+	if !exists {
+		return nil, "", models.ErrUserTokenNotFound
+	}
+
+	return &model, hashedToken, err
 }
 
 func (s *UserAuthTokenService) TryRotateToken(ctx context.Context, token *models.UserToken,
