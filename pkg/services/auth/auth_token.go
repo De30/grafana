@@ -22,7 +22,10 @@ const ServiceName = "UserAuthTokenService"
 
 var getTime = time.Now
 
-const urgentRotateTime = 1 * time.Minute
+const (
+	cacheTTL         = 30 * time.Second
+	urgentRotateTime = 1 * time.Minute
+)
 
 func ProvideUserAuthTokenService(
 	sqlStore *sqlstore.SQLStore, serverLockService *serverlock.ServerLockService,
@@ -122,7 +125,7 @@ func (s *UserAuthTokenService) CreateToken(ctx context.Context, user *user.User,
 }
 
 func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken string) (*models.UserToken, error) {
-	model, hashedToken, err := s.lookupToken(ctx, unhashedToken)
+	model, hashedToken, err := s.lookupCachedToken(ctx, unhashedToken)
 
 	if model.RevokedAt > 0 {
 		s.log.Debug("user token has been revoked", "user ID", model.UserId, "token ID", model.Id)
@@ -203,6 +206,30 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 	err = model.toUserToken(&userToken)
 
 	return &userToken, err
+}
+
+type cachedToken struct {
+	hashedToken string
+	token       userAuthToken
+}
+
+func (s *UserAuthTokenService) lookupCachedToken(ctx context.Context, rawToken string) (*userAuthToken, string, error) {
+	key := cacheKey(rawToken)
+	cached, ok := s.cache.Get(key)
+	if !ok {
+		s.log.Debug("no auth token found in cache")
+		token, hashedToken, err := s.lookupToken(ctx, rawToken)
+		if err != nil {
+			return nil, "", err
+		}
+		s.log.Debug("cache auth token")
+		s.cache.Set(key, cachedToken{hashedToken, *token}, cacheTTL)
+		return token, hashedToken, nil
+	}
+
+	s.log.Debug("auth token found in cache")
+	token := cached.(cachedToken)
+	return &token.token, token.hashedToken, nil
 }
 
 func (s *UserAuthTokenService) lookupToken(ctx context.Context, rawToken string) (*userAuthToken, string, error) {
@@ -471,6 +498,11 @@ func (s *UserAuthTokenService) createdAfterParam() int64 {
 
 func (s *UserAuthTokenService) rotatedAfterParam() int64 {
 	return getTime().Add(-s.Cfg.LoginMaxInactiveLifetime).Unix()
+}
+
+// cacheKey is the token with a prefix
+func cacheKey(token string) string {
+	return "auth-token-" + token
 }
 
 func hashToken(token string) string {
