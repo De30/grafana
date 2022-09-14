@@ -216,8 +216,12 @@ func TestUserAuthToken(t *testing.T) {
 			})
 		})
 
-		t.Run("when rotated_at is 5 days ago and created_at is 29 days and 23:59:59 ago should not find token", func(t *testing.T) {
-			updated, err := ctx.updateRotatedAt(model.Id, time.Unix(model.CreatedAt, 0).Add(24*25*time.Hour).Unix())
+		t.Run("when rotated_at is 5 days ago and created_at is 29 days and 23:59:59 ago should find token", func(t *testing.T) {
+			token, err := ctx.tokenService.CreateToken(context.Background(), user, net.ParseIP("192.168.10.11"), "some user agent")
+			require.Nil(t, err)
+			require.NotNil(t, token)
+
+			updated, err := ctx.updateRotatedAt(token.Id, time.Unix(model.CreatedAt, 0).Add(24*25*time.Hour).Unix())
 			require.Nil(t, err)
 			require.True(t, updated)
 
@@ -225,9 +229,9 @@ func TestUserAuthToken(t *testing.T) {
 				return time.Unix(model.CreatedAt, 0).Add(24 * 30 * time.Hour).Add(-time.Second)
 			}
 
-			stillGood, err = ctx.tokenService.LookupToken(context.Background(), stillGood.UnhashedToken)
+			token, err = ctx.tokenService.LookupToken(context.Background(), token.UnhashedToken)
 			require.Nil(t, err)
-			require.NotNil(t, stillGood)
+			require.NotNil(t, token)
 		})
 
 		t.Run("when rotated_at is 5 days ago and created_at is 30 days ago should return token expired error", func(t *testing.T) {
