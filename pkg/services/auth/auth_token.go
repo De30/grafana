@@ -209,10 +209,12 @@ func (s *UserAuthTokenService) LookupToken(ctx context.Context, unhashedToken st
 }
 
 type cachedToken struct {
-	hashedToken string
-	token       userAuthToken
+	hashedToken   string
+	userAuthtoken userAuthToken
 }
 
+// lookupCachedToken will check if the raw token is cached. With this we don't have to hash the raw token and do a db lookup
+// on every call. If no cached token is found we call lookupToken
 func (s *UserAuthTokenService) lookupCachedToken(ctx context.Context, rawToken string) (*userAuthToken, string, error) {
 	key := cacheKey(rawToken)
 	cached, ok := s.cache.Get(key)
@@ -229,9 +231,10 @@ func (s *UserAuthTokenService) lookupCachedToken(ctx context.Context, rawToken s
 
 	s.log.Debug("auth token found in cache")
 	token := cached.(cachedToken)
-	return &token.token, token.hashedToken, nil
+	return &token.userAuthtoken, token.hashedToken, nil
 }
 
+// lookupToken hashes the raw token and do a db lookup for user auth token
 func (s *UserAuthTokenService) lookupToken(ctx context.Context, rawToken string) (*userAuthToken, string, error) {
 	hashedToken := hashToken(rawToken)
 
