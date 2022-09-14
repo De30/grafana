@@ -1,0 +1,1454 @@
+//  🌟 This was machine generated.  Do not edit. 🌟
+//  
+//  Frame[0] 
+//  Name: dashboard
+//  Dimensions: 7 Fields by 95 Rows
+//  +-------------------------------------------------------------------------------+----------------------------------------------+----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+-----------------------------+-------------------------------------+
+//  | Name: UID                                                                     | Name: name                                   | Name: description                                                    | Name: url                                                                                                                   | Name: tag                                  | Name: ds_type               | Name: ds_uid                        |
+//  | Labels:                                                                       | Labels:                                      | Labels:                                                              | Labels:                                                                                                                     | Labels:                                    | Labels:                     | Labels:                             |
+//  | Type: []string                                                                | Type: []string                               | Type: []string                                                       | Type: []string                                                                                                              | Type: []json.RawMessage                    | Type: []json.RawMessage     | Type: []json.RawMessage             |
+//  +-------------------------------------------------------------------------------+----------------------------------------------+----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+-----------------------------+-------------------------------------+
+//  | devenv/dev-dashboards/alerting/testdata_alerts.json                           | Alerting with TestData                       |                                                                      | /d/devenv/dev-dashboards/alerting/testdata_alerts.json/alerting-with-testdata                                               | ["gdev","alerting"]                        | ["testdata","default.type"] | ["PD8C576611E62080A","default.uid"] |
+//  | devenv/dev-dashboards/all-panels.json                                         | Panel tests - All panels                     |                                                                      | /d/devenv/dev-dashboards/all-panels.json/panel-tests-all-panels                                                             | ["gdev","panel-tests","all-panels"]        | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_compare.json     | Datasource tests - Elasticsearch comparison  |                                                                      | /d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_compare.json/datasource-tests-elasticsearch-comparison      | ["elasticsearch","gdev","datasource-test"] | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7.json          | Datasource tests - Elasticsearch v7          |                                                                      | /d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7.json/datasource-tests-elasticsearch-v7                   | ["elasticsearch","gdev","datasource-test"] | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7_filebeat.json | Datasource tests - Elasticsearch v7 Filebeat |                                                                      | /d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7_filebeat.json/datasource-tests-elasticsearch-v7-filebeat | ["elasticsearch","gdev","datasource-test"] | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-influxdb/influxdb-logs.json                  | Datasource tests - InfluxDB Logs             |                                                                      | /d/devenv/dev-dashboards/datasource-influxdb/influxdb-logs.json/datasource-tests-influxdb-logs                              | ["gdev","influxdb","datasource-test"]      | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-influxdb/influxdb-templated.json             | Datasource tests - InfluxDB Templated        |                                                                      | /d/devenv/dev-dashboards/datasource-influxdb/influxdb-templated.json/datasource-tests-influxdb-templated                    | ["gdev","datasource-test","influxdb"]      | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-mssql/mssql_fakedata.json                    | Datasource tests - MSSQL                     | A dashboard visualizing data generated from grafana/fake-data-gen    | /d/devenv/dev-dashboards/datasource-mssql/mssql_fakedata.json/datasource-tests-mssql                                        | ["gdev","mssql","datasource-test"]         | ["default.type"]            | ["default.uid"]                     |
+//  | devenv/dev-dashboards/datasource-mssql/mssql_unittest.json                    | Datasource tests - MSSQL (unit test)         | Run the mssql unit tests to generate the data backing this dashboard | /d/devenv/dev-dashboards/datasource-mssql/mssql_unittest.json/datasource-tests-mssql-unit-test                              | ["gdev","mssql","datasource-test"]         | ["default.type"]            | ["default.uid"]                     |
+//  | ...                                                                           | ...                                          | ...                                                                  | ...                                                                                                                         | ...                                        | ...                         | ...                                 |
+//  +-------------------------------------------------------------------------------+----------------------------------------------+----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+-----------------------------+-------------------------------------+
+//  
+//  
+//  🌟 This was machine generated.  Do not edit. 🌟
+{
+  "frames": [
+    {
+      "schema": {
+        "name": "dashboard",
+        "fields": [
+          {
+            "name": "UID",
+            "type": "string",
+            "typeInfo": {
+              "frame": "string"
+            }
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "typeInfo": {
+              "frame": "string"
+            }
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "typeInfo": {
+              "frame": "string"
+            }
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "typeInfo": {
+              "frame": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "type": "other",
+            "typeInfo": {
+              "frame": "json.RawMessage"
+            }
+          },
+          {
+            "name": "ds_type",
+            "type": "other",
+            "typeInfo": {
+              "frame": "json.RawMessage"
+            }
+          },
+          {
+            "name": "ds_uid",
+            "type": "other",
+            "typeInfo": {
+              "frame": "json.RawMessage"
+            }
+          }
+        ]
+      },
+      "data": {
+        "values": [
+          [
+            "devenv/dev-dashboards/alerting/testdata_alerts.json",
+            "devenv/dev-dashboards/all-panels.json",
+            "devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_compare.json",
+            "devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7.json",
+            "devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7_filebeat.json",
+            "devenv/dev-dashboards/datasource-influxdb/influxdb-logs.json",
+            "devenv/dev-dashboards/datasource-influxdb/influxdb-templated.json",
+            "devenv/dev-dashboards/datasource-mssql/mssql_fakedata.json",
+            "devenv/dev-dashboards/datasource-mssql/mssql_unittest.json",
+            "devenv/dev-dashboards/datasource-mysql/mysql_fakedata.json",
+            "devenv/dev-dashboards/datasource-mysql/mysql_unittest.json",
+            "devenv/dev-dashboards/datasource-opentsdb/opentsdb.json",
+            "devenv/dev-dashboards/datasource-opentsdb/opentsdb_v2.3.json",
+            "devenv/dev-dashboards/datasource-postgres/postgres_fakedata.json",
+            "devenv/dev-dashboards/datasource-postgres/postgres_unittest.json",
+            "devenv/dev-dashboards/datasource-testdata/bar-gauge-demo2.json",
+            "devenv/dev-dashboards/datasource-testdata/demo1.json",
+            "devenv/dev-dashboards/datasource-testdata/new_features_in_v62.json",
+            "devenv/dev-dashboards/datasource-testdata/new_features_in_v74.json",
+            "devenv/dev-dashboards/datasource-testdata/new_features_in_v8.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-Kitchen-Sink.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-panel-horizontally.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-panel-vertically.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel-and-horizontal-repeating-panel.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel-and-vertical-repeating-panel.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-repeating-horizontal-panel.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-repeating-vertical-panel.json",
+            "devenv/dev-dashboards/e2e-repeats/Repeating-an-empty-row.json",
+            "devenv/dev-dashboards/feature-templating/global-variables-and-interpolation.json",
+            "devenv/dev-dashboards/feature-templating/templating-dashboard-links-and-variables.json",
+            "devenv/dev-dashboards/feature-templating/templating-textbox-e2e-scenarios.json",
+            "devenv/dev-dashboards/feature-templating/testdata-datalinks.json",
+            "devenv/dev-dashboards/feature-templating/testdata-nested-variables-drilldown.json",
+            "devenv/dev-dashboards/feature-templating/testdata-nested-variables.json",
+            "devenv/dev-dashboards/feature-templating/testdata-repeating.json",
+            "devenv/dev-dashboards/feature-templating/testdata-test-variable-output.json",
+            "devenv/dev-dashboards/feature-templating/testdata-variables-textbox.json",
+            "devenv/dev-dashboards/feature-templating/testdata-variables-that-update-on-time-change.json",
+            "devenv/dev-dashboards/home.json",
+            "devenv/dev-dashboards/panel-barchart/barchart-autosizing.json",
+            "devenv/dev-dashboards/panel-bargauge/bar_gauge_demo.json",
+            "devenv/dev-dashboards/panel-bargauge/panel_tests_bar_gauge.json",
+            "devenv/dev-dashboards/panel-bargauge/panel_tests_bar_gauge2.json",
+            "devenv/dev-dashboards/panel-candlestick/candlestick.json",
+            "devenv/dev-dashboards/panel-common/auto_decimals.json",
+            "devenv/dev-dashboards/panel-common/color_modes.json",
+            "devenv/dev-dashboards/panel-common/lazy_loading.json",
+            "devenv/dev-dashboards/panel-common/linked-viz.json",
+            "devenv/dev-dashboards/panel-common/panels_without_title.json",
+            "devenv/dev-dashboards/panel-common/shared_queries.json",
+            "devenv/dev-dashboards/panel-gauge/gauge-multi-series.json",
+            "devenv/dev-dashboards/panel-gauge/gauge_tests.json",
+            "devenv/dev-dashboards/panel-geomap/geomap-9.1.json",
+            "devenv/dev-dashboards/panel-geomap/geomap-color-field.json",
+            "devenv/dev-dashboards/panel-geomap/geomap-spatial-operations-transformer.json",
+            "devenv/dev-dashboards/panel-geomap/geomap_multi-layers.json",
+            "devenv/dev-dashboards/panel-geomap/panel-geomap.json",
+            "devenv/dev-dashboards/panel-graph/graph-gradient-area-fills.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-by-value-color-schemes.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-gradient-area.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-hue-gradients.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-nulls.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-soft-limits.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-stacking.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-stacking2.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-thresholds.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-time.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-y-ticks-zero-decimals.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng-yaxis-ticks.json",
+            "devenv/dev-dashboards/panel-graph/graph-ng.json",
+            "devenv/dev-dashboards/panel-graph/graph-shared-tooltip-cursor-position.json",
+            "devenv/dev-dashboards/panel-graph/graph-shared-tooltips.json",
+            "devenv/dev-dashboards/panel-graph/graph-time-regions.json",
+            "devenv/dev-dashboards/panel-graph/graph_tests.json",
+            "devenv/dev-dashboards/panel-graph/graph_y_axis.json",
+            "devenv/dev-dashboards/panel-heatmap/heatmap-calculate-log.json",
+            "devenv/dev-dashboards/panel-heatmap/heatmap-legacy.json",
+            "devenv/dev-dashboards/panel-histogram/histogram_tests.json",
+            "devenv/dev-dashboards/panel-library/panel-library.json",
+            "devenv/dev-dashboards/panel-piechart/panel_test_piechart.json",
+            "devenv/dev-dashboards/panel-polystat/polystat_test.json",
+            "devenv/dev-dashboards/panel-stat/panel-stat-tests.json",
+            "devenv/dev-dashboards/panel-table/table_pagination.json",
+            "devenv/dev-dashboards/panel-table/table_tests.json",
+            "devenv/dev-dashboards/panel-table/table_tests_new.json",
+            "devenv/dev-dashboards/panel-text/text-options.json",
+            "devenv/dev-dashboards/panel-timeline/timeline-demo.json",
+            "devenv/dev-dashboards/panel-timeline/timeline-modes.json",
+            "devenv/dev-dashboards/scenarios/slow_queries_and_annotations.json",
+            "devenv/dev-dashboards/scenarios/time_zone_support.json",
+            "devenv/dev-dashboards/transforms/config-from-query.json",
+            "devenv/dev-dashboards/transforms/join-by-field.json",
+            "devenv/dev-dashboards/transforms/join-by-labels.json",
+            "devenv/dev-dashboards/transforms/rows-to-fields.json"
+          ],
+          [
+            "Alerting with TestData",
+            "Panel tests - All panels",
+            "Datasource tests - Elasticsearch comparison",
+            "Datasource tests - Elasticsearch v7",
+            "Datasource tests - Elasticsearch v7 Filebeat",
+            "Datasource tests - InfluxDB Logs",
+            "Datasource tests - InfluxDB Templated",
+            "Datasource tests - MSSQL",
+            "Datasource tests - MSSQL (unit test)",
+            "Datasource tests - MySQL",
+            "Datasource tests - MySQL (unittest)",
+            "Datasource tests - OpenTSDB",
+            "Datasource tests - OpenTSDB v2.3",
+            "Datasource tests - Postgres",
+            "Datasource tests - Postgres (unittest)",
+            "Bar Gauge Demo Unfilled",
+            "TestData - Demo Dashboard",
+            "New Features in v6.2",
+            "New Features in v7.4",
+            "New Features in v8.0",
+            "Repeating Kitchen Sink",
+            "Repeating a panel horizontally",
+            "Repeating a panel vertically",
+            "Repeating a row with a non-repeating panel and horizontal repeating panel",
+            "Repeating a row with a non-repeating panel and vertical repeating panel",
+            "Repeating a row with a non-repeating panel",
+            "Repeating a row with a repeating horizontal panel",
+            "Repeating a row with a repeating vertical panel",
+            "Repeating an empty row",
+            "Templating - Global variables and interpolation",
+            "Templating - Dashboard Links and Variables",
+            "Templating - Textbox e2e scenarios",
+            "Datalinks - variables",
+            "Templating - Nested Variables Drilldown",
+            "Templating - Nested Template Variables",
+            "TestData Repeating Panels",
+            "Test variable output",
+            "Templating - Textbox \u0026 data links",
+            "Templating - Variables That Refresh On Time Change",
+            "Grafana Dev Overview \u0026 Home",
+            "BarChart - Panel Tests - Value sizing",
+            "Bar Gauge Demo",
+            "Panel Tests - Bar Gauge",
+            "Panel Tests - Bar Gauge 2",
+            "Candlestick",
+            "Panel Tests - Auto Decimals",
+            "Gradient Color modes",
+            "Lazy Loading",
+            "Panel \u0026 data links in stat, gauge and bargauge",
+            "Panel Tests - With \u0026 Without title",
+            "Datasource tests -  Shared Queries",
+            "Panel Tests - Gauge Multi Series",
+            "Panel Tests - Gauge",
+            "Panel Tests - Geomap 9.1",
+            "Geomap - color field Copy",
+            "Panel Tests - Geomap geohash transformer",
+            "Panel Tests - Geomap Multi Layers",
+            "Panel Tests - Geomap",
+            "Panel Tests - Graph - Gradient Area Fills",
+            "Panel Tests - Graph NG - By value color schemes",
+            "Panel Tests - Graph NG - Gradient Area Fills",
+            "Panel Tests - GraphNG - Hue Gradients",
+            "Panel Tests - Graph NG - Gaps and Connected",
+            "Panel Tests - Graph NG - softMin/softMax",
+            "Panel Tests - TimeSeries - stacking",
+            "TimeSeries \u0026 BarChart Stacking",
+            "Panel Tests - GraphNG Thresholds",
+            "Panel Tests - GraphNG - Time Axis",
+            "Zero Decimals Y Ticks",
+            "Panel Tests - Graph NG - Y axis ticks",
+            "Panel Tests - Graph NG",
+            "Panel Tests - shared tooltips cursor positioning",
+            "Panel Tests - shared tooltips",
+            "Panel Tests - Graph Time Regions",
+            "Panel Tests - Graph",
+            "Panel Tests - Graph - Y axis ticks",
+            "Heatmap calculate (log)",
+            "Legacy heatmap",
+            "Panel Tests - Histogram",
+            "Panel - Panel Library",
+            "Panel Tests - Pie chart",
+            "Panel Tests - Polystat",
+            "Panel Tests - Stat",
+            "Table panel - Pagination",
+            "Panel Tests - Table",
+            "Panel Tests - React Table",
+            "Text options",
+            "Timeline Demo",
+            "Timeline Modes",
+            "Panel tests - Slow Queries \u0026 Annotations",
+            "Panel Tests - Time zone support",
+            "Transforms - Config from query",
+            "Join by field",
+            "Join by labels",
+            "Transforms - Rows to fields"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "A dashboard visualizing data generated from grafana/fake-data-gen",
+            "Run the mssql unit tests to generate the data backing this dashboard",
+            "A dashboard visualizing data generated from grafana/fake-data-gen",
+            "Run the mysql unit tests to generate the data backing this dashboard",
+            "",
+            "",
+            "A dashboard visualizing data generated from grafana/fake-data-gen",
+            "Run the postgres unit tests to generate the data backing this dashboard",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "/d/devenv/dev-dashboards/alerting/testdata_alerts.json/alerting-with-testdata",
+            "/d/devenv/dev-dashboards/all-panels.json/panel-tests-all-panels",
+            "/d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_compare.json/datasource-tests-elasticsearch-comparison",
+            "/d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7.json/datasource-tests-elasticsearch-v7",
+            "/d/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_v7_filebeat.json/datasource-tests-elasticsearch-v7-filebeat",
+            "/d/devenv/dev-dashboards/datasource-influxdb/influxdb-logs.json/datasource-tests-influxdb-logs",
+            "/d/devenv/dev-dashboards/datasource-influxdb/influxdb-templated.json/datasource-tests-influxdb-templated",
+            "/d/devenv/dev-dashboards/datasource-mssql/mssql_fakedata.json/datasource-tests-mssql",
+            "/d/devenv/dev-dashboards/datasource-mssql/mssql_unittest.json/datasource-tests-mssql-unit-test",
+            "/d/devenv/dev-dashboards/datasource-mysql/mysql_fakedata.json/datasource-tests-mysql",
+            "/d/devenv/dev-dashboards/datasource-mysql/mysql_unittest.json/datasource-tests-mysql-unittest",
+            "/d/devenv/dev-dashboards/datasource-opentsdb/opentsdb.json/datasource-tests-opentsdb",
+            "/d/devenv/dev-dashboards/datasource-opentsdb/opentsdb_v2.3.json/datasource-tests-opentsdb-v2-3",
+            "/d/devenv/dev-dashboards/datasource-postgres/postgres_fakedata.json/datasource-tests-postgres",
+            "/d/devenv/dev-dashboards/datasource-postgres/postgres_unittest.json/datasource-tests-postgres-unittest",
+            "/d/devenv/dev-dashboards/datasource-testdata/bar-gauge-demo2.json/bar-gauge-demo-unfilled",
+            "/d/devenv/dev-dashboards/datasource-testdata/demo1.json/testdata-demo-dashboard",
+            "/d/devenv/dev-dashboards/datasource-testdata/new_features_in_v62.json/new-features-in-v6-2",
+            "/d/devenv/dev-dashboards/datasource-testdata/new_features_in_v74.json/new-features-in-v7-4",
+            "/d/devenv/dev-dashboards/datasource-testdata/new_features_in_v8.json/new-features-in-v8-0",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-Kitchen-Sink.json/repeating-kitchen-sink",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-panel-horizontally.json/repeating-a-panel-horizontally",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-panel-vertically.json/repeating-a-panel-vertically",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel-and-horizontal-repeating-panel.json/repeating-a-row-with-a-non-repeating-panel-and-horizontal-repeating-panel",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel-and-vertical-repeating-panel.json/repeating-a-row-with-a-non-repeating-panel-and-vertical-repeating-panel",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-non-repeating-panel.json/repeating-a-row-with-a-non-repeating-panel",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-repeating-horizontal-panel.json/repeating-a-row-with-a-repeating-horizontal-panel",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-a-row-with-a-repeating-vertical-panel.json/repeating-a-row-with-a-repeating-vertical-panel",
+            "/d/devenv/dev-dashboards/e2e-repeats/Repeating-an-empty-row.json/repeating-an-empty-row",
+            "/d/devenv/dev-dashboards/feature-templating/global-variables-and-interpolation.json/templating-global-variables-and-interpolation",
+            "/d/devenv/dev-dashboards/feature-templating/templating-dashboard-links-and-variables.json/templating-dashboard-links-and-variables",
+            "/d/devenv/dev-dashboards/feature-templating/templating-textbox-e2e-scenarios.json/templating-textbox-e2e-scenarios",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-datalinks.json/datalinks-variables",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-nested-variables-drilldown.json/templating-nested-variables-drilldown",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-nested-variables.json/templating-nested-template-variables",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-repeating.json/testdata-repeating-panels",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-test-variable-output.json/test-variable-output",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-variables-textbox.json/templating-textbox-and-data-links",
+            "/d/devenv/dev-dashboards/feature-templating/testdata-variables-that-update-on-time-change.json/templating-variables-that-refresh-on-time-change",
+            "/d/devenv/dev-dashboards/home.json/grafana-dev-overview-and-home",
+            "/d/devenv/dev-dashboards/panel-barchart/barchart-autosizing.json/barchart-panel-tests-value-sizing",
+            "/d/devenv/dev-dashboards/panel-bargauge/bar_gauge_demo.json/bar-gauge-demo",
+            "/d/devenv/dev-dashboards/panel-bargauge/panel_tests_bar_gauge.json/panel-tests-bar-gauge",
+            "/d/devenv/dev-dashboards/panel-bargauge/panel_tests_bar_gauge2.json/panel-tests-bar-gauge-2",
+            "/d/devenv/dev-dashboards/panel-candlestick/candlestick.json/candlestick",
+            "/d/devenv/dev-dashboards/panel-common/auto_decimals.json/panel-tests-auto-decimals",
+            "/d/devenv/dev-dashboards/panel-common/color_modes.json/gradient-color-modes",
+            "/d/devenv/dev-dashboards/panel-common/lazy_loading.json/lazy-loading",
+            "/d/devenv/dev-dashboards/panel-common/linked-viz.json/panel-and-data-links-in-stat-gauge-and-bargauge",
+            "/d/devenv/dev-dashboards/panel-common/panels_without_title.json/panel-tests-with-and-without-title",
+            "/d/devenv/dev-dashboards/panel-common/shared_queries.json/datasource-tests-shared-queries",
+            "/d/devenv/dev-dashboards/panel-gauge/gauge-multi-series.json/panel-tests-gauge-multi-series",
+            "/d/devenv/dev-dashboards/panel-gauge/gauge_tests.json/panel-tests-gauge",
+            "/d/devenv/dev-dashboards/panel-geomap/geomap-9.1.json/panel-tests-geomap-9-1",
+            "/d/devenv/dev-dashboards/panel-geomap/geomap-color-field.json/geomap-color-field-copy",
+            "/d/devenv/dev-dashboards/panel-geomap/geomap-spatial-operations-transformer.json/panel-tests-geomap-geohash-transformer",
+            "/d/devenv/dev-dashboards/panel-geomap/geomap_multi-layers.json/panel-tests-geomap-multi-layers",
+            "/d/devenv/dev-dashboards/panel-geomap/panel-geomap.json/panel-tests-geomap",
+            "/d/devenv/dev-dashboards/panel-graph/graph-gradient-area-fills.json/panel-tests-graph-gradient-area-fills",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-by-value-color-schemes.json/panel-tests-graph-ng-by-value-color-schemes",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-gradient-area.json/panel-tests-graph-ng-gradient-area-fills",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-hue-gradients.json/panel-tests-graphng-hue-gradients",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-nulls.json/panel-tests-graph-ng-gaps-and-connected",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-soft-limits.json/panel-tests-graph-ng-softmin-softmax",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-stacking.json/panel-tests-timeseries-stacking",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-stacking2.json/timeseries-and-barchart-stacking",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-thresholds.json/panel-tests-graphng-thresholds",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-time.json/panel-tests-graphng-time-axis",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-y-ticks-zero-decimals.json/zero-decimals-y-ticks",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng-yaxis-ticks.json/panel-tests-graph-ng-y-axis-ticks",
+            "/d/devenv/dev-dashboards/panel-graph/graph-ng.json/panel-tests-graph-ng",
+            "/d/devenv/dev-dashboards/panel-graph/graph-shared-tooltip-cursor-position.json/panel-tests-shared-tooltips-cursor-positioning",
+            "/d/devenv/dev-dashboards/panel-graph/graph-shared-tooltips.json/panel-tests-shared-tooltips",
+            "/d/devenv/dev-dashboards/panel-graph/graph-time-regions.json/panel-tests-graph-time-regions",
+            "/d/devenv/dev-dashboards/panel-graph/graph_tests.json/panel-tests-graph",
+            "/d/devenv/dev-dashboards/panel-graph/graph_y_axis.json/panel-tests-graph-y-axis-ticks",
+            "/d/devenv/dev-dashboards/panel-heatmap/heatmap-calculate-log.json/heatmap-calculate-log",
+            "/d/devenv/dev-dashboards/panel-heatmap/heatmap-legacy.json/legacy-heatmap",
+            "/d/devenv/dev-dashboards/panel-histogram/histogram_tests.json/panel-tests-histogram",
+            "/d/devenv/dev-dashboards/panel-library/panel-library.json/panel-panel-library",
+            "/d/devenv/dev-dashboards/panel-piechart/panel_test_piechart.json/panel-tests-pie-chart",
+            "/d/devenv/dev-dashboards/panel-polystat/polystat_test.json/panel-tests-polystat",
+            "/d/devenv/dev-dashboards/panel-stat/panel-stat-tests.json/panel-tests-stat",
+            "/d/devenv/dev-dashboards/panel-table/table_pagination.json/table-panel-pagination",
+            "/d/devenv/dev-dashboards/panel-table/table_tests.json/panel-tests-table",
+            "/d/devenv/dev-dashboards/panel-table/table_tests_new.json/panel-tests-react-table",
+            "/d/devenv/dev-dashboards/panel-text/text-options.json/text-options",
+            "/d/devenv/dev-dashboards/panel-timeline/timeline-demo.json/timeline-demo",
+            "/d/devenv/dev-dashboards/panel-timeline/timeline-modes.json/timeline-modes",
+            "/d/devenv/dev-dashboards/scenarios/slow_queries_and_annotations.json/panel-tests-slow-queries-and-annotations",
+            "/d/devenv/dev-dashboards/scenarios/time_zone_support.json/panel-tests-time-zone-support",
+            "/d/devenv/dev-dashboards/transforms/config-from-query.json/transforms-config-from-query",
+            "/d/devenv/dev-dashboards/transforms/join-by-field.json/join-by-field",
+            "/d/devenv/dev-dashboards/transforms/join-by-labels.json/join-by-labels",
+            "/d/devenv/dev-dashboards/transforms/rows-to-fields.json/transforms-rows-to-fields"
+          ],
+          [
+            [
+              "gdev",
+              "alerting"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "all-panels"
+            ],
+            [
+              "elasticsearch",
+              "gdev",
+              "datasource-test"
+            ],
+            [
+              "elasticsearch",
+              "gdev",
+              "datasource-test"
+            ],
+            [
+              "elasticsearch",
+              "gdev",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "influxdb",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "datasource-test",
+              "influxdb"
+            ],
+            [
+              "gdev",
+              "mssql",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "mssql",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "mysql",
+              "datasource-tags"
+            ],
+            [
+              "gdev",
+              "mysql",
+              "datasource-test"
+            ],
+            [
+              "datasource-test",
+              "gdev",
+              "opentsdb"
+            ],
+            null,
+            [
+              "gdev",
+              "postgres",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "postgres",
+              "datasource-test"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev",
+              "graph-ng",
+              "demo"
+            ],
+            [
+              "gdev",
+              "graph-ng",
+              "demo"
+            ],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            [
+              "gdev",
+              "templating"
+            ],
+            [
+              "gdev",
+              "templating"
+            ],
+            null,
+            [
+              "gdev",
+              "templating"
+            ],
+            [
+              "gdev",
+              "templating"
+            ],
+            [
+              "gdev",
+              "templating"
+            ],
+            [
+              "gdev",
+              "templating"
+            ],
+            null,
+            [
+              "gdev",
+              "templating"
+            ],
+            [
+              "gdev",
+              "templating"
+            ],
+            null,
+            [
+              "gdev",
+              "panel-tests",
+              "barchart",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev",
+              "demo"
+            ],
+            [
+              "gdev"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "datasource-test"
+            ],
+            [
+              "panel-tests",
+              "gdev",
+              "gauge"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "geomap"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "geomap"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "geomap"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "geomap"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "geomap"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            null,
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "panel-test",
+              "gdev",
+              "polystat"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            [
+              "gdev",
+              "panel-tests"
+            ],
+            null,
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng",
+              "demo"
+            ],
+            [
+              "gdev",
+              "panel-tests",
+              "graph-ng"
+            ],
+            null,
+            [
+              "gdev",
+              "panel-tests",
+              "graph",
+              "table"
+            ],
+            [
+              "gdev",
+              "transform"
+            ],
+            [
+              "gdev",
+              "transform"
+            ],
+            [
+              "gdev",
+              "transform"
+            ],
+            [
+              "gdev",
+              "transform"
+            ]
+          ],
+          [
+            [
+              "testdata",
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata",
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata",
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata",
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type",
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "testdata"
+            ],
+            [
+              "default.type"
+            ]
+          ],
+          [
+            [
+              "PD8C576611E62080A",
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A",
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A",
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A",
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid",
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "PD8C576611E62080A"
+            ],
+            [
+              "default.uid"
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
