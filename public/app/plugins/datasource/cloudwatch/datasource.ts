@@ -62,11 +62,11 @@ export class CloudWatchDatasource
     this.languageProvider = new CloudWatchLanguageProvider(this);
     this.sqlCompletionItemProvider = new SQLCompletionItemProvider(this.api, this.templateSrv);
     this.metricMathCompletionItemProvider = new MetricMathCompletionItemProvider(this.api, this.templateSrv);
-    this.annotations = CloudWatchAnnotationSupport;
     this.metricsQueryRunner = new CloudWatchMetricsQueryRunner(instanceSettings, templateSrv);
     this.logsQueryRunner = new CloudWatchLogsQueryRunner(instanceSettings, templateSrv, timeSrv);
     this.annotationQueryRunner = new CloudWatchAnnotationQueryRunner(instanceSettings, templateSrv);
     this.variables = new CloudWatchVariableSupport(this.api, this.logsQueryRunner);
+    this.annotations = CloudWatchAnnotationSupport;
   }
 
   filterQuery(query: CloudWatchQuery) {
@@ -77,18 +77,31 @@ export class CloudWatchDatasource
     options = cloneDeep(options);
 
     let queries = options.targets.filter(this.filterQuery);
-    const { logQueries, metricsQueries, annotationQueries } = getTargetsByQueryMode(queries);
+
+    const logQueries: CloudWatchLogsQuery[] = [];
+    const metricsQueries: CloudWatchMetricsQuery[] = [];
+    const annotationQueries: CloudWatchAnnotationQuery[] = [];
+
+    queries.forEach((query) => {
+      if (isCloudWatchAnnotationQuery(query)) {
+        annotationQueries.push(query);
+      } else if (isCloudWatchLogsQuery(query)) {
+        logQueries.push(query);
+      } else {
+        metricsQueries.push(query);
+      }
+    });
 
     const dataQueryResponses: Array<Observable<DataQueryResponse>> = [];
-    if (logQueries.length > 0) {
+    if (logQueries.length) {
       dataQueryResponses.push(this.logsQueryRunner.handleLogQueries(logQueries, options));
     }
 
-    if (metricsQueries.length > 0) {
+    if (metricsQueries.length) {
       dataQueryResponses.push(this.metricsQueryRunner.handleMetricQueries(metricsQueries, options));
     }
 
-    if (annotationQueries.length > 0) {
+    if (annotationQueries.length) {
       dataQueryResponses.push(this.annotationQueryRunner.handleAnnotationQuery(annotationQueries, options));
     }
     // No valid targets, return the empty result to save a round trip.
@@ -160,26 +173,4 @@ export class CloudWatchDatasource
     }
     return region;
   }
-}
-
-function getTargetsByQueryMode(targets: CloudWatchQuery[]) {
-  const logQueries: CloudWatchLogsQuery[] = [];
-  const metricsQueries: CloudWatchMetricsQuery[] = [];
-  const annotationQueries: CloudWatchAnnotationQuery[] = [];
-
-  targets.forEach((query) => {
-    if (isCloudWatchAnnotationQuery(query)) {
-      annotationQueries.push(query);
-    } else if (isCloudWatchLogsQuery(query)) {
-      logQueries.push(query);
-    } else {
-      metricsQueries.push(query);
-    }
-  });
-
-  return {
-    logQueries,
-    metricsQueries,
-    annotationQueries,
-  };
 }
