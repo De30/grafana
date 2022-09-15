@@ -61,8 +61,8 @@ export class CloudWatchDatasource
     this.defaultRegion = instanceSettings.jsonData.defaultRegion;
     this.api = new CloudWatchAPI(instanceSettings, templateSrv);
     this.languageProvider = new CloudWatchLanguageProvider(this);
-    this.sqlCompletionItemProvider = new SQLCompletionItemProvider(this, this.templateSrv);
-    this.metricMathCompletionItemProvider = new MetricMathCompletionItemProvider(this, this.templateSrv);
+    this.sqlCompletionItemProvider = new SQLCompletionItemProvider(this.api, this.templateSrv);
+    this.metricMathCompletionItemProvider = new MetricMathCompletionItemProvider(this.api, this.templateSrv);
     this.variables = new CloudWatchVariableSupport(this);
     this.annotations = CloudWatchAnnotationSupport;
     this.metricsQueryRunner = new CloudWatchMetricsQueryRunner(instanceSettings, templateSrv);
