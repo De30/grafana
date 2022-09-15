@@ -421,7 +421,7 @@
     "node": ">= 16"
   },
   "volta": {
-    "node": "16.13.1"
+    "node": "18.9.0"
   },
   "packageManager": "yarn@3.2.3"
 }
