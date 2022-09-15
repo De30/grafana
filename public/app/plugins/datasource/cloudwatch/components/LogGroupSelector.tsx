@@ -98,7 +98,7 @@ export const LogGroupSelector: React.FC<LogGroupSelectorProps> = ({
       }
 
       setLoadingLogGroups(true);
-      return fetchLogGroupOptions(datasource.getActualRegion(region))
+      return fetchLogGroupOptions(datasource.api.getActualRegion(region))
         .then((logGroups) => {
           const newSelectedLogGroups = intersection(
             selectedLogGroups,

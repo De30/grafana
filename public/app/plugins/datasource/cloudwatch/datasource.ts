@@ -17,6 +17,7 @@ import { getTimeSrv, TimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_srv';
 
 import { CloudWatchAnnotationSupport } from './annotationSupport';
+import { CloudWatchAPI } from './api';
 import { SQLCompletionItemProvider } from './cloudwatch-sql/completion/CompletionItemProvider';
 import { isCloudWatchAnnotationQuery, isCloudWatchLogsQuery, isCloudWatchMetricsQuery } from './guards';
 import { CloudWatchLanguageProvider } from './language_provider';
@@ -30,7 +31,6 @@ import {
   CloudWatchLogsQuery,
   CloudWatchMetricsQuery,
   CloudWatchQuery,
-  Dimensions,
 } from './types';
 import { CloudWatchVariableSupport } from './variables';
 
@@ -38,7 +38,7 @@ export class CloudWatchDatasource
   extends DataSourceWithBackend<CloudWatchQuery, CloudWatchJsonData>
   implements DataSourceWithLogsContextSupport<CloudWatchLogsQuery>
 {
-  defaultRegion: any;
+  defaultRegion?: string;
   languageProvider: CloudWatchLanguageProvider;
   sqlCompletionItemProvider: SQLCompletionItemProvider;
   metricMathCompletionItemProvider: MetricMathCompletionItemProvider;
@@ -50,6 +50,7 @@ export class CloudWatchDatasource
   private annotationQueryRunner: CloudWatchAnnotationQueryRunner;
   // this member should be private too, but we need to fix https://github.com/grafana/grafana/issues/55243 to enable that
   logsQueryRunner: CloudWatchLogsQueryRunner;
+  api: CloudWatchAPI;
 
   constructor(
     instanceSettings: DataSourceInstanceSettings<CloudWatchJsonData>,
@@ -58,6 +59,7 @@ export class CloudWatchDatasource
   ) {
     super(instanceSettings);
     this.defaultRegion = instanceSettings.jsonData.defaultRegion;
+    this.api = new CloudWatchAPI(instanceSettings, templateSrv);
     this.languageProvider = new CloudWatchLanguageProvider(this);
     this.sqlCompletionItemProvider = new SQLCompletionItemProvider(this, this.templateSrv);
     this.metricMathCompletionItemProvider = new MetricMathCompletionItemProvider(this, this.templateSrv);
@@ -67,8 +69,6 @@ export class CloudWatchDatasource
     this.logsQueryRunner = new CloudWatchLogsQueryRunner(instanceSettings, templateSrv, timeSrv);
     this.annotationQueryRunner = new CloudWatchAnnotationQueryRunner(instanceSettings, templateSrv);
   }
-
-  // datasource api
 
   filterQuery(query: CloudWatchQuery) {
     return query.hide !== true || (isCloudWatchMetricsQuery(query) && query.id !== '');
@@ -110,8 +110,9 @@ export class CloudWatchDatasource
 
     return queries.map((query) => ({
       ...query,
-      region: this.getActualRegion(
-        this.metricsQueryRunner.replaceVariableAndDisplayWarningIfMulti(query.region, scopedVars)
+      region: this.metricsQueryRunner.replaceVariableAndDisplayWarningIfMulti(
+        this.getActualRegion(query.region),
+        scopedVars
       ),
       ...(isCloudWatchMetricsQuery(query) &&
         this.metricsQueryRunner.interpolateMetricsQueryVariables(query, scopedVars)),
@@ -154,113 +155,11 @@ export class CloudWatchDatasource
     return this.templateSrv.getVariables().map((v) => `$${v.name}`);
   }
 
-  getDefaultRegion() {
-    return this.defaultRegion;
-  }
-
   getActualRegion(region?: string) {
     if (region === 'default' || region === undefined || region === '') {
-      return this.getDefaultRegion();
+      return this.defaultRegion;
     }
     return region;
-  }
-
-  doMetricResourceRequest(subtype: string, parameters?: any): Promise<Array<{ text: any; label: any; value: any }>> {
-    return this.getResource(subtype, parameters);
-  }
-
-  // resource requests
-  getRegions(): Promise<Array<{ label: string; value: string; text: string }>> {
-    return this.doMetricResourceRequest('regions').then((regions: any) => [
-      { label: 'default', value: 'default', text: 'default' },
-      ...regions,
-    ]);
-  }
-
-  getNamespaces() {
-    return this.doMetricResourceRequest('namespaces');
-  }
-
-  async getMetrics(namespace: string | undefined, region?: string) {
-    if (!namespace) {
-      return [];
-    }
-
-    return this.doMetricResourceRequest('metrics', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      namespace: this.templateSrv.replace(namespace),
-    });
-  }
-
-  async getAllMetrics(region: string): Promise<Array<{ metricName: string; namespace: string }>> {
-    const values = await this.doMetricResourceRequest('all-metrics', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-    });
-
-    return values.map((v) => ({ metricName: v.value, namespace: v.text }));
-  }
-
-  async getDimensionKeys(
-    namespace: string | undefined,
-    region: string,
-    dimensionFilters: Dimensions = {},
-    metricName = ''
-  ) {
-    if (!namespace) {
-      return [];
-    }
-
-    return this.doMetricResourceRequest('dimension-keys', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      namespace: this.templateSrv.replace(namespace),
-      dimensionFilters: JSON.stringify(this.metricsQueryRunner.convertDimensionFormat(dimensionFilters, {})),
-      metricName,
-    });
-  }
-
-  async getDimensionValues(
-    region: string,
-    namespace: string | undefined,
-    metricName: string | undefined,
-    dimensionKey: string,
-    filterDimensions: {}
-  ) {
-    if (!namespace || !metricName) {
-      return [];
-    }
-
-    const values = await this.doMetricResourceRequest('dimension-values', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      namespace: this.templateSrv.replace(namespace),
-      metricName: this.templateSrv.replace(metricName.trim()),
-      dimensionKey: this.templateSrv.replace(dimensionKey),
-      dimensions: JSON.stringify(this.metricsQueryRunner.convertDimensionFormat(filterDimensions, {})),
-    });
-
-    return values;
-  }
-
-  getEbsVolumeIds(region: string, instanceId: string) {
-    return this.doMetricResourceRequest('ebs-volume-ids', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      instanceId: this.templateSrv.replace(instanceId),
-    });
-  }
-
-  getEc2InstanceAttribute(region: string, attributeName: string, filters: any) {
-    return this.doMetricResourceRequest('ec2-instance-attribute', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      attributeName: this.templateSrv.replace(attributeName),
-      filters: JSON.stringify(this.metricsQueryRunner.convertMultiFilterFormat(filters, 'filter key')),
-    });
-  }
-
-  getResourceARNs(region: string, resourceType: string, tags: any) {
-    return this.doMetricResourceRequest('resource-arns', {
-      region: this.templateSrv.replace(this.getActualRegion(region)),
-      resourceType: this.templateSrv.replace(resourceType),
-      tags: JSON.stringify(this.metricsQueryRunner.convertMultiFilterFormat(tags, 'tag name')),
-    });
   }
 }
 

@@ -36,7 +36,7 @@ export class SQLCompletionItemProvider extends CompletionItemProvider {
 
   constructor(datasource: CloudWatchDatasource, templateSrv: TemplateSrv = getTemplateSrv()) {
     super(datasource, templateSrv);
-    this.region = datasource.getActualRegion();
+    this.region = datasource.getActualRegion() ?? '';
     this.getStatementPosition = getStatementPosition;
     this.getSuggestionKinds = getSuggestionKinds;
     this.tokenTypes = SQLTokenTypes;
@@ -112,14 +112,14 @@ export class SQLCompletionItemProvider extends CompletionItemProvider {
             const namespaceToken = getNamespaceToken(currentToken);
             if (namespaceToken?.value) {
               // if a namespace is specified, only suggest metrics for the namespace
-              const metrics = await this.datasource.getMetrics(
+              const metrics = await this.datasource.api.getMetrics(
                 this.templateSrv.replace(namespaceToken?.value.replace(/\"/g, '')),
                 this.templateSrv.replace(this.region)
               );
               metrics.map((m) => addSuggestion(m.value));
             } else {
               // If no namespace is specified in the query, just list all metrics
-              const metrics = await this.datasource.getAllMetrics(this.templateSrv.replace(this.region));
+              const metrics = await this.datasource.api.getAllMetrics(this.templateSrv.replace(this.region));
               uniq(metrics.map((m) => m.metricName)).map((m) => addSuggestion(m, { insertText: m }));
             }
           }
@@ -147,12 +147,12 @@ export class SQLCompletionItemProvider extends CompletionItemProvider {
           let namespaces = [];
           if (metricNameToken?.value) {
             // if a metric is specified, only suggest namespaces that actually have that metric
-            const metrics = await this.datasource.getAllMetrics(this.region);
+            const metrics = await this.datasource.api.getAllMetrics(this.region);
             const metricName = this.templateSrv.replace(metricNameToken.value);
             namespaces = metrics.filter((m) => m.metricName === metricName).map((m) => m.namespace);
           } else {
             // if no metric is specified, just suggest all namespaces
-            const ns = await this.datasource.getNamespaces();
+            const ns = await this.datasource.api.getNamespaces();
             namespaces = ns.map((n) => n.value);
           }
           namespaces.map((n) => addSuggestion(`"${n}"`, { insertText: `"${n}"` }));
@@ -179,7 +179,7 @@ export class SQLCompletionItemProvider extends CompletionItemProvider {
               dimensionFilter = (labelKeyTokens || []).reduce((acc, curr) => {
                 return { ...acc, [curr.value]: null };
               }, {});
-              const keys = await this.datasource.getDimensionKeys(
+              const keys = await this.datasource.api.getDimensionKeys(
                 this.templateSrv.replace(namespaceToken.value.replace(/\"/g, '')),
                 this.templateSrv.replace(this.region),
                 dimensionFilter,
@@ -199,7 +199,7 @@ export class SQLCompletionItemProvider extends CompletionItemProvider {
             const metricNameToken = getMetricNameToken(currentToken);
             const labelKey = currentToken?.getPreviousNonWhiteSpaceToken()?.getPreviousNonWhiteSpaceToken();
             if (namespaceToken?.value && labelKey?.value && metricNameToken?.value) {
-              const values = await this.datasource.getDimensionValues(
+              const values = await this.datasource.api.getDimensionValues(
                 this.templateSrv.replace(this.region),
                 this.templateSrv.replace(namespaceToken.value.replace(/\"/g, '')),
                 this.templateSrv.replace(metricNameToken.value),
