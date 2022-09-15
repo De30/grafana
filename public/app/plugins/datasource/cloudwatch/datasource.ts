@@ -44,7 +44,6 @@ export class CloudWatchDatasource
   metricMathCompletionItemProvider: MetricMathCompletionItemProvider;
 
   type = 'cloudwatch';
-  standardStatistics = ['Average', 'Maximum', 'Minimum', 'Sum', 'SampleCount'];
 
   private metricsQueryRunner: CloudWatchMetricsQueryRunner;
   private annotationQueryRunner: CloudWatchAnnotationQueryRunner;
@@ -63,11 +62,11 @@ export class CloudWatchDatasource
     this.languageProvider = new CloudWatchLanguageProvider(this);
     this.sqlCompletionItemProvider = new SQLCompletionItemProvider(this.api, this.templateSrv);
     this.metricMathCompletionItemProvider = new MetricMathCompletionItemProvider(this.api, this.templateSrv);
-    this.variables = new CloudWatchVariableSupport(this);
     this.annotations = CloudWatchAnnotationSupport;
     this.metricsQueryRunner = new CloudWatchMetricsQueryRunner(instanceSettings, templateSrv);
     this.logsQueryRunner = new CloudWatchLogsQueryRunner(instanceSettings, templateSrv, timeSrv);
     this.annotationQueryRunner = new CloudWatchAnnotationQueryRunner(instanceSettings, templateSrv);
+    this.variables = new CloudWatchVariableSupport(this.api, this.logsQueryRunner);
   }
 
   filterQuery(query: CloudWatchQuery) {
