@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"time"
 
@@ -203,17 +204,12 @@ func (e *cloudWatchExecutor) checkHealthMetrics(pluginCtx backend.PluginContext)
 	return err
 }
 
-func (e *cloudWatchExecutor) checkHealthLogs(ctx context.Context, pluginCtx backend.PluginContext) error {
-	logsClient, err := e.getCWLogsClient(pluginCtx, defaultRegion)
-	if err != nil {
-		return err
+func (e *cloudWatchExecutor) checkHealthLogs(pluginCtx backend.PluginContext) error {
+	parameters := url.Values{
+		"limit": []string{"1"},
 	}
 
-	parameters := LogQueryJson{
-		Limit: &baseLimit,
-	}
-
-	_, err = e.handleDescribeLogGroups(ctx, logsClient, parameters)
+	_, err := e.handleDescribeLogGroups(pluginCtx, parameters)
 	return err
 }
 
@@ -228,7 +224,7 @@ func (e *cloudWatchExecutor) CheckHealth(ctx context.Context, req *backend.Check
 		metricsTest = fmt.Sprintf("CloudWatch metrics query failed: %s", err.Error())
 	}
 
-	err = e.checkHealthLogs(ctx, req.PluginContext)
+	err = e.checkHealthLogs(req.PluginContext)
 	if err != nil {
 		status = backend.HealthStatusError
 		logsTest = fmt.Sprintf("CloudWatch logs query failed: %s", err.Error())

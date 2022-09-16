@@ -84,6 +84,7 @@ export function setupMockedDataSource({
   setBackendSrv({
     ...getBackendSrv(),
     fetch: fetchMock,
+    get: jest.fn(),
   });
 
   return { datasource, fetchMock, templateService, timeSrv };
