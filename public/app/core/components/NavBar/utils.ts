@@ -8,6 +8,7 @@ import { contextSrv } from 'app/core/services/context_srv';
 import { ShowModalReactEvent } from '../../../types/events';
 import appEvents from '../../app_events';
 import { getFooterLinks } from '../Footer/Footer';
+import { OrgSwitcher } from '../OrgSwitcher';
 import { HelpModal } from '../help/HelpModal';
 
 export const SEARCH_ITEM_ID = 'search';
@@ -22,14 +23,14 @@ export const getForcedLoginUrl = (url: string) => {
   return `${getConfig().appSubUrl}${url.split('?')[0]}?${queryParams.toString()}`;
 };
 
-export const enrichConfigItems = (
-  items: NavModelItem[],
-  location: Location<unknown>,
-  toggleOrgSwitcher: () => void
-) => {
+export const enrichConfigItems = (items: NavModelItem[], location: Location<unknown>) => {
   const { isSignedIn, user } = contextSrv;
   const onOpenShortcuts = () => {
     appEvents.publish(new ShowModalReactEvent({ component: HelpModal }));
+  };
+
+  const onOpenOrgSwitcher = () => {
+    appEvents.publish(new ShowModalReactEvent({ component: OrgSwitcher }));
   };
 
   if (user && user.orgCount > 1) {
@@ -75,7 +76,7 @@ export const enrichConfigItems = (
           id: 'switch-organization',
           text: 'Switch organization',
           icon: 'arrow-random',
-          onClick: toggleOrgSwitcher,
+          onClick: onOpenOrgSwitcher,
         },
       ];
     }
