@@ -1,13 +1,11 @@
 package kind
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/experimental"
 	"github.com/grafana/grafana/pkg/services/searchV2/dslookup"
 	"github.com/stretchr/testify/require"
@@ -77,7 +75,7 @@ func TestReadDashboard(t *testing.T) {
 
 	indexer := dashboardIndexer{lookup: dsLookup()}
 
-	frames := toDataFrames(indexer.GetIndex())
+	builder := toIndexBuilder(indexer.GetIndex())
 	err := filepath.Walk(devdash,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -90,40 +88,21 @@ func TestReadDashboard(t *testing.T) {
 				}
 
 				uid := path[len("../../../../"):]
-				rows, err := indexer.Index(uid, file)
+				row, err := indexer.Index(uid, file)
 				if err != nil {
 					return err
 				}
-				for _, row := range rows {
-					frame := frames[row.Kind]
-					if frame != nil {
-						frame.Extend(1)
-						idx := frame.Fields[0].Len() - 1
-						for i, v := range row.Row {
-							if v == nil {
-								continue
-							}
-							f := frame.Fields[i]
-							//fmt.Printf("Field: %s :: %t\n", f.Name, v)
-							if f.Type() == data.FieldTypeJSON {
-								bbb, err := json.Marshal(v)
-								if err != nil {
-									return err
-								}
-								f.SetConcrete(idx, json.RawMessage(bbb))
-							} else {
-								f.SetConcrete(idx, v)
-							}
-						}
-					}
+
+				err = builder.append(row)
+				if err != nil {
+					return err
 				}
-				//fmt.Printf("p: %s :: %+v\n", uid, rows)
 			}
 			return nil
 		})
 	require.NoError(t, err)
 
-	for _, frame := range frames {
+	for _, frame := range builder.frames() {
 		experimental.CheckGoldenJSONFrame(t, "testdata", frame.Name, frame, true)
 	}
 

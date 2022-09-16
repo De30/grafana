@@ -1,6 +1,7 @@
 package kind
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -35,81 +36,64 @@ const (
 	DocumentFieldUpdatedAt   = "updated_at"
 )
 
-type DashboardIndexData struct {
-	UID         string   `json:"uid,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	URL         string   `json:"url,omitempty"`
-	Tags        []string `json:"tag,omitempty"` // User entered tags
-	DSTypes     []string `json:"ds_type,omitempty"`
-	DSUIDs      []string `json:"ds_uid,omitempty"`
-}
+func (x *dashboardIndexer) GetIndex() KindIndexInfo {
+	jsonconverter := func(v interface{}) (interface{}, error) {
+		out, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		return json.RawMessage(out), nil
+	}
 
-type DashboardPanelIndexData struct {
-	UID          string   `json:"uid,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Description  string   `json:"description,omitempty"`
-	URL          string   `json:"url,omitempty"`
-	PanelType    string   `json:"panel_type,omitempty"`
-	Transformers []string `json:"transformer,omitempty"`
-	Tags         []string `json:"tag,omitempty"` // User entered tags
-	DSTypes      []string `json:"ds_type,omitempty"`
-	DSUIDs       []string `json:"ds_uid,omitempty"`
-}
+	return KindIndexInfo{
+		Name: "dashboard",
+		Fields: []IndexField{
+			{Name: documentFieldName, Type: data.FieldTypeString},
+			{Name: documentFieldDescription, Type: data.FieldTypeString},
+			{Name: documentFieldURL, Type: data.FieldTypeString},
+			{Name: documentFieldTag, Type: data.FieldTypeJSON, Converter: jsonconverter},    // string[]
+			{Name: documentFieldDSType, Type: data.FieldTypeJSON, Converter: jsonconverter}, // string[] distinct ds types
+			{Name: documentFieldDSUID, Type: data.FieldTypeJSON, Converter: jsonconverter},  // string[] distinct ds uids
+			{Name: "panel", NestedIndex: &KindIndexInfo{
+				Name: "panel",
+				Fields: []IndexField{
+					{Name: documentFieldName, Type: data.FieldTypeString},
+					{Name: documentFieldDescription, Type: data.FieldTypeString},
+					{Name: documentFieldURL, Type: data.FieldTypeString},
 
-type DatasboardIndexRows struct {
-	Dashboard DashboardIndexData
-	Panels    []DashboardPanelIndexData
-}
-
-func (x *dashboardIndexer) GetIndex() []KindIndexInfo {
-	return []KindIndexInfo{
-		{Name: "dashboard",
-			Fields: []IndexField{
-				{Name: "UID", Type: data.FieldTypeString},
-				{Name: documentFieldName, Type: data.FieldTypeString},
-				{Name: documentFieldDescription, Type: data.FieldTypeString},
-				{Name: documentFieldURL, Type: data.FieldTypeString},
-				{Name: documentFieldTag, Type: data.FieldTypeJSON},    // string[]
-				{Name: documentFieldDSType, Type: data.FieldTypeJSON}, // string[] distinct ds types
-				{Name: documentFieldDSUID, Type: data.FieldTypeJSON},  // string[] distinct ds uids
-			},
-		},
-		{Name: "dashboard-panel",
-			Fields: []IndexField{
-				{Name: "UID", Type: data.FieldTypeString},
-				{Name: documentFieldName, Type: data.FieldTypeString},
-				{Name: documentFieldDescription, Type: data.FieldTypeString},
-				{Name: documentFieldURL, Type: data.FieldTypeString},
-
-				// panel specific fields
-				{Name: documentFieldPanelType, Type: data.FieldTypeString},
-				{Name: documentFieldTransformer, Type: data.FieldTypeJSON}, // string[] distinct transformers
-				{Name: documentFieldDSType, Type: data.FieldTypeJSON},      // string[] distinct ds types
-				{Name: documentFieldDSUID, Type: data.FieldTypeJSON},       // string[] distinct ds uids
-			},
+					// panel specific fields
+					{Name: documentFieldPanelType, Type: data.FieldTypeString},
+					{Name: documentFieldTransformer, Type: data.FieldTypeJSON, Converter: jsonconverter}, // string[] distinct transformers
+					{Name: documentFieldDSType, Type: data.FieldTypeJSON, Converter: jsonconverter},      // string[] distinct ds types
+					{Name: documentFieldDSUID, Type: data.FieldTypeJSON, Converter: jsonconverter},       // string[] distinct ds uids
+				},
+			}},
 		},
 	}
 }
 
-func (x *dashboardIndexer) Index(uid string, stream io.Reader) ([]KindIndexRow, error) {
+func (x *dashboardIndexer) Index(uid string, stream io.Reader) (*KindIndexRow, error) {
 	dash, err := extract.ReadDashboard(stream, x.lookup)
 	if err != nil {
 		return nil, err
 	}
 
+	row := &KindIndexRow{
+		UID:    uid,
+		Values: make(map[string]interface{}),
+	}
+
 	url := fmt.Sprintf("/d/%s/%s", uid, models.SlugifyTitle(dash.Title))
 	ds_uids, ds_types := getUnique(dash.Datasource)
-	rows := make([]KindIndexRow, 0, len(dash.Panels)+1)
-	rows = append(rows, KindIndexRow{Kind: "dashboard", Row: []interface{}{
-		uid,
-		dash.Title,
-		dash.Description,
-		url,
-		dash.Tags,
-		ds_types,
-		ds_uids,
-	}})
+	row.Values[documentFieldName] = dash.Title
+	row.Values[documentFieldDescription] = dash.Description
+	row.Values[documentFieldURL] = url
+	row.Values[documentFieldTag] = dash.Tags
+	row.Values[documentFieldDSType] = ds_types
+	row.Values[documentFieldDSUID] = ds_uids
+
+	panels := make([]*KindIndexRow, 0, len(dash.Panels)+1)
+	row.Values["panel"] = panels
 
 	for _, panel := range dash.Panels {
 		if panel.Type == "row" {
@@ -117,20 +101,21 @@ func (x *dashboardIndexer) Index(uid string, stream io.Reader) ([]KindIndexRow, 
 		}
 
 		ds_uids, ds_types = getUnique(dash.Datasource)
-		rows = append(rows, KindIndexRow{Kind: "dashboard-panel", Row: []interface{}{
-			uid + "#" + strconv.FormatInt(panel.ID, 10),
-			panel.Title,
-			panel.Description,
-			fmt.Sprintf("%s?viewPanel=%d", url, panel.ID), // URL
-			panel.Type,
 
-			panel.Transformer,
-			ds_types,
-			ds_uids,
-		}})
+		prow := &KindIndexRow{
+			UID:    uid + "#" + strconv.FormatInt(panel.ID, 10),
+			Values: make(map[string]interface{}),
+		}
+		prow.Values[documentFieldName] = panel.Title
+		prow.Values[documentFieldDescription] = panel.Description
+		prow.Values[documentFieldURL] = fmt.Sprintf("%s?viewPanel=%d", url, panel.ID)
+		prow.Values[documentFieldTransformer] = panel.Transformer
+		prow.Values[documentFieldDSType] = ds_types
+		prow.Values[documentFieldDSUID] = ds_uids
+		panels = append(panels, prow)
 	}
 
-	return rows, nil
+	return row, nil
 }
 
 func getUnique(refs []dslookup.DataSourceRef) ([]string, []string) {
@@ -157,7 +142,3 @@ func getUnique(refs []dslookup.DataSourceRef) ([]string, []string) {
 
 	return uids, types
 }
-
-// func ReadDashboard(stream io.Reader, lookup dslookup.DatasourceLookup) (*DashboardInfo, error) {
-
-// }
