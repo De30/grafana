@@ -1,6 +1,7 @@
 package kind
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,30 +18,6 @@ func dsLookup() dslookup.DatasourceLookup {
 			UID:       "P8045C56BDA891CB2",
 			Type:      "cloudwatch",
 			Name:      "cloudwatch-name",
-			IsDefault: false,
-		},
-		{
-			UID:       "PD8C576611E62080A",
-			Type:      "testdata",
-			Name:      "gdev-testdata",
-			IsDefault: false,
-		},
-		{
-			UID:       "dgd92lq7k",
-			Type:      "frser-sqlite-datasource",
-			Name:      "frser-sqlite-datasource-name",
-			IsDefault: false,
-		},
-		{
-			UID:       "sqlite-1",
-			Type:      "sqlite-datasource",
-			Name:      "SQLite Grafana",
-			IsDefault: false,
-		},
-		{
-			UID:       "sqlite-2",
-			Type:      "sqlite-datasource",
-			Name:      "SQLite Grafana2",
 			IsDefault: false,
 		},
 		{
@@ -73,29 +50,43 @@ func TestReadDashboard(t *testing.T) {
 
 	devdash := "../../../../devenv/dev-dashboards/"
 
-	indexer := dashboardIndexer{lookup: dsLookup()}
+	indexers := []KindIndexer{
+		&objectIndex{}, // generic object store metadata
+		&dashboardIndexer{lookup: dsLookup()},
+		&dashboardIndexExtender{}, // enterrpsie
+	}
 
-	builder := toIndexBuilder(indexer.GetIndex())
+	builder := toIndexFrameBuilder(
+		indexers[0].GetIndex(),
+		indexers[1].GetIndex(),
+		indexers[2].GetIndex(),
+	)
+
 	err := filepath.Walk(devdash,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
+
 			if !info.IsDir() && strings.HasSuffix(path, ".json") {
-				file, err := os.Open(path)
-				if err != nil {
-					return err
+				content := KindContent{
+					UID:          path[len("../../../../"):],
+					Size:         info.Size(),
+					LastModified: info.ModTime(),
+					GetBody:      func() (io.Reader, error) { return os.Open(path) },
 				}
 
-				uid := path[len("../../../../"):]
-				row, err := indexer.Index(uid, file)
-				if err != nil {
-					return err
-				}
+				// Add all the metdata fields
+				for _, indexer := range indexers {
+					row, err := indexer.Read(content)
+					if err != nil {
+						return err
+					}
 
-				err = builder.append(row)
-				if err != nil {
-					return err
+					err = builder.add(row)
+					if err != nil {
+						return err
+					}
 				}
 			}
 			return nil
@@ -106,5 +97,5 @@ func TestReadDashboard(t *testing.T) {
 		experimental.CheckGoldenJSONFrame(t, "testdata", frame.Name, frame, true)
 	}
 
-	require.Nil(t, indexer)
+	// require.Nil(t, indexer)
 }

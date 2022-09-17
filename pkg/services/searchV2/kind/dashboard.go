@@ -3,7 +3,6 @@ package kind
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 
 	"github.com/grafana/grafana-plugin-sdk-go/data"
@@ -72,18 +71,23 @@ func (x *dashboardIndexer) GetIndex() KindIndexInfo {
 	}
 }
 
-func (x *dashboardIndexer) Index(uid string, stream io.Reader) (*KindIndexRow, error) {
+func (x *dashboardIndexer) Read(doc KindContent) (*KindIndexRow, error) {
+	stream, err := doc.GetBody()
+	if err != nil {
+		return nil, err
+	}
+
 	dash, err := extract.ReadDashboard(stream, x.lookup)
 	if err != nil {
 		return nil, err
 	}
 
 	row := &KindIndexRow{
-		UID:    uid,
+		UID:    doc.UID,
 		Values: make(map[string]interface{}),
 	}
 
-	url := fmt.Sprintf("/d/%s/%s", uid, models.SlugifyTitle(dash.Title))
+	url := fmt.Sprintf("/d/%s/%s", doc.UID, models.SlugifyTitle(dash.Title))
 	ds_uids, ds_types := getUnique(dash.Datasource)
 	row.Values[documentFieldName] = dash.Title
 	row.Values[documentFieldDescription] = dash.Description
@@ -103,7 +107,7 @@ func (x *dashboardIndexer) Index(uid string, stream io.Reader) (*KindIndexRow, e
 		ds_uids, ds_types = getUnique(dash.Datasource)
 
 		prow := &KindIndexRow{
-			UID:    uid + "#" + strconv.FormatInt(panel.ID, 10),
+			UID:    doc.UID + "#" + strconv.FormatInt(panel.ID, 10),
 			Values: make(map[string]interface{}),
 		}
 		prow.Values[documentFieldName] = panel.Title

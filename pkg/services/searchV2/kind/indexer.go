@@ -3,15 +3,26 @@ package kind
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 )
+
+type KindContent struct {
+	UID          string
+	Size         int64
+	LastModified time.Time
+	ETag         string // empty if unknown
+
+	//... common properties from store??
+	GetBody func() (io.Reader, error)
+}
 
 type KindIndexer interface {
 	GetIndex() KindIndexInfo
 
 	// Given an entity, get indexable data
-	Index(uid string, stream io.Reader) (*KindIndexRow, error)
+	Read(doc KindContent) (*KindIndexRow, error)
 }
 
 type KindIndexInfo struct {
@@ -51,53 +62,63 @@ type IndexField struct {
 	NestedIndex *KindIndexInfo `json:"nested,omitempty"`
 }
 
-type indexBuilderFieldInfo struct {
+type indexFrameBuilderFieldInfo struct {
 	idx    int
 	conv   data.Converter
-	nested *indexBuilder
+	nested *indexFrameBuilder
 }
 
-type indexBuilder struct {
+type indexFrameBuilder struct {
 	frame  *data.Frame
-	field  map[string]*indexBuilderFieldInfo
+	field  map[string]*indexFrameBuilderFieldInfo
 	nested []string // lookup for the idx that has
 }
 
-func toIndexBuilder(kind KindIndexInfo) indexBuilder {
+func toIndexFrameBuilder(extractors ...KindIndexInfo) indexFrameBuilder {
 	uid := data.NewFieldFromFieldType(data.FieldTypeString, 0)
 	uid.Name = "UID"
-	b := indexBuilder{
-		frame: data.NewFrame(kind.Name, uid),
-		field: make(map[string]*indexBuilderFieldInfo),
+	b := indexFrameBuilder{
+		frame: data.NewFrame("", uid),
+		field: make(map[string]*indexFrameBuilderFieldInfo),
 	}
 	idx := 0
-	for _, f := range kind.Fields {
-		info := &indexBuilderFieldInfo{
-			conv: f.Converter,
-		}
-		b.field[f.Name] = info
-
-		if f.NestedIndex != nil {
-			sub := toIndexBuilder(*f.NestedIndex)
-			// TODO? add a colum for parent?
-			info.nested = &sub
-			continue
+	for _, info := range extractors {
+		if b.frame.Name == "" {
+			b.frame.Name = info.Name // may also be empty
 		}
 
-		idx += 1
-		info.idx = idx
-		field := data.NewFieldFromFieldType(f.Type, 0)
-		field.Config = f.Config
-		field.Name = f.Name
-		b.frame.Fields = append(b.frame.Fields, field)
+		for _, f := range info.Fields {
+			info := &indexFrameBuilderFieldInfo{
+				conv: f.Converter,
+			}
+			b.field[f.Name] = info
+
+			if f.NestedIndex != nil {
+				sub := toIndexFrameBuilder(*f.NestedIndex)
+				// TODO? add a colum for parent?
+				info.nested = &sub
+				continue
+			}
+
+			idx += 1
+			info.idx = idx
+			field := data.NewFieldFromFieldType(f.Type, 0)
+			field.Config = f.Config
+			field.Name = f.Name
+			b.frame.Fields = append(b.frame.Fields, field)
+		}
 	}
 	return b
 }
 
-func (b *indexBuilder) append(data *KindIndexRow) error {
-	row := b.frame.Fields[0].Len()
-	b.frame.Extend(1)
-	b.frame.Fields[0].SetConcrete(row, data.UID)
+// This will increment whenever the uid changes
+func (b *indexFrameBuilder) add(data *KindIndexRow) error {
+	row := b.frame.Fields[0].Len() - 1
+	if row < 0 || data.UID != b.frame.Fields[0].At(row) {
+		row += 1
+		b.frame.Extend(1)
+		b.frame.Fields[0].Set(row, data.UID)
+	}
 
 	for k, v := range data.Values {
 		field := b.field[k]
@@ -112,7 +133,7 @@ func (b *indexBuilder) append(data *KindIndexRow) error {
 				return fmt.Errorf("expecting rows")
 			}
 			for _, sub := range rows {
-				field.nested.append(sub)
+				field.nested.add(sub)
 			}
 			continue
 		}
@@ -132,7 +153,7 @@ func (b *indexBuilder) append(data *KindIndexRow) error {
 	return nil
 }
 
-func (b *indexBuilder) frames() data.Frames {
+func (b *indexFrameBuilder) frames() data.Frames {
 	frames := make(data.Frames, 0, 3)
 	frames = append(frames, b.frame)
 	for _, nested := range b.nested {
