@@ -51,9 +51,9 @@ func TestReadDashboard(t *testing.T) {
 	devdash := "../../../../devenv/dev-dashboards/"
 
 	indexers := []KindIndexer{
-		&objectIndex{}, // generic object store metadata
-		&dashboardIndexer{lookup: dsLookup()},
-		&dashboardIndexExtender{}, // enterrpsie
+		&objectIndex{},                        // only needs object metadata (not raw bytes)
+		&dashboardIndexer{lookup: dsLookup()}, // uses raw bytes
+		&dashboardIndexExtender{},             // enterprise... looks up by ID?  better to do in bulk later!
 	}
 
 	builder := toIndexFrameBuilder(
