@@ -261,7 +261,7 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
               datasourceInstance={this.props.datasourceInstance}
               preferredVisualizationType={preferredVisualizationType}
               eventBus={this.props.eventBridge}
-              renderedVisualizations={Object.keys(frames)}
+              renderedVisualizations={Object.keys(framesMap)}
             />
           </ScrollElementsContext.Provider>
         </ErrorBoundaryAlert>

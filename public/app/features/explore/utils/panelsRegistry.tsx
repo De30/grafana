@@ -141,11 +141,13 @@ function GraphPanel(props: ExplorePanelProps) {
     loadingState,
     onUpdateTimeRange,
     width,
+    renderedVisualizations,
   } = props;
 
   const theme = useTheme2();
   const spacing = parseInt(theme.spacing(2).slice(0, -2), 10);
   const label = <ExploreGraphLabel graphStyle={graphStyle} onChangeGraphStyle={onChangeGraphStyle} />;
+  const small = renderedVisualizations.includes('flamegraph');
   return (
     <Collapse
       label={label}
@@ -155,7 +157,7 @@ function GraphPanel(props: ExplorePanelProps) {
       <ExploreGraph
         graphStyle={graphStyle}
         data={data}
-        height={400}
+        height={small ? 180 : 400}
         width={width - spacing}
         absoluteRange={absoluteRange}
         onChangeTime={onUpdateTimeRange}
