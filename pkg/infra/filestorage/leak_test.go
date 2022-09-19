@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
+// run with GRAFANA_TEST_DB=mysql
 func TestLeak(t *testing.T) {
 	fmt.Println("start")
 
