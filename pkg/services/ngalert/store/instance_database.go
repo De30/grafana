@@ -131,24 +131,13 @@ func (st DBstore) SaveAlertInstances(ctx context.Context, cmd ...models.AlertIns
 				}
 			}()
 
-			// Prepare our big SQL statement on-demand, instead of initializing up-front
-			getBigStatement := func() (*core.Stmt, error) {
-				if bigStmt != nil {
-					return bigStmt, nil
-				}
+			// all SQLs executed via xorm.Session will be transformed into prepared statements
+			sess.Prepare()
 
-				bigUpsertSQL, err := st.SQLStore.Dialect.UpsertMultipleSQL(
-					"alert_instance", keyNames, fieldNames, maxRows)
-				if err != nil {
-					return nil, err
-				}
-
-				bigStmt, err = sess.DB().Prepare(bigUpsertSQL)
-				if err != nil {
-					bigStmt = nil
-				}
-
-				return bigStmt, err
+			bigUpsertSQL, err := st.SQLStore.Dialect.UpsertMultipleSQL(
+				"alert_instance", keyNames, fieldNames, maxRows)
+			if err != nil {
+				return err
 			}
 
 			// Generate batches of `maxRows` and write the statements when full.
@@ -170,12 +159,8 @@ func (st DBstore) SaveAlertInstances(ctx context.Context, cmd ...models.AlertIns
 
 				// If we've reached the maximum batch size, write to the database.
 				if len(args) >= maxArgs {
-					stmt, err := getBigStatement()
-					if err != nil {
-						return err
-					}
-
-					if _, err = stmt.ExecContext(ctx, args...); err != nil {
+					sqlAndArgs := append([]interface{}{bigUpsertSQL}, args...)
+					if _, err := sess.Exec(sqlAndArgs...); err != nil {
 						return err
 					}
 
@@ -192,15 +177,9 @@ func (st DBstore) SaveAlertInstances(ctx context.Context, cmd ...models.AlertIns
 					return err
 				}
 
-				stmt, err := sess.DB().Prepare(upsertSQL)
-				if err != nil {
+				sqlAndArgs := append([]interface{}{upsertSQL}, args...)
+				if _, err = sess.Exec(sqlAndArgs...); err != nil {
 					return err
-				}
-
-				_, err = stmt.ExecContext(ctx, args...)
-				closeErr := stmt.Close()
-				if closeErr != nil {
-					st.Logger.Warn("failed to close db connection", "err", closeErr)
 				}
 
 				if err != nil {
