@@ -263,7 +263,7 @@ func ProvideService(
 
 	// Duplicate SQL tables... should be in background service?
 	if features.IsEnabled(featuremgmt.FlagObjectStore) {
-		go object.SyncDashboardsToStorage() // pass in sql
+		go object.SyncDashboardsToStorage(sql)
 	}
 	return s
 }

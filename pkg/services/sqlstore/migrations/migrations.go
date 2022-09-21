@@ -5,7 +5,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/ualert"
 	. "github.com/grafana/grafana/pkg/services/sqlstore/migrator"
-	"github.com/grafana/grafana/pkg/services/store/object"
 )
 
 // --- Migration Guide line ---
@@ -85,7 +84,7 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 		}
 
 		if mg.Cfg.IsFeatureToggleEnabled(featuremgmt.FlagObjectStore) {
-			object.AddObjectStorageMigrations(mg)
+			addObjectStorageMigrations(mg)
 		}
 	}
 
