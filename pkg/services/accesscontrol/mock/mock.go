@@ -121,8 +121,8 @@ func (m *Mock) Evaluate(ctx context.Context, usr *user.SignedInUser, evaluator a
 	return resolvedEvaluator.Evaluate(permissions), nil
 }
 
-func (m *Mock) Checker(ctx context.Context, user *user.SignedInUser, action string, prefixes ...string) func(resource accesscontrol.Resource) bool {
-	return func(resource accesscontrol.Resource) bool { return false }
+func (m *Mock) Checker(ctx context.Context, user *user.SignedInUser, action string) func(scopes ...string) bool {
+	return func(scopes ...string) bool { return false }
 }
 
 // GetUserPermissions returns user permissions.

@@ -57,27 +57,27 @@ func (a *AccessControl) Evaluate(ctx context.Context, user *user.SignedInUser, e
 	return resolvedEvaluator.Evaluate(user.Permissions[user.OrgID]), nil
 }
 
-func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string) func(resource accesscontrol.Resource) bool {
+func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, action string) func(scopes ...string) bool {
 	if !verifyPermissions(user) {
-		return func(resource accesscontrol.Resource) bool { return false }
+		return func(scopes ...string) bool { return false }
 	}
 
-	scopes, ok := user.Permissions[user.OrgID][action]
+	userScopes, ok := user.Permissions[user.OrgID][action]
 	if !ok {
-		return func(resource accesscontrol.Resource) bool { return false }
+		return func(scopes ...string) bool { return false }
 	}
 
-	lookup := make(map[string]bool, len(scopes)-1)
-	for _, s := range scopes {
-		lookup[s] = true
+	lookup := make(map[string]bool, len(userScopes)-1)
+	for i := range userScopes {
+		lookup[userScopes[i]] = true
 	}
 
 	var cached bool
 	var hasWildcard bool
 
-	return func(resource accesscontrol.Resource) bool {
+	return func(scopes ...string) bool {
 		if !cached {
-			wildcards := wildcardsFromScopes(resource.Scopes()...)
+			wildcards := wildcardsFromScopes(scopes...)
 			for _, w := range wildcards {
 				if _, ok := lookup[w]; ok {
 					hasWildcard = true
@@ -90,7 +90,7 @@ func (a *AccessControl) Checker(ctx context.Context, user *user.SignedInUser, ac
 			return true
 		}
 
-		for _, s := range resource.Scopes() {
+		for _, s := range scopes {
 			if lookup[s] {
 				return true
 			}
@@ -116,10 +116,8 @@ func verifyPermissions(u *user.SignedInUser) bool {
 }
 
 func wildcardsFromScopes(scopes ...string) accesscontrol.Wildcards {
-	prefixes := []string{}
+	prefixes := make([]string, len(scopes))
 	for _, scope := range scopes {
-		// dashboards:uid:test
-		// folders:uid:test
 		prefixes = append(prefixes, accesscontrol.ScopePrefix(scope))
 	}
 

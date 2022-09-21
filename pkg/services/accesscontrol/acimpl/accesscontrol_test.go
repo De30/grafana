@@ -155,12 +155,11 @@ func TestAccessControl_Checker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			fakeService := actest.FakeService{}
-			ac := ProvideAccessControl(setting.NewCfg(), fakeService)
+			ac := ProvideAccessControl(setting.NewCfg())
 			check := ac.Checker(context.Background(), tt.user, "dashboards:read")
 			numPasses := 0
 			for _, d := range data {
-				if ok := check(d); ok {
+				if ok := check(d.Scopes()...); ok {
 					numPasses++
 				}
 			}
