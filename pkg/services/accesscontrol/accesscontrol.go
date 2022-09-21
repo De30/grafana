@@ -13,11 +13,11 @@ import (
 )
 
 type AccessControl interface {
-	// Evaluate evaluates access to the given resources.
+	// Evaluate runs the provided evaluator. If there is any scope resolver registered for a scope
+	// used in the evaluator it will be applied to the evaluation process
 	Evaluate(ctx context.Context, user *user.SignedInUser, evaluator Evaluator) (bool, error)
 	// Checker builds an optimized checker function for a specific action and should be used
-	// when we need to check access to a resource type repeatedly
-	// Prefixes is used to generate possible wildcards for scopes related to the action
+	// when we need to check access for a particular resource type repeatedly
 	Checker(ctx context.Context, user *user.SignedInUser, action string) func(scopes ...string) bool
 	// RegisterScopeAttributeResolver allows the caller to register a scope resolver for a
 	// specific scope prefix (ex: datasources:name:)
