@@ -5,6 +5,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations/ualert"
 	. "github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/services/store/object"
 )
 
 // --- Migration Guide line ---
@@ -85,6 +86,7 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 	}
 
 	addEntityEventsTableMigration(mg)
+	object.AddObjectStorageMigrations(mg)
 
 	addPublicDashboardMigration(mg)
 	ualert.CreateDefaultFoldersForAlertingMigration(mg)
