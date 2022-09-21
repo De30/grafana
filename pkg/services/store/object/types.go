@@ -1,5 +1,10 @@
 package object
 
+import (
+	"context"
+	"encoding/json"
+)
+
 // RawObject is the base byte[] with basic storage metadata
 type RawObject struct {
 	Path        string `json:"path"`        // UID+kind :)  include org in the prefix
@@ -55,8 +60,22 @@ type ExternalReference struct {
 	UID  string `json:"uid,omitempty"`  // path
 }
 
-// Values we can calculate based on the whole system and my update periodically
-type DynamicObjectData struct {
-	Info   map[string]interface{} // Key value pairs that update independent of the object body
-	Labels map[string]string      // tags can be represented as keys with no value
+// All storage + exracted fields together
+type FullObject struct {
+	RawObject
+	ObjectSummary
+
+	// Only fill the json if requested
+	Body json.RawMessage `json:"body,omitempty"`
+}
+
+type ObjectQuery struct {
+	Paths  []string
+	Folder string
+	Kind   string
+	Labels map[string]string // will match everything
+}
+
+type Service interface {
+	GetObject(ctx context.Context, path string) *FullObject
 }

@@ -83,10 +83,13 @@ func (*OSSMigrations) AddMigration(mg *Migrator) {
 			addCommentGroupMigrations(mg)
 			addCommentMigrations(mg)
 		}
+
+		if mg.Cfg.IsFeatureToggleEnabled(featuremgmt.FlagObjectStore) {
+			object.AddObjectStorageMigrations(mg)
+		}
 	}
 
 	addEntityEventsTableMigration(mg)
-	object.AddObjectStorageMigrations(mg)
 
 	addPublicDashboardMigration(mg)
 	ualert.CreateDefaultFoldersForAlertingMigration(mg)

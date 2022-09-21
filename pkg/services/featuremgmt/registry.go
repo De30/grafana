@@ -131,6 +131,12 @@ var (
 			State:       FeatureStateAlpha,
 		},
 		{
+			Name:            "objectStore",
+			Description:     "SQL based object storage",
+			State:           FeatureStateAlpha,
+			RequiresDevMode: true,
+		},
+		{
 			Name:            "dashboardsFromStorage",
 			Description:     "Load dashboards from the generic storage interface",
 			State:           FeatureStateAlpha,

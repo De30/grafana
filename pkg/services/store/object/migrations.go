@@ -101,17 +101,23 @@ func AddObjectStorageMigrations(mg *migrator.Migrator) {
 		},
 	}
 
+	// Initalize all tables
 	tables := []migrator.Table{objectTable, objectLabelsTable, objectReferenceTable, objectHistoryTable}
 	for t := range tables {
-		mg.AddMigration("create table "+tables[t].Name, migrator.NewAddTableMigration(tables[t]))
+		mg.AddMigration("ObjectStore: create table "+tables[t].Name, migrator.NewAddTableMigration(tables[t]))
 		for i := range tables[t].Indices {
-			mg.AddMigration(fmt.Sprintf("create index %s[%d]", tables[t].Name, i), migrator.NewAddIndexMigration(tables[t], tables[t].Indices[i]))
+			mg.AddMigration(fmt.Sprintf("ObjectStore: create index %s[%d]", tables[t].Name, i), migrator.NewAddIndexMigration(tables[t], tables[t].Indices[i]))
 		}
 	}
 
 	// TODO: add collation support to `migrator.Column`
-	mg.AddMigration("set path collation in object tables", migrator.NewRawSQLMigration("").
+	mg.AddMigration("ObjectStore: set path collation in object tables", migrator.NewRawSQLMigration("").
 		// MySQL `utf8mb4_unicode_ci` collation is set in `mysql_dialect.go`
 		// SQLite uses a `BINARY` collation by default
 		Postgres("ALTER TABLE object ALTER COLUMN path TYPE VARCHAR(1024) COLLATE \"C\";")) // Collate C - sorting done based on character code byte values
+}
+
+// Write the contents of dashboareds table into the object table
+func SyncDashboardsToStorage() {
+	fmt.Errorf("TODO... query all dashboards... then write to object")
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/services/sqlstore/db"
+	"github.com/grafana/grafana/pkg/services/store/object"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -259,6 +260,11 @@ func ProvideService(
 	s := newStandardStorageService(sql, globalRoots, initializeOrgStorages, authService, cfg)
 	s.quotaService = quotaService
 	s.cfg = settings
+
+	// Duplicate SQL tables... should be in background service?
+	if features.IsEnabled(featuremgmt.FlagObjectStore) {
+		go object.SyncDashboardsToStorage() // pass in sql
+	}
 	return s
 }
 
