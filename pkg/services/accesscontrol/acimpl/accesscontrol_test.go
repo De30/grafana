@@ -137,7 +137,7 @@ func TestAccessControl_Checker(t *testing.T) {
 			expectedLen: 3,
 		},
 		{
-			desc: "should only pass for for 4 for secondary supported scope",
+			desc: "should only pass 4 with secondary supported scope",
 			user: &user.SignedInUser{
 				OrgID:       1,
 				Permissions: map[int64]map[string][]string{1: {"dashboards:read": {"folders:uid:104", "folders:uid:150", "folders:uid:154", "folders:uid:199"}}},
