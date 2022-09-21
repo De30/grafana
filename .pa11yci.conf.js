@@ -122,6 +122,12 @@ var config = {
       wait: 500,
       rootElement: '.main-view',
     },
+    // Text Panel
+    {
+      url: '${HOST}/d/n1jR8vnnz/panel-tests-all-panels?orgId=1&viewPanel=35',
+      wait: 500,
+      rootElement: '.main-view',
+    },
   ],
 };
 
