@@ -199,14 +199,15 @@ func (hs *HTTPServer) getNavTree(c *models.ReqContext, hasEditPerm bool, prefs *
 		dashboardsUrl := "/dashboards"
 
 		dashboardLink := &dtos.NavLink{
-			Text:       "Dashboards",
-			Id:         "dashboards",
-			SubTitle:   "Manage dashboards and folders",
-			Icon:       "apps",
-			Url:        hs.Cfg.AppSubURL + dashboardsUrl,
-			SortWeight: dtos.WeightDashboard,
-			Section:    dtos.NavSectionCore,
-			Children:   dashboardChildLinks,
+			Text:        "Dashboards",
+			Id:          "dashboards",
+			Description: "Create and manage dashboards to visualize your data",
+			SubTitle:    "Manage dashboards and folders",
+			Icon:        "apps",
+			Url:         hs.Cfg.AppSubURL + dashboardsUrl,
+			SortWeight:  dtos.WeightDashboard,
+			Section:     dtos.NavSectionCore,
+			Children:    dashboardChildLinks,
 		}
 
 		if hs.Features.IsEnabled(featuremgmt.FlagTopnav) {
@@ -370,7 +371,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Users",
 			Id:          "users",
-			Description: "Manage org members",
+			Description: "Invite and assign roles to users",
 			Icon:        "user",
 			Url:         hs.Cfg.AppSubURL + "/org/users",
 		})
@@ -380,7 +381,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Teams",
 			Id:          "teams",
-			Description: "Manage org groups",
+			Description: "Groups of users that have common dashboard and permission needs",
 			Icon:        "users-alt",
 			Url:         hs.Cfg.AppSubURL + "/org/teams",
 		})
@@ -391,7 +392,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Plugins",
 			Id:          "plugins",
-			Description: "View and configure plugins",
+			Description: "Extend the Grafana experience with plugins",
 			Icon:        "plug",
 			Url:         hs.Cfg.AppSubURL + "/plugins",
 		})
@@ -401,7 +402,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Preferences",
 			Id:          "org-settings",
-			Description: "Organization preferences",
+			Description: "Manage preferences across an organization",
 			Icon:        "sliders-v-alt",
 			Url:         hs.Cfg.AppSubURL + "/org",
 		})
@@ -417,7 +418,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "API keys",
 			Id:          "apikeys",
-			Description: "Create & manage API keys",
+			Description: "Manage and create API keys that are used to interact with Grafana HTTP APIs",
 			Icon:        "key-skeleton-alt",
 			Url:         hs.Cfg.AppSubURL + "/org/apikeys",
 		})
@@ -427,7 +428,7 @@ func (hs *HTTPServer) setupConfigNodes(c *models.ReqContext) ([]*dtos.NavLink, e
 		configNodes = append(configNodes, &dtos.NavLink{
 			Text:        "Service accounts",
 			Id:          "serviceaccounts",
-			Description: "Manage service accounts",
+			Description: "Use service accounts to run automated workloads in Grafana",
 			Icon:        "gf-service-account",
 			Url:         hs.Cfg.AppSubURL + "/org/serviceaccounts",
 		})
@@ -523,22 +524,24 @@ func (hs *HTTPServer) buildDashboardNavLinks(c *models.ReqContext, hasEditPerm b
 	}
 
 	dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-		Text: "Playlists", Id: "dashboards/playlists", Url: hs.Cfg.AppSubURL + "/playlists", Icon: "presentation-play",
+		Text: "Playlists", Description: "Playlists are groups of dashboards that are displayed in a sequence", Id: "dashboards/playlists", Url: hs.Cfg.AppSubURL + "/playlists", Icon: "presentation-play",
 	})
 
 	if c.IsSignedIn {
 		dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-			Text: "Snapshots",
-			Id:   "dashboards/snapshots",
-			Url:  hs.Cfg.AppSubURL + "/dashboard/snapshots",
-			Icon: "camera",
+			Text:        "Snapshots",
+			Description: "Interactive, publically available, point-in-time representations of dashboards",
+			Id:          "dashboards/snapshots",
+			Url:         hs.Cfg.AppSubURL + "/dashboard/snapshots",
+			Icon:        "camera",
 		})
 
 		dashboardChildNavs = append(dashboardChildNavs, &dtos.NavLink{
-			Text: "Library panels",
-			Id:   "dashboards/library-panels",
-			Url:  hs.Cfg.AppSubURL + "/library-panels",
-			Icon: "library-panel",
+			Text:        "Library panels",
+			Description: "Reusable panels that can be added to multiple dashboards",
+			Id:          "dashboards/library-panels",
+			Url:         hs.Cfg.AppSubURL + "/library-panels",
+			Icon:        "library-panel",
 		})
 	}
 
@@ -723,13 +726,13 @@ func (hs *HTTPServer) buildAdminNavLinks(c *models.ReqContext) []*dtos.NavLink {
 
 	if hasAccess(ac.ReqGrafanaAdmin, ac.EvalPermission(ac.ActionUsersRead, ac.ScopeGlobalUsersAll)) {
 		adminNavLinks = append(adminNavLinks, &dtos.NavLink{
-			Text: "Users", Id: "global-users", Url: hs.Cfg.AppSubURL + "/admin/users", Icon: "user",
+			Text: "Users", Description: "Manage and create users across the whole Grafana server", Id: "global-users", Url: hs.Cfg.AppSubURL + "/admin/users", Icon: "user",
 		})
 	}
 
 	if hasGlobalAccess(ac.ReqGrafanaAdmin, orgsAccessEvaluator) {
 		adminNavLinks = append(adminNavLinks, &dtos.NavLink{
-			Text: "Orgs", Id: "global-orgs", Url: hs.Cfg.AppSubURL + "/admin/orgs", Icon: "building",
+			Text: "Orgs", Description: "Manage and create orgs across the whole Grafana server", Id: "global-orgs", Url: hs.Cfg.AppSubURL + "/admin/orgs", Icon: "building",
 		})
 	}
 
