@@ -596,13 +596,14 @@ func (hs *HTTPServer) buildLegacyAlertNavLinks(c *models.ReqContext) []*dtos.Nav
 	}
 
 	var alertNav = dtos.NavLink{
-		Text:       "Alerting",
-		SubTitle:   "Alert rules and notifications",
-		Id:         "alerting-legacy",
-		Icon:       "bell",
-		Children:   alertChildNavs,
-		Section:    dtos.NavSectionCore,
-		SortWeight: dtos.WeightAlerting,
+		Text:        "Alerting",
+		SubTitle:    "Alert rules and notifications",
+		Description: "Learn about problems in your systems moments after they occur",
+		Id:          "alerting-legacy",
+		Icon:        "bell",
+		Children:    alertChildNavs,
+		Section:     dtos.NavSectionCore,
+		SortWeight:  dtos.WeightAlerting,
 	}
 	if hs.Features.IsEnabled(featuremgmt.FlagTopnav) {
 		alertNav.Url = hs.Cfg.AppSubURL + "/alerting"
@@ -618,20 +619,20 @@ func (hs *HTTPServer) buildAlertNavLinks(c *models.ReqContext) []*dtos.NavLink {
 
 	if hasAccess(ac.ReqViewer, ac.EvalAny(ac.EvalPermission(ac.ActionAlertingRuleRead), ac.EvalPermission(ac.ActionAlertingRuleExternalRead))) {
 		alertChildNavs = append(alertChildNavs, &dtos.NavLink{
-			Text: "Alert rules", Id: "alert-list", Url: hs.Cfg.AppSubURL + "/alerting/list", Icon: "list-ul",
+			Text: "Alert rules", Description: "Define rules that determine whether an alert will fire", Id: "alert-list", Url: hs.Cfg.AppSubURL + "/alerting/list", Icon: "list-ul",
 		})
 	}
 
 	if hasAccess(ac.ReqOrgAdminOrEditor, ac.EvalAny(ac.EvalPermission(ac.ActionAlertingNotificationsRead), ac.EvalPermission(ac.ActionAlertingNotificationsExternalRead))) {
 		alertChildNavs = append(alertChildNavs, &dtos.NavLink{
-			Text: "Contact points", Id: "receivers", Url: hs.Cfg.AppSubURL + "/alerting/notifications",
+			Text: "Contact points", Description: "Define how your contacts are notified when an alert fires", Id: "receivers", Url: hs.Cfg.AppSubURL + "/alerting/notifications",
 			Icon: "comment-alt-share", SubTitle: "Manage the settings of your contact points",
 		})
-		alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Notification policies", Id: "am-routes", Url: hs.Cfg.AppSubURL + "/alerting/routes", Icon: "sitemap"})
+		alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Notification policies", Description: "Determine how alerts are routed to contact points", Id: "am-routes", Url: hs.Cfg.AppSubURL + "/alerting/routes", Icon: "sitemap"})
 	}
 
 	if hasAccess(ac.ReqViewer, ac.EvalAny(ac.EvalPermission(ac.ActionAlertingInstanceRead), ac.EvalPermission(ac.ActionAlertingInstancesExternalRead))) {
-		alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Silences", Id: "silences", Url: hs.Cfg.AppSubURL + "/alerting/silences", Icon: "bell-slash"})
+		alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Silences", Description: "Stop notifications from one or more alerting rules", Id: "silences", Url: hs.Cfg.AppSubURL + "/alerting/silences", Icon: "bell-slash"})
 		alertChildNavs = append(alertChildNavs, &dtos.NavLink{Text: "Alert groups", Id: "groups", Url: hs.Cfg.AppSubURL + "/alerting/groups", Icon: "layer-group"})
 	}
 
@@ -655,13 +656,14 @@ func (hs *HTTPServer) buildAlertNavLinks(c *models.ReqContext) []*dtos.NavLink {
 
 	if len(alertChildNavs) > 0 {
 		var alertNav = dtos.NavLink{
-			Text:       "Alerting",
-			SubTitle:   "Alert rules and notifications",
-			Id:         "alerting",
-			Icon:       "bell",
-			Children:   alertChildNavs,
-			Section:    dtos.NavSectionCore,
-			SortWeight: dtos.WeightAlerting,
+			Text:        "Alerting",
+			Description: "Learn about problems in your systems moments after they occur",
+			SubTitle:    "Alert rules and notifications",
+			Id:          "alerting",
+			Icon:        "bell",
+			Children:    alertChildNavs,
+			Section:     dtos.NavSectionCore,
+			SortWeight:  dtos.WeightAlerting,
 		}
 
 		if hs.Features.IsEnabled(featuremgmt.FlagTopnav) {
@@ -732,13 +734,13 @@ func (hs *HTTPServer) buildAdminNavLinks(c *models.ReqContext) []*dtos.NavLink {
 
 	if hasGlobalAccess(ac.ReqGrafanaAdmin, orgsAccessEvaluator) {
 		adminNavLinks = append(adminNavLinks, &dtos.NavLink{
-			Text: "Orgs", Description: "Manage and create orgs across the whole Grafana server", Id: "global-orgs", Url: hs.Cfg.AppSubURL + "/admin/orgs", Icon: "building",
+			Text: "Organizations", Description: "Isolated instances of Grafana running on the same server", Id: "global-orgs", Url: hs.Cfg.AppSubURL + "/admin/orgs", Icon: "building",
 		})
 	}
 
 	if hasAccess(ac.ReqGrafanaAdmin, ac.EvalPermission(ac.ActionSettingsRead)) {
 		adminNavLinks = append(adminNavLinks, &dtos.NavLink{
-			Text: "Settings", Id: "server-settings", Url: hs.Cfg.AppSubURL + "/admin/settings", Icon: "sliders-v-alt",
+			Text: "Settings", Description: "View the settings defined in your Grafana config", Id: "server-settings", Url: hs.Cfg.AppSubURL + "/admin/settings", Icon: "sliders-v-alt",
 		})
 	}
 
