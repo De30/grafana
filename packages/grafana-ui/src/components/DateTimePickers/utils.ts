@@ -1,4 +1,4 @@
-import { dateMath, dateTimeParse, isDateTime, TimeZone } from '@grafana/data';
+import { dateMath, dateTimeParse, isDateTime, rangeUtil, TimeRange, TimeZone } from '@grafana/data';
 
 export function isValid(value: string, roundUp?: boolean, timeZone?: TimeZone): boolean {
   if (isDateTime(value)) {
@@ -11,4 +11,12 @@ export function isValid(value: string, roundUp?: boolean, timeZone?: TimeZone): 
 
   const parsed = dateTimeParse(value, { roundUp, timeZone });
   return parsed.isValid();
+}
+
+export function formattedRange(value: TimeRange, timeZone?: TimeZone) {
+  const adjustedTimeRange = {
+    to: dateMath.isMathString(value.raw.to) ? value.raw.to : value.to,
+    from: dateMath.isMathString(value.raw.from) ? value.raw.from : value.from,
+  };
+  return rangeUtil.describeTimeRange(adjustedTimeRange, timeZone);
 }

@@ -15,7 +15,7 @@ import {
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
-import { Icon, Tooltip } from '../..';
+import { Icon, IconButton, Tooltip } from '../..';
 import { useStyles2 } from '../../..';
 import { Button } from '../../Button';
 import { Field } from '../../Forms/Field';
@@ -24,6 +24,7 @@ import { Input } from '../../Input/Input';
 import TimePickerCalendar from './TimePickerCalendar';
 
 interface Props {
+  onAddToFavorites?: (timeOption: TimeRange) => void;
   isFullscreen: boolean;
   value: TimeRange;
   onApply: (range: TimeRange) => void;
@@ -45,7 +46,15 @@ const ERROR_MESSAGES = {
 };
 
 export const TimeRangeContent = (props: Props) => {
-  const { value, isFullscreen = false, timeZone, onApply: onApplyFromProps, isReversed, fiscalYearStartMonth } = props;
+  const {
+    value,
+    isFullscreen = false,
+    timeZone,
+    onApply: onApplyFromProps,
+    onAddToFavorites,
+    isReversed,
+    fiscalYearStartMonth,
+  } = props;
   const [fromValue, toValue] = valueToState(value.raw.from, value.raw.to, timeZone);
   const style = useStyles2(getStyles);
 
@@ -67,6 +76,19 @@ export const TimeRangeContent = (props: Props) => {
     },
     [setOpen]
   );
+
+  const onAddFavorite = useCallback(() => {
+    if (to.invalid || from.invalid) {
+      return;
+    }
+
+    const raw: RawTimeRange = { from: from.value, to: to.value };
+    const timeRange = rangeUtil.convertRawToRange(raw, timeZone, fiscalYearStartMonth);
+
+    if (onAddToFavorites) {
+      onAddToFavorites(timeRange);
+    }
+  }, [from.invalid, from.value, to.invalid, to.value, timeZone, fiscalYearStartMonth, onAddToFavorites]);
 
   const onApply = useCallback(() => {
     if (to.invalid || from.invalid) {
@@ -144,9 +166,14 @@ export const TimeRangeContent = (props: Props) => {
         </Field>
         {fyTooltip}
       </div>
-      <Button data-testid={selectors.components.TimePicker.applyTimeRange} type="button" onClick={onApply}>
-        Apply time range
-      </Button>
+      <div className={style.asd}>
+        <div className={style.qwe}>
+          <Button data-testid={selectors.components.TimePicker.applyTimeRange} type="button" onClick={onApply}>
+            Apply time range
+          </Button>
+        </div>
+        {onAddToFavorites ? <IconButton size="lg" name={'star'} onClick={onAddFavorite}></IconButton> : null}
+      </div>
 
       <TimePickerCalendar
         isFullscreen={isFullscreen}
@@ -221,6 +248,12 @@ function getStyles(theme: GrafanaTheme2) {
     tooltip: css`
       padding-left: ${theme.spacing(1)};
       padding-top: ${theme.spacing(3)};
+    `,
+    asd: css`
+      display: flex;
+    `,
+    qwe: css`
+      flex-grow: 3;
     `,
   };
 }

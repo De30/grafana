@@ -4,11 +4,12 @@ import React, { memo, useMemo, useState } from 'react';
 import { GrafanaTheme2, isDateTime, rangeUtil, RawTimeRange, TimeOption, TimeRange, TimeZone } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
-import { FilterInput } from '../..';
+import { FilterInput, IconButton } from '../..';
 import { stylesFactory, useTheme2 } from '../../../themes';
 import { getFocusStyles } from '../../../themes/mixins';
 import { CustomScrollbar } from '../../CustomScrollbar/CustomScrollbar';
 import { Icon } from '../../Icon/Icon';
+import { formattedRange } from '../utils';
 
 import { TimePickerFooter } from './TimePickerFooter';
 import { TimePickerTitle } from './TimePickerTitle';
@@ -20,11 +21,13 @@ interface Props {
   value: TimeRange;
   onChange: (timeRange: TimeRange) => void;
   onChangeTimeZone: (timeZone: TimeZone) => void;
+  onFavoritesChange?: (values: TimeRange[]) => void;
   onChangeFiscalYearStartMonth?: (month: number) => void;
   timeZone?: TimeZone;
   fiscalYearStartMonth?: number;
   quickOptions?: TimeOption[];
   history?: TimeRange[];
+  favorites?: TimeRange[];
   showHistory?: boolean;
   className?: string;
   hideTimeZone?: boolean;
@@ -40,6 +43,7 @@ export interface PropsWithScreenSize extends Props {
 
 interface FormProps extends Omit<Props, 'history'> {
   historyOptions?: TimeOption[];
+  favoritesOptions?: TimeOption[];
 }
 
 export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = (props) => {
@@ -53,6 +57,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = (p
     value,
     onChange,
     history,
+    favorites,
     showHistory,
     className,
     hideTimeZone,
@@ -98,7 +103,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = (p
         )}
         {isFullscreen && (
           <div className={styles.leftSide}>
-            <FullScreenForm {...props} historyOptions={historyOptions} />
+            <FullScreenForm {...props} favorites={favorites} historyOptions={historyOptions} />
           </div>
         )}
       </div>
@@ -171,29 +176,133 @@ const NarrowScreenForm = (props: FormProps) => {
   );
 };
 
+interface FavoriteTimeRangeListProps {
+  onFavoritesChange: (values: TimeRange[]) => void;
+  favorites: TimeRange[];
+  onChange: (option: TimeRange) => void;
+  timeZone: string | undefined;
+}
+
+const FavouriteTimeRangeList = (props: FavoriteTimeRangeListProps) => {
+  const { favorites, onFavoritesChange, timeZone, onChange } = props;
+  const theme = useTheme2();
+  const styles = getFavoritesStyles(theme);
+  const onRemoveFavourite = (timeRange: TimeRange) => {
+    onFavoritesChange(
+      favorites.filter((value: TimeRange) => {
+        let to = false,
+          from = false;
+        if (typeof value.raw.from === 'string') {
+          from = value.raw.from === timeRange.raw.from;
+        } else {
+          from = value.from.toISOString() === timeRange.from.toISOString();
+        }
+
+        if (typeof value.raw.to === 'string') {
+          to = value.raw.to === timeRange.raw.to;
+        } else {
+          to = value.to.toISOString() === timeRange.to.toISOString();
+        }
+        return !(from && to);
+      })
+    );
+  };
+
+  return (
+    <>
+      <ul aria-roledescription="Time range selection">
+        {favorites.map((favourite, index) => {
+          return (
+            <li
+              className={styles.container}
+              onClick={() => {
+                onChange(favourite);
+              }}
+              key={`${favourite.raw.from}${favourite.raw.to}${index}`}
+            >
+              <IconButton
+                className={styles.icon}
+                name="favorite"
+                size="md"
+                onClick={(e) => {
+                  onRemoveFavourite(favourite);
+                  e.stopPropagation();
+                }}
+              ></IconButton>
+              <label className={styles.label}>{formattedRange(favourite, timeZone)}</label>
+            </li>
+          );
+        })}
+      </ul>
+      <div />
+    </>
+  );
+};
+
+const getFavoritesStyles = (theme: GrafanaTheme2) => {
+  return {
+    container: css`
+      display: flex;
+      align-items: center;
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      padding: 7px 9px 7px 9px;
+
+      &:hover {
+        background: ${theme.colors.action.hover};
+        cursor: pointer;
+      }
+    `,
+    label: css`
+      cursor: pointer;
+    `,
+    icon: css`
+      color: #eb7b18;
+    `,
+  };
+};
+
 const FullScreenForm: React.FC<FormProps> = (props) => {
-  const { onChange, value, timeZone, fiscalYearStartMonth, isReversed, historyOptions } = props;
+  const { onFavoritesChange, favorites, onChange, value, timeZone, fiscalYearStartMonth, isReversed, historyOptions } =
+    props;
   const theme = useTheme2();
   const styles = getFullScreenStyles(theme, props.hideQuickRanges);
   const onChangeTimeOption = (timeOption: TimeOption) => {
     return onChange(mapOptionToTimeRange(timeOption, timeZone));
   };
 
+  const addToFavorites = (timeRange: TimeRange) => {
+    if (onFavoritesChange && favorites) {
+      onFavoritesChange(favorites.concat([timeRange]));
+    }
+  };
+
   return (
     <>
       <div className={styles.container}>
         <div className={styles.title} data-testid={selectors.components.TimePicker.absoluteTimeRangeTitle}>
-          <TimePickerTitle>Absolute time range</TimePickerTitle>
+          <TimePickerTitle>Custom time range</TimePickerTitle>
         </div>
         <TimeRangeContent
           value={value}
           timeZone={timeZone}
           fiscalYearStartMonth={fiscalYearStartMonth}
           onApply={onChange}
+          onAddToFavorites={addToFavorites}
           isFullscreen={true}
           isReversed={isReversed}
         />
       </div>
+      {onFavoritesChange && favorites ? (
+        <div className={styles.recent}>
+          <FavouriteTimeRangeList
+            favorites={favorites}
+            onChange={onChange}
+            onFavoritesChange={onFavoritesChange}
+            timeZone={timeZone}
+          ></FavouriteTimeRangeList>
+        </div>
+      ) : null}
       {props.showHistory && (
         <div className={styles.recent}>
           <TimeRangeList
@@ -329,7 +438,7 @@ const getFullScreenStyles = stylesFactory((theme: GrafanaTheme2, hideQuickRanges
     container: css`
       padding-top: 9px;
       padding-left: 11px;
-      padding-right: ${!hideQuickRanges ? '20%' : '11px'};
+      padding-right: ${!hideQuickRanges ? '9px' : '11px'};
     `,
     title: css`
       margin-bottom: 11px;

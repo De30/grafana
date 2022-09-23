@@ -6,8 +6,10 @@ import { TimeRangePickerProps, TimeRangePicker } from '@grafana/ui';
 import { LocalStorageValueProvider } from '../LocalStorageValueProvider';
 
 const LOCAL_STORAGE_KEY = 'grafana.dashboard.timepicker.history';
+const FAVORITES_STORAGE_KEY = 'grafana.dashboard.timepicker.favorites';
 
 interface Props extends Omit<TimeRangePickerProps, 'history' | 'theme'> {}
+interface FavoritesProps extends Omit<Props, 'favorites' | 'theme'> {}
 
 export const TimePickerWithHistory = (props: Props) => {
   return (
@@ -22,6 +24,22 @@ export const TimePickerWithHistory = (props: Props) => {
               props.onChange(value);
             }}
           />
+        );
+      }}
+    </LocalStorageValueProvider>
+  );
+};
+
+export const TimePickerWithFavorites = (props: FavoritesProps) => {
+  return (
+    <LocalStorageValueProvider<TimeRange[]> storageKey={FAVORITES_STORAGE_KEY} defaultValue={[]}>
+      {(values, onSaveToSTore) => {
+        return (
+          <TimePickerWithHistory
+            {...props}
+            favorites={convertIfJson(values)}
+            onFavoritesChange={onSaveToSTore}
+          ></TimePickerWithHistory>
         );
       }}
     </LocalStorageValueProvider>

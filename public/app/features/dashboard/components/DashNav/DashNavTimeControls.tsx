@@ -5,7 +5,7 @@ import { Unsubscribable } from 'rxjs';
 import { dateMath, TimeRange, TimeZone } from '@grafana/data';
 import { TimeRangeUpdatedEvent } from '@grafana/runtime';
 import { defaultIntervals, RefreshPicker } from '@grafana/ui';
-import { TimePickerWithHistory } from 'app/core/components/TimePicker/TimePickerWithHistory';
+import { TimePickerWithFavorites } from 'app/core/components/TimePicker/TimePickerWithHistory';
 import { appEvents } from 'app/core/core';
 import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';
 
@@ -89,7 +89,7 @@ export class DashNavTimeControls extends Component<Props> {
 
     return (
       <>
-        <TimePickerWithHistory
+        <TimePickerWithFavorites
           value={timePickerValue}
           onChange={this.onChangeTimePicker}
           timeZone={timeZone}

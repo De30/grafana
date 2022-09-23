@@ -12,7 +12,6 @@ import {
   timeZoneFormatUserFriendly,
   TimeRange,
   TimeZone,
-  dateMath,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 
@@ -23,6 +22,7 @@ import { Tooltip } from '../Tooltip/Tooltip';
 
 import { TimePickerContent } from './TimeRangePicker/TimePickerContent';
 import { quickOptions } from './options';
+import { formattedRange } from './utils';
 
 /** @public */
 export interface TimeRangePickerProps {
@@ -39,6 +39,8 @@ export interface TimeRangePickerProps {
   onMoveForward: () => void;
   onZoom: () => void;
   history?: TimeRange[];
+  favorites?: TimeRange[];
+  onFavoritesChange?: (value: TimeRange[]) => void;
   hideQuickRanges?: boolean;
   widthOverride?: number;
   isOnCanvas?: boolean;
@@ -66,6 +68,8 @@ export function TimeRangePicker(props: TimeRangePickerProps) {
     hideQuickRanges,
     widthOverride,
     isOnCanvas,
+    favorites,
+    onFavoritesChange,
   } = props;
 
   const onChange = (timeRange: TimeRange) => {
@@ -127,6 +131,8 @@ export function TimeRangePicker(props: TimeRangePickerProps) {
               quickOptions={quickOptions}
               history={history}
               showHistory
+              favorites={favorites}
+              onFavoritesChange={onFavoritesChange}
               widthOverride={widthOverride}
               onChangeTimeZone={onChangeTimeZone}
               onChangeFiscalYearStartMonth={onChangeFiscalYearStartMonth}
@@ -196,14 +202,6 @@ export const TimePickerButtonLabel = memo<LabelProps>(({ hideText, value, timeZo
 });
 
 TimePickerButtonLabel.displayName = 'TimePickerButtonLabel';
-
-const formattedRange = (value: TimeRange, timeZone?: TimeZone) => {
-  const adjustedTimeRange = {
-    to: dateMath.isMathString(value.raw.to) ? value.raw.to : value.to,
-    from: dateMath.isMathString(value.raw.from) ? value.raw.from : value.from,
-  };
-  return rangeUtil.describeTimeRange(adjustedTimeRange, timeZone);
-};
 
 const getStyles = () => {
   return {
