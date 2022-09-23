@@ -1,6 +1,6 @@
 import { dateMath, getDefaultTimeRange } from '@grafana/data';
+import { SceneTimeRangeObject } from './SceneTimeRangeObject';
 
-import { SceneTimeRangeObject } from './SceneObjectBase';
 import { SceneTimeRangeState } from './types';
 
 export class SceneTimeRange extends SceneTimeRangeObject {

@@ -4,6 +4,7 @@ import { Subscribable } from 'rxjs';
 import { EventBus, PanelData, TimeRange, UrlQueryMap } from '@grafana/data';
 
 import { SceneVariableSet } from '../variables/types';
+import { SceneTimeRangeObject } from './SceneTimeRangeObject';
 
 // import { SceneVariableSet } from '../variables/types';
 
@@ -127,4 +128,9 @@ export function isSceneObject(obj: any): obj is SceneObject {
 export interface SceneObjectWithUrlSync extends SceneObject {
   getUrlState(): UrlQueryMap;
   updateFromUrl(values: UrlQueryMap): void;
+}
+
+export interface StandardSceneObjectCtx {
+  timeRange: SceneTimeRangeObject;
+  variables: any[];
 }

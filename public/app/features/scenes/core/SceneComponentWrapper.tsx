@@ -10,7 +10,6 @@ export function SceneComponentWrapper<T extends SceneObject>({ model, isEditing 
 
   // Handle component activation state state
   useEffect(() => {
-    debugger;
     if (!model.isActive) {
       model.activate();
     }

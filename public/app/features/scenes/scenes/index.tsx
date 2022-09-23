@@ -12,22 +12,25 @@ import { sceneWithRowsFromJson } from './sceneWithRowsFromJson';
 import { timeShiftScene } from './timeShift';
 import { transformationsDemo } from './transformationNode';
 import { transformationsDemoFromJson } from './transformationNodeFromJson';
+import { timeShiftBasicScene } from './timeShiftBasic';
+import { nestedDataNodeReuse } from './nestedDataNodeReuse';
 
 export function getScenes(): Array<{ title: string; getScene: () => Scene }> {
   return [
     demo,
-    demoFromJSON,
+    // demoFromJSON,
     flexLayout,
-    flexLayoutFromJSON,
+    // flexLayoutFromJSON,
     basicNestedScene,
-    basicNestedSceneFromJson,
+    // basicNestedSceneFromJson,
     nestedScene,
-    nestedSceneFromJson,
+    // nestedSceneFromJson,
     sceneWithRows,
-    sceneWithRowsFromJson,
+    // sceneWithRowsFromJson,
     timeShiftScene,
+    timeShiftBasicScene,
     transformationsDemo,
-    transformationsDemoFromJson,
+    // transformationsDemoFromJson,
   ];
 }
 

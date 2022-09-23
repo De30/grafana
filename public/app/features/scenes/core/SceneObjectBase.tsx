@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Observer, Subject, Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EventBusSrv, TimeRange, UrlQueryMap } from '@grafana/data';
+import { EventBusSrv } from '@grafana/data';
 import { useForceUpdate } from '@grafana/ui';
 
 import { SceneComponentWrapper } from './SceneComponentWrapper';
@@ -15,9 +15,10 @@ import {
   isSceneObject,
   SceneObjectState,
   SceneLayoutChild,
-  SceneTimeRangeState,
-  SceneObjectWithUrlSync,
+  StandardSceneObjectCtx,
 } from './types';
+import { SceneTimeRangeObject } from './SceneTimeRangeObject';
+import { isContextObject } from './typeguards';
 
 export abstract class SceneObjectBase<TState extends SceneObjectState = {}> implements SceneObject<TState> {
   // keeps keys of all scene objects that are referencing this object
@@ -28,6 +29,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
   subs = new Subscription();
   isActive?: boolean;
   events = new EventBusSrv();
+  // ctx?: StandardSceneObjectCtx;
 
   constructor(state: TState) {
     if (!state.key) {
@@ -106,7 +108,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
       for (const param in params) {
         if (isSceneObject(params[param]) && !params[param].isActive) {
           if (!params[param].isActive) {
-            console.log('activating', params[param]);
+            params[param].setCtxResolver(this.getContext);
             params[param].activate();
           }
         }
@@ -141,6 +143,22 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
     return useSceneObjectState(this);
   }
 
+  getContext: () => StandardSceneObjectCtx = () => {
+    if (isContextObject(this)) {
+      return this.ctx;
+    }
+
+    if (this.parent) {
+      return this.parent.getContext();
+    }
+
+    throw new Error('No context found in scene tree');
+  };
+
+  setCtxResolver(resolver: () => StandardSceneObjectCtx) {
+    this.getContext = resolver;
+  }
+
   /**
    * Will walk up the scene object graph to the closest $timeRange scene object
    */
@@ -158,11 +176,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
       }
     }
 
-    if (this.parent) {
-      return this.parent.getTimeRange();
-    }
-
-    throw new Error('No time range found in scene tree');
+    return this.getContext().timeRange;
   }
 
   /**
@@ -254,44 +268,5 @@ function useSceneObjectState<TState extends SceneObjectState>(model: SceneObject
 export class SceneDataObject<TState extends SceneDataState = SceneDataState> extends SceneObjectBase<TState> {
   getData(): SceneObject<SceneDataState> {
     return this;
-  }
-}
-
-/**
- * This class needs to be extended by any scene object that can provide data to other objects
- */
-export class SceneTimeRangeObject<TState extends SceneTimeRangeState = SceneTimeRangeState>
-  extends SceneObjectBase<TState>
-  implements SceneObjectWithUrlSync
-{
-  getTimeRange(): SceneObject<SceneTimeRangeState> {
-    return this;
-  }
-
-  onTimeRangeChange = (range: TimeRange) => {
-    debugger;
-    this.setState({ range });
-  };
-
-  onRefresh = () => {
-    // TODO re-eval time range
-    this.setState({ ...this.state });
-  };
-
-  onIntervalChanged = (_: string) => {};
-
-  /** These url sync functions are only placeholders for something more sophisticated  */
-  getUrlState() {
-    if (this.state.range) {
-      return null;
-    }
-    return {
-      from: this.state.range!.raw.from,
-      to: this.state.range!.raw.to,
-    } as any;
-  }
-
-  updateFromUrl(values: UrlQueryMap) {
-    // TODO
   }
 }

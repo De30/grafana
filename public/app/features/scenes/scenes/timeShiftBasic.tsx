@@ -13,11 +13,6 @@ export function getScene(): Scene {
     timeShift: '-6h',
   });
 
-  const timeShiftNode1 = new SceneTimeShiftNode({
-    inputParams: { timeRange: timeShiftNode },
-    timeShift: '-6h',
-  });
-
   const queries = [
     {
       refId: 'A',
@@ -40,13 +35,6 @@ export function getScene(): Scene {
     queries,
   });
 
-  const dataNode3 = new SceneDataProviderNode({
-    inputParams: {
-      timeRange: timeShiftNode1,
-    },
-    queries,
-  });
-
   const scene = new Scene({
     $editor: new SceneEditManager({}),
     title: 'Time shift ranges',
@@ -61,7 +49,7 @@ export function getScene(): Scene {
             children: [
               new SceneToolbar({
                 orientation: 'horizontal',
-                children: [new SceneTimePicker({ inputParams: {} }), timeShiftNode, timeShiftNode1],
+                children: [new SceneTimePicker({ inputParams: {} }), timeShiftNode],
               }),
             ],
           }),
@@ -98,21 +86,6 @@ export function getScene(): Scene {
                       }),
                     ],
                   }),
-
-                  new SceneFlexChild({
-                    children: [
-                      new VizPanel({
-                        inputParams: {
-                          data: dataNode3,
-                        },
-                        pluginId: 'timeseries',
-                        title: 'Time range shifted',
-                        options: {
-                          legend: { displayMode: 'hidden' },
-                        },
-                      }),
-                    ],
-                  }),
                 ],
               }),
             ],
@@ -125,7 +98,7 @@ export function getScene(): Scene {
   return scene;
 }
 
-export const timeShiftScene = {
-  title: 'Scene with time shift ranges',
+export const timeShiftBasicScene = {
+  title: 'Scene with time shift (basic)',
   getScene,
 };

@@ -12,14 +12,12 @@ import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 
 export function getScene(): Scene {
-  const timeRangeNode1 = new SceneTimeRange({
-    range: getDefaultTimeRange(),
-  });
+  // const timeRangeNode1 = new SceneTimeRange({
+  //   range: getDefaultTimeRange(),
+  // });
 
   const dataNode1 = new SceneDataProviderNode({
-    inputParams: {
-      timeRange: timeRangeNode1,
-    },
+    inputParams: {},
     queries: [
       {
         refId: 'A',
@@ -69,7 +67,7 @@ export function getScene(): Scene {
                 children: [
                   new SceneToolbar({
                     orientation: 'horizontal',
-                    children: [new SceneTimePicker({ inputParams: { timeRange: timeRangeNode1 } })],
+                    children: [new SceneTimePicker({ inputParams: {} })],
                   }),
                 ],
               }),

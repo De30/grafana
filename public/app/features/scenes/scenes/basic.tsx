@@ -1,20 +1,20 @@
-import { getDefaultTimeRange } from '@grafana/data';
+// import { getDefaultTimeRange } from '@grafana/data';
 
 import { Scene } from '../components/Scene';
 import { SceneTimePicker } from '../components/SceneTimePicker';
 import { VizPanel } from '../components/VizPanel';
 import { SceneDataProviderNode } from '../core/SceneDataProviderNode';
-import { SceneTimeRange } from '../core/SceneTimeRange';
+// import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 
 export function getScene(): Scene {
-  const timeRangeNode1 = new SceneTimeRange({
-    range: getDefaultTimeRange(),
-  });
+  // const timeRangeNode1 = new SceneTimeRange({
+  //   range: getDefaultTimeRange(),
+  // });
 
   const dataNode1 = new SceneDataProviderNode({
     inputParams: {
-      timeRange: timeRangeNode1,
+      // timeRange: timeRangeNode1,
     },
     queries: [
       {
@@ -32,7 +32,7 @@ export function getScene(): Scene {
     $editor: new SceneEditManager({}),
     title: 'Minimal example: Data + viz',
     children: [
-      new SceneTimePicker({ inputParams: { timeRange: timeRangeNode1 } }),
+      new SceneTimePicker({ inputParams: {} }),
       new VizPanel({
         inputParams: {
           data: dataNode1,

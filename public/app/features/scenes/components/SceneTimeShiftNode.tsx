@@ -1,13 +1,13 @@
+import React from 'react';
 import { dateMath, dateTime, TimeRange } from '@grafana/data';
+import { Field, Input } from '@grafana/ui';
 
 import { SceneComponentProps } from '../core/types';
 import { SceneObjectStatePlain, SceneParametrizedState } from '../core/types';
-import { SceneTimeRangeObject } from '../core/SceneObjectBase';
-import React from 'react';
-import { Field, Input } from '@grafana/ui';
+import { SceneTimeRangeObject } from '../core/SceneTimeRangeObject';
 
 type SceneTimeShiftParams = {
-  range: SceneTimeRangeObject;
+  // range: SceneTimeRangeObject;
 };
 
 interface SceneTimeShiftNodeState extends SceneObjectStatePlain, SceneParametrizedState<SceneTimeShiftParams> {
@@ -18,18 +18,13 @@ interface SceneTimeShiftNodeState extends SceneObjectStatePlain, SceneParametriz
 export class SceneTimeShiftNode extends SceneTimeRangeObject<SceneTimeShiftNodeState> {
   static Component = SceneTimeShiftNodeRenderer;
 
-  constructor(state: SceneTimeShiftNodeState) {
-    super(state);
-
-    this.setState({
-      range: this.getShiftedTimeRange(state.inputParams.range.state.range!, state.timeShift),
-    });
-  }
-
   activate() {
     super.activate();
+    const timeRange = super.getTimeRange();
+    this.state.range = this.getShiftedTimeRange(timeRange.state.range!, this.state.timeShift);
+
     this.subs.add(
-      this.state.inputParams.range.subscribe({
+      timeRange.subscribe({
         next: (next) => {
           this.setState({ range: this.getShiftedTimeRange(next.range!, this.state.timeShift) });
         },
@@ -38,9 +33,10 @@ export class SceneTimeShiftNode extends SceneTimeRangeObject<SceneTimeShiftNodeS
   }
 
   onTimeShiftUpdate(shift: string) {
+    const timeRange = super.getTimeRange();
     this.setState({
       timeShift: shift,
-      range: this.getShiftedTimeRange(this.state.inputParams.range.state.range!, shift),
+      range: this.getShiftedTimeRange(timeRange.state.range!, shift),
     });
   }
 
@@ -62,6 +58,10 @@ export class SceneTimeShiftNode extends SceneTimeRangeObject<SceneTimeShiftNodeS
     };
 
     return next;
+  }
+
+  getTimeRange() {
+    return this;
   }
 }
 

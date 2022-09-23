@@ -15,6 +15,7 @@ import { SceneCanvasText } from './SceneCanvasText';
 import { SceneFlexLayout, SceneFlexChild } from './SceneFlexLayout';
 import { SceneToolbar } from './SceneToolbar';
 import { serializeNode, serializeScene } from '../core/serialization';
+import { SceneContextObject } from '../core/SceneContextObject';
 
 interface NestedSceneState extends SceneLayoutChildState, SceneLayoutState {
   title: string;
@@ -24,7 +25,7 @@ interface NestedSceneState extends SceneLayoutChildState, SceneLayoutState {
   actions?: SceneObject[];
 }
 
-export class NestedScene extends SceneObjectBase<NestedSceneState> {
+export class NestedScene extends SceneContextObject<NestedSceneState> {
   static Component = NestedSceneRenderer;
 
   private sceneCollapser: SceneCollapser;

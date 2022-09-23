@@ -1,6 +1,6 @@
 // import { getDefaultTimeRange } from '@grafana/data';
 
-import { DataTransformerID, getDefaultTimeRange } from '@grafana/data';
+import { DataTransformerID } from '@grafana/data';
 import { NestedScene } from '../components/NestedScene';
 
 import { Scene } from '../components/Scene';
@@ -9,19 +9,16 @@ import { SceneTimePicker } from '../components/SceneTimePicker';
 import { SceneToolbar } from '../components/SceneToolbar';
 import { VizPanel } from '../components/VizPanel';
 import { SceneDataProviderNode } from '../core/SceneDataProviderNode';
-import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneDataTransformationNode } from '../core/SceneTransformationNode';
 import { SceneEditManager } from '../editor/SceneEditManager';
 
 export function getScene(): Scene {
-  const timeRangeNode1 = new SceneTimeRange({
-    range: getDefaultTimeRange(),
-  });
+  // const timeRangeNode1 = new SceneTimeRange({
+  //   range: getDefaultTimeRange(),
+  // });
 
   const dataNode = new SceneDataProviderNode({
-    inputParams: {
-      timeRange: timeRangeNode1,
-    },
+    inputParams: {},
     queries: [
       {
         refId: 'A',
@@ -99,7 +96,7 @@ export function getScene(): Scene {
                 children: [
                   new SceneToolbar({
                     orientation: 'horizontal',
-                    children: [new SceneTimePicker({ inputParams: { timeRange: timeRangeNode1 } })],
+                    children: [new SceneTimePicker({ inputParams: {} })],
                   }),
                 ],
               }),

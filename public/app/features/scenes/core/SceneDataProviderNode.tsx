@@ -51,13 +51,14 @@ export class SceneDataProviderNode extends SceneDataObject<SceneDataProviderNode
     this.staticQueries = this.buildStaticQueries();
     this.runner.updateQueries(this.staticQueries);
 
-    const timeRange = this.state.inputParams.timeRange;
+    debugger;
+    const timeRange = this.getTimeRange();
     // console.log(timeRange);
     // debugger;
     this.subs.add(
-      this.state.inputParams.timeRange.subscribe({
-        next: (timeRange) => {
-          this.runner.runWithTimeRange(timeRange.range!).then((data) => {
+      timeRange.subscribe({
+        next: (range) => {
+          this.runner.runWithTimeRange(range.range!).then((data) => {
             if (!data) {
               return;
             }

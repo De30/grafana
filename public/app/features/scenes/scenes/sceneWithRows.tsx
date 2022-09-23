@@ -1,5 +1,3 @@
-import { getDefaultTimeRange } from '@grafana/data';
-
 import { NestedScene } from '../components/NestedScene';
 import { Scene } from '../components/Scene';
 import { SceneFlexChild, SceneFlexLayout } from '../components/SceneFlexLayout';
@@ -7,17 +5,14 @@ import { SceneTimePicker } from '../components/SceneTimePicker';
 import { SceneToolbar } from '../components/SceneToolbar';
 import { VizPanel } from '../components/VizPanel';
 import { SceneDataProviderNode } from '../core/SceneDataProviderNode';
-import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 
 import { getQueryRunnerWithRandomWalkQuery } from './queries';
 
 export function getScene(): Scene {
-  const timeRange = new SceneTimeRange({ range: getDefaultTimeRange() });
-
   const dataNode = new SceneDataProviderNode({
     queries: getQueryRunnerWithRandomWalkQuery(),
-    inputParams: { timeRange },
+    inputParams: {},
   });
 
   const dataNode1 = new SceneDataProviderNode({
@@ -31,7 +26,7 @@ export function getScene(): Scene {
         scenarioId: 'random_walk_table',
       },
     ],
-    inputParams: { timeRange },
+    inputParams: {},
   });
 
   const scene = new Scene({
@@ -40,13 +35,14 @@ export function getScene(): Scene {
       new SceneFlexLayout({
         direction: 'column',
         children: [
-          new SceneToolbar({
-            orientation: 'horizontal',
-            children: [new SceneTimePicker({ inputParams: { timeRange } })],
-          }),
+          // new SceneToolbar({
+          //   orientation: 'horizontal',
+          //   children: [new SceneTimePicker({ inputParams: {} })],
+          // }),
           new NestedScene({
             title: 'Overview',
             canCollapse: true,
+            actions: [new SceneTimePicker({ inputParams: {} })],
             children: [
               new SceneFlexLayout({
                 direction: 'row',
@@ -81,6 +77,7 @@ export function getScene(): Scene {
           new NestedScene({
             title: 'More server details',
             canCollapse: true,
+            actions: [new SceneTimePicker({ inputParams: {} })],
             children: [
               new SceneFlexLayout({
                 direction: 'row',
@@ -89,7 +86,7 @@ export function getScene(): Scene {
                     children: [
                       new VizPanel({
                         inputParams: {
-                          data: dataNode,
+                          data: dataNode1,
                         },
                         pluginId: 'timeseries',
                         title: 'Fill height',

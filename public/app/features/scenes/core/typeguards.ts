@@ -5,6 +5,7 @@ import { SceneTimePicker } from '../components/SceneTimePicker';
 import { SceneTimeShiftNode } from '../components/SceneTimeShiftNode';
 import { SceneToolbar } from '../components/SceneToolbar';
 import { VizPanel } from '../components/VizPanel';
+import { SceneContextObject } from './SceneContextObject';
 import { SceneDataNode } from './SceneDataNode';
 import { SceneDataProviderNode } from './SceneDataProviderNode';
 import { SceneTimeRange } from './SceneTimeRange';
@@ -53,4 +54,8 @@ export function isLayoutNode(node: SceneObject): boolean {
     node instanceof VizPanel ||
     node instanceof SceneTimePicker
   );
+}
+
+export function isContextObject(node: SceneObject): node is SceneContextObject {
+  return node instanceof SceneContextObject;
 }

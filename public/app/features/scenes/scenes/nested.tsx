@@ -10,14 +10,8 @@ import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
 
 export function getScene(): Scene {
-  const timeRangeNode = new SceneTimeRange({
-    range: getDefaultTimeRange(),
-  });
-
   const dataProviderNode = new SceneDataProviderNode({
-    inputParams: {
-      timeRange: timeRangeNode,
-    },
+    inputParams: {},
     queries: [
       {
         refId: 'A',
@@ -39,7 +33,7 @@ export function getScene(): Scene {
         children: [
           new SceneFlexChild({
             size: { ySizing: 'content' },
-            children: [new SceneTimePicker({ inputParams: { timeRange: timeRangeNode } })],
+            children: [new SceneTimePicker({ inputParams: {} })],
           }),
           new SceneFlexChild({
             children: [
@@ -73,14 +67,8 @@ export function getScene(): Scene {
 }
 
 export function getInnerScene(title: string) {
-  const timeRangeNode = new SceneTimeRange({
-    range: getDefaultTimeRange(),
-  });
-
   const dataProviderNode = new SceneDataProviderNode({
-    inputParams: {
-      timeRange: timeRangeNode,
-    },
+    inputParams: {},
     queries: [
       {
         refId: 'A',
@@ -98,7 +86,7 @@ export function getInnerScene(title: string) {
     canCollapse: true,
     canRemove: true,
     isCollapsed: false,
-    actions: [new SceneTimePicker({ inputParams: { timeRange: timeRangeNode } })],
+    actions: [new SceneTimePicker({ inputParams: {} })],
     children: [
       new SceneFlexLayout({
         direction: 'row',
