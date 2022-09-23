@@ -1,19 +1,22 @@
 // Libraries
 import classNames from 'classnames';
-import { cloneDeep, filter, has, uniqBy } from 'lodash';
+import { cloneDeep, filter, has, intersection, uniqBy } from 'lodash';
 import pluralize from 'pluralize';
 import React, { PureComponent, ReactNode } from 'react';
 
 // Utils & Services
 import {
+  AbstractQuery,
   CoreApp,
   DataQuery,
   DataSourceApi,
   DataSourceInstanceSettings,
   EventBusExtended,
   EventBusSrv,
+  hasQueryExportSupport,
   HistoryItem,
   LoadingState,
+  MapAbstractLabelOperator,
   PanelData,
   PanelEvents,
   QueryResultMetaNotice,
@@ -21,8 +24,8 @@ import {
   toLegacyResponseData,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
-import { AngularComponent, getAngularLoader } from '@grafana/runtime';
-import { Badge, ErrorBoundaryAlert, HorizontalGroup } from '@grafana/ui';
+import { AngularComponent, getAngularLoader, getDataSourceSrv } from '@grafana/runtime';
+import { Badge, Button, Card, CollapsableSection, ErrorBoundaryAlert, HorizontalGroup, Tag } from '@grafana/ui';
 import { OperationRowHelp } from 'app/core/components/QueryOperationRow/OperationRowHelp';
 import { QueryOperationAction } from 'app/core/components/QueryOperationRow/QueryOperationAction';
 import {
@@ -37,6 +40,8 @@ import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { RowActionComponents } from './QueryActionComponent';
 import { QueryEditorRowHeader } from './QueryEditorRowHeader';
 import { QueryErrorAlert } from './QueryErrorAlert';
+import store from '../../../core/store';
+import { DashboardDescriptor } from '../../dashboard/components/SaveDashboard/forms/SaveDashboardForm';
 
 interface Props<TQuery extends DataQuery> {
   data: PanelData;
@@ -69,7 +74,25 @@ interface State<TQuery extends DataQuery> {
   data?: PanelData;
   isOpen?: boolean;
   showingHelp: boolean;
+  showingRelatedQueries: boolean;
+  dashboardDescriptors: DashboardDescriptor[];
+  currentAbstractQuery?: AbstractQuery;
 }
+
+// type QueryMatching = {
+//   dsName: string;
+//   matchers: AbstractLabelMatcher[];
+// }
+//
+// type RelatedPanel = {
+//   panelDescriptor: PanelDescriptor;
+//   queryMatchings: QueryMatching[];
+// }
+//
+// type RelatedDashboard = {
+//   dashboard: DashboardDescriptor;
+//   relatedPanels: RelatedPanel;
+// };
 
 export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Props<TQuery>, State<TQuery>> {
   element: HTMLElement | null = null;
@@ -82,6 +105,8 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     data: undefined,
     isOpen: true,
     showingHelp: false,
+    showingRelatedQueries: false,
+    dashboardDescriptors: [],
   };
 
   componentDidMount() {
@@ -311,6 +336,14 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     }));
   };
 
+  onToggleRelatedQueries = (dashboardDescriptors: DashboardDescriptor[], currentAbstractQuery: AbstractQuery) => {
+    this.setState((state) => ({
+      showingRelatedQueries: !state.showingRelatedQueries,
+      dashboardDescriptors,
+      currentAbstractQuery,
+    }));
+  };
+
   onClickExample = (query: TQuery) => {
     this.props.onChange({
       ...query,
@@ -397,6 +430,48 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
     return (
       <HorizontalGroup width="auto">
+        <QueryOperationAction
+          title="Show related dashboards"
+          icon="gf-glue"
+          onClick={async () => {
+            const dashboardDescriptors = store.getObject('grafana.dashboard.abstractQueries', {}) as Record<
+              string,
+              DashboardDescriptor
+            >;
+            const ds = await getDataSourceSrv().get(datasource);
+            let rowQuery;
+            if (hasQueryExportSupport(ds)) {
+              rowQuery = (await ds.exportToAbstractQueries([query]))![0]!;
+              const rowQueryKeys = rowQuery.labelMatchers.map((matcher) => matcher.name);
+              Object.keys(dashboardDescriptors).forEach((dashboardUid) => {
+                dashboardDescriptors[dashboardUid].panels = dashboardDescriptors[dashboardUid].panels
+                  .map((panelDescriptor) => {
+                    panelDescriptor.abstractQueriesWithDs = panelDescriptor.abstractQueriesWithDs.filter(
+                      (abstractQueryWithDs) => {
+                        const panelQueryKeys = abstractQueryWithDs.abstractQuery.labelMatchers.map(
+                          (matcher) => matcher.name
+                        );
+                        const intersectionKeys = intersection(rowQueryKeys, panelQueryKeys);
+                        // const isMatching = !!rowQueryKeys.length && rowQueryKeys.length === intersectionKeys.length;
+                        const isMatching = !!rowQueryKeys.length && !!intersectionKeys.length;
+                        return isMatching;
+                      }
+                    );
+                    return panelDescriptor;
+                  })
+                  .filter((panelDescriptor) => {
+                    return panelDescriptor.abstractQueriesWithDs.length;
+                  });
+                if (dashboardDescriptors[dashboardUid].panels.length === 0) {
+                  delete dashboardDescriptors[dashboardUid];
+                }
+              });
+            }
+
+            this.onToggleRelatedQueries(Object.values(dashboardDescriptors), rowQuery);
+          }}
+          active={false}
+        />
         {hasEditorHelp && (
           <QueryOperationAction
             title="Toggle data source help"
@@ -450,7 +525,8 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
   render() {
     const { query, id, index, visualization } = this.props;
-    const { datasource, showingHelp, data } = this.state;
+    const { datasource, showingHelp, showingRelatedQueries, data, dashboardDescriptors, currentAbstractQuery } =
+      this.state;
     const isDisabled = query.hide;
 
     const rowClasses = classNames('query-editor-row', {
@@ -486,6 +562,92 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                   />
                 </OperationRowHelp>
               )}
+              {showingRelatedQueries &&
+                (dashboardDescriptors.length ? (
+                  dashboardDescriptors.map((dashboardDescriptor) => {
+                    let labelsForDashboard = {};
+                    dashboardDescriptor.panels.map((panelDescriptor) => {
+                      panelDescriptor.abstractQueriesWithDs.forEach((d) => {
+                        d.abstractQuery.labelMatchers.forEach((l) => {
+                          const sameFilter = currentAbstractQuery!.labelMatchers.find((lm) => lm.name === l.name);
+                          // @ts-ignore
+                          labelsForDashboard[`${l.name}${MapAbstractLabelOperator[l.operator]}${l.value}`] = {
+                            colorIndex: sameFilter ? (sameFilter.value === l.value ? 5 : 3) : 19,
+                          };
+                        });
+                      });
+                    });
+
+                    const dashboardLabels = (
+                      <HorizontalGroup>
+                        {Object.keys(labelsForDashboard).map((ld) => {
+                          return <Tag name={ld} colorIndex={labelsForDashboard[ld].colorIndex} />;
+                        })}
+                      </HorizontalGroup>
+                    );
+
+                    return (
+                      <Card>
+                        <Card.Heading>
+                          Dashboard: {dashboardDescriptor.title}{' '}
+                          <a href={dashboardDescriptor.url} target="_blank">
+                            <Button size="sm" icon="external-link-alt" />
+                          </a>
+                        </Card.Heading>
+                        <Card.Description>
+                          <CollapsableSection label={dashboardLabels} isOpen={false}>
+                            {dashboardDescriptor.panels.map((panelDescriptor) => {
+                              return (
+                                <ul style={{ fontSize: '0.8em' }}>
+                                  {panelDescriptor.abstractQueriesWithDs.map((d) => {
+                                    const filters = d.abstractQuery.labelMatchers.map((l) => {
+                                      const sameFilter = currentAbstractQuery!.labelMatchers.find(
+                                        (lm) => lm.name === l.name
+                                      );
+                                      return {
+                                        expr: `${l.name}${MapAbstractLabelOperator[l.operator]}${l.value}`,
+                                        colorIndex: sameFilter ? (sameFilter.value === l.value ? 5 : 3) : 19,
+                                      };
+                                    });
+                                    return (
+                                      <div style={{ marginTop: 5 }}>
+                                        <HorizontalGroup>
+                                          {panelDescriptor.title}
+                                          <a
+                                            href={dashboardDescriptor.url + '?viewPanel=' + panelDescriptor.id}
+                                            target="_blank"
+                                          >
+                                            <Button variant="secondary" size="sm" icon="external-link-alt" />
+                                          </a>
+                                          <span>{d.dsName}:</span>
+                                          {filters.map((f) => (
+                                            <Tag colorIndex={f.colorIndex} name={f.expr} />
+                                          ))}
+                                          |
+                                          <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            icon="play"
+                                            onClick={() => {
+                                              // @ts-ignore
+                                              this.props.onAddQuery(d.query);
+                                            }}
+                                          />
+                                        </HorizontalGroup>
+                                      </div>
+                                    );
+                                  })}
+                                </ul>
+                              );
+                            })}
+                          </CollapsableSection>
+                        </Card.Description>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <span>No related dashboards found.</span>
+                ))}
               {editor}
             </ErrorBoundaryAlert>
             {data?.error && data.error.refId === query.refId && <QueryErrorAlert error={data.error} />}

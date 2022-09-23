@@ -1,4 +1,11 @@
-import { DataSourceInstanceSettings, ScopedVars, TimeRange } from '@grafana/data';
+import {
+  AbstractLabelOperator,
+  AbstractQuery,
+  DataSourceInstanceSettings,
+  DataSourceWithQueryExportSupport,
+  ScopedVars,
+  TimeRange,
+} from '@grafana/data';
 import { TemplateSrv } from '@grafana/runtime';
 import { SqlDatasource } from 'app/features/plugins/sql/datasource/SqlDatasource';
 import {
@@ -16,7 +23,7 @@ import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQue
 import { fetchColumns, fetchTables, getFunctions, getSqlCompletionProvider } from './sqlCompletionProvider';
 import { MySQLOptions } from './types';
 
-export class MySqlDatasource extends SqlDatasource {
+export class MySqlDatasource extends SqlDatasource implements DataSourceWithQueryExportSupport<SQLQuery> {
   responseParser: MySqlResponseParser;
   completionProvider: LanguageCompletionProvider | undefined;
 
@@ -24,6 +31,14 @@ export class MySqlDatasource extends SqlDatasource {
     super(instanceSettings);
     this.responseParser = new MySqlResponseParser();
     this.completionProvider = undefined;
+  }
+
+  async exportToAbstractQueries(query: SQLQuery[]): Promise<AbstractQuery[]> {
+    return query.map((q) => {
+      return {
+        labelMatchers: [{ name: 'job', operator: AbstractLabelOperator.Equal, value: 'tns/app' }],
+      } as AbstractQuery;
+    });
   }
 
   getQueryModel(target?: Partial<SQLQuery>, templateSrv?: TemplateSrv, scopedVars?: ScopedVars): MySQLQueryModel {

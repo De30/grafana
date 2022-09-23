@@ -61,6 +61,18 @@ export interface AbstractQuery extends DataQuery {
   labelMatchers: AbstractLabelMatcher[];
 }
 
+export type QueryDescriptor = {
+  namespaces: string[];
+  operators: string[];
+  selectors: AbstractLabelMatcher[];
+};
+
+// Query contains
+// There's a query filtering for the same value of "job", different value of "cluster" (2123)
+export const describeAbstractQuery = (abstractQuery: AbstractQuery) => {
+  return `Query contains filters for: ${abstractQuery.labelMatchers.map((m) => m.name).join(', ')}`;
+};
+
 /**
  * @internal
  */
@@ -70,6 +82,13 @@ export enum AbstractLabelOperator {
   EqualRegEx = 'EqualRegEx',
   NotEqualRegEx = 'NotEqualRegEx',
 }
+
+export const MapAbstractLabelOperator = {
+  [AbstractLabelOperator.Equal]: '=',
+  [AbstractLabelOperator.NotEqual]: '!=',
+  [AbstractLabelOperator.EqualRegEx]: '~',
+  [AbstractLabelOperator.NotEqualRegEx]: '!~',
+};
 
 /**
  * @internal

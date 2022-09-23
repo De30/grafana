@@ -5,6 +5,9 @@ import { Button, Checkbox, Form, Stack, TextArea } from '@grafana/ui';
 import { DashboardModel } from 'app/features/dashboard/state';
 
 import { SaveDashboardData, SaveDashboardOptions } from '../types';
+import { getDataSourceSrv } from '@grafana/runtime';
+import { AbstractQuery, DataQuery, hasQueryExportSupport } from '@grafana/data';
+import store from '../../../../../core/store';
 
 interface FormDTO {
   message: string;
@@ -18,6 +21,23 @@ export type SaveProps = {
   onSubmit?: (clone: DashboardModel, options: SaveDashboardOptions, dashboard: DashboardModel) => Promise<any>;
   options: SaveDashboardOptions;
   onOptionsChange: (opts: SaveDashboardOptions) => void;
+};
+
+export type PanelDescriptor = {
+  id: number;
+  title: string;
+  abstractQueriesWithDs: {
+    dsName: string;
+    abstractQuery: AbstractQuery;
+    query: DataQuery;
+  }[];
+};
+
+export type DashboardDescriptor = {
+  uid: string;
+  title: string;
+  url: string;
+  panels: PanelDescriptor[];
 };
 
 export const SaveDashboardForm = ({
@@ -42,6 +62,43 @@ export const SaveDashboardForm = ({
         }
         setSaving(true);
         options = { ...options, message: data.message };
+
+        try {
+          const dashboardQueries = store.getObject('grafana.dashboard.abstractQueries', {}) as Record<
+            string,
+            DashboardDescriptor
+          >;
+          const dashboardId = saveModel.clone.uid;
+          delete dashboardQueries[dashboardId];
+          const panelDescriptors: PanelDescriptor[] = [];
+          for (let panel of saveModel.clone.panels) {
+            const ds = await getDataSourceSrv().get(panel.datasource);
+            if (hasQueryExportSupport(ds)) {
+              const queries = await ds.exportToAbstractQueries(panel.targets);
+              panelDescriptors.push({
+                id: panel.id,
+                title: panel.title,
+                abstractQueriesWithDs: queries.map((abstractQuery, index) => {
+                  return {
+                    dsName: ds.name,
+                    abstractQuery,
+                    query: panel.targets[index],
+                  };
+                }),
+              });
+            }
+          }
+          dashboardQueries[dashboardId] = {
+            uid: dashboardId,
+            title: saveModel.clone.title,
+            url: '/d/' + dashboardId + '/',
+            panels: panelDescriptors,
+          };
+          store.setObject('grafana.dashboard.abstractQueries', dashboardQueries);
+        } catch (error) {
+          console.log(error);
+        }
+
         const result = await onSubmit(saveModel.clone, options, dashboard);
         if (result.status === 'success') {
           if (options.saveVariables) {
