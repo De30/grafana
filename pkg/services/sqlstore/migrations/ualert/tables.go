@@ -410,3 +410,18 @@ func AddAlertImageMigrations(mg *migrator.Migrator) {
 		Postgres("ALTER TABLE alert_image ALTER COLUMN url TYPE VARCHAR(2048);").
 		Mysql("ALTER TABLE alert_image MODIFY url VARCHAR(2048) NOT NULL;"))
 }
+
+func AddAlertHistoryMigrations(mg *migrator.Migrator) {
+	historyTable := migrator.Table{
+		Name: "alert_history",
+		Columns: []*migrator.Column{
+			{Name: "id", Type: migrator.DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "org_id", Type: migrator.DB_BigInt, Nullable: false},
+			{Name: "rule_uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, Nullable: false},
+			{Name: "state", Type: migrator.DB_NVarchar, Length: 20, Nullable: false}, // TODO len
+			{Name: "created_at", Type: migrator.DB_DateTime, Nullable: false},
+		},
+	}
+
+	mg.AddMigration("create alert_history table", migrator.NewAddTableMigration(historyTable))
+}
