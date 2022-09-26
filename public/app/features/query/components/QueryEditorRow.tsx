@@ -431,7 +431,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     return (
       <HorizontalGroup width="auto">
         <QueryOperationAction
-          title="Show related dashboards"
+          title="Show similar queries"
           icon="gf-glue"
           onClick={async () => {
             const dashboardDescriptors = store.getObject('grafana.dashboard.abstractQueries', {}) as Record<
@@ -570,6 +570,9 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                       panelDescriptor.abstractQueriesWithDs.forEach((d) => {
                         d.abstractQuery.labelMatchers.forEach((l) => {
                           const sameFilter = currentAbstractQuery!.labelMatchers.find((lm) => lm.name === l.name);
+                          if (!sameFilter) {
+                            return;
+                          }
                           // @ts-ignore
                           labelsForDashboard[`${l.name}${MapAbstractLabelOperator[l.operator]}${l.value}`] = {
                             colorIndex: sameFilter ? (sameFilter.value === l.value ? 5 : 3) : 19,
@@ -580,22 +583,20 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
                     const dashboardLabels = (
                       <HorizontalGroup>
+                        <span style={{ color: '#fff', fontSize: 12 }}>{dashboardDescriptor.title}</span>
                         {Object.keys(labelsForDashboard).map((ld) => {
                           return <Tag name={ld} colorIndex={labelsForDashboard[ld].colorIndex} />;
                         })}
+                        <a href={dashboardDescriptor.url} target="_blank">
+                          <Button size="sm" icon="external-link-alt" />
+                        </a>
                       </HorizontalGroup>
                     );
 
                     return (
-                      <Card>
-                        <Card.Heading>
-                          Dashboard: {dashboardDescriptor.title}{' '}
-                          <a href={dashboardDescriptor.url} target="_blank">
-                            <Button size="sm" icon="external-link-alt" />
-                          </a>
-                        </Card.Heading>
+                      <Card style={{ padding: 5, margin: 5 }}>
                         <Card.Description>
-                          <CollapsableSection label={dashboardLabels} isOpen={false}>
+                          <CollapsableSection style={{ padding: 0, margin: 5 }} label={dashboardLabels} isOpen={false}>
                             {dashboardDescriptor.panels.map((panelDescriptor) => {
                               return (
                                 <ul style={{ fontSize: '0.8em' }}>
@@ -627,7 +628,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                                           <Button
                                             variant="secondary"
                                             size="sm"
-                                            icon="play"
+                                            icon="plus"
                                             onClick={() => {
                                               // @ts-ignore
                                               this.props.onAddQuery(d.query);
@@ -646,7 +647,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                     );
                   })
                 ) : (
-                  <span>No related dashboards found.</span>
+                  <span>No similar queries were found.</span>
                 ))}
               {editor}
             </ErrorBoundaryAlert>
