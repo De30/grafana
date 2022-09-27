@@ -121,8 +121,18 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 
 		wg.Wait()
 
-		// Report can take a while and we don't really need to wait for it.
-		go reportDiff(data, err, streamData, streamError)
+		plog.Info("req.Queries[0].RefID", "refID", req.Queries[0].RefID)
+		if req.Queries[0].RefID == "A" {
+			plog.Info("### BUFFERED ### result will be returned")
+			return data, err
+		}
+		if req.Queries[0].RefID == "B" {
+			plog.Info("### STREAMED ### result will be returned")
+			return streamData, streamError
+		}
+
+		// Report can take a while and, we don't really need to wait for it.
+		// go reportDiff(data, err, streamData, streamError)
 		return data, err
 	}
 
