@@ -111,4 +111,9 @@ func TestTimeSeriesQuery(t *testing.T) {
 		query := &cloudMonitoringTimeSeriesQuery{GraphPeriod: "disabled"}
 		assert.Equal(t, query.appendGraphPeriod(&backend.QueryDataRequest{Queries: []backend.DataQuery{{}}}), "")
 	})
+
+	// t.Run("run queries and returns complete result if paginated", func(t *testing.T) {
+	// 	query := &cloudMonitoringTimeSeriesQuery{}
+	// 	query.run(context.Background(), &backend.QueryDataRequest{Queries: []backend.DataQuery{{}}}, &backend.DataResponse{}, &cloudMonitoringExecutor{})
+	// })
 }
