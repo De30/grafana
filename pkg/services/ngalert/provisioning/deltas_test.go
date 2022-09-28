@@ -21,12 +21,13 @@ func TestCalculateChanges(t *testing.T) {
 	orgId := rand.Int63()
 
 	t.Run("detects alerts that need to be added", func(t *testing.T) {
-		fakeStore := store.NewFakeRuleStore(t)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules()
 
 		groupKey := models.GenerateGroupKey(orgId)
 		submitted := models.GenerateAlertRules(rand.Intn(5)+1, models.AlertRuleGen(withOrgID(orgId), simulateSubmitted, withoutUID))
 
-		changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, submitted)
+		changes, err := CalculateChanges(context.Background(), &store, groupKey, submitted)
 		require.NoError(t, err)
 
 		require.Len(t, changes.New, len(submitted))
@@ -48,10 +49,10 @@ func TestCalculateChanges(t *testing.T) {
 		groupKey := models.GenerateGroupKey(orgId)
 		inDatabaseMap, inDatabase := models.GenerateUniqueAlertRules(rand.Intn(5)+1, models.AlertRuleGen(withGroupKey(groupKey)))
 
-		fakeStore := store.NewFakeRuleStore(t)
-		fakeStore.PutRule(context.Background(), inDatabase...)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules(inDatabase...)
 
-		changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, make([]*models.AlertRule, 0))
+		changes, err := CalculateChanges(context.Background(), &store, groupKey, make([]*models.AlertRule, 0))
 		require.NoError(t, err)
 
 		require.Equal(t, groupKey, changes.GroupKey)
@@ -72,10 +73,10 @@ func TestCalculateChanges(t *testing.T) {
 		inDatabaseMap, inDatabase := models.GenerateUniqueAlertRules(rand.Intn(5)+1, models.AlertRuleGen(withGroupKey(groupKey)))
 		submittedMap, submitted := models.GenerateUniqueAlertRules(len(inDatabase), models.AlertRuleGen(simulateSubmitted, withGroupKey(groupKey), withUIDs(inDatabaseMap)))
 
-		fakeStore := store.NewFakeRuleStore(t)
-		fakeStore.PutRule(context.Background(), inDatabase...)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules(inDatabase...)
 
-		changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, submitted)
+		changes, err := CalculateChanges(context.Background(), &store, groupKey, submitted)
 		require.NoError(t, err)
 
 		require.Equal(t, groupKey, changes.GroupKey)
@@ -110,10 +111,10 @@ func TestCalculateChanges(t *testing.T) {
 			submitted = append(submitted, r)
 		}
 
-		fakeStore := store.NewFakeRuleStore(t)
-		fakeStore.PutRule(context.Background(), inDatabase...)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules(inDatabase...)
 
-		changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, submitted)
+		changes, err := CalculateChanges(context.Background(), &store, groupKey, submitted)
 		require.NoError(t, err)
 
 		require.Empty(t, changes.Update)
@@ -161,8 +162,8 @@ func TestCalculateChanges(t *testing.T) {
 
 		dbRule := models.AlertRuleGen(withOrgID(orgId))()
 
-		fakeStore := store.NewFakeRuleStore(t)
-		fakeStore.PutRule(context.Background(), dbRule)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules(dbRule)
 
 		groupKey := models.GenerateGroupKey(orgId)
 
@@ -171,7 +172,7 @@ func TestCalculateChanges(t *testing.T) {
 				expected := models.AlertRuleGen(simulateSubmitted, testCase.mutator)()
 				expected.UID = dbRule.UID
 				submitted := *expected
-				changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, []*models.AlertRule{&submitted})
+				changes, err := CalculateChanges(context.Background(), &store, groupKey, []*models.AlertRule{&submitted})
 				require.NoError(t, err)
 				require.Len(t, changes.Update, 1)
 				ch := changes.Update[0]
@@ -188,7 +189,9 @@ func TestCalculateChanges(t *testing.T) {
 		inDatabaseMap, inDatabase := models.GenerateUniqueAlertRules(rand.Intn(10)+10, models.AlertRuleGen(withGroupKey(sourceGroupKey)))
 
 		fakeStore := store.NewFakeRuleStore(t)
-		fakeStore.PutRule(context.Background(), inDatabase...)
+		//fakeStore.PutRule(context.Background(), inDatabase...)
+		store := MockRuleStore{}
+		store.EXPECT().readsRules(inDatabase...)
 
 		namespace := randFolder()
 		groupName := util.GenerateShortUID()
@@ -201,7 +204,7 @@ func TestCalculateChanges(t *testing.T) {
 
 		submittedMap, submitted := models.GenerateUniqueAlertRules(rand.Intn(len(inDatabase)-5)+5, models.AlertRuleGen(simulateSubmitted, withGroupKey(groupKey), withUIDs(inDatabaseMap)))
 
-		changes, err := CalculateChanges(context.Background(), fakeStore, groupKey, submitted)
+		changes, err := CalculateChanges(context.Background(), &store, groupKey, submitted)
 		require.NoError(t, err)
 
 		require.Equal(t, groupKey, changes.GroupKey)
@@ -449,4 +452,17 @@ func randFolder() *grafana_models.Folder {
 		UpdatedBy: 0,
 		CreatedBy: 0,
 	}
+}
+
+func (mrs *MockRuleStore_Expecter) readsRules(rules ...*models.AlertRule) {
+	mrs.ListAlertRules(mock.Anything, mock.Anything).
+		Return(nil).
+		Run(func(ctx context.Context, query *models.ListAlertRulesQuery) {
+			query.Result = rules
+		})
+	mrs.GetAlertRulesGroupByRuleUID(mock.Anything, mock.Anything).
+		Return(nil).
+		Run(func(ctx context.Context, query *models.GetAlertRulesGroupByRuleUIDQuery) {
+			query.Result = rules
+		})
 }
