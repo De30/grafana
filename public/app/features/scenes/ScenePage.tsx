@@ -14,6 +14,10 @@ export const ScenePage: FC<Props> = (props) => {
     return <h2>Scene not found</h2>;
   }
 
+  if (scene.getScene) {
+    return scene.getScene();
+  }
+
   return <scene.Component model={scene} />;
 };
 
