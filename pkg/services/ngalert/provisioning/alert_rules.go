@@ -193,13 +193,13 @@ func (service *AlertRuleService) ReplaceRuleGroup(ctx context.Context, orgID int
 	for i := range group.Rules {
 		rules = append(rules, &group.Rules[i])
 	}
-	delta, err := store.CalculateChanges(ctx, service.ruleStore, key, rules)
+	delta, err := CalculateChanges(ctx, service.ruleStore, key, rules)
 	if err != nil {
 		return fmt.Errorf("failed to calculate diff for alert rules: %w", err)
 	}
 
 	// Refresh all calculated fields across all rules.
-	delta = store.UpdateCalculatedRuleFields(delta)
+	delta = UpdateCalculatedRuleFields(delta)
 
 	if len(delta.New) == 0 && len(delta.Update) == 0 && len(delta.Delete) == 0 {
 		return nil

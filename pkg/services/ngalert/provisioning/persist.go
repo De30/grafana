@@ -35,6 +35,8 @@ type TransactionManager interface {
 }
 
 // RuleStore represents the ability to persist and query alert rules.
+//
+//go:generate mockery --name RuleStore --structname MockRuleStore --inpackage --filename rule_store_mock.go --with-expecter
 type RuleStore interface {
 	GetAlertRuleByUID(ctx context.Context, query *models.GetAlertRuleByUIDQuery) error
 	ListAlertRules(ctx context.Context, query *models.ListAlertRulesQuery) error
