@@ -150,6 +150,7 @@ class UnThemedLogRow extends PureComponent<Props, State> {
       onLogRowHover,
       app,
       scrollElement,
+      timeZone,
     } = this.props;
     const { showDetails, showContext } = this.state;
     const style = getLogRowStyles(theme, row.logLevel);
@@ -223,6 +224,7 @@ class UnThemedLogRow extends PureComponent<Props, State> {
               app={app}
               scrollElement={scrollElement}
               logsSortOrder={logsSortOrder}
+              timeZone={timeZone}
             />
           )}
         </tr>
@@ -253,7 +255,12 @@ class UnThemedLogRow extends PureComponent<Props, State> {
     if (showContext) {
       return (
         <>
-          <LogRowContextProvider row={row} getRowContext={getRowContext} logsSortOrder={logsSortOrder}>
+          <LogRowContextProvider
+            row={row}
+            getRowContext={getRowContext}
+            logsSortOrder={logsSortOrder}
+            timeZone={this.props.timeZone}
+          >
             {({ result, errors, hasMoreContextRows, updateLimit, logsSortOrder }) => {
               return <>{this.renderLogRow(result, errors, hasMoreContextRows, updateLimit, logsSortOrder)}</>;
             }}

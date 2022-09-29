@@ -16,9 +16,14 @@ export interface RowContextOptions {
   limit?: number;
 }
 
+export interface LogRowContextRow {
+  line: string;
+  timestamp: string;
+}
+
 export interface LogRowContextRows {
-  before?: string[];
-  after?: string[];
+  before?: LogRowContextRow[];
+  after?: LogRowContextRow[];
 }
 export interface LogRowContextQueryErrors {
   before?: string;
@@ -31,13 +36,14 @@ export interface HasMoreContextRows {
 }
 
 interface ResultType {
-  data: string[][];
+  data: LogRowContextRow[][];
   errors: string[];
 }
 
 interface LogRowContextProviderProps {
   row: LogRowModel;
   logsSortOrder?: LogsSortOrder | null;
+  timeZone: string;
   getRowContext: (row: LogRowModel, options?: RowContextOptions) => Promise<DataQueryResponse>;
   children: (props: {
     result: LogRowContextRows;
@@ -74,7 +80,7 @@ export const getRowContexts = async (
       return [];
     }
 
-    const data = [];
+    const data: LogRowContextRow[] = [];
     for (let index = 0; index < dataResult.data.length; index++) {
       const dataFrame = toDataFrame(dataResult.data[index]);
       const fieldCache = new FieldCache(dataFrame);
@@ -82,6 +88,7 @@ export const getRowContexts = async (
       const idField: Field<string> | undefined = fieldCache.getFieldByName('id');
 
       for (let fieldIndex = 0; fieldIndex < timestampField.values.length; fieldIndex++) {
+        const timestamp = timestampField.values.get(fieldIndex);
         // TODO: this filtering is datasource dependant so it will make sense to move it there so the API is
         //  to return correct list of lines handling inclusive ranges or how to filter the correct line on the
         //  datasource.
@@ -101,7 +108,7 @@ export const getRowContexts = async (
           // Fallback to timestamp. This should not happen right now as this feature is implemented only for loki
           // and that has ID. Later this branch could be used in other DS but mind that this could also filter out
           // logs which were logged in the same timestamp and that can be a problem depending on the precision.
-          if (parseInt(timestampField.values.get(fieldIndex), 10) === row.timeEpochMs) {
+          if (parseInt(timestamp, 10) === row.timeEpochMs) {
             continue;
           }
         }
@@ -109,7 +116,7 @@ export const getRowContexts = async (
         const lineField: Field<string> = dataFrame.fields.filter((field) => field.name === 'line')[0];
         const line = lineField.values.get(fieldIndex); // assuming that both fields have same length
 
-        data.push(line);
+        data.push({ timestamp, line });
       }
     }
 
@@ -136,6 +143,7 @@ export const LogRowContextProvider: React.FunctionComponent<LogRowContextProvide
   row,
   children,
   logsSortOrder,
+  timeZone,
 }) => {
   // React Hook that creates a number state value called limit to component state and a setter function called setLimit
   // The initial value for limit is 10

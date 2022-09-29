@@ -20,6 +20,7 @@ interface Props extends Themeable2 {
   contextIsOpen: boolean;
   wrapLogMessage: boolean;
   prettifyLogMessage: boolean;
+  timeZone: string;
   errors?: LogRowContextQueryErrors;
   context?: LogRowContextRows;
   showRowMenu?: boolean;
@@ -147,6 +148,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
       app,
       logsSortOrder,
       showContextToggle,
+      timeZone,
     } = this.props;
 
     const style = getLogRowStyles(theme, row.logLevel);
@@ -175,6 +177,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
               hasMoreContextRows={hasMoreContextRows}
               onOutsideClick={onToggleContext}
               logsSortOrder={logsSortOrder}
+              timeZone={timeZone}
               onLoadMoreContext={() => {
                 if (updateLimit) {
                   updateLimit();

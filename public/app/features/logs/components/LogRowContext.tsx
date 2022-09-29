@@ -1,11 +1,16 @@
 import { css, cx } from '@emotion/css';
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 
-import { GrafanaTheme2, DataQueryError, LogRowModel, textUtil, LogsSortOrder } from '@grafana/data';
+import { GrafanaTheme2, DataQueryError, LogRowModel, textUtil, LogsSortOrder, dateTimeFormat } from '@grafana/data';
 import { useStyles2, Alert, ClickOutsideWrapper, CustomScrollbar, List, Button } from '@grafana/ui';
 
 import { LogMessageAnsi } from './LogMessageAnsi';
-import { LogRowContextRows, LogRowContextQueryErrors, HasMoreContextRows } from './LogRowContextProvider';
+import {
+  LogRowContextRows,
+  LogRowContextQueryErrors,
+  HasMoreContextRows,
+  LogRowContextRow,
+} from './LogRowContextProvider';
 
 export enum LogGroupPosition {
   Bottom = 'bottom',
@@ -16,6 +21,7 @@ interface LogRowContextProps {
   row: LogRowModel;
   context: LogRowContextRows;
   wrapLogMessage: boolean;
+  timeZone: string;
   errors?: LogRowContextQueryErrors;
   hasMoreContextRows?: HasMoreContextRows;
   logsSortOrder?: LogsSortOrder | null;
@@ -84,7 +90,7 @@ const getLogRowContextStyles = (theme: GrafanaTheme2, wrapLogMessage?: boolean) 
 
 interface LogRowContextGroupHeaderProps {
   row: LogRowModel;
-  rows: Array<string | DataQueryError>;
+  rows: LogRowContextRow[];
   onLoadMoreContext: () => void;
   groupPosition: LogGroupPosition;
   shouldScrollToBottom?: boolean;
@@ -92,8 +98,9 @@ interface LogRowContextGroupHeaderProps {
   logsSortOrder?: LogsSortOrder | null;
 }
 interface LogRowContextGroupProps extends LogRowContextGroupHeaderProps {
-  rows: Array<string | DataQueryError>;
+  rows: LogRowContextRow[];
   groupPosition: LogGroupPosition;
+  timeZone: string;
   className?: string;
   error?: string;
   logsSortOrder?: LogsSortOrder | null;
@@ -147,6 +154,7 @@ export const LogRowContextGroup: React.FunctionComponent<LogRowContextGroupProps
   canLoadMoreRows,
   onLoadMoreContext,
   groupPosition,
+  timeZone,
   logsSortOrder,
 }) => {
   const { commonStyles, logs } = useStyles2(getLogRowContextStyles);
@@ -180,14 +188,17 @@ export const LogRowContextGroup: React.FunctionComponent<LogRowContextGroupProps
             {!error && (
               <List
                 items={rows}
-                renderItem={(item) => {
+                renderItem={({ line, timestamp }) => {
                   return (
                     <div
                       className={css`
                         padding: 5px 0;
                       `}
                     >
-                      {typeof item === 'string' && textUtil.hasAnsiCodes(item) ? <LogMessageAnsi value={item} /> : item}
+                      {dateTimeFormat(timestamp, {
+                        timeZone,
+                      })}{' '}
+                      {typeof line === 'string' && textUtil.hasAnsiCodes(line) ? <LogMessageAnsi value={line} /> : line}
                     </div>
                   );
                 }}
@@ -212,6 +223,7 @@ export const LogRowContext: React.FunctionComponent<LogRowContextProps> = ({
   hasMoreContextRows,
   wrapLogMessage,
   logsSortOrder,
+  timeZone,
 }) => {
   useEffect(() => {
     const handleEscKeyDown = (e: KeyboardEvent): void => {
@@ -242,6 +254,7 @@ export const LogRowContext: React.FunctionComponent<LogRowContextProps> = ({
             onLoadMoreContext={onLoadMoreContext}
             groupPosition={LogGroupPosition.Top}
             logsSortOrder={logsSortOrder}
+            timeZone={timeZone}
           />
         )}
 
@@ -255,6 +268,7 @@ export const LogRowContext: React.FunctionComponent<LogRowContextProps> = ({
             className={beforeContext}
             groupPosition={LogGroupPosition.Bottom}
             logsSortOrder={logsSortOrder}
+            timeZone={timeZone}
           />
         )}
       </div>
