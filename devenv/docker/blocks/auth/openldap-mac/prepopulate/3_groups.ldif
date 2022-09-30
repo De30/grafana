@@ -23,6 +23,7 @@ objectClass: groupOfNames
 member: cn=ldap-torkel,ou=users,dc=grafana,dc=org
 member: cn=ldap-daniel,ou=users,dc=grafana,dc=org
 member: cn=ldap-leo,ou=users,dc=grafana,dc=org
+member: cn=Christian Frantsen,ou=users,dc=grafana,dc=org
 
 # -- POSIX --
 
