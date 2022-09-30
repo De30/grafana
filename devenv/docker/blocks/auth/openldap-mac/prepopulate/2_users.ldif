@@ -79,6 +79,17 @@ objectClass: organizationalPerson
 sn: ldap-torkel
 cn: ldap-torkel
 
+# White space use case
+dn: cn=Christian Frantsen,ou=users,dc=grafana,dc=org
+mail: chris.fran@grafana.com
+userPassword: grafana
+objectClass: person
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+sn: chris.fran
+cn: chris.fran
+
 # admin for posix group (without support for memberOf attribute)
 dn: uid=ldap-posix-admin,ou=users,dc=grafana,dc=org
 mail: ldap-posix-admin@grafana.com
