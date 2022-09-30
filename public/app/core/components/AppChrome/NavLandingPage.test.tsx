@@ -46,7 +46,7 @@ describe('NavLandingPage', () => {
         text: mockSectionTitle,
         id: mockId,
         url: mockSectionUrl,
-        subTitle: mockSectionSubtitle,
+        description: mockSectionSubtitle,
         children: [mockChild1, mockChild2, mockChild3],
       },
     ];

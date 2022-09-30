@@ -64,10 +64,10 @@ export function getNotFoundNav(): NavModel {
   return getWarningNav('Page not found', '404 Error');
 }
 
-export function getWarningNav(text: string, subTitle?: string): NavModel {
+export function getWarningNav(text: string, description?: string): NavModel {
   const node: NavModelItem = {
     text,
-    subTitle,
+    description,
     icon: 'exclamation-triangle',
   };
   return {

@@ -8,7 +8,6 @@ export interface NavLinkDTO {
   text: string;
   description?: string;
   section?: NavSection;
-  subTitle?: string;
   icon?: IconName;
   img?: string;
   url?: string;
