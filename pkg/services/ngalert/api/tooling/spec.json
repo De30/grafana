@@ -2536,6 +2536,38 @@
           }
         }
       }
+    },
+    "/api/v1/templates/test": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "testing"
+        ],
+        "summary": "Test a notification template.",
+        "operationId": "RouteTestTemplateEval",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/TestTemplatePayload"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TemplateTestResult",
+            "schema": {
+              "$ref": "#/definitions/TemplateTestResult"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -5433,6 +5465,23 @@
         }
       }
     },
+    "TemplateTestResult": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "description": "Error is the error message associated with evaluation failures. This field is only present when Status is \"failure\".",
+          "type": "string"
+        },
+        "result": {
+          "description": "Result is the output of the evaluated template.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status is either \"success\" or \"failure\" depending on whether the evaluation was successful.",
+          "type": "string"
+        }
+      }
+    },
     "TestReceiverConfigResult": {
       "type": "object",
       "properties": {
@@ -5527,6 +5576,14 @@
         },
         "grafana_alert_instances": {
           "$ref": "#/definitions/AlertInstancesResponse"
+        }
+      }
+    },
+    "TestTemplatePayload": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "string"
         }
       }
     },
@@ -5994,7 +6051,6 @@
       "$ref": "#/definitions/gettableAlert"
     },
     "gettableAlerts": {
-      "description": "GettableAlerts gettable alerts",
       "type": "array",
       "items": {
         "$ref": "#/definitions/gettableAlert"
@@ -6002,6 +6058,7 @@
       "$ref": "#/definitions/gettableAlerts"
     },
     "gettableSilence": {
+      "description": "GettableSilence gettable silence",
       "type": "object",
       "required": [
         "comment",
@@ -6194,6 +6251,7 @@
       }
     },
     "postableSilence": {
+      "description": "PostableSilence postable silence",
       "type": "object",
       "required": [
         "comment",
@@ -6232,7 +6290,6 @@
       "$ref": "#/definitions/postableSilence"
     },
     "receiver": {
-      "description": "Receiver receiver",
       "type": "object",
       "required": [
         "active",

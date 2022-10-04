@@ -53,6 +53,19 @@ import (
 //     Responses:
 //       200: EvalQueriesResponse
 
+// swagger:route POST /api/v1/templates/test testing RouteTestTemplateEval
+//
+// Test a notification template.
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: TemplateTestResult
+
 // swagger:parameters RouteTestReceiverConfig
 type TestReceiverRequest struct {
 	// in:body
@@ -83,6 +96,27 @@ type EvalQueriesRequest struct {
 type EvalQueriesPayload struct {
 	Data []models.AlertQuery `json:"data"`
 	Now  time.Time           `json:"now"`
+}
+
+// swagger:model
+type TemplateTestResult struct {
+	// Result is the output of the evaluated template.
+	Result string `json:"result" yaml:"result"`
+	// Status is either "success" or "failure" depending on whether the evaluation was successful.
+	Status string `json:"status" yaml:"status"`
+	// Error is the error message associated with evaluation failures. This field is only present when Status is "failure".
+	Error string `json:"error,omitempty" yaml:"error,omitempty"`
+}
+
+// swagger:parameters RouteTestTemplateEval
+type TestTemplateRequest struct {
+	// in:body
+	Body TestTemplatePayload
+}
+
+// swagger:model
+type TestTemplatePayload struct {
+	Template string `json:"template" yaml:"template"`
 }
 
 func (p *TestRulePayload) UnmarshalJSON(b []byte) error {

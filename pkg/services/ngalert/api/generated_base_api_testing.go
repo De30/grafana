@@ -22,6 +22,7 @@ type TestingApi interface {
 	RouteEvalQueries(*models.ReqContext) response.Response
 	RouteTestRuleConfig(*models.ReqContext) response.Response
 	RouteTestRuleGrafanaConfig(*models.ReqContext) response.Response
+	RouteTestTemplateEval(*models.ReqContext) response.Response
 }
 
 func (f *TestingApiHandler) RouteEvalQueries(ctx *models.ReqContext) response.Response {
@@ -49,6 +50,14 @@ func (f *TestingApiHandler) RouteTestRuleGrafanaConfig(ctx *models.ReqContext) r
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
 	return f.handleRouteTestRuleGrafanaConfig(ctx, conf)
+}
+func (f *TestingApiHandler) RouteTestTemplateEval(ctx *models.ReqContext) response.Response {
+	// Parse Request Body
+	conf := apimodels.TestTemplatePayload{}
+	if err := web.Bind(ctx.Req, &conf); err != nil {
+		return response.Error(http.StatusBadRequest, "bad request data", err)
+	}
+	return f.handleRouteTestTemplateEval(ctx, conf)
 }
 
 func (api *API) RegisterTestingApiEndpoints(srv TestingApi, m *metrics.API) {
@@ -80,6 +89,16 @@ func (api *API) RegisterTestingApiEndpoints(srv TestingApi, m *metrics.API) {
 				http.MethodPost,
 				"/api/v1/rule/test/grafana",
 				srv.RouteTestRuleGrafanaConfig,
+				m,
+			),
+		)
+		group.Post(
+			toMacaronPath("/api/v1/templates/test"),
+			api.authorize(http.MethodPost, "/api/v1/templates/test"),
+			metrics.Instrument(
+				http.MethodPost,
+				"/api/v1/templates/test",
+				srv.RouteTestTemplateEval,
 				m,
 			),
 		)

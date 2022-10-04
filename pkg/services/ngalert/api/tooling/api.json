@@ -2894,6 +2894,23 @@
    "title": "TelegramConfig configures notifications via Telegram.",
    "type": "object"
   },
+  "TemplateTestResult": {
+   "properties": {
+    "error": {
+     "description": "Error is the error message associated with evaluation failures. This field is only present when Status is \"failure\".",
+     "type": "string"
+    },
+    "result": {
+     "description": "Result is the output of the evaluated template.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Status is either \"success\" or \"failure\" depending on whether the evaluation was successful.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
   "TestReceiverConfigResult": {
    "properties": {
     "error": {
@@ -2987,6 +3004,14 @@
     },
     "grafana_alert_instances": {
      "$ref": "#/definitions/AlertInstancesResponse"
+    }
+   },
+   "type": "object"
+  },
+  "TestTemplatePayload": {
+   "properties": {
+    "template": {
+     "type": "string"
     }
    },
    "type": "object"
@@ -3398,7 +3423,6 @@
    "type": "object"
   },
   "gettableAlert": {
-   "description": "GettableAlert gettable alert",
    "properties": {
     "annotations": {
      "$ref": "#/definitions/labelSet"
@@ -3454,14 +3478,12 @@
    "type": "object"
   },
   "gettableAlerts": {
-   "description": "GettableAlerts gettable alerts",
    "items": {
     "$ref": "#/definitions/gettableAlert"
    },
    "type": "array"
   },
   "gettableSilence": {
-   "description": "GettableSilence gettable silence",
    "properties": {
     "comment": {
      "description": "comment",
@@ -3510,13 +3532,13 @@
    "type": "object"
   },
   "gettableSilences": {
-   "description": "GettableSilences gettable silences",
    "items": {
     "$ref": "#/definitions/gettableSilence"
    },
    "type": "array"
   },
   "integration": {
+   "description": "Integration integration",
    "properties": {
     "lastNotifyAttempt": {
      "description": "A timestamp indicating the last attempt to deliver a notification regardless of the outcome.\nFormat: date-time",

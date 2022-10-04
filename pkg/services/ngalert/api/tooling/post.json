@@ -2894,6 +2894,23 @@
    "title": "TelegramConfig configures notifications via Telegram.",
    "type": "object"
   },
+  "TemplateTestResult": {
+   "properties": {
+    "error": {
+     "description": "Error is the error message associated with evaluation failures. This field is only present when Status is \"failure\".",
+     "type": "string"
+    },
+    "result": {
+     "description": "Result is the output of the evaluated template.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Status is either \"success\" or \"failure\" depending on whether the evaluation was successful.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
   "TestReceiverConfigResult": {
    "properties": {
     "error": {
@@ -2987,6 +3004,14 @@
     },
     "grafana_alert_instances": {
      "$ref": "#/definitions/AlertInstancesResponse"
+    }
+   },
+   "type": "object"
+  },
+  "TestTemplatePayload": {
+   "properties": {
+    "template": {
+     "type": "string"
     }
    },
    "type": "object"
@@ -3452,13 +3477,13 @@
    "type": "object"
   },
   "gettableAlerts": {
-   "description": "GettableAlerts gettable alerts",
    "items": {
     "$ref": "#/definitions/gettableAlert"
    },
    "type": "array"
   },
   "gettableSilence": {
+   "description": "GettableSilence gettable silence",
    "properties": {
     "comment": {
      "description": "comment",
@@ -3648,6 +3673,7 @@
    "type": "array"
   },
   "postableSilence": {
+   "description": "PostableSilence postable silence",
    "properties": {
     "comment": {
      "description": "comment",
@@ -3685,7 +3711,6 @@
    "type": "object"
   },
   "receiver": {
-   "description": "Receiver receiver",
    "properties": {
     "active": {
      "description": "active",
@@ -6298,6 +6323,38 @@
       }
      }
     },
+    "tags": [
+     "testing"
+    ]
+   }
+  },
+  "/api/v1/templates/test": {
+   "post": {
+    "consumes": [
+     "application/json"
+    ],
+    "operationId": "RouteTestTemplateEval",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "Body",
+      "schema": {
+       "$ref": "#/definitions/TestTemplatePayload"
+      }
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "responses": {
+     "200": {
+      "description": "TemplateTestResult",
+      "schema": {
+       "$ref": "#/definitions/TemplateTestResult"
+      }
+     }
+    },
+    "summary": "Test a notification template.",
     "tags": [
      "testing"
     ]
