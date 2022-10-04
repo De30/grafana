@@ -297,6 +297,10 @@ func (srv AlertmanagerSrv) RoutePostTestReceivers(c *models.ReqContext, body api
 	return response.JSON(statusForTestReceivers(result.Receivers), newTestReceiversResult(result))
 }
 
+func (srv AlertmanagerSrv) RouteTestTemplateEval(c *models.ReqContext, body apimodels.TestTemplatePayload) response.Response {
+
+}
+
 // contextWithTimeoutFromRequest returns a context with a deadline set from the
 // Request-Timeout header in the HTTP request. If the header is absent then the
 // context will use the default timeout. The timeout in the Request-Timeout

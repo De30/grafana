@@ -44,6 +44,7 @@ type AlertmanagerApi interface {
 	RoutePostGrafanaAlertingConfig(*models.ReqContext) response.Response
 	RoutePostTestGrafanaReceivers(*models.ReqContext) response.Response
 	RoutePostTestReceivers(*models.ReqContext) response.Response
+	RouteTestTemplateEval(*models.ReqContext) response.Response
 }
 
 func (f *AlertmanagerApiHandler) RouteCreateGrafanaSilence(ctx *models.ReqContext) response.Response {
@@ -190,6 +191,14 @@ func (f *AlertmanagerApiHandler) RoutePostTestReceivers(ctx *models.ReqContext) 
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
 	return f.handleRoutePostTestReceivers(ctx, conf, datasourceUIDParam)
+}
+func (f *AlertmanagerApiHandler) RouteTestTemplateEval(ctx *models.ReqContext) response.Response {
+	// Parse Request Body
+	conf := apimodels.TestTemplatePayload{}
+	if err := web.Bind(ctx.Req, &conf); err != nil {
+		return response.Error(http.StatusBadRequest, "bad request data", err)
+	}
+	return f.handleRouteTestTemplateEval(ctx, conf)
 }
 
 func (api *API) RegisterAlertmanagerApiEndpoints(srv AlertmanagerApi, m *metrics.API) {
@@ -441,6 +450,16 @@ func (api *API) RegisterAlertmanagerApiEndpoints(srv AlertmanagerApi, m *metrics
 				http.MethodPost,
 				"/api/alertmanager/{DatasourceUID}/config/api/v1/receivers/test",
 				srv.RoutePostTestReceivers,
+				m,
+			),
+		)
+		group.Post(
+			toMacaronPath("/api/alertmanager/grafana/templates/test"),
+			api.authorize(http.MethodPost, "/api/alertmanager/grafana/templates/test"),
+			metrics.Instrument(
+				http.MethodPost,
+				"/api/alertmanager/grafana/templates/test",
+				srv.RouteTestTemplateEval,
 				m,
 			),
 		)

@@ -177,6 +177,19 @@ import (
 //       408: Failure
 //       409: AlertManagerNotReady
 
+// swagger:route POST /api/alertmanager/grafana/templates/test alertmanager RouteTestTemplateEval
+//
+// Test a notification template without saving it.
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: TemplateTestResult
+
 // swagger:route GET /api/alertmanager/grafana/api/v2/silences alertmanager RouteGetGrafanaSilences
 //
 // get silences
@@ -293,6 +306,27 @@ type TestReceiverConfigResult struct {
 	UID    string `json:"uid"`
 	Status string `json:"status"`
 	Error  string `json:"error,omitempty"`
+}
+
+// swagger:model
+type TemplateTestResult struct {
+	// Result is the output of the evaluated template.
+	Result string `json:"result" yaml:"result"`
+	// Status is either "success" or "failure" depending on whether the evaluation was successful.
+	Status string `json:"status" yaml:"status"`
+	// Error is the error message associated with evaluation failures. This field is only present when Status is "failure".
+	Error string `json:"error,omitempty" yaml:"error,omitempty"`
+}
+
+// swagger:parameters RouteTestTemplateEval
+type TestTemplateRequest struct {
+	// in:body
+	Body TestTemplatePayload
+}
+
+// swagger:model
+type TestTemplatePayload struct {
+	Template string `json:"template" yaml:"template"`
 }
 
 // swagger:parameters RouteCreateSilence RouteCreateGrafanaSilence
