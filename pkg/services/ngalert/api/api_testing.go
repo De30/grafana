@@ -117,3 +117,7 @@ func (srv TestingApiSrv) RouteEvalQueries(c *models.ReqContext, cmd apimodels.Ev
 
 	return response.JSONStreaming(http.StatusOK, evalResults)
 }
+
+func (srv TestingApiSrv) RouteTestTemplateEval(c *models.ReqContext, cmd apimodels.TestTemplatePayload) response.Response {
+
+}
