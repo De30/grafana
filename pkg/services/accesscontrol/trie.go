@@ -81,7 +81,9 @@ func (t *Trie) Scopes(action, prefix string) ([]string, bool) {
 
 	var scopes []string
 	t.Root.walkChildren(prefix, func(n *Node) bool {
-		scopes = append(scopes, prefix+n.Path)
+		if n.Actions[action] {
+			scopes = append(scopes, prefix+n.Path)
+		}
 		return false
 	})
 	return scopes, false
