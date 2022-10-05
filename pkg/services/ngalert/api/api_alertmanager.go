@@ -298,7 +298,23 @@ func (srv AlertmanagerSrv) RoutePostTestReceivers(c *models.ReqContext, body api
 }
 
 func (srv AlertmanagerSrv) RouteTestTemplateEval(c *models.ReqContext, body apimodels.TestTemplatePayload) response.Response {
+	am, errResp := srv.AlertmanagerFor(c.OrgID)
+	if errResp != nil {
+		return errResp
+	}
 
+	res, err := am.TestReceiverTemplate(c.Req.Context(), body.Template)
+
+	resp := apimodels.TemplateTestResult{
+		Result: res,
+		Status: "success",
+	}
+	if err != nil {
+		resp.Status = "failure"
+		resp.Error = err.Error()
+	}
+
+	return response.JSON(200, resp) // TODO
 }
 
 // contextWithTimeoutFromRequest returns a context with a deadline set from the

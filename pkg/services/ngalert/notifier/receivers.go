@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/strfmt"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
+	"github.com/grafana/grafana/pkg/services/ngalert/notifier/channels"
 	"github.com/prometheus/alertmanager/api/v2/models"
 	"github.com/prometheus/alertmanager/notify"
 	"github.com/prometheus/alertmanager/types"
@@ -197,6 +198,43 @@ func (am *Alertmanager) TestReceivers(ctx context.Context, c apimodels.TestRecei
 	}
 
 	return newTestReceiversResult(testAlert, append(invalid, results...), now), nil
+}
+
+func (am *Alertmanager) TestReceiverTemplate(ctx context.Context, template string) (string, error) {
+	tmplCtx, err := am.getTemplate()
+	if err != nil {
+		return "", fmt.Errorf("failed to get template: %w", err)
+	}
+
+	data := make([]*types.Alert, 0)
+	data = append(data, &types.Alert{
+		Alert: model.Alert{
+			StartsAt:     time.Now(),
+			GeneratorURL: "<link to rule>",
+		},
+		UpdatedAt: time.Now(),
+	})
+
+	dataShim := channels.ExtendedData{
+		Receiver: "<receiver>",
+		Alerts: channels.ExtendedAlerts{
+			{
+				Status:       "<status>",
+				GeneratorURL: "<generator-URL>",
+				Fingerprint:  "<fingerprint>",
+				SilenceURL:   "<silence-URL>",
+			},
+		},
+		Status:      "<status>",
+		ExternalURL: "<external-image-URL>",
+	}
+
+	//var tmplErr error
+	//tmplasd, _ := channels.TmplText(ctx, tmplCtx, data, log.NewNopLogger(), &tmplErr)
+
+	result, tmplErr := tmplCtx.ExecuteTextString(template, dataShim)
+
+	return result, tmplErr
 }
 
 func (am *Alertmanager) GetReceivers(ctx context.Context) apimodels.Receivers {
