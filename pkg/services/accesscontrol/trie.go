@@ -23,7 +23,7 @@ func TrieFromMap(permissions map[string][]string) *Trie {
 	for action, scopes := range permissions {
 		t.AllActions[action] = true
 		for _, scope := range scopes {
-			t.Root.addNode(action, scope, ":")
+			t.Root.addNode(action, scope, scopeDelim)
 		}
 	}
 	return t
@@ -55,7 +55,7 @@ func (t *Trie) HasAccess(action, scope string) bool {
 		return t.AllActions[action]
 	}
 	var hasAccess bool
-	t.Root.walkPath(scope, func(n *Node) bool {
+	t.Root.walkPath(scope, scopeDelim, func(n *Node) bool {
 		if n.Actions[action] {
 			hasAccess = true
 			return true
@@ -67,7 +67,7 @@ func (t *Trie) HasAccess(action, scope string) bool {
 
 func (t *Trie) Scopes(action, prefix string) ([]string, bool) {
 	var hasWildcard bool
-	t.Root.walkPath(prefix, func(n *Node) bool {
+	t.Root.walkPath(prefix, scopeDelim, func(n *Node) bool {
 		if n.Actions[action] {
 			hasWildcard = true
 			return true
@@ -80,7 +80,7 @@ func (t *Trie) Scopes(action, prefix string) ([]string, bool) {
 	}
 
 	var scopes []string
-	t.Root.walkChildren(prefix, func(n *Node) bool {
+	t.Root.walkChildren(prefix, scopeDelim, func(n *Node) bool {
 		if n.Actions[action] {
 			scopes = append(scopes, prefix+n.Path)
 		}
@@ -91,7 +91,7 @@ func (t *Trie) Scopes(action, prefix string) ([]string, bool) {
 
 func (t *Trie) Metadata(scope string) map[string]bool {
 	metadata := Metadata{}
-	t.Root.walkPath(scope, func(n *Node) bool {
+	t.Root.walkPath(scope, scopeDelim, func(n *Node) bool {
 		for action := range n.Actions {
 			metadata[action] = true
 		}
@@ -141,7 +141,7 @@ func (n *Node) addNode(action, path, delim string) {
 	c.addNode(action, path[idx+1:], delim)
 }
 
-func (n *Node) walkPath(path string, walkFn func(n *Node) bool) {
+func (n *Node) walkPath(path, delim string, walkFn func(n *Node) bool) {
 	stop := walkFn(n)
 	if stop {
 		return
@@ -152,26 +152,26 @@ func (n *Node) walkPath(path string, walkFn func(n *Node) bool) {
 	}
 
 	prefix := path
-	idx := strings.Index(prefix, ":")
+	idx := strings.Index(prefix, delim)
 	if idx > 0 {
 		prefix = path[:idx]
 	}
 
 	if c, ok := n.Children[prefix]; ok {
-		c.walkPath(path[idx+1:], walkFn)
+		c.walkPath(path[idx+1:], delim, walkFn)
 	}
 }
 
 // walkChildren walks every node under prefix
-func (n *Node) walkChildren(parent string, walkFn func(n *Node) bool) {
+func (n *Node) walkChildren(parent, delim string, walkFn func(n *Node) bool) {
 	path := parent
-	idx := strings.Index(path, ":")
+	idx := strings.Index(path, delim)
 	if idx > 0 {
 		path = parent[:idx]
 	}
 
 	if c, ok := n.Children[path]; ok {
-		c.walkChildren(parent[idx+1:], walkFn)
+		c.walkChildren(parent[idx+1:], delim, walkFn)
 	}
 
 	if path == "" {
