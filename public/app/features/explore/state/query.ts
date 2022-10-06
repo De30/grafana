@@ -1,7 +1,16 @@
 import { AnyAction, createAction, PayloadAction } from '@reduxjs/toolkit';
 import deepEqual from 'fast-deep-equal';
 import { flatten, groupBy } from 'lodash';
-import { identity, Observable, of, SubscriptionLike, Unsubscribable } from 'rxjs';
+import {
+  identity,
+  Observable,
+  of,
+  SubscriptionLike,
+  Unsubscribable,
+  BehaviorSubject,
+  combineLatest,
+  filter,
+} from 'rxjs';
 import { mergeMap, throttleTime } from 'rxjs/operators';
 
 import {
@@ -15,7 +24,6 @@ import {
   hasQueryImportSupport,
   HistoryItem,
   LoadingState,
-  PanelData,
   PanelEvents,
   QueryFixAction,
   toLegacyResponseData,
@@ -32,8 +40,10 @@ import {
   updateHistory,
 } from 'app/core/utils/explore';
 import { getShiftedTimeRange } from 'app/core/utils/timePicker';
+import { CorrelationData } from 'app/features/correlations/useCorrelations';
 import { getTimeZone } from 'app/features/profile/state/selectors';
 import { MIXED_DATASOURCE_NAME } from 'app/plugins/datasource/mixed/MixedDataSource';
+import { store } from 'app/store/store';
 import { ExploreItemState, ExplorePanelData, ThunkDispatch, ThunkResult } from 'app/types';
 import { ExploreId, ExploreState, QueryOptions } from 'app/types/explore';
 
@@ -398,6 +408,19 @@ export const runQueries = (
   exploreId: ExploreId,
   options?: { replaceUrl?: boolean; preserveCache?: boolean }
 ): ThunkResult<void> => {
+  const correlations$ = new BehaviorSubject<CorrelationData[] | undefined>(undefined);
+  correlations$.unsubscribe();
+
+  const unsubscribe = store.subscribe(() => {
+    const { correlations } = store.getState().explore;
+
+    if (correlations) {
+      correlations$.next(correlations);
+      correlations$.complete();
+      unsubscribe();
+    }
+  });
+
   return (dispatch, getState) => {
     dispatch(updateTime({ exploreId }));
 
@@ -407,7 +430,7 @@ export const runQueries = (
       dispatch(clearCache(exploreId));
     }
 
-    const correlations = getState().explore.correlations;
+    // const correlations = getState().explore.correlations;
 
     const exploreItemState = getState().explore[exploreId]!;
     const {
@@ -440,9 +463,12 @@ export const runQueries = (
 
     // If we have results saved in cache, we are going to use those results instead of running queries
     if (cachedValue) {
-      newQuerySub = of(cachedValue)
+      newQuerySub = combineLatest([
+        of(cachedValue),
+        correlations$.pipe(filter((correlations) => correlations !== undefined)),
+      ])
         .pipe(
-          mergeMap((data: PanelData) =>
+          mergeMap(([data, correlations]) =>
             decorateData(
               data,
               queryResponse,
@@ -496,13 +522,16 @@ export const runQueries = (
 
       dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Loading }));
 
-      newQuerySub = runRequest(datasourceInstance, transaction.request)
-        .pipe(
+      newQuerySub = combineLatest([
+        runRequest(datasourceInstance, transaction.request)
           // Simple throttle for live tailing, in case of > 1000 rows per interval we spend about 200ms on processing and
           // rendering. In case this is optimized this can be tweaked, but also it should be only as fast as user
           // actually can see what is happening.
-          live ? throttleTime(500) : identity,
-          mergeMap((data: PanelData) =>
+          .pipe(live ? throttleTime(500) : identity),
+        correlations$.pipe(filter((correlations) => correlations !== undefined)),
+      ])
+        .pipe(
+          mergeMap(([data, correlations]) =>
             decorateData(
               data,
               queryResponse,

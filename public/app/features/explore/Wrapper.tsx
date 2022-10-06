@@ -4,9 +4,10 @@ import { debounce, inRange } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { locationService } from '@grafana/runtime';
-import { ErrorBoundaryAlert, LoadingPlaceholder } from '@grafana/ui';
+import { ErrorBoundaryAlert, Alert } from '@grafana/ui';
 import { SplitView } from 'app/core/components/SplitPaneWrapper/SplitView';
 import { useGrafana } from 'app/core/context/GrafanaContext';
+import { useAppNotification } from 'app/core/copy/appNotification';
 import { useNavModel } from 'app/core/hooks/useNavModel';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { isTruthy } from 'app/core/utils/types';
@@ -35,7 +36,7 @@ const styles = {
 const MIN_PANE_WIDTH = 200;
 function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   useExplorePageTitle();
-  const { maxedExploreId, evenSplitPanes, correlations } = useSelector((state) => state.explore);
+  const { maxedExploreId, evenSplitPanes } = useSelector((state) => state.explore);
   const [rightPaneWidth, setRightPaneWidth] = useState<number>();
   const [prevWindowWidth, setWindowWidth] = useState<number>();
   const dispatch = useDispatch();
@@ -44,6 +45,7 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   const { keybindings, chrome, config } = useGrafana();
   const navModel = useNavModel('explore');
   const { get } = useCorrelations();
+  const { warning } = useAppNotification();
 
   useEffect(() => {
     //This is needed for breadcrumbs and topnav.
@@ -65,10 +67,16 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   }, []);
 
   useEffect(() => {
-    if (get.value || get.error) {
-      dispatch(saveCorrelationsAction(get.error ? [] : get.value!));
+    if (get.value) {
+      dispatch(saveCorrelationsAction(get.value));
+    } else if (get.error) {
+      dispatch(saveCorrelationsAction([]));
+      warning(
+        'Could not load correlations.',
+        'Correlations data could not be loaded, DataLinks may have partial data.'
+      );
     }
-  }, [get.value, get.error, dispatch]);
+  }, [get.value, get.error, dispatch, warning]);
 
   useEffect(() => {
     lastSavedUrl.left = undefined;
@@ -155,13 +163,10 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
     }
   }
 
-  if (!correlations) {
-    return <LoadingPlaceholder text="Loading..." />;
-  }
-
   const splitSizeObj = { rightPaneSize: widthCalc };
   return (
     <div className={styles.pageScrollbarWrapper} ref={containerRef}>
+      {get.error && <Alert title="Error loading correlations" severity="error" />}
       <ExploreActions exploreIdLeft={ExploreId.left} exploreIdRight={ExploreId.right} />
       <div className={styles.exploreWrapper}>
         <SplitView uiState={splitSizeObj} minSize={MIN_PANE_WIDTH} onResize={updateSplitSize}>
