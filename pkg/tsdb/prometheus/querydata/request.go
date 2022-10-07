@@ -90,7 +90,7 @@ func (s *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) 
 			return &result, err
 		}
 		if r == nil {
-			s.log.Debug("Received nilresponse from runQuery", "query", query.Expr)
+			s.log.Debug("Received nil response from runQuery", "query", query.Expr)
 			continue
 		}
 		result.Responses[q.RefID] = *r

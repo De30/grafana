@@ -253,7 +253,7 @@ func readLabelsOrExemplars(iter *jsoniter.Iterator) (*data.Frame, [][2]string) {
 			valueField.Labels = labels
 			frame = data.NewFrame("", timeField, valueField)
 			frame.Meta = &data.FrameMeta{
-				Custom: resultTypeToCustomMeta("exemplar"),
+				Custom: resultTypeToCustomMetaMap["exemplar"],
 			}
 			for iter.ReadArray() {
 				for l2Field := iter.ReadObject(); l2Field != ""; l2Field = iter.ReadObject() {
@@ -331,7 +331,7 @@ func readString(iter *jsoniter.Iterator) *backend.DataResponse {
 	frame := data.NewFrame("", timeField, valueField)
 	frame.Meta = &data.FrameMeta{
 		Type:   data.FrameTypeTimeSeriesMany,
-		Custom: resultTypeToCustomMeta("string"),
+		Custom: resultTypeToCustomMetaMap["string"],
 	}
 
 	return &backend.DataResponse{
@@ -355,7 +355,7 @@ func readScalar(iter *jsoniter.Iterator) *backend.DataResponse {
 	frame := data.NewFrame("", timeField, valueField)
 	frame.Meta = &data.FrameMeta{
 		Type:   data.FrameTypeTimeSeriesMany,
-		Custom: resultTypeToCustomMeta("scalar"),
+		Custom: resultTypeToCustomMetaMap["scalar"],
 	}
 
 	return &backend.DataResponse{
@@ -371,7 +371,7 @@ func readMatrixOrVectorWide(iter *jsoniter.Iterator, resultType string) *backend
 	frame := data.NewFrame("", timeField)
 	frame.Meta = &data.FrameMeta{
 		Type:   data.FrameTypeTimeSeriesWide,
-		Custom: resultTypeToCustomMeta(resultType),
+		Custom: resultTypeToCustomMetaMap[resultType],
 	}
 	rsp := &backend.DataResponse{
 		Frames: []*data.Frame{},
@@ -545,7 +545,7 @@ func readMatrixOrVectorMulti(iter *jsoniter.Iterator, resultType string) *backen
 			frame := data.NewFrame("", timeField, valueField)
 			frame.Meta = &data.FrameMeta{
 				Type:   data.FrameTypeTimeSeriesMany,
-				Custom: resultTypeToCustomMeta(resultType),
+				Custom: resultTypeToCustomMetaMap[resultType],
 			}
 			rsp.Frames = append(rsp.Frames, frame)
 		}
@@ -730,8 +730,12 @@ func readStream(iter *jsoniter.Iterator) *backend.DataResponse {
 	return rsp
 }
 
-func resultTypeToCustomMeta(resultType string) map[string]string {
-	return map[string]string{"resultType": resultType}
+var resultTypeToCustomMetaMap = map[string]map[string]string{
+	"matrix":   {"resultType": "matrix"},
+	"vector":   {"resultType": "vector"},
+	"string":   {"resultType": "string"},
+	"scalar":   {"resultType": "scalar"},
+	"exemplar": {"resultType": "exemplar"},
 }
 
 func timeFromFloat(fv float64) time.Time {
