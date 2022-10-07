@@ -2,7 +2,10 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/grafana/grafana/pkg/models"
@@ -205,11 +208,32 @@ func (hs *HTTPServer) getFrontendSettingsMap(c *models.ReqContext) (map[string]i
 	if hs.Cfg.GeomapDefaultBaseLayerConfig != nil {
 		jsonObj["geomapDefaultBaseLayerConfig"] = hs.Cfg.GeomapDefaultBaseLayerConfig
 	}
+
 	if !hs.Cfg.GeomapEnableCustomBaseLayers {
 		jsonObj["geomapDisableCustomBaseLayer"] = true
 	}
 
+	if !hs.Features.IsEnabled(featuremgmt.FlagCustomThemes) {
+		if customTheme, err := hs.readCustomTheme(c); err != nil {
+			return nil, err
+		} else if customTheme != nil {
+			jsonObj["customTheme"] = customTheme
+		}
+	}
+
 	return jsonObj, nil
+}
+
+func (hs *HTTPServer) readCustomTheme(c *models.ReqContext) (map[string]interface{}, error) {
+	jsonB, err := os.ReadFile(filepath.Join(hs.Cfg.DataPath, "themes", "theme.json"))
+	if err != nil {
+		return nil, nil
+	}
+	var theme map[string]interface{}
+	if err := json.Unmarshal(jsonB, &theme); err != nil {
+		return nil, err
+	}
+	return theme, nil
 }
 
 func (hs *HTTPServer) getFSDataSources(c *models.ReqContext, enabledPlugins EnabledPlugins) (map[string]plugins.DataSourceDTO, error) {

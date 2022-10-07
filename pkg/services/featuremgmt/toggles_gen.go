@@ -230,4 +230,8 @@ const (
 	// FlagIncreaseInMemDatabaseQueryCache
 	// Enable more in memory caching for database queries
 	FlagIncreaseInMemDatabaseQueryCache = "increaseInMemDatabaseQueryCache"
+
+	// FlagCustomThemes
+	// Enable custom themes
+	FlagCustomThemes = "customThemes"
 )

@@ -310,5 +310,9 @@ var (
 			Name:        "increaseInMemDatabaseQueryCache",
 			Description: "Enable more in memory caching for database queries",
 		},
+		{
+			Name:        "customThemes",
+			Description: "Enable custom themes",
+		},
 	}
 )
