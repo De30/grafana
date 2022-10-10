@@ -1,0 +1,7 @@
+{
+  "extends": "../../../../../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["WebWorker", "ES2015"]
+  },
+  "files": ["alerting.worker.ts"]
+}

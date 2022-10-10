@@ -20,5 +20,6 @@
     "packages/jaeger-ui-components/typings",
     "packages/grafana-data/typings",
     "packages/grafana-ui/src/types"
-  ]
+  ],
+  "exclude": ["public/app/features/alerting/unified/sw/alerting.worker.ts"]
 }

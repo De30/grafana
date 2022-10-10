@@ -12,6 +12,7 @@ import { useDispatch } from 'app/types';
 import { CombinedRuleNamespace } from '../../../types/unified-alerting';
 
 import { LogMessages } from './Analytics';
+import { createWorker } from './api/alertingLoaderWorker';
 import { AlertingPageWrapper } from './components/AlertingPageWrapper';
 import { NoRulesSplash } from './components/rules/NoRulesCTA';
 import { RuleListErrors } from './components/rules/RuleListErrors';
@@ -78,6 +79,11 @@ const RuleList = withErrorBoundary(
       dispatch(fetchAllPromAndRulerRulesAction());
     }, [dispatch]);
     useInterval(fetchRules, RULE_LIST_POLL_INTERVAL_MS);
+
+    useEffect(() => {
+      const worker = createWorker();
+      worker.postMessage({ promRules: promRuleRequests, rulerRuler: rulerRuleRequests });
+    }, [promRuleRequests, rulerRuleRequests]);
 
     // Show splash only when we loaded all of the data sources and none of them has alerts
     const showNewAlertSplash = allPromLoaded && allPromEmpty && promRequests.length > 0;
