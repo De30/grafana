@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/runner"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/services"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/utils"
+	gscommands "github.com/grafana/grafana/pkg/cmd/grafana-server/commands"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrations"
@@ -237,5 +239,16 @@ var Commands = []*cli.Command{
 		Name:        "admin",
 		Usage:       "Grafana admin commands",
 		Subcommands: adminCommands,
+	},
+	{
+		Name:  "server",
+		Usage: "Start Grafana server",
+		Action: func(ctx *cli.Context) error {
+			res := gscommands.RunServer(servOpt)
+			if res != 0 {
+				return errors.New("run grafana server failed")
+			}
+			return nil
+		},
 	},
 }

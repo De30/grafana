@@ -9,13 +9,16 @@ import (
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/services"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/utils"
+	gscommands "github.com/grafana/grafana/pkg/cmd/grafana-server/commands"
 	"github.com/urfave/cli/v2"
 )
 
-// RunCLI is the entrypoint for the grafana-cli command. It returns the exit code for the grafana-cli program.
-func RunCLI(version string) int {
-	setupLogging()
+var servOpt gscommands.ServerOptions
 
+// RunCLI is the entrypoint for the grafana-cli command. It returns the exit code for the grafana-cli program.
+func RunCLI(version, commit, buildBranch, buildstamp string) int {
+	setupLogging()
+	setupServOpt(version, commit, buildBranch, buildstamp)
 	app := &cli.App{
 		Name: "Grafana CLI",
 		Authors: []*cli.Author{
@@ -87,6 +90,15 @@ func setupLogging() {
 		if f == "-d" || f == "--debug" || f == "-debug" {
 			logger.SetDebug(true)
 		}
+	}
+}
+
+func setupServOpt(version, commit, buildBranch, buildstamp string) {
+	servOpt = gscommands.ServerOptions{
+		Version:     version,
+		Commit:      commit,
+		BuildBranch: buildBranch,
+		BuildStamp:  buildstamp,
 	}
 }
 

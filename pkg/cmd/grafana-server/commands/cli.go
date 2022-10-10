@@ -206,7 +206,6 @@ func executeServer(configFile, homePath, pidFile, packaging string, traceDiagnos
 			code:   code,
 		}
 	}
-
 	return nil
 }
 
