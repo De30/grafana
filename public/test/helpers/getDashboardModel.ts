@@ -1,6 +1,6 @@
-import { Dashboard } from '@grafana/schema';
+import { Dashboard, Panel } from '@grafana/schema';
 
-import { DashboardModel } from '../../app/features/dashboard/state';
+import { DashboardModel, PanelModel } from '../../app/features/dashboard/state';
 
 export const getDashboardModel = (json: any, meta: any = {}) => {
   const getVariablesFromState = () => json.templating.list;
@@ -17,3 +17,14 @@ export const getDashboardModelMock = () => {
   };
   return new DashboardModel(dashboard);
 };
+
+// const dashboard = new DashboardMockBuilder().addPanel(panelBuilder.withTransformations([]).withTargets([])).
+
+class PanelMockBuilder {
+  private mock: Partial<Panel> = {};
+  constructor() {}
+
+  build(): PanelModel {
+    return new PanelModel({});
+  }
+}
