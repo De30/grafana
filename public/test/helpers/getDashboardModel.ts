@@ -20,11 +20,17 @@ export const getDashboardModelMock = () => {
 
 // const dashboard = new DashboardMockBuilder().addPanel(panelBuilder.withTransformations([]).withTargets([])).
 
+
+const isPanelModel = (panel: Partial<Panel>): panel is Panel => {
+  return ((typeof panel === 'object') && (typeof panel.id === 'number'|| typeof panel.id === undefined)
+  && (typeof panel.type === 'string')); 
+}
+
 class PanelMockBuilder {
   private mock: Partial<Panel> = {};
   constructor() {}
 
-  build(): PanelModel {
-    return new PanelModel({});
+  build(): Panel {
+    return this.mock;
   }
 }
