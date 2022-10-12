@@ -107,7 +107,7 @@ export const PageToolbar: FC<Props> = React.memo(
               </>
             )}
 
-            {(title || leftItems?.length) && (
+            {(title || Boolean(leftItems?.length)) && (
               <div className={styles.titleWrapper}>
                 {title && (
                   <h1 className={styles.h1Styles}>

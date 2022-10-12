@@ -10,6 +10,7 @@ import { ExploreId, ExploreItemState, ExploreState } from 'app/types/explore';
 import { RichHistoryResults } from '../../../core/history/RichHistoryStorage';
 import { RichHistorySearchFilters, RichHistorySettings } from '../../../core/utils/richHistoryTypes';
 import { ThunkResult } from '../../../types';
+import { CorrelationData } from '../../correlations/useCorrelations';
 import { TimeSrv } from '../../dashboard/services/TimeSrv';
 
 import { paneReducer } from './explorePane';
@@ -46,6 +47,7 @@ export const maximizePaneAction = createAction<{
 }>('explore/maximizePaneAction');
 
 export const evenPaneResizeAction = createAction('explore/evenPaneResizeAction');
+export const saveCorrelationsAction = createAction<CorrelationData[]>('explore/saveCorrelationsAction');
 
 /**
  * Resets state for explore.
@@ -166,6 +168,7 @@ export const initialExploreState: ExploreState = {
   syncedTimes: false,
   left: initialExploreItemState,
   right: undefined,
+  correlations: undefined,
   richHistoryStorageFull: false,
   richHistoryLimitExceededWarningShown: false,
   richHistoryMigrationFailed: false,
@@ -220,6 +223,13 @@ export const exploreReducer = (state = initialExploreState, action: AnyAction): 
       largerExploreId: undefined,
       maxedExploreId: undefined,
       evenSplitPanes: true,
+    };
+  }
+
+  if (saveCorrelationsAction.match(action)) {
+    return {
+      ...state,
+      correlations: action.payload,
     };
   }
 

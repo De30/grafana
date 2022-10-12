@@ -7,17 +7,19 @@ import { locationService } from '@grafana/runtime';
 import { ErrorBoundaryAlert } from '@grafana/ui';
 import { SplitView } from 'app/core/components/SplitPaneWrapper/SplitView';
 import { useGrafana } from 'app/core/context/GrafanaContext';
+import { useAppNotification } from 'app/core/copy/appNotification';
 import { useNavModel } from 'app/core/hooks/useNavModel';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { isTruthy } from 'app/core/utils/types';
-import { useSelector, useDispatch } from 'app/types';
+import { useDispatch, useSelector } from 'app/types';
 import { ExploreId, ExploreQueryParams } from 'app/types/explore';
 
 import { Branding } from '../../core/components/Branding/Branding';
+import { useCorrelations } from '../correlations/useCorrelations';
 
 import { ExploreActions } from './ExploreActions';
 import { ExplorePaneContainer } from './ExplorePaneContainer';
-import { lastSavedUrl, resetExploreAction, splitSizeUpdateAction } from './state/main';
+import { lastSavedUrl, resetExploreAction, splitSizeUpdateAction, saveCorrelationsAction } from './state/main';
 
 const styles = {
   pageScrollbarWrapper: css`
@@ -40,8 +42,10 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   const dispatch = useDispatch();
   const containerRef = useRef<HTMLDivElement>(null);
   const queryParams = props.queryParams;
-  const { keybindings, chrome } = useGrafana();
+  const { keybindings, chrome, config } = useGrafana();
   const navModel = useNavModel('explore');
+  const { get } = useCorrelations();
+  const { warning } = useAppNotification();
 
   useEffect(() => {
     //This is needed for breadcrumbs and topnav.
@@ -52,6 +56,27 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   useEffect(() => {
     keybindings.setupTimeRangeBindings(false);
   }, [keybindings]);
+
+  useEffect(() => {
+    if (!config.featureToggles.correlations) {
+      dispatch(saveCorrelationsAction([]));
+    } else {
+      get.execute();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (get.value) {
+      dispatch(saveCorrelationsAction(get.value));
+    } else if (get.error) {
+      dispatch(saveCorrelationsAction([]));
+      warning(
+        'Could not load correlations.',
+        'Correlations data could not be loaded, DataLinks may have partial data.'
+      );
+    }
+  }, [get.value, get.error, dispatch, warning]);
 
   useEffect(() => {
     lastSavedUrl.left = undefined;
@@ -78,8 +103,9 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- dispatch is stable, doesn't need to be in the deps array
   }, []);
 
-  const debouncedFunctionRef = useRef((prevWindowWidth?: number, rightPaneWidth?: number) => {
+  const windowWidthChangeDebounceRef = useRef((prevWindowWidth?: number, rightPaneWidth?: number) => {
     let rightPaneRatio = 0.5;
+    console.log('dfr', prevWindowWidth, rightPaneWidth);
     if (!containerRef.current) {
       return;
     }
@@ -104,13 +130,14 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   // eslint needs the callback to be inline to analyze the dependencies, but we need to use debounce from lodash
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onResize = useCallback(
-    debounce(() => debouncedFunctionRef.current(prevWindowWidth, rightPaneWidth), 500),
-    [prevWindowWidth, rightPaneWidth]
+    debounce(() => windowWidthChangeDebounceRef.current(prevWindowWidth, rightPaneWidth), 500),
+    [prevWindowWidth]
   );
 
   const updateSplitSize = (rightPaneWidth: number) => {
     const evenSplitWidth = window.innerWidth / 2;
-    const areBothSimilar = inRange(rightPaneWidth, evenSplitWidth - 100, evenSplitWidth + 100);
+    const areBothSimilar = inRange(rightPaneWidth, evenSplitWidth - 50, evenSplitWidth + 50);
+    console.log('updatesplitsize', areBothSimilar);
     if (areBothSimilar) {
       dispatch(splitSizeUpdateAction({ largerExploreId: undefined }));
     } else {
@@ -164,8 +191,7 @@ const useExplorePageTitle = () => {
     [state.explore.left.datasourceInstance?.name, state.explore.right?.datasourceInstance?.name].filter(isTruthy)
   );
 
-  const documentTitle = `${navModel.main.text} - ${datasources.join(' | ')} - ${Branding.AppTitle}`;
-  document.title = documentTitle;
+  document.title = `${navModel.main.text} - ${datasources.join(' | ')} - ${Branding.AppTitle}`;
 };
 
 export default Wrapper;
