@@ -664,6 +664,7 @@ export function createTableFrameFromTraceQlQuery(
         name: 'spanID',
         type: FieldType.string,
         config: {
+          custom: { subcol: true },
           unit: 'string',
           displayNameFromDS: 'Span ID',
           links: [
@@ -685,7 +686,11 @@ export function createTableFrameFromTraceQlQuery(
       // { name: 'traceName', type: FieldType.string, config: { displayNameFromDS: 'Name' } },
       // { name: 'attributes', type: FieldType.string, config: { displayNameFromDS: 'Attributes' } },
       { name: 'startTime', type: FieldType.string, config: { displayNameFromDS: 'Start time' } },
-      { name: 'duration', type: FieldType.number, config: { displayNameFromDS: 'Duration', unit: 'ms' } },
+      {
+        name: 'duration',
+        type: FieldType.number,
+        config: { displayNameFromDS: 'Duration', unit: 'ms' },
+      },
     ],
     meta: {
       preferredVisualisationType: 'table',
@@ -701,7 +706,11 @@ export function createTableFrameFromTraceQlQuery(
     trace.spanSet?.spans.forEach((span) => {
       span.attributes?.forEach((attr) => {
         if (!attributesAdded.includes(attr.key)) {
-          frame.addField({ name: attr.key, type: FieldType.string, config: { displayNameFromDS: attr.key } });
+          frame.addField({
+            name: attr.key,
+            type: FieldType.string,
+            config: { custom: { subcol: true }, displayNameFromDS: attr.key },
+          });
           attributesAdded.push(attr.key);
         }
       });
