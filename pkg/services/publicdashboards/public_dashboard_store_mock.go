@@ -161,6 +161,50 @@ func (_m *FakePublicDashboardStore) GetPublicDashboardConfig(ctx context.Context
 	return r0, r1
 }
 
+// GetPublicDashboardOrgId provides a mock function with given fields: ctx, accessToken
+func (_m *FakePublicDashboardStore) GetPublicDashboardOrgId(ctx context.Context, accessToken string) (int64, error) {
+	ret := _m.Called(ctx, accessToken)
+
+	var r0 int64
+	if rf, ok := ret.Get(0).(func(context.Context, string) int64); ok {
+		r0 = rf(ctx, accessToken)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, accessToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListPublicDashboards provides a mock function with given fields: ctx, orgId
+func (_m *FakePublicDashboardStore) ListPublicDashboards(ctx context.Context, orgId int64) ([]publicdashboardsmodels.PublicDashboardListResponse, error) {
+	ret := _m.Called(ctx, orgId)
+
+	var r0 []publicdashboardsmodels.PublicDashboardListResponse
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []publicdashboardsmodels.PublicDashboardListResponse); ok {
+		r0 = rf(ctx, orgId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]publicdashboardsmodels.PublicDashboardListResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, orgId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PublicDashboardEnabled provides a mock function with given fields: ctx, dashboardUid
 func (_m *FakePublicDashboardStore) PublicDashboardEnabled(ctx context.Context, dashboardUid string) (bool, error) {
 	ret := _m.Called(ctx, dashboardUid)
