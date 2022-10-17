@@ -70,8 +70,7 @@ export const Card: CardInterface = ({ disabled, href, onClick, children, isSelec
       {...htmlProps}
     >
       <CardContext.Provider value={{ href, onClick: onCardClick, disabled, isSelected }}>
-        {!hasHeadingComponent && <Heading />}
-        {children}
+        {hasHeadingComponent ? { children } : <Heading> {children} </Heading>}
       </CardContext.Provider>
     </CardContainer>
   );
