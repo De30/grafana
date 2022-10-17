@@ -55,13 +55,13 @@ An alert rule can have one the following health statuses:
 
 | State      | Description                                                                        |
 | ---------- | ---------------------------------------------------------------------------------- |
-| **Ok**     | No error when evaluating an alerting rule.                                         |
-| **Error**  | An error occurred when evaluating an alerting rule.                                |
+| **Ok**     | No error when evaluating an alert rule.                                            |
+| **Error**  | An error occurred when evaluating an alert rule.                                   |
 | **NoData** | The absence of data in at least one time series returned during a rule evaluation. |
 
 ## Special alerts for `NoData` and `Error`
 
-When evaluation of an alerting rule produces state `NoData` or `Error`, Grafana Alerting will generate alert instances that have the following additional labels:
+When evaluation of an alert rule produces state `NoData` or `Error`, Grafana Alerting will generate alert instances that have the following additional labels:
 
 | Label              | Description                                                            |
 | ------------------ | ---------------------------------------------------------------------- |

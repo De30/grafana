@@ -54,4 +54,4 @@ To filter alert rules:
 
 - From **Select data sources**, select a data source. You can see alert rules that query the selected data source.
 - In the **Search by label**, enter search criteria using label selectors. For example, `environment=production,region=~US|EU,severity!=warning`.
-- From **Filter alerts by state**, select an alerting state you want to see. You can see alerting rules that match the state. Rules matching other states are hidden.
+- From **Filter alerts by state**, select an alerting state you want to see. You can see alert rules that match the state. Rules matching other states are hidden.
