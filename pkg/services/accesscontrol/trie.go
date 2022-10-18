@@ -32,7 +32,6 @@ func TrieFromMap(permissions map[string][]string) *Trie {
 func newTrie() *Trie {
 	return &Trie{
 		Root: &Node{
-			Root:     true,
 			Path:     "",
 			Children: map[string]Node{},
 			Actions:  map[string]bool{},
@@ -101,7 +100,6 @@ func (t *Trie) Metadata(scope string) map[string]bool {
 }
 
 type Node struct {
-	Root     bool            `json:"root"`
 	Path     string          `json:"path"`
 	Actions  map[string]bool `json:"actions"`
 	Children map[string]Node `json:"children"`
