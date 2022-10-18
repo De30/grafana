@@ -36,11 +36,29 @@ func TestTrie_HasAccess(t *testing.T) {
 			expected: true,
 		},
 		{
-			desc:   "should have should not have access when missing action",
+			desc:   "should not have access when missing action",
 			action: "users:write",
 			scope:  "users:id:1",
 			permissions: []Permission{
 				{Action: "users:read", Scope: "users:*"},
+			},
+			expected: false,
+		},
+		{
+			desc:   "should have access with path based scopes and action on parent",
+			action: "dashboards:write",
+			scope:  "path:folder/sub/dash",
+			permissions: []Permission{
+				{Action: "dashboards:write", Scope: "path:folder/*"},
+			},
+			expected: true,
+		},
+		{
+			desc:   "should not have access with path based scopes with action on child",
+			action: "dashboards:write",
+			scope:  "path:folder/sub",
+			permissions: []Permission{
+				{Action: "dashboards:write", Scope: "path:folder/sub/child"},
 			},
 			expected: false,
 		},

@@ -7,13 +7,15 @@ import (
 const (
 	pathDelim  = "/"
 	scopeDelim = ":"
+	pathPrefix = "path:"
 )
 
 func TrieFromPermissions(permissions []Permission) *Trie {
 	t := newTrie()
 	for _, p := range permissions {
 		t.AllActions[p.Action] = true
-		t.Root.addNode(p.Action, p.Scope, scopeDelim)
+		path, delim := getPathAndDelim(p.Scope)
+		t.Root.addNode(p.Action, path, delim)
 	}
 	return t
 }
@@ -23,7 +25,8 @@ func TrieFromMap(permissions map[string][]string) *Trie {
 	for action, scopes := range permissions {
 		t.AllActions[action] = true
 		for _, scope := range scopes {
-			t.Root.addNode(action, scope, scopeDelim)
+			path, delim := getPathAndDelim(scope)
+			t.Root.addNode(action, path, delim)
 		}
 	}
 	return t
@@ -50,11 +53,12 @@ func (t *Trie) Actions() map[string]bool {
 }
 
 func (t *Trie) HasAccess(action, scope string) bool {
-	if scope == "" {
+	path, delim := getPathAndDelim(scope)
+	if path == "" {
 		return t.AllActions[action]
 	}
 	var hasAccess bool
-	t.Root.walkPath(scope, scopeDelim, func(n *Node) bool {
+	t.Root.walkPath(path, delim, func(n *Node) bool {
 		if n.Actions[action] {
 			hasAccess = true
 			return true
@@ -89,8 +93,9 @@ func (t *Trie) Scopes(action, prefix string) ([]string, bool) {
 }
 
 func (t *Trie) Metadata(scope string) map[string]bool {
+	path, delim := getPathAndDelim(scope)
 	metadata := Metadata{}
-	t.Root.walkPath(scope, scopeDelim, func(n *Node) bool {
+	t.Root.walkPath(path, delim, func(n *Node) bool {
 		for action := range n.Actions {
 			metadata[action] = true
 		}
@@ -177,4 +182,12 @@ func (n *Node) walkChildren(parent, delim string, walkFn func(n *Node) bool) {
 			walkFn(&c)
 		}
 	}
+}
+
+func getPathAndDelim(scope string) (string, string) {
+	path, delim := scope, scopeDelim
+	if strings.HasPrefix(path, pathPrefix) {
+		path, delim = strings.TrimPrefix(path, pathPrefix), pathDelim
+	}
+	return path, delim
 }
