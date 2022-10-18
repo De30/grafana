@@ -94,7 +94,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = {}> impl
     );
   }
 
-  private getRoot(): SceneObject {
+  getRoot(): SceneObject {
     return !this.parent ? this : this.parent.getRoot();
   }
 

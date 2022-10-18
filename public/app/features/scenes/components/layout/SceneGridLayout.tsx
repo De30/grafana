@@ -16,6 +16,7 @@ import {
   SceneObject,
 } from '../../core/types';
 import { SceneDragHandle } from '../SceneDragHandle';
+import { SceneObjectDragStart } from '../../core/events';
 
 interface SceneGridLayoutState extends SceneLayoutState {}
 
@@ -28,11 +29,19 @@ type GridCellLayout = {
 
 export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
   static Component = SceneGridLayoutRenderer;
+  private dragging?: SceneObject;
 
   constructor(state: SceneGridLayoutState) {
     super({
       isDraggable: true,
       ...state,
+    });
+  }
+  activate(): void {
+    super.activate();
+
+    this.getRoot().events.subscribe(SceneObjectDragStart, ({ payload }) => {
+      this.dragging = payload.obj;
     });
   }
 
@@ -58,31 +67,34 @@ export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
 
   // When layout changes, figure out if it's a nested grid layout and update enclosing cell's size if needed
   onLayoutChange = (layout: ReactGridLayout.Layout[]) => {
-    // debugger;
-    // let enclosingLayout = this.parent ? this.parent.getLayout() : undefined;
-    // if (!enclosingLayout) {
-    //   return;
-    // }
-    // if (enclosingLayout && enclosingLayout instanceof SceneGridLayout) {
-    //   const accH = [];
-    //   for (let i = 0; i < layout.length; i++) {
-    //     const c = layout[i];
-    //     accH.push(c.y + c.h);
+    console.log('layout change', layout);
+    // try {
+    //   let enclosingLayout = this.parent ? this.parent.getLayout() : undefined;
+    //   if (!enclosingLayout) {
+    //     return;
     //   }
-    //   if (enclosingLayout.state.size.height !== Math.max(...accH)) {
-    //     const diff = Math.max(...accH) - enclosingLayout.state.size.height;
-    //     enclosingLayout.setState({
-    //       size: {
-    //         ...enclosingLayout.state.size,
-    //         height: enclosingLayout.state.size.height + diff + (enclosingLayout instanceof SceneGridRow ? 1 : 0),
-    //       },
-    //     });
-    //     // Update parent layout
-    //     if (enclosingLayout.parent && enclosingLayout.parent instanceof SceneGridLayout) {
+    //   if (enclosingLayout && enclosingLayout instanceof SceneGridLayout) {
+    //     const accH = [];
+    //     for (let i = 0; i < layout.length; i++) {
+    //       const c = layout[i];
+    //       accH.push(c.y + c.h);
+    //     }
+    //     if (!enclosingLayout.state.size || enclosingLayout.state.size.height !== Math.max(...accH)) {
+    //       const diff = Math.max(...accH) - enclosingLayout.state.size.height;
+    //       // debugger;
+    //       enclosingLayout.setState({
+    //         size: {
+    //           ...enclosingLayout.state.size,
+    //           height: enclosingLayout.state.size.height + diff + (enclosingLayout instanceof SceneGridRow ? 1 : 0),
+    //         },
+    //       });
+    //       // Update parent layout
+    //       // if (enclosingLayout.parent && enclosingLayout.parent instanceof SceneGridLayout) {
     //       enclosingLayout.updateLayout();
+    //       // }
     //     }
     //   }
-    // }
+    // } catch (e) {}
     // let parent = this.parent;
     // while (parent) {
     //   if (parent instanceof SceneGridRow) {
@@ -123,6 +135,30 @@ export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
     }
 
     this.updateLayout();
+  };
+
+  onDragStart: ReactGridLayout.ItemCallback = (_, oldItem) => {
+    const item = this.state.children.find((c) => c.state.key === oldItem.i);
+    if (!item) {
+      return;
+    }
+
+    this.getRoot().events.publish(
+      new SceneObjectDragStart({
+        obj: item,
+      })
+    );
+  };
+
+  onDrop() {}
+
+  onDropDragOver = () => {
+    if (this.dragging) {
+      return {
+        w: this.dragging.state.size.width,
+        h: this.dragging.state.size.height,
+      };
+    }
   };
 }
 
@@ -194,16 +230,20 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
               rowHeight={GRID_CELL_HEIGHT}
               draggableHandle={`.grid-drag-handle-${model.state.key}`}
               // @ts-ignore: ignoring for now until we make the size type numbers-only
-              layout={width > 768 ? layout.lg : layout.sm}
+              // layout={width > 768 ? layout.lg : layout.sm}
+              layout={layout.lg}
               onDragStop={model.onDragStop}
               onResizeStop={model.onResizeStop}
               onLayoutChange={model.onLayoutChange}
+              onDropDragOver={model.onDropDragOver}
+              onDragStart={model.onDragStart}
               isBounded={true}
+              isDroppable={true}
             >
               {children.map((child) => {
                 return (
                   // Grid items are flex, to be able to render flex layouts inside
-                  <div key={child.state.key} style={{ display: 'flex' }}>
+                  <div key={child.state.key} style={{ display: 'flex' }} draggable>
                     <child.Component model={child} key={child.state.key} />
                   </div>
                 );

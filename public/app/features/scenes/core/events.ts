@@ -12,3 +12,11 @@ export interface SceneObjectStateChangedPayload {
 export class SceneObjectStateChangedEvent extends BusEventWithPayload<SceneObjectStateChangedPayload> {
   static type = 'scene-object-state-change';
 }
+
+export interface SceneObjectDragStartPayload {
+  obj: SceneObject;
+}
+
+export class SceneObjectDragStart extends BusEventWithPayload<SceneObjectDragStartPayload> {
+  static type = 'scene-object-drag-start';
+}
