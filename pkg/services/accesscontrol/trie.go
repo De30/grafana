@@ -162,7 +162,7 @@ func (n *Node) walkPath(path, delim string, walkFn func(n *Node) bool) {
 	}
 }
 
-// walkChildren walks every node under prefix
+// walkChildren walks all children of parent
 func (n *Node) walkChildren(parent, delim string, walkFn func(n *Node) bool) {
 	path := parent
 	idx := strings.Index(path, delim)
