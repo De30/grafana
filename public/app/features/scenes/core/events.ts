@@ -20,3 +20,11 @@ export interface SceneObjectDragStartPayload {
 export class SceneObjectDragStart extends BusEventWithPayload<SceneObjectDragStartPayload> {
   static type = 'scene-object-drag-start';
 }
+
+export interface SceneObjectDropPayload {
+  obj: SceneObject;
+}
+
+export class SceneObjectDrop extends BusEventWithPayload<SceneObjectDropPayload> {
+  static type = 'scene-object-drop';
+}

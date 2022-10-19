@@ -16,7 +16,7 @@ import {
   SceneObject,
 } from '../../core/types';
 import { SceneDragHandle } from '../SceneDragHandle';
-import { SceneObjectDragStart } from '../../core/events';
+import { SceneObjectDragStart, SceneObjectDrop } from '../../core/events';
 
 interface SceneGridLayoutState extends SceneLayoutState {}
 
@@ -37,11 +37,23 @@ export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
       ...state,
     });
   }
+
   activate(): void {
     super.activate();
 
     this.getRoot().events.subscribe(SceneObjectDragStart, ({ payload }) => {
       this.dragging = payload.obj;
+      console.log(this.dragging);
+    });
+
+    this.getRoot().events.subscribe(SceneObjectDrop, ({ payload }) => {
+      const item = this.state.children.find((c) => c.state.key === payload.obj.state.key);
+
+      if (!item) {
+        return;
+      }
+
+      this.setState({ children: this.state.children.filter((child) => child.state.key !== item.state.key) });
     });
   }
 
@@ -112,12 +124,12 @@ export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
     // If enclosing cell size is different than updated layout height, resize it accordingly
   };
 
-  onDragStop: ReactGridLayout.ItemCallback = (l, o, n) => {
+  onDragStop: ReactGridLayout.ItemCallback = (layout, oldItem, newItem) => {
     // Update children positions if they have changed
-    for (let i = 0; i < l.length; i++) {
+    for (let i = 0; i < layout.length; i++) {
       const child = this.state.children[i];
       const childSize = child.state.size;
-      const childLayout = l[i];
+      const childLayout = layout[i];
       if (
         childSize?.x !== childLayout.x ||
         childSize?.y !== childLayout.y ||
@@ -150,7 +162,30 @@ export class SceneGridLayout extends SceneObjectBase<SceneGridLayoutState> {
     );
   };
 
-  onDrop() {}
+  onDrop = (layout: ReactGridLayout.Layout[], droppedLayout: ReactGridLayout.Layout) => {
+    debugger;
+    if (!this.dragging) {
+      return;
+    }
+
+    const newSize = {
+      w: droppedLayout.w,
+      h: droppedLayout.h,
+      x: droppedLayout.x,
+      y: droppedLayout.y,
+    };
+
+    this.dragging.setState({ size: { ...this.dragging.state.size, ...newSize } });
+
+    if (this.dragging) {
+      this.getRoot().events.publish(
+        new SceneObjectDrop({
+          obj: this.dragging,
+        })
+      );
+      this.setState({ children: [...this.state.children, this.dragging] });
+    }
+  };
 
   onDropDragOver = () => {
     if (this.dragging) {
@@ -213,7 +248,7 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
            * in an element that has the calculated size given by the AutoSizer. The AutoSizer
            * has a width of 0 and will let its content overflow its div.
            */
-          <div style={{ width: `${width}px`, height: '100%', background }}>
+          <div style={{ width: `${width}px`, height: '100%', background, border: '1px solid green' }}>
             <ReactGridLayout
               width={width}
               /*
@@ -237,7 +272,7 @@ function SceneGridLayoutRenderer({ model }: SceneComponentProps<SceneGridLayout>
               onLayoutChange={model.onLayoutChange}
               onDropDragOver={model.onDropDragOver}
               onDragStart={model.onDragStart}
-              isBounded={true}
+              onDrop={model.onDrop}
               isDroppable={true}
             >
               {children.map((child) => {
