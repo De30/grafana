@@ -4,7 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/team/teamimpl"
+	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/services/user/userimpl"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/stretchr/testify/require"
 )
@@ -51,6 +55,64 @@ func TestOrgService(t *testing.T) {
 		err := orgService.DeleteUserFromAll(context.Background(), 1)
 		require.NoError(t, err)
 	})
+}
+
+func TestAddOrgUser(t *testing.T) {
+	var orgID int64 = 1
+	testdb := db.InitTestDB(t)
+	orgsvc := ProvideService(testdb, testdb.Cfg)
+	teamsvc := teamimpl.ProvideService(testdb, testdb.Cfg)
+	usersvc := userimpl.ProvideService(testdb, orgsvc, testdb.Cfg, teamsvc, nil)
+
+	// create org and admin
+	_, err := usersvc.Create(context.Background(), &user.CreateUserCommand{
+		Login: "admin",
+		OrgID: orgID,
+	})
+	require.NoError(t, err)
+
+	// create a service account with no org
+	sa, err := usersvc.Create(context.Background(), &user.CreateUserCommand{
+		Login:            "sa-no-org",
+		IsServiceAccount: true,
+		SkipOrgSetup:     true,
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, int64(-1), sa.OrgID)
+
+	// assign the sa to the org but without the override. should fail
+	err = orgsvc.AddOrgUser(context.Background(), &org.AddOrgUserCommand{
+		Role:   "Viewer",
+		OrgID:  orgID,
+		UserID: sa.ID,
+	})
+	require.Error(t, err)
+
+	// assign the sa to the org with the override. should succeed
+	err = orgsvc.AddOrgUser(context.Background(), &org.AddOrgUserCommand{
+		Role:                      "Viewer",
+		OrgID:                     orgID,
+		UserID:                    sa.ID,
+		AllowAddingServiceAccount: true,
+	})
+
+	require.NoError(t, err)
+
+	// assert the org has been correctly set
+	saFound := new(user.User)
+	err = testdb.WithDbSession(context.Background(), func(sess *db.Session) error {
+		has, err := sess.ID(sa.ID).Get(saFound)
+		if err != nil {
+			return err
+		} else if !has {
+			return user.ErrUserNotFound
+		}
+		return nil
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, saFound.OrgID, orgID)
 }
 
 type FakeOrgStore struct {
