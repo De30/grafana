@@ -9,9 +9,39 @@ import { SceneToolbarInput } from '../components/SceneToolbarButton';
 import { VizPanel } from '../components/VizPanel';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { SceneEditManager } from '../editor/SceneEditManager';
+import { SceneDataConsumer } from '../querying/SceneDataConsumer';
+import { SceneDataProvider, SceneDataProviders } from '../querying/SceneDataProvider';
 import { SceneQueryRunner } from '../querying/SceneQueryRunner';
 
 export function getFlexLayoutTest(): Scene {
+  const dataProducer1 = new SceneDataProvider({
+    queries: [
+      {
+        refId: 'A',
+        datasource: {
+          uid: 'gdev-testdata',
+          type: 'testdata',
+        },
+        scenarioId: 'random_walk',
+        alias: 'Data producer 1',
+      },
+    ],
+  });
+
+  const dataProducer2 = new SceneDataProvider({
+    queries: [
+      {
+        refId: 'A',
+        datasource: {
+          uid: 'gdev-testdata',
+          type: 'testdata',
+        },
+        scenarioId: 'random_walk',
+        alias: 'Data producer 2',
+      },
+    ],
+  });
+
   const scene = new Scene({
     title: 'Flex layout test',
     layout: new SceneFlexLayout({
@@ -21,6 +51,7 @@ export function getFlexLayoutTest(): Scene {
           pluginId: 'timeseries',
           title: 'Dynamic height and width',
           size: { minWidth: '70%' },
+          $data: new SceneDataConsumer(dataProducer1),
         }),
         new SceneFlexLayout({
           // size: { width: 450 },
@@ -29,10 +60,12 @@ export function getFlexLayoutTest(): Scene {
             new VizPanel({
               pluginId: 'timeseries',
               title: 'Fill height',
+              $data: new SceneDataConsumer(dataProducer2),
             }),
             new VizPanel({
               pluginId: 'timeseries',
               title: 'Fill height',
+              $data: new SceneDataConsumer(dataProducer2),
             }),
             new SceneCanvasText({
               text: 'Size to content',
@@ -44,6 +77,7 @@ export function getFlexLayoutTest(): Scene {
               pluginId: 'timeseries',
               title: 'Fixed height',
               size: { height: 300 },
+              $data: new SceneDataConsumer(dataProducer1),
             }),
           ],
         }),
@@ -51,17 +85,8 @@ export function getFlexLayoutTest(): Scene {
     }),
     $editor: new SceneEditManager({}),
     $timeRange: new SceneTimeRange(getDefaultTimeRange()),
-    $data: new SceneQueryRunner({
-      queries: [
-        {
-          refId: 'A',
-          datasource: {
-            uid: 'gdev-testdata',
-            type: 'testdata',
-          },
-          scenarioId: 'random_walk',
-        },
-      ],
+    $data: new SceneDataProviders({
+      providers: [dataProducer1, dataProducer2],
     }),
     actions: [new SceneTimePicker({})],
   });
