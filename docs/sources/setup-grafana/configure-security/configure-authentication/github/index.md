@@ -23,7 +23,7 @@ settings page). When you create the application you will need to specify
 a callback URL. Specify this as callback:
 
 ```bash
-http://<my_grafana_server_name_or_ip>:<grafana_server_port>/grafana/login/github
+http://<my_grafana_server_name_or_ip>:<grafana_server_port>/login/github
 ```
 
 This callback URL must match the full HTTP address that you use in your
@@ -61,6 +61,12 @@ user successfully authenticating via GitHub authentication will be
 automatically signed up.
 
 You can also use [variable expansion]({{< relref "../../../configure-grafana/#variable-expansion" >}}) to reference environment variables and local files in your GitHub auth configuration.
+
+### Refresh Token
+
+> Available in Grafana v9.3 and later versions.
+
+GitHub OAuth applications do not support refresh tokens, because the provided access token doesn't specify an expiry date.
 
 ### team_ids
 
