@@ -151,7 +151,7 @@ func TestCalculate(t *testing.T) {
 			})
 			setting.AppUrl = tc.appURL
 
-			sig, err := Calculate(log.NewNopLogger(), &plugins.Plugin{
+			sig, err := Calculate(log.NewNopLogger(), plugins.PluginBase{
 				JSONData: plugins.JSONData{
 					ID: "test-datasource",
 					Info: plugins.Info{

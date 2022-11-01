@@ -52,6 +52,25 @@ type BackendFactoryProvider interface {
 	BackendFactory(ctx context.Context, p *Plugin) backendplugin.PluginFactoryFunc
 }
 
+type PluginBase struct {
+	JSONData
+	Class     Class
+	PluginDir string
+}
+
+func (pb PluginBase) IsCorePlugin() bool {
+	return pb.Class == Core
+}
+
+type ModuleProvider interface {
+	Module(ctx context.Context, p PluginBase) (ModuleInfo, error)
+}
+
+type ModuleInfo struct {
+	Module  string
+	BaseURL string
+}
+
 type RendererManager interface {
 	// Renderer returns a renderer plugin.
 	Renderer(ctx context.Context) *Plugin

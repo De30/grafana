@@ -96,7 +96,7 @@ func readPluginManifest(body []byte) (*pluginManifest, error) {
 	return &manifest, nil
 }
 
-func Calculate(mlog log.Logger, plugin *plugins.Plugin) (plugins.Signature, error) {
+func Calculate(mlog log.Logger, plugin plugins.PluginBase) (plugins.Signature, error) {
 	if plugin.IsCorePlugin() {
 		return plugins.Signature{
 			Status: plugins.SignatureInternal,
@@ -226,7 +226,7 @@ func verifyHash(mlog log.Logger, pluginID string, path string, hash string) erro
 
 // pluginFilesRequiringVerification gets plugin filenames that require verification for plugin signing
 // returns filenames as a slice of posix style paths relative to plugin directory
-func pluginFilesRequiringVerification(plugin *plugins.Plugin) ([]string, error) {
+func pluginFilesRequiringVerification(plugin plugins.PluginBase) ([]string, error) {
 	var files []string
 	err := filepath.Walk(plugin.PluginDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

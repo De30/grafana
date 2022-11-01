@@ -355,3 +355,13 @@ func (*FakeLicensingService) EnabledFeatures() map[string]bool {
 func (*FakeLicensingService) FeatureEnabled(_ string) bool {
 	return false
 }
+
+type FakeModuleProvider struct{}
+
+func NewFakeModuleProvider() *FakeModuleProvider {
+	return &FakeModuleProvider{}
+}
+
+func (f *FakeModuleProvider) Module(_ context.Context, _ plugins.PluginBase) (plugins.ModuleInfo, error) {
+	return plugins.ModuleInfo{}, nil
+}
