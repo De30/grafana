@@ -137,7 +137,8 @@ func runValidateConflictUsersFile() func(context *cli.Context) error {
 		if validErr != nil {
 			return fmt.Errorf("could not validate file with error %s", err)
 		}
-		logger.Info("File validation complete without errors.\n\n File can be used with ingesting command `ingest-file`.\n\n")
+		logger.Info(color.GreenString("File valid for ingestion.\n\n"))
+		logger.Info("File can be used with ingesting command `ingest-file <filepath>`.\n\n")
 		return nil
 	}
 }
@@ -176,7 +177,7 @@ func runIngestConflictUsersFile() func(context *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("not able to merge with %e", err)
 		}
-		logger.Info("\n\nconflicts resolved.\n")
+		logger.Info(color.GreenString("\n\nConflicts resolved.\n\n"))
 		return nil
 	}
 }
