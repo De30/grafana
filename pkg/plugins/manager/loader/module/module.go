@@ -2,6 +2,7 @@ package module
 
 import (
 	"context"
+	"fmt"
 	"path"
 	"path/filepath"
 
@@ -20,7 +21,11 @@ func ProvideService() *Loader {
 	}
 }
 
-func (l *Loader) Module(_ context.Context, p plugins.PluginBase) (plugins.ModuleInfo, error) {
+func (l *Loader) Module(ctx context.Context, p plugins.PluginBase) (plugins.ModuleInfo, error) {
+	return DefaultModuleProvider(ctx, p)
+}
+
+var DefaultModuleProvider = func(ctx context.Context, p plugins.PluginBase) (plugins.ModuleInfo, error) {
 	var baseURL string
 	if p.IsCorePlugin() {
 		baseURL = coreBaseURL(p.Type, p.PluginDir)
@@ -40,10 +45,7 @@ func (l *Loader) Module(_ context.Context, p plugins.PluginBase) (plugins.Module
 		if exists, err := fs.Exists(modJS); err != nil {
 			return plugins.ModuleInfo{}, err
 		} else if !exists {
-			l.log.Warn("Plugin missing module.js",
-				"pluginID", p.ID,
-				"warning", "Missing module.js, If you loaded this plugin from git, make sure to compile it.",
-				"path", module)
+			return plugins.ModuleInfo{}, fmt.Errorf("no module information could be provided")
 		}
 	}
 
