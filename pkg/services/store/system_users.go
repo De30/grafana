@@ -26,8 +26,7 @@ type SystemUsersProvider interface {
 type SystemUsers interface {
 	SystemUsersFilterProvider
 	SystemUsersProvider
-	AddUser(userType SystemUserType, userOrgMap map[int64]*user.SignedInUser)
-	AddFilter(user *user.SignedInUser, filterFn func() map[string]filestorage.PathFilter)
+	RegisterUser(userType SystemUserType, filterFn func() map[string]filestorage.PathFilter)
 }
 
 func ProvideSystemUsersService() SystemUsers {
@@ -95,10 +94,12 @@ func (h *hardcodedSystemUsers) GetUser(userType SystemUserType, orgID int64) (*u
 	return newUser, nil
 }
 
-func (h *hardcodedSystemUsers) AddUser(userType SystemUserType, userOrgMap map[int64]*user.SignedInUser) {
-	h.users[userType] = userOrgMap
-}
+func (h *hardcodedSystemUsers) RegisterUser(userType SystemUserType, filterFn func() map[string]filestorage.PathFilter) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 
-func (h *hardcodedSystemUsers) AddFilter(user *user.SignedInUser, filterFn func() map[string]filestorage.PathFilter) {
-	h.createFilterByUser[user] = filterFn
+	globalUser := &user.SignedInUser{OrgID: ac.GlobalOrgID, Login: string(userType)}
+	h.users[userType] = map[int64]*user.SignedInUser{ac.GlobalOrgID: globalUser}
+
+	h.createFilterByUser[globalUser] = filterFn
 }
