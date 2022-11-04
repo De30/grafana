@@ -107,6 +107,9 @@ trigger:
     - packaging/**
     - go.sum
     - go.mod
+    - scripts/drone/**
+    - .drone.yml
+    - .drone.star
     include: []
 type: docker
 volumes:
@@ -159,6 +162,9 @@ trigger:
     - packaging/**
     - go.sum
     - go.mod
+    - scripts/drone/**
+    - .drone.yml
+    - .drone.star
     include: []
 type: docker
 volumes:
@@ -235,6 +241,9 @@ trigger:
     exclude:
     - docs/**
     - '*.md'
+    - scripts/drone/**
+    - .drone.yml
+    - .drone.star
     include:
     - pkg/**
     - packaging/**
@@ -296,6 +305,9 @@ trigger:
     exclude:
     - docs/**
     - '*.md'
+    - scripts/drone/**
+    - .drone.yml
+    - .drone.star
     include:
     - pkg/**
     - packaging/**
@@ -712,6 +724,9 @@ trigger:
     exclude:
     - docs/**
     - '*.md'
+    - scripts/drone/**
+    - .drone.yml
+    - .drone.star
     include:
     - pkg/**
     - packaging/**
@@ -5450,6 +5465,6 @@ kind: secret
 name: packages_secret_access_key
 ---
 kind: signature
-hmac: 284ccba3c82e516df5db917eec0afde057a622394002b3a311276fe528b7a86c
+hmac: 2891ac9ba8303d6dd40a163224514e2179999420fe05a4335b398e5807174156
 
 ...
