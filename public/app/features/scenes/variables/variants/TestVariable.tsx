@@ -4,8 +4,8 @@ import { Observable, Subject } from 'rxjs';
 import { queryMetricTree } from 'app/plugins/datasource/testdata/metricTree';
 
 import { SceneComponentProps } from '../../core/types';
+import { VariableDependencyCache } from '../VariableDependencyCache';
 import { VariableValueSelect } from '../components/VariableValueSelect';
-import { getVariableDependencies } from '../getVariableDependencies';
 import { sceneTemplateInterpolator } from '../sceneTemplateInterpolator';
 import { VariableValueOption } from '../types';
 
@@ -22,6 +22,8 @@ export interface TestVariableState extends MultiValueVariableState {
  * This variable is only designed for unit tests and potentially e2e tests.
  */
 export class TestVariable extends MultiValueVariable<TestVariableState> {
+  private dependencies = new VariableDependencyCache<TestVariableState>(['query']);
+
   completeUpdate = new Subject<number>();
   isGettingValues = true;
 
@@ -69,8 +71,8 @@ export class TestVariable extends MultiValueVariable<TestVariableState> {
     this.completeUpdate.next(1);
   }
 
-  getDependencies() {
-    return getVariableDependencies(this.state.query);
+  getVariableDependencies() {
+    return this.dependencies.getAll(this.state);
   }
 
   static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
