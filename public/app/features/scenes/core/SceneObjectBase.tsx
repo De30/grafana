@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BusEvent, BusEventHandler, BusEventType, EventBusSrv } from '@grafana/data';
 import { useForceUpdate } from '@grafana/ui';
 
+import { sceneTemplateInterpolator } from '../variables/sceneTemplateInterpolator';
 import { SceneVariables } from '../variables/types';
 
 import { SceneComponentWrapper } from './SceneComponentWrapper';
@@ -16,7 +17,7 @@ import {
   SceneEditor,
   SceneTimeRange,
   SceneObjectState,
-  SceneVariableDependencyConfig,
+  SceneVariableDependencyConfigLike,
 } from './types';
 import { cloneSceneObject, forEachSceneObjectInState } from './utils';
 
@@ -33,7 +34,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = SceneObj
   protected _parent?: SceneObject;
   protected subs = new Subscription();
 
-  protected _variableDependency: SceneVariableDependencyConfig | undefined;
+  protected _variableDependency: SceneVariableDependencyConfigLike | undefined;
 
   constructor(state: TState) {
     if (!state.key) {
@@ -61,7 +62,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = SceneObj
   }
 
   /** Returns variable dependency config */
-  get variableDependency(): SceneVariableDependencyConfig | undefined {
+  get variableDependency(): SceneVariableDependencyConfigLike | undefined {
     return this._variableDependency;
   }
 
@@ -207,7 +208,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = SceneObj
     throw new Error('No data found in scene tree');
   }
 
-  getVariables(): SceneVariables {
+  getVariables(): SceneVariables | undefined {
     if (this.state.$variables) {
       return this.state.$variables;
     }
@@ -216,7 +217,7 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = SceneObj
       return this.parent.getVariables();
     }
 
-    throw new Error('No variables found');
+    return undefined;
   }
 
   /**
@@ -240,6 +241,19 @@ export abstract class SceneObjectBase<TState extends SceneObjectState = SceneObj
    */
   clone(withState?: Partial<TState>): this {
     return cloneSceneObject(this, withState);
+  }
+
+  /**
+   * Interpolates the given string using the current scene object as context.
+   * TODO: Cache interpolatinos?
+   */
+  interpolate(value: string | undefined) {
+    // Skip interpolation if there are no variable depdendencies
+    if (!value || !this._variableDependency || this._variableDependency.getNames().size === 0) {
+      return value;
+    }
+
+    return sceneTemplateInterpolator(value, this);
   }
 }
 

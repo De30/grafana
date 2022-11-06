@@ -51,7 +51,7 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
   updateNextBatch() {
     // If we have nothing more to update and variable values changed we need to update scene objects that depend on these variables
     if (this.variablesToUpdate.size === 0 && this.variablesThatHaveChanged.size > 0) {
-      this.updateDependentSceneObjects();
+      this.notifyDependentSceneObjects();
       return;
     }
 
@@ -118,7 +118,7 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
    * Extract dependencies from all variables and add those that needs update to the variablesToUpdate map
    * Then it will start the update process.
    */
-  validateAndUpdateAll() {
+  private validateAndUpdateAll() {
     for (const variable of this.state.variables) {
       if (variable.validateAndUpdate) {
         this.variablesToUpdate.set(variable.state.name, variable);
@@ -131,7 +131,7 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
   /**
    * This will trigger an update of all variables that depend on it.
    * */
-  onVariableValueChanged = (event: SceneVariableValueChangedEvent) => {
+  private onVariableValueChanged = (event: SceneVariableValueChangedEvent) => {
     const variableThatChanged = event.payload;
 
     this.variablesThatHaveChanged.add(variableThatChanged.state.name);
@@ -155,27 +155,32 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
   /**
    * Walk scene object graph and update all objects that depend on variables that have changed
    */
-  updateDependentSceneObjects() {
+  private notifyDependentSceneObjects() {
     if (!this.parent) {
       return;
     }
 
-    updateSceneGraph(this.parent, this.variablesThatHaveChanged);
+    this.traverseSceneGraphAndNotify(this.parent, this.variablesThatHaveChanged);
     this.variablesThatHaveChanged.clear();
   }
-}
 
-function updateSceneGraph(sceneObject: SceneObject, variablesThatChanged: Set<string>) {
-  if (sceneObject.variableDependency) {
-    for (const dep of sceneObject.variableDependency.getNames()) {
-      if (variablesThatChanged.has(dep)) {
-        sceneObject.setState({});
-        break;
+  /**
+   * Recursivly walk the full scene object graph and notify all objects with dependencies that include any of changed variables
+   */
+  private traverseSceneGraphAndNotify(sceneObject: SceneObject, variablesThatChanged: Set<string>) {
+    if (sceneObject.variableDependency) {
+      for (const dep of sceneObject.variableDependency.getNames()) {
+        if (variablesThatChanged.has(dep)) {
+          sceneObject.variableDependency.onVariableValuesChanged();
+          break;
+        }
       }
     }
-  }
 
-  forEachSceneObjectInState(sceneObject.state, (child) => updateSceneGraph(child, variablesThatChanged));
+    forEachSceneObjectInState(sceneObject.state, (child) =>
+      this.traverseSceneGraphAndNotify(child, variablesThatChanged)
+    );
+  }
 }
 
 export interface VariableUpdateInProgress {
