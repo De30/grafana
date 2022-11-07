@@ -33,6 +33,8 @@ func AddTablesMigrations(mg *migrator.Migrator) {
 	AddProvisioningMigrations(mg)
 
 	AddAlertImageMigrations(mg)
+
+	AddAlertHistoryMigrations(mg)
 }
 
 // AddAlertDefinitionMigrations should not be modified.
@@ -409,4 +411,33 @@ func AddAlertImageMigrations(mg *migrator.Migrator) {
 	mg.AddMigration("support longer URLs in alert_image table", migrator.NewRawSQLMigration("").
 		Postgres("ALTER TABLE alert_image ALTER COLUMN url TYPE VARCHAR(2048);").
 		Mysql("ALTER TABLE alert_image MODIFY url VARCHAR(2048) NOT NULL;"))
+}
+
+func AddAlertHistoryMigrations(mg *migrator.Migrator) {
+	historyTable := migrator.Table{
+		Name: "alert_history",
+		Columns: []*migrator.Column{
+			{Name: "id", Type: migrator.DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "rule_uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, Nullable: false},
+			{Name: "org_id", Type: migrator.DB_BigInt, Nullable: false},
+			{Name: "state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			{Name: "prev_state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			{Name: "at", Type: migrator.DB_DateTime, Nullable: false},
+			// TODO: labels hash?
+			// TODO: value
+		},
+		Indices: []*migrator.Index{},
+	}
+
+	labelsTable := migrator.Table{
+		Name: "alert_history_labels",
+		Columns: []*migrator.Column{
+			{Name: "name", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			{Name: "value", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			{Name: "history_id", Type: migrator.DB_BigInt, Nullable: false},
+		},
+	}
+
+	mg.AddMigration("create alert_history table", migrator.NewAddTableMigration(historyTable))
+	mg.AddMigration("create alert_history_labels table", migrator.NewAddTableMigration(labelsTable))
 }
