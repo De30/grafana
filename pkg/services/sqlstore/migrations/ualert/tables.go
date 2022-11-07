@@ -421,9 +421,9 @@ func AddAlertHistoryMigrations(mg *migrator.Migrator) {
 			{Name: "rule_uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, Nullable: false},
 			{Name: "org_id", Type: migrator.DB_BigInt, Nullable: false},
 			{Name: "state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
-			// TODO: reason
+			{Name: "reason", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
 			{Name: "prev_state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
-			// TODO: prev_state_reason
+			{Name: "prev_reason", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
 			{Name: "at", Type: migrator.DB_DateTime, Nullable: false},
 			// TODO: labels hash?
 			// TODO: value

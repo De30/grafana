@@ -4,19 +4,22 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/state"
 )
 
 type historyRecord struct {
-	uid       string    `xorm:"pk 'uid'"`
-	ruleUID   string    `xorm:"rule_uid"`
-	orgID     int64     `xorm:"org_id"`
-	state     string    `xorm:"state"`
-	prevState string    `xorm:"prev_state"`
-	at        time.Time `xorm:"at"`
-	labels    []label   `xorm:"-"`
+	uid        string    `xorm:"pk 'uid'"`
+	ruleUID    string    `xorm:"rule_uid"`
+	orgID      int64     `xorm:"org_id"`
+	state      string    `xorm:"state"`
+	reason     string    `xorm:"reason"`
+	prevState  string    `xorm:"prev_state"`
+	prevReason string    `xorm:"prev_reason"`
+	at         time.Time `xorm:"at"`
+	labels     []label   `xorm:"-"`
 }
 
 type label struct {
@@ -38,7 +41,7 @@ func (s *SqlStateHistorian) RecordStates(ctx context.Context, rule *models.Alert
 func (s *SqlStateHistorian) buildRecords(rule *models.AlertRule, states []state.StateTransition, logger log.Logger) ([]historyRecord, error) {
 	records := make([]historyRecord, 0, len(states))
 	for _, state := range states {
-		uid := "TODO"
+		uid := uuid.New().String()
 		filtered := removePrivateLabels(state.Labels)
 		lbls := make([]label, 0, len(filtered))
 		for n, v := range filtered {
@@ -50,13 +53,15 @@ func (s *SqlStateHistorian) buildRecords(rule *models.AlertRule, states []state.
 		}
 
 		record := historyRecord{
-			uid:       uid,
-			ruleUID:   state.AlertRuleUID,
-			orgID:     state.OrgID,
-			state:     string(state.State.State),   // TODO
-			prevState: string(state.PreviousState), // TODO
-			at:        state.LastEvaluationTime,
-			labels:    lbls,
+			uid:        uid,
+			ruleUID:    state.AlertRuleUID,
+			orgID:      state.OrgID,
+			state:      string(models.InstanceStateType(state.State.State.String())),
+			prevState:  string(models.InstanceStateType(state.PreviousState.String())),
+			reason:     state.StateReason,
+			prevReason: state.PreviousStateReason,
+			at:         state.LastEvaluationTime,
+			labels:     lbls,
 		}
 		records = append(records, record)
 	}
