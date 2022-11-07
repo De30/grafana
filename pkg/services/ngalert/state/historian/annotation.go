@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/annotations"
@@ -143,14 +142,4 @@ func buildAnnotationTextAndData(rule *ngmodels.AlertRule, currentState *state.St
 
 	labels := removePrivateLabels(currentState.Labels)
 	return fmt.Sprintf("%s {%s} - %s", rule.Title, labels.String(), value), jsonData
-}
-
-func removePrivateLabels(labels data.Labels) data.Labels {
-	result := make(data.Labels)
-	for k, v := range labels {
-		if !strings.HasPrefix(k, "__") && !strings.HasSuffix(k, "__") {
-			result[k] = v
-		}
-	}
-	return result
 }

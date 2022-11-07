@@ -417,11 +417,13 @@ func AddAlertHistoryMigrations(mg *migrator.Migrator) {
 	historyTable := migrator.Table{
 		Name: "alert_history",
 		Columns: []*migrator.Column{
-			{Name: "id", Type: migrator.DB_BigInt, IsPrimaryKey: true, IsAutoIncrement: true},
+			{Name: "uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, IsPrimaryKey: true, Nullable: false},
 			{Name: "rule_uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, Nullable: false},
 			{Name: "org_id", Type: migrator.DB_BigInt, Nullable: false},
 			{Name: "state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			// TODO: reason
 			{Name: "prev_state", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
+			// TODO: prev_state_reason
 			{Name: "at", Type: migrator.DB_DateTime, Nullable: false},
 			// TODO: labels hash?
 			// TODO: value
@@ -434,8 +436,9 @@ func AddAlertHistoryMigrations(mg *migrator.Migrator) {
 		Columns: []*migrator.Column{
 			{Name: "name", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
 			{Name: "value", Type: migrator.DB_NVarchar, Length: DefaultFieldMaxLength, Nullable: false},
-			{Name: "history_id", Type: migrator.DB_BigInt, Nullable: false},
+			{Name: "history_uid", Type: migrator.DB_NVarchar, Length: UIDMaxLength, Nullable: false},
 		},
+		Indices: []*migrator.Index{},
 	}
 
 	mg.AddMigration("create alert_history table", migrator.NewAddTableMigration(historyTable))
