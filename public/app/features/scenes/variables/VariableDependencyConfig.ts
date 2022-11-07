@@ -19,12 +19,12 @@ interface VariableDependencyConfigOptions<TState extends SceneObjectState> {
 export class VariableDependencyConfig<TState extends SceneObjectState> implements SceneVariableDependencyConfigLike {
   private _state: TState | undefined;
   private _dependencies = new Set<string>();
-  private _statePaths?: Array<keyof TState>;
-  private _onReferencedVariableValueChanged: () => void;
+  private readonly _statePaths?: Array<keyof TState>;
+  private readonly _onReferencedVariableValueChanged: () => void;
 
-  scanCount = 0;
+  public scanCount = 0;
 
-  constructor(private _sceneObject: SceneObject<TState>, options: VariableDependencyConfigOptions<TState>) {
+  public constructor(private _sceneObject: SceneObject<TState>, options: VariableDependencyConfigOptions<TState>) {
     this._statePaths = options.statePaths;
     this._onReferencedVariableValueChanged =
       options.onReferencedVariableValueChanged ?? this.defaultHandlerReferencedVariableValueChanged;
@@ -33,14 +33,14 @@ export class VariableDependencyConfig<TState extends SceneObjectState> implement
   /**
    * Used to check for dependency on a specific variable
    */
-  hasDependencyOn(name: string): boolean {
+  public hasDependencyOn(name: string): boolean {
     return this.getNames().has(name);
   }
 
   /**
    * This is called whenever any set of variables have new values. It up to this implementation to check if it's relevant given the current dependencies.
    */
-  variableValuesChanged(variables: Set<SceneVariable>) {
+  public variableValuesChanged(variables: Set<SceneVariable>) {
     const deps = this.getNames();
 
     for (const variable of variables) {
@@ -58,7 +58,7 @@ export class VariableDependencyConfig<TState extends SceneObjectState> implement
     this._sceneObject.setState({});
   };
 
-  getNames(): Set<string> {
+  public getNames(): Set<string> {
     const prevState = this._state;
     const newState = (this._state = this._sceneObject.state);
 

@@ -15,7 +15,7 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
   /** Variables currently updating  */
   private updating = new Map<SceneVariable, VariableUpdateInProgress>();
 
-  getByName(name: string): SceneVariable | undefined {
+  public getByName(name: string): SceneVariable | undefined {
     // TODO: Replace with index
     return this.state.variables.find((x) => x.state.name === name);
   }
@@ -24,18 +24,18 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
    * Subscribes to child variable value changes
    * And starts the variable value validation process
    */
-  activate(): void {
+  public activate(): void {
     super.activate();
 
     // Subscribe to changes to child variables
-    this.subs.add(this.subscribeToEvent(SceneVariableValueChangedEvent, this.onVariableValueChanged));
+    this._subs.add(this.subscribeToEvent(SceneVariableValueChangedEvent, this.onVariableValueChanged));
     this.validateAndUpdateAll();
   }
 
   /**
    * Cancel all currently running updates
    */
-  deactivate(): void {
+  public deactivate(): void {
     super.deactivate();
     this.variablesToUpdate.clear();
 
@@ -48,7 +48,7 @@ export class SceneVariableSet extends SceneObjectBase<SceneVariableSetState> imp
    * This loops through variablesToUpdate and update all that that can.
    * If one has a dependency that is currently in variablesToUpdate it will be skipped for now.
    */
-  updateNextBatch() {
+  private updateNextBatch() {
     // If we have nothing more to update and variable values changed we need to update scene objects that depend on these variables
     if (this.variablesToUpdate.size === 0 && this.variablesThatHaveChanged.size > 0) {
       this.notifyDependentSceneObjects();

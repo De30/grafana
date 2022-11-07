@@ -17,14 +17,14 @@ export interface VizPanelState extends SceneLayoutChildState {
 }
 
 export class VizPanel extends SceneObjectBase<VizPanelState> {
-  static Component = ScenePanelRenderer;
-  static Editor = VizPanelEditor;
+  public static Component = ScenePanelRenderer;
+  public static Editor = VizPanelEditor;
 
-  _variableDependency = new VariableDependencyConfig(this, {
+  protected _variableDependency = new VariableDependencyConfig(this, {
     statePaths: ['title'],
   });
 
-  onSetTimeRange = (timeRange: AbsoluteTimeRange) => {
+  public onSetTimeRange = (timeRange: AbsoluteTimeRange) => {
     const sceneTimeRange = this.getTimeRange();
     sceneTimeRange.setState({
       raw: {

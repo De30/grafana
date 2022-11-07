@@ -32,17 +32,17 @@ export interface DataQueryExtended extends DataQuery {
 export class SceneQueryRunner extends SceneObjectBase<QueryRunnerState> {
   private querySub?: Unsubscribable;
 
-  _variableDependency = new VariableDependencyConfig(this, {
+  protected _variableDependency = new VariableDependencyConfig(this, {
     statePaths: ['queries'],
     onReferencedVariableValueChanged: () => this.runQueries(),
   });
 
-  activate() {
+  public activate() {
     super.activate();
 
     const timeRange = this.getTimeRange();
 
-    this.subs.add(
+    this._subs.add(
       timeRange.subscribeToState({
         next: (timeRange) => {
           this.runWithTimeRange(timeRange);
@@ -55,7 +55,7 @@ export class SceneQueryRunner extends SceneObjectBase<QueryRunnerState> {
     }
   }
 
-  deactivate(): void {
+  public deactivate(): void {
     super.deactivate();
 
     if (this.querySub) {
@@ -64,7 +64,7 @@ export class SceneQueryRunner extends SceneObjectBase<QueryRunnerState> {
     }
   }
 
-  runQueries() {
+  public runQueries() {
     const timeRange = this.getTimeRange();
     this.runWithTimeRange(timeRange.state);
   }
