@@ -1,3 +1,4 @@
+import handlebars from 'handlebars';
 import { escape, isString, property } from 'lodash';
 
 import {
@@ -277,6 +278,9 @@ export class TemplateSrv implements BaseTemplateSrv {
   replace(target?: string, scopedVars?: ScopedVars, format?: string | Function): string {
     if (!target) {
       return target ?? '';
+    }
+    if (target.startsWith('#! handlebars')) {
+      const str = target.substring('#! handlebars'.length);
     }
 
     this.regex.lastIndex = 0;

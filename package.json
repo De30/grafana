@@ -319,6 +319,7 @@
     "fast-json-patch": "3.1.1",
     "file-saver": "2.0.5",
     "framework-utils": "^1.1.0",
+    "handlebars": "^4.7.7",
     "history": "4.10.1",
     "hoist-non-react-statics": "3.3.2",
     "i18next": "^22.0.0",

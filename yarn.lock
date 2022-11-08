@@ -21683,6 +21683,7 @@ __metadata:
     framework-utils: ^1.1.0
     fs-extra: 10.1.0
     glob: 8.0.3
+    handlebars: ^4.7.7
     history: 4.10.1
     hoist-non-react-statics: 3.3.2
     html-loader: 4.2.0
