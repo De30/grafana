@@ -19,7 +19,12 @@ export function VariableValueSelect({ model }: SceneComponentProps<MultiValueVar
         allowCustomValue
         isLoading={loading}
         options={options}
-        onChange={model.onMultiValueChange}
+        onChange={(newValue) => {
+          model.changeValueTo(
+            newValue.map((v) => v.value!),
+            newValue.map((v) => v.label!)
+          );
+        }}
       />
     );
   }
@@ -33,7 +38,9 @@ export function VariableValueSelect({ model }: SceneComponentProps<MultiValueVar
       allowCustomValue
       isLoading={loading}
       options={options}
-      onChange={model.onSingleValueChange}
+      onChange={(newValue) => {
+        model.changeValueTo(newValue.value!, newValue.label!);
+      }}
     />
   );
 }

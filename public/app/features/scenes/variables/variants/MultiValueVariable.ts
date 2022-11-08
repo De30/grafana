@@ -1,7 +1,5 @@
 import { map, Observable } from 'rxjs';
 
-import { SelectableValue } from '@grafana/data';
-
 import { SceneObjectBase } from '../../core/SceneObjectBase';
 import { SceneObject } from '../../core/types';
 import {
@@ -14,8 +12,8 @@ import {
 } from '../types';
 
 export interface MultiValueVariableState extends SceneVariableState {
-  value: string | string[]; // old current.text
-  text: string | string[]; // old current.value
+  value: VariableValue; // old current.text
+  text: VariableValue; // old current.value
   options: VariableValueOption[];
   isMulti?: boolean;
 }
@@ -59,7 +57,7 @@ export abstract class MultiValueVariable<TState extends MultiValueVariableState 
     const foundCurrent = options.find((x) => x.value === this.state.value);
     if (!foundCurrent) {
       // Current value is not valid. Set to first of the available options
-      this.changeValueAndPublishChangeEvent(options[0].value, options[0].label);
+      this.changeValueTo(options[0].value, options[0].label);
     } else {
       // current value is still ok
       this.setStateHelper({ loading: false });
@@ -75,10 +73,13 @@ export abstract class MultiValueVariable<TState extends MultiValueVariableState 
       return this.state.text.join(' + ');
     }
 
-    return this.state.text;
+    return String(this.state.text);
   }
 
-  private changeValueAndPublishChangeEvent(value: string | string[], text: string | string[]) {
+  /**
+   * Change the value and publish SceneVariableValueChangedEvent event
+   */
+  public changeValueTo(value: VariableValue, text?: VariableValue) {
     if (value !== this.state.value || text !== this.state.text) {
       this.setStateHelper({ value, text, loading: false });
       this.publishEvent(new SceneVariableValueChangedEvent(this), true);
@@ -92,15 +93,4 @@ export abstract class MultiValueVariable<TState extends MultiValueVariableState 
     const test: SceneObject<MultiValueVariableState> = this;
     test.setState(state);
   }
-
-  public onSingleValueChange = (value: SelectableValue<string>) => {
-    this.changeValueAndPublishChangeEvent(value.value!, value.label!);
-  };
-
-  public onMultiValueChange = (value: Array<SelectableValue<string>>) => {
-    this.changeValueAndPublishChangeEvent(
-      value.map((v) => v.value!),
-      value.map((v) => v.label!)
-    );
-  };
 }
