@@ -22,14 +22,14 @@ export interface TestVariableState extends MultiValueVariableState {
  * This variable is only designed for unit tests and potentially e2e tests.
  */
 export class TestVariable extends MultiValueVariable<TestVariableState> {
-  completeUpdate = new Subject<number>();
-  isGettingValues = true;
+  private completeUpdate = new Subject<number>();
+  public isGettingValues = true;
 
-  _variableDependency = new VariableDependencyConfig(this, {
+  protected _variableDependency = new VariableDependencyConfig(this, {
     statePaths: ['query'],
   });
 
-  getValueOptions(args: VariableGetOptionsArgs): Observable<VariableValueOption[]> {
+  public getValueOptions(args: VariableGetOptionsArgs): Observable<VariableValueOption[]> {
     const { delayMs } = this.state;
 
     return new Observable<VariableValueOption[]>((observer) => {
@@ -56,7 +56,7 @@ export class TestVariable extends MultiValueVariable<TestVariableState> {
     });
   }
 
-  issueQuery() {
+  private issueQuery() {
     const interpolatedQuery = sceneTemplateInterpolator(this.state.query, this);
     const options = queryMetricTree(interpolatedQuery).map((x) => ({ label: x.name, value: x.name }));
 
@@ -69,11 +69,11 @@ export class TestVariable extends MultiValueVariable<TestVariableState> {
   }
 
   /** Useful from tests */
-  signalUpdateCompleted() {
+  public signalUpdateCompleted() {
     this.completeUpdate.next(1);
   }
 
-  static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
+  public static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
     return <VariableValueSelect model={model} />;
   };
 }
