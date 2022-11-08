@@ -226,12 +226,6 @@ export const formatRegistry = new Registry<FormatRegistryItem>(() => {
         }
 
         return String(value);
-        // if (text)
-        // const current = (variable as any)?.current;
-        // if (!current) {
-        //   return options.value;
-        // }
-        // return formatVariableLabel(variable);
       },
     },
     {

@@ -73,4 +73,20 @@ describe('sceneInterpolator', () => {
 
     expect(sceneInterpolator(scene, 'test.${test}.asd')).toBe('test.{hello,world}.asd');
   });
+
+  it('Can format multi valued values using text formatter', () => {
+    const scene = new TestScene({
+      $variables: new SceneVariableSet({
+        variables: [
+          new TestVariable({
+            name: 'test',
+            value: ['1', '2'],
+            text: ['hello', 'world'],
+          }),
+        ],
+      }),
+    });
+
+    expect(sceneInterpolator(scene, '${test:text}')).toBe('hello + world');
+  });
 });

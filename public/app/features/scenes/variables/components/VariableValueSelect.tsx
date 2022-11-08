@@ -19,6 +19,7 @@ export function VariableValueSelect({ model }: SceneComponentProps<MultiValueVar
         allowCustomValue
         isLoading={loading}
         options={options}
+        closeMenuOnSelect={false}
         onChange={(newValue) => {
           model.changeValueTo(
             newValue.map((v) => v.value!),
