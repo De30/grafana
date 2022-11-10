@@ -1511,6 +1511,19 @@
         },
         "description": "(empty)"
       },
+      "receiversResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/receiver"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "description": "(empty)"
+      },
       "recordingRuleResponse": {
         "content": {
           "application/json": {
@@ -1731,6 +1744,21 @@
           }
         },
         "description": "(empty)"
+      },
+      "validateDashboardResponse": {
+        "description": "(empty)",
+        "headers": {
+          "isValid": {
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          "message": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -1769,27 +1797,6 @@
           "active_viewers": {
             "format": "int64",
             "type": "integer"
-          }
-        },
-        "type": "object"
-      },
-      "AddBuiltInRoleCommand": {
-        "properties": {
-          "builtInRole": {
-            "enum": [
-              "Viewer",
-              " Editor",
-              " Admin",
-              " Grafana Admin"
-            ],
-            "type": "string"
-          },
-          "global": {
-            "description": "A flag indicating if the assignment is global or not. If set to false, the default org ID of the authenticated user will be used from the request to create organization local assignment. Refer to the Built-in role assignments for more information.",
-            "type": "boolean"
-          },
-          "roleUid": {
-            "type": "string"
           }
         },
         "type": "object"
@@ -2796,6 +2803,10 @@
           "replyTo": {
             "type": "string"
           },
+          "scaleFactor": {
+            "format": "int64",
+            "type": "integer"
+          },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleDTO"
           },
@@ -2860,11 +2871,15 @@
         "properties": {
           "field": {
             "description": "Field used to attach the correlation link",
+            "example": "message",
             "type": "string"
           },
           "target": {
             "additionalProperties": false,
             "description": "Target data query",
+            "example": {
+              "expr": "job=app"
+            },
             "type": "object"
           },
           "type": {
@@ -2880,6 +2895,27 @@
       },
       "CorrelationConfigType": {
         "type": "string"
+      },
+      "CorrelationConfigUpdateDTO": {
+        "properties": {
+          "field": {
+            "description": "Field used to attach the correlation link",
+            "example": "message",
+            "type": "string"
+          },
+          "target": {
+            "additionalProperties": false,
+            "description": "Target data query",
+            "example": {
+              "expr": "job=app"
+            },
+            "type": "object"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CorrelationConfigType"
+          }
+        },
+        "type": "object"
       },
       "CreateAlertNotificationCommand": {
         "properties": {
@@ -2933,7 +2969,7 @@
             "type": "string"
           },
           "targetUID": {
-            "description": "Target data source UID to which the correlation is created",
+            "description": "Target data source UID to which the correlation is created. required if config.type = query",
             "example": "PE1C5CBDA0504A6A3",
             "type": "string"
           }
@@ -2991,7 +3027,14 @@
         "type": "object"
       },
       "CreateFolderCommand": {
+        "description": "CreateFolderCommand captures the information required by the folder service\nto create a folder.",
         "properties": {
+          "description": {
+            "type": "string"
+          },
+          "parent_uid": {
+            "type": "string"
+          },
           "title": {
             "type": "string"
           },
@@ -3077,6 +3120,10 @@
           },
           "replyTo": {
             "type": "string"
+          },
+          "scaleFactor": {
+            "format": "int64",
+            "type": "integer"
           },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleDTO"
@@ -3423,6 +3470,9 @@
           "hasAcl": {
             "type": "boolean"
           },
+          "hasPublicDashboard": {
+            "type": "boolean"
+          },
           "isFolder": {
             "type": "boolean"
           },
@@ -3705,11 +3755,14 @@
         "description": "A map of RefIDs (unique query identifiers) to this type makes up the Responses property of a QueryDataResponse.\nThe Error property is used to allow for partial success responses from the containing QueryDataResponse.",
         "properties": {
           "Error": {
-            "description": "Error is a property to be set if the the corresponding DataQuery has an error.",
+            "description": "Error is a property to be set if the corresponding DataQuery has an error.",
             "type": "string"
           },
           "Frames": {
             "$ref": "#/components/schemas/Frames"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/Status"
           }
         },
         "title": "DataResponse contains the results from a DataQuery.",
@@ -3960,7 +4013,7 @@
         "type": "string"
       },
       "DsPermissionType": {
-        "description": "Datasource permission\nDescription:\n`0` - No Access\n`1` - Query\nEnum: 0,1",
+        "description": "Datasource permission\nDescription:\n`0` - No Access\n`1` - Query\n`2` - Edit\nEnum: 0,1,2",
         "format": "int64",
         "type": "integer"
       },
@@ -3976,6 +4029,9 @@
           },
           "auth_password": {
             "$ref": "#/components/schemas/Secret"
+          },
+          "auth_password_file": {
+            "type": "string"
           },
           "auth_secret": {
             "$ref": "#/components/schemas/Secret"
@@ -4334,6 +4390,10 @@
           "id": {
             "format": "int64",
             "type": "integer"
+          },
+          "parent_uid": {
+            "description": "only used if nested folders are enabled",
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -4891,6 +4951,9 @@
           "smtp_auth_password": {
             "$ref": "#/components/schemas/Secret"
           },
+          "smtp_auth_password_file": {
+            "type": "string"
+          },
           "smtp_auth_secret": {
             "$ref": "#/components/schemas/Secret"
           },
@@ -5104,6 +5167,9 @@
           "folderId": {
             "format": "int64",
             "type": "integer"
+          },
+          "folderUid": {
+            "type": "string"
           },
           "imported": {
             "type": "boolean"
@@ -5452,6 +5518,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "schemaVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
           "type": {
             "type": "string"
           },
@@ -5709,7 +5779,7 @@
             "type": "string"
           },
           "items": {
-            "description": "The ordered list of items that the playlist will iterate over.",
+            "description": "The ordered list of items that the playlist will iterate over.\nFIXME! This should not be optional, but changing it makes the godegen awkward",
             "items": {
               "$ref": "#/components/schemas/PlaylistItem"
             },
@@ -8215,12 +8285,8 @@
         "type": "string"
       },
       "Status": {
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "type": "object"
+        "format": "int64",
+        "type": "integer"
       },
       "Success": {
         "$ref": "#/components/schemas/ResponseDetails"
@@ -8643,6 +8709,9 @@
             },
             "type": "array"
           },
+          "location": {
+            "type": "string"
+          },
           "months": {
             "items": {
               "type": "string"
@@ -8996,6 +9065,9 @@
       "UpdateCorrelationCommand": {
         "description": "UpdateCorrelationCommand is the command for updating a correlation",
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/CorrelationConfigUpdateDTO"
+          },
           "description": {
             "description": "Optional description of the correlation",
             "example": "Logs to Traces",
@@ -9691,7 +9763,6 @@
         "type": "object"
       },
       "alertGroup": {
-        "description": "AlertGroup alert group",
         "properties": {
           "alerts": {
             "description": "alerts",
@@ -9883,7 +9954,6 @@
         "type": "array"
       },
       "gettableSilence": {
-        "description": "GettableSilence gettable silence",
         "properties": {
           "comment": {
             "description": "comment",
@@ -9932,13 +10002,13 @@
         "type": "object"
       },
       "gettableSilences": {
-        "description": "GettableSilences gettable silences",
         "items": {
           "$ref": "#/components/schemas/gettableSilence"
         },
         "type": "array"
       },
       "integration": {
+        "description": "Integration integration",
         "properties": {
           "lastNotifyAttempt": {
             "description": "A timestamp indicating the last attempt to deliver a notification regardless of the outcome.\nFormat: date-time",
@@ -10035,6 +10105,15 @@
         ],
         "type": "object"
       },
+      "postSilencesOKBody": {
+        "properties": {
+          "silenceID": {
+            "description": "silence ID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "postableAlert": {
         "description": "PostableAlert postable alert",
         "properties": {
@@ -10073,7 +10152,6 @@
         "type": "array"
       },
       "postableSilence": {
-        "description": "PostableSilence postable silence",
         "properties": {
           "comment": {
             "description": "comment",
@@ -10111,6 +10189,7 @@
         "type": "object"
       },
       "receiver": {
+        "description": "Receiver receiver",
         "properties": {
           "active": {
             "description": "active",
@@ -10243,10 +10322,6 @@
       "url": "https://grafana.com"
     },
     "description": "The Grafana backend exposes an HTTP API, the same API is used by the frontend to do\neverything from saving dashboards, creating users and updating data sources.",
-    "license": {
-      "name": "GNU Affero General Public License v3.0",
-      "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
-    },
     "title": "Grafana HTTP API.",
     "version": "0.0.1"
   },
@@ -15945,6 +16020,7 @@
         ]
       },
       "post": {
+        "description": "If nested folders are enabled then it additionally expects the parent folder UID.",
         "operationId": "createFolder",
         "requestBody": {
           "content": {
@@ -16023,7 +16099,7 @@
     },
     "/folders/{folder_uid}": {
       "delete": {
-        "description": "Deletes an existing folder identified by UID along with all dashboards (and their alerts) stored in the folder. This operation cannot be reverted.",
+        "description": "Deletes an existing folder identified by UID along with all dashboards (and their alerts) stored in the folder. This operation cannot be reverted.\nIf nested folders are enabled then it also deletes all the subfolders.",
         "operationId": "deleteFolder",
         "parameters": [
           {
@@ -16104,6 +16180,7 @@
         ]
       },
       "put": {
+        "description": "If nested folders are enabled then it optionally expects a new parent folder UID that moves the folder and\nincludes it into the response.",
         "operationId": "updateFolder",
         "parameters": [
           {
