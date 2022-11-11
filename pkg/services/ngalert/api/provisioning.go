@@ -88,6 +88,10 @@ func (f *ProvisioningApiHandler) handleRouteGetAlertRuleExport(ctx *models.ReqCo
 	return f.svc.RouteGetAlertRuleExport(ctx, UID)
 }
 
+func (f *ProvisioningApiHandler) handleRouteGetAlertRulesExport(ctx *models.ReqContext) response.Response {
+	return f.svc.RouteGetAlertRulesExport(ctx)
+}
+
 func (f *ProvisioningApiHandler) handleRoutePostAlertRule(ctx *models.ReqContext, ar apimodels.ProvisionedAlertRule) response.Response {
 	return f.svc.RoutePostAlertRule(ctx, ar)
 }
