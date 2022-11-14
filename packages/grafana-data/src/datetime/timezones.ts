@@ -100,6 +100,10 @@ export const getTimeZoneGroups = memoize(
   }
 );
 
+export const setGlobalTimezone = (zone: string) => {
+  moment.tz.setDefault(zone);
+};
+
 const mapInternal = (zone: string, timestamp: number): TimeZoneInfo | undefined => {
   switch (zone) {
     case InternalTimeZones.utc: {

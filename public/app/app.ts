@@ -68,6 +68,7 @@ import { PanelDataErrorView } from './features/panel/components/PanelDataErrorVi
 import { PanelRenderer } from './features/panel/components/PanelRenderer';
 import { DatasourceSrv } from './features/plugins/datasource_srv';
 import { preloadPlugins } from './features/plugins/pluginPreloader';
+import { updateGlobalTimezone } from './features/profile/state/reducers';
 import { QueryRunner } from './features/query/state/QueryRunner';
 import { initWindowRuntime } from './features/runtime/init';
 import { variableAdapters } from './features/variables/adapters';
@@ -112,6 +113,7 @@ export class GrafanaApp {
       addClassIfNoOverlayScrollbar();
       setLocale(config.bootData.user.locale);
       setWeekStart(config.bootData.user.weekStart);
+
       setPanelRenderer(PanelRenderer);
       setPluginPage(PluginPage);
       setPanelDataErrorView(PanelDataErrorView);
@@ -119,7 +121,8 @@ export class GrafanaApp {
       setTimeZoneResolver(() => config.bootData.user.timezone);
       // Important that extension reducers are initialized before store
       addExtensionReducers();
-      configureStore();
+      const store = configureStore();
+      store.dispatch(updateGlobalTimezone(config.bootData.user.timezone));
       initExtensions();
 
       standardEditorsRegistry.setInit(getAllOptionEditors);
