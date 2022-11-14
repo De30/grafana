@@ -57,11 +57,14 @@ message RawObject {
 }
 
 message ObjectOriginInfo {
-  // NOTE: currently managed by the dashboard_provisioning table
-  string source = 1;
+  // ID of the origin configuratino
+  string id = 1;
 
-  // Time in epoch milliseconds that the object was last synced with an external system (provisioning/git)
-  int64 time = 2;
+  // Path in the origin system
+  string path = 2;
+
+  // Origin revision key
+  string key = 3;
 }
 
 // Report error while working with objects
@@ -198,7 +201,7 @@ message AdminWriteObjectRequest {
   bool clear_history = 10;
 
   // Optionally define where the object came from
-  string origin = 11;
+  ObjectOriginInfo origin = 11;
 }
 
 message WriteObjectResponse {

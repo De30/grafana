@@ -135,9 +135,11 @@ func (e *objectStoreJob) start(ctx context.Context) {
 			UpdatedAt:    dash.Updated.UnixMilli(),
 			UpdatedBy:    fmt.Sprintf("user:%d", dash.UpdatedBy),
 			CreatedBy:    fmt.Sprintf("user:%d", dash.CreatedBy),
-			Origin:       "export-from-sql",
-			Body:         dash.Data,
-			Comment:      "(exported from SQL)",
+			Origin: &object.ObjectOriginInfo{
+				Id: "export-from-sql",
+			},
+			Body:    dash.Data,
+			Comment: "(exported from SQL)",
 		})
 		if err != nil {
 			e.status.Status = "error: " + err.Error()

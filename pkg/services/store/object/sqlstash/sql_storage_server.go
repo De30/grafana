@@ -53,7 +53,7 @@ func getReadSelect(r *object.ReadObjectRequest) string {
 		"size", "etag", "errors", // errors are always returned
 		"created_at", "created_by",
 		"updated_at", "updated_by",
-		"origin", "origin_ts"}
+		"origin_id", "origin_path", "origin_key"}
 
 	if r.WithBody {
 		fields = append(fields, `body`)
@@ -66,10 +66,9 @@ func getReadSelect(r *object.ReadObjectRequest) string {
 
 func (s *sqlObjectServer) rowToReadObjectResponse(ctx context.Context, rows *sql.Rows, r *object.ReadObjectRequest) (*object.ReadObjectResponse, error) {
 	path := "" // string (extract UID?)
-	var origin sql.NullString
-	originTime := int64(0)
 	raw := &object.RawObject{
-		GRN: &object.GRN{},
+		GRN:    &object.GRN{},
+		Origin: &object.ObjectOriginInfo{},
 	}
 
 	summaryjson := &summarySupport{}
@@ -78,7 +77,7 @@ func (s *sqlObjectServer) rowToReadObjectResponse(ctx context.Context, rows *sql
 		&raw.Size, &raw.ETag, &summaryjson.errors,
 		&raw.CreatedAt, &raw.CreatedBy,
 		&raw.UpdatedAt, &raw.UpdatedBy,
-		&origin, &originTime,
+		&raw.Origin.Id, &raw.Origin.Path, &raw.Origin.Key,
 	}
 	if r.WithBody {
 		args = append(args, &raw.Body)
@@ -92,11 +91,8 @@ func (s *sqlObjectServer) rowToReadObjectResponse(ctx context.Context, rows *sql
 		return nil, err
 	}
 
-	if origin.Valid {
-		raw.Origin = &object.ObjectOriginInfo{
-			Source: origin.String,
-			Time:   originTime,
-		}
+	if raw.Origin.Path == "" {
+		raw.Origin = nil
 	}
 
 	// Get the GRN from key.  TODO? save each part as a column?
@@ -314,6 +310,10 @@ func (s *sqlObjectServer) AdminWrite(ctx context.Context, r *object.AdminWriteOb
 
 	etag := createContentsHash(body)
 	path := route.Key
+	origin := r.Origin
+	if origin == nil {
+		origin = &object.ObjectOriginInfo{}
+	}
 
 	rsp := &object.WriteObjectResponse{
 		GRN:    grn,
@@ -473,12 +473,12 @@ func (s *sqlObjectServer) AdminWrite(ctx context.Context, r *object.AdminWriteOb
 		_, err = tx.Exec(ctx, "INSERT INTO object ("+
 			"path, parent_folder_path, kind, size, body, etag, version, "+
 			"updated_at, updated_by, created_at, created_by, "+
-			"name, description, origin, origin_ts, "+
+			"name, description, origin_id, origin_path, origin_key, "+
 			"labels, fields, errors) "+
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			path, getParentFolderPath(grn.Kind, path), grn.Kind, versionInfo.Size, body, etag, versionInfo.Version,
 			updatedAt, createdBy, createdAt, createdBy, // created + updated are the same
-			summary.model.Name, summary.model.Description, r.Origin, timestamp,
+			summary.model.Name, summary.model.Description, origin.Id, origin.Path, origin.Key,
 			summary.labels, summary.fields, summary.errors,
 		)
 		return err
