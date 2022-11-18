@@ -1,11 +1,22 @@
 import { css } from '@emotion/css';
 import pluralize from 'pluralize';
 import React, { FC } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Stack } from '@grafana/experimental';
-import { Button, ButtonGroup, Card, Icon, Input, Pagination, RadioButtonGroup, Tag, useStyles2 } from '@grafana/ui';
+import {
+  Button,
+  ButtonGroup,
+  Card,
+  Icon,
+  Input,
+  Pagination,
+  RadioButtonGroup,
+  Select,
+  Tag,
+  useStyles2,
+} from '@grafana/ui';
 import { AlertingRule, CombinedRule, CombinedRuleNamespace } from 'app/types/unified-alerting';
 import { PromAlertingRuleState } from 'app/types/unified-alerting-dto';
 
@@ -26,6 +37,7 @@ interface Filters {
   type: string | null;
   dataSource: string | null;
   labels: string | null;
+  namespace: string | null;
 }
 
 const ViewOptions: SelectableValue[] = [
@@ -63,6 +75,7 @@ function filterAlertStates(
  */
 export const RuleListGroupView: FC<Props> = ({ namespaces }) => {
   const styles = useStyles2(getStyles);
+  const history = useHistory();
   const { search, pathname } = useLocation();
 
   // filters
@@ -73,6 +86,7 @@ export const RuleListGroupView: FC<Props> = ({ namespaces }) => {
     type: searchParams.get('ruleType'),
     dataSource: searchParams.get('dataSource'),
     labels: searchParams.get('queryString'),
+    namespace: searchParams.get('namespace'),
   };
 
   /**
@@ -99,13 +113,15 @@ export const RuleListGroupView: FC<Props> = ({ namespaces }) => {
    * ║       └────────┘        └────────┘ ║ ║       └────────┘    ║
    * ╚════════════════════════════════════╝ ╚═════════════════════╝
    */
-  const allRulesGroupedByNamespaceGroup = namespaces.map((namespace) => ({
-    ...namespace,
-    groups: namespace.groups.map((group) => ({
-      ...group,
-      rules: filterAlertStates(group.rules, FILTERS.state),
-    })),
-  }));
+  const allRulesGroupedByNamespaceGroup = namespaces
+    .filter((namespace) => namespace.name === FILTERS.namespace)
+    .map((namespace) => ({
+      ...namespace,
+      groups: namespace.groups.map((group) => ({
+        ...group,
+        rules: filterAlertStates(group.rules, FILTERS.state),
+      })),
+    }));
 
   const allRules = namespaces.flatMap((namespace) => namespace.groups.flatMap((group) => group.rules));
   const allAlertRules = allRules.filter((rule): rule is CombinedRule<AlertingRule> => isAlertingRule(rule.promRule));
@@ -117,10 +133,22 @@ export const RuleListGroupView: FC<Props> = ({ namespaces }) => {
     [PromAlertingRuleState.Inactive]: filterAlertStates(allAlertRules, PromAlertingRuleState.Inactive),
   };
 
+  // available namespaces
+  const namespaceOptions = namespaces.map((namespace) => ({
+    label: namespace.name,
+    value: namespace.name,
+  }));
+
+  // TODO refactor this in to separate "setSearchParam" function
+  const handleNamespaceChange = (option: SelectableValue<string>) => {
+    history.push('/alerting/list?view=groups&namespace=' + option.value);
+  };
+
   return (
     <>
       <Stack direction="column" gap={2}>
         <Stack direction="row" gap={1}>
+          <Select options={namespaceOptions} onChange={handleNamespaceChange} />
           <Input
             name="search-input"
             value={createFilterValue(FILTERS)}
@@ -178,11 +206,6 @@ export const RuleListGroupView: FC<Props> = ({ namespaces }) => {
               {/* start row item */}
               {allRulesGroupedByNamespaceGroup.map((namespace) => (
                 <>
-                  <div className={styles.list.namespaceHeader}>
-                    <Stack alignItems="center" gap={1}>
-                      <Icon name="folder-open" /> <Shiny>{namespace.name}</Shiny>
-                    </Stack>
-                  </div>
                   {namespace.groups.map((group) => (
                     <>
                       <div className={styles.list.groupHeader}>
