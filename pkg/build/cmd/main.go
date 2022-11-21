@@ -11,7 +11,13 @@ import (
 
 func main() {
 	app := cli.NewApp()
+
 	app.Commands = cli.Commands{
+		{
+			Name:        "dagger",
+			Usage:       "Sub-commands that use the Dagger SDK and buildkit",
+			Subcommands: daggerCommands(),
+		},
 		{
 			Name:      "build-backend",
 			Usage:     "Build one or more variants of back-end binaries",

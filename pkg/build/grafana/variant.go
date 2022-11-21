@@ -27,6 +27,10 @@ type BuildVariantOpts struct {
 	GrafanaDir string
 }
 
+func (b *BuildVariantOpts) String() string {
+	return GrafanaDescriptor(VariantBuildArgs(b.Variant).BuildOpts)
+}
+
 // BuildVariant builds a certain variant of the grafana-server and grafana-cli binaries sequentially.
 func BuildVariant(ctx context.Context, opts BuildVariantOpts) error {
 	grafanaDir, err := filepath.Abs(opts.GrafanaDir)
