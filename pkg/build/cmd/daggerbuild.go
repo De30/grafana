@@ -163,7 +163,7 @@ func buildOsArch(ctx context.Context, builder *dagger.Container, opts grafana.Bu
 
 	log.Println("copying binary", out, "...")
 	dir := builder.Directory(out)
-	if err := os.MkdirAll(filepath.Join(".", out), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Dir(out), os.ModePerm); err != nil {
 		return err
 	}
 	log.Println("done making directory")
