@@ -32,7 +32,7 @@ func (o *BuildGrafanaOpts) Output(bin string) string {
 
 func BuildGrafanaCommand(cmd string, opts *BuildGrafanaOpts) []string {
 	goArgs := opts.GoBuildArgs()
-	goArgs.Package = cmd
+	goArgs.Package = "./pkg/cmd/" + cmd
 
 	revision := config.Revision{
 		Timestamp: opts.Timestamp.Unix(),
@@ -55,7 +55,7 @@ func BuildGrafanaCommand(cmd string, opts *BuildGrafanaOpts) []string {
 		goArgs.ExtraArgs = []string{"-tags=pro"}
 	}
 
-	return append([]string{"go"}, goArgs.Args()...)
+	return append([]string{"go", "build"}, goArgs.Args()...)
 }
 
 func BuildGrafanaCLICommand(opts *BuildGrafanaOpts) []string {

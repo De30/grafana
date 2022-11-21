@@ -84,15 +84,17 @@ func GetDaggerBuildOpts(c *cli.Context) (*DaggerBuildOpts, error) {
 
 func DaggerBuild(ctx context.Context, opts *DaggerBuildOpts) error {
 	// g, ctx := errgroup.WithContext(ctx)
-	var (
-		dir *dagger.Directory
-	)
 
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
+	var (
+		dir = client.Host().Directory(".", dagger.HostDirectoryOpts{
+			Exclude: []string{"node_modules", "dist"},
+		})
+	)
 
 	if opts.Clone {
 		repo := client.Git(GrafanaRepository)
@@ -163,10 +165,6 @@ func buildOsArch(ctx context.Context, builder *dagger.Container, opts grafana.Bu
 
 	log.Println("copying binary", out, "...")
 	dir := builder.Directory(out)
-	if err := os.MkdirAll(filepath.Dir(out), os.ModePerm); err != nil {
-		return err
-	}
-	log.Println("done making directory")
 
 	log.Println("exporting...")
 	if _, err := dir.Export(ctx, filepath.Join(".", out)); err != nil {
