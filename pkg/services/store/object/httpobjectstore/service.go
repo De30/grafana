@@ -56,6 +56,9 @@ func (s *httpObjectStore) RegisterHTTPRoutes(route routing.RouteRegister) {
 	route.Get("/list/*", reqGrafanaAdmin, routing.Wrap(s.doListFolder)) // Simplified version of search -- path is prefix
 	route.Get("/search", reqGrafanaAdmin, routing.Wrap(s.doSearch))
 
+	// osfs := sync.NewObjectStoreFS(s.store)
+	// route.Get("/fs/*", http.FileServer(http.FS(osfs)))
+
 	// File upload
 	route.Post("/upload/:scope", reqGrafanaAdmin, routing.Wrap(s.doUpload))
 }
@@ -315,7 +318,20 @@ func (s *httpObjectStore) doUpload(c *models.ReqContext) response.Response {
 }
 
 func (s *httpObjectStore) doListFolder(c *models.ReqContext) response.Response {
-	return response.JSON(501, "Not implemented yet")
+	params := web.Params(c.Req)
+	req := &object.ObjectSearchRequest{
+		WithBody:   false,
+		WithLabels: true,
+		WithFields: false,
+		Folder:     params["*"],
+	}
+
+	rsp, err := s.store.Search(c.Req.Context(), req)
+	if err != nil {
+		return response.Error(500, "?", err)
+	}
+	return response.JSON(200, rsp)
+
 }
 
 func (s *httpObjectStore) doSearch(c *models.ReqContext) response.Response {
