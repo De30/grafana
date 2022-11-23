@@ -52,6 +52,9 @@ export const graphPanelChangedHandler: PanelTypeChangedHandler = (
     });
     panel.fieldConfig = fieldConfig; // Mutates the incoming panel
     panel.alert = prevOptions.angular.alert;
+
+    // move to histogram
+    panel.type = 'histogram';
     return options;
   }
 
