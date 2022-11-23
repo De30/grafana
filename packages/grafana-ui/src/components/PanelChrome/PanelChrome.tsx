@@ -8,7 +8,7 @@ import { IconName } from '../../types/icon';
 import { Button } from '../Button';
 import { Dropdown } from '../Dropdown/Dropdown';
 import { Icon } from '../Icon/Icon';
-import { IconButton, IconButtonVariant } from '../IconButton/IconButton';
+import { IconButtonVariant } from '../IconButton/IconButton';
 import { PopoverContent, Tooltip } from '../Tooltip';
 
 /**
@@ -94,9 +94,9 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
             </div>
           )}
 
-          {titleItems.length > 0 && (
-            <div className={styles.items} data-testid="title-items-container">
-              {titleItems
+          <div className={styles.items} data-testid="title-items-container">
+            {titleItems &&
+              titleItems
                 .filter((item) => isIconName(item.icon))
                 .map((item, i) => (
                   <div key={`${item.icon}-${i}`} className={styles.item}>
@@ -117,11 +117,10 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
                     )}
                   </div>
                 ))}
-            </div>
-          )}
+          </div>
 
           {menu && (
-            <Dropdown overlay={menu} placement="bottom">
+            <Dropdown overlay={menu} placement="bottom-end">
               <div className={cx(styles.item, styles.menuItem, 'menu-icon')} data-testid="menu-icon">
                 <Button
                   aria-label={`Menu for panel with ${title ? `title ${title}` : 'no title'}`}
