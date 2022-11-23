@@ -602,9 +602,23 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
       const titleItems: PanelChromeInfoState[] = [];
       if (panel.description) {
         titleItems.push({
-          text: panel.description,
           tooltip: panel.description,
           icon: 'info-circle',
+        });
+      }
+
+      if (data.request?.timeInfo) {
+        titleItems.push({
+          label: data.request?.timeInfo,
+          icon: 'clock-nine',
+        });
+      }
+
+      if (errorMessage) {
+        titleItems.push({
+          tooltip: errorMessage,
+          icon: 'exclamation-triangle',
+          variant: 'destructive',
         });
       }
 

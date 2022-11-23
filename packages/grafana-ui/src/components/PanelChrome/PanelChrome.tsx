@@ -76,10 +76,7 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
   const headerStyles: CSSProperties = {
     height: headerHeight,
   };
-  const itemStyles: CSSProperties = {
-    minHeight: headerHeight,
-    minWidth: headerHeight,
-  };
+
   const containerStyles: CSSProperties = { width, height };
 
   const handleMenuOpen = () => {};
@@ -101,12 +98,20 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
               {titleItems
                 .filter((item) => isIconName(item.icon))
                 .map((item, i) => (
-                  <div key={`${item.icon}-${i}`} className={styles.item} style={itemStyles}>
+                  <div key={`${item.icon}-${i}`} className={styles.item}>
                     {item.onClick ? (
-                      <IconButton tooltip={item.tooltip} name={item.icon} size="sm" onClick={item.onClick} />
+                      <IconButton
+                        tooltip={item.tooltip}
+                        name={item.icon}
+                        size="sm"
+                        onClick={item.onClick}
+                        variant={item.variant}
+                      />
                     ) : (
                       <Tooltip content={item.tooltip ?? ''}>
-                        <Icon name={item.icon} size="sm" />
+                        <span>
+                          <Icon name={item.icon} size="sm" /> {item.label}
+                        </span>
                       </Tooltip>
                     )}
                   </div>
@@ -116,7 +121,7 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
 
           {menu && (
             <Dropdown overlay={menu} placement="bottom">
-              <div className={cx(styles.item, styles.menuItem, 'menu-icon')} data-testid="menu-icon" style={itemStyles}>
+              <div className={cx(styles.item, styles.menuItem, 'menu-icon')} data-testid="menu-icon">
                 <IconButton
                   ariaLabel={`Menu for panel with ${title ? `title ${title}` : 'no title'}`}
                   tooltip="Menu"
@@ -201,6 +206,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     content: css({
       label: 'panel-content',
       width: '100%',
+      contain: 'strict',
       flexGrow: 1,
     }),
     headerContainer: css({
@@ -208,6 +214,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: 'flex',
       alignItems: 'center',
       padding: `0 ${theme.spacing(padding)}`,
+      gap: theme.spacing(1),
     }),
     title: css({
       textOverflow: 'ellipsis',
@@ -217,6 +224,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     items: css({
       display: 'flex',
+      gap: theme.spacing(1),
     }),
     item: css({
       display: 'flex',
