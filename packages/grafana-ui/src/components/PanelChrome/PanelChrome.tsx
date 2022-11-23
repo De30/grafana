@@ -5,6 +5,7 @@ import { GrafanaTheme2, isIconName } from '@grafana/data';
 
 import { useStyles2, useTheme2 } from '../../themes';
 import { IconName } from '../../types/icon';
+import { Button } from '../Button';
 import { Dropdown } from '../Dropdown/Dropdown';
 import { Icon } from '../Icon/Icon';
 import { IconButton, IconButtonVariant } from '../IconButton/IconButton';
@@ -100,12 +101,12 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
                 .map((item, i) => (
                   <div key={`${item.icon}-${i}`} className={styles.item}>
                     {item.onClick ? (
-                      <IconButton
+                      <Button
+                        variant={item.variant}
                         tooltip={item.tooltip}
-                        name={item.icon}
+                        icon={item.icon}
                         size="sm"
                         onClick={item.onClick}
-                        variant={item.variant}
                       />
                     ) : (
                       <Tooltip content={item.tooltip ?? ''}>
@@ -122,10 +123,12 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
           {menu && (
             <Dropdown overlay={menu} placement="bottom">
               <div className={cx(styles.item, styles.menuItem, 'menu-icon')} data-testid="menu-icon">
-                <IconButton
-                  ariaLabel={`Menu for panel with ${title ? `title ${title}` : 'no title'}`}
+                <Button
+                  aria-label={`Menu for panel with ${title ? `title ${title}` : 'no title'}`}
+                  variant="secondary"
+                  fill="text"
                   tooltip="Menu"
-                  name="ellipsis-v"
+                  icon="ellipsis-v"
                   size="sm"
                   onClick={handleMenuOpen}
                 />
@@ -133,9 +136,9 @@ export const PanelChrome: React.FC<PanelChromeProps> = ({
             </Dropdown>
           )}
 
-          {leftItems.length > 0 && (
+          {/* {leftItems.length > 0 && (
             <div className={cx(styles.rightAligned, styles.items)}>{itemsRenderer(leftItems, (item) => item)}</div>
-          )}
+          )} */}
         </div>
       )}
 
@@ -225,6 +228,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     items: css({
       display: 'flex',
       gap: theme.spacing(1),
+      flexGrow: 1,
     }),
     item: css({
       display: 'flex',
