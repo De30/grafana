@@ -7,7 +7,7 @@ import { PanelChrome as PanelChromeComponent, PanelChromeProps } from './PanelCh
 /**
  * @internal
  */
-export type { PanelChromeProps, PanelPadding } from './PanelChrome';
+export type { PanelChromeProps, PanelPadding, PanelChromeInfoState } from './PanelChrome';
 
 /**
  * @internal

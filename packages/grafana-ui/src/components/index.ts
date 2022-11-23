@@ -124,6 +124,7 @@ export {
   type PanelContext,
   PanelContextRoot,
   usePanelContext,
+  type PanelChromeInfoState,
 } from './PanelChrome';
 export {
   VizLayout,

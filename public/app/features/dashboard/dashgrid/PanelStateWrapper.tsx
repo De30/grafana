@@ -25,10 +25,12 @@ import { config, locationService, RefreshEvent } from '@grafana/runtime';
 import { VizLegendOptions } from '@grafana/schema';
 import {
   ErrorBoundary,
+  Menu,
   PanelChrome,
   PanelContext,
   PanelContextProvider,
   PanelPadding,
+  PanelChromeInfoState,
   SeriesVisibilityChangeMode,
 } from '@grafana/ui';
 import { PANEL_BORDER } from 'app/core/constants';
@@ -587,8 +589,35 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
     ];
 
     if (config.featureToggles.newPanelChromeUI) {
+      const menu = (
+        <Menu>
+          <Menu.Item label="Edit" icon="pen" />
+          <Menu.Item label="View" icon="eye" />
+          <Menu.Item label="Share" icon="share-alt" />
+          <Menu.Item label="Explore" icon="compass" />
+          <Menu.Item label="Inspect" icon="info-circle" />
+          <Menu.Item label="Delete" icon="trash-alt" destructive />
+        </Menu>
+      );
+      const titleItems: PanelChromeInfoState[] = [];
+      if (panel.description) {
+        titleItems.push({
+          text: panel.description,
+          tooltip: panel.description,
+          icon: 'info-circle',
+        });
+      }
+
       return (
-        <PanelChrome width={width} height={height} title={title} leftItems={leftItems} padding={noPadding}>
+        <PanelChrome
+          width={width}
+          height={height}
+          title={title}
+          leftItems={leftItems}
+          padding={noPadding}
+          menu={menu}
+          titleItems={titleItems}
+        >
           {(innerWidth, innerHeight) => (
             <>
               <ErrorBoundary
