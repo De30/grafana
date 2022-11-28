@@ -81,6 +81,7 @@ type API struct {
 	AlertRules           *provisioning.AlertRuleService
 	AlertsRouter         *sender.AlertsRouter
 	EvaluatorFactory     eval.EvaluatorFactory
+	Historian            Historian
 }
 
 // RegisterAPIEndpoints registers API handlers
@@ -146,7 +147,8 @@ func (api *API) RegisterAPIEndpoints(m *metrics.API) {
 	}), m)
 
 	api.RegisterHistoryApiEndpoints(NewHistoryApi(&HistorySrv{
-		log: logger,
+		log:  logger,
+		hist: api.Historian,
 	}), m)
 }
 

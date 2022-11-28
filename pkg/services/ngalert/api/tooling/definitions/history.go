@@ -23,5 +23,5 @@ import "github.com/grafana/grafana-plugin-sdk-go/data"
 //       200: StateHistory
 
 type StateHistory struct {
-	results data.Frame
+	Results *data.Frame `json:"results"`
 }

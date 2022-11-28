@@ -237,6 +237,7 @@ func (ng *AlertNG) init() error {
 		AlertRules:           alertRuleService,
 		AlertsRouter:         alertsRouter,
 		EvaluatorFactory:     evalFactory,
+		Historian:            historian,
 	}
 	api.RegisterAPIEndpoints(ng.Metrics.GetAPIMetrics())
 

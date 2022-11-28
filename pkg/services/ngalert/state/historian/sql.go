@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/state"
@@ -46,6 +47,12 @@ func (s *SqlStateHistorian) RecordStates(ctx context.Context, rule *models.Alert
 	logger := s.log.FromContext(ctx)
 	records, _ := s.buildRecords(rule, states, logger) // TODO
 	go s.writeHistory(ctx, records)
+}
+
+func (s *SqlStateHistorian) QueryStates(ctx context.Context) (*data.Frame, error) {
+	// TODO: There should be an app logic layer above this.
+	// TODO: We should not allow querying of state history of rules that the user is not authorized to view.
+	return data.NewFrame("states"), nil
 }
 
 func (s *SqlStateHistorian) buildRecords(rule *models.AlertRule, states []state.StateTransition, logger log.Logger) ([]historyRecord, error) {
