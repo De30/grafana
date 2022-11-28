@@ -6,16 +6,19 @@ import (
 )
 
 type HistoryApiHandler struct {
+	svc *HistorySrv
 }
 
-func NewHistoryApi() *HistoryApiHandler {
-	return &HistoryApiHandler{}
+func NewHistoryApi(svc *HistorySrv) *HistoryApiHandler {
+	return &HistoryApiHandler{
+		svc: svc,
+	}
 }
 
 func (f *HistoryApiHandler) handleRouteGetStateHistory(ctx *models.ReqContext) response.Response {
-	return nil
+	return f.svc.RouteQueryHistory(ctx)
 }
 
 func (f *HistoryApiHandler) handleRouteGetRuleStateHistory(ctx *models.ReqContext) response.Response {
-	return nil
+	return f.svc.RouteQueryRuleHistory(ctx)
 }
