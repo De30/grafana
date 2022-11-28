@@ -3290,6 +3290,7 @@
    "type": "object"
   },
   "alertGroups": {
+   "description": "AlertGroups alert groups",
    "items": {
     "$ref": "#/definitions/alertGroup"
    },
@@ -5061,6 +5062,40 @@
     },
     "tags": [
      "ruler"
+    ]
+   }
+  },
+  "/api/ruler/grafana/states": {
+   "get": {
+    "operationId": "RouteGetStateHistory",
+    "produces": [
+     "application/json"
+    ],
+    "responses": {
+     "200": {
+      "$ref": "#/responses/StateHistory"
+     }
+    },
+    "summary": "Query state history.",
+    "tags": [
+     "history"
+    ]
+   }
+  },
+  "/api/ruler/grafana/states/{RuleUID}": {
+   "get": {
+    "operationId": "RouteGetStateHistory",
+    "produces": [
+     "application/json"
+    ],
+    "responses": {
+     "200": {
+      "$ref": "#/responses/StateHistory"
+     }
+    },
+    "summary": "Query state history for a rule.",
+    "tags": [
+     "history"
     ]
    }
   },
