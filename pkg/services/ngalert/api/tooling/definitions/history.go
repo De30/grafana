@@ -12,7 +12,7 @@ import "github.com/grafana/grafana-plugin-sdk-go/data"
 //     Responses:
 //       200: StateHistory
 
-// swagger:route GET /api/ruler/grafana/states/{RuleUID} history RouteGetStateHistory
+// swagger:route GET /api/ruler/grafana/states/{RuleUID} history RouteGetRuleStateHistory
 //
 // Query state history for a rule.
 //

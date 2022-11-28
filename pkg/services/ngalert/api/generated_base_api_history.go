@@ -17,19 +17,29 @@ import (
 )
 
 type HistoryApi interface {
+	RouteGetRuleStateHistory(*models.ReqContext) response.Response
 	RouteGetStateHistory(*models.ReqContext) response.Response
-	RouteGetStateHistory_1(*models.ReqContext) response.Response
 }
 
+func (f *HistoryApiHandler) RouteGetRuleStateHistory(ctx *models.ReqContext) response.Response {
+	return f.handleRouteGetRuleStateHistory(ctx)
+}
 func (f *HistoryApiHandler) RouteGetStateHistory(ctx *models.ReqContext) response.Response {
 	return f.handleRouteGetStateHistory(ctx)
-}
-func (f *HistoryApiHandler) RouteGetStateHistory_1(ctx *models.ReqContext) response.Response {
-	return f.handleRouteGetStateHistory_1(ctx)
 }
 
 func (api *API) RegisterHistoryApiEndpoints(srv HistoryApi, m *metrics.API) {
 	api.RouteRegister.Group("", func(group routing.RouteRegister) {
+		group.Get(
+			toMacaronPath("/api/ruler/grafana/states/{RuleUID}"),
+			api.authorize(http.MethodGet, "/api/ruler/grafana/states/{RuleUID}"),
+			metrics.Instrument(
+				http.MethodGet,
+				"/api/ruler/grafana/states/{RuleUID}",
+				srv.RouteGetRuleStateHistory,
+				m,
+			),
+		)
 		group.Get(
 			toMacaronPath("/api/ruler/grafana/states"),
 			api.authorize(http.MethodGet, "/api/ruler/grafana/states"),
@@ -37,16 +47,6 @@ func (api *API) RegisterHistoryApiEndpoints(srv HistoryApi, m *metrics.API) {
 				http.MethodGet,
 				"/api/ruler/grafana/states",
 				srv.RouteGetStateHistory,
-				m,
-			),
-		)
-		group.Get(
-			toMacaronPath("/api/ruler/grafana/states/{RuleUID}"),
-			api.authorize(http.MethodGet, "/api/ruler/grafana/states/{RuleUID}"),
-			metrics.Instrument(
-				http.MethodGet,
-				"/api/ruler/grafana/states/{RuleUID}",
-				srv.RouteGetStateHistory_1,
 				m,
 			),
 		)
