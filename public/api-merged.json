@@ -17560,6 +17560,9 @@
         "Host": {
           "type": "string"
         },
+        "OmitHost": {
+          "type": "boolean"
+        },
         "Opaque": {
           "type": "string"
         },
@@ -18379,7 +18382,6 @@
       }
     },
     "alertGroups": {
-      "description": "AlertGroups alert groups",
       "type": "array",
       "items": {
         "$ref": "#/definitions/alertGroup"

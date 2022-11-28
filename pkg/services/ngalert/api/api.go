@@ -144,6 +144,10 @@ func (api *API) RegisterAPIEndpoints(m *metrics.API) {
 		muteTimings:         api.MuteTimings,
 		alertRules:          api.AlertRules,
 	}), m)
+
+	api.RegisterHistoryApiEndpoints(NewHistoryApi(&HistorySrv{
+		log: logger,
+	}), m)
 }
 
 func (api *API) Usage(ctx context.Context, scopeParams *quota.ScopeParameters) (*quota.Map, error) {

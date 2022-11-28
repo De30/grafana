@@ -199,6 +199,11 @@ func (api *API) authorize(method, path string) web.Handler {
 		fallback = middleware.ReqOrgAdmin
 		eval = ac.EvalPermission(ac.ActionAlertingProvisioningRead) // organization scope
 
+	case http.MethodGet + "/api/ruler/grafana/states",
+		http.MethodGet + "/api/ruler/grafana/states/{RuleUID}":
+		fallback = middleware.ReqSignedIn
+		eval = ac.EvalPermission(ac.ActionAlertingRuleRead)
+
 	case http.MethodPut + "/api/v1/provisioning/policies",
 		http.MethodDelete + "/api/v1/provisioning/policies",
 		http.MethodPost + "/api/v1/provisioning/contact-points",
