@@ -192,7 +192,8 @@ func (ng *AlertNG) init() error {
 		AlertSender:      alertsRouter,
 	}
 
-	historian := historian.NewAnnotationHistorian(ng.annotationsRepo, ng.dashboardService)
+	// historian := historian.NewAnnotationHistorian(ng.annotationsRepo, ng.dashboardService)
+	historian := historian.NewSqlStateHistorian(store)
 	stateManager := state.NewManager(ng.Metrics.GetStateMetrics(), appUrl, store, ng.imageService, clk, historian)
 	scheduler := schedule.NewScheduler(schedCfg, appUrl, stateManager)
 
