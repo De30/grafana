@@ -13,8 +13,8 @@ const common = require('./webpack.common.js');
 
 module.exports = (env = {}) =>
   merge(common, {
+    devtool: 'nosources-source-map',
     mode: 'production',
-    devtool: 'source-map',
 
     entry: {
       dark: './public/sass/grafana.dark.scss',
@@ -43,6 +43,13 @@ module.exports = (env = {}) =>
         }),
       ],
     },
+
+    // https://webpack.js.org/guides/build-performance/#output-without-path-info
+    output: {
+      pathinfo: false,
+    },
+
+    // https://webpack.js.org/guides/build-performance/#avoid-extra-optimization-steps
     optimization: {
       nodeEnv: 'production',
       minimize: parseInt(env.noMinify, 10) !== 1,
@@ -71,15 +78,15 @@ module.exports = (env = {}) =>
         filename: path.resolve(__dirname, '../../public/views/error.html'),
         template: path.resolve(__dirname, '../../public/views/error-template.html'),
         inject: false,
-        excludeChunks: ['dark', 'light'],
         chunksSortMode: 'none',
+        excludeChunks: ['dark', 'light'],
       }),
       new HtmlWebpackPlugin({
         filename: path.resolve(__dirname, '../../public/views/index.html'),
         template: path.resolve(__dirname, '../../public/views/index-template.html'),
         inject: false,
-        excludeChunks: ['manifest', 'dark', 'light'],
         chunksSortMode: 'none',
+        excludeChunks: ['manifest', 'dark', 'light'],
       }),
       new HTMLWebpackCSSChunks(),
       new WebpackManifestPlugin({

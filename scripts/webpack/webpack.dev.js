@@ -33,14 +33,16 @@ module.exports = (env = {}) =>
       rules: [
         {
           test: /\.tsx?$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              cacheDirectory: true,
-              cacheCompression: false,
-            },
-          },
           exclude: /node_modules/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                cacheDirectory: true,
+                cacheCompression: false,
+              },
+            },
+          ],
         },
         require('./sass.rule.js')({
           sourceMap: false,

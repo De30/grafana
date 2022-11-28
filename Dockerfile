@@ -26,7 +26,8 @@ COPY scripts scripts
 COPY emails emails
 
 ENV NODE_ENV production
-RUN yarn build
+RUN yarn build && \
+    find public -type f -regex '.*[.]\(tsx*\|scss\)' -delete
 
 FROM ${GO_IMAGE} as go-builder
 
