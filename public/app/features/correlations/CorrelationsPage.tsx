@@ -11,7 +11,7 @@ import { contextSrv } from 'app/core/core';
 import { useNavModel } from 'app/core/hooks/useNavModel';
 import { AccessControlAction } from 'app/types';
 
-import { AddCorrelationForm } from './Forms/AddCorrelationForm';
+import { AddCorrelationFormMockUp } from './Forms/AddCorrelationFormMockUp';
 import { EditCorrelationForm } from './Forms/EditCorrelationForm';
 import { EmptyCorrelationsCTA } from './components/EmptyCorrelationsCTA';
 import { Column, Table } from './components/Table';
@@ -163,7 +163,8 @@ export default function CorrelationsPage() {
             )
           }
 
-          {isAdding && <AddCorrelationForm onClose={() => setIsAdding(false)} onCreated={handleAdded} />}
+          {isAdding && <AddCorrelationFormMockUp onClose={() => setIsAdding(false)} onCreated={handleAdded} />}
+          {/*{isAdding && <AddCorrelationForm onClose={() => setIsAdding(false)} onCreated={handleAdded} />}*/}
 
           {data && data.length >= 1 && (
             <Table
