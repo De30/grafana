@@ -49,7 +49,7 @@ func (s *SqlStateHistorian) RecordStates(ctx context.Context, rule *models.Alert
 	go s.writeHistory(ctx, records)
 }
 
-func (s *SqlStateHistorian) QueryStates(ctx context.Context) (*data.Frame, error) {
+func (s *SqlStateHistorian) QueryStates(ctx context.Context, query models.HistoryQuery) (*data.Frame, error) {
 	// TODO: There should be an app logic layer above this.
 	// TODO: We should not allow querying of state history of rules that the user is not authorized to view.
 	return data.NewFrame("states"), nil
