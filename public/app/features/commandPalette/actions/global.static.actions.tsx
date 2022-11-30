@@ -2,7 +2,7 @@ import { Action, Priority } from 'kbar';
 import React from 'react';
 
 import { isIconName, NavModelItem } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
+import { config, locationService } from '@grafana/runtime';
 import { Icon } from '@grafana/ui';
 
 const SECTION_PAGES = 'Pages';
@@ -30,7 +30,8 @@ function navTreeToActions(navTree: NavModelItem[], parent?: NavModelItem): Actio
       continue;
     }
 
-    const hasPerform = url && !hasChildren;
+    // Parent items should only navigate to url on selection if the feature flag is enabled
+    const hasPerform = url && (hasChildren ? config.featureToggles.cmdPaletteParentHasPerform : true);
 
     const action: Action = {
       id: idForNavItem(navItem),

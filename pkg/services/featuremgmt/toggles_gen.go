@@ -274,4 +274,8 @@ const (
 	// FlagAuthnService
 	// Use new auth service to perform authentication
 	FlagAuthnService = "authnService"
+
+	// FlagCmdPaletteNavigateToParents
+	// DO NOT MERGE: Navigates to parent items on select rather than traversing into them
+	FlagCmdPaletteNavigateToParents = "cmdPaletteNavigateToParents"
 )

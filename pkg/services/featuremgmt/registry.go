@@ -372,5 +372,10 @@ var (
 			Description: "Use new auth service to perform authentication",
 			State:       FeatureStateAlpha,
 		},
+		{
+			Name:        "cmdPaletteNavigateToParents",
+			Description: "DO NOT MERGE: Navigates to parent items on select rather than traversing into them",
+			State:       FeatureStateAlpha,
+		},
 	}
 )

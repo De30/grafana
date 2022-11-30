@@ -83,4 +83,5 @@ export interface FeatureToggles {
   accessTokenExpirationCheck?: boolean;
   elasticsearchBackendMigration?: boolean;
   authnService?: boolean;
+  cmdPaletteNavigateToParents?: boolean;
 }
