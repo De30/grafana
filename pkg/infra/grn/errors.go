@@ -6,4 +6,5 @@ import (
 
 var (
 	ErrInvalidGRN = errutil.NewBase(errutil.StatusValidationFailed, "grn.InvalidGRN")
+	ErrInvalidUID = errutil.NewBase(errutil.StatusValidationFailed, "grn.InvalidUID")
 )

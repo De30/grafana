@@ -63,6 +63,29 @@ func ParseStr(str string) (GRN, error) {
 	return ret, nil
 }
 
+// ValidateUID will return an error if the UID constraints are not matched
+func ValidateUID(uid string) error {
+	if uid == "" {
+		return ErrInvalidUID.Errorf("empty UID")
+	}
+	if len(uid) > 253 {
+		return ErrInvalidUID.Errorf("uid is too long (%d > 253)", len(uid))
+	}
+
+	// k8s constraints have:
+	// https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+	// * contain no more than 253 characters
+	// * contain only lowercase alphanumeric characters, '-' or '.'
+	// * start with an alphanumeric character
+	// * end with an alphanumeric character
+
+	// this matches the current implicit rules enforced by using macron to parse uids from a URL ¯\_(ツ)_/¯
+	if strings.ContainsAny(uid, "/%?#") {
+		return ErrInvalidUID.Errorf("uid contains invalid characters")
+	}
+	return nil
+}
+
 // MustParseStr is a wrapper around ParseStr that panics if the given input is
 // not a valid GRN. This is intended for use in tests.
 func MustParseStr(str string) GRN {
