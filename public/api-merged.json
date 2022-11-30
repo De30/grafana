@@ -2886,13 +2886,13 @@
         "tags": [
           "provisioning"
         ],
-        "summary": "Get all message templates.",
+        "summary": "Get all notification templates.",
         "operationId": "RouteGetTemplates",
         "responses": {
           "200": {
-            "description": "MessageTemplates",
+            "description": "NotificationTemplates",
             "schema": {
-              "$ref": "#/definitions/MessageTemplates"
+              "$ref": "#/definitions/NotificationTemplates"
             }
           },
           "404": {
@@ -2906,7 +2906,7 @@
         "tags": [
           "provisioning"
         ],
-        "summary": "Get a message template.",
+        "summary": "Get a notification template.",
         "operationId": "RouteGetTemplate",
         "parameters": [
           {
@@ -2919,9 +2919,9 @@
         ],
         "responses": {
           "200": {
-            "description": "MessageTemplate",
+            "description": "NotificationTemplate",
             "schema": {
-              "$ref": "#/definitions/MessageTemplate"
+              "$ref": "#/definitions/NotificationTemplate"
             }
           },
           "404": {
@@ -2950,15 +2950,15 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/MessageTemplateContent"
+              "$ref": "#/definitions/NotificationTemplateContent"
             }
           }
         ],
         "responses": {
           "202": {
-            "description": "MessageTemplate",
+            "description": "NotificationTemplate",
             "schema": {
-              "$ref": "#/definitions/MessageTemplate"
+              "$ref": "#/definitions/NotificationTemplate"
             }
           },
           "400": {
@@ -13394,7 +13394,7 @@
         "$ref": "#/definitions/Matcher"
       }
     },
-    "MessageTemplate": {
+    "NotificationTemplate": {
       "type": "object",
       "properties": {
         "name": {
@@ -13408,7 +13408,7 @@
         }
       }
     },
-    "MessageTemplateContent": {
+    "NotificationTemplateContent": {
       "type": "object",
       "properties": {
         "template": {
@@ -13416,10 +13416,10 @@
         }
       }
     },
-    "MessageTemplates": {
+    "NotificationTemplates": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/MessageTemplate"
+        "$ref": "#/definitions/NotificationTemplate"
       }
     },
     "Metadata": {
