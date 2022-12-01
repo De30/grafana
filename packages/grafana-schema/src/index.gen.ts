@@ -88,3 +88,9 @@ export type {
 
 // Raw generated default consts from playlist kind.
 export { defaultPlaylist } from './raw/playlist/x/playlist_types.gen';
+
+// Raw generated types from Stars kind.
+export type { Stars } from './raw/stars/x/stars_types.gen';
+
+// Raw generated default consts from stars kind.
+export { defaultStars } from './raw/stars/x/stars_types.gen';
