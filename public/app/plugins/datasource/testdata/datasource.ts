@@ -15,6 +15,7 @@ import {
   ScopedVars,
   toDataFrame,
   MutableDataFrame,
+  TraceKeyValuePair,
 } from '@grafana/data';
 import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
@@ -252,6 +253,13 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> {
     const start = Date.now() - 1000 * 60 * 30;
 
     for (let i = 0; i < numberOfSpans; i++) {
+      const tags: TraceKeyValuePair[] = [{ key: 'error', value: Math.random() > 0.9 }];
+      if (i === 0) {
+        tags.push({ key: 'span.kind', value: 'client' });
+      }
+      if (i === 1) {
+        tags.push({ key: 'span.kind', value: 'server' });
+      }
       frame.add({
         traceID: spanIdPrefix + '10000',
         spanID: spanIdPrefix + (10000 + i),
@@ -260,6 +268,7 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> {
         serviceName: `Service ${i}`,
         startTime: start + i * 100,
         duration: 300,
+        tags,
       });
     }
 
