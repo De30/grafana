@@ -368,9 +368,10 @@ var (
 			State:       FeatureStateStable,
 		},
 		{
-			Name:        "elasticsearchBackendMigration",
-			Description: "Use Elasticsearch as backend data source",
-			State:       FeatureStateAlpha,
+			Name:            "elasticsearchBackendMigration",
+			Description:     "Use Elasticsearch as backend data source",
+			State:           FeatureStateAlpha,
+			RequiresDevMode: true,
 		},
 		{
 			Name:        "secureSocksDatasourceProxy",

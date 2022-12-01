@@ -89,7 +89,6 @@ Alpha features might be changed or removed without prior notice.
 | `newPanelChromeUI`                 | Show updated look and feel of grafana-ui PanelChrome: panel header, icons, and menu                                                                                          |
 | `showDashboardValidationWarnings`  | Show warnings when dashboards do not validate against the schema                                                                                                             |
 | `mysqlAnsiQuotes`                  | Use double quotes to escape keyword in a MySQL query                                                                                                                         |
-| `elasticsearchBackendMigration`    | Use Elasticsearch as backend data source                                                                                                                                     |
 | `secureSocksDatasourceProxy`       | Enable secure socks tunneling for supported core datasources                                                                                                                 |
 | `authnService`                     | Use new auth service to perform authentication                                                                                                                               |
 
@@ -109,3 +108,4 @@ The following toggles require explicitly setting Grafana's [app mode]({{< relref
 | `queryLibrary`                         | Reusable query library                                    |
 | `accessControlOnCall`                  | Access control primitives for OnCall                      |
 | `nestedFolders`                        | Enable folder nesting                                     |
+| `elasticsearchBackendMigration`        | Use Elasticsearch as backend data source                  |
