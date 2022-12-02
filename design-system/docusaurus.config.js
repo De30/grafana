@@ -52,7 +52,6 @@ const config = {
         },
       }),
     ],
-    // ['@babel/plugin-transform-typescript', {allowDeclareFields: true}]
   ],
 
   themeConfig:
