@@ -17,12 +17,11 @@ import {
   MutableDataFrame,
   DataCatalogueProvider,
   DataCatalogueFolder,
-  DataCatalogueItem,
-  DataCatalogueItemAction,
 } from '@grafana/data';
 import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
 
+import { getRootDataCatalogueFolder } from './dataCatalogue';
 import { queryMetricTree } from './metricTree';
 import { generateRandomEdges, generateRandomNodes, savedNodesResponse } from './nodeGraphUtils';
 import { runStream } from './runStreams';
@@ -42,18 +41,7 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> imp
   }
 
   async getRootDataCatalogueFolder(): Promise<DataCatalogueFolder> {
-    const f = createTestCatalogueItem;
-    return f('test-data', [
-      f('folder1', [
-        f('item1.1'),
-        f('item1.2 with action', undefined, undefined, [{ name: 'action1.1', handler: () => {} }]),
-      ]),
-      f('folder2', [
-        f('item2.1'),
-        f('folder2.2 with attrs', [f('item2.2.1'), f('item2.2.2'), f('item2.2.3')], { version: '1' }),
-        f('item2.3 with attrs  and actions', undefined, { size: '20MB' }, [{ name: 'action2.3', handler: () => {} }]),
-      ]),
-    ]) as DataCatalogueFolder;
+    return await getRootDataCatalogueFolder();
   }
 
   query(options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {
@@ -357,25 +345,3 @@ function runGrafanaLiveQuery(
     key: `testStream.${liveQueryCounter++}`,
   });
 }
-
-const createTestCatalogueItem = (
-  name: string,
-  items?: DataCatalogueItem[],
-  attributes?: Record<string, string>,
-  actions?: DataCatalogueItemAction[]
-) => {
-  if (items) {
-    return {
-      name,
-      attributes,
-      actions,
-      items: async () => items,
-    } as DataCatalogueFolder;
-  } else {
-    return {
-      name,
-      attributes,
-      actions,
-    } as DataCatalogueItem;
-  }
-};

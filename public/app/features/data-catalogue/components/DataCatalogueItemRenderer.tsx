@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 import { DataCatalogueItem, isDataCatalogueFolder } from '@grafana/data';
-import { Button } from '@grafana/ui';
+import { IconButton } from '@grafana/ui';
 
-import { DataCatalogueItemAttributesAndActionsRenderer } from './DataCatalogueItemAttributesAndActionsRenderer';
+import { DataCatalogueItemAttributesRenderer } from './DataCatalogueItemAttributesRenderer';
 
 type Props = {
   item: DataCatalogueItem;
@@ -40,15 +40,17 @@ export const DataCatalogueItemRenderer = (props: Props) => {
   return (
     <div>
       {isFolder && (
-        <Button
+        <IconButton
           variant="secondary"
           size="sm"
-          icon={expanded ? 'arrow-down' : 'arrow-right'}
+          name={expanded ? 'arrow-down' : 'arrow-right'}
           onClick={() => (expanded ? collapse() : expand())}
         />
       )}
       {props.item.name}
-      {(props.item.attrs || props.item.actions) && <DataCatalogueItemAttributesAndActionsRenderer item={props.item} />}
+      {props.item.attributes && props.item.attributes.length > 0 && (
+        <DataCatalogueItemAttributesRenderer item={props.item} />
+      )}
       <div style={{ paddingLeft: '20px' }}>
         {children.map((child, index) => (
           <DataCatalogueItemRenderer key={index} item={child} />

@@ -4,8 +4,72 @@ export interface DataCatalogueItemAction {
   icon?: string;
 }
 
+export enum DataCatalogueItemAttributeType {
+  KeyValue = 'KeyValue',
+  Icon = 'Icon',
+  Action = 'Action',
+}
+
+export interface DataCatalogueItemAttribute {
+  type: DataCatalogueItemAttributeType;
+}
+
+export class DataCatalogueItemAttributeKeyValue implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.KeyValue;
+  key: string;
+  value: string;
+
+  constructor(key: string, value: string) {
+    this.key = key;
+    this.value = value;
+  }
+}
+
+export const IsDataCatalogueItemAttributeKeyValue = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeKeyValue => {
+  return attribute.type === DataCatalogueItemAttributeType.KeyValue;
+};
+
+export const IsDataCatalogueItemAttributeIcon = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeIcon => {
+  return attribute.type === DataCatalogueItemAttributeType.Icon;
+};
+
+export const IsDataCatalogueItemAttributeAction = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeAction => {
+  return attribute.type === DataCatalogueItemAttributeType.Action;
+};
+
+export class DataCatalogueItemAttributeIcon implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Icon;
+  icon: string;
+  name: string;
+  info: string;
+
+  constructor(name: string, icon: string, info: string) {
+    this.name = name;
+    this.icon = icon;
+    this.info = info;
+  }
+}
+
+export class DataCatalogueItemAttributeAction implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Action;
+  name: string;
+  handler: () => void;
+
+  constructor(name: string, handler: () => void) {
+    this.name = name;
+    this.handler = handler;
+  }
+}
+
 export interface DataCatalogueItem {
   name: string;
+  attributes?: DataCatalogueItemAttribute[];
   // @deprecated
   attrs?: Record<string, string>;
   // @deprecated
@@ -36,26 +100,36 @@ export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCata
 
 export class DataCatalogueItemBuilder implements DataCatalogueItem {
   name: string;
-  attrs?: Record<string, string>;
-  actions?: DataCatalogueItemAction[];
+  attributes: DataCatalogueItemAttribute[] = [];
 
   constructor(name: string) {
     this.name = name;
   }
 
-  addAttr(name: string, value: string) {
-    if (!this.attrs) {
-      this.attrs = {};
-    }
-    this.attrs[name] = value;
+  addKeyValue(key: string, value: string) {
+    this.attributes.push(new DataCatalogueItemAttributeKeyValue(key, value));
     return this;
   }
 
+  addIcon(name: string, icon: string, info: string) {
+    this.attributes.push(new DataCatalogueItemAttributeIcon(name, icon, info));
+    return this;
+  }
+
+  addAction(name: string, handler: () => void) {
+    this.attributes.push(new DataCatalogueItemAttributeAction(name, handler));
+    return this;
+  }
+
+  // @deprecated
+  addAttr(name: string, value: string) {
+    this.attributes.push(new DataCatalogueItemAttributeKeyValue(name, value));
+    return this;
+  }
+
+  // @deprecated
   addActions(name: string, handler: () => void) {
-    if (!this.actions) {
-      this.actions = [];
-    }
-    this.actions.push({ name, handler });
+    this.attributes.push(new DataCatalogueItemAttributeAction(name, handler));
     return this;
   }
 }
