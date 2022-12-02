@@ -1,5 +1,6 @@
 export * from './constants';
 export * from './data';
+export * from './dataCatalogue';
 export * from './dataFrame';
 export * from './dataFrameTypes';
 export * from './dataLink';

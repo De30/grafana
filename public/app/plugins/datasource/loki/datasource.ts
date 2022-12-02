@@ -32,6 +32,8 @@ import {
   QueryHint,
   getDefaultTimeRange,
   QueryFixAction,
+  DataCatalogueProvider,
+  DataCatalogueFolder,
 } from '@grafana/data';
 import { FetchError, config, DataSourceWithBackend } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -49,6 +51,7 @@ import LanguageProvider from './LanguageProvider';
 import { LiveStreams, LokiLiveTarget } from './LiveStreams';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
+import { getRootDataCatalogueFolder } from './dataCatalogue';
 import { escapeLabelValueInExactSelector, escapeLabelValueInSelector, isRegexSelector } from './languageUtils';
 import { labelNamesRegex, labelValuesRegex } from './migrations/variableQueryMigrations';
 import {
@@ -105,7 +108,8 @@ export class LokiDatasource
     DataSourceWithLogsContextSupport,
     DataSourceWithLogsVolumeSupport<LokiQuery>,
     DataSourceWithQueryImportSupport<LokiQuery>,
-    DataSourceWithQueryExportSupport<LokiQuery>
+    DataSourceWithQueryExportSupport<LokiQuery>,
+    DataCatalogueProvider
 {
   private streams = new LiveStreams();
   languageProvider: LanguageProvider;
@@ -125,6 +129,13 @@ export class LokiDatasource
       QueryEditor: LokiAnnotationsQueryEditor,
     };
     this.variables = new LokiVariableSupport(this);
+  }
+
+  async getRootDataCatalogueFolder(): Promise<DataCatalogueFolder> {
+    return await getRootDataCatalogueFolder({
+      datasource: this,
+      instanceSettings: this.instanceSettings,
+    });
   }
 
   getLogsVolumeDataProvider(request: DataQueryRequest<LokiQuery>): Observable<DataQueryResponse> | undefined {

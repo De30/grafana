@@ -20,6 +20,7 @@ import {
   QueryResultMetaNotice,
   TimeRange,
   toLegacyResponseData,
+  hasDataCatalogueSupport,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { AngularComponent, getAngularLoader } from '@grafana/runtime';
@@ -33,6 +34,7 @@ import {
 import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
+import { DataCatalogue } from 'app/features/data-catalogue';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 
 import { RowActionComponents } from './QueryActionComponent';
@@ -70,6 +72,7 @@ interface State<TQuery extends DataQuery> {
   data?: PanelData;
   isOpen?: boolean;
   showingHelp: boolean;
+  showingDataCatalogue: boolean;
 }
 
 export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Props<TQuery>, State<TQuery>> {
@@ -84,6 +87,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     data: undefined,
     isOpen: true,
     showingHelp: false,
+    showingDataCatalogue: false,
   };
 
   componentDidMount() {
@@ -317,6 +321,14 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   onToggleHelp = () => {
     this.setState((state) => ({
       showingHelp: !state.showingHelp,
+      showingDataCatalogue: false,
+    }));
+  };
+
+  onToggleDataCatalogue = () => {
+    this.setState((state) => ({
+      showingHelp: false,
+      showingDataCatalogue: !state.showingDataCatalogue,
     }));
   };
 
@@ -403,13 +415,22 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
   renderActions = (props: QueryOperationRowRenderProps) => {
     const { query, hideDisableQuery = false } = this.props;
-    const { hasTextEditMode, datasource, showingHelp } = this.state;
+    const { hasTextEditMode, datasource, showingHelp, showingDataCatalogue } = this.state;
     const isDisabled = query.hide;
 
     const hasEditorHelp = datasource?.components?.QueryEditorHelp;
+    const hasDataCatalogue = hasDataCatalogueSupport(datasource);
 
     return (
       <HorizontalGroup width="auto">
+        {hasDataCatalogue && (
+          <QueryOperationAction
+            title="Show data catalogue"
+            icon="database"
+            onClick={this.onToggleDataCatalogue}
+            active={showingDataCatalogue}
+          />
+        )}
         {hasEditorHelp && (
           <QueryOperationAction
             title="Toggle data source help"
@@ -463,7 +484,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
 
   render() {
     const { query, index, visualization } = this.props;
-    const { datasource, showingHelp, data } = this.state;
+    const { datasource, showingHelp, showingDataCatalogue, data } = this.state;
     const isDisabled = query.hide;
 
     const rowClasses = classNames('query-editor-row', {
@@ -490,6 +511,9 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
         >
           <div className={rowClasses} id={this.id}>
             <ErrorBoundaryAlert>
+              {showingDataCatalogue && hasDataCatalogueSupport(datasource) && (
+                <DataCatalogue dataCatalogueProvider={datasource} onClose={() => this.onToggleDataCatalogue()} />
+              )}
               {showingHelp && DatasourceCheatsheet && (
                 <OperationRowHelp>
                   <DatasourceCheatsheet
