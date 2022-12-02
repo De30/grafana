@@ -2,7 +2,7 @@
   "unversionedId": "grafana",
   "id": "grafana",
   "title": "Grafana",
-  "description": "<iframe",
+  "description": "Buttons",
   "source": "@site/design-system/docs/grafana.mdx",
   "sourceDirName": ".",
   "slug": "/grafana",

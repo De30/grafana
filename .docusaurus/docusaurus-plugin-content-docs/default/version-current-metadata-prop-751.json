@@ -93,7 +93,7 @@
     "grafana": {
       "id": "grafana",
       "title": "Grafana",
-      "description": "<iframe",
+      "description": "Buttons",
       "sidebar": "tutorialSidebar"
     },
     "intro": {
