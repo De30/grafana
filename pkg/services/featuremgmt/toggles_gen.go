@@ -274,4 +274,8 @@ const (
 	// FlagAuthnService
 	// Use new auth service to perform authentication
 	FlagAuthnService = "authnService"
+
+	// FlagCustomThemes
+	// Enable new custom themes feature
+	FlagCustomThemes = "customThemes"
 )

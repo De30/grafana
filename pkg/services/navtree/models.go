@@ -191,6 +191,7 @@ func ApplyAdminIA(root *NavTreeRoot) {
 		}
 		generalNodeLinks = AppendIfNotNil(generalNodeLinks, root.FindById("global-orgs"))
 		generalNodeLinks = AppendIfNotNil(generalNodeLinks, root.FindById("server-settings"))
+		generalNodeLinks = AppendIfNotNil(generalNodeLinks, root.FindById("themes"))
 
 		pluginsNodeLinks = AppendIfNotNil(pluginsNodeLinks, root.FindById("plugins"))
 		pluginsNodeLinks = AppendIfNotNil(pluginsNodeLinks, root.FindById("datasources"))

@@ -497,6 +497,7 @@ export function getAppRoutes(): RouteDescriptor[] {
         () => import(/* webpackChunkName: "NotificationsPage"*/ 'app/features/notifications/NotificationsPage')
       ),
     },
+    ...getThemesRoutes(),
     ...getBrowseStorageRoutes(),
     ...getDynamicDashboardRoutes(),
     ...getPluginCatalogRoutes(),
@@ -533,6 +534,27 @@ export function getBrowseStorageRoutes(cfg = config): RouteDescriptor[] {
       path: '/g/:slug*',
       component: SafeDynamicImport(
         () => import(/* webpackChunkName: "StorageFolderPage" */ '../features/storage/StorageFolderPage')
+      ),
+    },
+  ];
+}
+
+function getThemesRoutes(): RouteDescriptor[] {
+  if (!config.featureToggles.customThemes) {
+    return [];
+  }
+
+  return [
+    {
+      path: '/themes',
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "ThemeListPage"*/ 'app/features/themes/ThemeListPage')
+      ),
+    },
+    {
+      path: '/themes/:uid',
+      component: SafeDynamicImport(
+        () => import(/* webpackChunkName: "ThemeEditPage"*/ 'app/features/themes/ThemeEditPage')
       ),
     },
   ];

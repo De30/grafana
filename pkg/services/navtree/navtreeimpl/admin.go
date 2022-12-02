@@ -106,6 +106,16 @@ func (s *ServiceImpl) getOrgAdminNode(c *models.ReqContext) (*navtree.NavLink, e
 		})
 	}
 
+	if s.features.IsEnabled(featuremgmt.FlagCustomThemes) && c.IsGrafanaAdmin {
+		configNodes = append(configNodes, &navtree.NavLink{
+			Text:     "Themes",
+			Icon:     "palette",
+			SubTitle: "Create and manage custom themes",
+			Id:       "themes",
+			Url:      s.cfg.AppSubURL + "/themes",
+		})
+	}
+
 	configNode := &navtree.NavLink{
 		Id:         navtree.NavIDCfg,
 		Text:       "Configuration",

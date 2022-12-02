@@ -130,6 +130,7 @@ import (
 	teamguardianManager "github.com/grafana/grafana/pkg/services/teamguardian/manager"
 	tempuser "github.com/grafana/grafana/pkg/services/temp_user"
 	"github.com/grafana/grafana/pkg/services/temp_user/tempuserimpl"
+	"github.com/grafana/grafana/pkg/services/themes/themesimpl"
 	"github.com/grafana/grafana/pkg/services/thumbs"
 	"github.com/grafana/grafana/pkg/services/thumbs/dashboardthumbsimpl"
 	"github.com/grafana/grafana/pkg/services/updatechecker"
@@ -334,6 +335,7 @@ var wireBasicSet = wire.NewSet(
 	resolver.ProvideEntityReferenceResolver,
 	httpentitystore.ProvideHTTPEntityStore,
 	teamimpl.ProvideService,
+	themesimpl.ProvideService,
 	tempuserimpl.ProvideService,
 	loginattemptimpl.ProvideService,
 	wire.Bind(new(loginattempt.Service), new(*loginattemptimpl.Service)),

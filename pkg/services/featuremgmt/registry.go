@@ -378,5 +378,10 @@ var (
 			Description: "Use new auth service to perform authentication",
 			State:       FeatureStateAlpha,
 		},
+		{
+			Name:        "customThemes",
+			Description: "Enable new custom themes feature",
+			State:       FeatureStateAlpha,
+		},
 	}
 )
