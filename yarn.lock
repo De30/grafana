@@ -23283,6 +23283,7 @@ __metadata:
     "@docusaurus/core": 2.2.0
     "@docusaurus/module-type-aliases": 2.2.0
     "@docusaurus/preset-classic": 2.2.0
+    "@docusaurus/types": 2.2.0
     "@emotion/css": 11.10.5
     "@emotion/eslint-plugin": 11.10.0
     "@emotion/react": 11.10.5

@@ -101,6 +101,7 @@
     "@betterer/eslint": "5.4.0",
     "@betterer/regexp": "5.4.0",
     "@docusaurus/module-type-aliases": "2.2.0",
+    "@docusaurus/types": "2.2.0",
     "@emotion/eslint-plugin": "11.10.0",
     "@grafana/e2e": "workspace:*",
     "@grafana/eslint-config": "5.0.0",
