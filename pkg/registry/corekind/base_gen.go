@@ -12,8 +12,11 @@ package corekind
 import (
 	"fmt"
 
+	"github.com/grafana/grafana/pkg/kinds/check"
 	"github.com/grafana/grafana/pkg/kinds/dashboard"
+	"github.com/grafana/grafana/pkg/kinds/platformatonsm"
 	"github.com/grafana/grafana/pkg/kinds/playlist"
+	"github.com/grafana/grafana/pkg/kinds/service"
 	"github.com/grafana/grafana/pkg/kinds/svg"
 	"github.com/grafana/grafana/pkg/kinds/team"
 	"github.com/grafana/grafana/pkg/kindsys"
@@ -33,23 +36,39 @@ import (
 type Base struct {
 	all                   []kindsys.Interface
 	numRaw, numStructured int
+	check                 *check.Kind
 	dashboard             *dashboard.Kind
+	platformatonsm        *platformatonsm.Kind
 	playlist              *playlist.Kind
 	svg                   *svg.Kind
+	service               *service.Kind
 	team                  *team.Kind
 }
 
 // type guards
 var (
+	_ kindsys.Structured = &check.Kind{}
 	_ kindsys.Structured = &dashboard.Kind{}
+	_ kindsys.Structured = &platformatonsm.Kind{}
 	_ kindsys.Structured = &playlist.Kind{}
 	_ kindsys.Raw        = &svg.Kind{}
+	_ kindsys.Structured = &service.Kind{}
 	_ kindsys.Structured = &team.Kind{}
 )
+
+// Check returns the [kindsys.Interface] implementation for the check kind.
+func (b *Base) Check() *check.Kind {
+	return b.check
+}
 
 // Dashboard returns the [kindsys.Interface] implementation for the dashboard kind.
 func (b *Base) Dashboard() *dashboard.Kind {
 	return b.dashboard
+}
+
+// PlatformatonSM returns the [kindsys.Interface] implementation for the platformatonsm kind.
+func (b *Base) PlatformatonSM() *platformatonsm.Kind {
+	return b.platformatonsm
 }
 
 // Playlist returns the [kindsys.Interface] implementation for the playlist kind.
@@ -62,6 +81,11 @@ func (b *Base) SVG() *svg.Kind {
 	return b.svg
 }
 
+// Service returns the [kindsys.Interface] implementation for the service kind.
+func (b *Base) Service() *service.Kind {
+	return b.service
+}
+
 // Team returns the [kindsys.Interface] implementation for the team kind.
 func (b *Base) Team() *team.Kind {
 	return b.team
@@ -71,14 +95,26 @@ func doNewBase(rt *thema.Runtime) *Base {
 	var err error
 	reg := &Base{
 		numRaw:        1,
-		numStructured: 3,
+		numStructured: 6,
 	}
+
+	reg.check, err = check.NewKind(rt)
+	if err != nil {
+		panic(fmt.Sprintf("error while initializing the check Kind: %s", err))
+	}
+	reg.all = append(reg.all, reg.check)
 
 	reg.dashboard, err = dashboard.NewKind(rt)
 	if err != nil {
 		panic(fmt.Sprintf("error while initializing the dashboard Kind: %s", err))
 	}
 	reg.all = append(reg.all, reg.dashboard)
+
+	reg.platformatonsm, err = platformatonsm.NewKind(rt)
+	if err != nil {
+		panic(fmt.Sprintf("error while initializing the platformatonsm Kind: %s", err))
+	}
+	reg.all = append(reg.all, reg.platformatonsm)
 
 	reg.playlist, err = playlist.NewKind(rt)
 	if err != nil {
@@ -91,6 +127,12 @@ func doNewBase(rt *thema.Runtime) *Base {
 		panic(fmt.Sprintf("error while initializing the svg Kind: %s", err))
 	}
 	reg.all = append(reg.all, reg.svg)
+
+	reg.service, err = service.NewKind(rt)
+	if err != nil {
+		panic(fmt.Sprintf("error while initializing the service Kind: %s", err))
+	}
+	reg.all = append(reg.all, reg.service)
 
 	reg.team, err = team.NewKind(rt)
 	if err != nil {

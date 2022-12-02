@@ -7,6 +7,12 @@
 //
 // Run 'make gen-cue' from repository root to regenerate.
 
+// Raw generated types from Check kind.
+export type { Check } from './raw/check/x/check_types.gen';
+
+// Raw generated default consts from check kind.
+export { defaultCheck } from './raw/check/x/check_types.gen';
+
 // Raw generated types from Dashboard kind.
 export type {
   AnnotationTarget,
@@ -88,6 +94,15 @@ export type {
 
 // Raw generated default consts from playlist kind.
 export { defaultPlaylist } from './raw/playlist/x/playlist_types.gen';
+
+// Raw generated types from Service kind.
+export type {
+  Service,
+  Endpoint
+} from './raw/service/x/service_types.gen';
+
+// Raw generated default consts from service kind.
+export { defaultService } from './raw/service/x/service_types.gen';
 
 // Raw generated types from Team kind.
 export type {
