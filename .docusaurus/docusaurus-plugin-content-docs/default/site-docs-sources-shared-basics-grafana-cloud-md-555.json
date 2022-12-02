@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/basics/grafana-cloud",
+  "id": "sources/shared/basics/grafana-cloud",
+  "title": "Grafana Cloud",
+  "description": "Grafana Cloud",
+  "source": "@site/docs/sources/shared/basics/grafana-cloud.md",
+  "sourceDirName": "sources/shared/basics",
+  "slug": "/sources/shared/basics/grafana-cloud",
+  "permalink": "/docs/sources/shared/basics/grafana-cloud",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/basics/grafana-cloud.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/basics/grafana-cloud/"],
+    "title": "Grafana Cloud"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Grafana managed alerts",
+    "permalink": "/docs/sources/shared/alerts/grafana-managed-alerts"
+  },
+  "next": {
+    "title": "Grafana Enterprise",
+    "permalink": "/docs/sources/shared/basics/grafana-enterprise"
+  }
+}

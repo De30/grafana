@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-grafana/enterprise-configuration/index",
+  "id": "sources/setup-grafana/configure-grafana/enterprise-configuration/index",
+  "title": "Configure Grafana Enterprise",
+  "description": "Learn about Grafana Enterprise configuration options that you can specify.",
+  "source": "@site/docs/sources/setup-grafana/configure-grafana/enterprise-configuration/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-grafana/enterprise-configuration",
+  "slug": "/sources/setup-grafana/configure-grafana/enterprise-configuration/",
+  "permalink": "/docs/sources/setup-grafana/configure-grafana/enterprise-configuration/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-grafana/enterprise-configuration/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/enterprise/enterprise-configuration/",
+      "/docs/grafana/latest/setup-grafana/configure-grafana/enterprise-configuration/"
+    ],
+    "description": "Learn about Grafana Enterprise configuration options that you can specify.",
+    "title": "Configure Grafana Enterprise",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure tracing to troubleshoot Grafana",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/configure-tracing/"
+  },
+  "next": {
+    "title": "Configure feature toggles",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/feature-toggles/"
+  }
+}

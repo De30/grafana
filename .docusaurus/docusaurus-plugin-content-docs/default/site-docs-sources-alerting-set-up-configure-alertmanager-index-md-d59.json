@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/alerting/set-up/configure-alertmanager/index",
+  "id": "sources/alerting/set-up/configure-alertmanager/index",
+  "title": "Add an external Alertmanager",
+  "description": "Configure Alertmanager",
+  "source": "@site/docs/sources/alerting/set-up/configure-alertmanager/index.md",
+  "sourceDirName": "sources/alerting/set-up/configure-alertmanager",
+  "slug": "/sources/alerting/set-up/configure-alertmanager/",
+  "permalink": "/docs/sources/alerting/set-up/configure-alertmanager/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/set-up/configure-alertmanager/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/configure-alertmanager",
+      "/docs/grafana/latest/alerting/configure-alertmanager"
+    ],
+    "description": "Configure Alertmanager",
+    "keywords": ["grafana", "alerting", "set up", "configure", "external Alertmanager"],
+    "title": "Add an external Alertmanager",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Performance considerations and limitations",
+    "permalink": "/docs/sources/alerting/performance-limitations/"
+  },
+  "next": {
+    "title": "Create and manage alerting resources using file provisioning",
+    "permalink": "/docs/sources/alerting/set-up/provision-alerting-resources/file-provisioning/"
+  }
+}

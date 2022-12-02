@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/datasources/parca",
+  "id": "sources/datasources/parca",
+  "title": "Parca",
+  "description": "Continuous profiling for analysis of CPU and memory usage, down to the line number and throughout time. Saving infrastructure cost, improving performance, and increasing reliability.",
+  "source": "@site/docs/sources/datasources/parca.md",
+  "sourceDirName": "sources/datasources",
+  "slug": "/sources/datasources/parca",
+  "permalink": "/docs/sources/datasources/parca",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/datasources/parca.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/datasources/parca/", "/docs/grafana/latest/features/datasources/parca/"],
+    "description": "Continuous profiling for analysis of CPU and memory usage, down to the line number and throughout time. Saving infrastructure cost, improving performance, and increasing reliability.",
+    "keywords": ["parca", "guide", "profiling"],
+    "title": "Parca",
+    "weight": 1110
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Microsoft SQL Server template variables",
+    "permalink": "/docs/sources/datasources/mssql/template-variables/"
+  },
+  "next": {
+    "title": "Phlare",
+    "permalink": "/docs/sources/datasources/phlare"
+  }
+}

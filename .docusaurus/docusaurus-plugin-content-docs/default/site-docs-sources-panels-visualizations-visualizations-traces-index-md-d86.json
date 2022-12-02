@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/traces/index",
+  "id": "sources/panels-visualizations/visualizations/traces/index",
+  "title": "Traces",
+  "description": "Note: This panel is currently in beta. Expect changes in future releases.",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/traces/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/traces",
+  "slug": "/sources/panels-visualizations/visualizations/traces/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/traces/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/traces/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/visualizations/traces/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/traces/"
+    ],
+    "keywords": ["grafana", "dashboard", "documentation", "panels", "traces"],
+    "title": "Traces",
+    "weight": 850
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Time series",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/time-series/"
+  },
+  "next": {
+    "title": "Release notes for Grafana 7.3.0",
+    "permalink": "/docs/sources/release-notes/release-notes-7-3-0"
+  }
+}

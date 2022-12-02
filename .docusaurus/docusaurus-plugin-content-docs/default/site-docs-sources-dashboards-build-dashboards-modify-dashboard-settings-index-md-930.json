@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/dashboards/build-dashboards/modify-dashboard-settings/index",
+  "id": "sources/dashboards/build-dashboards/modify-dashboard-settings/index",
+  "title": "Modify dashboard settings",
+  "description": "The dashboard settings page enables you to:",
+  "source": "@site/docs/sources/dashboards/build-dashboards/modify-dashboard-settings/index.md",
+  "sourceDirName": "sources/dashboards/build-dashboards/modify-dashboard-settings",
+  "slug": "/sources/dashboards/build-dashboards/modify-dashboard-settings/",
+  "permalink": "/docs/sources/dashboards/build-dashboards/modify-dashboard-settings/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/dashboards/build-dashboards/modify-dashboard-settings/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/dashboards/build-dashboards/modify-dashboard-settings/"],
+    "title": "Modify dashboard settings",
+    "menuTitle": "Dashboard settings",
+    "weight": 8,
+    "keywords": ["time settings", "variables", "links", "dashboard", "settings"]
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Manage dashboard version history",
+    "permalink": "/docs/sources/dashboards/build-dashboards/manage-version-history/"
+  },
+  "next": {
+    "title": "JSON model",
+    "permalink": "/docs/sources/dashboards/build-dashboards/view-dashboard-json-model/"
+  }
+}

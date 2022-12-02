@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/alerting/alerting-rules/create-grafana-managed-rule",
+  "id": "sources/alerting/alerting-rules/create-grafana-managed-rule",
+  "title": "Create Grafana managed alert rules",
+  "description": "Create Grafana managed alert rule",
+  "source": "@site/docs/sources/alerting/alerting-rules/create-grafana-managed-rule.md",
+  "sourceDirName": "sources/alerting/alerting-rules",
+  "slug": "/sources/alerting/alerting-rules/create-grafana-managed-rule",
+  "permalink": "/docs/sources/alerting/alerting-rules/create-grafana-managed-rule",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/alerting-rules/create-grafana-managed-rule.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/alerting-rules/create-grafana-managed-rule/",
+      "/docs/grafana/latest/alerting/unified-alerting/alerting-rules/create-grafana-managed-rule/"
+    ],
+    "description": "Create Grafana managed alert rule",
+    "keywords": ["grafana", "alerting", "guide", "rules", "create"],
+    "title": "Create Grafana managed alert rules",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Manage user preferences",
+    "permalink": "/docs/sources/administration/user-management/user-preferences/"
+  },
+  "next": {
+    "title": "Create Grafana Mimir or Loki managed recording rules",
+    "permalink": "/docs/sources/alerting/alerting-rules/create-mimir-loki-managed-recording-rule"
+  }
+}

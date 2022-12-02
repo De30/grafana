@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/datasources/influxdb/query-editor/index",
+  "id": "sources/datasources/influxdb/query-editor/index",
+  "title": "Flux support in Grafana",
+  "description": "Guide for Flux in Grafana",
+  "source": "@site/docs/sources/datasources/influxdb/query-editor/index.md",
+  "sourceDirName": "sources/datasources/influxdb/query-editor",
+  "slug": "/sources/datasources/influxdb/query-editor/",
+  "permalink": "/docs/sources/datasources/influxdb/query-editor/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/datasources/influxdb/query-editor/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/datasources/influxdb/influxdb-flux/",
+      "/docs/grafana/latest/datasources/influxdb/query-editor/",
+      "/docs/grafana/latest/data-sources/influxdb/query-editor/"
+    ],
+    "description": "Guide for Flux in Grafana",
+    "title": "Flux support in Grafana",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Graphite template variables",
+    "permalink": "/docs/sources/datasources/graphite/template-variables/"
+  },
+  "next": {
+    "title": "InfluxDB template variables",
+    "permalink": "/docs/sources/datasources/influxdb/template-variables/"
+  }
+}

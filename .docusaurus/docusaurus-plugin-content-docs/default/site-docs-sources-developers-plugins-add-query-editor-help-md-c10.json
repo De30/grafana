@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/add-query-editor-help",
+  "id": "sources/developers/plugins/add-query-editor-help",
+  "title": "Add query editor help",
+  "description": "By adding a help component to your plugin, you can for example create \"cheat sheets\" with commonly used queries. When the user clicks on one of the examples, it automatically updates the query editor. It's a great way to increase productivity for your users.",
+  "source": "@site/docs/sources/developers/plugins/add-query-editor-help.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-query-editor-help",
+  "permalink": "/docs/sources/developers/plugins/add-query-editor-help",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-query-editor-help.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/add-query-editor-help/"],
+    "title": "Add query editor help"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add authentication for data source plugins",
+    "permalink": "/docs/sources/developers/plugins/add-authentication-for-data-source-plugins"
+  },
+  "next": {
+    "title": "Add support for annotations",
+    "permalink": "/docs/sources/developers/plugins/add-support-for-annotations"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/alerting/fundamentals/data-source-alerting",
+  "id": "sources/alerting/fundamentals/data-source-alerting",
+  "title": "Data sources",
+  "description": "Data sources in Grafana Alerting",
+  "source": "@site/docs/sources/alerting/fundamentals/data-source-alerting.md",
+  "sourceDirName": "sources/alerting/fundamentals",
+  "slug": "/sources/alerting/fundamentals/data-source-alerting",
+  "permalink": "/docs/sources/alerting/fundamentals/data-source-alerting",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/fundamentals/data-source-alerting.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/alerting/fundamentals/data-source-alerting/"],
+    "description": "Data sources in Grafana Alerting",
+    "title": "Data sources",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Templating labels and annotations",
+    "permalink": "/docs/sources/alerting/fundamentals/annotation-label/variables-label-annotation"
+  },
+  "next": {
+    "title": "Alerting on numeric data",
+    "permalink": "/docs/sources/alerting/fundamentals/evaluate-grafana-alerts"
+  }
+}

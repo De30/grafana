@@ -1,0 +1,38 @@
+{
+  "unversionedId": "sources/alerting/manage-notifications/create-contact-point",
+  "id": "sources/alerting/manage-notifications/create-contact-point",
+  "title": "Manage contact points",
+  "description": "Use contact points to define how your contacts are notified when an alert rule fires. You can create, edit, delete, and test a contact point.",
+  "source": "@site/docs/sources/alerting/manage-notifications/create-contact-point.md",
+  "sourceDirName": "sources/alerting/manage-notifications",
+  "slug": "/sources/alerting/manage-notifications/create-contact-point",
+  "permalink": "/docs/sources/alerting/manage-notifications/create-contact-point",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/manage-notifications/create-contact-point.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/contact-points/create-contact-point/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/",
+      "/docs/grafana/latest/alerting/message-templating/",
+      "/docs/grafana/latest/alerting/unified-alerting/message-templating/",
+      "/docs/grafana/latest/alerting/contact-points/delete-contact-point/",
+      "/docs/grafana/latest/alerting/contact-points/edit-contact-point/",
+      "/docs/grafana/latest/alerting/contact-points/test-contact-point/",
+      "/docs/grafana/latest/alerting/manage-notifications/create-contact-point/"
+    ],
+    "keywords": ["grafana", "alerting", "guide", "contact point", "templating"],
+    "title": "Manage contact points",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "State and health of alerting rules",
+    "permalink": "/docs/sources/alerting/fundamentals/state-and-health"
+  },
+  "next": {
+    "title": "Create and edit message templates",
+    "permalink": "/docs/sources/alerting/manage-notifications/create-message-template"
+  }
+}

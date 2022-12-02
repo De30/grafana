@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/administration/plugin-management/index",
+  "id": "sources/administration/plugin-management/index",
+  "title": "Plugin management",
+  "description": "Besides the wide range of visualizations and data sources that are available immediately after you install Grafana, you can extend your Grafana experience with plugins.",
+  "source": "@site/docs/sources/administration/plugin-management/index.md",
+  "sourceDirName": "sources/administration/plugin-management",
+  "slug": "/sources/administration/plugin-management/",
+  "permalink": "/docs/sources/administration/plugin-management/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/plugin-management/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/plugins/",
+      "/docs/grafana/latest/plugins/catalog/",
+      "/docs/grafana/latest/plugins/installation/",
+      "/docs/grafana/latest/plugins/plugin-signature-verification/",
+      "/docs/grafana/latest/plugins/plugin-signatures/",
+      "/docs/grafana/latest/administration/plugin-management/"
+    ],
+    "title": "Plugin management",
+    "weight": 600
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Organization preferences",
+    "permalink": "/docs/sources/administration/organization-preferences/"
+  },
+  "next": {
+    "title": "Provision Grafana",
+    "permalink": "/docs/sources/administration/provisioning/"
+  }
+}

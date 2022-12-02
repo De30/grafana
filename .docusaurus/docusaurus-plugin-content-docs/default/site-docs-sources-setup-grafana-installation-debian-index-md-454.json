@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/installation/debian/index",
+  "id": "sources/setup-grafana/installation/debian/index",
+  "title": "Install on Debian or Ubuntu",
+  "description": "Install guide for Grafana on Debian or Ubuntu",
+  "source": "@site/docs/sources/setup-grafana/installation/debian/index.md",
+  "sourceDirName": "sources/setup-grafana/installation/debian",
+  "slug": "/sources/setup-grafana/installation/debian/",
+  "permalink": "/docs/sources/setup-grafana/installation/debian/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/installation/debian/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/installation/debian/",
+      "/docs/grafana/latest/installation/installation/debian/",
+      "/docs/grafana/latest/setup-grafana/installation/debian/"
+    ],
+    "description": "Install guide for Grafana on Debian or Ubuntu",
+    "title": "Install on Debian or Ubuntu",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Troubleshooting",
+    "permalink": "/docs/sources/setup-grafana/image-rendering/troubleshooting/"
+  },
+  "next": {
+    "title": "Run Grafana Docker image",
+    "permalink": "/docs/sources/setup-grafana/installation/docker/"
+  }
+}

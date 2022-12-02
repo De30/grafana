@@ -3,6 +3,11 @@ last 1 chrome versions
 last 1 firefox versions
 last 1 safari versions
 
+[development]
+last 1 chrome version
+last 1 firefox version
+last 1 safari version
+
 [production]
 last 2 Firefox versions
 last 2 Chrome versions
@@ -11,5 +16,3 @@ last 2 Edge versions
 last 1 ios_saf versions
 last 1 and_chr versions
 last 1 samsung versions
-
-

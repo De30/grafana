@@ -1,0 +1,46 @@
+{
+  "unversionedId": "sources/alerting/manage-notifications/create-message-template",
+  "id": "sources/alerting/manage-notifications/create-message-template",
+  "title": "Create and edit message templates",
+  "description": "You can use message templates to customize notification messages for the contact point types.",
+  "source": "@site/docs/sources/alerting/manage-notifications/create-message-template.md",
+  "sourceDirName": "sources/alerting/manage-notifications",
+  "slug": "/sources/alerting/manage-notifications/create-message-template",
+  "permalink": "/docs/sources/alerting/manage-notifications/create-message-template",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/manage-notifications/create-message-template.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/contact-points/message-templating/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/create-message-template/",
+      "/docs/grafana/latest/alerting/message-templating/",
+      "/docs/grafana/latest/alerting/unified-alerting/message-templating/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/delete-message-template/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/edit-message-template/",
+      "/docs/grafana/latest/alerting/manage-notifications/create-message-template/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/example-template/",
+      "/docs/grafana/latest/alerting/message-templating/",
+      "/docs/grafana/latest/alerting/unified-alerting/message-templating/",
+      "/docs/grafana/latest/alerting/fundamentals/contact-points/example-template/",
+      "/docs/grafana/latest/alerting/contact-points/message-templating/template-data/",
+      "/docs/grafana/latest/alerting/message-templating/template-data/",
+      "/docs/grafana/latest/alerting/unified-alerting/message-templating/template-data/",
+      "/docs/grafana/latest/alerting/fundamentals/contact-points/template-data/"
+    ],
+    "keywords": ["grafana", "alerting", "guide", "contact point", "templating"],
+    "title": "Create and edit message templates",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Manage contact points",
+    "permalink": "/docs/sources/alerting/manage-notifications/create-contact-point"
+  },
+  "next": {
+    "title": "Manage notification policies",
+    "permalink": "/docs/sources/alerting/manage-notifications/create-notification-policy"
+  }
+}

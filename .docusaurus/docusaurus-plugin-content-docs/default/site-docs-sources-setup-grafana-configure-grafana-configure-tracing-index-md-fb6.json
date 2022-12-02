@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-grafana/configure-tracing/index",
+  "id": "sources/setup-grafana/configure-grafana/configure-tracing/index",
+  "title": "Configure tracing to troubleshoot Grafana",
+  "description": "You can set up the grafana-server process to enable certain diagnostics when it starts. This can be helpful",
+  "source": "@site/docs/sources/setup-grafana/configure-grafana/configure-tracing/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-grafana/configure-tracing",
+  "slug": "/sources/setup-grafana/configure-grafana/configure-tracing/",
+  "permalink": "/docs/sources/setup-grafana/configure-grafana/configure-tracing/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-grafana/configure-tracing/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/setup-grafana/enable-diagnostics/",
+      "/docs/grafana/latest/troubleshooting/diagnostics/",
+      "/docs/grafana/latest/setup-grafana/configure-grafana/configure-tracing/"
+    ],
+    "title": "Configure tracing to troubleshoot Grafana",
+    "menuTitle": "Configure tracing",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure custom branding",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/configure-custom-branding/"
+  },
+  "next": {
+    "title": "Configure Grafana Enterprise",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/enterprise-configuration/"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/news/index",
+  "id": "sources/panels-visualizations/visualizations/news/index",
+  "title": "News",
+  "description": "News",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/news/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/news",
+  "slug": "/sources/panels-visualizations/visualizations/news/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/news/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/news/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/visualizations/news-graph/",
+      "/docs/grafana/latest/visualizations/news-panel/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/news/"
+    ],
+    "keywords": ["grafana", "news", "documentation", "panels", "news panel"],
+    "title": "News",
+    "weight": 800
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Logs panel",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/logs/"
+  },
+  "next": {
+    "title": "Node graph",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/node-graph/"
+  }
+}

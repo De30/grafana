@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/alerting/fundamentals/alert-rules/alert-rule-types",
+  "id": "sources/alerting/fundamentals/alert-rules/alert-rule-types",
+  "title": "Alert rule types",
+  "description": "Learn about the different alert rule types",
+  "source": "@site/docs/sources/alerting/fundamentals/alert-rules/alert-rule-types.md",
+  "sourceDirName": "sources/alerting/fundamentals/alert-rules",
+  "slug": "/sources/alerting/fundamentals/alert-rules/alert-rule-types",
+  "permalink": "/docs/sources/alerting/fundamentals/alert-rules/alert-rule-types",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/fundamentals/alert-rules/alert-rule-types.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/alerting/fundamentals/alert-rules/alert-rule-types/"],
+    "description": "Learn about the different alert rule types",
+    "keywords": ["grafana", "alerting", "rule types"],
+    "title": "Alert rule types",
+    "weight": 102
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Alert instances",
+    "permalink": "/docs/sources/alerting/fundamentals/alert-rules/alert-instances"
+  },
+  "next": {
+    "title": "Message templating",
+    "permalink": "/docs/sources/alerting/fundamentals/alert-rules/message-templating"
+  }
+}

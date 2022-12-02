@@ -1,0 +1,37 @@
+{
+  "unversionedId": "sources/panels-visualizations/configure-panel-options/index",
+  "id": "sources/panels-visualizations/configure-panel-options/index",
+  "title": "Configure panel options",
+  "description": "A Grafana panel is the user interface you use to define a data source query, and transform and format data that appears in visualizations.",
+  "source": "@site/docs/sources/panels-visualizations/configure-panel-options/index.md",
+  "sourceDirName": "sources/panels-visualizations/configure-panel-options",
+  "slug": "/sources/panels-visualizations/configure-panel-options/",
+  "permalink": "/docs/sources/panels-visualizations/configure-panel-options/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/configure-panel-options/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/add-panels-dynamically/",
+      "/docs/grafana/latest/panels/repeat-panels-or-rows/",
+      "/docs/grafana/latest/panels/working-with-panels/add-title-and-description/",
+      "/docs/grafana/latest/panels/working-with-panels/view-json-model/",
+      "/docs/grafana/latest/panels/configure-panel-options/",
+      "/docs/grafana/latest/panels-visualizations/configure-panel-options/"
+    ],
+    "title": "Configure panel options",
+    "menuTitle": "Configure panel options",
+    "weight": 2,
+    "keywords": ["panel", "dynamic", "add", "title", "description", "JSON model"]
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure field overrides",
+    "permalink": "/docs/sources/panels-visualizations/configure-overrides/"
+  },
+  "next": {
+    "title": "Configure standard options",
+    "permalink": "/docs/sources/panels-visualizations/configure-standard-options/"
+  }
+}

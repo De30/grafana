@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-security/configure-authentication/generic-oauth/index",
+  "id": "sources/setup-grafana/configure-security/configure-authentication/generic-oauth/index",
+  "title": "Configure generic OAuth authentication",
+  "description": "Grafana OAuthentication Guide",
+  "source": "@site/docs/sources/setup-grafana/configure-security/configure-authentication/generic-oauth/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-security/configure-authentication/generic-oauth",
+  "slug": "/sources/setup-grafana/configure-security/configure-authentication/generic-oauth/",
+  "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/generic-oauth/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-security/configure-authentication/generic-oauth/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/auth/generic-oauth/",
+      "/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/generic-oauth/"
+    ],
+    "description": "Grafana OAuthentication Guide",
+    "keywords": ["grafana", "configuration", "documentation", "oauth"],
+    "title": "Configure generic OAuth authentication",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure enhanced LDAP integration",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/enhanced-ldap/"
+  },
+  "next": {
+    "title": "Configure GitHub OAuth2 Authentication",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/github/"
+  }
+}

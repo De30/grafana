@@ -1,0 +1,39 @@
+{
+  "unversionedId": "sources/alerting/manage-notifications/create-silence",
+  "id": "sources/alerting/manage-notifications/create-silence",
+  "title": "Manage silences",
+  "description": "Add silence alert notification",
+  "source": "@site/docs/sources/alerting/manage-notifications/create-silence.md",
+  "sourceDirName": "sources/alerting/manage-notifications",
+  "slug": "/sources/alerting/manage-notifications/create-silence",
+  "permalink": "/docs/sources/alerting/manage-notifications/create-silence",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/manage-notifications/create-silence.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/silences/create-silence/",
+      "/docs/grafana/latest/alerting/unified-alerting/silences/",
+      "/docs/grafana/latest/alerting/silences/edit-silence/",
+      "/docs/grafana/latest/alerting/unified-alerting/silences/",
+      "/docs/grafana/latest/alerting/silences/linking-to-silence-form/",
+      "/docs/grafana/latest/alerting/unified-alerting/silences/",
+      "/docs/grafana/latest/alerting/silences/remove-silence/",
+      "/docs/grafana/latest/alerting/unified-alerting/silences/"
+    ],
+    "description": "Add silence alert notification",
+    "keywords": ["grafana", "alerting", "silence", "mute"],
+    "title": "Manage silences",
+    "weight": 450
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Manage notification policies",
+    "permalink": "/docs/sources/alerting/manage-notifications/create-notification-policy"
+  },
+  "next": {
+    "title": "Create mute timings",
+    "permalink": "/docs/sources/alerting/manage-notifications/mute-timings"
+  }
+}

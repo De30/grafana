@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/introduction/grafana-enterprise",
+  "id": "sources/introduction/grafana-enterprise",
+  "title": "Grafana Enterprise",
+  "description": "Grafana Enterprise overview",
+  "source": "@site/docs/sources/introduction/grafana-enterprise.md",
+  "sourceDirName": "sources/introduction",
+  "slug": "/sources/introduction/grafana-enterprise",
+  "permalink": "/docs/sources/introduction/grafana-enterprise",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/introduction/grafana-enterprise.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/enterprise/", "/docs/grafana/latest/introduction/grafana-enterprise/"],
+    "description": "Grafana Enterprise overview",
+    "title": "Grafana Enterprise",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Grafana Cloud",
+    "permalink": "/docs/sources/introduction/grafana-cloud"
+  },
+  "next": {
+    "title": "Alert notification templating",
+    "permalink": "/docs/sources/old-alerting/add-notification-template"
+  }
+}

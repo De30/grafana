@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/test",
+  "id": "sources/shared/test",
+  "title": "Shared Content",
+  "description": "Intro text",
+  "source": "@site/docs/sources/shared/test.md",
+  "sourceDirName": "sources/shared",
+  "slug": "/sources/shared/test",
+  "permalink": "/docs/sources/shared/test",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/test.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/test/"],
+    "title": "Shared Content"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Serving Grafana on a port < 1024",
+    "permalink": "/docs/sources/shared/systemd/bind-net-capabilities"
+  },
+  "next": {
+    "title": "View user list",
+    "permalink": "/docs/sources/shared/view-server-org-list"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/release-notes/release-notes-8-0-5",
+  "id": "sources/release-notes/release-notes-8-0-5",
+  "title": "Release notes for Grafana 8.0.5",
+  "description": "Features and enhancements",
+  "source": "@site/docs/sources/release-notes/release-notes-8-0-5.md",
+  "sourceDirName": "sources/release-notes",
+  "slug": "/sources/release-notes/release-notes-8-0-5",
+  "permalink": "/docs/sources/release-notes/release-notes-8-0-5",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/release-notes/release-notes-8-0-5.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "_build": {
+      "list": false
+    },
+    "aliases": ["/docs/grafana/latest/release-notes/release-notes-8-0-5/"],
+    "title": "Release notes for Grafana 8.0.5"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Release notes for Grafana 8.0.4",
+    "permalink": "/docs/sources/release-notes/release-notes-8-0-4"
+  },
+  "next": {
+    "title": "Release notes for Grafana 8.0.6",
+    "permalink": "/docs/sources/release-notes/release-notes-8-0-6"
+  }
+}

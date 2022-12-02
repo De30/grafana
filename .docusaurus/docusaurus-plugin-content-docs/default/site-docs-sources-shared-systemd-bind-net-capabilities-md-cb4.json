@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/systemd/bind-net-capabilities",
+  "id": "sources/shared/systemd/bind-net-capabilities",
+  "title": "Serving Grafana on a port < 1024",
+  "description": "If you are using systemd and want to start Grafana on a port that is less than 1024, then you must add a systemd unit override.",
+  "source": "@site/docs/sources/shared/systemd/bind-net-capabilities.md",
+  "sourceDirName": "sources/shared/systemd",
+  "slug": "/sources/shared/systemd/bind-net-capabilities",
+  "permalink": "/docs/sources/shared/systemd/bind-net-capabilities",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/systemd/bind-net-capabilities.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/systemd/bind-net-capabilities/"],
+    "title": "Serving Grafana on a port < 1024"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Some tasks require permissions",
+    "permalink": "/docs/sources/shared/preferences/some-tasks-require-permissions"
+  },
+  "next": {
+    "title": "Shared Content",
+    "permalink": "/docs/sources/shared/test"
+  }
+}

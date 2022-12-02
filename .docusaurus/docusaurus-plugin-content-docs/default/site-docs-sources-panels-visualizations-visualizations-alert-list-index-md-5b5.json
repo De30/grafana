@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/alert-list/index",
+  "id": "sources/panels-visualizations/visualizations/alert-list/index",
+  "title": "Alert list",
+  "description": "Use Alert list to display your alerts. You can configure the list to show the current state or recent state changes. You can read more about alerts in Grafana Alerting overview.",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/alert-list/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/alert-list",
+  "slug": "/sources/panels-visualizations/visualizations/alert-list/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/alert-list/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/alert-list/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/features/panels/alertlist/",
+      "/docs/grafana/latest/panels/visualizations/alert-list-panel/",
+      "/docs/grafana/latest/reference/alertlist/",
+      "/docs/grafana/latest/visualizations/alert-list-panel/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/alert-list/"
+    ],
+    "keywords": ["grafana", "alert list", "documentation", "panel", "alertlist"],
+    "title": "Alert list",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Troubleshoot queries",
+    "permalink": "/docs/sources/panels-visualizations/query-transform-data/troubleshoot-queries/"
+  },
+  "next": {
+    "title": "Annotations",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/annotations/"
+  }
+}

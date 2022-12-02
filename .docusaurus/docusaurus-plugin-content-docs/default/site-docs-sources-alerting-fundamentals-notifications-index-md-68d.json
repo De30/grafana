@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/alerting/fundamentals/notifications/index",
+  "id": "sources/alerting/fundamentals/notifications/index",
+  "title": "Notifications",
+  "description": "Create or edit contact point",
+  "source": "@site/docs/sources/alerting/fundamentals/notifications/index.md",
+  "sourceDirName": "sources/alerting/fundamentals/notifications",
+  "slug": "/sources/alerting/fundamentals/notifications/",
+  "permalink": "/docs/sources/alerting/fundamentals/notifications/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/fundamentals/notifications/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/notifications/",
+      "/docs/grafana/latest/alerting/contact-points/",
+      "/docs/grafana/latest/alerting/unified-alerting/contact-points/",
+      "/docs/grafana/latest/alerting/fundamentals/contact-points/contact-point-types/"
+    ],
+    "description": "Create or edit contact point",
+    "keywords": ["grafana", "alerting", "guide", "contact point", "notification channel", "create"],
+    "title": "Notifications",
+    "weight": 410
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Alerting on numeric data",
+    "permalink": "/docs/sources/alerting/fundamentals/evaluate-grafana-alerts"
+  },
+  "next": {
+    "title": "State and health of alerting rules",
+    "permalink": "/docs/sources/alerting/fundamentals/state-and-health"
+  }
+}

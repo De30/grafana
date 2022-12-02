@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/alerting/migrating-alerts/opt-out",
+  "id": "sources/alerting/migrating-alerts/opt-out",
+  "title": "Opt out of Grafana Alerting",
+  "description": "Opt out of Grafana Alerting",
+  "source": "@site/docs/sources/alerting/migrating-alerts/opt-out.md",
+  "sourceDirName": "sources/alerting/migrating-alerts",
+  "slug": "/sources/alerting/migrating-alerts/opt-out",
+  "permalink": "/docs/sources/alerting/migrating-alerts/opt-out",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/migrating-alerts/opt-out.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/migrating-alerts/opt-out/",
+      "/docs/grafana/latest/alerting/opt-in/",
+      "/docs/grafana/latest/alerting/unified-alerting/opt-in/"
+    ],
+    "description": "Opt out of Grafana Alerting",
+    "title": "Opt out of Grafana Alerting",
+    "weight": 102
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Opt in to Grafana Alerting",
+    "permalink": "/docs/sources/alerting/migrating-alerts/opt-in"
+  },
+  "next": {
+    "title": "Roll back to legacy alerting",
+    "permalink": "/docs/sources/alerting/migrating-alerts/roll-back"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/time-series/index",
+  "id": "sources/panels-visualizations/visualizations/time-series/index",
+  "title": "Time series",
+  "description": "{{}}",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/time-series/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/time-series",
+  "slug": "/sources/panels-visualizations/visualizations/time-series/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/time-series/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/time-series/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/visualizations/time-series/",
+      "/docs/grafana/latest/visualizations/time-series/",
+      "/docs/grafana/latest/panels/visualizations/time-series/annotate-time-series/",
+      "/docs/grafana/latest/visualizations/time-series/annotate-time-series/",
+      "/docs/grafana/latest/panels/visualizations/time-series/change-axis-display/",
+      "/docs/grafana/latest/visualizations/time-series/change-axis-display/",
+      "/docs/grafana/latest/panels/visualizations/time-series/graph-color-scheme/",
+      "/docs/grafana/latest/visualizations/time-series/graph-color-scheme/",
+      "/docs/grafana/latest/panels/visualizations/time-series/graph-time-series-as-bars/",
+      "/docs/grafana/latest/visualizations/time-series/graph-time-series-as-bars/",
+      "/docs/grafana/latest/panels/visualizations/time-series/graph-time-series-as-lines/",
+      "/docs/grafana/latest/visualizations/time-series/graph-time-series-as-lines/",
+      "/docs/grafana/latest/panels/visualizations/time-series/graph-time-series-as-points/",
+      "/docs/grafana/latest/visualizations/time-series/graph-time-series-as-points/",
+      "/docs/grafana/latest/features/panels/histogram/",
+      "/docs/grafana/latest/panels/visualizations/time-series/graph-time-series-stacking/",
+      "/docs/grafana/latest/visualizations/time-series/graph-time-series-stacking/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/time-series/"
+    ],
+    "keywords": ["grafana", "graph panel", "time series panel", "documentation", "guide", "graph"],
+    "title": "Time series",
+    "weight": 90
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Text",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/text/"
+  },
+  "next": {
+    "title": "Traces",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/traces/"
+  }
+}

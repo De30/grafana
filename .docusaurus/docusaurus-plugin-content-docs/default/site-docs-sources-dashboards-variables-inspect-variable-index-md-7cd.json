@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/dashboards/variables/inspect-variable/index",
+  "id": "sources/dashboards/variables/inspect-variable/index",
+  "title": "Inspect variables",
+  "description": "The variables page lets you easily identify whether a variable is being referenced (or used) in other variables or dashboard. In addition, you can also add and manage variables from this page.",
+  "source": "@site/docs/sources/dashboards/variables/inspect-variable/index.md",
+  "sourceDirName": "sources/dashboards/variables/inspect-variable",
+  "slug": "/sources/dashboards/variables/inspect-variable/",
+  "permalink": "/docs/sources/dashboards/variables/inspect-variable/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/dashboards/variables/inspect-variable/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/reference/templating/",
+      "/docs/grafana/latest/variables/inspect-variable/",
+      "/docs/grafana/latest/dashboards/variables/inspect-variable/"
+    ],
+    "keywords": ["grafana", "templating", "documentation", "guide", "template", "variable"],
+    "title": "Inspect variables",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add and manage variables",
+    "permalink": "/docs/sources/dashboards/variables/add-template-variables/"
+  },
+  "next": {
+    "title": "Variable syntax",
+    "permalink": "/docs/sources/dashboards/variables/variable-syntax/"
+  }
+}

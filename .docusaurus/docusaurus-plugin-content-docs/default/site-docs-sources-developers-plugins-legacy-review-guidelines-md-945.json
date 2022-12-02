@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/developers/plugins/legacy/review-guidelines",
+  "id": "sources/developers/plugins/legacy/review-guidelines",
+  "title": "Legacy review guidelines",
+  "description": "The Grafana team reviews all plugins that are published on Grafana.com. There are two areas we review, the metadata for the plugin and the plugin functionality.",
+  "source": "@site/docs/sources/developers/plugins/legacy/review-guidelines.md",
+  "sourceDirName": "sources/developers/plugins/legacy",
+  "slug": "/sources/developers/plugins/legacy/review-guidelines",
+  "permalink": "/docs/sources/developers/plugins/legacy/review-guidelines",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/legacy/review-guidelines.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/plugins/legacy/review-guidelines/",
+      "/docs/grafana/latest/plugins/developing/plugin-review-guidelines/"
+    ],
+    "title": "Legacy review guidelines"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Legacy panel plugins",
+    "permalink": "/docs/sources/developers/plugins/legacy/panels"
+  },
+  "next": {
+    "title": "Legacy snapshot mode",
+    "permalink": "/docs/sources/developers/plugins/legacy/snapshot-mode"
+  }
+}

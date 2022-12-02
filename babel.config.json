@@ -42,7 +42,8 @@
     "@babel/plugin-proposal-optional-chaining",
     "@babel/plugin-syntax-dynamic-import", // needed for `() => import()` in routes.ts
     "angularjs-annotate",
-    "macros"
+    "macros",
+    "@docusaurus/core/lib/babel/preset"
   ],
   "env": {
     "production": {

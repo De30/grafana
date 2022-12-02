@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/developers/http_api/alerting_notification_channels",
+  "id": "sources/developers/http_api/alerting_notification_channels",
+  "title": "Alerting Notification Channels HTTP API ",
+  "description": "Grafana Alerting Notification Channel HTTP API",
+  "source": "@site/docs/sources/developers/http_api/alerting_notification_channels.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/alerting_notification_channels",
+  "permalink": "/docs/sources/developers/http_api/alerting_notification_channels",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/alerting_notification_channels.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/http_api/alerting_notification_channels/",
+      "/docs/grafana/latest/http_api/alerting_notification_channels/"
+    ],
+    "description": "Grafana Alerting Notification Channel HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "alerting", "alerts", "notifications"],
+    "title": "Alerting Notification Channels HTTP API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Alerting HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/alerting"
+  },
+  "next": {
+    "title": "Alerting Provisioning HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/alerting_provisioning"
+  }
+}

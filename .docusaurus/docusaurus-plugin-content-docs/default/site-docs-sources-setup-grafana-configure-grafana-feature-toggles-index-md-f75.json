@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-grafana/feature-toggles/index",
+  "id": "sources/setup-grafana/configure-grafana/feature-toggles/index",
+  "title": "Configure feature toggles",
+  "description": "Learn about toggles for experimental and beta features, which you can enable or disable.",
+  "source": "@site/docs/sources/setup-grafana/configure-grafana/feature-toggles/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-grafana/feature-toggles",
+  "slug": "/sources/setup-grafana/configure-grafana/feature-toggles/",
+  "permalink": "/docs/sources/setup-grafana/configure-grafana/feature-toggles/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-grafana/feature-toggles/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/setup-grafana/configure-grafana/feature-toggles/"],
+    "description": "Learn about toggles for experimental and beta features, which you can enable or disable.",
+    "title": "Configure feature toggles",
+    "weight": 150
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure Grafana Enterprise",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/enterprise-configuration/"
+  },
+  "next": {
+    "title": "Settings updates at runtime",
+    "permalink": "/docs/sources/setup-grafana/configure-grafana/settings-updates-at-runtime/"
+  }
+}

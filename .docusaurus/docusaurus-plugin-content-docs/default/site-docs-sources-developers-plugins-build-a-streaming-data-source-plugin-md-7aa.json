@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/build-a-streaming-data-source-plugin",
+  "id": "sources/developers/plugins/build-a-streaming-data-source-plugin",
+  "title": "Build a streaming data source plugin",
+  "description": "This guide explains how to build a streaming data source plugin.",
+  "source": "@site/docs/sources/developers/plugins/build-a-streaming-data-source-plugin.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/build-a-streaming-data-source-plugin",
+  "permalink": "/docs/sources/developers/plugins/build-a-streaming-data-source-plugin",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/build-a-streaming-data-source-plugin.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/build-a-streaming-data-source-plugin/"],
+    "title": "Build a streaming data source plugin"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Build a logs data source plugin",
+    "permalink": "/docs/sources/developers/plugins/build-a-logs-data-source-plugin"
+  },
+  "next": {
+    "title": "Custom panel option editors",
+    "permalink": "/docs/sources/developers/plugins/custom-panel-option-editors"
+  }
+}

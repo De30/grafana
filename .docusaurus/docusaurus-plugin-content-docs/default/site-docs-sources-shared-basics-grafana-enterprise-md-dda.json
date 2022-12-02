@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/basics/grafana-enterprise",
+  "id": "sources/shared/basics/grafana-enterprise",
+  "title": "Grafana Enterprise",
+  "description": "Grafana Enterprise",
+  "source": "@site/docs/sources/shared/basics/grafana-enterprise.md",
+  "sourceDirName": "sources/shared/basics",
+  "slug": "/sources/shared/basics/grafana-enterprise",
+  "permalink": "/docs/sources/shared/basics/grafana-enterprise",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/basics/grafana-enterprise.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/basics/grafana-enterprise/"],
+    "title": "Grafana Enterprise"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Grafana Cloud",
+    "permalink": "/docs/sources/shared/basics/grafana-cloud"
+  },
+  "next": {
+    "title": "Grafana Open Source",
+    "permalink": "/docs/sources/shared/basics/what-is-grafana"
+  }
+}

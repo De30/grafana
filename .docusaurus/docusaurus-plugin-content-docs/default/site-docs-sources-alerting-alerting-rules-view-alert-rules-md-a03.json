@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/alerting/alerting-rules/view-alert-rules",
+  "id": "sources/alerting/alerting-rules/view-alert-rules",
+  "title": "View and filter alert rules",
+  "description": "Manage alerting rules",
+  "source": "@site/docs/sources/alerting/alerting-rules/view-alert-rules.md",
+  "sourceDirName": "sources/alerting/alerting-rules",
+  "slug": "/sources/alerting/alerting-rules/view-alert-rules",
+  "permalink": "/docs/sources/alerting/alerting-rules/view-alert-rules",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/alerting-rules/view-alert-rules.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/alerting-rules/rule-list/",
+      "/docs/grafana/latest/alerting/unified-alerting/alerting-rules/rule-list/",
+      "/docs/grafana/latest/alerting/view-alert-rules/",
+      "/docs/grafana/latest/alerting/alerting-rules/view-alert-rules"
+    ],
+    "description": "Manage alerting rules",
+    "keywords": ["grafana", "alerting", "guide", "rules", "view"],
+    "title": "View and filter alert rules",
+    "weight": 410
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Grafana Mimir or Loki rule groups and namespaces",
+    "permalink": "/docs/sources/alerting/alerting-rules/edit-mimir-loki-namespace-group"
+  },
+  "next": {
+    "title": "View the state and health of alert rules",
+    "permalink": "/docs/sources/alerting/alerting-rules/view-state-health"
+  }
+}

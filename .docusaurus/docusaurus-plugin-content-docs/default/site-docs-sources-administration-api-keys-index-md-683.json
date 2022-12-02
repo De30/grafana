@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/administration/api-keys/index",
+  "id": "sources/administration/api-keys/index",
+  "title": "API keys",
+  "description": "This section contains information about API keys in Grafana",
+  "source": "@site/docs/sources/administration/api-keys/index.md",
+  "sourceDirName": "sources/administration/api-keys",
+  "slug": "/sources/administration/api-keys/",
+  "permalink": "/docs/sources/administration/api-keys/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/api-keys/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/administration/api-keys/about-api-keys/",
+      "/docs/grafana/latest/administration/api-keys/",
+      "/docs/grafana/latest/administration/api-keys/create-api-key/"
+    ],
+    "description": "This section contains information about API keys in Grafana",
+    "keywords": ["API keys", "Service accounts"],
+    "menuTitle": "API keys",
+    "title": "API keys",
+    "weight": 700
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Building the docs locally",
+    "permalink": "/docs/"
+  },
+  "next": {
+    "title": "Data source management",
+    "permalink": "/docs/sources/administration/data-source-management/"
+  }
+}

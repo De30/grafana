@@ -1,0 +1,28 @@
+{
+  "unversionedId": "sources/explore/explore-inspector",
+  "id": "sources/explore/explore-inspector",
+  "title": "Inspector in Explore",
+  "description": "The inspector helps you understand and troubleshoot your queries. You can inspect the raw data, export that data to a comma-separated values (CSV) file, export log results in TXT format, and view query requests.",
+  "source": "@site/docs/sources/explore/explore-inspector.md",
+  "sourceDirName": "sources/explore",
+  "slug": "/sources/explore/explore-inspector",
+  "permalink": "/docs/sources/explore/explore-inspector",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/explore/explore-inspector.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/explore/explore-inspector/"],
+    "title": "Inspector in Explore",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Working with data frames",
+    "permalink": "/docs/sources/developers/plugins/working-with-data-frames"
+  },
+  "next": {
+    "title": "Logs in Explore",
+    "permalink": "/docs/sources/explore/logs-integration"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/add-anonymous-usage-reporting",
+  "id": "sources/developers/plugins/add-anonymous-usage-reporting",
+  "title": "Add anonymous usage reporting",
+  "description": "The Grafana server administrator has the possibility to configure anonymous usage tracking.",
+  "source": "@site/docs/sources/developers/plugins/add-anonymous-usage-reporting.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-anonymous-usage-reporting",
+  "permalink": "/docs/sources/developers/plugins/add-anonymous-usage-reporting",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-anonymous-usage-reporting.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/add-anonymous-usage-reporting/"],
+    "title": "Add anonymous usage reporting"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "User HTTP API",
+    "permalink": "/docs/sources/developers/http_api/user"
+  },
+  "next": {
+    "title": "Add authentication for data source plugins",
+    "permalink": "/docs/sources/developers/plugins/add-authentication-for-data-source-plugins"
+  }
+}

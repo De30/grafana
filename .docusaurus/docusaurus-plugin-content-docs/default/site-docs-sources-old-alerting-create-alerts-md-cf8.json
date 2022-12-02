@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/old-alerting/create-alerts",
+  "id": "sources/old-alerting/create-alerts",
+  "title": "Create alerts",
+  "description": "Configure alert rules",
+  "source": "@site/docs/sources/old-alerting/create-alerts.md",
+  "sourceDirName": "sources/old-alerting",
+  "slug": "/sources/old-alerting/create-alerts",
+  "permalink": "/docs/sources/old-alerting/create-alerts",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/old-alerting/create-alerts.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/alerting/create-alerts/", "/docs/grafana/latest/old-alerting/create-alerts/"],
+    "description": "Configure alert rules",
+    "draft": true,
+    "keywords": ["grafana", "alerting", "guide", "rules"],
+    "title": "Create alerts",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Alert notification templating",
+    "permalink": "/docs/sources/old-alerting/add-notification-template"
+  },
+  "next": {
+    "title": "Alert notifications",
+    "permalink": "/docs/sources/old-alerting/notifications"
+  }
+}

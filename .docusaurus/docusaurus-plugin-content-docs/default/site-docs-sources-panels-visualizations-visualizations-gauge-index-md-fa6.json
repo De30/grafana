@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/gauge/index",
+  "id": "sources/panels-visualizations/visualizations/gauge/index",
+  "title": "Gauge",
+  "description": "Gauge panel docs",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/gauge/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/gauge",
+  "slug": "/sources/panels-visualizations/visualizations/gauge/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/gauge/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/gauge/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/features/panels/gauge/",
+      "/docs/grafana/latest/panels/visualizations/gauge-panel/",
+      "/docs/grafana/latest/visualizations/gauge-panel/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/gauge/"
+    ],
+    "description": "Gauge panel docs",
+    "keywords": ["grafana", "gauge", "gauge panel"],
+    "title": "Gauge",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Flame graph",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/flame-graph/"
+  },
+  "next": {
+    "title": "Geomap",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/geomap/"
+  }
+}

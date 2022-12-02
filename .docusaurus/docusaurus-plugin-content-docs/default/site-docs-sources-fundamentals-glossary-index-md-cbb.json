@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/fundamentals/glossary/index",
+  "id": "sources/fundamentals/glossary/index",
+  "title": "Glossary",
+  "description": "Grafana glossary",
+  "source": "@site/docs/sources/fundamentals/glossary/index.md",
+  "sourceDirName": "sources/fundamentals/glossary",
+  "slug": "/sources/fundamentals/glossary/",
+  "permalink": "/docs/sources/fundamentals/glossary/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/fundamentals/glossary/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/basics/glossary/",
+      "/docs/grafana/latest/getting-started/glossary/",
+      "/docs/grafana/latest/guides/glossary/",
+      "/docs/grafana/latest/fundamentals/glossary/"
+    ],
+    "description": "Grafana glossary",
+    "keywords": ["grafana", "intro", "glossary", "dictionary"],
+    "title": "Glossary",
+    "weight": 800
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Exemplars",
+    "permalink": "/docs/sources/fundamentals/exemplars/"
+  },
+  "next": {
+    "title": "Histograms and heatmaps",
+    "permalink": "/docs/sources/fundamentals/intro-histograms/"
+  }
+}

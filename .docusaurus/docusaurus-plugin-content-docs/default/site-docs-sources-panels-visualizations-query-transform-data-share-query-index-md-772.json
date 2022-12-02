@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/panels-visualizations/query-transform-data/share-query/index",
+  "id": "sources/panels-visualizations/query-transform-data/share-query/index",
+  "title": "Share query results with another panel",
+  "description": "Grafana let you use the query result from one panel for any other panel in the dashboard. Sharing query results across panels reduces the number of queries made to your data source, which can improve the performance of your dashboard.",
+  "source": "@site/docs/sources/panels-visualizations/query-transform-data/share-query/index.md",
+  "sourceDirName": "sources/panels-visualizations/query-transform-data/share-query",
+  "slug": "/sources/panels-visualizations/query-transform-data/share-query/",
+  "permalink": "/docs/sources/panels-visualizations/query-transform-data/share-query/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/query-transform-data/share-query/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/query-a-data-source/share-query/",
+      "/docs/grafana/latest/panels-visualizations/query-transform-data/share-query/"
+    ],
+    "title": "Share query results with another panel",
+    "menuTitle": "Share query results",
+    "weight": 60
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Write expression queries",
+    "permalink": "/docs/sources/panels-visualizations/query-transform-data/expression-queries/"
+  },
+  "next": {
+    "title": "Transform data",
+    "permalink": "/docs/sources/panels-visualizations/query-transform-data/transform-data/"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/panels/repeat-panel-intro",
+  "id": "sources/shared/panels/repeat-panel-intro",
+  "title": "Repeat panel intro",
+  "description": "Grafana lets you create dynamic dashboards using template variables. All variables in your queries expand to the current value of the variable before the query is sent to the database. Variables let you reuse a single dashboard for all your services.",
+  "source": "@site/docs/sources/shared/panels/repeat-panel-intro.md",
+  "sourceDirName": "sources/shared/panels",
+  "slug": "/sources/shared/panels/repeat-panel-intro",
+  "permalink": "/docs/sources/shared/panels/repeat-panel-intro",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/panels/repeat-panel-intro.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/panels/repeat-panel-intro/"],
+    "title": "Repeat panel intro"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Panel links intro",
+    "permalink": "/docs/sources/shared/panels/panel-links-intro"
+  },
+  "next": {
+    "title": "Navigate to the dashboard list",
+    "permalink": "/docs/sources/shared/preferences/navigate-to-the-dashboard-list"
+  }
+}

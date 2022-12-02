@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/add-support-for-annotations",
+  "id": "sources/developers/plugins/add-support-for-annotations",
+  "title": "Add support for annotations",
+  "description": "This guide explains how to add support for annotations to an existing data source plugin.",
+  "source": "@site/docs/sources/developers/plugins/add-support-for-annotations.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-support-for-annotations",
+  "permalink": "/docs/sources/developers/plugins/add-support-for-annotations",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-support-for-annotations.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/add-support-for-annotations/"],
+    "title": "Add support for annotations"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add query editor help",
+    "permalink": "/docs/sources/developers/plugins/add-query-editor-help"
+  },
+  "next": {
+    "title": "Add support for Explore queries",
+    "permalink": "/docs/sources/developers/plugins/add-support-for-explore-queries"
+  }
+}

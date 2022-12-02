@@ -54,25 +54,23 @@ class Options
     getSyntax: defaultGetSyntax,
     renderDecoration: defaultRenderDecoration,
   })
-  implements OptionsFormat
-{
-  declare readonly onlyIn: (node: Node) => boolean;
-  declare readonly getSyntax: (node: Node) => string;
-  declare readonly renderDecoration: (
-    {
-      decoration,
-      children,
-    }: {
-      decoration: Decoration;
-      children: React.ReactNode;
-    },
-    editor: Editor,
-    next: () => any
-  ) => void | React.ReactNode;
-
-  constructor(props: OptionsFormat) {
-    super(props);
-  }
+  implements OptionsFormat {
+  // declare readonly onlyIn: (node: Node) => boolean;
+  // declare readonly getSyntax: (node: Node) => string;
+  // declare readonly renderDecoration: (
+  //   {
+  //     decoration,
+  //     children,
+  //   }: {
+  //     decoration: Decoration;
+  //     children: React.ReactNode;
+  //   },
+  //   editor: Editor,
+  //   next: () => any
+  // ) => void | React.ReactNode;
+  // constructor(props: OptionsFormat) {
+  //   super(props);
+  // }
 }
 
 export default Options;

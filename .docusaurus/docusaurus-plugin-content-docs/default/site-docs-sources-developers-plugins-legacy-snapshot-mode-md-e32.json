@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/developers/plugins/legacy/snapshot-mode",
+  "id": "sources/developers/plugins/legacy/snapshot-mode",
+  "title": "Legacy snapshot mode",
+  "description": "{{}}",
+  "source": "@site/docs/sources/developers/plugins/legacy/snapshot-mode.md",
+  "sourceDirName": "sources/developers/plugins/legacy",
+  "slug": "/sources/developers/plugins/legacy/snapshot-mode",
+  "permalink": "/docs/sources/developers/plugins/legacy/snapshot-mode",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/legacy/snapshot-mode.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/plugins/legacy/snapshot-mode/",
+      "/docs/grafana/latest/plugins/developing/snapshot-mode/"
+    ],
+    "title": "Legacy snapshot mode"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Legacy review guidelines",
+    "permalink": "/docs/sources/developers/plugins/legacy/review-guidelines"
+  },
+  "next": {
+    "title": "Legacy code style guide",
+    "permalink": "/docs/sources/developers/plugins/legacy/style-guide"
+  }
+}

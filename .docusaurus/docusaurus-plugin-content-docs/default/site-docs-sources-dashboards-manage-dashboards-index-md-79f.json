@@ -1,0 +1,49 @@
+{
+  "unversionedId": "sources/dashboards/manage-dashboards/index",
+  "id": "sources/dashboards/manage-dashboards/index",
+  "title": "Manage dashboards",
+  "description": "A dashboard is a set of one or more panels that visually presents your data in one or more rows.",
+  "source": "@site/docs/sources/dashboards/manage-dashboards/index.md",
+  "sourceDirName": "sources/dashboards/manage-dashboards",
+  "slug": "/sources/dashboards/manage-dashboards/",
+  "permalink": "/docs/sources/dashboards/manage-dashboards/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/dashboards/manage-dashboards/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/dashboards/dashboard-manage/",
+      "/docs/grafana/latest/features/dashboard/dashboards/",
+      "/docs/grafana/latest/dashboards/dashboard-folders/",
+      "/docs/grafana/latest/reference/dashboard_folders/",
+      "/docs/grafana/latest/dashboards/export-import/",
+      "/docs/grafana/latest/reference/export_import/",
+      "/docs/grafana/latest/troubleshooting/troubleshoot-dashboards/",
+      "/docs/grafana/latest/dashboards/time-range-controls/",
+      "/docs/grafana/latest/reference/timerange/",
+      "/docs/grafana/latest/panels/working-with-panels/organize-dashboard/",
+      "/docs/grafana/latest/dashboards/manage-dashboards/"
+    ],
+    "title": "Manage dashboards",
+    "menuTitle": "Manage dashboards",
+    "weight": 8,
+    "keywords": [
+      "grafana",
+      "dashboard",
+      "dashboard folders",
+      "folder",
+      "folders",
+      "import",
+      "export",
+      "troubleshoot",
+      "time range",
+      "scripting"
+    ]
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Public dashboards",
+    "permalink": "/docs/sources/dashboards/dashboard-public/"
+  }
+}

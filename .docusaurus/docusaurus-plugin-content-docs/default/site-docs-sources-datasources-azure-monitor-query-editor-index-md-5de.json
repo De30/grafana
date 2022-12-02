@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/datasources/azure-monitor/query-editor/index",
+  "id": "sources/datasources/azure-monitor/query-editor/index",
+  "title": "Azure Monitor query editor",
+  "description": "Guide for using the Azure Monitor data source's query editor",
+  "source": "@site/docs/sources/datasources/azure-monitor/query-editor/index.md",
+  "sourceDirName": "sources/datasources/azure-monitor/query-editor",
+  "slug": "/sources/datasources/azure-monitor/query-editor/",
+  "permalink": "/docs/sources/datasources/azure-monitor/query-editor/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/datasources/azure-monitor/query-editor/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/data-sources/azure-monitor/query-editor/"],
+    "description": "Guide for using the Azure Monitor data source's query editor",
+    "keywords": ["grafana", "microsoft", "azure", "monitor", "metrics", "logs", "resources", "queries"],
+    "menuTitle": "Query editor",
+    "title": "Azure Monitor query editor",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "CloudWatch template variables",
+    "permalink": "/docs/sources/datasources/aws-cloudwatch/template-variables/"
+  },
+  "next": {
+    "title": "Azure Monitor template variables",
+    "permalink": "/docs/sources/datasources/azure-monitor/template-variables/"
+  }
+}

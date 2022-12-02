@@ -1,0 +1,36 @@
+{
+  "unversionedId": "sources/administration/organization-management/index",
+  "id": "sources/administration/organization-management/index",
+  "title": "Manage organizations",
+  "description": "Describes how to use organizations to isolate dashboard to users and teams.",
+  "source": "@site/docs/sources/administration/organization-management/index.md",
+  "sourceDirName": "sources/administration/organization-management",
+  "slug": "/sources/administration/organization-management/",
+  "permalink": "/docs/sources/administration/organization-management/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/organization-management/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/administration/manage-organizations/",
+      "/docs/grafana/latest/manage-users/server-admin/",
+      "/docs/grafana/latest/manage-users/server-admin/server-admin-manage-orgs/",
+      "/docs/grafana/latest/administration/organization-management/"
+    ],
+    "description": "Describes how to use organizations to isolate dashboard to users and teams.",
+    "keywords": ["organizations", "dashboards"],
+    "menuTitle": "Manage organizations",
+    "title": "Manage organizations",
+    "weight": 200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Transfer your AWS Marketplace Grafana Enterprise license",
+    "permalink": "/docs/sources/administration/enterprise-licensing/activate-aws-marketplace-license/transfer-ge-license/"
+  },
+  "next": {
+    "title": "Organization preferences",
+    "permalink": "/docs/sources/administration/organization-preferences/"
+  }
+}

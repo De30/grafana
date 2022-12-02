@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/index",
+  "id": "sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/index",
+  "title": "View provisioned resources in Grafana",
+  "description": "View provisioned resources in Grafana",
+  "source": "@site/docs/sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/index.md",
+  "sourceDirName": "sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources",
+  "slug": "/sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/",
+  "permalink": "/docs/sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/set-up/provision-alerting-resources/view-provisioned-resources/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/alerting/provision-alerting-resources/view-provisioned-resources"],
+    "description": "View provisioned resources in Grafana",
+    "keywords": ["grafana", "alerting", "alerting resources", "provisioning"],
+    "title": "View provisioned resources in Grafana",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Create and manage alerting resources using Terraform",
+    "permalink": "/docs/sources/alerting/set-up/provision-alerting-resources/terraform-provisioning/"
+  },
+  "next": {
+    "title": "Grafana CLI",
+    "permalink": "/docs/sources/cli"
+  }
+}

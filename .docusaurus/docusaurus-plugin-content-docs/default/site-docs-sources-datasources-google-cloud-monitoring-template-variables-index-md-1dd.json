@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/datasources/google-cloud-monitoring/template-variables/index",
+  "id": "sources/datasources/google-cloud-monitoring/template-variables/index",
+  "title": "Google Cloud Monitoring template variables",
+  "description": "Guide for using template variables when querying the Google Cloud Monitoring data source",
+  "source": "@site/docs/sources/datasources/google-cloud-monitoring/template-variables/index.md",
+  "sourceDirName": "sources/datasources/google-cloud-monitoring/template-variables",
+  "slug": "/sources/datasources/google-cloud-monitoring/template-variables/",
+  "permalink": "/docs/sources/datasources/google-cloud-monitoring/template-variables/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/datasources/google-cloud-monitoring/template-variables/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/data-sources/google-cloud-monitoring/template-variables/"],
+    "description": "Guide for using template variables when querying the Google Cloud Monitoring data source",
+    "keywords": ["grafana", "google", "cloud", "monitoring", "queries", "template", "variable"],
+    "menuTitle": "Template variables",
+    "title": "Google Cloud Monitoring template variables",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Google Cloud Monitoring query editor",
+    "permalink": "/docs/sources/datasources/google-cloud-monitoring/query-editor/"
+  },
+  "next": {
+    "title": "Graphite query editor",
+    "permalink": "/docs/sources/datasources/graphite/query-editor/"
+  }
+}

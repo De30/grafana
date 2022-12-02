@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/view-server-user-list-search",
+  "id": "sources/shared/view-server-user-list-search",
+  "title": "View user list",
+  "description": "1. Hover your cursor over the Server Admin (shield) icon until a menu appears.",
+  "source": "@site/docs/sources/shared/view-server-user-list-search.md",
+  "sourceDirName": "sources/shared",
+  "slug": "/sources/shared/view-server-user-list-search",
+  "permalink": "/docs/sources/shared/view-server-user-list-search",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/view-server-user-list-search.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/view-server-user-list-search/"],
+    "title": "View user list"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "View user list",
+    "permalink": "/docs/sources/shared/view-server-org-list"
+  },
+  "next": {
+    "title": "Stack series link",
+    "permalink": "/docs/sources/shared/visualizations/change-axis-link"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/development-with-local-grafana",
+  "id": "sources/developers/plugins/development-with-local-grafana",
+  "title": "Development with local Grafana",
+  "description": "This guide allows you to setup a development environment where you run Grafana and your plugin locally. With this, you will be able to see your changes as you add them.",
+  "source": "@site/docs/sources/developers/plugins/development-with-local-grafana.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/development-with-local-grafana",
+  "permalink": "/docs/sources/developers/plugins/development-with-local-grafana",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/development-with-local-grafana.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/development-with-local-grafana/"],
+    "title": "Development with local Grafana"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Data frames",
+    "permalink": "/docs/sources/developers/plugins/data-frames"
+  },
+  "next": {
+    "title": "Error handling",
+    "permalink": "/docs/sources/developers/plugins/error-handling"
+  }
+}

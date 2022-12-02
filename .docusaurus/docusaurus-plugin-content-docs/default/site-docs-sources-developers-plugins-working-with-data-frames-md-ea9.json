@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/working-with-data-frames",
+  "id": "sources/developers/plugins/working-with-data-frames",
+  "title": "Working with data frames",
+  "description": "The data frame is a columnar data structure which allows efficient querying of large amounts of data. Since data frames are a central concept when developing plugins for Grafana, in this guide we'll look at some ways you can use them.",
+  "source": "@site/docs/sources/developers/plugins/working-with-data-frames.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/working-with-data-frames",
+  "permalink": "/docs/sources/developers/plugins/working-with-data-frames",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/working-with-data-frames.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/working-with-data-frames/"],
+    "title": "Working with data frames"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Sign a plugin",
+    "permalink": "/docs/sources/developers/plugins/sign-a-plugin"
+  },
+  "next": {
+    "title": "Inspector in Explore",
+    "permalink": "/docs/sources/explore/explore-inspector"
+  }
+}

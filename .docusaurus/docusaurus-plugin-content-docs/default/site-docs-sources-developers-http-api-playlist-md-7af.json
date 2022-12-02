@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/developers/http_api/playlist",
+  "id": "sources/developers/http_api/playlist",
+  "title": "Playlist HTTP API ",
+  "description": "Playlist Admin HTTP API",
+  "source": "@site/docs/sources/developers/http_api/playlist.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/playlist",
+  "permalink": "/docs/sources/developers/http_api/playlist",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/playlist.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/http_api/playlist/", "/docs/grafana/latest/http_api/playlist/"],
+    "description": "Playlist Admin HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "playlist"],
+    "title": "Playlist HTTP API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Other HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/other"
+  },
+  "next": {
+    "title": "HTTP Preferences API ",
+    "permalink": "/docs/sources/developers/http_api/preferences"
+  }
+}

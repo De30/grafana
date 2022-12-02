@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/developers/http_api/library_element",
+  "id": "sources/developers/http_api/library_element",
+  "title": "Library Element HTTP API ",
+  "description": "Grafana Library Element HTTP API",
+  "source": "@site/docs/sources/developers/http_api/library_element.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/library_element",
+  "permalink": "/docs/sources/developers/http_api/library_element",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/library_element.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/http_api/library_element/",
+      "/docs/grafana/latest/http_api/library_element/"
+    ],
+    "description": "Grafana Library Element HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "library-element"],
+    "title": "Library Element HTTP API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Folder Permissions HTTP API",
+    "permalink": "/docs/sources/developers/http_api/folder_permissions"
+  },
+  "next": {
+    "title": "Licensing HTTP API",
+    "permalink": "/docs/sources/developers/http_api/licensing"
+  }
+}

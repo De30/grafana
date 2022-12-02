@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/node-graph/index",
+  "id": "sources/panels-visualizations/visualizations/node-graph/index",
+  "title": "Node graph",
+  "description": "Note: This panel is currently in beta. Expect changes in future releases.",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/node-graph/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/node-graph",
+  "slug": "/sources/panels-visualizations/visualizations/node-graph/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/node-graph/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/node-graph/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/visualizations/node-graph/",
+      "/docs/grafana/latest/visualizations/node-graph/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/node-graph/"
+    ],
+    "keywords": ["grafana", "dashboard", "documentation", "panels", "node graph", "directed graph"],
+    "title": "Node graph",
+    "weight": 850
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "News",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/news/"
+  },
+  "next": {
+    "title": "Pie chart",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/pie-chart/"
+  }
+}

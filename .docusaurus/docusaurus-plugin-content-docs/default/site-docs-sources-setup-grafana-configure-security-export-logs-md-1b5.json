@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-security/export-logs",
+  "id": "sources/setup-grafana/configure-security/export-logs",
+  "title": "Export logs of usage insights",
+  "description": "Export logs of usage insights",
+  "source": "@site/docs/sources/setup-grafana/configure-security/export-logs.md",
+  "sourceDirName": "sources/setup-grafana/configure-security",
+  "slug": "/sources/setup-grafana/configure-security/export-logs",
+  "permalink": "/docs/sources/setup-grafana/configure-security/export-logs",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-security/export-logs.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/enterprise/usage-insights/export-logs/"],
+    "description": "Export logs of usage insights",
+    "keywords": ["grafana", "export", "usage-insights", "enterprise"],
+    "title": "Export logs of usage insights",
+    "weight": 900
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure Team Sync",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-team-sync"
+  },
+  "next": {
+    "title": "Monitor the image renderer",
+    "permalink": "/docs/sources/setup-grafana/image-rendering/monitoring/"
+  }
+}

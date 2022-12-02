@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/preferences/some-tasks-require-permissions",
+  "id": "sources/shared/preferences/some-tasks-require-permissions",
+  "title": "Some tasks require permissions",
+  "description": "Some tasks require certain permissions. For more information about roles, refer to About users and permission.",
+  "source": "@site/docs/sources/shared/preferences/some-tasks-require-permissions.md",
+  "sourceDirName": "sources/shared/preferences",
+  "slug": "/sources/shared/preferences/some-tasks-require-permissions",
+  "permalink": "/docs/sources/shared/preferences/some-tasks-require-permissions",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/preferences/some-tasks-require-permissions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/preferences/some-tasks-require-permissions/"],
+    "title": "Some tasks require permissions"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Select the UI theme",
+    "permalink": "/docs/sources/shared/preferences/select-ui-theme-list"
+  },
+  "next": {
+    "title": "Serving Grafana on a port < 1024",
+    "permalink": "/docs/sources/shared/systemd/bind-net-capabilities"
+  }
+}

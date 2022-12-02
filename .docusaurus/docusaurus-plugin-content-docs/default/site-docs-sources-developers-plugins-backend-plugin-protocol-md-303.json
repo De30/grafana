@@ -1,0 +1,28 @@
+{
+  "unversionedId": "sources/developers/plugins/backend/plugin-protocol",
+  "id": "sources/developers/plugins/backend/plugin-protocol",
+  "title": "Plugin protocol",
+  "description": "There’s a physical wire protocol that Grafana server uses to communicate with backend plugins. This is the contract between Grafana and backend plugins, that must be agreed upon for Grafana and a backend plugin to be able to communicate with each other. The plugin protocol is built on gRPC and is defined in Protocol Buffers (a.k.a., protobuf).",
+  "source": "@site/docs/sources/developers/plugins/backend/plugin-protocol.md",
+  "sourceDirName": "sources/developers/plugins/backend",
+  "slug": "/sources/developers/plugins/backend/plugin-protocol",
+  "permalink": "/docs/sources/developers/plugins/backend/plugin-protocol",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/backend/plugin-protocol.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/backend/plugin-protocol/"],
+    "keywords": ["grafana", "plugins", "backend", "plugin", "backend-plugins", "documentation"],
+    "title": "Plugin protocol"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Grafana Plugin SDK for Go",
+    "permalink": "/docs/sources/developers/plugins/backend/grafana-plugin-sdk-for-go"
+  },
+  "next": {
+    "title": "Build a logs data source plugin",
+    "permalink": "/docs/sources/developers/plugins/build-a-logs-data-source-plugin"
+  }
+}

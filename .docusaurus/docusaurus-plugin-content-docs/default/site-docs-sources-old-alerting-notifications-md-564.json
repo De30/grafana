@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/old-alerting/notifications",
+  "id": "sources/old-alerting/notifications",
+  "title": "Alert notifications",
+  "description": "Alerting notifications guide",
+  "source": "@site/docs/sources/old-alerting/notifications.md",
+  "sourceDirName": "sources/old-alerting",
+  "slug": "/sources/old-alerting/notifications",
+  "permalink": "/docs/sources/old-alerting/notifications",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/old-alerting/notifications.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/alerting/notifications/", "/docs/grafana/latest/old-alerting/notifications/"],
+    "description": "Alerting notifications guide",
+    "draft": true,
+    "keywords": ["Grafana", "alerting", "guide", "notifications"],
+    "title": "Alert notifications",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Create alerts",
+    "permalink": "/docs/sources/old-alerting/create-alerts"
+  },
+  "next": {
+    "title": "Pause alert rule",
+    "permalink": "/docs/sources/old-alerting/pause-an-alert-rule"
+  }
+}

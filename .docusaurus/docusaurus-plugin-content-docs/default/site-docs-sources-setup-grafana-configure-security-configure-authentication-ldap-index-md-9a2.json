@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-security/configure-authentication/ldap/index",
+  "id": "sources/setup-grafana/configure-security/configure-authentication/ldap/index",
+  "title": "Configure LDAP Authentication",
+  "description": "Grafana LDAP Authentication Guide",
+  "source": "@site/docs/sources/setup-grafana/configure-security/configure-authentication/ldap/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-security/configure-authentication/ldap",
+  "slug": "/sources/setup-grafana/configure-security/configure-authentication/ldap/",
+  "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/ldap/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-security/configure-authentication/ldap/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/auth/ldap/",
+      "/docs/grafana/latest/installation/ldap/",
+      "/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/ldap/"
+    ],
+    "description": "Grafana LDAP Authentication Guide",
+    "title": "Configure LDAP Authentication",
+    "weight": 800
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure Keycloak OAuth2 authentication",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/keycloak/"
+  },
+  "next": {
+    "title": "Configure Okta OAuth2 authentication",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/okta/"
+  }
+}

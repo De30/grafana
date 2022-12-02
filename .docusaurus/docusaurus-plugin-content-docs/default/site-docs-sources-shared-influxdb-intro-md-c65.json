@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/influxdb/intro",
+  "id": "sources/shared/influxdb/intro",
+  "title": "Intro paragraph",
+  "description": "InfluxDB is an open-source time series database (TSDB) developed by InfluxData. It is optimized for fast, high-availability storage and retrieval of time series data in fields such as operations monitoring, application metrics, IoT sensor data, and real-time analytics.",
+  "source": "@site/docs/sources/shared/influxdb/intro.md",
+  "sourceDirName": "sources/shared/influxdb",
+  "slug": "/sources/shared/influxdb/intro",
+  "permalink": "/docs/sources/shared/influxdb/intro",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/influxdb/intro.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/influxdb/intro/"],
+    "title": "Intro paragraph"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Shared Content",
+    "permalink": "/docs/sources/shared/example"
+  },
+  "next": {
+    "title": "View org list as server admin",
+    "permalink": "/docs/sources/shared/manage-users/view-server-org-list-and-edit"
+  }
+}

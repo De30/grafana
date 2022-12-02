@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/whatsnew/whats-new-in-v7-0",
+  "id": "sources/whatsnew/whats-new-in-v7-0",
+  "title": "What's New in Grafana v7.0",
+  "description": "Feature and improvement highlights for Grafana v7",
+  "source": "@site/docs/sources/whatsnew/whats-new-in-v7-0.md",
+  "sourceDirName": "sources/whatsnew",
+  "slug": "/sources/whatsnew/whats-new-in-v7-0",
+  "permalink": "/docs/sources/whatsnew/whats-new-in-v7-0",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/whatsnew/whats-new-in-v7-0.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "_build": {
+      "list": false
+    },
+    "aliases": ["/docs/grafana/latest/guides/whats-new-in-v7-0/", "/docs/grafana/latest/whatsnew/whats-new-in-v7-0/"],
+    "description": "Feature and improvement highlights for Grafana v7",
+    "keywords": ["grafana", "new", "documentation", "7.0", "release notes"],
+    "title": "What's New in Grafana v7.0",
+    "weight": -27
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Send a panel to Grafana Labs support",
+    "permalink": "/docs/sources/troubleshooting/send-panel-to-grafana-support/"
+  },
+  "next": {
+    "title": "What's New in Grafana v7.1",
+    "permalink": "/docs/sources/whatsnew/whats-new-in-v7-1"
+  }
+}

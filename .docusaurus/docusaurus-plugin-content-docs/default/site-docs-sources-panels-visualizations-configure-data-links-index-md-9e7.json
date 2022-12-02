@@ -1,0 +1,38 @@
+{
+  "unversionedId": "sources/panels-visualizations/configure-data-links/index",
+  "id": "sources/panels-visualizations/configure-data-links/index",
+  "title": "Configure data links",
+  "description": "You can use data link variables or data links to create links between panels.",
+  "source": "@site/docs/sources/panels-visualizations/configure-data-links/index.md",
+  "sourceDirName": "sources/panels-visualizations/configure-data-links",
+  "slug": "/sources/panels-visualizations/configure-data-links/",
+  "permalink": "/docs/sources/panels-visualizations/configure-data-links/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/configure-data-links/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/linking/data-link-variables/",
+      "/docs/grafana/latest/variables/url-variables/",
+      "/docs/grafana/latest/variables/variable-types/url-variables/",
+      "/docs/grafana/latest/linking/data-links/",
+      "/docs/grafana/latest/reference/datalinks/",
+      "/docs/grafana/latest/panels/configure-data-links/",
+      "/docs/grafana/latest/panels-visualizations/configure-data-links/"
+    ],
+    "keywords": ["grafana", "url variables", "variables", "data link", "documentation", "playlist"],
+    "title": "Configure data links",
+    "menuTitle": "Configure data links",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Calculation types",
+    "permalink": "/docs/sources/panels-visualizations/calculation-types/"
+  },
+  "next": {
+    "title": "Configure field overrides",
+    "permalink": "/docs/sources/panels-visualizations/configure-overrides/"
+  }
+}

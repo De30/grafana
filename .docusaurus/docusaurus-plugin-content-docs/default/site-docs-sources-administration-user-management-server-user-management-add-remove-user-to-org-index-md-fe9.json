@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/administration/user-management/server-user-management/add-remove-user-to-org/index",
+  "id": "sources/administration/user-management/server-user-management/add-remove-user-to-org/index",
+  "title": "Add or remove a user in an organization",
+  "description": "Describes how a Grafana server administrator can add or remove users in an organization",
+  "source": "@site/docs/sources/administration/user-management/server-user-management/add-remove-user-to-org/index.md",
+  "sourceDirName": "sources/administration/user-management/server-user-management/add-remove-user-to-org",
+  "slug": "/sources/administration/user-management/server-user-management/add-remove-user-to-org/",
+  "permalink": "/docs/sources/administration/user-management/server-user-management/add-remove-user-to-org/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/user-management/server-user-management/add-remove-user-to-org/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/administration/manage-users-and-permissions/manage-server-users/add-remove-user-to-org/",
+      "/docs/grafana/latest/administration/manage-users-and-permissions/manage-server-users/add-user-to-org/",
+      "/docs/grafana/latest/administration/user-management/server-user-management/add-remove-user-to-org/"
+    ],
+    "title": "Add or remove a user in an organization",
+    "description": "Describes how a Grafana server administrator can add or remove users in an organization",
+    "weight": 30
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Manage users in an organization",
+    "permalink": "/docs/sources/administration/user-management/manage-org-users/"
+  },
+  "next": {
+    "title": "Assign or remove Grafana server administrator privileges",
+    "permalink": "/docs/sources/administration/user-management/server-user-management/assign-remove-server-admin-privileges/"
+  }
+}

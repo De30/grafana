@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/setup-grafana/installation/windows/index",
+  "id": "sources/setup-grafana/installation/windows/index",
+  "title": "Install on Windows",
+  "description": "Install Grafana on Windows",
+  "source": "@site/docs/sources/setup-grafana/installation/windows/index.md",
+  "sourceDirName": "sources/setup-grafana/installation/windows",
+  "slug": "/sources/setup-grafana/installation/windows/",
+  "permalink": "/docs/sources/setup-grafana/installation/windows/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/installation/windows/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/installation/windows/",
+      "/docs/grafana/latest/setup-grafana/installation/windows/"
+    ],
+    "description": "Install Grafana on Windows",
+    "title": "Install on Windows",
+    "weight": 500
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Install on RPM-based Linux",
+    "permalink": "/docs/sources/setup-grafana/installation/rpm/"
+  },
+  "next": {
+    "title": "Restart Grafana",
+    "permalink": "/docs/sources/setup-grafana/restart-grafana"
+  }
+}

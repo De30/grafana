@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/configure-legend/index",
+  "id": "sources/panels-visualizations/visualizations/configure-legend/index",
+  "title": "Configure a legend",
+  "description": "A panel includes a legend that you can use to interpret data displayed in a visualization. Each legend option adds context and clarity to the data illustrated in a visualization.",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/configure-legend/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/configure-legend",
+  "slug": "/sources/panels-visualizations/visualizations/configure-legend/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/configure-legend/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/configure-legend/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/working-with-panels/configure-legend/",
+      "/docs/grafana/latest/visualizations/configure-legend/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/configure-legend/"
+    ],
+    "title": "Configure a legend",
+    "weight": 1300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Canvas",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/canvas/"
+  },
+  "next": {
+    "title": "Dashboard list",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/dashboard-list/"
+  }
+}

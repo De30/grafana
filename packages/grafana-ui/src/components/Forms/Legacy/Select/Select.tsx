@@ -52,7 +52,7 @@ export const MenuList = (props: MenuListProps) => {
   );
 };
 export class Select<T> extends PureComponent<LegacySelectProps<T>> {
-  declare context: React.ContextType<typeof ThemeContext>;
+  // declare context: React.ContextType<typeof ThemeContext>;
   static contextType = ThemeContext;
 
   static defaultProps: Partial<LegacySelectProps<unknown>> = {

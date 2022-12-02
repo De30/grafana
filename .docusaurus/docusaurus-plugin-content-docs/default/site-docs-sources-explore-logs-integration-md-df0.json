@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/explore/logs-integration",
+  "id": "sources/explore/logs-integration",
+  "title": "Logs in Explore",
+  "description": "Logs in Explore",
+  "source": "@site/docs/sources/explore/logs-integration.md",
+  "sourceDirName": "sources/explore",
+  "slug": "/sources/explore/logs-integration",
+  "permalink": "/docs/sources/explore/logs-integration",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/explore/logs-integration.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/explore/logs-integration/"],
+    "description": "Logs in Explore",
+    "keywords": ["explore", "logs"],
+    "title": "Logs in Explore",
+    "weight": 15
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Inspector in Explore",
+    "permalink": "/docs/sources/explore/explore-inspector"
+  },
+  "next": {
+    "title": "Query management",
+    "permalink": "/docs/sources/explore/query-management"
+  }
+}

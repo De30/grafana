@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-security/configure-authentication/azuread/index",
+  "id": "sources/setup-grafana/configure-security/configure-authentication/azuread/index",
+  "title": "Configure Azure AD OAuth2 authentication",
+  "description": "Grafana Azure AD OAuth Guide",
+  "source": "@site/docs/sources/setup-grafana/configure-security/configure-authentication/azuread/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-security/configure-authentication/azuread",
+  "slug": "/sources/setup-grafana/configure-security/configure-authentication/azuread/",
+  "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/azuread/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-security/configure-authentication/azuread/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/auth/azuread/",
+      "/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/azuread/"
+    ],
+    "description": "Grafana Azure AD OAuth Guide",
+    "keywords": ["grafana", "configuration", "documentation", "oauth"],
+    "title": "Configure Azure AD OAuth2 authentication",
+    "weight": 600
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure auth proxy authentication",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/auth-proxy/"
+  },
+  "next": {
+    "title": "Configure enhanced LDAP integration",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/enhanced-ldap/"
+  }
+}

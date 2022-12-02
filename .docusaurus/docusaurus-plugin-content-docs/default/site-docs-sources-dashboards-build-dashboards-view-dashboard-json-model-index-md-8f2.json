@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/dashboards/build-dashboards/view-dashboard-json-model/index",
+  "id": "sources/dashboards/build-dashboards/view-dashboard-json-model/index",
+  "title": "JSON model",
+  "description": "A dashboard in Grafana is represented by a JSON object, which stores metadata of its dashboard. Dashboard metadata includes dashboard properties, metadata from panels, template variables, panel queries, etc.",
+  "source": "@site/docs/sources/dashboards/build-dashboards/view-dashboard-json-model/index.md",
+  "sourceDirName": "sources/dashboards/build-dashboards/view-dashboard-json-model",
+  "slug": "/sources/dashboards/build-dashboards/view-dashboard-json-model/",
+  "permalink": "/docs/sources/dashboards/build-dashboards/view-dashboard-json-model/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/dashboards/build-dashboards/view-dashboard-json-model/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/dashboards/json-model/",
+      "/docs/grafana/latest/reference/dashboard/",
+      "/docs/grafana/latest/dashboards/build-dashboards/view-dashboard-json-model/"
+    ],
+    "keywords": ["grafana", "dashboard", "documentation", "json", "model"],
+    "title": "JSON model",
+    "weight": 700
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Modify dashboard settings",
+    "permalink": "/docs/sources/dashboards/build-dashboards/modify-dashboard-settings/"
+  },
+  "next": {
+    "title": "Manage playlists",
+    "permalink": "/docs/sources/dashboards/create-manage-playlists/"
+  }
+}

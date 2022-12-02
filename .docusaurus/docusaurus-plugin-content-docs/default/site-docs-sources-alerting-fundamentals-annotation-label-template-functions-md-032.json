@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/alerting/fundamentals/annotation-label/template-functions",
+  "id": "sources/alerting/fundamentals/annotation-label/template-functions",
+  "title": "Template functions",
+  "description": "Template functions allow you to process alert evaluation results to generate dynamic notifications.",
+  "source": "@site/docs/sources/alerting/fundamentals/annotation-label/template-functions.md",
+  "sourceDirName": "sources/alerting/fundamentals/annotation-label",
+  "slug": "/sources/alerting/fundamentals/annotation-label/template-functions",
+  "permalink": "/docs/sources/alerting/fundamentals/annotation-label/template-functions",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/alerting/fundamentals/annotation-label/template-functions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/alerting/contact-points/message-templating/template-functions/",
+      "/docs/grafana/latest/alerting/message-templating/template-functions/",
+      "/docs/grafana/latest/alerting/unified-alerting/message-templating/template-functions/",
+      "/docs/grafana/latest/alerting/fundamentals/annotation-label/template-functions/",
+      "/docs/grafana/latest/alerting/unified-alerting/fundamentals/annotation-label/template-functions/"
+    ],
+    "keywords": ["grafana", "alerting", "guide", "contact point", "templating"],
+    "title": "Template functions",
+    "weight": 125
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Label matchers",
+    "permalink": "/docs/sources/alerting/fundamentals/annotation-label/labels-and-label-matchers"
+  },
+  "next": {
+    "title": "Templating labels and annotations",
+    "permalink": "/docs/sources/alerting/fundamentals/annotation-label/variables-label-annotation"
+  }
+}

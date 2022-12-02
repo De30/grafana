@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/developers/http_api/data_source",
+  "id": "sources/developers/http_api/data_source",
+  "title": "Data source HTTP API",
+  "description": "Grafana Data source HTTP API",
+  "source": "@site/docs/sources/developers/http_api/data_source.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/data_source",
+  "permalink": "/docs/sources/developers/http_api/data_source",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/data_source.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/http_api/data_source/",
+      "/docs/grafana/latest/http_api/data_source/",
+      "/docs/grafana/latest/http_api/datasource/"
+    ],
+    "description": "Grafana Data source HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "data source"],
+    "title": "Data source HTTP API"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Dashboard Versions HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/dashboard_versions"
+  },
+  "next": {
+    "title": "Datasource Permissions HTTP API",
+    "permalink": "/docs/sources/developers/http_api/datasource_permissions"
+  }
+}

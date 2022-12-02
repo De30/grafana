@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/add-support-for-explore-queries",
+  "id": "sources/developers/plugins/add-support-for-explore-queries",
+  "title": "Add support for Explore queries",
+  "description": "This guide explains how to improve support for Explore in an existing data source plugin.",
+  "source": "@site/docs/sources/developers/plugins/add-support-for-explore-queries.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-support-for-explore-queries",
+  "permalink": "/docs/sources/developers/plugins/add-support-for-explore-queries",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-support-for-explore-queries.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/add-support-for-explore-queries/"],
+    "title": "Add support for Explore queries"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add support for annotations",
+    "permalink": "/docs/sources/developers/plugins/add-support-for-annotations"
+  },
+  "next": {
+    "title": "Add support for variables in plugins",
+    "permalink": "/docs/sources/developers/plugins/add-support-for-variables"
+  }
+}

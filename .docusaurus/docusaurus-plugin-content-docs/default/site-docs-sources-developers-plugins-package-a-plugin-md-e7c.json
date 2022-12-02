@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/developers/plugins/package-a-plugin",
+  "id": "sources/developers/plugins/package-a-plugin",
+  "title": "Package a plugin",
+  "description": "You've just built your first plugin, and now you want to share it with the world. In this guide, you'll learn how to package and share your plugin with others.",
+  "source": "@site/docs/sources/developers/plugins/package-a-plugin.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/package-a-plugin",
+  "permalink": "/docs/sources/developers/plugins/package-a-plugin",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/package-a-plugin.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/plugins/package-a-plugin/",
+      "/docs/grafana/latest/developers/plugins/share-a-plugin/"
+    ],
+    "title": "Package a plugin",
+    "type": "docs"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Plugin migration guide",
+    "permalink": "/docs/sources/developers/plugins/migration-guide"
+  },
+  "next": {
+    "title": "Plugin publishing and signing criteria",
+    "permalink": "/docs/sources/developers/plugins/publishing-and-signing-criteria"
+  }
+}

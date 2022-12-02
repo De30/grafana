@@ -1,0 +1,39 @@
+{
+  "unversionedId": "sources/panels-visualizations/configure-overrides/index",
+  "id": "sources/panels-visualizations/configure-overrides/index",
+  "title": "Configure field overrides",
+  "description": "Overrides allow you to customize visualization settings for specific fields or series. This is accomplished by adding an override rule that targets a particular set of fields and that can each define multiple options.",
+  "source": "@site/docs/sources/panels-visualizations/configure-overrides/index.md",
+  "sourceDirName": "sources/panels-visualizations/configure-overrides",
+  "slug": "/sources/panels-visualizations/configure-overrides/",
+  "permalink": "/docs/sources/panels-visualizations/configure-overrides/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/configure-overrides/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/field-overrides/",
+      "/docs/grafana/latest/panels/override-field-values/",
+      "/docs/grafana/latest/panels/override-field-values/about-field-overrides/",
+      "/docs/grafana/latest/panels/override-field-values/add-a-field-override/",
+      "/docs/grafana/latest/panels/override-field-values/delete-a-field-override/",
+      "/docs/grafana/latest/panels/override-field-values/edit-field-override/",
+      "/docs/grafana/latest/panels/override-field-values/view-field-override/",
+      "/docs/grafana/latest/panels/configure-overrides/",
+      "/docs/grafana/latest/panels-visualizations/configure-overrides/"
+    ],
+    "title": "Configure field overrides",
+    "menuTitle": "Configure field overrides",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure data links",
+    "permalink": "/docs/sources/panels-visualizations/configure-data-links/"
+  },
+  "next": {
+    "title": "Configure panel options",
+    "permalink": "/docs/sources/panels-visualizations/configure-panel-options/"
+  }
+}

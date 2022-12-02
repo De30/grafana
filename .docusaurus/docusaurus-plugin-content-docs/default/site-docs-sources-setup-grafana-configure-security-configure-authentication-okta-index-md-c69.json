@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/setup-grafana/configure-security/configure-authentication/okta/index",
+  "id": "sources/setup-grafana/configure-security/configure-authentication/okta/index",
+  "title": "Configure Okta OAuth2 authentication",
+  "description": "Grafana Okta OAuth Guide",
+  "source": "@site/docs/sources/setup-grafana/configure-security/configure-authentication/okta/index.md",
+  "sourceDirName": "sources/setup-grafana/configure-security/configure-authentication/okta",
+  "slug": "/sources/setup-grafana/configure-security/configure-authentication/okta/",
+  "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/okta/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/configure-security/configure-authentication/okta/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/auth/okta/",
+      "/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/okta/"
+    ],
+    "description": "Grafana Okta OAuth Guide",
+    "title": "Configure Okta OAuth2 authentication",
+    "weight": 1200
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure LDAP Authentication",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/ldap/"
+  },
+  "next": {
+    "title": "Configure SAML authentication in Grafana",
+    "permalink": "/docs/sources/setup-grafana/configure-security/configure-authentication/saml/"
+  }
+}

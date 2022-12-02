@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/fundamentals/timeseries-dimensions/index",
+  "id": "sources/fundamentals/timeseries-dimensions/index",
+  "title": "Time series dimensions",
+  "description": "time series dimensions",
+  "source": "@site/docs/sources/fundamentals/timeseries-dimensions/index.md",
+  "sourceDirName": "sources/fundamentals/timeseries-dimensions",
+  "slug": "/sources/fundamentals/timeseries-dimensions/",
+  "permalink": "/docs/sources/fundamentals/timeseries-dimensions/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/fundamentals/timeseries-dimensions/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/basics/timeseries-dimensions/",
+      "/docs/grafana/latest/getting-started/timeseries-dimensions/",
+      "/docs/grafana/latest/guides/timeseries-dimensions/",
+      "/docs/rafana/latest/fundamentals/timeseries-dimensions/"
+    ],
+    "description": "time series dimensions",
+    "keywords": ["grafana", "intro", "guide", "concepts", "timeseries", "labels"],
+    "title": "Time series dimensions",
+    "weight": 600
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Intro to time series",
+    "permalink": "/docs/sources/fundamentals/timeseries/"
+  },
+  "next": {
+    "title": "Build your first dashboard",
+    "permalink": "/docs/sources/getting-started/build-first-dashboard"
+  }
+}

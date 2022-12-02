@@ -1,0 +1,37 @@
+{
+  "unversionedId": "sources/administration/stats-and-license/index",
+  "id": "sources/administration/stats-and-license/index",
+  "title": "Stats and license",
+  "description": "How to view server settings in the Grafana UI",
+  "source": "@site/docs/sources/administration/stats-and-license/index.md",
+  "sourceDirName": "sources/administration/stats-and-license",
+  "slug": "/sources/administration/stats-and-license/",
+  "permalink": "/docs/sources/administration/stats-and-license/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/stats-and-license/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/administration/view-server/",
+      "/docs/grafana/latest/admin/view-server-settings/",
+      "/docs/grafana/latest/administration/view-server/view-server-settings/",
+      "/docs/grafana/latest/admin/view-server-stats/",
+      "/docs/grafana/latest/administration/view-server/view-server-stats/",
+      "/docs/grafana/latest/administration/stats-and-license/"
+    ],
+    "description": "How to view server settings in the Grafana UI",
+    "keywords": ["grafana", "configuration", "server", "settings"],
+    "title": "Stats and license",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Service accounts",
+    "permalink": "/docs/sources/administration/service-accounts/"
+  },
+  "next": {
+    "title": "Team management",
+    "permalink": "/docs/sources/administration/team-management/"
+  }
+}

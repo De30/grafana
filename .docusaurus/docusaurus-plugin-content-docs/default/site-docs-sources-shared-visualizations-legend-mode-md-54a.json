@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/visualizations/legend-mode",
+  "id": "sources/shared/visualizations/legend-mode",
+  "title": "Legend mode and legend placement",
+  "description": "Legend mode",
+  "source": "@site/docs/sources/shared/visualizations/legend-mode.md",
+  "sourceDirName": "sources/shared/visualizations",
+  "slug": "/sources/shared/visualizations/legend-mode",
+  "permalink": "/docs/sources/shared/visualizations/legend-mode",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/visualizations/legend-mode.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/visualizations/legend-mode/"],
+    "title": "Legend mode and legend placement"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Stack series link",
+    "permalink": "/docs/sources/shared/visualizations/change-axis-link"
+  },
+  "next": {
+    "title": "Stack series link",
+    "permalink": "/docs/sources/shared/visualizations/stack-series-link"
+  }
+}

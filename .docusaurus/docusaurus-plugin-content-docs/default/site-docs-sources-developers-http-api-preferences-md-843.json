@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/developers/http_api/preferences",
+  "id": "sources/developers/http_api/preferences",
+  "title": "HTTP Preferences API ",
+  "description": "Grafana HTTP API",
+  "source": "@site/docs/sources/developers/http_api/preferences.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/preferences",
+  "permalink": "/docs/sources/developers/http_api/preferences",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/preferences.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/http_api/preferences/", "/docs/grafana/latest/http_api/preferences/"],
+    "description": "Grafana HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "preferences"],
+    "title": "HTTP Preferences API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Playlist HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/playlist"
+  },
+  "next": {
+    "title": "Query History HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/query_history"
+  }
+}

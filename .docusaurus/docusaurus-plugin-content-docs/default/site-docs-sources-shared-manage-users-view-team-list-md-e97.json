@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/manage-users/view-team-list",
+  "id": "sources/shared/manage-users/view-team-list",
+  "title": "View team list",
+  "description": "1. Hover your cursor over the Configuration (gear) icon in the side menu.",
+  "source": "@site/docs/sources/shared/manage-users/view-team-list.md",
+  "sourceDirName": "sources/shared/manage-users",
+  "slug": "/sources/shared/manage-users/view-team-list",
+  "permalink": "/docs/sources/shared/manage-users/view-team-list",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/manage-users/view-team-list.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/manage-users/view-team-list/"],
+    "title": "View team list"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "View user list as server admin",
+    "permalink": "/docs/sources/shared/manage-users/view-server-user-list"
+  },
+  "next": {
+    "title": "Panel links intro",
+    "permalink": "/docs/sources/shared/panels/panel-links-intro"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/datasources/loki/query-editor/index",
+  "id": "sources/datasources/loki/query-editor/index",
+  "title": "Loki query editor",
+  "description": "Guide for using the Loki data source's query editor",
+  "source": "@site/docs/sources/datasources/loki/query-editor/index.md",
+  "sourceDirName": "sources/datasources/loki/query-editor",
+  "slug": "/sources/datasources/loki/query-editor/",
+  "permalink": "/docs/sources/datasources/loki/query-editor/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/datasources/loki/query-editor/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/data-sources/loki/query-editor/"],
+    "description": "Guide for using the Loki data source's query editor",
+    "keywords": ["grafana", "loki", "logs", "queries"],
+    "menuTitle": "Query editor",
+    "title": "Loki query editor",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "InfluxDB template variables",
+    "permalink": "/docs/sources/datasources/influxdb/template-variables/"
+  },
+  "next": {
+    "title": "Loki template variables",
+    "permalink": "/docs/sources/datasources/loki/template-variables/"
+  }
+}

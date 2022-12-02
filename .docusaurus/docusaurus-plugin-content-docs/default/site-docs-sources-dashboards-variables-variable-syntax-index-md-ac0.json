@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/dashboards/variables/variable-syntax/index",
+  "id": "sources/dashboards/variables/variable-syntax/index",
+  "title": "Variable syntax",
+  "description": "Panel titles and metric queries can refer to variables using two different syntaxes:",
+  "source": "@site/docs/sources/dashboards/variables/variable-syntax/index.md",
+  "sourceDirName": "sources/dashboards/variables/variable-syntax",
+  "slug": "/sources/dashboards/variables/variable-syntax/",
+  "permalink": "/docs/sources/dashboards/variables/variable-syntax/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/dashboards/variables/variable-syntax/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/variables/advanced-variable-format-options/",
+      "/docs/grafana/latest/reference/templating/",
+      "/docs/grafana/latest/variables/syntax/",
+      "/docs/grafana/latest/dashboards/variables/variable-syntax/"
+    ],
+    "keywords": ["grafana", "templating", "documentation", "guide", "template", "variable"],
+    "title": "Variable syntax",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Inspect variables",
+    "permalink": "/docs/sources/dashboards/variables/inspect-variable/"
+  }
+}

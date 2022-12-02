@@ -1,0 +1,34 @@
+{
+  "unversionedId": "sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/index",
+  "id": "sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/index",
+  "title": "Grafana RBAC role definitions",
+  "description": "This topic includes a table that lists permission associated with Grafana fixed and basic roles.",
+  "source": "@site/docs/sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/index.md",
+  "sourceDirName": "sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions",
+  "slug": "/sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/",
+  "permalink": "/docs/sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/enterprise/access-control/fine-grained-access-control-references/",
+      "/docs/grafana/latest/enterprise/access-control/rbac-fixed-basic-role-definitions/",
+      "/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/"
+    ],
+    "description": "This topic includes a table that lists permission associated with Grafana fixed and basic roles.",
+    "menuTitle": "RBAC role definitions",
+    "title": "Grafana RBAC role definitions",
+    "weight": 70
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Plan your Grafana RBAC rollout strategy",
+    "permalink": "/docs/sources/administration/roles-and-permissions/access-control/plan-rbac-rollout-strategy/"
+  },
+  "next": {
+    "title": "Provisioning RBAC with Grafana",
+    "permalink": "/docs/sources/administration/roles-and-permissions/access-control/rbac-grafana-provisioning/"
+  }
+}

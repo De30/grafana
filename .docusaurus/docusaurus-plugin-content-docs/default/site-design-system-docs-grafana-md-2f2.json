@@ -1,0 +1,23 @@
+{
+  "unversionedId": "grafana",
+  "id": "grafana",
+  "title": "Grafana",
+  "description": "//import { ConfirmModal } from '@site/packages/grafana-ui/src/components/ConfirmModal/ConfirmModal.tsx';",
+  "source": "@site/design-system/docs/grafana.md",
+  "sourceDirName": ".",
+  "slug": "/grafana",
+  "permalink": "/design-system/docs/grafana",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/design-system/docs/grafana.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "tutorialSidebar",
+  "next": {
+    "title": "Tutorial Intro",
+    "permalink": "/design-system/docs/intro"
+  }
+}

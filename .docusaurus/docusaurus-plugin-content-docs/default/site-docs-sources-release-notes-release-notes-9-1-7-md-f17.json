@@ -1,0 +1,24 @@
+{
+  "unversionedId": "sources/release-notes/release-notes-9-1-7",
+  "id": "sources/release-notes/release-notes-9-1-7",
+  "title": "release-notes-9-1-7",
+  "description": "+++",
+  "source": "@site/docs/sources/release-notes/release-notes-9-1-7.md",
+  "sourceDirName": "sources/release-notes",
+  "slug": "/sources/release-notes/release-notes-9-1-7",
+  "permalink": "/docs/sources/release-notes/release-notes-9-1-7",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/release-notes/release-notes-9-1-7.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "release-notes-9-1-6",
+    "permalink": "/docs/sources/release-notes/release-notes-9-1-6"
+  },
+  "next": {
+    "title": "undefined",
+    "permalink": "/docs/sources/release-notes/release-notes-v7-4-2"
+  }
+}

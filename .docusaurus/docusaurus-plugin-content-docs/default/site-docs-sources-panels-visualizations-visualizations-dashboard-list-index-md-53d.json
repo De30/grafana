@@ -1,0 +1,35 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/dashboard-list/index",
+  "id": "sources/panels-visualizations/visualizations/dashboard-list/index",
+  "title": "Dashboard list",
+  "description": "The dashboard list visualization allows you to display dynamic links to other dashboards. The list can be configured to use starred dashboards, recently viewed dashboards, a search query, and dashboard tags.",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/dashboard-list/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/dashboard-list",
+  "slug": "/sources/panels-visualizations/visualizations/dashboard-list/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/dashboard-list/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/dashboard-list/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/features/panels/dashlist/",
+      "/docs/grafana/latest/panels/visualizations/dashboard-list-panel/",
+      "/docs/grafana/latest/reference/dashlist/",
+      "/docs/grafana/latest/visualizations/dashboard-list-panel/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/dashboard-list/"
+    ],
+    "keywords": ["grafana", "dashboard list", "documentation", "panel", "dashlist"],
+    "title": "Dashboard list",
+    "weight": 300
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure a legend",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/configure-legend/"
+  },
+  "next": {
+    "title": "Flame graph",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/flame-graph/"
+  }
+}

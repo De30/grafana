@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/set-up-for-high-availability",
+  "id": "sources/setup-grafana/set-up-for-high-availability",
+  "title": "Set up Grafana for high availability",
+  "description": "Setting up Grafana for high availability is fairly simple. You just need a shared database for storing dashboard, users,",
+  "source": "@site/docs/sources/setup-grafana/set-up-for-high-availability.md",
+  "sourceDirName": "sources/setup-grafana",
+  "slug": "/sources/setup-grafana/set-up-for-high-availability",
+  "permalink": "/docs/sources/setup-grafana/set-up-for-high-availability",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/set-up-for-high-availability.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/administration/set-up-for-high-availability/",
+      "/docs/grafana/latest/setup-grafana/set-up-for-high-availability/",
+      "/docs/grafana/latest/tutorials/ha_setup/"
+    ],
+    "keywords": ["grafana", "tutorials", "HA", "high availability"],
+    "title": "Set up Grafana for high availability",
+    "weight": 900
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Restart Grafana",
+    "permalink": "/docs/sources/setup-grafana/restart-grafana"
+  },
+  "next": {
+    "title": "Set up Grafana Live",
+    "permalink": "/docs/sources/setup-grafana/set-up-grafana-live"
+  }
+}

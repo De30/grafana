@@ -1,0 +1,40 @@
+{
+  "unversionedId": "sources/panels-visualizations/configure-value-mappings/index",
+  "id": "sources/panels-visualizations/configure-value-mappings/index",
+  "title": "Configure value mappings",
+  "description": "In addition to field overrides, value mapping is a technique that you can use to change the visual treatment of data that appears in a visualization.",
+  "source": "@site/docs/sources/panels-visualizations/configure-value-mappings/index.md",
+  "sourceDirName": "sources/panels-visualizations/configure-value-mappings",
+  "slug": "/sources/panels-visualizations/configure-value-mappings/",
+  "permalink": "/docs/sources/panels-visualizations/configure-value-mappings/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/configure-value-mappings/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/panels/configure-value-mappings/",
+      "/docs/grafana/latest/panels/format-data/",
+      "/docs/grafana/latest/panels/value-mappings/",
+      "/docs/grafana/latest/panels/format-data/about-value-mapping/",
+      "/docs/grafana/latest/panels/format-data/edit-value-mapping/",
+      "/docs/grafana/latest/panels/format-data/map-a-range/",
+      "/docs/grafana/latest/panels/format-data/map-a-regular-expression/",
+      "/docs/grafana/latest/panels/format-data/map-a-special-value/",
+      "/docs/grafana/latest/panels/format-data/map-a-value/",
+      "/docs/grafana/latest/panels-visualizations/configure-value-mappings/"
+    ],
+    "title": "Configure value mappings",
+    "menuTitle": "Configure value mappings",
+    "weight": 600
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Configure thresholds",
+    "permalink": "/docs/sources/panels-visualizations/configure-thresholds/"
+  },
+  "next": {
+    "title": "Panel editor overview",
+    "permalink": "/docs/sources/panels-visualizations/panel-editor-overview/"
+  }
+}

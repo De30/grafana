@@ -1,0 +1,43 @@
+{
+  "unversionedId": "sources/developers/http_api/datasource_permissions",
+  "id": "sources/developers/http_api/datasource_permissions",
+  "title": "Datasource Permissions HTTP API",
+  "description": "Data Source Permissions API",
+  "source": "@site/docs/sources/developers/http_api/datasource_permissions.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/datasource_permissions",
+  "permalink": "/docs/sources/developers/http_api/datasource_permissions",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/datasource_permissions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/http_api/datasource_permissions/",
+      "/docs/grafana/latest/http_api/datasource_permissions/",
+      "/docs/grafana/latest/http_api/datasourcepermissions/"
+    ],
+    "description": "Data Source Permissions API",
+    "keywords": [
+      "grafana",
+      "http",
+      "documentation",
+      "api",
+      "datasource",
+      "permission",
+      "permissions",
+      "acl",
+      "enterprise"
+    ],
+    "title": "Datasource Permissions HTTP API"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Data source HTTP API",
+    "permalink": "/docs/sources/developers/http_api/data_source"
+  },
+  "next": {
+    "title": "External Group Sync HTTP API",
+    "permalink": "/docs/sources/developers/http_api/external_group_sync"
+  }
+}

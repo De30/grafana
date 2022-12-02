@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/preferences/select-home-dashboard-list",
+  "id": "sources/shared/preferences/select-home-dashboard-list",
+  "title": "Select home dashboard list",
+  "description": "1. In the Home Dashboard field, select the dashboard that you want to use for your home dashboard. Options include all starred dashboards.",
+  "source": "@site/docs/sources/shared/preferences/select-home-dashboard-list.md",
+  "sourceDirName": "sources/shared/preferences",
+  "slug": "/sources/shared/preferences/select-home-dashboard-list",
+  "permalink": "/docs/sources/shared/preferences/select-home-dashboard-list",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/preferences/select-home-dashboard-list.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/preferences/select-home-dashboard-list/"],
+    "title": "Select home dashboard list"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Click Org preferences",
+    "permalink": "/docs/sources/shared/preferences/org-preferences-list"
+  },
+  "next": {
+    "title": "Select home dashboard list",
+    "permalink": "/docs/sources/shared/preferences/select-timezone-list"
+  }
+}

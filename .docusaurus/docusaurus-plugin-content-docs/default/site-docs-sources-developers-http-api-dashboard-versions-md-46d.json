@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/developers/http_api/dashboard_versions",
+  "id": "sources/developers/http_api/dashboard_versions",
+  "title": "Dashboard Versions HTTP API ",
+  "description": "Grafana Dashboard Versions HTTP API",
+  "source": "@site/docs/sources/developers/http_api/dashboard_versions.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/dashboard_versions",
+  "permalink": "/docs/sources/developers/http_api/dashboard_versions",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/dashboard_versions.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/http_api/dashboard_versions/",
+      "/docs/grafana/latest/http_api/dashboard_versions/",
+      "/docs/grafana/latest/http_api/dashboardversions/"
+    ],
+    "description": "Grafana Dashboard Versions HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "dashboard", "versions"],
+    "title": "Dashboard Versions HTTP API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Dashboard Permissions HTTP API",
+    "permalink": "/docs/sources/developers/http_api/dashboard_permissions"
+  },
+  "next": {
+    "title": "Data source HTTP API",
+    "permalink": "/docs/sources/developers/http_api/data_source"
+  }
+}

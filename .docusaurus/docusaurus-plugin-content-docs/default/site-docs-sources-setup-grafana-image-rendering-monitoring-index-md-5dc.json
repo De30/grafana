@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/image-rendering/monitoring/index",
+  "id": "sources/setup-grafana/image-rendering/monitoring/index",
+  "title": "Monitor the image renderer",
+  "description": "Image rendering monitoring",
+  "source": "@site/docs/sources/setup-grafana/image-rendering/monitoring/index.md",
+  "sourceDirName": "sources/setup-grafana/image-rendering/monitoring",
+  "slug": "/sources/setup-grafana/image-rendering/monitoring/",
+  "permalink": "/docs/sources/setup-grafana/image-rendering/monitoring/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/image-rendering/monitoring/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/image-rendering/monitoring/",
+      "/docs/grafana/latest/setup-grafana/image-rendering/monitoring/"
+    ],
+    "description": "Image rendering monitoring",
+    "keywords": ["grafana", "image", "rendering", "plugin", "monitoring"],
+    "title": "Monitor the image renderer",
+    "weight": 100
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Export logs of usage insights",
+    "permalink": "/docs/sources/setup-grafana/configure-security/export-logs"
+  },
+  "next": {
+    "title": "Troubleshooting",
+    "permalink": "/docs/sources/setup-grafana/image-rendering/troubleshooting/"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/shared/preferences/navigate-user-preferences-list",
+  "id": "sources/shared/preferences/navigate-user-preferences-list",
+  "title": "Navigate to user preferences list",
+  "description": "1. On the left menu, hover your cursor over your avatar and then click Preferences.",
+  "source": "@site/docs/sources/shared/preferences/navigate-user-preferences-list.md",
+  "sourceDirName": "sources/shared/preferences",
+  "slug": "/sources/shared/preferences/navigate-user-preferences-list",
+  "permalink": "/docs/sources/shared/preferences/navigate-user-preferences-list",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/shared/preferences/navigate-user-preferences-list.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/shared/preferences/navigate-user-preferences-list/"],
+    "title": "Navigate to user preferences list"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Navigate to the dashboard list",
+    "permalink": "/docs/sources/shared/preferences/navigate-to-the-dashboard-list"
+  },
+  "next": {
+    "title": "Click Org preferences",
+    "permalink": "/docs/sources/shared/preferences/org-preferences-list"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "unversionedId": "sources/setup-grafana/installation/rpm/index",
+  "id": "sources/setup-grafana/installation/rpm/index",
+  "title": "Install on RPM-based Linux",
+  "description": "Grafana Installation guide for RPM-based Linux, such as Centos, Fedora, OpenSuse, and Red Hat.",
+  "source": "@site/docs/sources/setup-grafana/installation/rpm/index.md",
+  "sourceDirName": "sources/setup-grafana/installation/rpm",
+  "slug": "/sources/setup-grafana/installation/rpm/",
+  "permalink": "/docs/sources/setup-grafana/installation/rpm/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/setup-grafana/installation/rpm/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/installation/installation/rpm/",
+      "/docs/grafana/latest/installation/rpm/",
+      "/docs/grafana/latest/setup-grafana/installation/rpm/"
+    ],
+    "description": "Grafana Installation guide for RPM-based Linux, such as Centos, Fedora, OpenSuse, and Red Hat.",
+    "title": "Install on RPM-based Linux",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Install on macOS",
+    "permalink": "/docs/sources/setup-grafana/installation/mac/"
+  },
+  "next": {
+    "title": "Install on Windows",
+    "permalink": "/docs/sources/setup-grafana/installation/windows/"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "unversionedId": "sources/developers/http_api/snapshot",
+  "id": "sources/developers/http_api/snapshot",
+  "title": "HTTP Snapshot API ",
+  "description": "Grafana HTTP API",
+  "source": "@site/docs/sources/developers/http_api/snapshot.md",
+  "sourceDirName": "sources/developers/http_api",
+  "slug": "/sources/developers/http_api/snapshot",
+  "permalink": "/docs/sources/developers/http_api/snapshot",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/http_api/snapshot.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/http_api/snapshot/", "/docs/grafana/latest/http_api/snapshot/"],
+    "description": "Grafana HTTP API",
+    "keywords": ["grafana", "http", "documentation", "api", "snapshot"],
+    "title": "HTTP Snapshot API "
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Short URL HTTP API ",
+    "permalink": "/docs/sources/developers/http_api/short_url"
+  },
+  "next": {
+    "title": "Team HTTP API",
+    "permalink": "/docs/sources/developers/http_api/team"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "unversionedId": "sources/developers/plugins/add-authentication-for-data-source-plugins",
+  "id": "sources/developers/plugins/add-authentication-for-data-source-plugins",
+  "title": "Add authentication for data source plugins",
+  "description": "This page explains how to configure your data source plugin to authenticate against a third-party API.",
+  "source": "@site/docs/sources/developers/plugins/add-authentication-for-data-source-plugins.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-authentication-for-data-source-plugins",
+  "permalink": "/docs/sources/developers/plugins/add-authentication-for-data-source-plugins",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-authentication-for-data-source-plugins.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/developers/plugins/add-authentication-for-data-source-plugins/",
+      "/docs/grafana/latest/plugins/developing/auth-for-datasources/",
+      "/docs/grafana/next/developers/plugins/authentication/"
+    ],
+    "title": "Add authentication for data source plugins"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add anonymous usage reporting",
+    "permalink": "/docs/sources/developers/plugins/add-anonymous-usage-reporting"
+  },
+  "next": {
+    "title": "Add query editor help",
+    "permalink": "/docs/sources/developers/plugins/add-query-editor-help"
+  }
+}

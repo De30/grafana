@@ -1,0 +1,34 @@
+{
+  "unversionedId": "sources/panels-visualizations/visualizations/canvas/index",
+  "id": "sources/panels-visualizations/visualizations/canvas/index",
+  "title": "Canvas",
+  "description": "Canvas visualization documentation",
+  "source": "@site/docs/sources/panels-visualizations/visualizations/canvas/index.md",
+  "sourceDirName": "sources/panels-visualizations/visualizations/canvas",
+  "slug": "/sources/panels-visualizations/visualizations/canvas/",
+  "permalink": "/docs/sources/panels-visualizations/visualizations/canvas/",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/panels-visualizations/visualizations/canvas/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/features/panels/canvas/",
+      "/docs/grafana/latest/visualizations/canvas/",
+      "/docs/grafana/latest/panels-visualizations/visualizations/canvas/"
+    ],
+    "description": "Canvas visualization documentation",
+    "keywords": ["grafana", "canvas", "panel", "documentation"],
+    "title": "Canvas",
+    "weight": 600
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Candlestick",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/candlestick/"
+  },
+  "next": {
+    "title": "Configure a legend",
+    "permalink": "/docs/sources/panels-visualizations/visualizations/configure-legend/"
+  }
+}

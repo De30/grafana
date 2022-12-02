@@ -1,0 +1,30 @@
+{
+  "unversionedId": "sources/cli",
+  "id": "sources/cli",
+  "title": "Grafana CLI",
+  "description": "Guide to using grafana-cli",
+  "source": "@site/docs/sources/cli.md",
+  "sourceDirName": "sources",
+  "slug": "/sources/cli",
+  "permalink": "/docs/sources/cli",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/cli.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/administration/cli/"],
+    "description": "Guide to using grafana-cli",
+    "keywords": ["grafana", "cli", "grafana-cli", "command line interface"],
+    "title": "Grafana CLI",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Translate your site",
+    "permalink": "/docs/sources/tutorial-extras/translate-your-site"
+  },
+  "next": {
+    "title": "Assess dashboard usage",
+    "permalink": "/docs/sources/dashboards/assess-dashboard-usage/"
+  }
+}

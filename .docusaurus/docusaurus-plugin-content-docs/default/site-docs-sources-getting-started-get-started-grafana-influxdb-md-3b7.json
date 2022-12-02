@@ -1,0 +1,32 @@
+{
+  "unversionedId": "sources/getting-started/get-started-grafana-influxdb",
+  "id": "sources/getting-started/get-started-grafana-influxdb",
+  "title": "Get started with Grafana and InfluxDB",
+  "description": "Learn how to build your first InfluxDB dashboard in Grafana.",
+  "source": "@site/docs/sources/getting-started/get-started-grafana-influxdb.md",
+  "sourceDirName": "sources/getting-started",
+  "slug": "/sources/getting-started/get-started-grafana-influxdb",
+  "permalink": "/docs/sources/getting-started/get-started-grafana-influxdb",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/getting-started/get-started-grafana-influxdb.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": [
+      "/docs/grafana/latest/getting-started/get-started-grafana-influxdb/",
+      "/docs/grafana/latest/getting-started/getting-started-influxdb/"
+    ],
+    "description": "Learn how to build your first InfluxDB dashboard in Grafana.",
+    "title": "Get started with Grafana and InfluxDB",
+    "weight": 400
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Build your first dashboard",
+    "permalink": "/docs/sources/getting-started/build-first-dashboard"
+  },
+  "next": {
+    "title": "Get started with Grafana and MS SQL Server",
+    "permalink": "/docs/sources/getting-started/get-started-grafana-ms-sql-server"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "unversionedId": "sources/developers/plugins/add-support-for-variables",
+  "id": "sources/developers/plugins/add-support-for-variables",
+  "title": "Add support for variables in plugins",
+  "description": "Variables are placeholders for values, and can be used to create things like templated queries and dashboard or panel links. For more information on variables, refer to Templates and variables.",
+  "source": "@site/docs/sources/developers/plugins/add-support-for-variables.md",
+  "sourceDirName": "sources/developers/plugins",
+  "slug": "/sources/developers/plugins/add-support-for-variables",
+  "permalink": "/docs/sources/developers/plugins/add-support-for-variables",
+  "draft": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/sources/developers/plugins/add-support-for-variables.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "aliases": ["/docs/grafana/latest/developers/plugins/add-support-for-variables/"],
+    "title": "Add support for variables in plugins"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Add support for Explore queries",
+    "permalink": "/docs/sources/developers/plugins/add-support-for-explore-queries"
+  },
+  "next": {
+    "title": "Grafana Plugin SDK for Go",
+    "permalink": "/docs/sources/developers/plugins/backend/grafana-plugin-sdk-for-go"
+  }
+}
