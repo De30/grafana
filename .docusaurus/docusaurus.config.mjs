@@ -11,6 +11,9 @@ export default {
   "onBrokenLinks": "throw",
   "onBrokenMarkdownLinks": "warn",
   "favicon": "img/favicon.ico",
+  "staticDirectories": [
+    "design-system/static"
+  ],
   "organizationName": "facebook",
   "projectName": "docusaurus",
   "i18n": {
@@ -275,9 +278,6 @@ export default {
   },
   "baseUrlIssueBanner": true,
   "onDuplicateRoutes": "warn",
-  "staticDirectories": [
-    "static"
-  ],
   "customFields": {},
   "plugins": [],
   "themes": [],
