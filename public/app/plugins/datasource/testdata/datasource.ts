@@ -17,6 +17,7 @@ import {
   MutableDataFrame,
   DataCatalogueProvider,
   DataCatalogueFolder,
+  DataCatalogueContext,
 } from '@grafana/data';
 import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
@@ -29,7 +30,10 @@ import { flameGraphData } from './testData/flameGraphResponse';
 import { Scenario, TestDataQuery } from './types';
 import { TestDataVariableSupport } from './variables';
 
-export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> implements DataCatalogueProvider {
+export class TestDataDataSource
+  extends DataSourceWithBackend<TestDataQuery>
+  implements DataCatalogueProvider<TestDataQuery>
+{
   scenariosCache?: Promise<Scenario[]>;
 
   constructor(
@@ -40,8 +44,8 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> imp
     this.variables = new TestDataVariableSupport();
   }
 
-  async getRootDataCatalogueFolder(): Promise<DataCatalogueFolder> {
-    return await getRootDataCatalogueFolder();
+  async getRootDataCatalogueFolder(context: DataCatalogueContext<TestDataQuery>): Promise<DataCatalogueFolder> {
+    return await getRootDataCatalogueFolder(context);
   }
 
   query(options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {

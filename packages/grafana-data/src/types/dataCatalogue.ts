@@ -1,3 +1,6 @@
+import { CoreApp } from './app';
+import { DataQuery } from './query';
+
 export interface DataCatalogueItemAction {
   name: string;
   handler: () => void;
@@ -83,15 +86,17 @@ export interface DataCatalogueFolder extends DataCatalogueItem {
 /**
  * @internal
  */
-export interface DataCatalogueProvider {
-  getRootDataCatalogueFolder(): Promise<DataCatalogueFolder>;
+export interface DataCatalogueProvider<TQuery extends DataQuery> {
+  getRootDataCatalogueFolder(context: DataCatalogueContext<TQuery>): Promise<DataCatalogueFolder>;
 }
 
 /**
  * @internal
  */
-export const hasDataCatalogueSupport = (datasource: unknown): datasource is DataCatalogueProvider => {
-  return (datasource as DataCatalogueProvider).getRootDataCatalogueFolder !== undefined;
+export const hasDataCatalogueSupport = <TQuery extends DataQuery>(
+  datasource: unknown
+): datasource is DataCatalogueProvider<TQuery> => {
+  return (datasource as DataCatalogueProvider<TQuery>).getRootDataCatalogueFolder !== undefined;
 };
 
 export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCatalogueFolder => {
@@ -157,3 +162,12 @@ export class DataCatalogueFolderBuilder extends DataCatalogueItemBuilder impleme
     }
   }
 }
+
+export type DataCatalogueContext<TQuery extends DataQuery> = {
+  closeDataCatalogue: () => void;
+  app?: CoreApp;
+  // query context
+  queryRefId?: string;
+  changeQuery?: (query: TQuery) => void;
+  runQuery?: () => void;
+};

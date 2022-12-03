@@ -21,6 +21,7 @@ import {
   TimeRange,
   toLegacyResponseData,
   hasDataCatalogueSupport,
+  DataCatalogueContext,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { AngularComponent, getAngularLoader } from '@grafana/runtime';
@@ -483,7 +484,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
   };
 
   render() {
-    const { query, index, visualization } = this.props;
+    const { query, index, visualization, app, onChange, onRunQuery } = this.props;
     const { datasource, showingHelp, showingDataCatalogue, data } = this.state;
     const isDisabled = query.hide;
 
@@ -512,7 +513,18 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
           <div className={rowClasses} id={this.id}>
             <ErrorBoundaryAlert>
               {showingDataCatalogue && hasDataCatalogueSupport(datasource) && (
-                <DataCatalogue dataCatalogueProvider={datasource} onClose={() => this.onToggleDataCatalogue()} />
+                <DataCatalogue
+                  dataCatalogueProvider={datasource}
+                  dataCatalogueContext={
+                    {
+                      app,
+                      changeQuery: onChange,
+                      queryRefId: query.refId,
+                      runQuery: onRunQuery,
+                    } as DataCatalogueContext<TQuery>
+                  }
+                  onClose={() => this.onToggleDataCatalogue()}
+                />
               )}
               {showingHelp && DatasourceCheatsheet && (
                 <OperationRowHelp>

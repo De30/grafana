@@ -1,6 +1,15 @@
-import { DataCatalogueFolder, DataCatalogueFolderBuilder, DataCatalogueItemBuilder } from '@grafana/data';
+import {
+  DataCatalogueContext,
+  DataCatalogueFolder,
+  DataCatalogueFolderBuilder,
+  DataCatalogueItemBuilder,
+} from '@grafana/data';
 
-export const getRootDataCatalogueFolder = async (): Promise<DataCatalogueFolder> => {
+import { TestDataQuery } from './types';
+
+export const getRootDataCatalogueFolder = async (
+  context: DataCatalogueContext<TestDataQuery>
+): Promise<DataCatalogueFolder> => {
   return new DataCatalogueFolderBuilder('root').setItems([
     new DataCatalogueFolderBuilder('Data').setItems([
       new DataCatalogueFolderBuilder('Metrics').setItems([
@@ -12,7 +21,16 @@ export const getRootDataCatalogueFolder = async (): Promise<DataCatalogueFolder>
         new DataCatalogueFolderBuilder('job').setItems([
           new DataCatalogueItemBuilder('load-balancer'),
           new DataCatalogueItemBuilder('application'),
-          new DataCatalogueItemBuilder('database').addAction('run query', () => {}),
+          new DataCatalogueItemBuilder('database').addAction('run query', () => {
+            if (context.changeQuery && context.queryRefId && context.runQuery) {
+              context.closeDataCatalogue();
+              context.changeQuery({
+                refId: context.queryRefId,
+                scenarioId: 'logs',
+              });
+              context.runQuery();
+            }
+          }),
         ]),
       ]),
     ]),
