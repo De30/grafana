@@ -45,7 +45,7 @@ export class TestDataDataSource
   }
 
   async getRootDataCatalogueFolder(context: DataCatalogueContext<TestDataQuery>): Promise<DataCatalogueFolder> {
-    return await getRootDataCatalogueFolder(context);
+    return await getRootDataCatalogueFolder(context, this);
   }
 
   query(options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {

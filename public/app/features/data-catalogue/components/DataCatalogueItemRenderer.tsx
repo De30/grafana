@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { DataCatalogueItem, isDataCatalogueFolder } from '@grafana/data';
-import { IconButton } from '@grafana/ui';
 
-import { DataCatalogueItemAttributesRenderer } from './DataCatalogueItemAttributesRenderer';
+import { DataCatalogueItemLineRenderer } from './DataCatalogueItemLineRenderer';
 
 type Props = {
   item: DataCatalogueItem;
+  setSelectedItem: (item: DataCatalogueItem) => void;
+  selectedItem?: DataCatalogueItem;
 };
 
 export const DataCatalogueItemRenderer = (props: Props) => {
   const [children, setChildren] = useState<DataCatalogueItem[]>([]);
   const [expanded, setExpanded] = useState(false);
-  const isFolder = isDataCatalogueFolder(props.item);
+
+  const { item, setSelectedItem, selectedItem } = props;
+  const isSelected = item === selectedItem;
+
+  useEffect(() => {
+    if (isSelected && !expanded) {
+      expand();
+    }
+  }, [isSelected]);
 
   const expand = () => {
     if (isDataCatalogueFolder(props.item)) {
@@ -39,21 +48,22 @@ export const DataCatalogueItemRenderer = (props: Props) => {
 
   return (
     <div>
-      {isFolder && (
-        <IconButton
-          variant="secondary"
-          size="sm"
-          name={expanded ? 'arrow-down' : 'arrow-right'}
-          onClick={() => (expanded ? collapse() : expand())}
-        />
-      )}
-      {props.item.name}
-      {props.item.attributes && props.item.attributes.length > 0 && (
-        <DataCatalogueItemAttributesRenderer item={props.item} />
-      )}
+      <DataCatalogueItemLineRenderer
+        item={item}
+        setSelectedItem={setSelectedItem}
+        isSelected={isSelected}
+        expand={expand}
+        collapse={collapse}
+        expanded={expanded}
+      />
       <div style={{ paddingLeft: '20px' }}>
         {children.map((child, index) => (
-          <DataCatalogueItemRenderer key={index} item={child} />
+          <DataCatalogueItemRenderer
+            key={index}
+            item={child}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+          />
         ))}
       </div>
     </div>

@@ -77,7 +77,7 @@ export class PrometheusDatasource
   implements
     DataSourceWithQueryImportSupport<PromQuery>,
     DataSourceWithQueryExportSupport<PromQuery>,
-    DataCatalogueProvider
+    DataCatalogueProvider<PromQuery>
 {
   type: string;
   editorSrc: string;

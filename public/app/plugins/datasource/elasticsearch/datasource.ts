@@ -26,6 +26,7 @@ import {
   CoreApp,
   DataCatalogueProvider,
   DataCatalogueFolder,
+  DataCatalogueContext,
 } from '@grafana/data';
 import { BackendSrvRequest, DataSourceWithBackend, getBackendSrv, getDataSourceSrv, config } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -139,8 +140,8 @@ export class ElasticDatasource
     this.timeSrv = getTimeSrv();
   }
 
-  async getRootDataCatalogueFolder(): Promise<DataCatalogueFolder> {
-    return await getRootDataCatalogueFolder({ datasource: this });
+  async getRootDataCatalogueFolder(context: DataCatalogueContext<ElasticsearchQuery>): Promise<DataCatalogueFolder> {
+    return await getRootDataCatalogueFolder({ datasource: this, context });
   }
 
   private request(

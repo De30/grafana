@@ -1,4 +1,5 @@
 import { CoreApp } from './app';
+import { DataSourceApi } from './datasource';
 import { DataQuery } from './query';
 
 export interface DataCatalogueItemAction {
@@ -11,6 +12,9 @@ export enum DataCatalogueItemAttributeType {
   KeyValue = 'KeyValue',
   Icon = 'Icon',
   Action = 'Action',
+  Image = 'Image',
+  Description = 'Description',
+  Tag = 'Tag',
 }
 
 export interface DataCatalogueItemAttribute {
@@ -46,6 +50,24 @@ export const IsDataCatalogueItemAttributeAction = (
   return attribute.type === DataCatalogueItemAttributeType.Action;
 };
 
+export const IsDataCatalogueItemAttributeTag = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeTag => {
+  return attribute.type === DataCatalogueItemAttributeType.Tag;
+};
+
+export const IsDataCatalogueItemAttributeDescription = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeDescription => {
+  return attribute.type === DataCatalogueItemAttributeType.Description;
+};
+
+export const IsDataCatalogueItemAttributeImage = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeImage => {
+  return attribute.type === DataCatalogueItemAttributeType.Image;
+};
+
 export class DataCatalogueItemAttributeIcon implements DataCatalogueItemAttribute {
   type = DataCatalogueItemAttributeType.Icon;
   icon: string;
@@ -70,8 +92,36 @@ export class DataCatalogueItemAttributeAction implements DataCatalogueItemAttrib
   }
 }
 
+export class DataCatalogueItemAttributeImage implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Image;
+  url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+}
+
+export class DataCatalogueItemAttributeTag implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Tag;
+  tag: string;
+
+  constructor(tag: string) {
+    this.tag = tag;
+  }
+}
+
+export class DataCatalogueItemAttributeDescription implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Description;
+  description: string;
+
+  constructor(description: string) {
+    this.description = description;
+  }
+}
+
 export interface DataCatalogueItem {
   name: string;
+  type?: string;
   attributes?: DataCatalogueItemAttribute[];
   // @deprecated
   attrs?: Record<string, string>;
@@ -105,10 +155,12 @@ export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCata
 
 export class DataCatalogueItemBuilder implements DataCatalogueItem {
   name: string;
+  type?: string;
   attributes: DataCatalogueItemAttribute[] = [];
 
-  constructor(name: string) {
+  constructor(name: string, type?: string) {
     this.name = name;
+    this.type = type;
   }
 
   addKeyValue(key: string, value: string) {
@@ -123,6 +175,21 @@ export class DataCatalogueItemBuilder implements DataCatalogueItem {
 
   addAction(name: string, handler: () => void) {
     this.attributes.push(new DataCatalogueItemAttributeAction(name, handler));
+    return this;
+  }
+
+  addTag(tag: string) {
+    this.attributes.push(new DataCatalogueItemAttributeTag(tag));
+    return this;
+  }
+
+  addDescription(description: string) {
+    this.attributes.push(new DataCatalogueItemAttributeDescription(description));
+    return this;
+  }
+
+  addImage(url: string) {
+    this.attributes.push(new DataCatalogueItemAttributeImage(url));
     return this;
   }
 
@@ -163,11 +230,35 @@ export class DataCatalogueFolderBuilder extends DataCatalogueItemBuilder impleme
   }
 }
 
-export type DataCatalogueContext<TQuery extends DataQuery> = {
+export class DataCatalogueDatasourceFolderBuilder extends DataCatalogueFolderBuilder {
+  constructor(datasource: DataSourceApi) {
+    super(datasource.name);
+    this.addKeyValue('Name', datasource.meta.name);
+    datasource.meta.category && this.addKeyValue('Category', datasource.meta.category);
+    this.addKeyValue('Author', datasource.meta.info.author.name);
+    this.addDescription(datasource.meta.info.description);
+    datasource.meta.info.version && this.addKeyValue('Version', datasource.meta.info.version);
+    this.addImage(datasource.meta.info.logos.small);
+  }
+}
+
+export interface DataCatalogueContext<TQuery extends DataQuery> {
   closeDataCatalogue: () => void;
   app?: CoreApp;
   // query context
   queryRefId?: string;
   changeQuery?: (query: TQuery) => void;
   runQuery?: () => void;
+}
+
+export interface DataCatalogueContextWithQuery<TQuery extends DataQuery> extends DataCatalogueContext<TQuery> {
+  queryRefId: string;
+  changeQuery: (query: TQuery) => void;
+  runQuery: () => void;
+}
+
+export const isDataCatalogueContextWithQuery = (
+  context: DataCatalogueContext<any>
+): context is DataCatalogueContextWithQuery<any> => {
+  return !!context.queryRefId && !!context.changeQuery && !!context.runQuery;
 };

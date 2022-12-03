@@ -1,4 +1,4 @@
-import { DataCatalogueFolder, DataSourceInstanceSettings } from '@grafana/data';
+import { DataCatalogueDatasourceFolderBuilder, DataCatalogueFolder, DataSourceInstanceSettings } from '@grafana/data';
 
 import { LokiDatasource } from './datasource';
 
@@ -8,17 +8,9 @@ type Deps = {
 };
 
 export const getRootDataCatalogueFolder = async (deps: Deps): Promise<DataCatalogueFolder> => {
-  const root: DataCatalogueFolder = {
-    name: deps.instanceSettings.name,
-    attributes: {
-      URL: deps.instanceSettings.url || '',
-    },
-    items: async () => {
-      return [await getLabelsDataCatalogueFolder(deps), await getConfigDataCatalogueFolder(deps)];
-    },
-  };
-
-  return root;
+  return new DataCatalogueDatasourceFolderBuilder(deps.datasource).loadItems(async () => {
+    return [await getLabelsDataCatalogueFolder(deps), await getConfigDataCatalogueFolder(deps)];
+  });
 };
 
 export const getConfigDataCatalogueFolder = async (deps: Deps) => {

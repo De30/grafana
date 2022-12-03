@@ -1,16 +1,19 @@
 import {
   DataCatalogueContext,
+  DataCatalogueDatasourceFolderBuilder,
   DataCatalogueFolder,
   DataCatalogueFolderBuilder,
   DataCatalogueItemBuilder,
 } from '@grafana/data';
 
+import { TestDataDataSource } from './datasource';
 import { TestDataQuery } from './types';
 
 export const getRootDataCatalogueFolder = async (
-  context: DataCatalogueContext<TestDataQuery>
+  context: DataCatalogueContext<TestDataQuery>,
+  datasource: TestDataDataSource
 ): Promise<DataCatalogueFolder> => {
-  return new DataCatalogueFolderBuilder('root').setItems([
+  return new DataCatalogueDatasourceFolderBuilder(datasource).setItems([
     new DataCatalogueFolderBuilder('Data').setItems([
       new DataCatalogueFolderBuilder('Metrics').setItems([
         new DataCatalogueItemBuilder('memory_total')
@@ -35,8 +38,11 @@ export const getRootDataCatalogueFolder = async (
       ]),
     ]),
     new DataCatalogueFolderBuilder('Status').setItems([
-      new DataCatalogueItemBuilder('')
+      new DataCatalogueItemBuilder('Info')
         .addKeyValue('version', '1.2')
+        .addKeyValue('status', 'ok')
+        .addKeyValue('date', '2022-11-30')
+        .addKeyValue('hash', '12bf4a')
         .addIcon('health', 'check', 'The system is running okay.'),
     ]),
   ]);
