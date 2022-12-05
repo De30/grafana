@@ -118,6 +118,15 @@ message ReadEntityRequest {
   bool with_summary = 4;
 }
 
+message WatchEntityRequest {
+  // Name of kind to watch
+  string kind = 1;
+}
+
+message EntityWatchResponse {
+  repeated GRN GRN = 1;
+}
+
 //------------------------------------------------------
 // Make many read requests at once (by Kind+ID+version)
 //------------------------------------------------------
@@ -153,7 +162,7 @@ message WriteEntityRequest {
 
 // This operation is useful when syncing a resource from external sources
 // that have more accurate metadata information (git, or an archive).
-// This process can bypass the forced checks that 
+// This process can bypass the forced checks that
 message AdminWriteEntityRequest {
   // Entity identifier
   GRN GRN = 1;
@@ -207,7 +216,7 @@ message WriteEntityResponse {
   GRN GRN = 2;
 
   // Entity details with the body removed
-  EntityVersionInfo entity = 3; 
+  EntityVersionInfo entity = 3;
 
   // Entity summary as JSON
   bytes summary_json = 4;
@@ -249,7 +258,7 @@ message EntityHistoryRequest {
   GRN GRN = 1;
 
   // Maximum number of items to return
-  int64 limit = 3; 
+  int64 limit = 3;
 
   // Starting from the requested page
   string next_page_token = 5;
@@ -276,7 +285,7 @@ message EntitySearchRequest {
   string next_page_token = 1;
 
   // Maximum number of items to return
-  int64 limit = 2; 
+  int64 limit = 2;
 
   // Free text query string -- mileage may vary :)
   string query = 3;
@@ -369,6 +378,7 @@ service EntityStore {
   rpc Delete(DeleteEntityRequest) returns (DeleteEntityResponse);
   rpc History(EntityHistoryRequest) returns (EntityHistoryResponse);
   rpc Search(EntitySearchRequest) returns (EntitySearchResponse);
+  rpc Watch(WatchEntityRequest) returns (stream EntityWatchResponse);
 
 // Ideally an additional search endpoint with more flexibility to limit what you actually care about
 //  https://github.com/grafana/grafana-plugin-sdk-go/blob/main/proto/backend.proto#L129

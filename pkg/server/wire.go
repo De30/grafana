@@ -84,6 +84,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/oauthtoken/oauthtokentest"
 	"github.com/grafana/grafana/pkg/services/org/orgimpl"
+	"github.com/grafana/grafana/pkg/services/platformaton"
 	"github.com/grafana/grafana/pkg/services/playlist/playlistimpl"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	plugindashboardsservice "github.com/grafana/grafana/pkg/services/plugindashboards/service"
@@ -348,6 +349,7 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(notifications.TempUserStore), new(tempuser.Service)),
 	tagimpl.ProvideService,
 	wire.Bind(new(tag.Service), new(*tagimpl.Service)),
+	platformaton.ProvideSMPlatformaton,
 )
 
 var wireSet = wire.NewSet(
