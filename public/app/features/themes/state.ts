@@ -1,12 +1,13 @@
 import { FormEvent } from 'react';
 
-import { NavModelItem, NewThemeOptions } from '@grafana/data';
+import { AppEvents, GrafanaTheme2, NavModelItem, NewThemeOptions } from '@grafana/data';
 import { getBackendSrv } from '@grafana/runtime';
+import appEvents from 'app/core/app_events';
 import { StateManagerBase } from 'app/core/services/StateManagerBase';
 
 import { setRuntimeTheme } from './changeTheme';
 
-export interface CustomTheme {
+export interface CustomThemeDTO {
   uid: string;
   name: string;
   body: NewThemeOptions;
@@ -17,14 +18,16 @@ export enum CustomThemeType {
   Dashboard = 'dashboard',
 }
 
-export function loadAllThemes(): Promise<CustomTheme[]> {
+export function loadAllThemes(): Promise<CustomThemeDTO[]> {
   return getBackendSrv().get(`/api/themes`);
 }
 
 export interface EditThemeState {
-  theme: CustomTheme;
-  code: string;
+  theme: CustomThemeDTO;
+  defJson: string;
+  fullJson: string;
   loading: boolean;
+  tab: string;
 }
 
 export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
@@ -36,8 +39,10 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
         body: {},
       },
       loading: true,
-      code: `{        
+      tab: 'def',
+      defJson: `{        
       }`,
+      fullJson: '',
     });
   }
 
@@ -45,15 +50,16 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
     if (uid === 'new') {
       this.setState({ loading: false });
     } else {
-      const result = await getBackendSrv().get(`/api/themes/${uid}`);
+      const customTheme = await getBackendSrv().get<CustomThemeDTO>(`/api/themes/${uid}`);
+
+      const runtimeTheme = setRuntimeTheme(customTheme);
 
       this.setState({
-        theme: result,
+        theme: customTheme,
         loading: false,
-        code: JSON.stringify(result.body, null, 2),
+        defJson: JSON.stringify(customTheme.body, null, 2),
+        fullJson: this.getFullJson(runtimeTheme),
       });
-
-      setRuntimeTheme(this.state.theme);
     }
   }
 
@@ -74,9 +80,11 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
     if (theme.uid === 'new') {
       const result = await getBackendSrv().post('/api/themes', theme);
       this.setState({ theme: result });
+      appEvents.emit(AppEvents.alertSuccess, ['Theme created']);
     } else {
       const result = await getBackendSrv().put(`/api/themes/${theme.uid}`, theme);
       this.setState({ theme: result });
+      appEvents.emit(AppEvents.alertSuccess, ['Theme saved']);
     }
   };
 
@@ -90,13 +98,31 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
   };
 
   onCodeBlur = (code: string) => {
-    this.setState({
-      theme: { ...this.state.theme, body: JSON.parse(code) },
-      code,
-    });
+    const customTheme: CustomThemeDTO = { ...this.state.theme, body: JSON.parse(code) };
+    const runtimeTheme = setRuntimeTheme(customTheme);
 
-    setRuntimeTheme(this.state.theme);
+    this.setState({
+      theme: customTheme,
+      defJson: code,
+      fullJson: this.getFullJson(runtimeTheme),
+    });
   };
+
+  getFullJson(theme: GrafanaTheme2) {
+    const slim = {
+      colors: theme.colors,
+      spacing: theme.spacing,
+      shadows: theme.shadows,
+      components: theme.components,
+      visualization: theme.visualization,
+    };
+
+    return JSON.stringify(slim, null, 2);
+  }
+
+  changeTab(tab: string) {
+    this.setState({ tab });
+  }
 }
 
 let editState: ThemeEditPageState | null = null;

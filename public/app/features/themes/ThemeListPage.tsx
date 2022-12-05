@@ -4,10 +4,10 @@ import { useAsync } from 'react-use';
 import { Card, LinkButton, VerticalGroup } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 
-import { loadAllThemes, CustomTheme } from './state';
+import { loadAllThemes, CustomThemeDTO } from './state';
 
 interface State {
-  themes: CustomTheme[];
+  themes: CustomThemeDTO[];
 }
 
 export function ThemeListPage() {

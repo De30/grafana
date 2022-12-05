@@ -12,11 +12,18 @@ describe('createTheme', () => {
           canvas: '#123',
         },
       },
+      components: {
+        panel: {
+          background: 'red',
+        },
+      },
     });
 
     expect(custom.colors.primary.main).toBe('rgb(240,0,0)');
     expect(custom.colors.primary.shade).toBe('rgb(242, 38, 38)');
     expect(custom.colors.background.canvas).toBe('#123');
+    expect(custom.components.panel.background).toBe('red');
+    expect(custom.components.panel.padding).toBe(1);
   });
 
   it('create default theme', () => {
