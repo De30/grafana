@@ -8,6 +8,7 @@ import {
   DataCatalogueProvider,
   DataQuery,
   GrafanaTheme2,
+  IsLazyDataCatalogueItem,
 } from '@grafana/data';
 import { Modal, useStyles2 } from '@grafana/ui';
 
@@ -45,8 +46,11 @@ export const DataCatalogue = <TQuery extends DataQuery>(props: Props<TQuery>) =>
   useEffect(() => {
     props.dataCatalogueProvider
       .getRootDataCatalogueFolder({ ...props.dataCatalogueContext, closeDataCatalogue: props.onClose })
-      .then((item: DataCatalogueFolder) => {
+      .then(async (item: DataCatalogueFolder) => {
         setRoot(item);
+        if (IsLazyDataCatalogueItem(item)) {
+          await item.createAttributes();
+        }
         setSelectedItem(item);
       });
   }, []);
@@ -56,7 +60,16 @@ export const DataCatalogue = <TQuery extends DataQuery>(props: Props<TQuery>) =>
       {root && (
         <div className={styles.container}>
           <div className={styles.pane}>
-            <DataCatalogueItemRenderer item={root} selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+            <DataCatalogueItemRenderer
+              item={root}
+              selectedItem={selectedItem}
+              setSelectedItem={async (item) => {
+                if (IsLazyDataCatalogueItem(item)) {
+                  await item.createAttributes();
+                }
+                setSelectedItem(item);
+              }}
+            />
           </div>
           <div className={styles.pane}>{selectedItem && <DataCatalogueItemDetailsRenderer item={selectedItem} />}</div>
         </div>

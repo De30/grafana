@@ -1,4 +1,11 @@
-import { DataSourceInstanceSettings, ScopedVars, TimeRange } from '@grafana/data';
+import {
+  DataCatalogueContext,
+  DataCatalogueFolder,
+  DataCatalogueProvider,
+  DataSourceInstanceSettings,
+  ScopedVars,
+  TimeRange,
+} from '@grafana/data';
 import { CompletionItemKind, LanguageDefinition, TableIdentifier } from '@grafana/experimental';
 import { TemplateSrv } from '@grafana/runtime';
 import { SqlDatasource } from 'app/features/plugins/sql/datasource/SqlDatasource';
@@ -6,16 +13,21 @@ import { DB, SQLQuery } from 'app/features/plugins/sql/types';
 import { formatSQL } from 'app/features/plugins/sql/utils/formatSQL';
 
 import MySQLQueryModel from './MySqlQueryModel';
+import { getRootDataCatalogueFolder } from './dataCatalogue';
 import { mapFieldsToTypes } from './fields';
 import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQuery';
 import { getSqlCompletionProvider } from './sqlCompletionProvider';
 import { MySQLOptions } from './types';
 
-export class MySqlDatasource extends SqlDatasource {
+export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvider<SQLQuery> {
   sqlLanguageDefinition: LanguageDefinition | undefined;
 
   constructor(private instanceSettings: DataSourceInstanceSettings<MySQLOptions>) {
     super(instanceSettings);
+  }
+
+  async getRootDataCatalogueFolder(context: DataCatalogueContext<SQLQuery>): Promise<DataCatalogueFolder> {
+    return getRootDataCatalogueFolder(context, this);
   }
 
   getQueryModel(target?: Partial<SQLQuery>, templateSrv?: TemplateSrv, scopedVars?: ScopedVars): MySQLQueryModel {

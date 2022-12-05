@@ -122,11 +122,16 @@ export class DataCatalogueItemAttributeDescription implements DataCatalogueItemA
 export interface DataCatalogueItem {
   name: string;
   type?: string;
+  createAttributes?: () => Promise<void>;
   attributes?: DataCatalogueItemAttribute[];
   // @deprecated
   attrs?: Record<string, string>;
   // @deprecated
   actions?: DataCatalogueItemAction[];
+}
+
+export interface LazyDataCatalogueItem extends DataCatalogueItem {
+  createAttributes: () => Promise<void>;
 }
 
 export interface DataCatalogueFolder extends DataCatalogueItem {
@@ -153,10 +158,15 @@ export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCata
   return (item as DataCatalogueFolder).items !== undefined;
 };
 
+export const IsLazyDataCatalogueItem = (item: DataCatalogueItem): item is LazyDataCatalogueItem => {
+  return (item as LazyDataCatalogueItem).createAttributes !== undefined;
+};
+
 export class DataCatalogueItemBuilder implements DataCatalogueItem {
   name: string;
   type?: string;
   attributes: DataCatalogueItemAttribute[] = [];
+  createAttributes?: () => Promise<void>;
 
   constructor(name: string, type?: string) {
     this.name = name;
@@ -190,6 +200,13 @@ export class DataCatalogueItemBuilder implements DataCatalogueItem {
 
   addImage(url: string) {
     this.attributes.push(new DataCatalogueItemAttributeImage(url));
+    return this;
+  }
+
+  loadAttributes(loader: (itemBuilder: DataCatalogueItemBuilder) => Promise<void>) {
+    this.createAttributes = async () => {
+      await loader(this);
+    };
     return this;
   }
 
