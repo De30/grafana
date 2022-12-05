@@ -5,6 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import {
   AnnotationEvent,
   ArrayVector,
+  DataCatalogueProvider,
   DataFrame,
   DataQueryError,
   DataQueryRequest,
@@ -19,6 +20,7 @@ import {
   TIME_SERIES_VALUE_FIELD_NAME,
   TimeSeries,
   toDataFrame,
+  DataCatalogueContext,
 } from '@grafana/data';
 import {
   BackendDataSourceResponse,
@@ -33,6 +35,7 @@ import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_sr
 import { AnnotationEditor } from './components/AnnotationEditor';
 import { FluxQueryEditor } from './components/FluxQueryEditor';
 import { BROWSER_MODE_DISABLED_MESSAGE } from './constants';
+import { getRootDataCatalogueItem } from './dataCatalogue';
 import InfluxQueryModel from './influx_query_model';
 import InfluxSeries from './influx_series';
 import { prepareAnnotation } from './migrations';
@@ -112,7 +115,10 @@ function timeSeriesToDataFrame(timeSeries: TimeSeries): DataFrame {
   };
 }
 
-export default class InfluxDatasource extends DataSourceWithBackend<InfluxQuery, InfluxOptions> {
+export default class InfluxDatasource
+  extends DataSourceWithBackend<InfluxQuery, InfluxOptions>
+  implements DataCatalogueProvider
+{
   type: string;
   urls: string[];
   username: string;
@@ -722,5 +728,9 @@ export default class InfluxDatasource extends DataSourceWithBackend<InfluxQuery,
 
   isMigrationToggleOnAndIsAccessProxy() {
     return config.featureToggles.influxdbBackendMigration && this.access === 'proxy';
+  }
+
+  async getRootDataCatalogueItem(context: DataCatalogueContext) {
+    return await getRootDataCatalogueItem({ datasource: this, context });
   }
 }

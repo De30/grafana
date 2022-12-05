@@ -4,16 +4,16 @@ import React from 'react';
 import {
   DataCatalogueItem,
   DataCatalogueItemAttributeAction,
-  DataCatalogueItemAttributeDescription,
   DataCatalogueItemAttributeKeyValue,
   GrafanaTheme2,
   IsDataCatalogueItemAttributeAction,
   IsDataCatalogueItemAttributeDescription,
   IsDataCatalogueItemAttributeImage,
   IsDataCatalogueItemAttributeKeyValue,
+  IsDataCatalogueItemAttributeLink,
   IsDataCatalogueItemAttributeTag,
 } from '@grafana/data';
-import { Button, Tag, useStyles2 } from '@grafana/ui';
+import { Button, LinkButton, Tag, useStyles2 } from '@grafana/ui';
 
 type Props = {
   item: DataCatalogueItem;
@@ -41,6 +41,7 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
   const tableAttributes = (item.attributes || []).filter(IsDataCatalogueItemAttributeKeyValue);
   const actions = (item.attributes || []).filter(IsDataCatalogueItemAttributeAction);
   const descriptions = (item.attributes || []).filter(IsDataCatalogueItemAttributeDescription);
+  const links = (item.attributes || []).filter(IsDataCatalogueItemAttributeLink);
   const images = (item.attributes || []).filter(IsDataCatalogueItemAttributeImage);
   const tags = (item.attributes || []).filter(IsDataCatalogueItemAttributeTag);
 
@@ -48,10 +49,10 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
 
   return (
     <div>
-      <span>
+      <p>
         {item.type ? item.type + ': ' : ''}
         {item.name}
-      </span>
+      </p>
       {images.length > 0 && <img src={images[0].url} style={{ maxWidth: 50, maxHeight: 50, float: 'right' }} />}
       {tags && (
         <div>
@@ -60,10 +61,19 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
           ))}
         </div>
       )}
-      {descriptions.map(({ description }: DataCatalogueItemAttributeDescription, index) => {
+      {descriptions.map(({ description }, index) => {
         return (
           <p key={index}>
             <i>{description}</i>
+          </p>
+        );
+      })}
+      {links.map(({ url, title }) => {
+        return (
+          <p>
+            <LinkButton variant="secondary" href={url} target="_blank" rel="noreferrer">
+              {title || url}
+            </LinkButton>
           </p>
         );
       })}

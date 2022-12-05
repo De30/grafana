@@ -13,6 +13,7 @@ export enum DataCatalogueItemAttributeType {
   Icon = 'Icon',
   Action = 'Action',
   Image = 'Image',
+  Link = 'Link',
   Description = 'Description',
   Tag = 'Tag',
 }
@@ -68,6 +69,12 @@ export const IsDataCatalogueItemAttributeImage = (
   return attribute.type === DataCatalogueItemAttributeType.Image;
 };
 
+export const IsDataCatalogueItemAttributeLink = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeLink => {
+  return attribute.type === DataCatalogueItemAttributeType.Link;
+};
+
 export class DataCatalogueItemAttributeIcon implements DataCatalogueItemAttribute {
   type = DataCatalogueItemAttributeType.Icon;
   icon: string;
@@ -98,6 +105,17 @@ export class DataCatalogueItemAttributeImage implements DataCatalogueItemAttribu
 
   constructor(url: string) {
     this.url = url;
+  }
+}
+
+export class DataCatalogueItemAttributeLink implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Link;
+  url: string;
+  title?: string;
+
+  constructor(url: string, title?: string) {
+    this.url = url;
+    this.title = title;
   }
 }
 
@@ -197,6 +215,11 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
 
   addDescription(description: string) {
     this.attributes.push(new DataCatalogueItemAttributeDescription(description));
+    return this;
+  }
+
+  addLink(url: string, title?: string) {
+    this.attributes.push(new DataCatalogueItemAttributeLink(url, title));
     return this;
   }
 
