@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/supportbundles"
+	"github.com/grafana/grafana/pkg/infra/usagestats"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -21,7 +22,7 @@ type Service struct {
 	collectors map[string]supportbundles.CollectorFunc
 }
 
-func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, settings setting.Provider) *Service {
+func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, settings setting.Provider, usageStats usagestats.Service) *Service {
 	s := &Service{
 		cfg:   cfg,
 		store: newStore(kvStore),
@@ -33,6 +34,7 @@ func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister rou
 	// TODO: move to relevant services
 	s.RegisterSupportItemCollector("basic", basicCollector(cfg))
 	s.RegisterSupportItemCollector("settings", settingsCollector(settings))
+	s.RegisterSupportItemCollector("usage stats", usageStatesCollector(usageStats))
 
 	return s
 }
