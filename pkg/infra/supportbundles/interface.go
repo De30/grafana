@@ -31,5 +31,5 @@ type Bundle struct {
 
 type CollectorFunc func(context.Context) (*SupportItem, error)
 type Service interface {
-	RegisterSupportItemCollector(CollectorFunc)
+	RegisterSupportItemCollector(name string, collector CollectorFunc)
 }

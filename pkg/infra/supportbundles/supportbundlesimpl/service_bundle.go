@@ -18,10 +18,10 @@ type bundleResult struct {
 	err  error
 }
 
-func (s *Service) startBundleWork(ctx context.Context, uid string) {
+func (s *Service) startBundleWork(ctx context.Context, collectors []string, uid string) {
 	result := make(chan bundleResult)
 	go func() {
-		sbFilePath, err := s.bundle(ctx, uid)
+		sbFilePath, err := s.bundle(ctx, collectors, uid)
 		if err != nil {
 			result <- bundleResult{err: err}
 		}
@@ -52,13 +52,24 @@ func (s *Service) startBundleWork(ctx context.Context, uid string) {
 	}
 }
 
-func (s *Service) bundle(ctx context.Context, uid string) (string, error) {
+func (s *Service) bundle(ctx context.Context, collectors []string, uid string) (string, error) {
+	lookup := make(map[string]bool, len(collectors))
+	for _, c := range collectors {
+		lookup[c] = true
+	}
+
+	// always include basic collector
+	lookup["basic"] = true
+
 	sbDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return "", err
 	}
 
-	for _, collector := range s.collectors {
+	for name, collector := range s.collectors {
+		if !lookup[name] {
+			continue
+		}
 		item, err := collector(ctx)
 		if err != nil {
 			s.log.Warn("Failed to collect support bundle item", "error", err)
@@ -82,7 +93,7 @@ func (s *Service) bundle(ctx context.Context, uid string) (string, error) {
 	finalFilePath := filepath.Join(sbDir, fmt.Sprintf("%s.tar.gz", uid))
 
 	// write the .tar.gzip
-	fileToWrite, err := os.OpenFile(finalFilePath, os.O_CREATE|os.O_RDWR, os.FileMode(600))
+	fileToWrite, err := os.OpenFile(finalFilePath, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		panic(err)
 	}
