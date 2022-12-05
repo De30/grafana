@@ -1,4 +1,4 @@
-package service
+package supportbundlesimpl
 
 import (
 	"archive/tar"
@@ -9,46 +9,50 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/grafana/grafana/pkg/infra/supportbundles"
 )
 
-func (s *SupportBundleService) CreateSupportBundle(ctx context.Context) (string, error) {
-	newUID, err := uuid.NewRandom()
-	if err != nil {
-	}
-
-	uid := newUID.String()
-	s.kvStore.Set(ctx, uid, "pending")
-
-	go s.createBundleWrap(ctx, uid)
-
-	return uid, nil
+type bundleResult struct {
+	path string
+	err  error
 }
 
-func (s *SupportBundleService) createBundleWrap(ctx context.Context, uid string) {
-	result := make(chan string, 1)
+func (s *Service) startBundleWork(ctx context.Context, uid string) {
+	result := make(chan bundleResult)
 	go func() {
-		sbFilePath, err := s.createBundle(ctx, uid)
+		sbFilePath, err := s.bundle(ctx, uid)
 		if err != nil {
-			result <- err.Error()
+			result <- bundleResult{err: err}
 		}
-		result <- sbFilePath
+		result <- bundleResult{
+			path: sbFilePath,
+		}
+		close(result)
 	}()
 
 	select {
-	case <-time.After(20 * time.Minute):
-		s.log.Warn("Timed out collecting support bundle")
 	case <-ctx.Done():
 		s.log.Warn("Context cancelled while collecting support bundle")
-	case <-result:
-		s.kvStore.Set(ctx, uid, "pending")
+		if err := s.store.Update(ctx, uid, supportbundles.StateTimeout, ""); err != nil {
+			s.log.Error("failed to update bundle after timeout")
+		}
+		return
+	case r := <-result:
+		if r.err != nil {
+			if err := s.store.Update(ctx, uid, supportbundles.StateError, ""); err != nil {
+				s.log.Error("failed to update bundle after error")
+			}
+			return
+		}
+		if err := s.store.Update(ctx, uid, supportbundles.StateComplete, r.path); err != nil {
+			s.log.Error("failed to update bundle after completion")
+		}
 		return
 	}
 }
 
-func (s *SupportBundleService) createBundle(ctx context.Context, uid string) (string, error) {
+func (s *Service) bundle(ctx context.Context, uid string) (string, error) {
 	sbDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return "", err
@@ -133,10 +137,4 @@ func compress(src string, buf io.Writer) error {
 	}
 	//
 	return nil
-}
-
-func (s *SupportBundleService) ListSupportBundles() {
-}
-
-func (s *SupportBundleService) RetrieveSupportBundlePath() {
 }
