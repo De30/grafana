@@ -1,6 +1,5 @@
 import {
   DataCatalogueContext,
-  DataCatalogueItem,
   DataCatalogueProvider,
   DataSourceInstanceSettings,
   ScopedVars,

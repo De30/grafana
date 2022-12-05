@@ -973,6 +973,20 @@ export class ElasticDatasource
     }
     return { ...query, query: expression };
   }
+
+  async getStats() {
+    return await lastValueFrom(this.request('GET', '_stats'));
+  }
+
+  async getMappings(
+    indexName: string
+  ): Promise<Record<string, { mappings: { properties: Record<string, { type: string }> } }>> {
+    return await lastValueFrom(this.request('GET', `${indexName}/_mapping`));
+  }
+
+  async getFeatures() {
+    return await lastValueFrom(this.request('GET', '_xpack'));
+  }
 }
 
 /**

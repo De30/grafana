@@ -13,7 +13,7 @@ import {
   IsDataCatalogueItemAttributeKeyValue,
   IsDataCatalogueItemAttributeTag,
 } from '@grafana/data';
-import { Button, IconButton, Tag, useStyles2 } from '@grafana/ui';
+import { Button, Tag, useStyles2 } from '@grafana/ui';
 
 type Props = {
   item: DataCatalogueItem;

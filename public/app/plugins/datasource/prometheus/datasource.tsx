@@ -26,7 +26,6 @@ import {
   AnnotationQueryRequest,
   QueryFixAction,
   DataCatalogueProvider,
-  DataCatalogueItem,
 } from '@grafana/data';
 import {
   BackendSrvRequest,

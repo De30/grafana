@@ -1,6 +1,3 @@
-import { lastValueFrom, map, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
 import { DataCatalogueContext, DataCatalogueBuilder, isDataCatalogueContextWithQuery } from '@grafana/data';
 
 import { ElasticDatasource } from './datasource';
@@ -12,7 +9,7 @@ type Deps = {
 };
 
 export const getRootDataCatalogueItem = async (deps: Deps) => {
-  const stats = await lastValueFrom(deps.datasource.request('GET', '_stats'));
+  const stats = await deps.datasource.getStats();
   const context = deps.context;
 
   return new DataCatalogueBuilder().fromDataSource(deps.datasource).setItems([
@@ -35,39 +32,21 @@ export const getRootDataCatalogueItem = async (deps: Deps) => {
             }
           })
           .loadItems(async () => {
-            return lastValueFrom(
-              deps.datasource.request('GET', `${indexName}/_mapping`).pipe(
-                map((result) => {
-                  const properties = result[indexName]?.mappings.properties;
-                  return Object.keys(properties).map((propertyName) =>
-                    new DataCatalogueBuilder(propertyName, 'Field').addKeyValue('type', properties[propertyName].type)
-                  );
-                }),
-                catchError(() => {
-                  return of([new DataCatalogueBuilder('No mappings found inside this index.')]);
-                })
-              )
+            const mappings = await deps.datasource.getMappings(indexName);
+            const properties = mappings[indexName]?.mappings.properties;
+            return Object.keys(properties).map((propertyName) =>
+              new DataCatalogueBuilder(propertyName, 'Field').addKeyValue('type', properties[propertyName].type)
             );
           })
       );
     }),
     new DataCatalogueBuilder('Features').loadItems(async () => {
-      return lastValueFrom(
-        // TODO: request is private, logic should be moved to ds
-        deps.datasource.request('GET', `_xpack`).pipe(
-          map((result) => {
-            return Object.keys(result.features).map((featureName) => {
-              return new DataCatalogueBuilder(featureName, 'Feature')
-                .addAttr('available', result.features[featureName].available ? 'yes' : 'no')
-                .addAttr('enabled', result.features[featureName].enabled ? 'yes' : 'no');
-            });
-            return [];
-          }),
-          catchError(() => {
-            return of([new DataCatalogueBuilder('No features found.')]);
-          })
-        )
-      );
+      const features = await deps.datasource.getFeatures();
+      return Object.keys(features).map((featureName) => {
+        return new DataCatalogueBuilder(featureName, 'Feature')
+          .addKeyValue('available', features[featureName].available ? 'yes' : 'no')
+          .addKeyValue('enabled', features[featureName].enabled ? 'yes' : 'no');
+      });
     }),
     new DataCatalogueBuilder('Stats')
       .addKeyValue('Docs', stats._all.total.docs.count)

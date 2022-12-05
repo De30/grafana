@@ -21,7 +21,7 @@ import {
   TimeRange,
   toLegacyResponseData,
   hasDataCatalogueSupport,
-  DataCatalogueContext,
+  DataCatalogueContextWithQuery,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { AngularComponent, getAngularLoader } from '@grafana/runtime';
@@ -521,7 +521,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
                       changeQuery: onChange,
                       queryRefId: query.refId,
                       runQuery: onRunQuery,
-                    } as DataCatalogueContext<TQuery>
+                    } as DataCatalogueContextWithQuery<TQuery>
                   }
                   onClose={() => this.onToggleDataCatalogue()}
                 />
