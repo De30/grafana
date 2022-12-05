@@ -11,9 +11,9 @@ import { SortOrder } from '../utils/richHistoryTypes';
 
 export function filterAndSortQueries(
   queries: RichHistoryQuery[],
-  sortOrder: SortOrder,
   listOfDatasourceFilters: string[],
-  searchFilter: string,
+  sortOrder?: SortOrder,
+  searchFilter?: string,
   timeFilter?: [number, number]
 ) {
   const filteredQueriesByDs = filterQueriesByDataSource(queries, listOfDatasourceFilters);
@@ -49,9 +49,9 @@ function filterQueriesByDataSource(queries: RichHistoryQuery[], listOfDatasource
     : queries;
 }
 
-function filterQueriesBySearchFilter(queries: RichHistoryQuery[], searchFilter: string) {
+function filterQueriesBySearchFilter(queries: RichHistoryQuery[], searchFilter?: string) {
   return queries.filter((query) => {
-    if (query.comment.includes(searchFilter)) {
+    if (searchFilter === undefined || query.comment.includes(searchFilter)) {
       return true;
     }
 
@@ -66,7 +66,7 @@ function filterQueriesBySearchFilter(queries: RichHistoryQuery[], searchFilter: 
   });
 }
 
-export const sortQueries = (array: RichHistoryQuery[], sortOrder: SortOrder) => {
+export const sortQueries = (array: RichHistoryQuery[], sortOrder?: SortOrder) => {
   let sortFunc;
 
   if (sortOrder === SortOrder.Ascending) {

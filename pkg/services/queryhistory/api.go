@@ -67,9 +67,9 @@ func (s *QueryHistoryService) searchHandler(c *models.ReqContext) response.Respo
 
 	query := SearchInQueryHistoryQuery{
 		DatasourceUIDs: c.QueryStrings("datasourceUid"),
-		SearchString:   c.Query("searchString"),
+		SearchString:   c.QueryStringWithDefault("searchString", ""),
 		OnlyStarred:    c.QueryBoolWithDefault("onlyStarred", false),
-		Sort:           c.Query("sort"),
+		Sort:           c.QueryStringWithDefault("sort", ""),
 		Page:           c.QueryInt("page"),
 		Limit:          c.QueryInt("limit"),
 		From:           timeRange.GetFromAsSecondsEpoch(),

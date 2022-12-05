@@ -101,3 +101,12 @@ func (ctx *ReqContext) QueryBoolWithDefault(field string, d bool) bool {
 
 	return ctx.QueryBool(field)
 }
+
+// QueryBoolWithDefault extracts a value from the request query params and applies a bool default if not present.
+func (ctx *ReqContext) QueryStringWithDefault(field string, d string) string {
+	f := ctx.Query(field)
+	if f == "" {
+		return d
+	}
+	return f
+}

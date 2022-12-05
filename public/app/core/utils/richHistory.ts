@@ -224,7 +224,7 @@ export function getQueryDisplayText(query: DataQuery): string {
   return JSON.stringify(strippedQuery);
 }
 
-export function createQueryHeading(query: RichHistoryQuery, sortOrder: SortOrder) {
+export function createQueryHeading(query: RichHistoryQuery, sortOrder?: SortOrder) {
   let heading = '';
   if (sortOrder === SortOrder.DatasourceAZ || sortOrder === SortOrder.DatasourceZA) {
     heading = query.datasourceName;
@@ -245,7 +245,7 @@ export function createQueryText(query: DataQuery, queryDsInstance: DataSourceApi
   return getQueryDisplayText(query);
 }
 
-export function mapQueriesToHeadings(query: RichHistoryQuery[], sortOrder: SortOrder) {
+export function mapQueriesToHeadings(query: RichHistoryQuery[], sortOrder?: SortOrder) {
   let mappedQueriesToHeadings: any = {};
 
   query.forEach((q) => {

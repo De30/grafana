@@ -39,31 +39,31 @@ const storedHistory: Array<RichHistoryQuery<MockQuery>> = [
 
 describe('filterQueries', () => {
   it('should include all entries for empty filters', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, [], '');
+    const filteredQueries = filterAndSortQueries(storedHistory, [], SortOrder.Ascending, '');
     expect(filteredQueries).toMatchObject([expect.objectContaining({ id: '1' }), expect.objectContaining({ id: '2' })]);
   });
   it('should sort entries based on the filter', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Descending, [], '');
+    const filteredQueries = filterAndSortQueries(storedHistory, [], SortOrder.Descending, '');
     expect(filteredQueries).toMatchObject([expect.objectContaining({ id: '2' }), expect.objectContaining({ id: '1' })]);
   });
   it('should filter out queries based on data source filter', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, ['not provided data source'], '');
+    const filteredQueries = filterAndSortQueries(storedHistory, ['not provided data source'], SortOrder.Ascending, '');
     expect(filteredQueries).toHaveLength(0);
   });
   it('should keep queries based on data source filter', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, ['datasource history name'], '');
+    const filteredQueries = filterAndSortQueries(storedHistory, ['datasource history name'], SortOrder.Ascending, '');
     expect(filteredQueries).toMatchObject([expect.objectContaining({ id: '1' })]);
   });
   it('should filter out all queries based on search filter', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, [], 'i do not exist in query');
+    const filteredQueries = filterAndSortQueries(storedHistory, [], SortOrder.Ascending, 'i do not exist in query');
     expect(filteredQueries).toHaveLength(0);
   });
   it('should include queries based on search filter', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, [], 'query1');
+    const filteredQueries = filterAndSortQueries(storedHistory, [], SortOrder.Ascending, 'query1');
     expect(filteredQueries).toMatchObject([expect.objectContaining({ id: '1' })]);
   });
   it('should include queries based on comments', () => {
-    const filteredQueries = filterAndSortQueries(storedHistory, SortOrder.Ascending, [], 'comment 2');
+    const filteredQueries = filterAndSortQueries(storedHistory, [], SortOrder.Ascending, 'comment 2');
     expect(filteredQueries).toMatchObject([expect.objectContaining({ id: '2' })]);
   });
 });
