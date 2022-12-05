@@ -34,6 +34,7 @@ import {
   QueryFixAction,
   DataCatalogueProvider,
   DataCatalogueItem,
+  DataCatalogueContext,
 } from '@grafana/data';
 import { FetchError, config, DataSourceWithBackend } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -131,10 +132,10 @@ export class LokiDatasource
     this.variables = new LokiVariableSupport(this);
   }
 
-  async getRootDataCatalogueItem(): Promise<DataCatalogueItem> {
+  async getRootDataCatalogueItem(context: DataCatalogueContext): Promise<DataCatalogueItem> {
     return await getRootDataCatalogueItem({
       datasource: this,
-      instanceSettings: this.instanceSettings,
+      context,
     });
   }
 
