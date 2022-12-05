@@ -37,17 +37,17 @@ func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister rou
 	return s
 }
 
-func (s *Service) Create(ctx context.Context, usr *user.SignedInUser) (*supportbundles.Bundle, error) {
+func (s *Service) Create(ctx context.Context, collectors []string, usr *user.SignedInUser) (*supportbundles.Bundle, error) {
 	bundle, err := s.store.Create(ctx, usr)
 	if err != nil {
 		return nil, err
 	}
 
-	go func(uid string) {
+	go func(uid string, collectors []string) {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 		defer cancel()
-		s.startBundleWork(ctx, uid)
-	}(bundle.UID)
+		s.startBundleWork(ctx, collectors, uid)
+	}(bundle.UID, collectors)
 
 	return bundle, nil
 }

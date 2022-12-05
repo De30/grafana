@@ -38,7 +38,16 @@ func (s *Service) handleList(ctx *models.ReqContext) response.Response {
 }
 
 func (s *Service) handleCreate(ctx *models.ReqContext) response.Response {
-	bundle, err := s.Create(context.Background(), ctx.SignedInUser)
+	type command struct {
+		Collectors []string `json:"collectors"`
+	}
+
+	var c command
+	if err := web.Bind(ctx.Req, &c); err != nil {
+		return response.Error(http.StatusBadRequest, "failed to parse request", err)
+	}
+
+	bundle, err := s.Create(context.Background(), c.Collectors, ctx.SignedInUser)
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "failed to create support bundle", err)
 	}
