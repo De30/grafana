@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { Button, CodeEditor, Field, FieldSet, HorizontalGroup, Input, Tab, TabContent, TabsBar } from '@grafana/ui';
+import { Button, CodeEditor, Field, FieldSet, Input, Tab, TabContent, TabsBar, ThemeDemo } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 
@@ -16,8 +16,14 @@ export function ThemeEditPage({ match }: Props) {
     stateManager.loadTheme(match.params.uid);
   }, [match.params.uid, stateManager]);
 
+  const actions = (
+    <Button type="submit" size="md" variant="primary" onClick={stateManager.onSave}>
+      Save
+    </Button>
+  );
+
   return (
-    <Page navId="themes" pageNav={stateManager.getPageNav()}>
+    <Page navId="themes" pageNav={stateManager.getPageNav()} actions={actions}>
       <Page.Contents isLoading={loading}>
         <FieldSet label="Theme info">
           <Field label="Theme name" required>
@@ -38,6 +44,7 @@ export function ThemeEditPage({ match }: Props) {
           <TabsBar>
             <Tab label="Definition" active={tab === 'def'} onChangeTab={() => stateManager.changeTab('def')} />
             <Tab label="Full" active={tab === 'full'} onChangeTab={() => stateManager.changeTab('full')} />
+            <Tab label="Preview" active={tab === 'preview'} onChangeTab={() => stateManager.changeTab('preview')} />
           </TabsBar>
           <TabContent>
             {tab === 'def' && (
@@ -53,15 +60,8 @@ export function ThemeEditPage({ match }: Props) {
             {tab === 'full' && (
               <CodeEditor value={fullJson} height={600} width="100%" language="json" showMiniMap={false} readOnly />
             )}
+            {tab === 'preview' && <ThemeDemo />}
           </TabContent>
-        </div>
-
-        <div className="gf-form-button-row">
-          <HorizontalGroup>
-            <Button type="submit" size="md" variant="primary" onClick={stateManager.onSave}>
-              Save
-            </Button>
-          </HorizontalGroup>
         </div>
       </Page.Contents>
     </Page>

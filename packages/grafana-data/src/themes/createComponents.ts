@@ -51,10 +51,14 @@ export interface ThemeComponents {
   horizontalDrawer: {
     defaultHeight: number;
   };
-  topnav: {
+  navbar: {
     background: string;
     borderColor: string;
     boxShadow: string;
+  };
+  toolbarButton: {
+    background: string;
+    borderColor: string;
   };
 }
 
@@ -118,6 +122,10 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
         colors.mode === 'dark'
           ? `0 0.6px 1.5px rgb(0 0 0), 0 2px 4px rgb(0 0 0 / 40%), 0 5px 10px rgb(0 0 0 / 23%)`
           : '0 0.6px 1.5px rgb(0 0 0 / 8%), 0 2px 4px rgb(0 0 0 / 6%), 0 5px 10px rgb(0 0 0 / 5%)',
+    },
+    toolbarButton: {
+      background: colors.background.primary,
+      borderColor: 'transparent',
     },
   };
 
