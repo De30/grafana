@@ -4,13 +4,14 @@ import {
   DataCatalogueFolder,
   DataCatalogueFolderBuilder,
   DataCatalogueItemBuilder,
+  isDataCatalogueContextWithQuery,
 } from '@grafana/data';
 
 import { TestDataDataSource } from './datasource';
 import { TestDataQuery } from './types';
 
 export const getRootDataCatalogueFolder = async (
-  context: DataCatalogueContext<TestDataQuery>,
+  context: DataCatalogueContext,
   datasource: TestDataDataSource
 ): Promise<DataCatalogueFolder> => {
   return new DataCatalogueDatasourceFolderBuilder(datasource).setItems([
@@ -25,7 +26,7 @@ export const getRootDataCatalogueFolder = async (
           new DataCatalogueItemBuilder('load-balancer'),
           new DataCatalogueItemBuilder('application'),
           new DataCatalogueItemBuilder('database').addAction('run query', () => {
-            if (context.changeQuery && context.queryRefId && context.runQuery) {
+            if (isDataCatalogueContextWithQuery<TestDataQuery>(context)) {
               context.closeDataCatalogue();
               context.changeQuery({
                 refId: context.queryRefId,

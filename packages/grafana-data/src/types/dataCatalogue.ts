@@ -141,8 +141,8 @@ export interface DataCatalogueFolder extends DataCatalogueItem {
 /**
  * @internal
  */
-export interface DataCatalogueProvider<TQuery extends DataQuery> {
-  getRootDataCatalogueFolder(context: DataCatalogueContext<TQuery>): Promise<DataCatalogueFolder>;
+export interface DataCatalogueProvider {
+  getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder>;
 }
 
 /**
@@ -259,23 +259,20 @@ export class DataCatalogueDatasourceFolderBuilder extends DataCatalogueFolderBui
   }
 }
 
-export interface DataCatalogueContext<TQuery extends DataQuery> {
+export interface DataCatalogueContext {
   closeDataCatalogue: () => void;
   app?: CoreApp;
-  // query context
-  queryRefId?: string;
-  changeQuery?: (query: TQuery) => void;
-  runQuery?: () => void;
 }
 
-export interface DataCatalogueContextWithQuery<TQuery extends DataQuery> extends DataCatalogueContext<TQuery> {
+export interface DataCatalogueContextWithQuery<TQuery extends DataQuery> extends DataCatalogueContext {
   queryRefId: string;
   changeQuery: (query: TQuery) => void;
   runQuery: () => void;
 }
 
-export const isDataCatalogueContextWithQuery = (
-  context: DataCatalogueContext<any>
-): context is DataCatalogueContextWithQuery<any> => {
-  return !!context.queryRefId && !!context.changeQuery && !!context.runQuery;
+export const isDataCatalogueContextWithQuery = <TQuery extends DataQuery>(
+  context: DataCatalogueContext
+): context is DataCatalogueContextWithQuery<TQuery> => {
+  const contextWithQuery = context as DataCatalogueContextWithQuery<TQuery>;
+  return !!contextWithQuery.queryRefId && !!contextWithQuery.changeQuery && !!contextWithQuery.runQuery;
 };

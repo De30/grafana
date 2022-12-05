@@ -15,7 +15,7 @@ import { ElasticsearchQuery } from './types';
 
 type Deps = {
   datasource: ElasticDatasource;
-  context: DataCatalogueContext<ElasticsearchQuery>;
+  context: DataCatalogueContext;
 };
 
 export const getRootDataCatalogueFolder = async (deps: Deps): Promise<DataCatalogueFolder> => {
@@ -31,7 +31,7 @@ export const getRootDataCatalogueFolder = async (deps: Deps): Promise<DataCatalo
           .addKeyValue('Status', stats.indices[indexName].status)
           .addKeyValue('Docs', stats.indices[indexName].total.docs.count)
           .addAction('Show data for this index', () => {
-            if (isDataCatalogueContextWithQuery(context)) {
+            if (isDataCatalogueContextWithQuery<ElasticsearchQuery>(context)) {
               context.changeQuery({
                 refId: context.queryRefId,
                 query: `_index:"${indexName}"`,

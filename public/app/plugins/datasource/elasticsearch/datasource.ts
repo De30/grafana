@@ -140,7 +140,7 @@ export class ElasticDatasource
     this.timeSrv = getTimeSrv();
   }
 
-  async getRootDataCatalogueFolder(context: DataCatalogueContext<ElasticsearchQuery>): Promise<DataCatalogueFolder> {
+  async getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder> {
     return await getRootDataCatalogueFolder({ datasource: this, context });
   }
 

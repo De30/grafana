@@ -11,7 +11,7 @@ import { SQLQuery } from '../../../features/plugins/sql';
 
 import { MySqlDatasource } from './MySqlDatasource';
 
-export const getRootDataCatalogueFolder = (context: DataCatalogueContext<SQLQuery>, datasource: MySqlDatasource) => {
+export const getRootDataCatalogueFolder = (context: DataCatalogueContext, datasource: MySqlDatasource) => {
   return new DataCatalogueDatasourceFolderBuilder(datasource).setItems([
     new DataCatalogueFolderBuilder('Schemas').loadItems(async () => {
       const datasets = await datasource.fetchDatasets();
@@ -32,7 +32,7 @@ export const getRootDataCatalogueFolder = (context: DataCatalogueContext<SQLQuer
                   item.addKeyValue(name, type || 'unknown');
                 });
                 item.addAction('Show data for this table', () => {
-                  if (isDataCatalogueContextWithQuery(context)) {
+                  if (isDataCatalogueContextWithQuery<SQLQuery>(context)) {
                     context.changeQuery({ refId: context.queryRefId, dataset, table });
                     context.runQuery();
                     context.closeDataCatalogue();

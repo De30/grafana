@@ -19,14 +19,14 @@ import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQue
 import { getSqlCompletionProvider } from './sqlCompletionProvider';
 import { MySQLOptions } from './types';
 
-export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvider<SQLQuery> {
+export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvider {
   sqlLanguageDefinition: LanguageDefinition | undefined;
 
   constructor(private instanceSettings: DataSourceInstanceSettings<MySQLOptions>) {
     super(instanceSettings);
   }
 
-  async getRootDataCatalogueFolder(context: DataCatalogueContext<SQLQuery>): Promise<DataCatalogueFolder> {
+  async getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder> {
     return getRootDataCatalogueFolder(context, this);
   }
 

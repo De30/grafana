@@ -17,8 +17,8 @@ import { DataCatalogueItemRenderer } from './DataCatalogueItemRenderer';
 
 type Props<TQuery extends DataQuery> = {
   onClose: () => void;
-  dataCatalogueProvider: DataCatalogueProvider<TQuery>;
-  dataCatalogueContext: Omit<DataCatalogueContext<TQuery>, 'closeDataCatalogue'>;
+  dataCatalogueProvider: DataCatalogueProvider;
+  dataCatalogueContext: Omit<DataCatalogueContext, 'closeDataCatalogue'>;
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({

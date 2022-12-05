@@ -30,10 +30,7 @@ import { flameGraphData } from './testData/flameGraphResponse';
 import { Scenario, TestDataQuery } from './types';
 import { TestDataVariableSupport } from './variables';
 
-export class TestDataDataSource
-  extends DataSourceWithBackend<TestDataQuery>
-  implements DataCatalogueProvider<TestDataQuery>
-{
+export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> implements DataCatalogueProvider {
   scenariosCache?: Promise<Scenario[]>;
 
   constructor(
@@ -44,7 +41,7 @@ export class TestDataDataSource
     this.variables = new TestDataVariableSupport();
   }
 
-  async getRootDataCatalogueFolder(context: DataCatalogueContext<TestDataQuery>): Promise<DataCatalogueFolder> {
+  async getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder> {
     return await getRootDataCatalogueFolder(context, this);
   }
 
