@@ -64,7 +64,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     gap: theme.spacing(1),
     alignItems: 'center',
     padding: theme.spacing(0, 2),
-    borderBottom: `1px solid ${theme.colors.border.weak}`,
+    borderBottom: `1px solid ${theme.components.navbar.borderColor}`,
     justifyContent: 'space-between',
 
     [theme.breakpoints.up('sm')]: {

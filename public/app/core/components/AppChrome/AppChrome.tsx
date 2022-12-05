@@ -55,10 +55,6 @@ export function AppChrome({ children }: Props) {
 }
 
 const getStyles = (theme: GrafanaTheme2) => {
-  const shadow = theme.isDark
-    ? `0 0.6px 1.5px rgb(0 0 0), 0 2px 4px rgb(0 0 0 / 40%), 0 5px 10px rgb(0 0 0 / 23%)`
-    : '0 0.6px 1.5px rgb(0 0 0 / 8%), 0 2px 4px rgb(0 0 0 / 6%), 0 5px 10px rgb(0 0 0 / 5%)';
-
   return {
     content: css({
       display: 'flex',
@@ -79,8 +75,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       zIndex: theme.zIndex.navbarFixed,
       left: 0,
       right: 0,
-      boxShadow: shadow,
-      background: theme.colors.background.primary,
+      boxShadow: theme.components.navbar.boxShadow,
+      background: theme.components.navbar.background,
       flexDirection: 'column',
     }),
   };
