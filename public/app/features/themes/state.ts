@@ -106,6 +106,8 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
       defJson: code,
       fullJson: this.getFullJson(runtimeTheme),
     });
+
+    this.onSave();
   };
 
   getFullJson(theme: GrafanaTheme2) {

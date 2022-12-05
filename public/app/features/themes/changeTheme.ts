@@ -12,8 +12,12 @@ export function setRuntimeTheme(custom: CustomThemeDTO) {
     },
   };
 
-  const runtimeTheme = createTheme(options);
-  appEvents.publish(new ThemeChangedEvent(runtimeTheme));
-
-  return runtimeTheme;
+  try {
+    const runtimeTheme = createTheme(options);
+    appEvents.publish(new ThemeChangedEvent(runtimeTheme));
+    return runtimeTheme;
+  } catch (err: unknown) {
+    console.error(err);
+    return config.theme2;
+  }
 }
