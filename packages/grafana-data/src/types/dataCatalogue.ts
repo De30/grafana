@@ -1,5 +1,5 @@
 import { CoreApp } from './app';
-import { DataSourceApi } from './datasource';
+import { DataSourceApi, DataSourceJsonData } from './datasource';
 import { DataQuery } from './query';
 
 export interface DataCatalogueItemAction {
@@ -142,16 +142,14 @@ export interface DataCatalogueFolder extends DataCatalogueItem {
  * @internal
  */
 export interface DataCatalogueProvider {
-  getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder>;
+  getRootDataCatalogueItem(context: DataCatalogueContext): Promise<DataCatalogueItem>;
 }
 
 /**
  * @internal
  */
-export const hasDataCatalogueSupport = <TQuery extends DataQuery>(
-  datasource: unknown
-): datasource is DataCatalogueProvider<TQuery> => {
-  return (datasource as DataCatalogueProvider<TQuery>).getRootDataCatalogueFolder !== undefined;
+export const hasDataCatalogueSupport = (datasource: unknown): datasource is DataCatalogueProvider => {
+  return (datasource as DataCatalogueProvider).getRootDataCatalogueItem !== undefined;
 };
 
 export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCatalogueFolder => {
@@ -162,14 +160,18 @@ export const IsLazyDataCatalogueItem = (item: DataCatalogueItem): item is LazyDa
   return (item as LazyDataCatalogueItem).createAttributes !== undefined;
 };
 
-export class DataCatalogueItemBuilder implements DataCatalogueItem {
+/**
+ * Use the builder to create data catalogue items
+ */
+export class DataCatalogueBuilder implements DataCatalogueItem {
   name: string;
   type?: string;
   attributes: DataCatalogueItemAttribute[] = [];
   createAttributes?: () => Promise<void>;
+  items?: () => Promise<DataCatalogueItem[]>;
 
-  constructor(name: string, type?: string) {
-    this.name = name;
+  constructor(name?: string, type?: string) {
+    this.name = name || '';
     this.type = type;
   }
 
@@ -203,59 +205,36 @@ export class DataCatalogueItemBuilder implements DataCatalogueItem {
     return this;
   }
 
-  loadAttributes(loader: (itemBuilder: DataCatalogueItemBuilder) => Promise<void>) {
+  loadAttributes(loader: (itemBuilder: DataCatalogueBuilder) => Promise<void>) {
     this.createAttributes = async () => {
       await loader(this);
     };
     return this;
   }
 
-  // @deprecated
-  addAttr(name: string, value: string) {
-    this.attributes.push(new DataCatalogueItemAttributeKeyValue(name, value));
-    return this;
-  }
-
-  // @deprecated
-  addActions(name: string, handler: () => void) {
-    this.attributes.push(new DataCatalogueItemAttributeAction(name, handler));
-    return this;
-  }
-}
-
-export class DataCatalogueFolderBuilder extends DataCatalogueItemBuilder implements DataCatalogueFolder {
-  private _itemsLoader?: () => Promise<DataCatalogueItem[]>;
-
   loadItems(loader: () => Promise<DataCatalogueItem[]>) {
-    this._itemsLoader = loader;
+    this.items = loader;
     return this;
   }
 
   setItems(items: DataCatalogueItem[]) {
-    this._itemsLoader = async () => items;
+    this.items = async () => {
+      return items;
+    };
     return this;
   }
 
-  async items(): Promise<DataCatalogueItem[]> {
-    if (this._itemsLoader) {
-      const results = await this._itemsLoader();
-      console.log(results);
-      return results;
-    } else {
-      return [];
-    }
-  }
-}
-
-export class DataCatalogueDatasourceFolderBuilder extends DataCatalogueFolderBuilder {
-  constructor(datasource: DataSourceApi) {
-    super(datasource.name);
+  fromDataSource<TQuery extends DataQuery, TOptions extends DataSourceJsonData>(
+    datasource: DataSourceApi<TQuery, TOptions>
+  ) {
+    this.name = datasource.name;
     this.addKeyValue('Name', datasource.meta.name);
     datasource.meta.category && this.addKeyValue('Category', datasource.meta.category);
     this.addKeyValue('Author', datasource.meta.info.author.name);
     this.addDescription(datasource.meta.info.description);
     datasource.meta.info.version && this.addKeyValue('Version', datasource.meta.info.version);
     this.addImage(datasource.meta.info.logos.small);
+    return this;
   }
 }
 

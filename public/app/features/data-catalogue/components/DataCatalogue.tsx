@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 
 import {
   DataCatalogueContext,
-  DataCatalogueFolder,
   DataCatalogueItem,
   DataCatalogueProvider,
   DataQuery,
@@ -38,21 +37,22 @@ const getStyles = (theme: GrafanaTheme2) => ({
 });
 
 export const DataCatalogue = <TQuery extends DataQuery>(props: Props<TQuery>) => {
-  const [root, setRoot] = useState<DataCatalogueFolder | undefined>(undefined);
+  const [root, setRoot] = useState<DataCatalogueItem | undefined>(undefined);
   const [selectedItem, setSelectedItem] = useState<DataCatalogueItem | undefined>(undefined);
 
   const styles = useStyles2(getStyles);
 
   useEffect(() => {
     props.dataCatalogueProvider
-      .getRootDataCatalogueFolder({ ...props.dataCatalogueContext, closeDataCatalogue: props.onClose })
-      .then(async (item: DataCatalogueFolder) => {
+      .getRootDataCatalogueItem({ ...props.dataCatalogueContext, closeDataCatalogue: props.onClose })
+      .then(async (item: DataCatalogueItem) => {
         setRoot(item);
         if (IsLazyDataCatalogueItem(item)) {
           await item.createAttributes();
         }
         setSelectedItem(item);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

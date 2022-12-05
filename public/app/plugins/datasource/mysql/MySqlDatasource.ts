@@ -1,6 +1,6 @@
 import {
   DataCatalogueContext,
-  DataCatalogueFolder,
+  DataCatalogueItem,
   DataCatalogueProvider,
   DataSourceInstanceSettings,
   ScopedVars,
@@ -13,7 +13,7 @@ import { DB, SQLQuery } from 'app/features/plugins/sql/types';
 import { formatSQL } from 'app/features/plugins/sql/utils/formatSQL';
 
 import MySQLQueryModel from './MySqlQueryModel';
-import { getRootDataCatalogueFolder } from './dataCatalogue';
+import { getRootDataCatalogueItem } from './dataCatalogue';
 import { mapFieldsToTypes } from './fields';
 import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQuery';
 import { getSqlCompletionProvider } from './sqlCompletionProvider';
@@ -26,8 +26,8 @@ export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvi
     super(instanceSettings);
   }
 
-  async getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder> {
-    return getRootDataCatalogueFolder(context, this);
+  async getRootDataCatalogueItem(context: DataCatalogueContext) {
+    return getRootDataCatalogueItem(context, this);
   }
 
   getQueryModel(target?: Partial<SQLQuery>, templateSrv?: TemplateSrv, scopedVars?: ScopedVars): MySQLQueryModel {

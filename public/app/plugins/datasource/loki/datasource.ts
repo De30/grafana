@@ -33,7 +33,7 @@ import {
   getDefaultTimeRange,
   QueryFixAction,
   DataCatalogueProvider,
-  DataCatalogueFolder,
+  DataCatalogueItem,
 } from '@grafana/data';
 import { FetchError, config, DataSourceWithBackend } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -51,7 +51,7 @@ import LanguageProvider from './LanguageProvider';
 import { LiveStreams, LokiLiveTarget } from './LiveStreams';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
-import { getRootDataCatalogueFolder } from './dataCatalogue';
+import { getRootDataCatalogueItem } from './dataCatalogue';
 import { escapeLabelValueInExactSelector, escapeLabelValueInSelector, isRegexSelector } from './languageUtils';
 import { labelNamesRegex, labelValuesRegex } from './migrations/variableQueryMigrations';
 import {
@@ -131,8 +131,8 @@ export class LokiDatasource
     this.variables = new LokiVariableSupport(this);
   }
 
-  async getRootDataCatalogueFolder(): Promise<DataCatalogueFolder> {
-    return await getRootDataCatalogueFolder({
+  async getRootDataCatalogueItem(): Promise<DataCatalogueItem> {
+    return await getRootDataCatalogueItem({
       datasource: this,
       instanceSettings: this.instanceSettings,
     });

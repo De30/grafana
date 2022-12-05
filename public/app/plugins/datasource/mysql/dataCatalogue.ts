@@ -1,9 +1,7 @@
 import {
   DataCatalogueContext,
-  DataCatalogueDatasourceFolderBuilder,
-  DataCatalogueFolderBuilder,
   DataCatalogueItem,
-  DataCatalogueItemBuilder,
+  DataCatalogueBuilder,
   isDataCatalogueContextWithQuery,
 } from '@grafana/data';
 
@@ -11,35 +9,29 @@ import { SQLQuery } from '../../../features/plugins/sql';
 
 import { MySqlDatasource } from './MySqlDatasource';
 
-export const getRootDataCatalogueFolder = (context: DataCatalogueContext, datasource: MySqlDatasource) => {
-  return new DataCatalogueDatasourceFolderBuilder(datasource).setItems([
-    new DataCatalogueFolderBuilder('Schemas').loadItems(async () => {
+export const getRootDataCatalogueItem = (context: DataCatalogueContext, datasource: MySqlDatasource) => {
+  return new DataCatalogueBuilder().fromDataSource(datasource).setItems([
+    new DataCatalogueBuilder('Schemas').loadItems(async () => {
       const datasets = await datasource.fetchDatasets();
       return datasets.map((dataset: string) => {
-        const schema = new DataCatalogueFolderBuilder(dataset, 'Schema');
+        const schema = new DataCatalogueBuilder(dataset, 'Schema');
         schema.loadItems(async () => {
           const tables = await datasource.fetchTables(dataset);
-          schema.addKeyValue('Total tables', tables.length);
+          schema.addKeyValue('Total tables', tables.length.toString());
           return tables.map((table) => {
-            return new DataCatalogueItemBuilder('table', 'Table').loadAttributes(
-              async (item: DataCatalogueItemBuilder) => {
-                const fields = await datasource.fetchFields({ table, dataset });
-
-                const meta = await datasource.fetchMeta({ table, schema: dataset });
-                console.log('meta', meta);
-
-                fields.forEach(({ name, type }) => {
-                  item.addKeyValue(name, type || 'unknown');
-                });
-                item.addAction('Show data for this table', () => {
-                  if (isDataCatalogueContextWithQuery<SQLQuery>(context)) {
-                    context.changeQuery({ refId: context.queryRefId, dataset, table });
-                    context.runQuery();
-                    context.closeDataCatalogue();
-                  }
-                });
-              }
-            );
+            return new DataCatalogueBuilder('table', 'Table').loadAttributes(async (item: DataCatalogueBuilder) => {
+              const fields = await datasource.fetchFields({ table, dataset });
+              fields.forEach(({ name, type }) => {
+                item.addKeyValue(name, type || 'unknown');
+              });
+              item.addAction('Show data for this table', () => {
+                if (isDataCatalogueContextWithQuery<SQLQuery>(context)) {
+                  context.changeQuery({ refId: context.queryRefId, dataset, table });
+                  context.runQuery();
+                  context.closeDataCatalogue();
+                }
+              });
+            });
           }) as DataCatalogueItem[];
         });
         return schema;

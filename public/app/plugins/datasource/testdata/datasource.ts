@@ -16,13 +16,12 @@ import {
   toDataFrame,
   MutableDataFrame,
   DataCatalogueProvider,
-  DataCatalogueFolder,
   DataCatalogueContext,
 } from '@grafana/data';
 import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
 
-import { getRootDataCatalogueFolder } from './dataCatalogue';
+import { getRootDataCatalogueItem } from './dataCatalogue';
 import { queryMetricTree } from './metricTree';
 import { generateRandomEdges, generateRandomNodes, savedNodesResponse } from './nodeGraphUtils';
 import { runStream } from './runStreams';
@@ -41,8 +40,8 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> imp
     this.variables = new TestDataVariableSupport();
   }
 
-  async getRootDataCatalogueFolder(context: DataCatalogueContext): Promise<DataCatalogueFolder> {
-    return await getRootDataCatalogueFolder(context, this);
+  async getRootDataCatalogueItem(context: DataCatalogueContext) {
+    return await getRootDataCatalogueItem(context, this);
   }
 
   query(options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {
