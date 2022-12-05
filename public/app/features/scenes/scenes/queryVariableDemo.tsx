@@ -8,8 +8,9 @@ import { SceneFlexLayout } from '../components/layout/SceneFlexLayout';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 import { VariableValueSelectors } from '../variables/components/VariableValueSelectors';
 import { SceneVariableSet } from '../variables/sets/SceneVariableSet';
-import { QueryVariable } from '../variables/variants/query/QueryVariable';
 import { CustomVariable } from '../variables/variants/CustomVariable';
+import { DataSourceVariable } from '../variables/variants/DataSourceVariable';
+import { QueryVariable } from '../variables/variants/query/QueryVariable';
 
 export function getQueryVariableDemo(): Scene {
   const scene = new Scene({
@@ -20,11 +21,22 @@ export function getQueryVariableDemo(): Scene {
           name: 'metric',
           query: 'job : job, instance : instance',
         }),
+        new DataSourceVariable({
+          name: 'datasource',
+          query: 'prometheus',
+          isMulti: true,
+        }),
         new QueryVariable({
           name: 'instance (on time range refresh)',
           refresh: VariableRefresh.onTimeRangeChanged,
           query: { query: 'label_values(go_gc_duration_seconds, ${metric})' },
           datasource: { uid: 'gdev-prometheus', type: 'prometheus' },
+        }),
+        new QueryVariable({
+          name: 'instance (using datasource variable)',
+          refresh: VariableRefresh.onTimeRangeChanged,
+          query: { query: 'label_values(go_gc_duration_seconds, ${metric})' },
+          datasource: 'datasource',
         }),
       ],
     }),
