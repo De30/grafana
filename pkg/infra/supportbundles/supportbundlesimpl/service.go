@@ -34,7 +34,7 @@ func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister rou
 }
 
 func (s *Service) Create(ctx context.Context, usr *user.SignedInUser) (*supportbundles.Bundle, error) {
-	bundle, err := s.store.Create(ctx)
+	bundle, err := s.store.Create(ctx, usr)
 	if err != nil {
 		return nil, err
 	}
