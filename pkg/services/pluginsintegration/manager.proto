@@ -1,0 +1,74 @@
+syntax = "proto3";
+package plugins;
+
+option go_package = "./;plugins";
+
+message PluginData {
+  string id = 1;
+
+  string version = 2;
+}
+
+message GetPluginRequest {
+  string id = 1;
+}
+
+message GetPluginResponse {
+  PluginData plugin = 1;
+}
+
+message GetPluginsRequest {
+  repeated string types = 1;
+}
+
+message GetPluginsResponse {
+  repeated PluginData plugins = 1;
+}
+
+message AddPluginRequest {
+  string id = 1;
+
+  string version = 2;
+
+  AddPluginOpts opts = 3;
+}
+
+message AddPluginOpts {
+  string grafanaVersion = 1;
+
+  string os = 2;
+
+  string arch = 3;
+}
+
+message AddPluginResponse {
+  bool OK = 1;
+}
+
+message RemovePluginRequest {
+  string id = 1;
+}
+
+message RemovePluginResponse {
+  bool OK = 1;
+}
+
+message GetPluginErrorsRequest {
+
+}
+
+message GetPluginErrorsResponse {
+
+}
+
+service PluginManager {
+  rpc Plugin(GetPluginRequest) returns (GetPluginResponse);
+  rpc Plugins(GetPluginsRequest) returns (GetPluginsResponse);
+  rpc AddPlugin(AddPluginRequest) returns (AddPluginResponse);
+  rpc RemovePlugin(RemovePluginRequest) returns (RemovePluginResponse);
+
+  rpc PluginErrors(GetPluginErrorsRequest) returns (GetPluginErrorsResponse);
+
+  //  pluginv2.Data
+  // Renderer + SecretsManager
+}

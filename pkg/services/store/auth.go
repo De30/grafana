@@ -16,6 +16,12 @@ type UserInfo struct {
 }
 
 func UserInfoFromString(raw string) *UserInfo {
+	var u *UserInfo
+	err := json.Unmarshal([]byte(raw), &u)
+	if err == nil {
+		return u
+	}
+
 	var orgID, userID int64
 	login := ""
 

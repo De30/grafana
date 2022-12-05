@@ -273,6 +273,8 @@ var wireBasicSet = wire.NewSet(
 	dashsnapsvc.ProvideService,
 	datasourceservice.ProvideService,
 	wire.Bind(new(datasources.DataSourceService), new(*datasourceservice.Service)),
+	wire.Bind(new(pluginsintegration.PluginManagerClient), new((*pluginsintegration.PluginManagerClientService))),
+	pluginsintegration.ProvidePluginManagerClientService,
 	pluginSettings.ProvideService,
 	wire.Bind(new(pluginsettings.Service), new(*pluginSettings.Service)),
 	alerting.ProvideService,

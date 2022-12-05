@@ -5,11 +5,14 @@ import (
 
 	"github.com/grafana/dskit/modules"
 	"github.com/grafana/dskit/services"
+
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/server/backgroundsvcs"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
+	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/services/store/entity/sqlstash"
 	"github.com/grafana/grafana/pkg/services/store/kind"
 	"github.com/grafana/grafana/pkg/services/store/resolver"
@@ -23,6 +26,7 @@ const (
 	GRPCServerReflection  string = "grpc-server-reflection"
 	Core                  string = "core"
 	EntityStore           string = "entity-store"
+	PluginManager         string = "plugin-manager"
 )
 
 type Modules struct {
@@ -34,6 +38,9 @@ type Modules struct {
 	backgroundServiceRegistry *backgroundsvcs.BackgroundServiceRegistry
 	db                        db.DB
 	entityReferenceResolver   resolver.EntityReferenceResolver
+	pluginStore               plugins.Store
+	pluginClient              plugins.Client
+	pluginInstaller           plugins.Installer
 
 	ModuleManager  *modules.Manager
 	ServiceManager *services.Manager
@@ -49,6 +56,7 @@ func ProvideService(
 	roleRegistry accesscontrol.RoleRegistry,
 	db db.DB,
 	entityReferenceResolver resolver.EntityReferenceResolver,
+	store plugins.Store, client plugins.Client, installer plugins.Installer,
 ) *Modules {
 	m := &Modules{
 		cfg: cfg,
@@ -56,6 +64,10 @@ func ProvideService(
 
 		db:                      db,
 		entityReferenceResolver: entityReferenceResolver,
+
+		pluginInstaller: installer,
+		pluginClient:    client,
+		pluginStore:     store,
 
 		grpcServer:                server,
 		kindRegistry:              kindRegistry,
@@ -73,14 +85,16 @@ func (m *Modules) Init() error {
 	mm.RegisterModule(GRPCServerHealthCheck, m.initGRPCServerHealthCheck, modules.UserInvisibleModule)
 	mm.RegisterModule(GRPCServerReflection, m.initGRPCServerReflection, modules.UserInvisibleModule)
 	mm.RegisterModule(EntityStore, m.initObjectStore)
+	mm.RegisterModule(PluginManager, m.initPluginManager)
 	mm.RegisterModule(Core, m.initBackgroundServices)
 	mm.RegisterModule(All, nil)
 
 	deps := map[string][]string{
-		GRPCServer:  {GRPCServerHealthCheck, GRPCServerReflection},
-		EntityStore: {GRPCServer},
-		Core:        {},
-		All:         {Core, EntityStore},
+		GRPCServer:    {GRPCServerHealthCheck, GRPCServerReflection},
+		EntityStore:   {GRPCServer},
+		PluginManager: {GRPCServer},
+		Core:          {},
+		All:           {Core, EntityStore, PluginManager},
 	}
 
 	for mod, targets := range deps {
@@ -117,8 +131,8 @@ func (m *Modules) Run() error {
 
 	m.ServiceManager = sm
 
-	healthy := func() { m.log.Info("msg", "Modules started") }
-	stopped := func() { m.log.Info("msg", "Modules stopped") }
+	healthy := func() { m.log.Info("Modules started") }
+	stopped := func() { m.log.Info("Modules stopped") }
 	serviceFailed := func(service services.Service) {
 		// if any service fails, stop all services
 		sm.StopAsync()
@@ -127,15 +141,15 @@ func (m *Modules) Run() error {
 		for module, s := range serviceMap {
 			if s == service {
 				if service.FailureCase() == modules.ErrStopProcess {
-					m.log.Info("msg", "received stop signal via return error", "module", module, "error", service.FailureCase())
+					m.log.Info("received stop signal via return error", "module", module, "error", service.FailureCase())
 				} else {
-					m.log.Error("msg", "module failed", "module", module, "error", service.FailureCase())
+					m.log.Error("module failed", "module", module, "error", service.FailureCase())
 				}
 				return
 			}
 		}
 
-		m.log.Error("msg", "module failed", "module", "unknown", "error", service.FailureCase())
+		m.log.Error("module failed", "module", "unknown", "error", service.FailureCase())
 	}
 
 	sm.AddListener(services.NewManagerListener(healthy, stopped, serviceFailed))
@@ -175,4 +189,8 @@ func (m *Modules) initGRPCServerReflection() (services.Service, error) {
 
 func (m *Modules) initObjectStore() (services.Service, error) {
 	return sqlstash.ProvideSQLEntityServer(m.db, m.cfg, m.grpcServer, m.kindRegistry, m.entityReferenceResolver), nil
+}
+
+func (m *Modules) initPluginManager() (services.Service, error) {
+	return pluginsintegration.ProvidePluginManagerServerService(m.grpcServer, m.pluginStore, m.pluginClient, m.pluginInstaller), nil
 }

@@ -27,6 +27,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
+	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -411,10 +412,14 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 	}
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	err := hs.pluginInstaller.Add(c.Req.Context(), pluginID, dto.Version, plugins.CompatOpts{
-		GrafanaVersion: hs.Cfg.BuildVersion,
-		OS:             runtime.GOOS,
-		Arch:           runtime.GOARCH,
+	resp, err := hs.pluginManagerClient.AddPlugin(c.Req.Context(), &pluginsintegration.AddPluginRequest{
+		Id:      pluginID,
+		Version: dto.Version,
+		Opts: &pluginsintegration.AddPluginOpts{
+			GrafanaVersion: hs.Cfg.BuildVersion,
+			Os:             runtime.GOOS,
+			Arch:           runtime.GOARCH,
+		},
 	})
 	if err != nil {
 		var dupeErr plugins.DuplicateError
@@ -440,13 +445,17 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusInternalServerError, "Failed to install plugin", err)
 	}
 
+	if !resp.OK {
+		return response.Error(http.StatusInternalServerError, "Failed to install plugin", err)
+	}
+
 	return response.JSON(http.StatusOK, []byte{})
 }
 
 func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	err := hs.pluginInstaller.Remove(c.Req.Context(), pluginID)
+	resp, err := hs.pluginManagerClient.RemovePlugin(c.Req.Context(), &pluginsintegration.RemovePluginRequest{Id: pluginID})
 	if err != nil {
 		if errors.Is(err, plugins.ErrPluginNotInstalled) {
 			return response.Error(http.StatusNotFound, "Plugin not installed", err)
@@ -460,6 +469,11 @@ func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 
 		return response.Error(http.StatusInternalServerError, "Failed to uninstall plugin", err)
 	}
+
+	if !resp.OK {
+		return response.Error(http.StatusInternalServerError, "Failed to uninstall plugin", err)
+	}
+
 	return response.JSON(http.StatusOK, []byte{})
 }
 

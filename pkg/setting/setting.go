@@ -496,6 +496,8 @@ type Cfg struct {
 	GRPCServerTLSConfig *tls.Config
 	// Entity Store
 	EntityStore EntityStoreSettings
+	// Plugin Service
+	PluginManager PluginManagerServiceSettings
 
 	CustomResponseHeaders map[string]string
 }
@@ -1009,6 +1011,10 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 	}
 
 	if err := readObjectStoreSettings(cfg, iniFile); err != nil {
+		return err
+	}
+
+	if err := readPluginManagerServiceSettings(cfg, iniFile); err != nil {
 		return err
 	}
 
@@ -1580,6 +1586,17 @@ func readObjectStoreSettings(cfg *Cfg, iniFile *ini.File) error {
 	os := iniFile.Section("object_store")
 	address := os.Key("address").MustString("127.0.0.1:10000")
 	cfg.EntityStore = EntityStoreSettings{Address: address}
+	return nil
+}
+
+type PluginManagerServiceSettings struct {
+	Address string
+}
+
+func readPluginManagerServiceSettings(cfg *Cfg, iniFile *ini.File) error {
+	ps := iniFile.Section("plugin_service")
+	address := ps.Key("address").MustString("127.0.0.1:10000")
+	cfg.PluginManager = PluginManagerServiceSettings{Address: address}
 	return nil
 }
 
