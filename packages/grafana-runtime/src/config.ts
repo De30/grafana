@@ -181,8 +181,6 @@ export class GrafanaBootConfig implements GrafanaConfig {
     this.theme2 = createTheme(getThemeCustomizations(this));
 
     this.theme = this.theme2.v1;
-    // Special feature toggle that impact theme/component looks
-    this.theme2.flags.topnav = this.featureToggles.topnav;
   }
 }
 
@@ -190,6 +188,9 @@ function getThemeCustomizations(config: GrafanaBootConfig) {
   const mode = config.bootData.user.lightTheme ? 'light' : 'dark';
   const themeOptions: NewThemeOptions = {
     colors: { mode },
+    flags: {
+      topnav: config.featureToggles.topnav,
+    },
   };
 
   return themeOptions;

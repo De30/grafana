@@ -8,7 +8,7 @@ import { createTransitions } from './createTransitions';
 import { createTypography, ThemeTypographyInput } from './createTypography';
 import { createV1Theme } from './createV1Theme';
 import { createVisualizationColors } from './createVisualizationColors';
-import { GrafanaTheme2 } from './types';
+import { GrafanaTheme2, ThemeFeatureFlags } from './types';
 import { zIndex } from './zIndex';
 
 /** @internal */
@@ -18,6 +18,7 @@ export interface NewThemeOptions {
   spacing?: ThemeSpacingOptions;
   shape?: ThemeShapeInput;
   typography?: ThemeTypographyInput;
+  flags?: ThemeFeatureFlags;
 }
 
 /** @internal */
@@ -55,7 +56,7 @@ export function createTheme(options: NewThemeOptions = {}): GrafanaTheme2 {
     zIndex: {
       ...zIndex,
     },
-    flags: {},
+    flags: options.flags ?? {},
   };
 
   return {
