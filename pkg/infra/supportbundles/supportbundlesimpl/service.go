@@ -48,6 +48,10 @@ func (s *Service) Create(ctx context.Context, usr *user.SignedInUser) (*supportb
 	return bundle, nil
 }
 
+func (s *Service) Get(ctx context.Context, uid string) (*supportbundles.Bundle, error) {
+	return s.store.Get(ctx, uid)
+}
+
 func (s *Service) List(ctx context.Context) ([]supportbundles.Bundle, error) {
 	return s.store.List()
 }

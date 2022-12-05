@@ -82,7 +82,7 @@ func (s *Service) bundle(ctx context.Context, uid string) (string, error) {
 	finalFilePath := filepath.Join(sbDir, fmt.Sprintf("%s.tar.gz", uid))
 
 	// write the .tar.gzip
-	fileToWrite, err := os.OpenFile(finalFilePath, os.O_CREATE|os.O_RDWR, os.FileMode(600))
+	fileToWrite, err := os.OpenFile(finalFilePath, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		panic(err)
 	}
