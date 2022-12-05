@@ -42,6 +42,7 @@ export {
 } from './DateTimePickers/DatePickerWithInput/DatePickerWithInput';
 export { DateTimePicker } from './DateTimePickers/DateTimePicker/DateTimePicker';
 export { List } from './List/List';
+export { InteractiveTable } from './InteractiveTable/InteractiveTable';
 export { TagsInput } from './TagsInput/TagsInput';
 export { Pagination } from './Pagination/Pagination';
 export { Tag, type OnTagClick } from './Tags/Tag';
@@ -276,4 +277,3 @@ export { type GraphNGLegendEvent } from './GraphNG/types';
 export * from './PanelChrome/types';
 export { Label as BrowserLabel } from './BrowserLabel/Label';
 export { PanelContainer } from './PanelContainer/PanelContainer';
-export * from './QueryEditor';

@@ -54,7 +54,7 @@ type dashboard struct {
 	updated  time.Time
 
 	// Use generic structure
-	summary *models.ObjectSummary
+	summary *models.EntitySummary
 }
 
 // buildSignal is sent when search index is accessed in organization for which
@@ -913,7 +913,7 @@ func (l sqlDashboardLoader) LoadDashboards(ctx context.Context, orgID int64, das
 			slug:     "",
 			created:  time.Now(),
 			updated:  time.Now(),
-			summary: &models.ObjectSummary{
+			summary: &models.EntitySummary{
 				//ID:    0,
 				Name: "General",
 			},
@@ -953,7 +953,7 @@ func (l sqlDashboardLoader) LoadDashboards(ctx context.Context, orgID int64, das
 		readDashboardSpan.SetAttributes("orgID", orgID, attribute.Key("orgID").Int64(orgID))
 		readDashboardSpan.SetAttributes("dashboardCount", len(rows), attribute.Key("dashboardCount").Int(len(rows)))
 
-		reader := kdash.NewStaticDashboardSummaryBuilder(lookup)
+		reader := kdash.NewStaticDashboardSummaryBuilder(lookup, false)
 
 		for _, row := range rows {
 			summary, _, err := reader(ctx, row.Uid, row.Data)

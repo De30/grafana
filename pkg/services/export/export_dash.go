@@ -30,7 +30,7 @@ func exportDashboards(helper *commitHelper, job *gitExportJob) error {
 		return err
 	}
 
-	rootDir := path.Join(helper.orgDir, "root")
+	rootDir := path.Join(helper.orgDir, "drive")
 	folderStructure := commitOptions{
 		when:    time.Now(),
 		comment: "Exported folder structure",
@@ -59,7 +59,7 @@ func exportDashboards(helper *commitHelper, job *gitExportJob) error {
 			return err
 		}
 
-		reader := dashboard.NewStaticDashboardSummaryBuilder(lookup)
+		reader := dashboard.NewStaticDashboardSummaryBuilder(lookup, false)
 
 		// Process all folders
 		for _, row := range rows {
@@ -95,7 +95,7 @@ func exportDashboards(helper *commitHelper, job *gitExportJob) error {
 			if row.IsFolder {
 				continue
 			}
-			fname := row.Slug + "-dash.json"
+			fname := row.Slug + "-dashboard.json"
 			fpath, ok := folders[row.FolderID]
 			if ok {
 				fpath = path.Join(fpath, fname)

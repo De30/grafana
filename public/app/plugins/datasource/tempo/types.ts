@@ -29,6 +29,11 @@ export interface TempoJsonData extends DataSourceJsonData {
   spanBar?: {
     tag: string;
   };
+  traceQuery?: {
+    timeShiftEnabled?: boolean;
+    spanStartTimeShift?: string;
+    spanEndTimeShift?: string;
+  };
 }
 
 // search = Loki search, nativeSearch = Tempo search for backwards compatibility
@@ -90,7 +95,10 @@ export type Span = {
   kind?: SpanKind;
   startTimeUnixNano: string;
   endTimeUnixNano?: string;
-  attributes?: Array<{ key: string; value: { stringValue: string } }>;
+  attributes?: Array<{
+    key: string;
+    value: { stringValue?: string; intValue?: string; boolValue?: boolean; doubleValue?: string };
+  }>;
   dropped_attributes_count?: number;
 };
 
