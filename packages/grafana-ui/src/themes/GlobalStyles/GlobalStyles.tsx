@@ -9,6 +9,7 @@ import { getElementStyles } from './elements';
 import { getFormElementStyles } from './forms';
 import { getMarkdownStyles } from './markdownStyles';
 import { getPageStyles } from './page';
+import { getOldPanelStyles } from './panel';
 
 /** @internal */
 export function GlobalStyles() {
@@ -23,6 +24,7 @@ export function GlobalStyles() {
         getCardStyles(theme),
         getAgularPanelStyles(theme),
         getMarkdownStyles(theme),
+        getOldPanelStyles(theme),
       ]}
     />
   );
