@@ -20,6 +20,7 @@ func (s *Service) registerAPIEndpoints(routeRegister routing.RouteRegister) {
 		subrouter.Get("/", middleware.ReqGrafanaAdmin, routing.Wrap(s.handleList))
 		subrouter.Post("/", middleware.ReqGrafanaAdmin, routing.Wrap(s.handleCreate))
 		subrouter.Get("/:uid", middleware.ReqGrafanaAdmin, s.handleDownload)
+		subrouter.Get("/collectors", middleware.ReqGrafanaAdmin, routing.Wrap(s.handleGetCollectors))
 	})
 }
 
@@ -66,4 +67,12 @@ func (s *Service) handleDownload(ctx *models.ReqContext) {
 
 	ctx.Resp.Header().Set("Content-Type", "application/tar+gzip")
 	http.ServeFile(ctx.Resp, ctx.Req, bundle.FilePath)
+}
+
+func (s *Service) handleGetCollectors(ctx *models.ReqContext) response.Response {
+	collectors := make([]string, 0, len(s.collectors))
+	for name := range s.collectors {
+		collectors = append(collectors, name)
+	}
+	return response.JSON(http.StatusOK, collectors)
 }
