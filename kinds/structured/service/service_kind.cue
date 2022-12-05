@@ -1,6 +1,7 @@
 package kind
 
 name: "Service"
+description: "Service is a logical representation of a single 'service' within an org. Happy sloppy hackathoning!"
 
 lineage: seqs: [
 	{

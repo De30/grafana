@@ -43,6 +43,8 @@ func (m Maturity) Less(om Maturity) bool {
 
 // TODO docs
 type Interface interface {
+	Props() SomeKindMeta
+
 	// TODO docs
 	Name() string
 

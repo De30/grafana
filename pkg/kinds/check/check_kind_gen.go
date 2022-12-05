@@ -98,8 +98,17 @@ func (k *Kind) Maturity() kindsys.Maturity {
 	return k.decl.Meta.Maturity
 }
 
-// TODO standard generated docs
+// Decl returns the [kindsys.Decl] containing both CUE and Go representations of the
+// check declaration in .cue files.
 func (k *Kind) Decl() *kindsys.Decl[kindsys.CoreStructuredMeta] {
 	d := k.decl
 	return &d
+}
+
+// Props returns a [kindsys.SomeKindProps], with underlying type [kindsys.CoreStructuredMeta],
+// representing the static properties declared in the check kind.
+//
+// This method is identical to calling Decl().Props. It is provided to satisfy [kindsys.Interface].
+func (k *Kind) Props() kindsys.SomeKindMeta {
+	return k.decl.Meta
 }

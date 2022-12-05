@@ -14,7 +14,7 @@ export interface Endpoint {
 }
 
 export interface Service {
-  endpoints: Array<Endpoint>;
+  endpoints?: Array<Endpoint>;
   /**
    * name of the service
    */

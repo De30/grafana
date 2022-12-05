@@ -10,17 +10,6 @@
 
 package service
 
-// Defines values for EndpointsType.
-const (
-	EndpointsTypeDns EndpointsType = "dns"
-
-	EndpointsTypeHttp EndpointsType = "http"
-
-	EndpointsTypePing EndpointsType = "ping"
-
-	EndpointsTypeTcp EndpointsType = "tcp"
-)
-
 // Defines values for EndpointType.
 const (
 	EndpointTypeDns EndpointType = "dns"
@@ -34,18 +23,12 @@ const (
 
 // Service defines model for service.
 type Service struct {
-	Endpoints []struct {
-		Path string        `json:"path"`
-		Type EndpointsType `json:"type"`
-	} `json:"endpoints"`
+	Endpoints *[]Endpoint `json:"endpoints,omitempty"`
 
 	// name of the service
 	Name string `json:"name"`
 	Uid  string `json:"uid"`
 }
-
-// EndpointsType defines model for Service.Endpoints.Type.
-type EndpointsType string
 
 // Endpoint defines model for service.Endpoint.
 type Endpoint struct {

@@ -56,6 +56,8 @@ const (
 
 // EntityKindInfo describes information needed from the object store
 // All non-raw types will have a schema that can be used to validate
+//
+// TODO fully replace this with kindsys metas
 type EntityKindInfo struct {
 	// Unique short id for this kind
 	ID string `json:"id,omitempty"`

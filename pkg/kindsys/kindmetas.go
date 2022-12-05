@@ -10,9 +10,16 @@ type CommonMeta struct {
 	PluralMachineName string   `json:"pluralMachineName"`
 	LineageIsGroup    bool     `json:"lineageIsGroup"`
 	Maturity          Maturity `json:"maturity"`
+	MimeType          string   `json:"mimeType"`
+	Description       string   `json:"description"`
 }
 
-// TODO generate from type.cue
+// RawMeta represents the static properties in a #Raw kind declaration that are
+// trivially representable with basic Go types.
+//
+// When a .cue #Raw declaration is loaded through the standard [LoadCoreKind],
+// func, it is fully validated and populated according to all rules specified
+// in CUE for #Raw kinds.
 type RawMeta struct {
 	CommonMeta
 	Extensions []string `json:"extensions"`
@@ -23,7 +30,13 @@ func (m RawMeta) Common() CommonMeta {
 	return m.CommonMeta
 }
 
-// TODO
+// CoreStructuredMeta represents the static properties in the declaration of a
+// #CoreStructured kind that are representable with basic Go types. This
+// excludes Thema schemas.
+//
+// When a .cue #CoreStructured declaration is loaded through the standard [LoadCoreKind],
+// func, it is fully validated and populated according to all rules specified
+// in CUE for #CoreStructured kinds.
 type CoreStructuredMeta struct {
 	CommonMeta
 	CurrentVersion thema.SyntacticVersion `json:"currentVersion"`
@@ -34,7 +47,9 @@ func (m CoreStructuredMeta) Common() CommonMeta {
 	return m.CommonMeta
 }
 
-// TODO
+// CustomStructuredMeta represents the static properties in the declaration of a
+// #CustomStructured kind that are representable with basic Go types. This
+// excludes Thema schemas.
 type CustomStructuredMeta struct {
 	CommonMeta
 	CurrentVersion thema.SyntacticVersion `json:"currentVersion"`
@@ -45,7 +60,9 @@ func (m CustomStructuredMeta) Common() CommonMeta {
 	return m.CommonMeta
 }
 
-// TODO
+// ComposableMeta represents the static properties in the declaration of a
+// #Composable kind that are representable with basic Go types. This
+// excludes Thema schemas.
 type ComposableMeta struct {
 	CommonMeta
 	CurrentVersion thema.SyntacticVersion `json:"currentVersion"`
