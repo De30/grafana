@@ -154,6 +154,18 @@ func (s *ServiceImpl) GetNavTree(c *models.ReqContext, hasEditPerm bool, prefs *
 		}
 	}
 
+	if s.features.IsEnabled(featuremgmt.FlagPlatformatons) {
+		treeRoot.AddSection(&navtree.NavLink{
+			Text:       "Platformatons",
+			Id:         "platformatons",
+			SubTitle:   "Platformatons go!",
+			Icon:       "repeat",
+			SortWeight: navtree.WeightPlatformatons,
+			Section:    navtree.NavSectionCore,
+			Url:        s.cfg.AppSubURL + "/platformatons",
+		})
+	}
+
 	if s.features.IsEnabled(featuremgmt.FlagDataConnectionsConsole) {
 		treeRoot.AddSection(s.buildDataConnectionsNavLink(c))
 	}

@@ -378,5 +378,11 @@ var (
 			Description: "Use new auth service to perform authentication",
 			State:       FeatureStateAlpha,
 		},
+		{
+			Name:            "platformatons",
+			Description:     "Platformatons description",
+			State:           FeatureStateAlpha,
+			RequiresDevMode: true,
+		},
 	}
 )

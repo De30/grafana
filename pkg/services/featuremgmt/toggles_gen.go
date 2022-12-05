@@ -274,4 +274,8 @@ const (
 	// FlagAuthnService
 	// Use new auth service to perform authentication
 	FlagAuthnService = "authnService"
+
+	// FlagPlatformatons
+	// Platformatons
+	FlagPlatformatons = "platformatons"
 )

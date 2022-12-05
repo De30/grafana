@@ -16,6 +16,7 @@ const (
 	WeightCreate
 	WeightDashboard
 	WeightQueryLibrary
+	WeightPlatformatons
 	WeightExplore
 	WeightAlerting
 	WeightDataConnections
