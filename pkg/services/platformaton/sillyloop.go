@@ -27,6 +27,7 @@ type SMPlato struct {
 
 func (p *SMPlato) Run(ctx context.Context) error {
 	// p.store.Watch(// pass a kind name here) // get a channel back
+	return nil
 }
 
 // We care about
@@ -45,9 +46,11 @@ func (p *SMPlato) Reconcile() error {
 	var b []byte
 	// Transform the bytes into
 	svc, _, err := ksvc.JSONValueMux(b)
+	_ = svc
 	// repeat to load platformaton config
 
 	// then, implement logic to create checks, etc. from svc + pfsm
 	// then, write 'em to the places they need to go
 
+	return err
 }

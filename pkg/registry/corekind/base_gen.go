@@ -66,8 +66,8 @@ func (b *Base) Dashboard() *dashboard.Kind {
 	return b.dashboard
 }
 
-// PlatformatonSM returns the [kindsys.Interface] implementation for the platformatonsm kind.
-func (b *Base) PlatformatonSM() *platformatonsm.Kind {
+// Platformatonsm returns the [kindsys.Interface] implementation for the platformatonsm kind.
+func (b *Base) Platformatonsm() *platformatonsm.Kind {
 	return b.platformatonsm
 }
 

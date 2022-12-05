@@ -1,6 +1,6 @@
 package kind
 
-name: "PlatformatonSM"
+name: "Platformatonsm"
 description: "A synthetic monitoring platformaton. Happy sloppy hackathoning!"
 
 lineage: seqs: [
