@@ -14,6 +14,7 @@ export function ThemeEditPage({ match, queryParams }: Props) {
 
   useEffect(() => {
     stateManager.loadTheme(match.params.uid, queryParams.safeMode);
+    return () => stateManager.reset();
   }, [match.params.uid, queryParams.safeMode, stateManager]);
 
   const actions = (

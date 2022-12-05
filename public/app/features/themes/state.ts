@@ -31,25 +31,31 @@ export interface EditThemeState {
   safeMode?: boolean;
 }
 
+const defaultState: EditThemeState = {
+  theme: {
+    uid: 'new',
+    name: 'New theme',
+    body: {},
+  },
+  loading: true,
+  tab: 'def',
+  defJson: `{        
+  }`,
+  fullJson: '',
+};
+
 export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
   constructor() {
-    super({
-      theme: {
-        uid: 'new',
-        name: 'New theme',
-        body: {},
-      },
-      loading: true,
-      tab: 'def',
-      defJson: `{        
-      }`,
-      fullJson: '',
-    });
+    super(defaultState);
   }
 
   async loadTheme(uid: string, safeMode?: boolean) {
     if (uid === 'new') {
-      this.setState({ loading: false });
+      this.setState({
+        ...defaultState,
+        loading: false,
+        safeMode,
+      });
     } else {
       const customTheme = await getBackendSrv().get<CustomThemeDTO>(`/api/themes/${uid}`);
       let runtimeTheme = config.theme2;
@@ -57,6 +63,7 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
       runtimeTheme = setRuntimeTheme(customTheme, safeMode);
 
       this.setState({
+        ...defaultState,
         theme: customTheme,
         loading: false,
         defJson: JSON.stringify(customTheme.body, null, 2),
@@ -127,6 +134,10 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
 
   changeTab(tab: string) {
     this.setState({ tab });
+  }
+
+  reset() {
+    this.setState(defaultState);
   }
 }
 
