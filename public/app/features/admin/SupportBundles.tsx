@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button } from '@grafana/ui';
+import { Button, LinkButton } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 
 function SupportBundles() {
@@ -41,7 +41,9 @@ function SupportBundles() {
           </tbody>
         </table>
 
-        <Button variant="primary">Create New Support Bundle</Button>
+        <LinkButton href="admin/support-bundles/create" variant="primary">
+          Create New Support Bundle
+        </LinkButton>
       </Page.Contents>
     </Page>
   );
