@@ -28,7 +28,6 @@ type EntityStoreClient interface {
 	Delete(ctx context.Context, in *DeleteEntityRequest, opts ...grpc.CallOption) (*DeleteEntityResponse, error)
 	History(ctx context.Context, in *EntityHistoryRequest, opts ...grpc.CallOption) (*EntityHistoryResponse, error)
 	Search(ctx context.Context, in *EntitySearchRequest, opts ...grpc.CallOption) (*EntitySearchResponse, error)
-	Watch(ctx context.Context, in *WatchEntityRequest, opts ...grpc.CallOption) (EntityStore_WatchClient, error)
 	// TEMPORARY... while we split this into a new service (see below)
 	AdminWrite(ctx context.Context, in *AdminWriteEntityRequest, opts ...grpc.CallOption) (*WriteEntityResponse, error)
 }
@@ -95,38 +94,6 @@ func (c *entityStoreClient) Search(ctx context.Context, in *EntitySearchRequest,
 	return out, nil
 }
 
-func (c *entityStoreClient) Watch(ctx context.Context, in *WatchEntityRequest, opts ...grpc.CallOption) (EntityStore_WatchClient, error) {
-	stream, err := c.cc.NewStream(ctx, &EntityStore_ServiceDesc.Streams[0], "/entity.EntityStore/Watch", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &entityStoreWatchClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type EntityStore_WatchClient interface {
-	Recv() (*EntityWatchResponse, error)
-	grpc.ClientStream
-}
-
-type entityStoreWatchClient struct {
-	grpc.ClientStream
-}
-
-func (x *entityStoreWatchClient) Recv() (*EntityWatchResponse, error) {
-	m := new(EntityWatchResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 func (c *entityStoreClient) AdminWrite(ctx context.Context, in *AdminWriteEntityRequest, opts ...grpc.CallOption) (*WriteEntityResponse, error) {
 	out := new(WriteEntityResponse)
 	err := c.cc.Invoke(ctx, "/entity.EntityStore/AdminWrite", in, out, opts...)
@@ -146,7 +113,6 @@ type EntityStoreServer interface {
 	Delete(context.Context, *DeleteEntityRequest) (*DeleteEntityResponse, error)
 	History(context.Context, *EntityHistoryRequest) (*EntityHistoryResponse, error)
 	Search(context.Context, *EntitySearchRequest) (*EntitySearchResponse, error)
-	Watch(*WatchEntityRequest, EntityStore_WatchServer) error
 	// TEMPORARY... while we split this into a new service (see below)
 	AdminWrite(context.Context, *AdminWriteEntityRequest) (*WriteEntityResponse, error)
 }
@@ -172,9 +138,6 @@ func (UnimplementedEntityStoreServer) History(context.Context, *EntityHistoryReq
 }
 func (UnimplementedEntityStoreServer) Search(context.Context, *EntitySearchRequest) (*EntitySearchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
-}
-func (UnimplementedEntityStoreServer) Watch(*WatchEntityRequest, EntityStore_WatchServer) error {
-	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
 }
 func (UnimplementedEntityStoreServer) AdminWrite(context.Context, *AdminWriteEntityRequest) (*WriteEntityResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminWrite not implemented")
@@ -299,27 +262,6 @@ func _EntityStore_Search_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EntityStore_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(WatchEntityRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(EntityStoreServer).Watch(m, &entityStoreWatchServer{stream})
-}
-
-type EntityStore_WatchServer interface {
-	Send(*EntityWatchResponse) error
-	grpc.ServerStream
-}
-
-type entityStoreWatchServer struct {
-	grpc.ServerStream
-}
-
-func (x *entityStoreWatchServer) Send(m *EntityWatchResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
 func _EntityStore_AdminWrite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AdminWriteEntityRequest)
 	if err := dec(in); err != nil {
@@ -374,13 +316,7 @@ var EntityStore_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _EntityStore_AdminWrite_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Watch",
-			Handler:       _EntityStore_Watch_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "entity.proto",
 }
 

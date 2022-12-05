@@ -378,7 +378,7 @@ service EntityStore {
   rpc Delete(DeleteEntityRequest) returns (DeleteEntityResponse);
   rpc History(EntityHistoryRequest) returns (EntityHistoryResponse);
   rpc Search(EntitySearchRequest) returns (EntitySearchResponse);
-  rpc Watch(WatchEntityRequest) returns (stream EntityWatchResponse);
+//  rpc Watch(WatchEntityRequest) returns (stream EntityWatchResponse);
 
 // Ideally an additional search endpoint with more flexibility to limit what you actually care about
 //  https://github.com/grafana/grafana-plugin-sdk-go/blob/main/proto/backend.proto#L129
