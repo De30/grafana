@@ -7,18 +7,29 @@ type SupportItem struct {
 	FileBytes []byte
 }
 
+type State string
+
+const (
+	StatePending  State = "pending"
+	StateComplete State = "complete"
+	StateError    State = "error"
+	StateTimeout  State = "timeout"
+)
+
+func (s State) String() string {
+	return string(s)
+}
+
 type Bundle struct {
-	UID         string
-	FilePath    string
-	Creator     string
-	RequestedAt int64
-	ExpiresAt   int64
+	UID       string `json:"uid"`
+	State     State  `json:"state"`
+	FilePath  string `json:"filePath"`
+	Creator   string `json:"creator"`
+	CreatedAt int64  `json:"createdAt"`
+	ExpiresAt int64  `json:"expiresAt"`
 }
 
 type CollectorFunc func(context.Context) (*SupportItem, error)
 type Service interface {
-	CreateSupportBundle(context.Context) (string, error)
-	ListSupportBundles() ([]Bundle, error)
-	RetrieveSupportBundle(string) (*Bundle, error)
 	RegisterSupportItemCollector(CollectorFunc)
 }
