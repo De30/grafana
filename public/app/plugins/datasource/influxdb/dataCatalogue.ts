@@ -22,10 +22,8 @@ export const getRootDataCatalogueItem = async ({
   datasource: InfluxDatasource;
   context: DataCatalogueContext;
 }) => {
-  return new DataCatalogueBuilder()
-    .fromDataSource(datasource)
-    .addKeyValue('Database', datasource.database)
-    .loadItems(async () => {
+  const dataCategoryFactory = (item: DataCatalogueBuilder) => {
+    item.loadItems(async () => {
       return [
         new DataCatalogueBuilder('Retention policies')
           .addDescription(RETENTION_POLICY_INFO)
@@ -50,4 +48,18 @@ export const getRootDataCatalogueItem = async ({
           }),
       ];
     });
+  };
+
+  const configurationCategoryFactory = (item: DataCatalogueBuilder) => {
+    item.addKeyValue('Database', datasource.database);
+    item.addKeyValue('Flux', datasource.isFlux ? 'yes' : 'no');
+    item.addKeyValue('HTTP mode', datasource.httpMode);
+    item.addKeyValue('Access', datasource.access);
+    datasource.interval && item.addKeyValue('Interval', datasource.interval);
+  };
+
+  return new DataCatalogueBuilder().fromDataSource(datasource, {
+    data: dataCategoryFactory,
+    configuration: configurationCategoryFactory,
+  });
 };

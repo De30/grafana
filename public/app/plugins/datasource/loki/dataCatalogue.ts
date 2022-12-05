@@ -1,52 +1,51 @@
-import { DataCatalogueBuilder, DataCatalogueItem, DataSourceInstanceSettings } from '@grafana/data';
+import { DataCatalogueBuilder, DataCatalogueContext, DataCatalogueItem } from '@grafana/data';
 
 import { LokiDatasource } from './datasource';
 
-type Deps = {
+export const getRootDataCatalogueItem = async ({
+  context,
+  datasource,
+}: {
   datasource: LokiDatasource;
-  instanceSettings: DataSourceInstanceSettings;
-};
-
-export const getRootDataCatalogueItem = async (deps: Deps): Promise<DataCatalogueItem> => {
-  return new DataCatalogueBuilder().fromDataSource(deps.datasource).loadItems(async () => {
-    return [await getLabelsDataCatalogueFolder(deps), await getConfigDataCatalogueFolder(deps)];
-  });
-};
-
-export const getConfigDataCatalogueFolder = async (deps: Deps) => {
-  const config = deps.datasource.metadataRequest('status/buildinfo');
-  console.log(config);
-  return {
-    name: 'Config',
-  };
-};
-
-export const getLabelsDataCatalogueFolder = async (deps: Deps) => {
-  return {
-    name: 'Labels',
-    items: async () => {
-      const labels = await deps.datasource.labelNamesQuery();
-      return labels.map((label: { text: string }) => {
-        return {
-          name: label.text,
-          items: async () => {
-            const values = await deps.datasource.labelValuesQuery(label.text);
-            return values.map((value: { text: string }) => {
-              return {
-                name: value.text,
-                actions: [
-                  {
-                    name: 'show data',
-                    handler: () => {
-                      alert('Clicked on ' + label.text + ' ' + value.text);
+  context: DataCatalogueContext;
+}): Promise<DataCatalogueItem> => {
+  const data = (item: DataCatalogueBuilder) => {
+    item.setItems([
+      new DataCatalogueBuilder('Labels').loadItems(async () => {
+        const labels = await datasource.labelNamesQuery();
+        return labels.map((label: { text: string }) => {
+          return {
+            name: label.text,
+            items: async () => {
+              const values = await datasource.labelValuesQuery(label.text);
+              return values.map((value: { text: string }) => {
+                return {
+                  name: value.text,
+                  actions: [
+                    {
+                      name: 'show data',
+                      handler: () => {
+                        alert('Clicked on ' + label.text + ' ' + value.text);
+                      },
                     },
-                  },
-                ],
-              };
-            });
-          },
-        };
-      });
-    },
+                  ],
+                };
+              });
+            },
+          };
+        });
+      }),
+    ]);
   };
+
+  const status = (item: DataCatalogueBuilder) => {
+    item.setItems([
+      new DataCatalogueBuilder('Build info').loadAttributes(async () => {
+        const config = datasource.metadataRequest('status/buildinfo');
+        console.log(config);
+      }),
+    ]);
+  };
+
+  return new DataCatalogueBuilder().fromDataSource(datasource, { data, status });
 };

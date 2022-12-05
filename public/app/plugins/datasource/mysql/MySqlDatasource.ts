@@ -26,7 +26,7 @@ export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvi
   }
 
   async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return getRootDataCatalogueItem(context, this);
+    return getRootDataCatalogueItem({ context, datasource: this });
   }
 
   getQueryModel(target?: Partial<SQLQuery>, templateSrv?: TemplateSrv, scopedVars?: ScopedVars): MySQLQueryModel {

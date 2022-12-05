@@ -6,6 +6,7 @@ import {
   DataCatalogueItemAttributeAction,
   DataCatalogueItemAttributeKeyValue,
   GrafanaTheme2,
+  isDataCatalogueFolder,
   IsDataCatalogueItemAttributeAction,
   IsDataCatalogueItemAttributeDescription,
   IsDataCatalogueItemAttributeImage,
@@ -38,6 +39,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
 export const DataCatalogueItemDetailsRenderer = (props: Props) => {
   const { item } = props;
 
+  const isFolder = isDataCatalogueFolder(props.item);
+
   const tableAttributes = (item.attributes || []).filter(IsDataCatalogueItemAttributeKeyValue);
   const actions = (item.attributes || []).filter(IsDataCatalogueItemAttributeAction);
   const descriptions = (item.attributes || []).filter(IsDataCatalogueItemAttributeDescription);
@@ -45,21 +48,23 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
   const images = (item.attributes || []).filter(IsDataCatalogueItemAttributeImage);
   const tags = (item.attributes || []).filter(IsDataCatalogueItemAttributeTag);
 
+  const sparseContent = tableAttributes.length + actions.length + descriptions.length + links.length === 0;
+
   const styles = useStyles2(getStyles);
 
   return (
     <div>
+      {images.length > 0 && <img src={images[0].url} style={{ maxWidth: 50, maxHeight: 50, float: 'right' }} />}
       <p>
         {item.type ? item.type + ': ' : ''}
         {item.name}
       </p>
-      {images.length > 0 && <img src={images[0].url} style={{ maxWidth: 50, maxHeight: 50, float: 'right' }} />}
       {tags && (
-        <div>
+        <p>
           {tags.map((tag, index) => (
             <Tag className={styles.tag} key={index} name={tag.tag} />
           ))}
-        </div>
+        </p>
       )}
       {descriptions.map(({ description }, index) => {
         return (
@@ -91,7 +96,7 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
       )}
       {actions.length > 0 && (
         <div>
-          <div>Actions:</div>
+          <p>Actions:</p>
           <table className={styles.table}>
             {actions.map(({ name, handler }: DataCatalogueItemAttributeAction, index) => {
               return (
@@ -106,6 +111,7 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
           </table>
         </div>
       )}
+      {sparseContent && isFolder ? 'Select one of the sub-items on the left.' : ''}
     </div>
   );
 };

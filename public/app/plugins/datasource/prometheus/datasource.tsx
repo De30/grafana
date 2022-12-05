@@ -26,6 +26,7 @@ import {
   AnnotationQueryRequest,
   QueryFixAction,
   DataCatalogueProvider,
+  DataCatalogueContext,
 } from '@grafana/data';
 import {
   BackendSrvRequest,
@@ -1211,8 +1212,8 @@ export class PrometheusDatasource
     return this.templateSrv.replace(string, undefined, this.interpolateQueryExpr);
   }
 
-  async getRootDataCatalogueItem() {
-    return await getRootDataCatalogueItem({ datasource: this });
+  async getRootDataCatalogueItem(context: DataCatalogueContext) {
+    return await getRootDataCatalogueItem({ context, datasource: this });
   }
 }
 

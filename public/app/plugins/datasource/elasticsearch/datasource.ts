@@ -984,7 +984,7 @@ export class ElasticDatasource
     return await lastValueFrom(this.request('GET', `${indexName}/_mapping`));
   }
 
-  async getFeatures() {
+  async getMeta() {
     return await lastValueFrom(this.request('GET', '_xpack'));
   }
 }

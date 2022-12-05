@@ -3,14 +3,12 @@ import React from 'react';
 
 import {
   DataCatalogueItem,
-  DataCatalogueItemAttribute,
   GrafanaTheme2,
   IconName,
   isDataCatalogueFolder,
   IsDataCatalogueItemAttributeIcon,
-  IsDataCatalogueItemAttributeTag,
 } from '@grafana/data';
-import { Icon, IconButton, Tag, useStyles2 } from '@grafana/ui';
+import { IconButton, useStyles2 } from '@grafana/ui';
 
 type Props = {
   item: DataCatalogueItem;
@@ -40,6 +38,10 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
   const { item, expand, expanded, setSelectedItem, isSelected, collapse } = props;
 
   const isFolder = isDataCatalogueFolder(props.item);
+  const icons = (item.attributes || []).filter(IsDataCatalogueItemAttributeIcon);
+  const hasCustomIcon = icons.length > 0;
+  const icon = icons.length > 0 ? icons[0].icon : isFolder ? 'folder' : 'info-circle';
+  const iconExpanded = icons.length > 0 ? icons[0].icon : isFolder ? 'folder-open' : 'info-circle';
 
   const styles = useStyles2(getStyles);
 
@@ -48,13 +50,13 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
       {isFolder ? (
         <IconButton
           className={styles.lineElement}
-          variant="secondary"
+          variant={expanded && hasCustomIcon ? 'primary' : 'secondary'}
           size="sm"
-          name={expanded ? 'folder-open' : 'folder'}
+          name={(expanded ? iconExpanded : icon) as IconName}
           onClick={() => (expanded ? collapse() : expand())}
         />
       ) : (
-        <IconButton size="sm" name="info-circle" className={styles.lineElement} />
+        <IconButton size="sm" name={icon as IconName} className={styles.lineElement} />
       )}
       <span
         className={styles.lineElement}
@@ -68,17 +70,6 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
       >
         {isSelected ? <b>{item.name}</b> : <span>{item.name}</span>}
       </span>
-      {item.attributes &&
-        item.attributes.length > 0 &&
-        item.attributes.map((attribute: DataCatalogueItemAttribute, index: number) => {
-          if (IsDataCatalogueItemAttributeIcon(attribute)) {
-            return <Icon key={index} name={attribute.icon as IconName} title={attribute.info} />;
-          } else if (IsDataCatalogueItemAttributeTag(attribute)) {
-            return <Tag key={index} className={styles.lineElement} name={attribute.tag} />;
-          } else {
-            return '';
-          }
-        })}
     </div>
   );
 };

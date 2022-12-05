@@ -78,11 +78,9 @@ export const IsDataCatalogueItemAttributeLink = (
 export class DataCatalogueItemAttributeIcon implements DataCatalogueItemAttribute {
   type = DataCatalogueItemAttributeType.Icon;
   icon: string;
-  name: string;
   info: string;
 
-  constructor(name: string, icon: string, info: string) {
-    this.name = name;
+  constructor(icon: string, info: string) {
     this.icon = icon;
     this.info = info;
   }
@@ -198,8 +196,8 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     return this;
   }
 
-  addIcon(name: string, icon: string, info: string) {
-    this.attributes.push(new DataCatalogueItemAttributeIcon(name, icon, info));
+  addIcon(icon: string, info: string) {
+    this.attributes.push(new DataCatalogueItemAttributeIcon(icon, info));
     return this;
   }
 
@@ -231,6 +229,7 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   loadAttributes(loader: (itemBuilder: DataCatalogueBuilder) => Promise<void>) {
     this.createAttributes = async () => {
       await loader(this);
+      delete this.createAttributes;
     };
     return this;
   }
@@ -248,15 +247,74 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   }
 
   fromDataSource<TQuery extends DataQuery, TOptions extends DataSourceJsonData>(
-    datasource: DataSourceApi<TQuery, TOptions>
+    datasource: DataSourceApi<TQuery, TOptions>,
+    categories: {
+      data?: (item: DataCatalogueBuilder) => void;
+      configuration?: (item: DataCatalogueBuilder) => void;
+      status?: (item: DataCatalogueBuilder) => void;
+      statistics?: (item: DataCatalogueBuilder) => void;
+    } = { status: () => {} }
   ) {
     this.name = datasource.name;
     this.addKeyValue('Name', datasource.meta.name);
     datasource.meta.category && this.addKeyValue('Category', datasource.meta.category);
     this.addKeyValue('Author', datasource.meta.info.author.name);
+    this.addKeyValue('Alerting', datasource.meta.alerting ? 'supported' : 'not supported');
+    this.addKeyValue('Annotations', datasource.meta.annotations ? 'supported' : 'not supported');
+    this.addKeyValue('Streaming', datasource.meta.streaming ? 'supported' : 'not supported');
     this.addDescription(datasource.meta.info.description);
     datasource.meta.info.version && this.addKeyValue('Version', datasource.meta.info.version);
     this.addImage(datasource.meta.info.logos.small);
+
+    if (datasource.meta.metrics) {
+      this.addTag('metrics');
+    }
+    if (datasource.meta.logs) {
+      this.addTag('logs');
+    }
+    if (datasource.meta.tracing) {
+      this.addTag('traces');
+    }
+
+    const commonCategories = [];
+    if (categories.data) {
+      const dataCategory = new DataCatalogueBuilder('Data').addIcon('database', 'Available data sets');
+      categories.data(dataCategory);
+      commonCategories.push(dataCategory);
+    }
+    if (categories.configuration) {
+      const configurationCategory = new DataCatalogueBuilder('Configuration').addIcon('cog', 'Current configuration');
+      categories.configuration(configurationCategory);
+      commonCategories.push(configurationCategory);
+    }
+    if (categories.status) {
+      const statusCategory = new DataCatalogueBuilder('Runtime status')
+        .addIcon('heart', 'Current status & health')
+        .loadAttributes(async (item) => {
+          let status;
+          try {
+            status = !!(await datasource.testDatasource());
+          } catch (e) {
+            status = false;
+          }
+          item.addKeyValue('Test check', status ? 'ok' : 'failed');
+        });
+      categories.status(statusCategory);
+      commonCategories.push(statusCategory);
+    }
+    if (categories.statistics) {
+      const statisticsCategory = new DataCatalogueBuilder('Statistics').addIcon(
+        'chart-line',
+        'Data statistics and summaries'
+      );
+      categories.statistics(statisticsCategory);
+      commonCategories.push(statisticsCategory);
+    }
+
+    if (commonCategories.length) {
+      this.setItems(commonCategories);
+    }
+
     return this;
   }
 }
