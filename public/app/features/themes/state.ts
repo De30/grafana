@@ -1,7 +1,7 @@
 import { FormEvent } from 'react';
 
 import { AppEvents, GrafanaTheme2, NavModelItem, NewThemeOptions } from '@grafana/data';
-import { getBackendSrv } from '@grafana/runtime';
+import { config, getBackendSrv } from '@grafana/runtime';
 import appEvents from 'app/core/app_events';
 import { StateManagerBase } from 'app/core/services/StateManagerBase';
 
@@ -28,6 +28,7 @@ export interface EditThemeState {
   fullJson: string;
   loading: boolean;
   tab: string;
+  safeMode?: boolean;
 }
 
 export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
@@ -46,19 +47,21 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
     });
   }
 
-  async loadTheme(uid: string) {
+  async loadTheme(uid: string, safeMode?: boolean) {
     if (uid === 'new') {
       this.setState({ loading: false });
     } else {
       const customTheme = await getBackendSrv().get<CustomThemeDTO>(`/api/themes/${uid}`);
+      let runtimeTheme = config.theme2;
 
-      const runtimeTheme = setRuntimeTheme(customTheme);
+      runtimeTheme = setRuntimeTheme(customTheme, safeMode);
 
       this.setState({
         theme: customTheme,
         loading: false,
         defJson: JSON.stringify(customTheme.body, null, 2),
         fullJson: this.getFullJson(runtimeTheme),
+        safeMode,
       });
     }
   }
@@ -99,7 +102,7 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
 
   onCodeBlur = (code: string) => {
     const customTheme: CustomThemeDTO = { ...this.state.theme, body: JSON.parse(code) };
-    const runtimeTheme = setRuntimeTheme(customTheme);
+    const runtimeTheme = setRuntimeTheme(customTheme, this.state.safeMode);
 
     this.setState({
       theme: customTheme,

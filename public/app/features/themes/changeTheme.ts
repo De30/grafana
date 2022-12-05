@@ -4,7 +4,7 @@ import appEvents from 'app/core/app_events';
 
 import { CustomThemeDTO } from './state';
 
-export function setRuntimeTheme(custom: CustomThemeDTO) {
+export function setRuntimeTheme(custom: CustomThemeDTO, safeMode?: boolean) {
   const options = {
     ...custom.body,
     flags: {
@@ -14,7 +14,9 @@ export function setRuntimeTheme(custom: CustomThemeDTO) {
 
   try {
     const runtimeTheme = createTheme(options);
-    appEvents.publish(new ThemeChangedEvent(runtimeTheme));
+    if (!safeMode) {
+      appEvents.publish(new ThemeChangedEvent(runtimeTheme));
+    }
     return runtimeTheme;
   } catch (err: unknown) {
     console.error(err);

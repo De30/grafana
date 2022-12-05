@@ -6,15 +6,15 @@ import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 
 import { getThemeEditStateManager } from './state';
 
-interface Props extends GrafanaRouteComponentProps<{ uid: string }> {}
+interface Props extends GrafanaRouteComponentProps<{ uid: string }, { safeMode?: boolean }> {}
 
-export function ThemeEditPage({ match }: Props) {
+export function ThemeEditPage({ match, queryParams }: Props) {
   const stateManager = getThemeEditStateManager();
   const { loading, theme, defJson, fullJson, tab } = stateManager.useState();
 
   useEffect(() => {
-    stateManager.loadTheme(match.params.uid);
-  }, [match.params.uid, stateManager]);
+    stateManager.loadTheme(match.params.uid, queryParams.safeMode);
+  }, [match.params.uid, queryParams.safeMode, stateManager]);
 
   const actions = (
     <Button type="submit" size="md" variant="primary" onClick={stateManager.onSave}>

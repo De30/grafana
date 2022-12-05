@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAsync } from 'react-use';
 
-import { Card, LinkButton, VerticalGroup } from '@grafana/ui';
+import { Card, DeleteButton, LinkButton, VerticalGroup } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 
 import { loadAllThemes, CustomThemeDTO } from './state';
@@ -28,8 +28,19 @@ export function ThemeListPage() {
     <Page navId="themes" actions={actions}>
       <VerticalGroup spacing="none">
         {state.themes.map((theme) => (
-          <Card href={`themes/${theme.uid}`} key={theme.uid}>
+          <Card key={theme.uid}>
             <Card.Heading>{theme.name}</Card.Heading>
+            <Card.Actions>
+              <LinkButton href={`themes/${theme.uid}`} variant="secondary">
+                Edit
+              </LinkButton>
+            </Card.Actions>
+            <Card.SecondaryActions>
+              <LinkButton href={`themes/${theme.uid}?safeMode`} fill="text">
+                Open in safe mode
+              </LinkButton>
+              <DeleteButton onConfirm={() => {}} />
+            </Card.SecondaryActions>
           </Card>
         ))}
       </VerticalGroup>
