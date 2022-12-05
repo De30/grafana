@@ -24,9 +24,10 @@ type Service struct {
 
 func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, settings setting.Provider, usageStats usagestats.Service) *Service {
 	s := &Service{
-		cfg:   cfg,
-		store: newStore(kvStore),
-		log:   log.New("supportbundle.service"),
+		cfg:        cfg,
+		store:      newStore(kvStore),
+		log:        log.New("supportbundle.service"),
+		collectors: map[string]supportbundles.CollectorFunc{},
 	}
 
 	s.registerAPIEndpoints(routeRegister)
