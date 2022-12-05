@@ -30,6 +30,9 @@ func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister rou
 	}
 
 	s.registerAPIEndpoints(routeRegister)
+
+	s.RegisterSupportItemCollector(basicCollector(cfg))
+
 	return s
 }
 
