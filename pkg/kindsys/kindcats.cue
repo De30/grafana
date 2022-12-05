@@ -145,7 +145,7 @@ _rootKind: {
 
 // CoreStructured specifies the Kind category for core types that are declared with schemas.
 // This includes Grafana's most common types, such as dashboards and datasources.
-#CoreStructured: S={
+#CoreStructured: {
 	#Structured
 	_rootKind
 
