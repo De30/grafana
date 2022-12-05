@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/infra/supportbundles"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 func newStore(kv kvstore.KVStore) *store {
@@ -21,7 +22,7 @@ type store struct {
 	kv *kvstore.NamespacedKVStore
 }
 
-func (s *store) Create(ctx context.Context) (*supportbundles.Bundle, error) {
+func (s *store) Create(ctx context.Context, usr *user.SignedInUser) (*supportbundles.Bundle, error) {
 	uid, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -30,7 +31,7 @@ func (s *store) Create(ctx context.Context) (*supportbundles.Bundle, error) {
 	bundle := supportbundles.Bundle{
 		UID:       uid.String(),
 		State:     supportbundles.StatePending,
-		Creator:   "kalle",
+		Creator:   usr.Login,
 		CreatedAt: time.Now().Unix(),
 		ExpiresAt: time.Now().Add(10 * time.Hour).Unix(),
 	}

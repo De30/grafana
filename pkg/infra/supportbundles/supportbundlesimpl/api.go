@@ -36,7 +36,7 @@ func (s *Service) handleList(ctx *models.ReqContext) response.Response {
 }
 
 func (s *Service) handleCreate(ctx *models.ReqContext) response.Response {
-	bundle, err := s.Create(context.Background())
+	bundle, err := s.Create(context.Background(), ctx.SignedInUser)
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "failed to create support bundle", err)
 	}

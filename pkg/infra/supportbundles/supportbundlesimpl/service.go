@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/supportbundles"
 	"github.com/grafana/grafana/pkg/infra/tracing"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -32,7 +33,7 @@ func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister rou
 	return s
 }
 
-func (s *Service) Create(ctx context.Context) (*supportbundles.Bundle, error) {
+func (s *Service) Create(ctx context.Context, usr *user.SignedInUser) (*supportbundles.Bundle, error) {
 	bundle, err := s.store.Create(ctx)
 	if err != nil {
 		return nil, err
