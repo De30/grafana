@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/infra/supportbundles"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/web"
@@ -18,6 +19,7 @@ func (s *Service) registerAPIEndpoints(routeRegister routing.RouteRegister) {
 	routeRegister.Group(rootUrl, func(subrouter routing.RouteRegister) {
 		subrouter.Get("/", middleware.ReqGrafanaAdmin, routing.Wrap(s.handleList))
 		subrouter.Post("/", middleware.ReqGrafanaAdmin, routing.Wrap(s.handleCreate))
+		subrouter.Get("/:uid", middleware.ReqGrafanaAdmin, s.handleDownload)
 	})
 }
 
@@ -49,11 +51,19 @@ func (s *Service) handleCreate(ctx *models.ReqContext) response.Response {
 	return response.JSON(http.StatusCreated, data)
 }
 
-// FIXME: implement download handler
-func (s *Service) handleDownload(c *models.ReqContext) {
-	_ = web.Params(c.Req)[":uid"]
+func (s *Service) handleDownload(ctx *models.ReqContext) {
+	uid := web.Params(ctx.Req)[":uid"]
+	bundle, err := s.Get(ctx.Req.Context(), uid)
+	if err != nil {
+		ctx.Resp.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	c.Resp.Header().Set("Content-Type", "application/tar+gzip")
+	if bundle.State != supportbundles.StateComplete {
+		ctx.Resp.WriteHeader(http.StatusLocked)
+		return
+	}
 
-	http.ServeFile(c.Resp, c.Req, "")
+	ctx.Resp.Header().Set("Content-Type", "application/tar+gzip")
+	http.ServeFile(ctx.Resp, ctx.Req, bundle.FilePath)
 }
