@@ -12,7 +12,7 @@ import { getSavedQuerySrv } from '../api/SavedQueriesSrv';
 import { QueryItem } from '../types';
 import { implementationComingSoonAlert } from '../utils';
 
-import { QueryEditorDrawer } from './QueryEditorDrawer';
+import { ServiceEditorDrawer } from './ServiceEditorDrawer';
 
 type QueryListItemProps = {
   query: QueryItem;
@@ -27,7 +27,7 @@ const options = {
   type: 'edit',
 } as const;
 
-export const QueryListItem = memo(
+export const ServiceListItem = memo(
   ({ query, showModal, hideModal, updateComponent, author, date }: QueryListItemProps) => {
     const notifyApp = useAppNotification();
 
@@ -52,7 +52,7 @@ export const QueryListItem = memo(
       const result = await getSavedQuerySrv().getSavedQueries([{ uid: query.uid }]);
       const savedQuery = result[0];
 
-      showModal(QueryEditorDrawer, { onDismiss: closeDrawer, savedQuery: savedQuery, options });
+      showModal(ServiceEditorDrawer, { onDismiss: closeDrawer, savedQuery: savedQuery, options });
     };
 
     const deleteQuery = async () => {
@@ -157,7 +157,7 @@ export const QueryListItem = memo(
   }
 );
 
-QueryListItem.displayName = 'QueryListItem';
+ServiceListItem.displayName = 'QueryListItem';
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {

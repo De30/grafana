@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { DataQuery } from '@grafana/data/src';
 
-import { SavedQueryUpdateOpts } from '../components/QueryEditorDrawer';
+import { SavedQueryUpdateOpts } from '../components/ServiceEditorDrawer';
 
 import { getSavedQuerySrv } from './SavedQueriesSrv';
 

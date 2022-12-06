@@ -25,7 +25,7 @@ export type SaveProps = {
   onOptionsChange: (opts: SaveQueryOptions) => void;
 };
 
-export const SaveQueryWorkflowModal = ({ options, onSubmit, onCancel, onSuccess }: SaveProps) => {
+export const SaveServiceWorkflowModal = ({ options, onSubmit, onCancel, onSuccess }: SaveProps) => {
   const [saving, setSaving] = useState(false);
 
   return (

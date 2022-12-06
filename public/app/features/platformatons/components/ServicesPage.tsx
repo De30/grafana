@@ -6,17 +6,17 @@ import { Page } from 'app/core/components/Page/Page';
 
 import { useNavModel } from '../../../core/hooks/useNavModel';
 
-import { Queries } from './Queries';
+import { Services } from './Services';
 
 const initialTabs = [
   {
-    label: 'Queries',
+    label: 'Services',
     active: true,
   },
 ];
 
-const PlatformatonsPage = () => {
-  const navModel = useNavModel('platformatons');
+const ServicesPage = () => {
+  const navModel = useNavModel('services');
 
   const [tabs, setTabs] = useState(initialTabs);
 
@@ -37,10 +37,10 @@ const PlatformatonsPage = () => {
             />
           ))}
         </TabsBar>
-        <TabContent>{tabs[0].active && <Queries />}</TabContent>
+        <TabContent>{tabs[0].active && <Services />}</TabContent>
       </Page.Contents>
     </Page>
   );
 };
 
-export default PlatformatonsPage;
+export default ServicesPage;

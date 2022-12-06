@@ -10,8 +10,8 @@ import { SavedQuery } from '../api/SavedQueriesApi';
 import { getSavedQuerySrv } from '../api/SavedQueriesSrv';
 import { implementationComingSoonAlert } from '../utils';
 
-import { SavedQueryUpdateOpts } from './QueryEditorDrawer';
-import { QueryName } from './QueryName';
+import { SavedQueryUpdateOpts } from './ServiceEditorDrawer';
+import { ServiceName } from './ServiceName';
 
 type Props = {
   onSavedQueryChange: (newQuery: SavedQuery) => void;
@@ -20,7 +20,7 @@ type Props = {
   options: SavedQueryUpdateOpts;
 };
 
-export const QueryEditorDrawerHeader = ({ savedQuery, onDismiss, onSavedQueryChange, options }: Props) => {
+export const ServiceEditorDrawerHeader = ({ savedQuery, onDismiss, onSavedQueryChange, options }: Props) => {
   const notifyApp = useAppNotification();
   const styles = useStyles2(getStyles);
 
@@ -105,7 +105,7 @@ export const QueryEditorDrawerHeader = ({ savedQuery, onDismiss, onSavedQueryCha
     <>
       <div className={styles.header}>
         <HorizontalGroup justify={'space-between'}>
-          <QueryName name={queryName} onChange={onQueryNameChange} editingEnabled={nameEditingEnabled} />
+          <ServiceName name={queryName} onChange={onQueryNameChange} editingEnabled={nameEditingEnabled} />
           <HorizontalGroup>
             <Button icon="times" size="md" variant={'secondary'} onClick={onDismiss} autoFocus={false}>
               Close

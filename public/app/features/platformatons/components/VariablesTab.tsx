@@ -7,7 +7,7 @@ import { LayerName } from 'app/core/components/Layers/LayerName';
 
 import { SavedQuery, useUpdateSavedQueryMutation, Variable } from '../api/SavedQueriesApi';
 
-import { SavedQueryUpdateOpts } from './QueryEditorDrawer';
+import { SavedQueryUpdateOpts } from './ServiceEditorDrawer';
 
 type Props = {
   savedQuery: SavedQuery;

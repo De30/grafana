@@ -6,15 +6,15 @@ import { Button, Card, Drawer, Icon, ModalsController, useStyles2 } from '@grafa
 
 import { SavedQuery } from '../api/SavedQueriesApi';
 
-import { QueryEditorDrawer, SavedQueryUpdateOpts } from './QueryEditorDrawer';
-import { QueryImportDrawer } from './QueryImportDrawer';
+import { ServiceEditorDrawer, SavedQueryUpdateOpts } from './ServiceEditorDrawer';
+import { ServiceImportDrawer } from './ServiceImportDrawer';
 
 type Props = {
   onDismiss: () => void;
   updateComponent: () => void;
 };
 
-export const QueryCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
+export const ServiceCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
   const styles = useStyles2(getStyles);
 
   const type: SavedQueryUpdateOpts['type'] = 'create-new';
@@ -62,7 +62,7 @@ export const QueryCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
                           },
                         ],
                       };
-                      showModal(QueryEditorDrawer, {
+                      showModal(ServiceEditorDrawer, {
                         onDismiss: closeDrawer,
                         options: { type },
                         savedQuery,
@@ -90,7 +90,7 @@ export const QueryCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
                     icon="arrow-right"
                     size="md"
                     onClick={() => {
-                      showModal(QueryImportDrawer, {
+                      showModal(ServiceImportDrawer, {
                         onDismiss: closeDrawer,
                         options: { type },
                       });

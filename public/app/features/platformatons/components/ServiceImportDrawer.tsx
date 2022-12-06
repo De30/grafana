@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Drawer, FileDropzone, useStyles2 } from '@grafana/ui';
 
-import { CreateNewQuery } from './CreateNewQuery';
-import { SavedQueryUpdateOpts } from './QueryEditorDrawer';
+import { CreateNewService } from './CreateNewService';
+import { SavedQueryUpdateOpts } from './ServiceEditorDrawer';
 
 type Props = {
   options: SavedQueryUpdateOpts;
   onDismiss: () => void;
 };
 
-export const QueryImportDrawer = ({ onDismiss, options }: Props) => {
+export const ServiceImportDrawer = ({ onDismiss, options }: Props) => {
   const styles = useStyles2(getStyles);
 
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -37,7 +37,7 @@ export const QueryImportDrawer = ({ onDismiss, options }: Props) => {
 
       {Boolean(file) && (
         <div className={styles.queryPreview}>
-          <CreateNewQuery options={options} onDismiss={onDismiss} />
+          <CreateNewService options={options} onDismiss={onDismiss} />
         </div>
       )}
     </Drawer>

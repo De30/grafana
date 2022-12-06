@@ -12,10 +12,10 @@ import { getGlobalStyles } from '../globalStyles';
 import { QueryItem } from '../types';
 
 import { DatasourceTypePicker } from './DatasourceTypePicker';
-import { QueryCreateDrawer } from './QueryCreateDrawer';
-import { QueryListItem } from './QueryListItem';
+import { ServiceCreateDrawer } from './ServiceCreateDrawer';
+import { ServiceListItem } from './ServiceListItem';
 
-const QueryLibrarySearchTable = () => {
+const ServicesSearchTable = () => {
   const styles = useStyles2(getStyles);
 
   const [datasourceType, setDatasourceType] = useState<string | null>(null);
@@ -78,14 +78,14 @@ const QueryLibrarySearchTable = () => {
         <HorizontalGroup width="100%" justify="space-between" spacing={'md'} height={25}>
           <HorizontalGroup>
             <FilterInput
-              placeholder="Search queries by name, source, or variable"
+              placeholder="Search services"
               autoFocus={true}
               value={searchQueryBy}
               onChange={setSearchByQuery}
               width={50}
               className={styles.searchBy}
             />
-            Filter by datasource type
+            Filter by platformaton type
             <DatasourceTypePicker
               current={datasourceType}
               onChange={(newDsType) => {
@@ -101,7 +101,7 @@ const QueryLibrarySearchTable = () => {
                     icon="plus"
                     size="md"
                     onClick={() => {
-                      showModal(QueryCreateDrawer, {
+                      showModal(ServiceCreateDrawer, {
                         onDismiss: hideModal,
                         updateComponent: () => {
                           setReload(reload + 1);
@@ -109,7 +109,7 @@ const QueryLibrarySearchTable = () => {
                       });
                     }}
                   >
-                    Create query
+                    Create service
                   </Button>
                 </div>
               );
@@ -127,11 +127,11 @@ const QueryLibrarySearchTable = () => {
                       <thead>
                         <tr>
                           <th />
-                          <th>Status</th>
-                          <th>Name and raw query</th>
-                          <th>Data Source</th>
-                          <th>User</th>
+                          <th>Links</th>
+                          <th>Service Name</th>
                           <th>Date</th>
+                          <th>Platformaton</th>
+                          <th>User</th>
                           <th />
                         </tr>
                       </thead>
@@ -152,7 +152,7 @@ const QueryLibrarySearchTable = () => {
                         {Boolean(found?.length) &&
                           found!.map((item, key) => {
                             return (
-                              <QueryListItem
+                              <ServiceListItem
                                 query={item}
                                 key={item.uid}
                                 showModal={showModal}
@@ -176,7 +176,7 @@ const QueryLibrarySearchTable = () => {
   );
 };
 
-export default QueryLibrarySearchTable;
+export default ServicesSearchTable;
 
 export const getStyles = (theme: GrafanaTheme2) => {
   return {

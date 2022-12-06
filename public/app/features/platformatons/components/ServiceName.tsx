@@ -10,7 +10,7 @@ export interface QueryNameProps {
   onChange: (v: string) => void;
 }
 
-export const QueryName = ({ name, onChange, editingEnabled }: QueryNameProps) => {
+export const ServiceName = ({ name, onChange, editingEnabled }: QueryNameProps) => {
   const styles = useStyles2(getStyles);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);

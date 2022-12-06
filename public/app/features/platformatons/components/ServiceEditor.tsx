@@ -26,7 +26,7 @@ type Props = {
   onSavedQueryChange: (newQuery: SavedQuery) => void;
 };
 
-export const QueryEditor = ({ savedQuery, onSavedQueryChange }: Props) => {
+export const ServiceEditor = ({ savedQuery, onSavedQueryChange }: Props) => {
   const styles = useStyles2(getStyles);
   const [queries, setQueries] = useState<DataQuery[]>(savedQuery.queries ?? [defaultQuery]);
 

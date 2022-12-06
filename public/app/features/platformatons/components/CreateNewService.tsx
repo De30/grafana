@@ -6,7 +6,7 @@ import { Button, CodeEditor, useStyles2 } from '@grafana/ui';
 
 import { SavedQuery, useUpdateSavedQueryMutation } from '../api/SavedQueriesApi';
 
-import { SavedQueryUpdateOpts } from './QueryEditorDrawer';
+import { SavedQueryUpdateOpts } from './ServiceEditorDrawer';
 
 type Props = {
   options: SavedQueryUpdateOpts;
@@ -74,7 +74,7 @@ const initialForm: QueryForm = {
   },
 };
 
-export const CreateNewQuery = ({ onDismiss, updateComponent, options }: Props) => {
+export const CreateNewService = ({ onDismiss, updateComponent, options }: Props) => {
   const styles = useStyles2(getStyles);
 
   const [updateSavedQuery] = useUpdateSavedQueryMutation();

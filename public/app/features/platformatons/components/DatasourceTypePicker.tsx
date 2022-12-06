@@ -95,8 +95,8 @@ export const DatasourceTypePicker = (props: DatasourceTypePickerProps) => {
         }}
         openMenuOnFocus={openMenuOnFocus}
         maxMenuHeight={500}
-        placeholder={placeholder ?? 'Select datasource type'}
-        noOptionsMessage="No datasources found"
+        placeholder={placeholder ?? 'Select platformaton type'}
+        noOptionsMessage="No types found"
         getOptionLabel={(o) => {
           if (o.meta && isUnsignedPluginSignature(o.meta.signature)) {
             return (

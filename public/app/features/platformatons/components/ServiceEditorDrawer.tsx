@@ -8,8 +8,8 @@ import { Drawer, IconName, Tab, TabContent, TabsBar, useStyles2 } from '@grafana
 import { SavedQuery } from '../api/SavedQueriesApi';
 
 import { HistoryTab } from './HistoryTab';
-import { QueryEditor } from './QueryEditor';
-import { QueryEditorDrawerHeader } from './QueryEditorDrawerHeader';
+import { ServiceEditor } from './ServiceEditor';
+import { ServiceEditorDrawerHeader } from './ServiceEditorDrawerHeader';
 import { UsagesTab } from './UsagesTab';
 import { VariablesTab } from './VariablesTab';
 
@@ -52,7 +52,7 @@ const initialTabs: tab[] = [
   },
 ];
 
-export const QueryEditorDrawer = (props: Props) => {
+export const ServiceEditorDrawer = (props: Props) => {
   const { onDismiss, options } = props;
   const styles = useStyles2(getStyles);
   const [tabs, setTabs] = useState(initialTabs);
@@ -61,14 +61,14 @@ export const QueryEditorDrawer = (props: Props) => {
   return (
     <Drawer onClose={onDismiss} width={'1000px'} expandable scrollableContent>
       <div>
-        <QueryEditorDrawerHeader
+        <ServiceEditorDrawerHeader
           options={options}
           onSavedQueryChange={setSavedQuery}
           savedQuery={query}
           onDismiss={onDismiss}
         />
         <div className={styles.queryWrapper}>
-          <QueryEditor onSavedQueryChange={setSavedQuery} savedQuery={query} />
+          <ServiceEditor onSavedQueryChange={setSavedQuery} savedQuery={query} />
         </div>
         <TabsBar>
           {tabs.map((tab, index) => (
