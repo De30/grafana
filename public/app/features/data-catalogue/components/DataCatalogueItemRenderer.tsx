@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { DataCatalogueItem, isDataCatalogueFolder } from '@grafana/data';
+import { DataCatalogueItem, isDataCatalogueFolder, IsLazyDataCatalogueFolder } from '@grafana/data';
 
 import { DataCatalogueItemLineRenderer } from './DataCatalogueItemLineRenderer';
 
 type Props = {
   item: DataCatalogueItem;
-  setSelectedItem: (item: DataCatalogueItem) => void;
+  setSelectedItem: (item: DataCatalogueItem | undefined) => void;
   selectedItem?: DataCatalogueItem;
 };
 
@@ -17,43 +17,46 @@ export const DataCatalogueItemRenderer = (props: Props) => {
   const { item, setSelectedItem, selectedItem } = props;
   const isSelected = item === selectedItem;
 
+  const toggle = async () => {
+    if (!expanded) {
+      if (isDataCatalogueFolder(props.item)) {
+        if (IsLazyDataCatalogueFolder(props.item)) {
+          setChildren([{ name: 'Loading... ' }]);
+          await props.item.createItems();
+        }
+        setExpanded(true);
+        setChildren(props.item.items || []);
+      }
+    } else {
+      setSelectedItem(undefined);
+      setExpanded(false);
+      setChildren([]);
+    }
+  };
+
+  const selectItem = useCallback(
+    (item: DataCatalogueItem | undefined) => {
+      if (isSelected && !expanded) {
+        toggle();
+      }
+      setSelectedItem(item);
+    },
+    [setSelectedItem, expanded, toggle]
+  );
+
   useEffect(() => {
     if (isSelected && !expanded) {
-      expand();
+      toggle();
     }
-  }, [isSelected]);
-
-  const expand = () => {
-    if (isDataCatalogueFolder(props.item)) {
-      setExpanded(true);
-      props.item
-        .items()
-        .then((children) => {
-          if (!children) {
-            setChildren([{ name: 'Error while loading catalogue item.' }]);
-          } else {
-            setChildren(children);
-          }
-        })
-        .catch((error) => {
-          setChildren([{ name: 'Error while loading catalogue item. ' + error.message }]);
-        });
-    }
-  };
-
-  const collapse = () => {
-    setExpanded(false);
-    setChildren([]);
-  };
+  }, [isSelected, expanded, toggle]);
 
   return (
     <div>
       <DataCatalogueItemLineRenderer
         item={item}
-        setSelectedItem={setSelectedItem}
+        setSelectedItem={selectItem}
         isSelected={isSelected}
-        expand={expand}
-        collapse={collapse}
+        toggle={toggle}
         expanded={expanded}
       />
       <div style={{ paddingLeft: '20px' }}>
@@ -62,7 +65,7 @@ export const DataCatalogueItemRenderer = (props: Props) => {
             key={index}
             item={child}
             selectedItem={selectedItem}
-            setSelectedItem={setSelectedItem}
+            setSelectedItem={selectItem}
           />
         ))}
       </div>

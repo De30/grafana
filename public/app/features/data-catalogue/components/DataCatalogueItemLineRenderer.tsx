@@ -12,8 +12,7 @@ import { IconButton, useStyles2 } from '@grafana/ui';
 
 type Props = {
   item: DataCatalogueItem;
-  expand: () => void;
-  collapse: () => void;
+  toggle: () => void;
   expanded: boolean;
   isSelected: boolean;
   setSelectedItem: (item: DataCatalogueItem) => void;
@@ -35,7 +34,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 });
 
 export const DataCatalogueItemLineRenderer = (props: Props) => {
-  const { item, expand, expanded, setSelectedItem, isSelected, collapse } = props;
+  const { item, toggle, expanded, setSelectedItem, isSelected } = props;
 
   const isFolder = isDataCatalogueFolder(props.item);
   const icons = (item.attributes || []).filter(IsDataCatalogueItemAttributeIcon);
@@ -53,7 +52,7 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
           variant={expanded && hasCustomIcon ? 'primary' : 'secondary'}
           size="sm"
           name={(expanded ? iconExpanded : icon) as IconName}
-          onClick={() => (expanded ? collapse() : expand())}
+          onClick={toggle}
         />
       ) : (
         <IconButton size="sm" name={icon as IconName} className={styles.lineElement} />
@@ -62,9 +61,6 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
         className={styles.lineElement}
         style={{ cursor: 'pointer' }}
         onClick={() => {
-          if (!expanded) {
-            expand();
-          }
           setSelectedItem(item);
         }}
       >

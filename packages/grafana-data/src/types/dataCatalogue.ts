@@ -164,12 +164,17 @@ export interface DataCatalogueItem {
   actions?: DataCatalogueItemAction[];
 }
 
+export interface DataCatalogueFolder extends DataCatalogueItem {
+  createItems?: () => Promise<void>;
+  items?: DataCatalogueItem[];
+}
+
 export interface LazyDataCatalogueItem extends DataCatalogueItem {
   createAttributes: () => Promise<void>;
 }
 
-export interface DataCatalogueFolder extends DataCatalogueItem {
-  items(): Promise<DataCatalogueItem[]>;
+export interface LazyDataCatalogueFolder extends DataCatalogueFolder {
+  createItems: () => Promise<void>;
 }
 
 /**
@@ -187,7 +192,11 @@ export const hasDataCatalogueSupport = (datasource: unknown): datasource is Data
 };
 
 export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCatalogueFolder => {
-  return (item as DataCatalogueFolder).items !== undefined;
+  return (item as DataCatalogueFolder).items !== undefined || (item as DataCatalogueFolder).createItems !== undefined;
+};
+
+export const IsLazyDataCatalogueFolder = (item: DataCatalogueItem): item is LazyDataCatalogueFolder => {
+  return (item as LazyDataCatalogueFolder).createItems !== undefined;
 };
 
 export const IsLazyDataCatalogueItem = (item: DataCatalogueItem): item is LazyDataCatalogueItem => {
@@ -202,7 +211,8 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   type?: string;
   attributes: DataCatalogueItemAttribute[] = [];
   createAttributes?: () => Promise<void>;
-  items?: () => Promise<DataCatalogueItem[]>;
+  createItems?: () => Promise<void>;
+  items: DataCatalogueItem[] = [];
 
   constructor(name?: string, type?: string) {
     this.name = name || '';
@@ -272,13 +282,15 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   }
 
   loadItems(loader: () => Promise<DataCatalogueItem[]>) {
-    this.items = loader;
+    this.createItems = async () => {
+      this.items = await loader();
+    };
     return this;
   }
 
   setItems(items: DataCatalogueItem[]) {
-    this.items = async () => {
-      return items;
+    this.createItems = async () => {
+      this.items = items;
     };
     return this;
   }

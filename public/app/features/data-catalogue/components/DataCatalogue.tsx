@@ -9,7 +9,7 @@ import {
   GrafanaTheme2,
   IsLazyDataCatalogueItem,
 } from '@grafana/data';
-import { Modal, useStyles2 } from '@grafana/ui';
+import { Input, Modal, useStyles2 } from '@grafana/ui';
 
 import { DataCatalogueItemDetailsRenderer } from './DataCatalogueItemDetailsRenderer';
 import { DataCatalogueItemRenderer } from './DataCatalogueItemRenderer';
@@ -39,6 +39,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 export const DataCatalogue = <TQuery extends DataQuery>(props: Props<TQuery>) => {
   const [root, setRoot] = useState<DataCatalogueItem | undefined>(undefined);
   const [selectedItem, setSelectedItem] = useState<DataCatalogueItem | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
   const styles = useStyles2(getStyles);
 
@@ -60,11 +61,18 @@ export const DataCatalogue = <TQuery extends DataQuery>(props: Props<TQuery>) =>
       {root && (
         <div className={styles.container}>
           <div className={styles.pane}>
+            <div>
+              <Input
+                placeholder="Search data catalogue..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.currentTarget.value)}
+              />
+            </div>
             <DataCatalogueItemRenderer
               item={root}
               selectedItem={selectedItem}
               setSelectedItem={async (item) => {
-                if (IsLazyDataCatalogueItem(item)) {
+                if (item && IsLazyDataCatalogueItem(item)) {
                   await item.createAttributes();
                 }
                 setSelectedItem(item);
