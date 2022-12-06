@@ -69,7 +69,7 @@ export function getHueGradientFn(
     );
 
     const color1 = tinycolor(color).spin(-25).darken(5);
-    const color2 = tinycolor(color).spin(25).brighten(20);
+    const color2 = tinycolor(color).saturate(20).spin(20).brighten(10);
 
     if (theme.isDark) {
       gradient.addColorStop(0, color2.lighten(10).setAlpha(opacity).toString());

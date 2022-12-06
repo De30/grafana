@@ -112,6 +112,18 @@ describe('utils/colorManipulator', () => {
       expect(values).toEqual([255, 255, 255]);
     });
 
+    it('handles gradients without crashing', () => {
+      const { type, values } = decomposeColor('radial-gradient(#333, #111)');
+      expect(type).toEqual('rgb');
+      expect(values).toEqual([0, 0, 0]);
+    });
+
+    it('handles gradients with prefix solid color', () => {
+      const { type, values } = decomposeColor('#333 radial-gradient(#333, #111)');
+      expect(type).toEqual('rgb');
+      expect(values).toEqual([51, 51, 51]);
+    });
+
     it('converts an rgba color string to an object with `type` and `value` keys', () => {
       const { type, values } = decomposeColor('rgba(255, 255, 255, 0.5)');
       expect(type).toEqual('rgba');
@@ -144,7 +156,7 @@ describe('utils/colorManipulator', () => {
       expect(values).toEqual([0, 1, 0, 0.4]);
     });
 
-    it('should throw error with inexistent color color space', () => {
+    it('should return error with inexistent color color space', () => {
       const decimposeWithError = () => decomposeColor('color(foo 0 1 0)');
       expect(decimposeWithError).toThrow();
     });
@@ -227,9 +239,7 @@ describe('utils/colorManipulator', () => {
     });
 
     it('throw on invalid colors', () => {
-      expect(() => {
-        getLuminance('black');
-      }).toThrowError(/Unsupported 'black' color/);
+      expect(getLuminance('black')).toEqual(0);
     });
   });
 
@@ -293,9 +303,7 @@ describe('utils/colorManipulator', () => {
     });
 
     it('throw on invalid colors', () => {
-      expect(() => {
-        alpha('white', 0.4);
-      }).toThrowError(/Unsupported 'white' color/);
+      expect(alpha('white', 0.4)).toEqual('rgb(0, 0, 0, 0.4)');
     });
   });
 

@@ -14,7 +14,7 @@ export function getOldPanelStyles(theme: GrafanaTheme2) {
     }
 
     .panel-container {
-      background-color: ${theme.components.panel.background};
+      background: ${theme.components.panel.background};
       border: 1px solid ${theme.components.panel.borderColor};
       position: relative;
       border-radius: 3px;
@@ -26,7 +26,7 @@ export function getOldPanelStyles(theme: GrafanaTheme2) {
       box-shadow: ${theme.components.panel.boxShadow};
 
       &--transparent {
-        background-color: transparent;
+        background: transparent;
         border: 1px solid transparent;
         box-shadow: none;
       }

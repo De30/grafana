@@ -106,7 +106,7 @@ const getStyles = (theme: GrafanaTheme2, searchBarHidden?: boolean) => {
   return {
     backdrop: css({
       backdropFilter: 'blur(1px)',
-      backgroundColor: theme.components.overlay.background,
+      background: theme.components.overlay.background,
       bottom: 0,
       left: 0,
       position: 'fixed',
@@ -129,7 +129,7 @@ const getStyles = (theme: GrafanaTheme2, searchBarHidden?: boolean) => {
       zIndex: theme.zIndex.modal,
       position: 'fixed',
       top: searchBarHidden ? 0 : TOP_BAR_LEVEL_HEIGHT,
-      backgroundColor: theme.colors.background.primary,
+      background: theme.colors.background.primary,
       boxSizing: 'content-box',
       [theme.breakpoints.up('md')]: {
         borderRight: `1px solid ${theme.colors.border.weak}`,

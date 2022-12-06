@@ -120,7 +120,7 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
       borderColor: colors.border.weak,
       boxShadow:
         colors.mode === 'dark'
-          ? `0 0.6px 1.5px rgb(0 0 0), 0 2px 4px rgb(0 0 0 / 40%), 0 5px 10px rgb(0 0 0 / 23%)`
+          ? `0 2px 4px rgb(0 0 0 / 10%), 0 6px 10px rgb(0 0 0 / 23%)`
           : '0 0.6px 1.5px rgb(0 0 0 / 8%), 0 2px 4px rgb(0 0 0 / 6%), 0 5px 10px rgb(0 0 0 / 5%)',
     },
     toolbarButton: {

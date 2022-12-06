@@ -29,6 +29,7 @@ function clamp(value: number, min = 0, max = 1) {
  * @beta
  */
 export function hexToRgb(color: string) {
+  color = color.split(' ')[0];
   color = color.slice(1);
 
   const re = new RegExp(`.{1,${color.length >= 6 ? 2 : 1}}`, 'g');
@@ -140,9 +141,10 @@ export function decomposeColor(color: string | DecomposeColor): DecomposeColor {
   const type = color.substring(0, marker);
 
   if (['rgb', 'rgba', 'hsl', 'hsla', 'color'].indexOf(type) === -1) {
-    throw new Error(
+    console.error(
       `Unsupported '${color}' color. The following formats are supported: #nnn, #nnnnnn, rgb(), rgba(), hsl(), hsla(), color()`
     );
+    return { type: 'rgb', values: [0, 0, 0] };
   }
 
   let values: any = color.substring(marker + 1, color.length - 1);
