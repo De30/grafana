@@ -8,6 +8,7 @@ import { t } from 'app/core/internationalization';
 import store from 'app/core/store';
 import { isShallowEqual } from 'app/core/utils/isShallowEqual';
 import { KioskMode } from 'app/types';
+import { AddGlobalComponentEvent, GlobalComponentItem, RemoveGlobalComponentEvent } from 'app/types/events';
 
 import { RouteDescriptor } from '../../navigation/types';
 
@@ -19,6 +20,7 @@ export interface AppChromeState {
   searchBarHidden?: boolean;
   megaMenuOpen?: boolean;
   kioskMode: KioskMode | null;
+  globalElements: GlobalComponentItem[];
 }
 
 const defaultSection: NavModelItem = { text: 'Grafana' };
@@ -33,7 +35,17 @@ export class AppChromeService {
     sectionNav: defaultSection,
     searchBarHidden: store.getBool(this.searchBarStorageKey, false),
     kioskMode: null,
+    globalElements: [],
   });
+
+  constructor() {
+    appEvents.subscribe(AddGlobalComponentEvent, (evt) =>
+      this.update({ globalElements: [...this.state.getValue().globalElements, evt.payload] })
+    );
+    appEvents.subscribe(RemoveGlobalComponentEvent, (evt) =>
+      this.update({ globalElements: this.state.getValue().globalElements.filter((item) => item.id !== evt.payload.id) })
+    );
+  }
 
   setMatchedRoute(route: RouteDescriptor) {
     if (this.currentRoute !== route) {

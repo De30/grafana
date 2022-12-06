@@ -1,3 +1,5 @@
+import React, { ComponentType } from 'react';
+
 import { AnnotationQuery, BusEventBase, BusEventWithPayload, eventFactory } from '@grafana/data';
 import { IconName, ButtonVariant } from '@grafana/ui';
 
@@ -182,6 +184,19 @@ export class ShowConfirmModalEvent extends BusEventWithPayload<ShowConfirmModalP
 
 export class ShowModalReactEvent extends BusEventWithPayload<ShowModalReactPayload> {
   static type = 'show-react-modal';
+}
+
+export interface GlobalComponentItem {
+  component: ComponentType<{ id: string }>;
+  id: string;
+}
+
+export class AddGlobalComponentEvent extends BusEventWithPayload<GlobalComponentItem> {
+  static type = 'add-global-element';
+}
+
+export class RemoveGlobalComponentEvent extends BusEventWithPayload<{ id: string }> {
+  static type = 'remove-global-element';
 }
 
 /**

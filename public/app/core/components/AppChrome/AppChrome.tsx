@@ -48,7 +48,12 @@ export function AppChrome({ children }: Props) {
           />
         </div>
       )}
-      <div className={contentClass}>{children}</div>
+      <div className={contentClass}>
+        {children}
+        {state.globalElements.map((element, index) => (
+          <element.component id={element.id} key={index} />
+        ))}
+      </div>
       {!state.chromeless && <MegaMenu searchBarHidden={searchBarHidden} onClose={() => chrome.setMegaMenu(false)} />}
     </main>
   );
@@ -62,6 +67,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       paddingTop: TOP_BAR_LEVEL_HEIGHT * 2,
       flexGrow: 1,
       height: '100%',
+      position: 'relative',
     }),
     contentNoSearchBar: css({
       paddingTop: TOP_BAR_LEVEL_HEIGHT,

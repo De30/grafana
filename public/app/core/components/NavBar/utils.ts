@@ -4,8 +4,9 @@ import { locationUtil, NavModelItem, NavSection } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 import { t } from 'app/core/internationalization';
 import { contextSrv } from 'app/core/services/context_srv';
+import { ThemePickerPopover } from 'app/features/themes/ThemePickerPopover';
 
-import { ShowModalReactEvent } from '../../../types/events';
+import { AddGlobalComponentEvent, ShowModalReactEvent } from '../../../types/events';
 import appEvents from '../../app_events';
 import { getFooterLinks } from '../Footer/Footer';
 import { OrgSwitcher } from '../OrgSwitcher';
@@ -70,6 +71,21 @@ export const enrichConfigItems = (items: NavModelItem[], location: Location<unkn
           text: t('nav.profile/switch-org', 'Switch organization'),
           icon: 'arrow-random',
           onClick: onOpenOrgSwitcher,
+        },
+      ];
+    }
+
+    if (link.id === 'profile') {
+      link.children = [
+        ...menuItems,
+        {
+          id: 'change-theme',
+          text: 'Change theme',
+          icon: 'palette',
+          onClick: () => {
+            reportInteraction('Change theme');
+            appEvents.publish(new AddGlobalComponentEvent({ component: ThemePickerPopover, id: 'theme-picker' }));
+          },
         },
       ];
     }
