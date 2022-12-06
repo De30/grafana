@@ -636,7 +636,7 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 		return nil, fmt.Errorf("missing user in context")
 	}
 
-	if r.NextPageToken != "" || len(r.Sort) > 0 || len(r.Labels) > 0 {
+	if r.NextPageToken != "" || len(r.Sort) > 0 {
 		return nil, fmt.Errorf("not yet supported")
 	}
 
@@ -650,6 +650,7 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 	if r.WithBody {
 		fields = append(fields, "body")
 	}
+
 	if r.WithLabels {
 		fields = append(fields, "labels")
 	}
@@ -657,25 +658,40 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 		fields = append(fields, "fields")
 	}
 
-	selectQuery := selectQuery{
+	entityQuery := selectQuery{
 		fields:   fields,
 		from:     "entity", // the table
 		args:     []interface{}{},
 		limit:    int(r.Limit),
 		oneExtra: true, // request one more than the limit (and show next token if it exists)
 	}
-	selectQuery.addWhere("tenant_id", user.OrgID)
+	entityQuery.addWhere("tenant_id", user.OrgID)
 
 	if len(r.Kind) > 0 {
-		selectQuery.addWhereIn("kind", r.Kind)
+		entityQuery.addWhereIn("kind", r.Kind)
 	}
 
 	// Folder UID or OID?
 	if r.Folder != "" {
-		selectQuery.addWhere("folder", r.Folder)
+		entityQuery.addWhere("folder", r.Folder)
 	}
 
-	query, args := selectQuery.toQuery()
+	if len(r.Labels) > 0 {
+		var args []interface{}
+		var conditions []string
+		for labelKey, labelValue := range r.Labels {
+			args = append(args, labelKey)
+			args = append(args, labelValue)
+			conditions = append(conditions, "(label = ? AND value = ?)")
+		}
+		joinedConditions := strings.Join(conditions, " OR ")
+		query := "SELECT grn FROM entity_labels WHERE " + joinedConditions + " GROUP BY grn HAVING COUNT(label) = ?"
+		args = append(args, len(r.Labels))
+
+		entityQuery.addWhereInSubquery("grn", query, args)
+	}
+
+	query, args := entityQuery.toQuery()
 
 	fmt.Printf("\n\n-------------\n")
 	fmt.Printf("%s\n", query)
@@ -717,7 +733,7 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 		}
 
 		// found one more than requested
-		if len(rsp.Results) >= selectQuery.limit {
+		if len(rsp.Results) >= entityQuery.limit {
 			// TODO? should this encode start+offset?
 			rsp.NextPageToken = oid
 			break
@@ -745,6 +761,7 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 
 		rsp.Results = append(rsp.Results, result)
 	}
+
 	return rsp, err
 }
 
