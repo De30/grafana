@@ -72,14 +72,29 @@ type SaveCallback func() error
 // If the callback results in error it rolls back the transaction.
 func (st DBstore) SaveAlertmanagerConfigurationWithCallback(ctx context.Context, cmd *models.SaveAlertmanagerConfigurationCmd, callback SaveCallback) error {
 	return st.SQLStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
+		hash := fmt.Sprintf("%x", md5.Sum([]byte(cmd.AlertmanagerConfiguration)))
+		createdAt := time.Now().Unix()
 		config := models.AlertConfiguration{
+			ID:                        cmd.OrgID, // TODO: notes: Use the org ID as the ID. This table now only stores one cfg per org.
 			AlertmanagerConfiguration: cmd.AlertmanagerConfiguration,
-			ConfigurationHash:         fmt.Sprintf("%x", md5.Sum([]byte(cmd.AlertmanagerConfiguration))),
+			ConfigurationHash:         hash,
 			ConfigurationVersion:      cmd.ConfigurationVersion,
 			Default:                   cmd.Default,
 			OrgID:                     cmd.OrgID,
+			CreatedAt:                 createdAt,
 		}
-		if _, err := sess.Insert(config); err != nil {
+		// TODO: Seed the table beforehand, so we can only update.
+		upsertSQL := st.SQLStore.GetDialect().UpsertSQL(
+			"alert_configuration",
+			[]string{"id"},
+			[]string{"id", "alertmanager_configuration", "configuration_version", "created_at", "default", "org_id", "configuration_hash"},
+		)
+		params := append(make([]interface{}, 0), config.ID, cmd.AlertmanagerConfiguration, cmd.ConfigurationVersion, createdAt, cmd.Default, cmd.OrgID, hash)
+		if _, err := sess.SQL(upsertSQL, params...).Query(); err != nil {
+			return err
+		}
+		config.ID = 0 // hack, horrible hack
+		if _, err := sess.Table("alert_configuration_history").Insert(config); err != nil {
 			return err
 		}
 		if _, err := st.deleteOldConfigurations(ctx, cmd.OrgID, ConfigRecordsLimit); err != nil {
@@ -96,6 +111,7 @@ func (st DBstore) SaveAlertmanagerConfigurationWithCallback(ctx context.Context,
 func (st *DBstore) UpdateAlertmanagerConfiguration(ctx context.Context, cmd *models.SaveAlertmanagerConfigurationCmd) error {
 	return st.SQLStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
 		config := models.AlertConfiguration{
+			ID:                        cmd.OrgID, // TODO: notes: Use the org ID as the ID. This table now only stores one cfg per org.
 			AlertmanagerConfiguration: cmd.AlertmanagerConfiguration,
 			ConfigurationHash:         fmt.Sprintf("%x", md5.Sum([]byte(cmd.AlertmanagerConfiguration))),
 			ConfigurationVersion:      cmd.ConfigurationVersion,
@@ -103,7 +119,8 @@ func (st *DBstore) UpdateAlertmanagerConfiguration(ctx context.Context, cmd *mod
 			OrgID:                     cmd.OrgID,
 			CreatedAt:                 time.Now().Unix(),
 		}
-		res, err := sess.Exec(fmt.Sprintf(getInsertQuery(st.SQLStore.GetDialect().DriverName()), st.SQLStore.GetDialect().Quote("default")),
+		st.SQLStore.GetDialect().Quote("default")
+		/*res, err := sess.Exec(fmt.Sprintf(getInsertQuery(st.SQLStore.GetDialect().DriverName()), st.SQLStore.GetDialect().Quote("default")),
 			config.AlertmanagerConfiguration,
 			config.ConfigurationHash,
 			config.ConfigurationVersion,
@@ -113,16 +130,23 @@ func (st *DBstore) UpdateAlertmanagerConfiguration(ctx context.Context, cmd *mod
 			cmd.OrgID,
 			cmd.OrgID,
 			cmd.FetchedConfigurationHash,
-		)
+		)*/
+		rows, err := sess.Table("alert_configuration").
+			AllCols().
+			Where("configuration_hash = ?", cmd.FetchedConfigurationHash).Update(config)
 		if err != nil {
 			return err
 		}
-		rows, err := res.RowsAffected()
+		/*rows, err := res.RowsAffected()
 		if err != nil {
 			return err
-		}
+		}*/
 		if rows == 0 {
 			return ErrVersionLockedObjectNotFound
+		}
+		config.ID = 0 // hack, horrible hack
+		if _, err := sess.Table("alert_configuration_history").Insert(config); err != nil {
+			return err
 		}
 		if _, err := st.deleteOldConfigurations(ctx, cmd.OrgID, ConfigRecordsLimit); err != nil {
 			st.Logger.Warn("failed to delete old am configs", "org", cmd.OrgID, "error", err)
@@ -218,7 +242,7 @@ func (st *DBstore) deleteOldConfigurations(ctx context.Context, orgID int64, lim
 	var affectedRows int64
 	err := st.SQLStore.WithDbSession(ctx, func(sess *db.Session) error {
 		highest := &models.AlertConfiguration{}
-		ok, err := sess.Desc("id").Where("org_id = ?", orgID).OrderBy("id").Limit(1, limit-1).Get(highest)
+		ok, err := sess.Table("alert_configuration_history").Desc("id").Where("org_id = ?", orgID).OrderBy("id").Limit(1, limit-1).Get(highest)
 		if err != nil {
 			return err
 		}
@@ -237,7 +261,7 @@ func (st *DBstore) deleteOldConfigurations(ctx context.Context, orgID int64, lim
 
 		res, err := sess.Exec(`
 			DELETE FROM 
-				alert_configuration 
+				alert_configuration_history
 			WHERE
 				org_id = ?
 			AND 
@@ -252,7 +276,7 @@ func (st *DBstore) deleteOldConfigurations(ctx context.Context, orgID int64, lim
 		}
 		affectedRows = rows
 		if affectedRows > 0 {
-			st.Logger.Info("deleted old alert_configuration(s)", "org", orgID, "limit", limit, "delete_count", affectedRows)
+			st.Logger.Info("deleted old alert_configuration_history entries", "org", orgID, "limit", limit, "delete_count", affectedRows)
 		}
 		return nil
 	})
