@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 )
 
 const (
@@ -31,19 +32,19 @@ type EntityReferenceResolver interface {
 	Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error)
 }
 
-func ProvideEntityReferenceResolver(ds datasources.DataSourceService, pluginStore plugins.Store) EntityReferenceResolver {
+func ProvideEntityReferenceResolver(ds datasources.DataSourceService, pluginService pluginsintegration.PluginService) EntityReferenceResolver {
 	return &standardReferenceResolver{
-		pluginStore: pluginStore,
+		pluginService: pluginService,
 		ds: dsCache{
-			ds:          ds,
-			pluginStore: pluginStore,
+			ds:            ds,
+			pluginService: pluginService,
 		},
 	}
 }
 
 type standardReferenceResolver struct {
-	pluginStore plugins.Store
-	ds          dsCache
+	pluginService pluginsintegration.PluginService
+	ds            dsCache
 }
 
 func (r *standardReferenceResolver) Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
@@ -100,7 +101,7 @@ func (r *standardReferenceResolver) resolveDatasource(ctx context.Context, ref *
 }
 
 func (r *standardReferenceResolver) resolvePlugin(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
-	p, ok := r.pluginStore.Plugin(ctx, ref.UID)
+	p, ok := r.pluginService.Plugin(ctx, ref.UID)
 	if !ok {
 		return ResolutionInfo{
 			OK:        false,

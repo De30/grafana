@@ -10,20 +10,10 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
+	"github.com/grafana/grafana/pkg/services/org"
 )
 
 var _ PluginManagerServer = (*PluginManagerServerService)(nil) // gRPC
-var _ PluginService = (*PluginManagerServerService)(nil)
-
-type PluginService interface {
-	Plugin(context.Context, *GetPluginRequest) (*GetPluginResponse, error)
-	Plugins(context.Context, *GetPluginsRequest) (*GetPluginsResponse, error)
-
-	AddPlugin(context.Context, *AddPluginRequest) (*AddPluginResponse, error)
-	RemovePlugin(context.Context, *RemovePluginRequest) (*RemovePluginResponse, error)
-
-	PluginErrors(context.Context, *GetPluginErrorsRequest) (*GetPluginErrorsResponse, error)
-}
 
 type PluginManagerServerService struct {
 	*services.BasicService
@@ -35,8 +25,8 @@ type PluginManagerServerService struct {
 
 func ProvidePluginManagerServerService(grpcServerProvider grpcserver.Provider, store plugins.Store, client plugins.Client, installer plugins.Installer) *PluginManagerServerService {
 	srv := NewPluginManagerServer(store, client, installer)
-	srv.BasicService = services.NewBasicService(srv.start, srv.run, srv.stop)
 	RegisterPluginManagerServer(grpcServerProvider.GetServer(), srv)
+	srv.BasicService = services.NewBasicService(srv.start, srv.run, srv.stop)
 	return srv
 }
 
@@ -67,21 +57,34 @@ func (s *PluginManagerServerService) stop(err error) error {
 	return nil
 }
 
-func (s *PluginManagerServerService) Plugin(ctx context.Context, req *GetPluginRequest) (*GetPluginResponse, error) {
+func (s *PluginManagerServerService) Plugin(ctx context.Context, pluginID string) (plugins.PluginDTO, bool) {
+	return s.store.Plugin(ctx, pluginID)
+}
+
+func (s *PluginManagerServerService) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
+	return s.store.Plugins(ctx, types...)
+}
+
+func (s *PluginManagerServerService) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
+	return s.installer.Add(ctx, pluginID, version, opts)
+}
+
+func (s *PluginManagerServerService) Remove(ctx context.Context, pluginID string) error {
+	return s.installer.Remove(ctx, pluginID)
+}
+
+func (s *PluginManagerServerService) GetPlugin(ctx context.Context, req *GetPluginRequest) (*GetPluginResponse, error) {
 	p, exists := s.store.Plugin(ctx, req.Id)
 	if !exists {
 		return nil, errors.New("plugin not found")
 	}
 
 	return &GetPluginResponse{
-		Plugin: &PluginData{
-			Id:      p.ID,
-			Version: p.Info.Version,
-		},
+		Plugin: toProto(p),
 	}, nil
 }
 
-func (s *PluginManagerServerService) Plugins(ctx context.Context, req *GetPluginsRequest) (*GetPluginsResponse, error) {
+func (s *PluginManagerServerService) GetPlugins(ctx context.Context, req *GetPluginsRequest) (*GetPluginsResponse, error) {
 	var types []plugins.Type
 	for _, t := range req.Types {
 		if plugins.Type(t).IsValid() {
@@ -91,15 +94,206 @@ func (s *PluginManagerServerService) Plugins(ctx context.Context, req *GetPlugin
 
 	var ps []*PluginData
 	for _, p := range s.store.Plugins(ctx, types...) {
-		ps = append(ps, &PluginData{
-			Id:      p.ID,
-			Version: p.Info.Version,
-		})
+		ps = append(ps, toProto(p))
 	}
 
 	return &GetPluginsResponse{
 		Plugins: ps,
 	}, nil
+}
+
+func toProto(p plugins.PluginDTO) *PluginData {
+	var links []*PluginData_JsonData_Info_Link
+	for _, l := range p.Info.Links {
+		links = append(links, &PluginData_JsonData_Info_Link{
+			Name: l.Name,
+			Url:  l.URL,
+		})
+	}
+
+	var screenshots []*PluginData_JsonData_Info_Screenshot
+	for _, s := range p.Info.Screenshots {
+		screenshots = append(screenshots, &PluginData_JsonData_Info_Screenshot{
+			Name: s.Name,
+			Path: s.Path,
+		})
+	}
+
+	var pluginDeps []*PluginData_JsonData_Dependencies_PluginDependency
+	for _, pd := range p.Dependencies.Plugins {
+		pluginDeps = append(pluginDeps, &PluginData_JsonData_Dependencies_PluginDependency{
+			Id:      pd.ID,
+			Type:    pd.Type,
+			Name:    pd.Name,
+			Version: pd.Version,
+		})
+	}
+
+	var includes []*PluginData_JsonData_Includes
+	for _, i := range p.Includes {
+		includes = append(includes, &PluginData_JsonData_Includes{
+			Name:       i.Name,
+			Path:       i.Path,
+			Type:       i.Type,
+			Component:  i.Component,
+			Role:       protoRole(i.Role),
+			Action:     i.Action,
+			AddToNav:   i.AddToNav,
+			DefaultNav: i.DefaultNav,
+			Slug:       i.Slug,
+			Icon:       i.Icon,
+			Uid:        i.UID,
+			Id:         i.ID,
+		})
+	}
+
+	var routes []*PluginData_JsonData_Route
+	for _, r := range p.Routes {
+		var urlParams []*PluginData_JsonData_Route_URLParam
+		for _, up := range r.URLParams {
+			urlParams = append(urlParams, &PluginData_JsonData_Route_URLParam{
+				Name:    up.Name,
+				Content: up.Content,
+			})
+		}
+		var headers []*PluginData_JsonData_Route_Header
+		for _, h := range r.Headers {
+			headers = append(headers, &PluginData_JsonData_Route_Header{
+				Name:    h.Name,
+				Content: h.Content,
+			})
+		}
+
+		rt := &PluginData_JsonData_Route{
+			Path:      r.Path,
+			Method:    r.Method,
+			ReqRole:   protoRole(r.ReqRole),
+			Url:       r.URL,
+			UrlParams: urlParams,
+			Headers:   headers,
+			AuthType:  r.AuthType,
+			Body:      r.Body,
+		}
+
+		if r.TokenAuth != nil {
+			rt.TokenAuth = &PluginData_JsonData_Route_JWTTokenAuth{
+				Url:    r.TokenAuth.Url,
+				Scopes: r.TokenAuth.Scopes,
+				Params: r.TokenAuth.Params,
+			}
+		}
+
+		if r.JwtTokenAuth != nil {
+			rt.JwtTokenAuth = &PluginData_JsonData_Route_JWTTokenAuth{
+				Url:    r.JwtTokenAuth.Url,
+				Scopes: r.JwtTokenAuth.Scopes,
+				Params: r.JwtTokenAuth.Params,
+			}
+		}
+		routes = append(routes, rt)
+	}
+
+	var roleRegistration []*PluginData_JsonData_RoleRegistration
+	for _, rr := range p.Roles {
+		var permissions []*PluginData_JsonData_RoleRegistration_Permission
+		for _, p := range rr.Role.Permissions {
+			permissions = append(permissions, &PluginData_JsonData_RoleRegistration_Permission{
+				Action: p.Action,
+				Scope:  p.Scope,
+			})
+		}
+
+		roleRegistration = append(roleRegistration, &PluginData_JsonData_RoleRegistration{
+			Role: &PluginData_JsonData_RoleRegistration_RBACRole{
+				Name:        rr.Role.Name,
+				Description: rr.Role.Description,
+				Permissions: permissions,
+			},
+			Grants: rr.Grants,
+		})
+	}
+
+	dto := &PluginData{
+		JsonData: &PluginData_JsonData{
+			Id:   p.ID,
+			Type: string(p.Type),
+			Name: p.Name,
+			Info: &PluginData_JsonData_Info{
+				Author: &PluginData_JsonData_Info_Author{
+					Name: p.Info.Author.Name,
+					Url:  p.Info.Author.URL,
+				},
+				Description: p.Info.Description,
+				Links:       links,
+				Logos: &PluginData_JsonData_Info_Logos{
+					Small: p.Info.Logos.Small,
+					Large: p.Info.Logos.Large,
+				},
+				Build: &PluginData_JsonData_Info_Build{
+					Time:   p.Info.Build.Time,
+					Repo:   p.Info.Build.Repo,
+					Branch: p.Info.Build.Branch,
+					Hash:   p.Info.Build.Hash,
+				},
+				Screenshots: screenshots,
+				Version:     p.Info.Version,
+				Updated:     p.Info.Updated,
+			},
+			Dependencies: &PluginData_JsonData_Dependencies{
+				GrafanaDependency: p.Dependencies.GrafanaDependency,
+				GrafanaVersion:    p.Dependencies.GrafanaVersion,
+				Plugins:           pluginDeps,
+			},
+			Includes:      includes,
+			State:         string(p.State),
+			Category:      p.Category,
+			HideFromList:  p.HideFromList,
+			Preload:       p.Preload,
+			Backend:       p.Backend,
+			Routes:        routes,
+			Roles:         roleRegistration,
+			SkipDataQuery: p.SkipDataQuery,
+			AutoEnabled:   p.AutoEnabled,
+			Annotations:   p.Annotations,
+			Metrics:       p.Metrics,
+			Alerting:      p.Alerting,
+			Explore:       p.Explore,
+			Tables:        p.Table,
+			Logs:          p.Logs,
+			Tracing:       p.Tracing,
+			QueryOptions:  p.QueryOptions,
+			BuiltIn:       p.BuiltIn,
+			Mixed:         p.Mixed,
+			Streaming:     p.Streaming,
+			Sdk:           p.SDK,
+			Executable:    p.Executable,
+		},
+		Class:           string(p.Class),
+		IncludedInAppID: p.IncludedInAppID,
+		DefaultNavURL:   p.DefaultNavURL,
+		Pinned:          p.Pinned,
+		Signature:       string(p.Signature),
+		SignatureType:   string(p.SignatureType),
+		SignatureOrg:    p.SignatureOrg,
+		SignatureError:  "",
+		Module:          p.Module,
+		BaseUrl:         p.BaseURL,
+		//StreamHandler:   nil,
+	}
+
+	return dto
+}
+
+func protoRole(r org.RoleType) PluginData_JsonData_Role {
+	switch r {
+	case org.RoleAdmin:
+		return PluginData_JsonData_ADMIN
+	case org.RoleViewer:
+		return PluginData_JsonData_VIEWER
+	case org.RoleEditor:
+		return PluginData_JsonData_EDITOR
+	}
+	return PluginData_JsonData_VIEWER
 }
 
 func (s *PluginManagerServerService) AddPlugin(ctx context.Context, req *AddPluginRequest) (*AddPluginResponse, error) {

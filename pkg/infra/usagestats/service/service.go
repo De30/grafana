@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/infra/usagestats"
-	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -17,7 +16,7 @@ type UsageStats struct {
 	Cfg           *setting.Cfg
 	kvStore       *kvstore.NamespacedKVStore
 	RouteRegister routing.RouteRegister
-	pluginStore   plugins.Store
+	//pluginService pluginsintegration.PluginService
 
 	log    log.Logger
 	tracer tracing.Tracer
@@ -26,14 +25,14 @@ type UsageStats struct {
 	sendReportCallbacks []usagestats.SendReportCallbackFunc
 }
 
-func ProvideService(cfg *setting.Cfg, pluginStore plugins.Store, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, tracer tracing.Tracer) *UsageStats {
+func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, tracer tracing.Tracer) *UsageStats {
 	s := &UsageStats{
 		Cfg:           cfg,
 		RouteRegister: routeRegister,
-		pluginStore:   pluginStore,
-		kvStore:       kvstore.WithNamespace(kvStore, 0, "infra.usagestats"),
-		log:           log.New("infra.usagestats"),
-		tracer:        tracer,
+		//pluginService: pluginService,
+		kvStore: kvstore.WithNamespace(kvStore, 0, "infra.usagestats"),
+		log:     log.New("infra.usagestats"),
+		tracer:  tracer,
 	}
 
 	s.registerAPIEndpoints()
@@ -96,10 +95,11 @@ func (uss *UsageStats) RegisterSendReportCallback(c usagestats.SendReportCallbac
 }
 
 func (uss *UsageStats) ShouldBeReported(ctx context.Context, dsType string) bool {
-	ds, exists := uss.pluginStore.Plugin(ctx, dsType)
-	if !exists {
-		return false
-	}
-
-	return ds.Signature.IsValid() || ds.Signature.IsInternal()
+	//ds, exists := uss.pluginService.Plugin(ctx, dsType)
+	//if !exists {
+	//	return false
+	//}
+	//
+	//return ds.Signature.IsValid() || ds.Signature.IsInternal()
+	return true
 }

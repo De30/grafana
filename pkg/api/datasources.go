@@ -73,7 +73,7 @@ func (hs *HTTPServer) GetDataSources(c *models.ReqContext) response.Response {
 			ReadOnly:  ds.ReadOnly,
 		}
 
-		if plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), ds.Type); exists {
+		if plugin, exists := hs.pluginService.Plugin(c.Req.Context(), ds.Type); exists {
 			dsItem.TypeLogoUrl = plugin.Info.Logos.Small
 			dsItem.TypeName = plugin.Name
 		} else {
@@ -655,7 +655,7 @@ func (hs *HTTPServer) CallDatasourceResource(c *models.ReqContext) {
 		return
 	}
 
-	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), ds.Type)
+	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), ds.Type)
 	if !exists {
 		c.JsonApiErr(500, "Unable to find datasource plugin", err)
 		return
@@ -692,7 +692,7 @@ func (hs *HTTPServer) CallDatasourceResourceWithUID(c *models.ReqContext) {
 		return
 	}
 
-	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), ds.Type)
+	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), ds.Type)
 	if !exists {
 		c.JsonApiErr(http.StatusInternalServerError, "Unable to find datasource plugin", err)
 		return
@@ -793,7 +793,7 @@ func (hs *HTTPServer) CheckDatasourceHealth(c *models.ReqContext) response.Respo
 }
 
 func (hs *HTTPServer) checkDatasourceHealth(c *models.ReqContext, ds *datasources.DataSource) response.Response {
-	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), ds.Type)
+	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), ds.Type)
 	if !exists {
 		return response.Error(http.StatusInternalServerError, "Unable to find datasource plugin", nil)
 	}

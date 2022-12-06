@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
+	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/stats"
 	"github.com/grafana/grafana/pkg/setting"
@@ -26,7 +27,7 @@ import (
 type Service struct {
 	cfg                *setting.Cfg
 	sqlstore           sqlstore.Store
-	plugins            plugins.Store
+	pluginService      pluginsintegration.PluginService
 	social             social.Service
 	usageStats         usagestats.Service
 	statsService       stats.Service
@@ -48,7 +49,7 @@ func ProvideService(
 	cfg *setting.Cfg,
 	store sqlstore.Store,
 	social social.Service,
-	plugins plugins.Store,
+	pluginService pluginsintegration.PluginService,
 	features *featuremgmt.FeatureManager,
 	datasourceService datasources.DataSourceService,
 	httpClientProvider httpclient.Provider,
@@ -56,7 +57,7 @@ func ProvideService(
 	s := &Service{
 		cfg:                cfg,
 		sqlstore:           store,
-		plugins:            plugins,
+		pluginService:      pluginService,
 		social:             social,
 		usageStats:         us,
 		statsService:       statsService,
@@ -367,13 +368,13 @@ func (s *Service) updateTotalStats(ctx context.Context) bool {
 }
 
 func (s *Service) appCount(ctx context.Context) int {
-	return len(s.plugins.Plugins(ctx, plugins.App))
+	return len(s.pluginService.Plugins(ctx, plugins.App))
 }
 
 func (s *Service) panelCount(ctx context.Context) int {
-	return len(s.plugins.Plugins(ctx, plugins.Panel))
+	return len(s.pluginService.Plugins(ctx, plugins.Panel))
 }
 
 func (s *Service) dataSourceCount(ctx context.Context) int {
-	return len(s.plugins.Plugins(ctx, plugins.DataSource))
+	return len(s.pluginService.Plugins(ctx, plugins.DataSource))
 }

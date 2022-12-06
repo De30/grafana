@@ -27,7 +27,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -60,7 +59,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 	}
 
 	// Filter plugins
-	pluginDefinitions := hs.pluginStore.Plugins(c.Req.Context())
+	pluginDefinitions := hs.pluginService.Plugins(c.Req.Context())
 	filteredPluginDefinitions := []plugins.PluginDTO{}
 	filteredPluginIDs := map[string]bool{}
 	for _, pluginDef := range pluginDefinitions {
@@ -161,7 +160,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 func (hs *HTTPServer) GetPluginSettingByID(c *models.ReqContext) response.Response {
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
+	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		return response.Error(http.StatusNotFound, "Plugin not found, no installed plugin with that id", nil)
 	}
@@ -234,7 +233,7 @@ func (hs *HTTPServer) UpdatePluginSetting(c *models.ReqContext) response.Respons
 	}
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	if _, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID); !exists {
+	if _, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID); !exists {
 		return response.Error(404, "Plugin not installed", nil)
 	}
 
@@ -304,7 +303,7 @@ func (hs *HTTPServer) CollectPluginMetrics(c *models.ReqContext) response.Respon
 // /public/plugins/:pluginId/*
 func (hs *HTTPServer) getPluginAssets(c *models.ReqContext) {
 	pluginID := web.Params(c.Req)[":pluginId"]
-	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
+	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		c.JsonApiErr(404, "Plugin not found", nil)
 		return
@@ -412,14 +411,10 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 	}
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	resp, err := hs.pluginManagerClient.AddPlugin(c.Req.Context(), &pluginsintegration.AddPluginRequest{
-		Id:      pluginID,
-		Version: dto.Version,
-		Opts: &pluginsintegration.AddPluginOpts{
-			GrafanaVersion: hs.Cfg.BuildVersion,
-			Os:             runtime.GOOS,
-			Arch:           runtime.GOARCH,
-		},
+	err := hs.pluginService.Add(c.Req.Context(), pluginID, dto.Version, plugins.CompatOpts{
+		GrafanaVersion: hs.Cfg.BuildVersion,
+		OS:             runtime.GOOS,
+		Arch:           runtime.GOARCH,
 	})
 	if err != nil {
 		var dupeErr plugins.DuplicateError
@@ -445,17 +440,13 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusInternalServerError, "Failed to install plugin", err)
 	}
 
-	if !resp.OK {
-		return response.Error(http.StatusInternalServerError, "Failed to install plugin", err)
-	}
-
 	return response.JSON(http.StatusOK, []byte{})
 }
 
 func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	resp, err := hs.pluginManagerClient.RemovePlugin(c.Req.Context(), &pluginsintegration.RemovePluginRequest{Id: pluginID})
+	err := hs.pluginService.Remove(c.Req.Context(), pluginID)
 	if err != nil {
 		if errors.Is(err, plugins.ErrPluginNotInstalled) {
 			return response.Error(http.StatusNotFound, "Plugin not installed", err)
@@ -467,10 +458,6 @@ func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 			return response.Error(http.StatusForbidden, "Cannot uninstall a plugin outside of the plugins directory", err)
 		}
 
-		return response.Error(http.StatusInternalServerError, "Failed to uninstall plugin", err)
-	}
-
-	if !resp.OK {
 		return response.Error(http.StatusInternalServerError, "Failed to uninstall plugin", err)
 	}
 
@@ -498,7 +485,7 @@ func translatePluginRequestErrorToAPIError(err error) response.Response {
 }
 
 func (hs *HTTPServer) pluginMarkdown(ctx context.Context, pluginId string, name string) ([]byte, error) {
-	plugin, exists := hs.pluginStore.Plugin(ctx, pluginId)
+	plugin, exists := hs.pluginService.Plugin(ctx, pluginId)
 	if !exists {
 		return nil, plugins.NotFoundError{PluginID: pluginId}
 	}
