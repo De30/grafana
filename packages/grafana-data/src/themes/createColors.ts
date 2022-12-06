@@ -140,9 +140,9 @@ class DarkColors implements ThemeColorsBase<Partial<ThemeRichColor>> {
   };
 
   action = {
-    hover: `rgba(${this.whiteBase}, 0.16)`,
-    selected: `rgba(${this.whiteBase}, 0.12)`,
-    focus: `rgba(${this.whiteBase}, 0.16)`,
+    hover: `rgba(${this.whiteBase}, 0.12)`,
+    selected: `rgba(${this.whiteBase}, 0.08)`,
+    focus: `rgba(${this.whiteBase}, 0.08)`,
     hoverOpacity: 0.08,
     disabledText: this.text.disabled,
     disabledBackground: `rgba(${this.whiteBase}, 0.04)`,

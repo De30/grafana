@@ -60,6 +60,9 @@ export interface ThemeComponents {
     background: string;
     borderColor: string;
   };
+  sectionNav: {
+    activeItemBackground: string;
+  };
 }
 
 export type ThemeComponentsInput = DeepPartial<ThemeComponents>;
@@ -126,6 +129,10 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     toolbarButton: {
       background: colors.background.primary,
       borderColor: 'transparent',
+    },
+    sectionNav: {
+      activeItemBackground:
+        overrides.sectionNav?.activeItemBackground ?? colors.emphasize(colors.background.canvas, 0.03),
     },
   };
 
