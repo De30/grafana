@@ -23,11 +23,15 @@ const (
 
 // Check defines model for check.
 type Check struct {
-	Job       string   `json:"job"`
-	Locations []string `json:"locations"`
-	Target    string   `json:"target"`
-	Type      Type     `json:"type"`
-	Uid       string   `json:"uid"`
+	Job string `json:"job"`
+
+	// hack this in body b/c kindsys doesn't support meta yet
+	// codegen here is buggy - value type IS always a string, you can safely assert that in your code
+	Labels    map[string]interface{} `json:"labels"`
+	Locations []string               `json:"locations"`
+	Target    string                 `json:"target"`
+	Type      Type                   `json:"type"`
+	Uid       string                 `json:"uid"`
 }
 
 // Type defines model for Check.Type.

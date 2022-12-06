@@ -16,6 +16,11 @@ export interface Endpoint {
 export interface Service {
   endpoints?: Array<Endpoint>;
   /**
+   * hack this in body b/c kindsys doesn't support meta yet.
+   * codegen here is buggy - value type IS always a string, you can safely assert that in your code
+   */
+  labels: Record<string, unknown>;
+  /**
    * name of the service
    */
   name: string;

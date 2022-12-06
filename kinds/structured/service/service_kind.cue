@@ -13,6 +13,10 @@ lineage: seqs: [
 				name: string
 				endpoints?: [...#Endpoint]
 
+				// hack this in body b/c kindsys doesn't support meta yet.
+				// codegen here is buggy - value type IS always a string, you can safely assert that in your code
+				labels: [string]: string
+
 				#Endpoint: {
 					path: string
 					type: "http" | "ping" | "dns" | "tcp"

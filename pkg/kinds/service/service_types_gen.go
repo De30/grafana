@@ -25,6 +25,10 @@ const (
 type Service struct {
 	Endpoints *[]Endpoint `json:"endpoints,omitempty"`
 
+	// hack this in body b/c kindsys doesn't support meta yet.
+	// codegen here is buggy - value type IS always a string, you can safely assert that in your code
+	Labels map[string]interface{} `json:"labels"`
+
 	// name of the service
 	Name string `json:"name"`
 	Uid  string `json:"uid"`
