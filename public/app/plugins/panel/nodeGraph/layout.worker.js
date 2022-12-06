@@ -46,11 +46,11 @@ export function layout(nodes, edges, config) {
 /**
  * This initializes positions of the graph by going from the root to its children and laying it out in a grid from left
  * to right. This works only so, so because service map graphs can have cycles and children levels are not ordered in a
- * way to minimize the edge lengths. Nevertheless this seems to make the graph easier to nudge with the forces later on
- * than with the d3 default initial positioning. Also we can fix the root positions later on for a bit more neat
+ * way to minimize the edge lengths. Nevertheless, this seems to make the graph easier to nudge with the forces later on
+ * than with the d3 default initial positioning. Also, we can fix the root positions later on for a bit more neat
  * organisation.
  *
- * This function directly modifies the nodes given and only returns references to root nodes so they do not have to be
+ * This function directly modifies the nodes given and only returns references to root nodes, so they do not have to be
  * found again later on.
  *
  * How the spacing could look like approximately:

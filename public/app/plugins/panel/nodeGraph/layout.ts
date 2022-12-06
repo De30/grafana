@@ -1,3 +1,4 @@
+import { Graphviz } from '@hpcc-js/wasm/graphviz';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUnmount } from 'react-use';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -36,6 +37,8 @@ export const defaultConfig: Config = {
   tick: 300,
   gridLayout: false,
 };
+
+let graphviz: undefined | typeof Graphviz;
 
 /**
  * This will return copy of the nods and edges with x,y positions filled in. Also the layout changes source/target props
@@ -85,12 +88,59 @@ export function useLayout(
 
     setLoading(true);
 
-    // This is async but as I wanted to still run the sync grid layout and you cannot return promise from effect so
+    (async () => {
+      if (!graphviz) {
+        graphviz = await Graphviz.load();
+      }
+      // const dot = edgesToDOT(rawEdges);
+      // const dotLayout = JSON.parse(graphviz.dot(dot, 'json0'));
+      // const dot = edgesToDOTNeato(rawEdges);
+      // const dotLayout = JSON.parse(graphviz.neato(dot, 'json0'));
+      const dot = edgesToDOTfdp(rawEdges);
+      const dotLayout = JSON.parse(graphviz.fdp(dot, 'json0'));
+      // const dot = edgesToDOTsfdp(rawEdges);
+      // const dotLayout = JSON.parse(graphviz.sfdp(dot, 'json0'));
+
+      const nodesMap: Record<string, { obj: { pos: string }; datum: NodeDatum }> = dotLayout.objects.reduce(
+        (acc: Record<string, { obj: { pos: string } }>, obj: { pos: string; name: string }) => {
+          acc[obj.name] = {
+            obj,
+          };
+          return acc;
+        },
+        {}
+      );
+
+      for (const node of rawNodes) {
+        nodesMap[node.id] = {
+          ...nodesMap[node.id],
+          datum: {
+            ...node,
+            x: parseFloat(nodesMap[node.id].obj.pos.split(',')[0]),
+            y: parseFloat(nodesMap[node.id].obj.pos.split(',')[1]),
+          },
+        };
+      }
+      const edges = rawEdges.map((e) => {
+        return {
+          ...e,
+          source: nodesMap[e.source].datum,
+          target: nodesMap[e.target].datum,
+        };
+      });
+
+      setNodesGraph(Object.values(nodesMap).map((v) => v.datum));
+      setEdgesGraph(edges as EdgeDatumLayout[]);
+      setLoading(false);
+    })();
+
+    // This is async but as I wanted to still run the sync grid layout, and you cannot return promise from effect so
     // having callback seems ok here.
     const cancel = defaultLayout(rawNodes, rawEdges, ({ nodes, edges }) => {
       if (isMounted()) {
-        setNodesGraph(nodes);
-        setEdgesGraph(edges as EdgeDatumLayout[]);
+        // console.log({ nodes, edges });
+        // setNodesGraph(nodes);
+        // setEdgesGraph(edges as EdgeDatumLayout[]);
         setLoading(false);
       }
     });
@@ -154,7 +204,7 @@ function defaultLayout(
   const worker = createWorker();
   worker.onmessage = (event: MessageEvent<{ nodes: NodeDatum[]; edges: EdgeDatumLayout[] }>) => {
     for (let i = 0; i < nodes.length; i++) {
-      // These stats needs to be Field class but the data is stringified over the worker boundary
+      // These stats need to be Field class but the data is stringified over the worker boundary
       event.data.nodes[i] = {
         ...nodes[i],
         ...event.data.nodes[i],
@@ -210,4 +260,70 @@ function gridLayout(
     node.x = column * spacingHorizontal - midPoint;
     node.y = -60 + row * spacingVertical;
   }
+}
+
+function edgesToDOT(edges: EdgeDatum[]) {
+  let dot = `
+  digraph G {
+  `;
+  for (const edge of edges) {
+    dot += edge.source + '->' + edge.target + ' [ minlen=3 ]\n';
+  }
+  dot += nodesDOT(edges);
+  dot += '}';
+  return dot;
+}
+
+function edgesToDOTNeato(edges: EdgeDatum[]) {
+  let dot = `
+  digraph G {
+    sep=1; overlap=false; mode="hier";
+  `;
+  for (const edge of edges) {
+    dot += edge.source + '->' + edge.target + ' [ len=1 ]\n';
+  }
+  dot += nodesDOT(edges);
+  dot += '}';
+  return dot;
+}
+
+function edgesToDOTfdp(edges: EdgeDatum[]) {
+  let dot = `
+  digraph G {
+    sep=1;
+  `;
+  for (const edge of edges) {
+    dot += edge.source + '->' + edge.target + ' [ len=3 ]\n';
+  }
+  dot += nodesDOT(edges);
+  dot += '}';
+  return dot;
+}
+
+function edgesToDOTsfdp(edges: EdgeDatum[]) {
+  let dot = `
+  digraph G {
+    overlap_scaling=40; overlap_shrink=false;
+  `;
+  for (const edge of edges) {
+    dot += edge.source + '->' + edge.target + '\n';
+  }
+  dot += nodesDOT(edges);
+  dot += '}';
+  return dot;
+}
+
+function nodesDOT(edges: EdgeDatum[]) {
+  let dot = '';
+  const visitedNodes = new Set();
+  const attr = '[fixedsize=true, width=1.2, height=1.2] \n';
+  for (const edge of edges) {
+    if (!visitedNodes.has(edge.source)) {
+      dot += edge.source + attr;
+    }
+    if (!visitedNodes.has(edge.target)) {
+      dot += edge.target + attr;
+    }
+  }
+  return dot;
 }

@@ -33,6 +33,7 @@ export interface TestDataQuery extends DataQuery {
 export interface NodesQuery {
   type?: 'random' | 'response' | 'random edges';
   count?: number;
+  seed?: number;
 }
 
 export interface StreamingQuery {
