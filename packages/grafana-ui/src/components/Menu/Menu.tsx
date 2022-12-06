@@ -62,7 +62,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
     wrapper: css({
-      background: `${theme.colors.background.primary}`,
+      background: `${theme.components.dropdown.background}`,
       boxShadow: `${theme.shadows.z3}`,
       display: `inline-block`,
       borderRadius: `${theme.shape.borderRadius()}`,

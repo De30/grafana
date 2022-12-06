@@ -17,6 +17,16 @@ export interface ThemeVisualizationColors {
 /**
  * @alpha
  */
+export interface ThemeVisualizationColorsInput {
+  /** Only for internal use by color schemes */
+  palette?: string[];
+  /** Colors organized by hue */
+  hues?: ThemeVizHue[];
+}
+
+/**
+ * @alpha
+ */
 export interface ThemeVizColor {
   color: string;
   name: string;
@@ -35,9 +45,11 @@ export interface ThemeVizHue {
 /**
  * @internal
  */
-export function createVisualizationColors(colors: ThemeColors): ThemeVisualizationColors {
-  const hues = colors.mode === 'light' ? getLightHues() : getDarkHues();
-
+export function createVisualizationColors(
+  input: ThemeVisualizationColorsInput,
+  colors: ThemeColors
+): ThemeVisualizationColors {
+  const hues = input.hues ?? (colors.mode === 'light' ? getLightHues() : getDarkHues());
   const byNameIndex: Record<string, string> = {};
 
   for (const hue of hues) {
@@ -87,7 +99,7 @@ export function createVisualizationColors(colors: ThemeColors): ThemeVisualizati
 
   return {
     hues,
-    palette,
+    palette: input.palette ?? palette,
     getColorByName,
   };
 }
@@ -284,92 +296,6 @@ function getClassicPalette() {
     '#DEDAF7',
   ];
 }
-
-// Old hues
-// function getDarkHues(): ThemeVizHue[] {
-//     return [
-//       {
-//         name: 'red',
-//         shades: [
-//           { name: 'red1', color: '#FFC2D4', aliases: ['super-light-red'] },
-//           { name: 'red2', color: '#FFA8C2', aliases: ['light-red'] },
-//           { name: 'red3', color: '#FF85A9', aliases: ['red'], primary: true },
-//           { name: 'red4', color: '#FF5286', aliases: ['semi-dark-red'] },
-//           { name: 'red5', color: '#E0226E', aliases: ['dark-red'] },
-//         ],
-//       },
-//       {
-//         name: 'orange',
-//         shades: [
-//           { name: 'orange1', color: '#FFC0AD', aliases: ['super-light-orange'] },
-//           { name: 'orange2', color: '#FFA98F', aliases: ['light-orange'] },
-//           { name: 'orange3', color: '#FF825C', aliases: ['orange'], primary: true },
-//           { name: 'orange4', color: '#FF5F2E', aliases: ['semi-dark-orange'] },
-//           { name: 'orange5', color: '#E73903', aliases: ['dark-orange'] },
-//         ],
-//       },
-//       {
-//         name: 'yellow',
-//         shades: [
-//           { name: 'yellow1', color: '#FFE68F', aliases: ['super-light-yellow'] },
-//           { name: 'yellow2', color: '#FAD34A', aliases: ['light-yellow'] },
-//           { name: 'yellow3', color: '#ECBB09', aliases: ['yellow'], primary: true },
-//           { name: 'yellow4', color: '#CFA302', aliases: ['semi-dark-yellow'] },
-//           { name: 'yellow5', color: '#AD8800', aliases: ['dark-yellow'] },
-//         ],
-//       },
-//       {
-//         name: 'green',
-//         shades: [
-//           { name: 'green1', color: '#93ECCB', aliases: ['super-light-green'] },
-//           { name: 'green2', color: '#65DCB1', aliases: ['light-green'] },
-//           { name: 'green3', color: '#2DC88F', aliases: ['green'], primary: true },
-//           { name: 'green4', color: '#25A777', aliases: ['semi-dark-green'] },
-//           { name: 'green5', color: '#1B855E', aliases: ['dark-green'] },
-//         ],
-//       },
-//       {
-//         name: 'teal',
-//         shades: [
-//           { name: 'teal1', color: '#73E7F7' },
-//           { name: 'teal2', color: '#2BD6EE' },
-//           { name: 'teal3', color: '#11BDD4', primary: true },
-//           { name: 'teal4', color: '#0EA0B4' },
-//           { name: 'teal5', color: '#077D8D' },
-//         ],
-//       },
-//       {
-//         name: 'blue',
-//         shades: [
-//           { name: 'blue1', color: '#C2D7FF', aliases: ['super-light-blue'] },
-//           { name: 'blue2', color: '#A3C2FF', aliases: ['light-blue'] },
-//           { name: 'blue3', color: '#83ACFC', aliases: ['blue'], primary: true },
-//           { name: 'blue4', color: '#5D8FEF', aliases: ['semi-dark-blue'] },
-//           { name: 'blue5', color: '#3871DC', aliases: ['dark-blue'] },
-//         ],
-//       },
-//       {
-//         name: 'violet',
-//         shades: [
-//           { name: 'violet1', color: '#DACCFF' },
-//           { name: 'violet2', color: '#C7B2FF' },
-//           { name: 'violet3', color: '#B094FF', primary: true },
-//           { name: 'violet4', color: '#9271EF' },
-//           { name: 'violet5', color: '#7E63CA' },
-//         ],
-//       },
-//       {
-//         name: 'purple',
-//         shades: [
-//           { name: 'purple1', color: '#FFBDFF', aliases: ['super-light-purple'] },
-//           { name: 'purple2', color: '#F5A3F5', aliases: ['light-purple'] },
-//           { name: 'purple3', color: '#E48BE4', aliases: ['purple'], primary: true },
-//           { name: 'purple4', color: '#CA68CA', aliases: ['semi-dark-purple'] },
-//           { name: 'purple5', color: '#B545B5', aliases: ['dark-purple'] },
-//         ],
-//       },
-//     ];
-//   }
 
 const nativeColorNames: Record<string, string> = {
   aliceblue: '#f0f8ff',

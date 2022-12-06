@@ -89,7 +89,7 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     input,
     panel,
     dropdown: {
-      background: input.background,
+      background: colors.background.primary,
     },
     tooltip: {
       background: colors.background.secondary,

@@ -5,6 +5,7 @@ import { useTheme2 } from '..';
 
 import { getAgularPanelStyles } from './angularPanelStyles';
 import { getCardStyles } from './card';
+import { getOldDropdownStyles } from './dropdown';
 import { getElementStyles } from './elements';
 import { getFormElementStyles } from './forms';
 import { getMarkdownStyles } from './markdownStyles';
@@ -24,6 +25,7 @@ export function GlobalStyles() {
         getCardStyles(theme),
         getAgularPanelStyles(theme),
         getMarkdownStyles(theme),
+        getOldDropdownStyles(theme),
         getOldPanelStyles(theme),
       ]}
     />
