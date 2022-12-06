@@ -101,7 +101,7 @@ export const getRootDataCatalogueItem = async ({
     });
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, {
+  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
     data,
     configuration,
     status,

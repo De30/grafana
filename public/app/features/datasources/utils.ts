@@ -1,4 +1,4 @@
-import { DataSourceJsonData, DataSourceSettings, urlUtil, locationUtil } from '@grafana/data';
+import { DataSourceJsonData, DataSourceSettings, urlUtil, locationUtil, DataQuery } from '@grafana/data';
 
 interface ItemWithName {
   name: string;
@@ -48,8 +48,11 @@ function getNewName(name: string) {
   return name.slice(0, name.length - 1);
 }
 
-export const constructDataSourceExploreUrl = (dataSource: DataSourceSettings<DataSourceJsonData, {}>) => {
-  const exploreState = JSON.stringify({ datasource: dataSource.name, context: 'explore' });
+export const constructDataSourceExploreUrl = (
+  dataSource: DataSourceSettings<DataSourceJsonData, {}>,
+  queries: DataQuery[] = []
+) => {
+  const exploreState = JSON.stringify({ datasource: dataSource.name, context: 'explore', queries });
   const exploreUrl = urlUtil.renderUrl(locationUtil.assureBaseUrl('/explore'), { left: exploreState });
 
   return exploreUrl;

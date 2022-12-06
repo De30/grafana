@@ -3,6 +3,8 @@ import { EMPTY, from, lastValueFrom, merge, Observable, of, throwError } from 'r
 import { catchError, concatMap, map, mergeMap, toArray } from 'rxjs/operators';
 
 import {
+  DataCatalogueContext,
+  DataCatalogueProvider,
   DataQueryRequest,
   DataQueryResponse,
   DataQueryResponseData,
@@ -34,6 +36,7 @@ import { LokiOptions } from '../loki/types';
 import { PrometheusDatasource } from '../prometheus/datasource';
 import { PromQuery } from '../prometheus/types';
 
+import { getRootDataCatalogueItem } from './dataCatalogue';
 import {
   failedMetric,
   histogramMetric,
@@ -57,7 +60,7 @@ import { SearchQueryParams, TempoQuery, TempoJsonData } from './types';
 
 export const DEFAULT_LIMIT = 20;
 
-export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJsonData> {
+export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJsonData> implements DataCatalogueProvider {
   tracesToLogs?: TraceToLogsOptions;
   serviceMap?: {
     datasourceUid?: string;
@@ -443,6 +446,10 @@ export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJson
         : undefined;
     return this.lokiSearch?.datasourceUid ?? legacyLogsDatasourceUid;
   };
+
+  async getRootDataCatalogueItem(context: DataCatalogueContext) {
+    return await getRootDataCatalogueItem({ context, datasource: this });
+  }
 }
 
 function queryPrometheus(request: DataQueryRequest<PromQuery>, datasourceUid: string) {

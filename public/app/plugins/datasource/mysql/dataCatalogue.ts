@@ -47,5 +47,5 @@ export const getRootDataCatalogueItem = ({
     ]);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, { data });
+  return new DataCatalogueBuilder().fromDataSource(datasource, context, { data });
 };

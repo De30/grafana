@@ -58,7 +58,7 @@ export const getRootDataCatalogueItem = async ({
     datasource.interval && item.addKeyValue('Interval', datasource.interval);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, {
+  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
     data: dataCategoryFactory,
     configuration: configurationCategoryFactory,
   });

@@ -4,10 +4,12 @@ import React from 'react';
 import {
   DataCatalogueItem,
   DataCatalogueItemAttributeAction,
+  DataCatalogueItemAttributeActionLink,
   DataCatalogueItemAttributeKeyValue,
   GrafanaTheme2,
   isDataCatalogueFolder,
   IsDataCatalogueItemAttributeAction,
+  IsDataCatalogueItemAttributeActionLink,
   IsDataCatalogueItemAttributeDescription,
   IsDataCatalogueItemAttributeImage,
   IsDataCatalogueItemAttributeKeyValue,
@@ -43,6 +45,7 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
 
   const tableAttributes = (item.attributes || []).filter(IsDataCatalogueItemAttributeKeyValue);
   const actions = (item.attributes || []).filter(IsDataCatalogueItemAttributeAction);
+  const actionLinks = (item.attributes || []).filter(IsDataCatalogueItemAttributeActionLink);
   const descriptions = (item.attributes || []).filter(IsDataCatalogueItemAttributeDescription);
   const links = (item.attributes || []).filter(IsDataCatalogueItemAttributeLink);
   const images = (item.attributes || []).filter(IsDataCatalogueItemAttributeImage);
@@ -54,7 +57,9 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
 
   return (
     <div>
-      {images.length > 0 && <img src={images[0].url} style={{ maxWidth: 50, maxHeight: 50, float: 'right' }} />}
+      {images.length > 0 && (
+        <img alt="data source logo" src={images[0].url} style={{ maxWidth: 50, maxHeight: 50, float: 'right' }} />
+      )}
       <p>
         {item.type ? item.type + ': ' : ''}
         {item.name}
@@ -73,9 +78,9 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
           </p>
         );
       })}
-      {links.map(({ url, title }) => {
+      {links.map(({ url, title }, index) => {
         return (
-          <p>
+          <p key={index}>
             <LinkButton variant="secondary" href={url} target="_blank" rel="noreferrer">
               {title || url}
             </LinkButton>
@@ -84,9 +89,9 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
       })}
       {tableAttributes && (
         <table className={styles.table}>
-          {tableAttributes.map(({ key, value }: DataCatalogueItemAttributeKeyValue) => {
+          {tableAttributes.map(({ key, value }: DataCatalogueItemAttributeKeyValue, index) => {
             return (
-              <tr>
+              <tr key={index}>
                 <td>{key}</td>
                 <td>{value}</td>
               </tr>
@@ -94,13 +99,13 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
           })}
         </table>
       )}
-      {actions.length > 0 && (
+      {actions.length + actionLinks.length > 0 && (
         <div>
           <p>Actions:</p>
           <table className={styles.table}>
             {actions.map(({ name, handler }: DataCatalogueItemAttributeAction, index) => {
               return (
-                <tr>
+                <tr key={`action_${index}`}>
                   <td>{name}</td>
                   <td>
                     <Button icon="play" key={index} variant="secondary" onClick={handler} />
@@ -108,9 +113,20 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
                 </tr>
               );
             })}
+            {actionLinks.map(({ name, url }: DataCatalogueItemAttributeActionLink, index) => {
+              return (
+                <tr key={`actionLink_${index}`}>
+                  <td>{name}</td>
+                  <td>
+                    <LinkButton icon="play" key={index} variant="secondary" href={url} />
+                  </td>
+                </tr>
+              );
+            })}
           </table>
         </div>
       )}
+
       {sparseContent && isFolder ? 'Select one of the sub-items on the left.' : ''}
     </div>
   );

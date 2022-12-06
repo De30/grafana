@@ -1,20 +1,23 @@
 import React from 'react';
 
+import { DataCatalogueContext, DataCatalogueProvider } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { Button, LinkButton } from '@grafana/ui';
 import { contextSrv } from 'app/core/core';
 import { AccessControlAction } from 'app/types';
 
 export interface Props {
-  exploreUrl: string;
   canSave: boolean;
   canDelete: boolean;
   onDelete: () => void;
   onSubmit: (event: any) => void;
+  onExplore: () => void;
   onTest: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  dataCatalogueProvider?: DataCatalogueProvider;
+  dataCatalogueContext?: DataCatalogueContext;
 }
 
-export function ButtonRow({ canSave, canDelete, onDelete, onSubmit, onTest, exploreUrl }: Props) {
+export function ButtonRow({ canSave, canDelete, onDelete, onSubmit, onTest, onExplore }: Props) {
   const canExploreDataSources = contextSrv.hasPermission(AccessControlAction.DataSourcesExplore);
 
   return (
@@ -22,7 +25,7 @@ export function ButtonRow({ canSave, canDelete, onDelete, onSubmit, onTest, expl
       <Button variant="secondary" fill="solid" type="button" onClick={() => history.back()}>
         Back
       </Button>
-      <LinkButton variant="secondary" fill="solid" href={exploreUrl} disabled={!canExploreDataSources}>
+      <LinkButton variant="secondary" fill="solid" onClick={onExplore} disabled={!canExploreDataSources}>
         Explore
       </LinkButton>
       <Button

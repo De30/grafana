@@ -1,4 +1,4 @@
-import { DataSourcePluginMeta, DataSourceSettings, LayoutMode } from '@grafana/data';
+import { DataCatalogueProvider, DataSourcePluginMeta, DataSourceSettings, LayoutMode } from '@grafana/data';
 import { HealthCheckResultDetails } from '@grafana/runtime/src/utils/DataSourceWithBackend';
 import { GenericDataSourcePlugin } from 'app/features/datasources/types';
 
@@ -28,6 +28,10 @@ export interface DataSourceSettingsState {
   testingStatus?: TestingStatus;
   loadError?: string | null;
   loading: boolean;
+  exploreDisplay: {
+    dataCatalogueProvider?: DataCatalogueProvider;
+    exploreUrl?: string;
+  };
 }
 
 export interface DataSourcePluginCategory {

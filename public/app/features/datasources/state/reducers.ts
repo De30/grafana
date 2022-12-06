@@ -1,6 +1,12 @@
 import { AnyAction, createAction } from '@reduxjs/toolkit';
 
-import { DataSourcePluginMeta, DataSourceSettings, LayoutMode, LayoutModes } from '@grafana/data';
+import {
+  DataCatalogueProvider,
+  DataSourcePluginMeta,
+  DataSourceSettings,
+  LayoutMode,
+  LayoutModes,
+} from '@grafana/data';
 import { DataSourcesState, DataSourceSettingsState, TestingStatus } from 'app/types';
 
 import { GenericDataSourcePlugin } from '../types';
@@ -107,6 +113,7 @@ export const dataSourcesReducer = (state: DataSourcesState = initialState, actio
 
 export const initialDataSourceSettingsState: DataSourceSettingsState = {
   testingStatus: {},
+  exploreDisplay: {},
   loadError: null,
   loading: true,
   plugin: null,
@@ -123,6 +130,12 @@ export const testDataSourceStarting = createAction<undefined>('dataSourceSetting
 export const testDataSourceSucceeded = createAction<TestingStatus>('dataSourceSettings/testDataSourceSucceeded');
 
 export const testDataSourceFailed = createAction<TestingStatus>('dataSourceSettings/testDataSourceFailed');
+
+type SetExploreDisplayAction = {
+  dataCatalogueProvider?: DataCatalogueProvider;
+  exploreUrl?: string;
+};
+export const setExploreDisplay = createAction<SetExploreDisplayAction>('dataSourceSettings/setExploreDisplay');
 
 export const dataSourceSettingsReducer = (
   state: DataSourceSettingsState = initialDataSourceSettingsState,
@@ -164,6 +177,16 @@ export const dataSourceSettingsReducer = (
         status: 'error',
         message: action.payload?.message,
         details: action.payload?.details,
+      },
+    };
+  }
+
+  if (setExploreDisplay.match(action)) {
+    return {
+      ...state,
+      exploreDisplay: {
+        dataCatalogueProvider: action.payload.dataCatalogueProvider,
+        exploreUrl: action.payload.exploreUrl,
       },
     };
   }

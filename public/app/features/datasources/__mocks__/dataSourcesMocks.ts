@@ -97,6 +97,7 @@ export const getMockDataSourceSettingsState = (overrides?: Partial<DataSourceSet
       testingStatus: {},
       loadError: null,
       loading: false,
+      exploreDisplay: {},
     },
     overrides
   );

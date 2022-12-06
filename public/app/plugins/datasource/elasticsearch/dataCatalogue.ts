@@ -1,4 +1,4 @@
-import { DataCatalogueContext, DataCatalogueBuilder, isDataCatalogueContextWithQuery } from '@grafana/data';
+import { DataCatalogueContext, DataCatalogueBuilder } from '@grafana/data';
 
 import { ElasticDatasource } from './datasource';
 import { ElasticsearchQuery } from './types';
@@ -36,25 +36,22 @@ export const getRootDataCatalogueItem = async ({
                 .addKeyValue('Health', stats.indices[indexName].health)
                 .addKeyValue('Status', stats.indices[indexName].status)
                 .addKeyValue('Docs', stats.indices[indexName].total.docs.count)
-                .addAction('Show data for this index', () => {
-                  if (isDataCatalogueContextWithQuery<ElasticsearchQuery>(context)) {
-                    context.changeQuery({
-                      refId: context.queryRefId,
-                      query: `_index:"${indexName}"`,
-                      metrics: [{ type: 'raw_data', id: '1' }],
-                      timeField: datasource.timeField,
-                      bucketAggs: [
-                        {
-                          id: '2',
-                          type: 'date_histogram',
-                          field: datasource.timeField,
-                        },
-                      ],
-                    });
-                    context.runQuery();
-                    context.closeDataCatalogue();
-                  }
-                })
+                .addRunQueryAction<Omit<ElasticsearchQuery, 'refId'>>(
+                  'Show data for this index',
+                  {
+                    query: `_index:"${indexName}"`,
+                    metrics: [{ type: 'raw_data', id: '1' }],
+                    timeField: datasource.timeField,
+                    bucketAggs: [
+                      {
+                        id: '2',
+                        type: 'date_histogram',
+                        field: datasource.timeField,
+                      },
+                    ],
+                  },
+                  context
+                )
                 .loadItems(async () => {
                   const mappings = await datasource.getMappings(indexName);
                   const properties = mappings[indexName]?.mappings.properties;
@@ -97,7 +94,7 @@ export const getRootDataCatalogueItem = async ({
     item.addKeyValue('Build data', build.date);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, {
+  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
     data,
     configuration,
     statistics,

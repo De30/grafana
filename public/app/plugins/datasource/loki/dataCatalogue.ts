@@ -47,5 +47,5 @@ export const getRootDataCatalogueItem = async ({
     ]);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, { data, status });
+  return new DataCatalogueBuilder().fromDataSource(datasource, context, { data, status });
 };

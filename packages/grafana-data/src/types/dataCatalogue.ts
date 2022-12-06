@@ -12,6 +12,7 @@ export enum DataCatalogueItemAttributeType {
   KeyValue = 'KeyValue',
   Icon = 'Icon',
   Action = 'Action',
+  ActionLink = 'ActionLink',
   Image = 'Image',
   Link = 'Link',
   Description = 'Description',
@@ -49,6 +50,12 @@ export const IsDataCatalogueItemAttributeAction = (
   attribute: DataCatalogueItemAttribute
 ): attribute is DataCatalogueItemAttributeAction => {
   return attribute.type === DataCatalogueItemAttributeType.Action;
+};
+
+export const IsDataCatalogueItemAttributeActionLink = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeActionLink => {
+  return attribute.type === DataCatalogueItemAttributeType.ActionLink;
 };
 
 export const IsDataCatalogueItemAttributeTag = (
@@ -94,6 +101,17 @@ export class DataCatalogueItemAttributeAction implements DataCatalogueItemAttrib
   constructor(name: string, handler: () => void) {
     this.name = name;
     this.handler = handler;
+  }
+}
+
+export class DataCatalogueItemAttributeActionLink implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.ActionLink;
+  name: string;
+  url: string;
+
+  constructor(name: string, url: string) {
+    this.name = name;
+    this.url = url;
   }
 }
 
@@ -206,6 +224,25 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     return this;
   }
 
+  addActionLink(name: string, url: string) {
+    this.attributes.push(new DataCatalogueItemAttributeActionLink(name, url));
+    return this;
+  }
+
+  addRunQueryAction<TQuery extends Omit<DataQuery, 'refId'>>(
+    name: string,
+    query: TQuery,
+    context: DataCatalogueContext
+  ) {
+    const { url, handler } = dataCatalogueQueryRunnerBuilder<TQuery>(query, context);
+    if (handler) {
+      this.addAction(name, handler);
+    } else if (url) {
+      this.addActionLink(name, url);
+    }
+    return this;
+  }
+
   addTag(tag: string) {
     this.attributes.push(new DataCatalogueItemAttributeTag(tag));
     return this;
@@ -248,6 +285,7 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
 
   fromDataSource<TQuery extends DataQuery, TOptions extends DataSourceJsonData>(
     datasource: DataSourceApi<TQuery, TOptions>,
+    context: DataCatalogueContext,
     categories: {
       data?: (item: DataCatalogueBuilder) => void;
       configuration?: (item: DataCatalogueBuilder) => void;
@@ -265,6 +303,11 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     this.addDescription(datasource.meta.info.description);
     datasource.meta.info.version && this.addKeyValue('Version', datasource.meta.info.version);
     this.addImage(datasource.meta.info.logos.small);
+
+    if (isDataCatalogueContextExploreLinkBuilder(context)) {
+      const exploreUrl = context.createExploreUrl([]);
+      this.addLink(exploreUrl, 'Open Grafana Explore');
+    }
 
     if (datasource.meta.metrics) {
       this.addTag('metrics');
@@ -319,6 +362,27 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   }
 }
 
+export const dataCatalogueQueryRunnerBuilder = <TQuery extends Omit<DataQuery, 'refId'>>(
+  query: TQuery,
+  context: DataCatalogueContext
+) => {
+  if (isDataCatalogueContextWithQuery<TQuery & { refId: string }>(context)) {
+    return {
+      handler: () => {
+        context.changeQuery({ ...query, refId: context.queryRefId });
+        context.runQuery();
+        context.closeDataCatalogue();
+      },
+    };
+  } else if (isDataCatalogueContextExploreLinkBuilder(context)) {
+    return {
+      url: context.createExploreUrl([{ ...query, refId: 'A' }]),
+    };
+  } else {
+    return {};
+  }
+};
+
 export interface DataCatalogueContext {
   closeDataCatalogue: () => void;
   app?: CoreApp;
@@ -335,4 +399,14 @@ export const isDataCatalogueContextWithQuery = <TQuery extends DataQuery>(
 ): context is DataCatalogueContextWithQuery<TQuery> => {
   const contextWithQuery = context as DataCatalogueContextWithQuery<TQuery>;
   return !!contextWithQuery.queryRefId && !!contextWithQuery.changeQuery && !!contextWithQuery.runQuery;
+};
+
+export interface DataCatalogueContextWithExploreLinkBuilder extends DataCatalogueContext {
+  createExploreUrl: (queries: DataQuery[]) => string;
+}
+
+export const isDataCatalogueContextExploreLinkBuilder = (
+  context: DataCatalogueContext
+): context is DataCatalogueContextWithExploreLinkBuilder => {
+  return (context as DataCatalogueContextWithExploreLinkBuilder).createExploreUrl !== undefined;
 };
