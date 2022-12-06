@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/slugify"
@@ -25,8 +26,9 @@ import (
 var _ entity.EntityStoreServer = &sqlEntityServer{}
 var _ entity.EntityStoreAdminServer = &sqlEntityServer{}
 
-func ProvideSQLEntityServer(db db.DB, cfg *setting.Cfg, grpcServerProvider grpcserver.Provider, kinds kind.KindRegistry, resolver resolver.EntityReferenceResolver) entity.EntityStoreServer {
+func ProvideSQLEntityServer(db db.DB, cfg *setting.Cfg, grpcServerProvider grpcserver.Provider, kinds kind.KindRegistry, resolver resolver.EntityReferenceResolver, bus bus.Bus) entity.EntityStoreServer {
 	entityServer := &sqlEntityServer{
+		bus:      bus,
 		sess:     db.GetSqlxSession(),
 		log:      log.New("sql-entity-server"),
 		kinds:    kinds,
@@ -37,6 +39,7 @@ func ProvideSQLEntityServer(db db.DB, cfg *setting.Cfg, grpcServerProvider grpcs
 }
 
 type sqlEntityServer struct {
+	bus      bus.Bus
 	log      log.Logger
 	sess     *session.SessionDB
 	kinds    kind.KindRegistry
@@ -267,8 +270,18 @@ func (s *sqlEntityServer) Write(ctx context.Context, r *entity.WriteEntityReques
 	return s.AdminWrite(ctx, entity.ToAdminWriteEntityRequest(r))
 }
 
-//nolint:gocyclo
 func (s *sqlEntityServer) AdminWrite(ctx context.Context, r *entity.AdminWriteEntityRequest) (*entity.WriteEntityResponse, error) {
+	resp, err := s.adminWrite(ctx, r)
+	if err != nil {
+		s.bus.Publish(ctx, EntityWriteEvent{
+			Kind: r.GRN.Kind,
+		})
+	}
+	return resp, err
+}
+
+//nolint:gocyclo
+func (s *sqlEntityServer) adminWrite(ctx context.Context, r *entity.AdminWriteEntityRequest) (*entity.WriteEntityResponse, error) {
 	grn, err := s.validateGRN(ctx, r.GRN)
 	if err != nil {
 		return nil, err
@@ -734,3 +747,13 @@ func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequ
 	}
 	return rsp, err
 }
+
+type EntityWriteEvent struct {
+	// string identifier of the kind
+	Kind string
+}
+
+// type EntityAdminWriteEvent struct {
+// 	// string identifier of the kind
+// 	Kind string
+// }
