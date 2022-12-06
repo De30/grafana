@@ -4,7 +4,7 @@ import (
 	"context"
 
 	googletokenprovider "github.com/grafana/grafana-google-sdk-go/pkg/tokenprovider"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 )
 
 type gceAccessTokenProvider struct {
@@ -12,8 +12,8 @@ type gceAccessTokenProvider struct {
 	ctx    context.Context
 }
 
-func newGceAccessTokenProvider(ctx context.Context, ds DSInfo, pluginRoute *plugins.Route,
-	authParams *plugins.JWTTokenAuth) *gceAccessTokenProvider {
+func newGceAccessTokenProvider(ctx context.Context, ds DSInfo, pluginRoute *pluginLib.Route,
+	authParams *pluginLib.JWTTokenAuth) *gceAccessTokenProvider {
 	cfg := googletokenprovider.Config{
 		RoutePath:         pluginRoute.Path,
 		RouteMethod:       pluginRoute.Method,

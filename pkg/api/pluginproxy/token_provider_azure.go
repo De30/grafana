@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/grafana-azure-sdk-go/azsettings"
 	"github.com/grafana/grafana-azure-sdk-go/aztokenprovider"
 
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -18,7 +18,7 @@ type azureAccessTokenProvider struct {
 	scopes        []string
 }
 
-func newAzureAccessTokenProvider(ctx context.Context, cfg *setting.Cfg, authParams *plugins.JWTTokenAuth) (*azureAccessTokenProvider, error) {
+func newAzureAccessTokenProvider(ctx context.Context, cfg *setting.Cfg, authParams *pluginLib.JWTTokenAuth) (*azureAccessTokenProvider, error) {
 	credentials := getAzureCredentials(cfg.Azure, authParams)
 	tokenProvider, err := aztokenprovider.NewAzureAccessTokenProvider(cfg.Azure, credentials)
 	if err != nil {
@@ -35,7 +35,7 @@ func (provider *azureAccessTokenProvider) GetAccessToken() (string, error) {
 	return provider.tokenProvider.GetAccessToken(provider.ctx, provider.scopes)
 }
 
-func getAzureCredentials(settings *azsettings.AzureSettings, authParams *plugins.JWTTokenAuth) azcredentials.AzureCredentials {
+func getAzureCredentials(settings *azsettings.AzureSettings, authParams *pluginLib.JWTTokenAuth) azcredentials.AzureCredentials {
 	authType := strings.ToLower(authParams.Params["azure_auth_type"])
 	clientId := authParams.Params["client_id"]
 

@@ -35,8 +35,6 @@ var (
 	ErrInvalidPluginJSONFilePath = errors.New("invalid plugin.json filepath was provided")
 )
 
-var _ plugins.ErrorResolver = (*Loader)(nil)
-
 type Loader struct {
 	pluginFinder       finder.Finder
 	processManager     process.Service

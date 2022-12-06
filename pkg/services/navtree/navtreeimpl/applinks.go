@@ -6,10 +6,11 @@ import (
 	"strconv"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/navtree"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -36,7 +37,7 @@ func (s *ServiceImpl) addAppLinks(treeRoot *navtree.NavTreeRoot, c *models.ReqCo
 		return false
 	}
 
-	for _, plugin := range s.pluginService.Plugins(c.Req.Context(), plugins.App) {
+	for _, plugin := range s.pluginStore.Plugins(c.Req.Context(), plugins.App) {
 		if !isPluginEnabled(plugin) {
 			continue
 		}
@@ -237,9 +238,9 @@ func (s *ServiceImpl) addPluginToSection(c *models.ReqContext, treeRoot *navtree
 	}
 }
 
-func (s *ServiceImpl) hasAccessToInclude(c *models.ReqContext, pluginID string) func(include *plugins.Includes) bool {
+func (s *ServiceImpl) hasAccessToInclude(c *models.ReqContext, pluginID string) func(include *pluginLib.Includes) bool {
 	hasAccess := ac.HasAccess(s.accessControl, c)
-	return func(include *plugins.Includes) bool {
+	return func(include *pluginLib.Includes) bool {
 		useRBAC := s.features.IsEnabled(featuremgmt.FlagAccessControlOnCall) &&
 			!s.accessControl.IsDisabled() && include.RequiresRBACAction()
 		if useRBAC && !hasAccess(ac.ReqHasRole(include.Role), ac.EvalPermission(include.Action)) {

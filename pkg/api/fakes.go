@@ -7,8 +7,6 @@ import (
 )
 
 type fakePluginInstaller struct {
-	plugins.Installer
-
 	plugins map[string]fakePlugin
 }
 
@@ -43,8 +41,6 @@ func (ps *fakeRendererManager) Renderer(_ context.Context) *plugins.Plugin {
 }
 
 type fakePluginStaticRouteResolver struct {
-	plugins.StaticRouteResolver
-
 	routes []*plugins.StaticRoute
 }
 

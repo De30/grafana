@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/org"
 )
 
@@ -59,14 +60,14 @@ func (e SignatureError) Error() string {
 	return fmt.Sprintf("plugin '%s' has an unknown signature state", e.PluginID)
 }
 
-func (e SignatureError) AsErrorCode() ErrorCode {
+func (e SignatureError) AsErrorCode() pluginLib.ErrorCode {
 	switch e.SignatureStatus {
 	case SignatureInvalid:
-		return ErrorCodeSignatureInvalid
+		return pluginLib.ErrorCodeSignatureInvalid
 	case SignatureModified:
-		return ErrorCodeSignatureModified
+		return pluginLib.ErrorCodeSignatureModified
 	case SignatureUnsigned:
-		return ErrorCodeSignatureMissing
+		return pluginLib.ErrorCodeSignatureMissing
 	case SignatureInternal, SignatureValid:
 		return ""
 	}
@@ -201,9 +202,9 @@ type Signature struct {
 }
 
 type PluginMetaDTO struct {
-	JSONData
+	pluginLib.JSONData
 
-	Signature SignatureStatus `json:"signature"`
+	Signature pluginLib.SignatureStatus `json:"signature"`
 
 	Module  string `json:"module"`
 	BaseURL string `json:"baseUrl"`
@@ -238,29 +239,29 @@ type DataSourceDTO struct {
 }
 
 type PanelDTO struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	Info          Info   `json:"info"`
-	HideFromList  bool   `json:"hideFromList"`
-	Sort          int    `json:"sort"`
-	SkipDataQuery bool   `json:"skipDataQuery"`
-	ReleaseState  string `json:"state"`
-	BaseURL       string `json:"baseUrl"`
-	Signature     string `json:"signature"`
-	Module        string `json:"module"`
+	ID            string         `json:"id"`
+	Name          string         `json:"name"`
+	Info          pluginLib.Info `json:"info"`
+	HideFromList  bool           `json:"hideFromList"`
+	Sort          int            `json:"sort"`
+	SkipDataQuery bool           `json:"skipDataQuery"`
+	ReleaseState  string         `json:"state"`
+	BaseURL       string         `json:"baseUrl"`
+	Signature     string         `json:"signature"`
+	Module        string         `json:"module"`
 }
 
 const (
-	ErrorCodeSignatureMissing  ErrorCode = "ErrorCodeSignatureMissing"
-	ErrorCodeSignatureModified ErrorCode = "ErrorCodeSignatureModified"
-	ErrorCodeSignatureInvalid  ErrorCode = "ErrorCodeSignatureInvalid"
+	SignatureMissingErrorCode  ErrorCode = "SignatureMissingErrorCode"
+	SignatureModifiedErrorCode ErrorCode = "SignatureModifiedErrorCode"
+	SignatureInvalidErrorCode  ErrorCode = "SignatureInvalidErrorCode"
 )
 
 type ErrorCode string
 
 type Error struct {
-	ErrorCode `json:"errorCode"`
-	PluginID  string `json:"pluginId,omitempty"`
+	pluginLib.ErrorCode `json:"errorCode"`
+	PluginID            string `json:"pluginId,omitempty"`
 }
 
 type PreloadPlugin struct {

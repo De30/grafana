@@ -12,8 +12,6 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var _ plugins.Store = (*Service)(nil)
-
 type Service struct {
 	gCfg           *setting.Cfg
 	cfg            *config.Cfg

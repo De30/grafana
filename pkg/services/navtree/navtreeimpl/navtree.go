@@ -14,8 +14,8 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/navtree"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	pref "github.com/grafana/grafana/pkg/services/preference"
 	"github.com/grafana/grafana/pkg/services/querylibrary"
 	"github.com/grafana/grafana/pkg/services/star"
@@ -26,7 +26,7 @@ type ServiceImpl struct {
 	cfg                  *setting.Cfg
 	log                  log.Logger
 	accessControl        ac.AccessControl
-	pluginService        pluginsintegration.PluginService
+	pluginStore          plugins.Store
 	pluginSettings       pluginsettings.Service
 	starService          star.Service
 	features             *featuremgmt.FeatureManager
@@ -47,12 +47,12 @@ type NavigationAppConfig struct {
 	Text       string
 }
 
-func ProvideService(cfg *setting.Cfg, accessControl ac.AccessControl, pluginService pluginsintegration.PluginService, pluginSettings pluginsettings.Service, starService star.Service, features *featuremgmt.FeatureManager, dashboardService dashboards.DashboardService, accesscontrolService ac.Service, kvStore kvstore.KVStore, apiKeyService apikey.Service, queryLibraryService querylibrary.HTTPService) navtree.Service {
+func ProvideService(cfg *setting.Cfg, accessControl ac.AccessControl, pluginStore plugins.Store, pluginSettings pluginsettings.Service, starService star.Service, features *featuremgmt.FeatureManager, dashboardService dashboards.DashboardService, accesscontrolService ac.Service, kvStore kvstore.KVStore, apiKeyService apikey.Service, queryLibraryService querylibrary.HTTPService) navtree.Service {
 	service := &ServiceImpl{
 		cfg:                  cfg,
 		log:                  log.New("navtree service"),
 		accessControl:        accessControl,
-		pluginService:        pluginService,
+		pluginStore:          pluginStore,
 		pluginSettings:       pluginSettings,
 		starService:          starService,
 		features:             features,

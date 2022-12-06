@@ -14,8 +14,6 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/storage"
 )
 
-var _ plugins.Installer = (*PluginInstaller)(nil)
-
 type PluginInstaller struct {
 	pluginRepo     repo.Service
 	pluginStorage  storage.Manager

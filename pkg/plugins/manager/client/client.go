@@ -18,8 +18,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/store"
 )
 
-var _ plugins.Client = (*Service)(nil)
-
 type Service struct {
 	pluginRegistry registry.Service
 	jwtAuthService jwt.PluginAuthService

@@ -18,7 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/repo"
 	"github.com/grafana/grafana/pkg/plugins/storage"
@@ -26,6 +26,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -59,7 +60,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 	}
 
 	// Filter plugins
-	pluginDefinitions := hs.pluginService.Plugins(c.Req.Context())
+	pluginDefinitions := hs.pluginStore.Plugins(c.Req.Context())
 	filteredPluginDefinitions := []plugins.PluginDTO{}
 	filteredPluginIDs := map[string]bool{}
 	for _, pluginDef := range pluginDefinitions {
@@ -89,7 +90,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 			continue
 		}
 
-		if pluginDef.State == plugins.AlphaRelease && !hs.Cfg.PluginsEnableAlpha {
+		if pluginDef.State == pluginLib.AlphaRelease && !hs.Cfg.PluginsEnableAlpha {
 			continue
 		}
 
@@ -160,7 +161,7 @@ func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 func (hs *HTTPServer) GetPluginSettingByID(c *models.ReqContext) response.Response {
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID)
+	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		return response.Error(http.StatusNotFound, "Plugin not found, no installed plugin with that id", nil)
 	}
@@ -233,7 +234,7 @@ func (hs *HTTPServer) UpdatePluginSetting(c *models.ReqContext) response.Respons
 	}
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	if _, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID); !exists {
+	if _, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID); !exists {
 		return response.Error(404, "Plugin not installed", nil)
 	}
 
@@ -303,7 +304,7 @@ func (hs *HTTPServer) CollectPluginMetrics(c *models.ReqContext) response.Respon
 // /public/plugins/:pluginId/*
 func (hs *HTTPServer) getPluginAssets(c *models.ReqContext) {
 	pluginID := web.Params(c.Req)[":pluginId"]
-	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID)
+	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		c.JsonApiErr(404, "Plugin not found", nil)
 		return
@@ -411,7 +412,7 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 	}
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	err := hs.pluginService.Add(c.Req.Context(), pluginID, dto.Version, plugins.CompatOpts{
+	err := hs.pluginInstaller.Add(c.Req.Context(), pluginID, dto.Version, plugins.CompatOpts{
 		GrafanaVersion: hs.Cfg.BuildVersion,
 		OS:             runtime.GOOS,
 		Arch:           runtime.GOARCH,
@@ -446,7 +447,7 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	err := hs.pluginService.Remove(c.Req.Context(), pluginID)
+	err := hs.pluginInstaller.Remove(c.Req.Context(), pluginID)
 	if err != nil {
 		if errors.Is(err, plugins.ErrPluginNotInstalled) {
 			return response.Error(http.StatusNotFound, "Plugin not installed", err)
@@ -485,7 +486,7 @@ func translatePluginRequestErrorToAPIError(err error) response.Response {
 }
 
 func (hs *HTTPServer) pluginMarkdown(ctx context.Context, pluginId string, name string) ([]byte, error) {
-	plugin, exists := hs.pluginService.Plugin(ctx, pluginId)
+	plugin, exists := hs.pluginStore.Plugin(ctx, pluginId)
 	if !exists {
 		return nil, plugins.NotFoundError{PluginID: pluginId}
 	}

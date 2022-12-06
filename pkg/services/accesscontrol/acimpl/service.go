@@ -14,7 +14,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/localcache"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/metrics"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/api"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
@@ -24,7 +24,7 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var _ plugins.RoleRegistry = &Service{}
+//var _ plugins.RoleRegistry = &Service{}
 
 const (
 	cacheTTL = 10 * time.Second
@@ -216,7 +216,7 @@ func permissionCacheKey(user *user.SignedInUser) (string, error) {
 
 // DeclarePluginRoles allow the caller to declare, to the service, plugin roles and their assignments
 // to organization roles ("Viewer", "Editor", "Admin") or "Grafana Admin"
-func (s *Service) DeclarePluginRoles(_ context.Context, ID, name string, regs []plugins.RoleRegistration) error {
+func (s *Service) DeclarePluginRoles(_ context.Context, ID, name string, regs []pluginLib.RoleRegistration) error {
 	// If accesscontrol is disabled no need to register roles
 	if accesscontrol.IsDisabled(s.cfg) {
 		return nil

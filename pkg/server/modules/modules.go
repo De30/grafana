@@ -8,10 +8,12 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/plugins/manager"
+	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/server/backgroundsvcs"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/services/store/entity/sqlstash"
 	"github.com/grafana/grafana/pkg/services/store/kind"
@@ -38,9 +40,9 @@ type Modules struct {
 	backgroundServiceRegistry *backgroundsvcs.BackgroundServiceRegistry
 	db                        db.DB
 	entityReferenceResolver   resolver.EntityReferenceResolver
-	pluginStore               plugins.Store
+	pluginStore               *store.Service
 	pluginClient              plugins.Client
-	pluginInstaller           plugins.Installer
+	pluginInstaller           *manager.PluginInstaller
 
 	ModuleManager  *modules.Manager
 	ServiceManager *services.Manager
@@ -56,7 +58,7 @@ func ProvideService(
 	roleRegistry accesscontrol.RoleRegistry,
 	db db.DB,
 	entityReferenceResolver resolver.EntityReferenceResolver,
-	store plugins.Store, client plugins.Client, installer plugins.Installer,
+	store *store.Service, client plugins.Client, installer *manager.PluginInstaller,
 ) *Modules {
 	m := &Modules{
 		cfg: cfg,

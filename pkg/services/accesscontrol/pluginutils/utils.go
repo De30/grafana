@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
 // ValidatePluginPermissions errors when a permission does not match expected pattern for plugins
@@ -40,7 +41,7 @@ func ValidatePluginRole(pluginID string, role ac.RoleDTO) error {
 	return ValidatePluginPermissions(pluginID, role.Permissions)
 }
 
-func ToRegistrations(pluginID, pluginName string, regs []plugins.RoleRegistration) []ac.RoleRegistration {
+func ToRegistrations(pluginID, pluginName string, regs []pluginLib.RoleRegistration) []ac.RoleRegistration {
 	res := make([]ac.RoleRegistration, 0, len(regs))
 	for i := range regs {
 		res = append(res, ac.RoleRegistration{
@@ -63,7 +64,7 @@ func roleName(pluginID, roleName string) string {
 	return fmt.Sprintf("%v%v:%v", ac.PluginRolePrefix, pluginID, strings.Replace(strings.ToLower(roleName), " ", "-", -1))
 }
 
-func toPermissions(perms []plugins.Permission) []ac.Permission {
+func toPermissions(perms []pluginLib.Permission) []ac.Permission {
 	res := make([]ac.Permission, 0, len(perms))
 	for i := range perms {
 		res = append(res, ac.Permission{Action: perms[i].Action, Scope: perms[i].Scope})

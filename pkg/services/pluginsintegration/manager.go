@@ -8,29 +8,32 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	pluginManagerLib "github.com/grafana/grafana/pkg/plugins/manager"
+	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
-var _ PluginManagerServer = (*PluginManagerServerService)(nil) // gRPC
+var _ PluginManagerServer = (*PluginManagerServerService)(nil)
 
 type PluginManagerServerService struct {
 	*services.BasicService
-	store     plugins.Store
+	store     *store.Service
 	client    plugins.Client
-	installer plugins.Installer
+	installer *pluginManagerLib.PluginInstaller
 	log       log.Logger
 }
 
-func ProvidePluginManagerServerService(grpcServerProvider grpcserver.Provider, store plugins.Store, client plugins.Client, installer plugins.Installer) *PluginManagerServerService {
+func ProvidePluginManagerServerService(grpcServerProvider grpcserver.Provider, store *store.Service, client plugins.Client, installer *pluginManagerLib.PluginInstaller) *PluginManagerServerService {
 	srv := NewPluginManagerServer(store, client, installer)
 	RegisterPluginManagerServer(grpcServerProvider.GetServer(), srv)
 	srv.BasicService = services.NewBasicService(srv.start, srv.run, srv.stop)
 	return srv
 }
 
-func NewPluginManagerServer(store plugins.Store, client plugins.Client, installer plugins.Installer) *PluginManagerServerService {
+func NewPluginManagerServer(store *store.Service, client plugins.Client, installer *pluginManagerLib.PluginInstaller) *PluginManagerServerService {
 	return &PluginManagerServerService{
 		store:     store,
 		client:    client,
@@ -58,15 +61,58 @@ func (s *PluginManagerServerService) stop(err error) error {
 }
 
 func (s *PluginManagerServerService) Plugin(ctx context.Context, pluginID string) (plugins.PluginDTO, bool) {
-	return s.store.Plugin(ctx, pluginID)
+	libDTO, exists := s.store.Plugin(ctx, pluginID)
+	if !exists {
+		return plugins.PluginDTO{}, false
+	}
+
+	return toGrafanaDTO(libDTO), true
+}
+
+func toGrafanaDTO(gDTO pluginLib.PluginDTO) plugins.PluginDTO {
+	dto := plugins.PluginDTO{
+		JSONData:        gDTO.JSONData,
+		Class:           gDTO.Class,
+		IncludedInAppID: gDTO.IncludedInAppID,
+		DefaultNavURL:   gDTO.DefaultNavURL,
+		Pinned:          gDTO.Pinned,
+		Signature:       gDTO.Signature,
+		SignatureType:   gDTO.SignatureType,
+		SignatureOrg:    gDTO.SignatureOrg,
+		SignatureError:  gDTO.SignatureError,
+		Module:          gDTO.Module,
+		BaseURL:         gDTO.BaseURL,
+		//StreamHandler:   nil,
+	}
+
+	return dto
 }
 
 func (s *PluginManagerServerService) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
-	return s.store.Plugins(ctx, types...)
+	libTypes := toLibTypes(types)
+
+	var res []plugins.PluginDTO
+	for _, p := range s.store.Plugins(ctx, libTypes...) {
+		res = append(res, toGrafanaDTO(p))
+	}
+
+	return res
+}
+
+func toLibTypes(types []plugins.Type) []pluginLib.Type {
+	var libTypes []pluginLib.Type
+	for _, t := range types {
+		libTypes = append(libTypes, pluginLib.Type(t))
+	}
+	return libTypes
 }
 
 func (s *PluginManagerServerService) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
-	return s.installer.Add(ctx, pluginID, version, opts)
+	return s.installer.Add(ctx, pluginID, version, pluginLib.CompatOpts{
+		GrafanaVersion: opts.GrafanaVersion,
+		OS:             opts.OS,
+		Arch:           opts.OS,
+	})
 }
 
 func (s *PluginManagerServerService) Remove(ctx context.Context, pluginID string) error {
@@ -93,7 +139,7 @@ func (s *PluginManagerServerService) GetPlugins(ctx context.Context, req *GetPlu
 	}
 
 	var ps []*PluginData
-	for _, p := range s.store.Plugins(ctx, types...) {
+	for _, p := range s.store.Plugins(ctx, toLibTypes(types)...) {
 		ps = append(ps, toProto(p))
 	}
 
@@ -102,7 +148,7 @@ func (s *PluginManagerServerService) GetPlugins(ctx context.Context, req *GetPlu
 	}, nil
 }
 
-func toProto(p plugins.PluginDTO) *PluginData {
+func toProto(p pluginLib.PluginDTO) *PluginData {
 	var links []*PluginData_JsonData_Info_Link
 	for _, l := range p.Info.Links {
 		links = append(links, &PluginData_JsonData_Info_Link{
@@ -297,7 +343,7 @@ func protoRole(r org.RoleType) PluginData_JsonData_Role {
 }
 
 func (s *PluginManagerServerService) AddPlugin(ctx context.Context, req *AddPluginRequest) (*AddPluginResponse, error) {
-	err := s.installer.Add(ctx, req.Id, req.Version, plugins.CompatOpts{
+	err := s.installer.Add(ctx, req.Id, req.Version, pluginLib.CompatOpts{
 		GrafanaVersion: req.Opts.GrafanaVersion,
 		OS:             req.Opts.Os,
 		Arch:           req.Opts.Arch,

@@ -14,14 +14,17 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins/adapters"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
-func ProvideService(cacheService *localcache.CacheService, dataSourceCache datasources.CacheService,
-	dataSourceService datasources.DataSourceService, pluginSettingsService pluginsettings.Service) *Provider {
+func ProvideService(cacheService *localcache.CacheService, pluginStore plugins.Store,
+	dataSourceCache datasources.CacheService, dataSourceService datasources.DataSourceService,
+	pluginSettingsService pluginsettings.Service) *Provider {
 	return &Provider{
 		cacheService:          cacheService,
+		pluginStore:           pluginStore,
 		dataSourceCache:       dataSourceCache,
 		dataSourceService:     dataSourceService,
 		pluginSettingsService: pluginSettingsService,
@@ -30,8 +33,8 @@ func ProvideService(cacheService *localcache.CacheService, dataSourceCache datas
 }
 
 type Provider struct {
-	cacheService *localcache.CacheService
-	//pluginService         pluginsintegration.PluginService
+	cacheService          *localcache.CacheService
+	pluginStore           plugins.Store
 	dataSourceCache       datasources.CacheService
 	dataSourceService     datasources.DataSourceService
 	pluginSettingsService pluginsettings.Service
@@ -66,10 +69,10 @@ const pluginSettingsCacheTTL = 5 * time.Second
 const pluginSettingsCachePrefix = "plugin-setting-"
 
 func (p *Provider) pluginContext(ctx context.Context, pluginID string, user *user.SignedInUser) (backend.PluginContext, bool, error) {
-	//plugin, exists := p.pluginService.Plugin(ctx, pluginID)
-	//if !exists {
-	//	return backend.PluginContext{}, false, nil
-	//}
+	plugin, exists := p.pluginStore.Plugin(ctx, pluginID)
+	if !exists {
+		return backend.PluginContext{}, false, nil
+	}
 
 	jsonData := json.RawMessage{}
 	decryptedSecureJSONData := map[string]string{}
@@ -93,7 +96,7 @@ func (p *Provider) pluginContext(ctx context.Context, pluginID string, user *use
 
 	return backend.PluginContext{
 		OrgID:    user.OrgID,
-		PluginID: pluginID,
+		PluginID: plugin.ID,
 		User:     adapters.BackendUserFromSignedInUser(user),
 		AppInstanceSettings: &backend.AppInstanceSettings{
 			JSONData:                jsonData,

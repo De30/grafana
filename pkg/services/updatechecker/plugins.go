@@ -12,8 +12,7 @@ import (
 	"github.com/hashicorp/go-version"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -22,19 +21,19 @@ type PluginsService struct {
 
 	enabled        bool
 	grafanaVersion string
-	pluginService  pluginsintegration.PluginService
+	pluginStore    plugins.Store
 	httpClient     httpClient
 	mutex          sync.RWMutex
 	log            log.Logger
 }
 
-func ProvidePluginsService(cfg *setting.Cfg, pluginService pluginsintegration.PluginService) *PluginsService {
+func ProvidePluginsService(cfg *setting.Cfg, pluginStore plugins.Store) *PluginsService {
 	return &PluginsService{
 		enabled:          cfg.CheckForPluginUpdates,
 		grafanaVersion:   cfg.BuildVersion,
 		httpClient:       &http.Client{Timeout: 10 * time.Second},
 		log:              log.New("plugins.update.checker"),
-		pluginService:    pluginService,
+		pluginStore:      pluginStore,
 		availableUpdates: make(map[string]string),
 	}
 }
@@ -71,7 +70,7 @@ func (s *PluginsService) HasUpdate(ctx context.Context, pluginID string) (string
 	s.mutex.RUnlock()
 	if updateAvailable {
 		// check if plugin has already been updated since the last invocation of `checkForUpdates`
-		plugin, exists := s.pluginService.Plugin(ctx, pluginID)
+		plugin, exists := s.pluginStore.Plugin(ctx, pluginID)
 		if !exists {
 			return "", false
 		}
@@ -157,7 +156,7 @@ func (s *PluginsService) pluginIDsCSV(m map[string]plugins.PluginDTO) string {
 
 func (s *PluginsService) pluginsEligibleForVersionCheck(ctx context.Context) map[string]plugins.PluginDTO {
 	result := make(map[string]plugins.PluginDTO)
-	for _, p := range s.pluginService.Plugins(ctx) {
+	for _, p := range s.pluginStore.Plugins(ctx) {
 		if p.IsCorePlugin() {
 			continue
 		}

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,12 +18,12 @@ type configReader interface {
 }
 
 type configReaderImpl struct {
-	log           log.Logger
-	pluginService pluginsintegration.PluginService
+	log         log.Logger
+	pluginStore plugins.Store
 }
 
-func newConfigReader(logger log.Logger, pluginService pluginsintegration.PluginService) configReader {
-	return &configReaderImpl{log: logger, pluginService: pluginService}
+func newConfigReader(logger log.Logger, pluginStore plugins.Store) configReader {
+	return &configReaderImpl{log: logger, pluginStore: pluginStore}
 }
 
 func (cr *configReaderImpl) readConfig(ctx context.Context, path string) ([]*pluginsAsConfig, error) {
@@ -114,7 +114,7 @@ func (cr *configReaderImpl) validatePluginsConfig(ctx context.Context, apps []*p
 		}
 
 		for _, app := range apps[i].Apps {
-			if _, exists := cr.pluginService.Plugin(ctx, app.PluginID); !exists {
+			if _, exists := cr.pluginStore.Plugin(ctx, app.PluginID); !exists {
 				return fmt.Errorf("plugin not installed: %q", app.PluginID)
 			}
 		}

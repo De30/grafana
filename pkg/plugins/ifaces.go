@@ -3,49 +3,8 @@ package plugins
 import (
 	"context"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend"
-
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 )
-
-// Store is the publicly accessible storage for plugins.
-type Store interface {
-	// Plugin finds a plugin by its ID.
-	Plugin(ctx context.Context, pluginID string) (PluginDTO, bool)
-	// Plugins returns plugins by their requested type.
-	Plugins(ctx context.Context, pluginTypes ...Type) []PluginDTO
-}
-
-type Installer interface {
-	// Add adds a new plugin.
-	Add(ctx context.Context, pluginID, version string, opts CompatOpts) error
-	// Remove removes an existing plugin.
-	Remove(ctx context.Context, pluginID string) error
-}
-
-type PluginSource struct {
-	Class Class
-	Paths []string
-}
-
-type CompatOpts struct {
-	GrafanaVersion string
-	OS             string
-	Arch           string
-}
-
-type UpdateInfo struct {
-	PluginZipURL string
-}
-
-// Client is used to communicate with backend plugin implementations.
-type Client interface {
-	backend.QueryDataHandler
-	backend.CheckHealthHandler
-	backend.StreamHandler
-	backend.CallResourceHandler
-	backend.CollectMetricsHandler
-}
 
 // BackendFactoryProvider provides a backend factory for a provided plugin.
 type BackendFactoryProvider interface {
@@ -62,14 +21,6 @@ type SecretsPluginManager interface {
 	SecretsManager(ctx context.Context) *Plugin
 }
 
-type StaticRouteResolver interface {
-	Routes() []*StaticRoute
-}
-
-type ErrorResolver interface {
-	PluginErrors() []*Error
-}
-
 type PluginLoaderAuthorizer interface {
 	// CanLoadPlugin confirms if a plugin is authorized to load
 	CanLoadPlugin(plugin *Plugin) bool
@@ -80,19 +31,13 @@ type RoleRegistry interface {
 	DeclarePluginRoles(ctx context.Context, ID, name string, registrations []RoleRegistration) error
 }
 
-// ClientMiddleware is an interface representing the ability to create a middleware
-// that implements the Client interface.
-type ClientMiddleware interface {
-	// CreateClientMiddleware creates a new client middleware.
-	CreateClientMiddleware(next Client) Client
+type PluginSource struct {
+	Class Class
+	Paths []string
 }
 
-// The ClientMiddlewareFunc type is an adapter to allow the use of ordinary
-// functions as ClientMiddleware's. If f is a function with the appropriate
-// signature, ClientMiddlewareFunc(f) is a ClientMiddleware that calls f.
-type ClientMiddlewareFunc func(next Client) Client
-
-// CreateClientMiddleware implements the ClientMiddleware interface.
-func (fn ClientMiddlewareFunc) CreateClientMiddleware(next Client) Client {
-	return fn(next)
+type CompatOpts struct {
+	GrafanaVersion string
+	OS             string
+	Arch           string
 }

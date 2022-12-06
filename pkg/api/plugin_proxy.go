@@ -34,7 +34,7 @@ func (hs *HTTPServer) ProxyPluginRequest(c *models.ReqContext) {
 
 	pluginID := web.Params(c.Req)[":pluginId"]
 
-	plugin, exists := hs.pluginService.Plugin(c.Req.Context(), pluginID)
+	plugin, exists := hs.pluginStore.Plugin(c.Req.Context(), pluginID)
 	if !exists {
 		c.JsonApiErr(http.StatusNotFound, "Plugin not found, no installed plugin with that id", nil)
 		return

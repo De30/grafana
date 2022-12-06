@@ -6,11 +6,12 @@ import (
 	"strconv"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/licensing"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/secrets/kvstore"
 	"github.com/grafana/grafana/pkg/setting"
@@ -59,7 +60,7 @@ func (hs *HTTPServer) getFrontendSettingsMap(c *models.ReqContext) (map[string]i
 
 	panels := make(map[string]plugins.PanelDTO)
 	for _, panel := range enabledPlugins[plugins.Panel] {
-		if panel.State == plugins.AlphaRelease && !hs.Cfg.PluginsEnableAlpha {
+		if panel.State == pluginLib.AlphaRelease && !hs.Cfg.PluginsEnableAlpha {
 			continue
 		}
 
@@ -332,7 +333,7 @@ func (hs *HTTPServer) getFSDataSources(c *models.ReqContext, enabledPlugins Enab
 
 	// add data sources that are built in (meaning they are not added via data sources page, nor have any entry in
 	// the datasource table)
-	for _, ds := range hs.pluginService.Plugins(c.Req.Context(), plugins.DataSource) {
+	for _, ds := range hs.pluginStore.Plugins(c.Req.Context(), plugins.DataSource) {
 		if ds.BuiltIn {
 			dto := plugins.DataSourceDTO{
 				Type:     string(ds.Type),
@@ -418,7 +419,7 @@ func (hs *HTTPServer) enabledPlugins(ctx context.Context, orgID int64) (EnabledP
 	}
 
 	apps := make(map[string]plugins.PluginDTO)
-	for _, app := range hs.pluginService.Plugins(ctx, plugins.App) {
+	for _, app := range hs.pluginStore.Plugins(ctx, plugins.App) {
 		if b, exists := pluginSettingMap[app.ID]; exists {
 			app.Pinned = b.Pinned
 			apps[app.ID] = app
@@ -427,7 +428,7 @@ func (hs *HTTPServer) enabledPlugins(ctx context.Context, orgID int64) (EnabledP
 	ep[plugins.App] = apps
 
 	dataSources := make(map[string]plugins.PluginDTO)
-	for _, ds := range hs.pluginService.Plugins(ctx, plugins.DataSource) {
+	for _, ds := range hs.pluginStore.Plugins(ctx, plugins.DataSource) {
 		if _, exists := pluginSettingMap[ds.ID]; exists {
 			dataSources[ds.ID] = ds
 		}
@@ -435,7 +436,7 @@ func (hs *HTTPServer) enabledPlugins(ctx context.Context, orgID int64) (EnabledP
 	ep[plugins.DataSource] = dataSources
 
 	panels := make(map[string]plugins.PluginDTO)
-	for _, p := range hs.pluginService.Plugins(ctx, plugins.Panel) {
+	for _, p := range hs.pluginStore.Plugins(ctx, plugins.Panel) {
 		if _, exists := pluginSettingMap[p.ID]; exists {
 			panels[p.ID] = p
 		}
@@ -458,7 +459,7 @@ func (hs *HTTPServer) pluginSettings(ctx context.Context, orgID int64) (map[stri
 	}
 
 	// fill settings from app plugins
-	for _, plugin := range hs.pluginService.Plugins(ctx, plugins.App) {
+	for _, plugin := range hs.pluginStore.Plugins(ctx, plugins.App) {
 		// ignore settings that already exist
 		if _, exists := pluginSettings[plugin.ID]; exists {
 			continue
@@ -477,7 +478,7 @@ func (hs *HTTPServer) pluginSettings(ctx context.Context, orgID int64) (map[stri
 	}
 
 	// fill settings from all remaining plugins (including potential app child plugins)
-	for _, plugin := range hs.pluginService.Plugins(ctx) {
+	for _, plugin := range hs.pluginStore.Plugins(ctx) {
 		// ignore settings that already exist
 		if _, exists := pluginSettings[plugin.ID]; exists {
 			continue

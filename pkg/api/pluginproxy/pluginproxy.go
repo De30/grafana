@@ -9,7 +9,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/setting"
@@ -21,10 +21,10 @@ import (
 
 type PluginProxy struct {
 	ps             *pluginsettings.DTO
-	pluginRoutes   []*plugins.Route
+	pluginRoutes   []*pluginLib.Route
 	ctx            *models.ReqContext
 	proxyPath      string
-	matchedRoute   *plugins.Route
+	matchedRoute   *pluginLib.Route
 	cfg            *setting.Cfg
 	secretsService secrets.Service
 	tracer         tracing.Tracer
@@ -32,7 +32,7 @@ type PluginProxy struct {
 }
 
 // NewPluginProxy creates a plugin proxy.
-func NewPluginProxy(ps *pluginsettings.DTO, routes []*plugins.Route, ctx *models.ReqContext,
+func NewPluginProxy(ps *pluginsettings.DTO, routes []*pluginLib.Route, ctx *models.ReqContext,
 	proxyPath string, cfg *setting.Cfg, secretsService secrets.Service, tracer tracing.Tracer,
 	transport *http.Transport) (*PluginProxy, error) {
 	return &PluginProxy{

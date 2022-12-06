@@ -7,12 +7,13 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/models/roletype"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/acimpl"
 	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/navtree"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -28,11 +29,11 @@ func TestAddAppLinks(t *testing.T) {
 	}
 
 	testApp1 := plugins.PluginDTO{
-		JSONData: plugins.JSONData{
+		JSONData: pluginLib.JSONData{
 			ID:   "test-app1",
 			Name: "Test app1 name",
 			Type: plugins.App,
-			Includes: []*plugins.Includes{
+			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Catalog",
 					Path:       "/a/test-app1/catalog",
@@ -51,11 +52,11 @@ func TestAddAppLinks(t *testing.T) {
 	}
 
 	testApp2 := plugins.PluginDTO{
-		JSONData: plugins.JSONData{
+		JSONData: pluginLib.JSONData{
 			ID:   "test-app2",
 			Name: "Test app2 name",
-			Type: plugins.App,
-			Includes: []*plugins.Includes{
+			Type: pluginLib.App,
+			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Hello",
 					Path:       "/a/quick-app/catalog",
@@ -68,11 +69,11 @@ func TestAddAppLinks(t *testing.T) {
 	}
 
 	testApp3 := plugins.PluginDTO{
-		JSONData: plugins.JSONData{
+		JSONData: pluginLib.JSONData{
 			ID:   "test-app3",
 			Name: "Test app3 name",
 			Type: plugins.App,
-			Includes: []*plugins.Includes{
+			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Default page",
 					Path:       "/a/test-app3/default",
@@ -108,8 +109,8 @@ func TestAddAppLinks(t *testing.T) {
 		accessControl:  accesscontrolmock.New().WithPermissions(permissions),
 		pluginSettings: &pluginSettings,
 		features:       featuremgmt.WithFeatures(),
-		pluginStore: plugins.FakePluginStore{
-			PluginList: []plugins.PluginDTO{testApp1, testApp2, testApp3},
+		pluginStore: pluginLib.FakePluginStore{
+			PluginList: []pluginLib.PluginDTO{testApp1, testApp2, testApp3},
 		},
 	}
 
@@ -383,7 +384,7 @@ func TestAddAppLinksAccessControl(t *testing.T) {
 	catalogReadAction := "test-app1.catalog:read"
 
 	testApp1 := plugins.PluginDTO{
-		JSONData: plugins.JSONData{
+		JSONData: pluginLib.JSONData{
 			ID: "test-app1", Name: "Test app1 name", Type: plugins.App,
 			Includes: []*plugins.Includes{
 				{
@@ -418,8 +419,8 @@ func TestAddAppLinksAccessControl(t *testing.T) {
 		accessControl:  acimpl.ProvideAccessControl(cfg),
 		pluginSettings: &pluginSettings,
 		features:       featuremgmt.WithFeatures(),
-		pluginStore: plugins.FakePluginStore{
-			PluginList: []plugins.PluginDTO{testApp1},
+		pluginStore: pluginLib.FakePluginStore{
+			PluginList: []pluginLib.PluginDTO{testApp1},
 		},
 	}
 

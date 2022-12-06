@@ -41,7 +41,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/live/runstream"
 	"github.com/grafana/grafana/pkg/services/live/survey"
 	"github.com/grafana/grafana/pkg/services/org"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/query"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -73,7 +73,7 @@ type CoreGrafanaScope struct {
 }
 
 func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, routeRegister routing.RouteRegister,
-	pluginService pluginsintegration.PluginService, cacheService *localcache.CacheService,
+	pluginStore plugins.Store, cacheService *localcache.CacheService,
 	dataSourceCache datasources.CacheService, sqlStore db.DB, secretsService secrets.Service,
 	usageStatsService usagestats.Service, queryDataService *query.Service, toggles featuremgmt.FeatureToggles,
 	accessControl accesscontrol.AccessControl, dashboardService dashboards.DashboardService, annotationsRepo annotations.Repository,
@@ -83,7 +83,7 @@ func ProvideService(plugCtxProvider *plugincontext.Provider, cfg *setting.Cfg, r
 		Features:              toggles,
 		PluginContextProvider: plugCtxProvider,
 		RouteRegister:         routeRegister,
-		pluginService:         pluginService,
+		pluginStore:           pluginStore,
 		CacheService:          cacheService,
 		DataSourceCache:       dataSourceCache,
 		SQLStore:              sqlStore,
@@ -406,7 +406,7 @@ type GrafanaLive struct {
 	DataSourceCache       datasources.CacheService
 	SQLStore              db.DB
 	SecretsService        secrets.Service
-	pluginService         pluginsintegration.PluginService
+	pluginStore           plugins.Store
 	queryDataService      *query.Service
 	orgService            org.Service
 
@@ -438,7 +438,7 @@ type GrafanaLive struct {
 }
 
 func (g *GrafanaLive) getStreamPlugin(ctx context.Context, pluginID string) (backend.StreamHandler, error) {
-	plugin, exists := g.pluginService.Plugin(ctx, pluginID)
+	plugin, exists := g.pluginStore.Plugin(ctx, pluginID)
 	if !exists {
 		return nil, fmt.Errorf("plugin not found: %s", pluginID)
 	}

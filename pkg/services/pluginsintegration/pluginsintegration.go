@@ -2,7 +2,8 @@ package pluginsintegration
 
 import (
 	"github.com/google/wire"
-	"github.com/grafana/grafana/pkg/plugins"
+
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/provider"
 	"github.com/grafana/grafana/pkg/plugins/config"
@@ -17,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/repo"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/clientmiddleware"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -25,10 +27,15 @@ import (
 var WireSet = wire.NewSet(
 	config.ProvideConfig,
 	store.ProvideService,
-	wire.Bind(new(plugins.Store), new(*store.Service)),
-	wire.Bind(new(plugins.RendererManager), new(*store.Service)),
-	wire.Bind(new(plugins.SecretsPluginManager), new(*store.Service)),
-	wire.Bind(new(plugins.StaticRouteResolver), new(*store.Service)),
+	wire.Bind(new(pluginLib.RendererManager), new(*store.Service)),
+	wire.Bind(new(pluginLib.SecretsPluginManager), new(*store.Service)),
+
+	plugins.ProvideRouteResolver,
+	wire.Bind(new(plugins.StaticRouteResolver), new(*plugins.RouteResolver)),
+
+	plugins.ProvideErrorResolver,
+	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)),
+
 	ProvideClientDecorator,
 	wire.Bind(new(plugins.Client), new(*client.Decorator)),
 	process.ProvideService,
@@ -36,9 +43,7 @@ var WireSet = wire.NewSet(
 	coreplugin.ProvideCoreRegistry,
 	loader.ProvideService,
 	wire.Bind(new(loader.Service), new(*loader.Loader)),
-	wire.Bind(new(plugins.ErrorResolver), new(*loader.Loader)),
 	manager.ProvideInstaller,
-	wire.Bind(new(plugins.Installer), new(*manager.PluginInstaller)),
 	registry.ProvideService,
 	wire.Bind(new(registry.Service), new(*registry.InMemory)),
 	repo.ProvideService,
@@ -50,9 +55,9 @@ var WireSet = wire.NewSet(
 // extended.
 var WireExtensionSet = wire.NewSet(
 	provider.ProvideService,
-	wire.Bind(new(plugins.BackendFactoryProvider), new(*provider.Service)),
+	wire.Bind(new(pluginLib.BackendFactoryProvider), new(*provider.Service)),
 	signature.ProvideOSSAuthorizer,
-	wire.Bind(new(plugins.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
+	wire.Bind(new(pluginLib.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
 )
 
 func ProvideClientDecorator(cfg *setting.Cfg, pCfg *config.Cfg,

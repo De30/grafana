@@ -476,7 +476,7 @@ func (hs *HTTPServer) postDashboard(c *models.ReqContext, cmd models.SaveDashboa
 	}
 
 	if err != nil {
-		return apierrors.ToDashboardErrorResponse(ctx, hs.pluginService, err)
+		return apierrors.ToDashboardErrorResponse(ctx, hs.pluginStore, err)
 	}
 
 	// Clear permission cache for the user who's created the dashboard, so that new permissions are fetched for their next call

@@ -16,7 +16,7 @@ type UsageStats struct {
 	Cfg           *setting.Cfg
 	kvStore       *kvstore.NamespacedKVStore
 	RouteRegister routing.RouteRegister
-	//pluginService pluginsintegration.PluginService
+	//pluginStore   plugins.Store
 
 	log    log.Logger
 	tracer tracing.Tracer
@@ -25,11 +25,12 @@ type UsageStats struct {
 	sendReportCallbacks []usagestats.SendReportCallbackFunc
 }
 
-func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, routeRegister routing.RouteRegister, tracer tracing.Tracer) *UsageStats {
+func ProvideService(cfg *setting.Cfg, kvStore kvstore.KVStore, //pluginStore plugins.Store,
+	routeRegister routing.RouteRegister, tracer tracing.Tracer) *UsageStats {
 	s := &UsageStats{
 		Cfg:           cfg,
 		RouteRegister: routeRegister,
-		//pluginService: pluginService,
+		//pluginStore:   pluginStore,
 		kvStore: kvstore.WithNamespace(kvStore, 0, "infra.usagestats"),
 		log:     log.New("infra.usagestats"),
 		tracer:  tracer,
@@ -95,11 +96,11 @@ func (uss *UsageStats) RegisterSendReportCallback(c usagestats.SendReportCallbac
 }
 
 func (uss *UsageStats) ShouldBeReported(ctx context.Context, dsType string) bool {
-	//ds, exists := uss.pluginService.Plugin(ctx, dsType)
+	return true
+	//ds, exists := uss.pluginStore.Plugin(ctx, dsType)
 	//if !exists {
 	//	return false
 	//}
 	//
 	//return ds.Signature.IsValid() || ds.Signature.IsInternal()
-	return true
 }

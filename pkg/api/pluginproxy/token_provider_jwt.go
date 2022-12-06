@@ -4,7 +4,7 @@ import (
 	"context"
 
 	googletokenprovider "github.com/grafana/grafana-google-sdk-go/pkg/tokenprovider"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 )
 
 type jwtAccessTokenProvider struct {
@@ -12,8 +12,8 @@ type jwtAccessTokenProvider struct {
 	ctx    context.Context
 }
 
-func newJwtAccessTokenProvider(ctx context.Context, ds DSInfo, pluginRoute *plugins.Route,
-	authParams *plugins.JWTTokenAuth) *jwtAccessTokenProvider {
+func newJwtAccessTokenProvider(ctx context.Context, ds DSInfo, pluginRoute *pluginLib.Route,
+	authParams *pluginLib.JWTTokenAuth) *jwtAccessTokenProvider {
 	jwtConf := &googletokenprovider.JwtTokenConfig{}
 	if val, ok := authParams.Params["client_email"]; ok {
 		jwtConf.Email = val

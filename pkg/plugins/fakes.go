@@ -5,8 +5,6 @@ import (
 )
 
 type FakePluginStore struct {
-	Store
-
 	PluginList []PluginDTO
 }
 

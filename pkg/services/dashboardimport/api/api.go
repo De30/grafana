@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboardimport"
 	"github.com/grafana/grafana/pkg/services/dashboards"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -19,16 +19,16 @@ import (
 type ImportDashboardAPI struct {
 	dashboardImportService dashboardimport.Service
 	quotaService           QuotaService
-	pluginService          pluginsintegration.PluginService
+	pluginStore            plugins.Store
 	ac                     accesscontrol.AccessControl
 }
 
 func New(dashboardImportService dashboardimport.Service, quotaService QuotaService,
-	pluginService pluginsintegration.PluginService, ac accesscontrol.AccessControl) *ImportDashboardAPI {
+	pluginStore plugins.Store, ac accesscontrol.AccessControl) *ImportDashboardAPI {
 	return &ImportDashboardAPI{
 		dashboardImportService: dashboardImportService,
 		quotaService:           quotaService,
-		pluginService:          pluginService,
+		pluginStore:            pluginStore,
 		ac:                     ac,
 	}
 }
@@ -77,7 +77,7 @@ func (api *ImportDashboardAPI) ImportDashboard(c *models.ReqContext) response.Re
 	req.User = c.SignedInUser
 	resp, err := api.dashboardImportService.ImportDashboard(c.Req.Context(), &req)
 	if err != nil {
-		return apierrors.ToDashboardErrorResponse(c.Req.Context(), api.pluginService, err)
+		return apierrors.ToDashboardErrorResponse(c.Req.Context(), api.pluginStore, err)
 	}
 
 	return response.JSON(http.StatusOK, resp)

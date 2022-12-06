@@ -91,6 +91,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/playlist/playlistimpl"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	plugindashboardsservice "github.com/grafana/grafana/pkg/services/plugindashboards/service"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration"
@@ -273,7 +274,8 @@ var wireBasicSet = wire.NewSet(
 	dashsnapsvc.ProvideService,
 	datasourceservice.ProvideService,
 	wire.Bind(new(datasources.DataSourceService), new(*datasourceservice.Service)),
-	wire.Bind(new(pluginsintegration.PluginService), new(*pluginsintegration.PluginManagerClientService)),
+	wire.Bind(new(plugins.Store), new(*pluginsintegration.PluginManagerClientService)),
+	wire.Bind(new(plugins.Installer), new(*pluginsintegration.PluginManagerClientService)),
 	pluginsintegration.ProvidePluginManagerClientService,
 	pluginSettings.ProvideService,
 	wire.Bind(new(pluginsettings.Service), new(*pluginSettings.Service)),

@@ -7,17 +7,17 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 )
 
 // Provision scans a directory for provisioning config files
 // and provisions the app in those files.
-func Provision(ctx context.Context, configDirectory string, pluginService pluginsintegration.PluginService, pluginSettings pluginsettings.Service, orgService org.Service) error {
+func Provision(ctx context.Context, configDirectory string, pluginStore plugins.Store, pluginSettings pluginsettings.Service, orgService org.Service) error {
 	logger := log.New("provisioning.plugins")
 	ap := PluginProvisioner{
 		log:            logger,
-		cfgProvider:    newConfigReader(logger, pluginService),
+		cfgProvider:    newConfigReader(logger, pluginStore),
 		pluginSettings: pluginSettings,
 		orgService:     orgService,
 	}

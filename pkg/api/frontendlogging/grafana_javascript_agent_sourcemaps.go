@@ -1,8 +1,10 @@
 package frontendlogging
 
+import "context"
+
 // ResolveSourceLocation resolves minified source location to original source location
-func ResolveSourceLocation(store *SourceMapStore, frame *Frame) (*Frame, error) {
-	smap, err := store.getSourceMap(frame.Filename)
+func ResolveSourceLocation(ctx context.Context, store *SourceMapStore, frame *Frame) (*Frame, error) {
+	smap, err := store.getSourceMap(ctx, frame.Filename)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +31,7 @@ func ResolveSourceLocation(store *SourceMapStore, frame *Frame) (*Frame, error) 
 }
 
 // TransformException will attempt to resolved all monified source locations in the stacktrace with original source locations
-func TransformException(ex *Exception, store *SourceMapStore) *Exception {
+func TransformException(ctx context.Context, ex *Exception, store *SourceMapStore) *Exception {
 	if ex.Stacktrace == nil {
 		return ex
 	}
@@ -37,7 +39,7 @@ func TransformException(ex *Exception, store *SourceMapStore) *Exception {
 
 	for _, frame := range ex.Stacktrace.Frames {
 		frame := frame
-		mappedFrame, err := ResolveSourceLocation(store, &frame)
+		mappedFrame, err := ResolveSourceLocation(ctx, store, &frame)
 		if err != nil {
 			frames = append(frames, frame)
 		} else if mappedFrame != nil {

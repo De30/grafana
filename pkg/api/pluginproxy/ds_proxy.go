@@ -18,7 +18,7 @@ import (
 	glog "github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/setting"
@@ -36,8 +36,8 @@ type DataSourceProxy struct {
 	ctx                *models.ReqContext
 	targetUrl          *url.URL
 	proxyPath          string
-	matchedRoute       *plugins.Route
-	pluginRoutes       []*plugins.Route
+	matchedRoute       *pluginLib.Route
+	pluginRoutes       []*pluginLib.Route
 	cfg                *setting.Cfg
 	clientProvider     httpclient.Provider
 	oAuthTokenService  oauthtoken.OAuthTokenService
@@ -50,7 +50,7 @@ type httpClient interface {
 }
 
 // NewDataSourceProxy creates a new Datasource proxy
-func NewDataSourceProxy(ds *datasources.DataSource, pluginRoutes []*plugins.Route, ctx *models.ReqContext,
+func NewDataSourceProxy(ds *datasources.DataSource, pluginRoutes []*pluginLib.Route, ctx *models.ReqContext,
 	proxyPath string, cfg *setting.Cfg, clientProvider httpclient.Provider,
 	oAuthTokenService oauthtoken.OAuthTokenService, dsService datasources.DataSourceService,
 	tracer tracing.Tracer) (*DataSourceProxy, error) {

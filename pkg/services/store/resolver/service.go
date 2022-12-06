@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
 const (
@@ -32,19 +32,19 @@ type EntityReferenceResolver interface {
 	Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error)
 }
 
-func ProvideEntityReferenceResolver(ds datasources.DataSourceService, pluginService pluginsintegration.PluginService) EntityReferenceResolver {
+func ProvideEntityReferenceResolver(ds datasources.DataSourceService, pluginStore plugins.Store) EntityReferenceResolver {
 	return &standardReferenceResolver{
-		pluginService: pluginService,
+		pluginStore: pluginStore,
 		ds: dsCache{
-			ds:            ds,
-			pluginService: pluginService,
+			ds:          ds,
+			pluginStore: pluginStore,
 		},
 	}
 }
 
 type standardReferenceResolver struct {
-	pluginService pluginsintegration.PluginService
-	ds            dsCache
+	pluginStore plugins.Store
+	ds          dsCache
 }
 
 func (r *standardReferenceResolver) Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
@@ -101,7 +101,7 @@ func (r *standardReferenceResolver) resolveDatasource(ctx context.Context, ref *
 }
 
 func (r *standardReferenceResolver) resolvePlugin(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
-	p, ok := r.pluginService.Plugin(ctx, ref.UID)
+	p, ok := r.pluginStore.Plugin(ctx, ref.UID)
 	if !ok {
 		return ResolutionInfo{
 			OK:        false,
@@ -110,7 +110,7 @@ func (r *standardReferenceResolver) resolvePlugin(ctx context.Context, ref *mode
 		}, nil
 	}
 
-	if p.Type != plugins.Type(ref.Type) {
+	if p.Type != pluginLib.Type(ref.Type) {
 		return ResolutionInfo{
 			OK:        false,
 			Timestamp: getNow(),

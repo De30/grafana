@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 )
 
 var (
@@ -27,8 +27,8 @@ type tokenCacheType struct {
 type genericAccessTokenProvider struct {
 	datasourceId      int64
 	datasourceUpdated time.Time
-	route             *plugins.Route
-	authParams        *plugins.JWTTokenAuth
+	route             *pluginLib.Route
+	authParams        *pluginLib.JWTTokenAuth
 }
 
 type jwtToken struct {
@@ -67,8 +67,8 @@ func (token *jwtToken) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func newGenericAccessTokenProvider(ds DSInfo, pluginRoute *plugins.Route,
-	authParams *plugins.JWTTokenAuth) *genericAccessTokenProvider {
+func newGenericAccessTokenProvider(ds DSInfo, pluginRoute *pluginLib.Route,
+	authParams *pluginLib.JWTTokenAuth) *genericAccessTokenProvider {
 	return &genericAccessTokenProvider{
 		datasourceId:      ds.ID,
 		datasourceUpdated: ds.Updated,

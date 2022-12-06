@@ -18,7 +18,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/auth"
 	"github.com/grafana/grafana/pkg/services/folder"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
 	"github.com/grafana/grafana/pkg/services/querylibrary"
 	"github.com/grafana/grafana/pkg/services/searchV2"
 	"github.com/grafana/grafana/pkg/services/stats"
@@ -40,7 +39,7 @@ import (
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/registry/corekind"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -74,6 +73,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/playlist"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings"
 	pref "github.com/grafana/grafana/pkg/services/preference"
 	"github.com/grafana/grafana/pkg/services/provisioning"
@@ -112,8 +112,6 @@ type HTTPServer struct {
 	namedMiddlewares []routing.RegisterNamedMiddleware
 	bus              bus.Bus
 
-	pluginService pluginsintegration.PluginService
-
 	PluginContextProvider        *plugincontext.Provider
 	RouteRegister                routing.RouteRegister
 	RenderService                rendering.Service
@@ -134,9 +132,11 @@ type HTTPServer struct {
 	DataProxy                    *datasourceproxy.DataSourceProxyService
 	PluginRequestValidator       models.PluginRequestValidator
 	pluginClient                 plugins.Client
+	pluginStore                  plugins.Store
+	pluginInstaller              plugins.Installer
 	pluginDashboardService       plugindashboards.Service
 	pluginStaticRouteResolver    plugins.StaticRouteResolver
-	pluginErrorResolver          plugins.ErrorResolver
+	pluginErrorResolver          plugins.PluginErrorResolver
 	SearchService                search.Service
 	ShortURLService              shorturls.Service
 	QueryHistoryService          queryhistory.Service
@@ -160,7 +160,7 @@ type HTTPServer struct {
 	Listener                     net.Listener
 	EncryptionService            encryption.Internal
 	SecretsService               secrets.Service
-	secretsPluginManager         plugins.SecretsPluginManager
+	secretsPluginManager         pluginLib.SecretsPluginManager
 	secretsStore                 secretsKV.SecretsKVStore
 	secretsMigrator              secrets.Migrator
 	secretsPluginMigrator        spm.SecretMigrationProvider
@@ -220,8 +220,8 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	renderService rendering.Service, licensing models.Licensing, hooksService *hooks.HooksService,
 	cacheService *localcache.CacheService, sqlStore *sqlstore.SQLStore, alertEngine *alerting.AlertEngine,
 	pluginRequestValidator models.PluginRequestValidator, pluginStaticRouteResolver plugins.StaticRouteResolver,
-	pluginDashboardService plugindashboards.Service, pluginClient plugins.Client,
-	pluginErrorResolver plugins.ErrorResolver, settingsProvider setting.Provider,
+	pluginDashboardService plugindashboards.Service, pluginClient plugins.Client, pluginStore plugins.Store,
+	pluginErrorResolver plugins.PluginErrorResolver, settingsProvider setting.Provider, pluginInstaller plugins.Installer,
 	dataSourceCache datasources.CacheService, userTokenService auth.UserTokenService,
 	cleanUpService *cleanup.CleanUpService, shortURLService shorturls.Service, queryHistoryService queryhistory.Service, correlationsService correlations.Service,
 	thumbService thumbs.Service, remoteCache *remotecache.RemoteCache, provisioningService provisioning.ProvisioningService,
@@ -245,32 +245,32 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	dashboardPermissionsService accesscontrol.DashboardPermissionsService, dashboardVersionService dashver.Service,
 	starService star.Service, csrfService csrf.Service, basekinds *corekind.Base,
 	playlistService playlist.Service, apiKeyService apikey.Service, kvStore kvstore.KVStore,
-	secretsMigrator secrets.Migrator, secretsPluginManager plugins.SecretsPluginManager, secretsService secrets.Service,
+	secretsMigrator secrets.Migrator, secretsPluginManager pluginLib.SecretsPluginManager, secretsService secrets.Service,
 	secretsPluginMigrator spm.SecretMigrationProvider, secretsStore secretsKV.SecretsKVStore,
 	publicDashboardsApi *publicdashboardsApi.Api, userService user.Service, tempUserService tempUser.Service,
 	loginAttemptService loginAttempt.Service, orgService org.Service, teamService team.Service,
 	accesscontrolService accesscontrol.Service, dashboardThumbsService thumbs.DashboardThumbService, navTreeService navtree.Service,
 	annotationRepo annotations.Repository, tagService tag.Service, searchv2HTTPService searchV2.SearchHTTPService,
 	queryLibraryHTTPService querylibrary.HTTPService, queryLibraryService querylibrary.Service, oauthTokenService oauthtoken.OAuthTokenService,
-	statsService stats.Service, pluginService pluginsintegration.PluginService,
+	statsService stats.Service,
 ) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
 
 	hs := &HTTPServer{
-		Cfg:                    cfg,
-		pluginService:          pluginService,
-		RouteRegister:          routeRegister,
-		bus:                    bus,
-		RenderService:          renderService,
-		License:                licensing,
-		HooksService:           hooksService,
-		CacheService:           cacheService,
-		SQLStore:               sqlStore,
-		AlertEngine:            alertEngine,
-		PluginRequestValidator: pluginRequestValidator,
-		pluginClient:           pluginClient,
-		//pluginStore:                  pluginStore,
+		Cfg:                          cfg,
+		RouteRegister:                routeRegister,
+		bus:                          bus,
+		RenderService:                renderService,
+		License:                      licensing,
+		HooksService:                 hooksService,
+		CacheService:                 cacheService,
+		SQLStore:                     sqlStore,
+		AlertEngine:                  alertEngine,
+		PluginRequestValidator:       pluginRequestValidator,
+		pluginClient:                 pluginClient,
+		pluginStore:                  pluginStore,
+		pluginInstaller:              pluginInstaller,
 		pluginStaticRouteResolver:    pluginStaticRouteResolver,
 		pluginDashboardService:       pluginDashboardService,
 		pluginErrorResolver:          pluginErrorResolver,

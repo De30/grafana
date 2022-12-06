@@ -8,9 +8,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -80,25 +81,25 @@ func (s *PluginManagerClientService) Plugins(ctx context.Context, pluginTypes ..
 }
 
 func fromProto(p *PluginData) plugins.PluginDTO {
-	var links []plugins.InfoLink
+	var links []pluginLib.InfoLink
 	for _, l := range p.JsonData.Info.Links {
-		links = append(links, plugins.InfoLink{
+		links = append(links, pluginLib.InfoLink{
 			Name: l.Name,
 			URL:  l.Url,
 		})
 	}
 
-	var screenshots []plugins.Screenshots
+	var screenshots []pluginLib.Screenshots
 	for _, s := range p.JsonData.Info.Screenshots {
-		screenshots = append(screenshots, plugins.Screenshots{
+		screenshots = append(screenshots, pluginLib.Screenshots{
 			Name: s.Name,
 			Path: s.Path,
 		})
 	}
 
-	var pluginDeps []plugins.Dependency
+	var pluginDeps []pluginLib.Dependency
 	for _, pd := range p.JsonData.Dependencies.Plugins {
-		pluginDeps = append(pluginDeps, plugins.Dependency{
+		pluginDeps = append(pluginDeps, pluginLib.Dependency{
 			ID:      pd.Id,
 			Type:    pd.Type,
 			Name:    pd.Name,
@@ -106,9 +107,9 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 		})
 	}
 
-	var includes []*plugins.Includes
+	var includes []*pluginLib.Includes
 	for _, i := range p.JsonData.Includes {
-		includes = append(includes, &plugins.Includes{
+		includes = append(includes, &pluginLib.Includes{
 			Name:       i.Name,
 			Path:       i.Path,
 			Type:       i.Type,
@@ -124,24 +125,24 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 		})
 	}
 
-	var routes []*plugins.Route
+	var routes []*pluginLib.Route
 	for _, r := range p.JsonData.Routes {
-		var urlParams []plugins.URLParam
+		var urlParams []pluginLib.URLParam
 		for _, up := range r.UrlParams {
-			urlParams = append(urlParams, plugins.URLParam{
+			urlParams = append(urlParams, pluginLib.URLParam{
 				Name:    up.Name,
 				Content: up.Content,
 			})
 		}
-		var headers []plugins.Header
+		var headers []pluginLib.Header
 		for _, h := range r.Headers {
-			headers = append(headers, plugins.Header{
+			headers = append(headers, pluginLib.Header{
 				Name:    h.Name,
 				Content: h.Content,
 			})
 		}
 
-		rt := &plugins.Route{
+		rt := &pluginLib.Route{
 			Path:      r.Path,
 			Method:    r.Method,
 			ReqRole:   org.RoleType(r.ReqRole),
@@ -153,7 +154,7 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 		}
 
 		if r.TokenAuth != nil {
-			rt.TokenAuth = &plugins.JWTTokenAuth{
+			rt.TokenAuth = &pluginLib.JWTTokenAuth{
 				Url:    r.TokenAuth.Url,
 				Scopes: r.TokenAuth.Scopes,
 				Params: r.TokenAuth.Params,
@@ -161,7 +162,7 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 		}
 
 		if r.JwtTokenAuth != nil {
-			rt.JwtTokenAuth = &plugins.JWTTokenAuth{
+			rt.JwtTokenAuth = &pluginLib.JWTTokenAuth{
 				Url:    r.JwtTokenAuth.Url,
 				Scopes: r.JwtTokenAuth.Scopes,
 				Params: r.JwtTokenAuth.Params,
@@ -171,18 +172,18 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 		routes = append(routes)
 	}
 
-	var roleRegistration []plugins.RoleRegistration
+	var roleRegistration []pluginLib.RoleRegistration
 	for _, rr := range p.JsonData.Roles {
-		var permissions []plugins.Permission
+		var permissions []pluginLib.Permission
 		for _, p := range rr.Role.Permissions {
-			permissions = append(permissions, plugins.Permission{
+			permissions = append(permissions, pluginLib.Permission{
 				Action: p.Action,
 				Scope:  p.Scope,
 			})
 		}
 
-		roleRegistration = append(roleRegistration, plugins.RoleRegistration{
-			Role: plugins.Role{
+		roleRegistration = append(roleRegistration, pluginLib.RoleRegistration{
+			Role: pluginLib.Role{
 				Name:        rr.Role.Name,
 				Description: rr.Role.Description,
 				Permissions: permissions,
@@ -192,22 +193,22 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 	}
 
 	dto := plugins.PluginDTO{
-		JSONData: plugins.JSONData{
+		JSONData: pluginLib.JSONData{
 			ID:   p.JsonData.Id,
-			Type: plugins.Type(p.JsonData.Type),
+			Type: pluginLib.Type(p.JsonData.Type),
 			Name: p.JsonData.Name,
-			Info: plugins.Info{
-				Author: plugins.InfoLink{
+			Info: pluginLib.Info{
+				Author: pluginLib.InfoLink{
 					Name: p.JsonData.Info.Author.Name,
 					URL:  p.JsonData.Info.Author.Url,
 				},
 				Description: p.JsonData.Info.Description,
 				Links:       links,
-				Logos: plugins.Logos{
+				Logos: pluginLib.Logos{
 					Small: p.JsonData.Info.Logos.Small,
 					Large: p.JsonData.Info.Logos.Large,
 				},
-				Build: plugins.BuildInfo{
+				Build: pluginLib.BuildInfo{
 					Time:   p.JsonData.Info.Build.Time,
 					Repo:   p.JsonData.Info.Build.Repo,
 					Branch: p.JsonData.Info.Build.Branch,
@@ -217,13 +218,13 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 				Version:     p.JsonData.Info.Version,
 				Updated:     p.JsonData.Info.Updated,
 			},
-			Dependencies: plugins.Dependencies{
+			Dependencies: pluginLib.Dependencies{
 				GrafanaDependency: p.JsonData.Dependencies.GrafanaDependency,
 				GrafanaVersion:    p.JsonData.Dependencies.GrafanaVersion,
 				Plugins:           pluginDeps,
 			},
 			Includes:      includes,
-			State:         plugins.ReleaseState(p.JsonData.State),
+			State:         pluginLib.ReleaseState(p.JsonData.State),
 			Category:      p.JsonData.Category,
 			HideFromList:  p.JsonData.HideFromList,
 			Preload:       p.JsonData.Preload,
@@ -246,12 +247,12 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 			SDK:           p.JsonData.Sdk,
 			Executable:    p.JsonData.Executable,
 		},
-		Class:           plugins.Class(p.Class),
+		Class:           pluginLib.Class(p.Class),
 		IncludedInAppID: p.IncludedInAppID,
 		DefaultNavURL:   p.DefaultNavURL,
 		Pinned:          p.Pinned,
-		Signature:       plugins.SignatureStatus(p.Signature),
-		SignatureType:   plugins.SignatureType(p.SignatureType),
+		Signature:       pluginLib.SignatureStatus(p.Signature),
+		SignatureType:   pluginLib.SignatureType(p.SignatureType),
 		SignatureOrg:    p.SignatureOrg,
 		SignatureError:  nil,
 		Module:          p.Module,

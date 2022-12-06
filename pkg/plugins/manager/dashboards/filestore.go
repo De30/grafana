@@ -6,20 +6,20 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/services/pluginsintegration"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/util"
 )
 
 var _ FileStore = (*FileStoreManager)(nil)
 
 type FileStoreManager struct {
-	pluginService pluginsintegration.PluginService
+	pluginStore plugins.Store
 }
 
-func ProvideFileStoreManager(pluginService pluginsintegration.PluginService) *FileStoreManager {
+func ProvideFileStoreManager(pluginStore plugins.Store) *FileStoreManager {
 	return &FileStoreManager{
-		pluginService: pluginService,
+		pluginStore: pluginStore,
 	}
 }
 
@@ -36,7 +36,7 @@ func (m *FileStoreManager) ListPluginDashboardFiles(ctx context.Context, args *L
 		return nil, fmt.Errorf("args.PluginID cannot be empty")
 	}
 
-	plugin, exists := m.pluginService.Plugin(ctx, args.PluginID)
+	plugin, exists := m.pluginStore.Plugin(ctx, args.PluginID)
 	if !exists {
 		return nil, plugins.NotFoundError{PluginID: args.PluginID}
 	}
@@ -64,12 +64,12 @@ func (m *FileStoreManager) GetPluginDashboardFileContents(ctx context.Context, a
 		return nil, fmt.Errorf("args.FileReference cannot be empty")
 	}
 
-	plugin, exists := m.pluginService.Plugin(ctx, args.PluginID)
+	plugin, exists := m.pluginStore.Plugin(ctx, args.PluginID)
 	if !exists {
 		return nil, plugins.NotFoundError{PluginID: args.PluginID}
 	}
 
-	var includedFile *plugins.Includes
+	var includedFile *pluginLib.Includes
 	for _, include := range plugin.DashboardIncludes() {
 		if args.FileReference == include.Path {
 			includedFile = include
