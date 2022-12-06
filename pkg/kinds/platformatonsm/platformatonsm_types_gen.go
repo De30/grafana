@@ -10,8 +10,8 @@
 
 package platformatonsm
 
-// Platformatonsm defines model for platformatonsm.
-type Platformatonsm struct {
+// PlatformatonSM defines model for platformatonsm.
+type PlatformatonSM struct {
 	GenerateFor struct {
 		Dns  bool `json:"dns"`
 		Http bool `json:"http"`

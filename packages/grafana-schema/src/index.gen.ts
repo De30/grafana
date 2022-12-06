@@ -86,9 +86,6 @@ export {
   defaultFieldConfig
 } from './veneer/dashboard.types';
 
-// Raw generated types from Platformatonsm kind.
-export type { Platformatonsm } from './raw/platformatonsm/x/platformatonsm_types.gen';
-
 // Raw generated types from Playlist kind.
 export type {
   Playlist,

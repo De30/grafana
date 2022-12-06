@@ -1,6 +1,8 @@
 package codegen
 
 import (
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/thema/encoding/gocode"
 	"golang.org/x/tools/go/ast/astutil"
@@ -19,7 +21,7 @@ func (j GoTypesJenny) Generate(sfg SchemaForGen) (*codejen.File, error) {
 	b, err := gocode.GenerateTypesOpenAPI(sfg.Schema, &gocode.TypeConfigOpenAPI{
 		// TODO will need to account for sanitizing e.g. dashes here at some point
 		PackageName: sfg.Schema.Lineage().Name(),
-		ApplyFuncs:  []astutil.ApplyFunc{PrefixDropper(sfg.Name)},
+		ApplyFuncs:  []astutil.ApplyFunc{PrefixReplacer(strings.Title(strings.ToLower(sfg.Name)), sfg.Name)},
 	})
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@
 //
 // Run 'make gen-cue' from repository root to regenerate.
 
-export interface Platformatonsm {
+export interface PlatformatonSM {
   generateFor: {
     http: boolean;
     ping: boolean;
