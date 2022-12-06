@@ -6,10 +6,13 @@ export function getRoutes(): RouteDescriptor[] {
   if (config.featureToggles.platformatons) {
     return [
       {
-        path: `/services`,
+        path: `/platformatons`,
         exact: false,
         component: SafeDynamicImport(
-          () => import(/* webpackChunkName: "ServicesPage" */ 'app/features/platformatons/components/ServicesPage')
+          () =>
+            import(
+              /* webpackChunkName: "PlatformatonsPage" */ 'app/features/platformatons/components/PlatformatonsPage'
+            )
         ),
       },
     ];

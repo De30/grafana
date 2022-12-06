@@ -13,10 +13,14 @@ const initialTabs = [
     label: 'Services',
     active: true,
   },
+  {
+    label: 'Platformatons / k8',
+    active: false,
+  },
 ];
 
-const ServicesPage = () => {
-  const navModel = useNavModel('services');
+const PlatformatonsPage = () => {
+  const navModel = useNavModel('platformatons');
 
   const [tabs, setTabs] = useState(initialTabs);
 
@@ -43,4 +47,4 @@ const ServicesPage = () => {
   );
 };
 
-export default ServicesPage;
+export default PlatformatonsPage;
