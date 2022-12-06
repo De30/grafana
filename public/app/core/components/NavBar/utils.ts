@@ -77,16 +77,15 @@ export const enrichConfigItems = (items: NavModelItem[], location: Location<unkn
 
     if (link.id === 'profile') {
       link.children = [
-        ...menuItems,
         {
           id: 'change-theme',
           text: 'Change theme',
-          icon: 'palette',
           onClick: () => {
             reportInteraction('Change theme');
             appEvents.publish(new AddGlobalComponentEvent({ component: ThemePickerPopover, id: 'theme-picker' }));
           },
         },
+        ...menuItems,
       ];
     }
   });

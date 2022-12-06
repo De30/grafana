@@ -89,6 +89,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       padding: theme.spacing(1),
       justifyContent: 'space-between',
       alignItems: 'center',
+      marginBottom: theme.spacing(1),
+      borderRadius: theme.shape.borderRadius(1),
     }),
   };
 };
