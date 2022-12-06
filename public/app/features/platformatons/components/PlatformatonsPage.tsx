@@ -1,28 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { NavModelItem } from '@grafana/data';
-// import { useStyles2 } from '@grafana/ui';
-import { Page } from 'app/core/components/PageNew/Page';
+import { config } from '@grafana/runtime/src';
+import { Alert, Tab, TabsBar, TabContent } from '@grafana/ui';
+import { Page } from 'app/core/components/Page/Page';
 
-const node: NavModelItem = {
-  id: 'platformatons',
-  text: 'Platformatons',
-  subTitle: 'Platformatons go!',
-  url: 'platformatons',
-};
+import { useNavModel } from '../../../core/hooks/useNavModel';
+
+import { Queries } from './Queries';
+
+const initialTabs = [
+  {
+    label: 'Queries',
+    active: true,
+  },
+];
 
 const PlatformatonsPage = () => {
-  //   const styles = useStyles2(getStyles);
+  const navModel = useNavModel('platformatons');
+
+  const [tabs, setTabs] = useState(initialTabs);
+
+  if (!config.featureToggles.panelTitleSearch) {
+    return <Alert title="Missing feature toggle: panelTitleSearch">Query library requires searchV2</Alert>;
+  }
 
   return (
-    <Page navModel={{ node: node, main: node }}>
+    <Page navModel={navModel}>
       <Page.Contents>
-        <div>Platformatons</div>
+        <TabsBar>
+          {tabs.map((tab, index) => (
+            <Tab
+              key={index}
+              label={tab.label}
+              active={tab.active}
+              onChangeTab={() => setTabs(tabs.map((tab, idx) => ({ ...tab, active: idx === index })))}
+            />
+          ))}
+        </TabsBar>
+        <TabContent>{tabs[0].active && <Queries />}</TabContent>
       </Page.Contents>
     </Page>
   );
 };
-
-// const getStyles = (theme: GrafanaTheme2) => ({});
 
 export default PlatformatonsPage;
