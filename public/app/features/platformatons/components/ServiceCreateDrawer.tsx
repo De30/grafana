@@ -26,8 +26,8 @@ export const ServiceCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
 
   return (
     <Drawer
-      title="Add new query"
-      subtitle="You can create a new query from builder or import from file"
+      title="Add new service"
+      subtitle="You can create a new service from builder or import from file"
       onClose={onDismiss}
       width={'1000px'}
       expandable
@@ -35,7 +35,7 @@ export const ServiceCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
     >
       <div>
         <Card>
-          <Card.Heading>Create by query builder</Card.Heading>
+          <Card.Heading>Create by service builder</Card.Heading>
           <Card.Description></Card.Description>
           <Card.Figure>
             <Icon name={'list-ui-alt'} className={styles.cardIcon} />
@@ -69,7 +69,7 @@ export const ServiceCreateDrawer = ({ onDismiss, updateComponent }: Props) => {
                       });
                     }}
                   >
-                    Create query
+                    Create service
                   </Button>
                 );
               }}
