@@ -1,6 +1,7 @@
 import { DataCatalogueBuilder, DataCatalogueContext, DataCatalogueItem } from '@grafana/data';
 
 import { LokiDatasource } from './datasource';
+import { LokiQuery } from './types';
 
 export const getRootDataCatalogueItem = async ({
   context,
@@ -14,25 +15,21 @@ export const getRootDataCatalogueItem = async ({
       new DataCatalogueBuilder('Labels').loadItems(async () => {
         const labels = await datasource.labelNamesQuery();
         return labels.map((label: { text: string }) => {
-          return {
-            name: label.text,
-            items: async () => {
-              const values = await datasource.labelValuesQuery(label.text);
-              return values.map((value: { text: string }) => {
-                return {
-                  name: value.text,
-                  actions: [
-                    {
-                      name: 'show data',
-                      handler: () => {
-                        alert('Clicked on ' + label.text + ' ' + value.text);
-                      },
-                    },
-                  ],
-                };
-              });
-            },
-          };
+          return new DataCatalogueBuilder(label.text, 'Label').loadItems(async () => {
+            const values = await datasource.labelValuesQuery(label.text);
+            return values.map((value: { text: string }) =>
+              new DataCatalogueBuilder(value.text, 'Label value')
+                .addKeyValue('Label', label.text)
+                .addKeyValue('Label value', value.text)
+                .addRunQueryAction<Omit<LokiQuery, 'refId'>>(
+                  'Show data',
+                  {
+                    expr: `{${label.text}="${value.text}"}`,
+                  },
+                  context
+                )
+            );
+          });
         });
       }),
     ]);

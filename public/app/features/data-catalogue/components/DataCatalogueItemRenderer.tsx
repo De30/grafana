@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { DataCatalogueItem, isDataCatalogueFolder, IsLazyDataCatalogueFolder } from '@grafana/data';
+import { LinkButton } from '@grafana/ui';
 
 import { DataCatalogueItemLineRenderer } from './DataCatalogueItemLineRenderer';
 
@@ -10,9 +11,16 @@ type Props = {
   selectedItem?: DataCatalogueItem;
 };
 
+const MAX_CHILDREN = 10;
+
 export const DataCatalogueItemRenderer = (props: Props) => {
   const [children, setChildren] = useState<DataCatalogueItem[]>([]);
   const [expanded, setExpanded] = useState(false);
+
+  const [showFilter, setShowFilter] = useState(false);
+  const [showAllChildren, setShowAllChildren] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const serachActive = searchTerm.length >= 3;
 
   const { item, setSelectedItem, selectedItem } = props;
   const isSelected = item === selectedItem;
@@ -24,8 +32,13 @@ export const DataCatalogueItemRenderer = (props: Props) => {
           setChildren([{ name: 'Loading... ' }]);
           await props.item.createItems();
         }
+        const items = props.item.items || [{ name: 'No items found. ' }];
         setExpanded(true);
-        setChildren(props.item.items || []);
+        if (items.length > MAX_CHILDREN) {
+          setShowAllChildren(false);
+          setShowFilter(true);
+        }
+        setChildren(items || []);
       }
     } else {
       setSelectedItem(undefined);
@@ -50,6 +63,14 @@ export const DataCatalogueItemRenderer = (props: Props) => {
     }
   }, [isSelected, expanded, toggle]);
 
+  let visibleChildren = children;
+  if (serachActive) {
+    visibleChildren = children.filter((item) => item.name.includes(searchTerm));
+  } else if (!showAllChildren) {
+    visibleChildren = children.slice(0, MAX_CHILDREN);
+  }
+  const allChildren = children.length;
+
   return (
     <div>
       <DataCatalogueItemLineRenderer
@@ -58,9 +79,12 @@ export const DataCatalogueItemRenderer = (props: Props) => {
         isSelected={isSelected}
         toggle={toggle}
         expanded={expanded}
+        showFilter={showFilter}
+        setSearchTerm={setSearchTerm}
+        searchTerm={searchTerm}
       />
-      <div style={{ paddingLeft: '20px' }}>
-        {children.map((child, index) => (
+      <div style={{ marginLeft: '20px' }}>
+        {visibleChildren.map((child, index) => (
           <DataCatalogueItemRenderer
             key={index}
             item={child}
@@ -68,6 +92,23 @@ export const DataCatalogueItemRenderer = (props: Props) => {
             setSelectedItem={selectItem}
           />
         ))}
+        {!showAllChildren && expanded && (
+          <div>
+            <span>...</span>
+            <span>
+              Showing {visibleChildren.length} of {allChildren}.{' '}
+              <LinkButton
+                size="sm"
+                onClick={() => {
+                  setShowAllChildren(true);
+                  setSearchTerm('');
+                }}
+              >
+                Show all
+              </LinkButton>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

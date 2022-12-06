@@ -212,7 +212,7 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
   attributes: DataCatalogueItemAttribute[] = [];
   createAttributes?: () => Promise<void>;
   createItems?: () => Promise<void>;
-  items: DataCatalogueItem[] = [];
+  items?: DataCatalogueItem[];
 
   constructor(name?: string, type?: string) {
     this.name = name || '';

@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   DataCatalogueItem,
@@ -8,14 +8,17 @@ import {
   isDataCatalogueFolder,
   IsDataCatalogueItemAttributeIcon,
 } from '@grafana/data';
-import { IconButton, useStyles2 } from '@grafana/ui';
+import { IconButton, Input, useStyles2 } from '@grafana/ui';
 
 type Props = {
   item: DataCatalogueItem;
   toggle: () => void;
   expanded: boolean;
+  searchTerm: string;
   isSelected: boolean;
   setSelectedItem: (item: DataCatalogueItem) => void;
+  setSearchTerm: (term: string) => void;
+  showFilter: boolean;
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
@@ -31,10 +34,19 @@ const getStyles = (theme: GrafanaTheme2) => ({
   notSelected: css`
     opacity: 0.8;
   `,
+  searchInput: css`
+    margin-top: -5px;
+    width: 200px;
+  `,
+  searchIcon: css`
+    margin-top: 5px;
+  `,
 });
 
 export const DataCatalogueItemLineRenderer = (props: Props) => {
-  const { item, toggle, expanded, setSelectedItem, isSelected } = props;
+  const { item, toggle, expanded, setSelectedItem, isSelected, showFilter, searchTerm, setSearchTerm } = props;
+
+  const [showSearchInput, setShowSearchInput] = useState(false);
 
   const isFolder = isDataCatalogueFolder(props.item);
   const icons = (item.attributes || []).filter(IsDataCatalogueItemAttributeIcon);
@@ -66,6 +78,27 @@ export const DataCatalogueItemLineRenderer = (props: Props) => {
       >
         {isSelected ? <b>{item.name}</b> : <span>{item.name}</span>}
       </span>
+      {showFilter && expanded && (
+        <>
+          {!showSearchInput && (
+            <IconButton
+              className={styles.searchIcon}
+              size="sm"
+              name="search"
+              onClick={() => setShowSearchInput(true)}
+            />
+          )}
+          {showSearchInput && (
+            <Input
+              autoFocus={true}
+              className={styles.searchInput}
+              value={searchTerm}
+              placeholder="Search..."
+              onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
