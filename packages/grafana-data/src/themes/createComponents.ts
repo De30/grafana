@@ -70,6 +70,9 @@ export interface ThemeComponents {
     borderColor: string;
     borderWidth: string;
   };
+  graph: {
+    gridColor: string;
+  };
 }
 
 export type ThemeComponentsInput = DeepPartial<ThemeComponents>;
@@ -146,6 +149,10 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     standardPage: {
       borderColor: colors.border.weak,
       borderWidth: '0',
+    },
+    graph: {
+      gridColor:
+        overrides.graph?.gridColor ?? (colors.mode === 'dark' ? 'rgba(240, 250, 255, 0.09)' : 'rgba(0, 10, 23, 0.09)'),
     },
   };
 
