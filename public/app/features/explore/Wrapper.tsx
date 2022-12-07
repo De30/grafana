@@ -3,9 +3,9 @@ import { inRange } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { useWindowSize } from 'react-use';
 
-import { isTruthy } from '@grafana/data';
+import { isTruthy, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { ErrorBoundaryAlert, usePanelContext } from '@grafana/ui';
+import { ErrorBoundaryAlert, usePanelContext, useStyles2 } from '@grafana/ui';
 import { SplitPaneWrapper } from 'app/core/components/SplitPaneWrapper/SplitPaneWrapper';
 import { useGrafana } from 'app/core/context/GrafanaContext';
 import { useAppNotification } from 'app/core/copy/appNotification';
@@ -21,17 +21,28 @@ import { ExploreActions } from './ExploreActions';
 import { ExplorePaneContainer } from './ExplorePaneContainer';
 import { lastSavedUrl, saveCorrelationsAction, resetExploreAction, splitSizeUpdateAction } from './state/main';
 
-const styles = {
-  pageScrollbarWrapper: css`
-    width: 100%;
-    flex-grow: 1;
-    min-height: 0;
-  `,
-  exploreWrapper: css`
-    display: flex;
-    height: 100%;
-  `,
-};
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    // FIXME: this should probably be handled by the split pane wrapper itself via a prop
+    resizer: css({
+      width: theme.spacing(0.25),
+      zIndex: 998,
+      [`&:before`]: {
+        borderRight: `1px solid ${theme.colors.border.weak}`,
+        position: 'absolute',
+        bottom: 0,
+        zIndex: 998,
+      },
+      [`&:after`]: {
+        width: theme.spacing(1.25),
+      },
+    }),
+    container: css({
+      position: 'relative',
+      height: '100%',
+    }),
+  };
+}
 
 function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   useExplorePageTitle();
@@ -47,6 +58,7 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   const { width: windowWidth } = useWindowSize();
   const minWidth = 200;
   const exploreState = useSelector((state) => state.explore);
+  const styles = useStyles2(getStyles);
 
   useEffect(() => {
     //This is needed for breadcrumbs and topnav.
@@ -133,37 +145,36 @@ function Wrapper(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
   }
 
   return (
-    <div className={styles.pageScrollbarWrapper}>
+    <div className={styles.container}>
       <ExploreActions exploreIdLeft={ExploreId.left} exploreIdRight={ExploreId.right} />
-      <div className={styles.exploreWrapper}>
-        <SplitPaneWrapper
-          splitOrientation="vertical"
-          paneSize={widthCalc}
-          minSize={minWidth}
-          maxSize={minWidth * -1}
-          primary="second"
-          splitVisible={hasSplit}
-          paneStyle={{ overflow: 'auto', display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}
-          onDragFinished={(size) => {
-            if (size) {
-              updateSplitSize(size);
-            }
-          }}
-        >
+      <SplitPaneWrapper
+        splitOrientation="vertical"
+        paneSize={widthCalc}
+        minSize={minWidth}
+        maxSize={minWidth * -1}
+        primary="second"
+        splitVisible={hasSplit}
+        paneStyle={{ overflow: 'auto', display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}
+        onDragFinished={(size) => {
+          if (size) {
+            updateSplitSize(size);
+          }
+        }}
+        resizerClassName={styles.resizer}
+      >
+        <ErrorBoundaryAlert style="page">
+          <ExplorePaneContainer exploreId={ExploreId.left} urlQuery={queryParams.left} eventBus={eventBus.current} />
+        </ErrorBoundaryAlert>
+        {hasSplit && (
           <ErrorBoundaryAlert style="page">
-            <ExplorePaneContainer exploreId={ExploreId.left} urlQuery={queryParams.left} eventBus={eventBus.current} />
+            <ExplorePaneContainer
+              exploreId={ExploreId.right}
+              urlQuery={queryParams.right}
+              eventBus={eventBus.current}
+            />
           </ErrorBoundaryAlert>
-          {hasSplit && (
-            <ErrorBoundaryAlert style="page">
-              <ExplorePaneContainer
-                exploreId={ExploreId.right}
-                urlQuery={queryParams.right}
-                eventBus={eventBus.current}
-              />
-            </ErrorBoundaryAlert>
-          )}
-        </SplitPaneWrapper>
-      </div>
+        )}
+      </SplitPaneWrapper>
     </div>
   );
 }
