@@ -1,13 +1,20 @@
   core:
-    image: grafana/grafana:dev-ubuntu
+    image: grafana/grafana:main-ubuntu
     ports:
       - 3000:3000
     volumes:
       - ./docker/blocks/hgmt/core.ini:/etc/grafana/grafana.ini
 
   entity-store:
-    image: grafana/grafana:dev-ubuntu
+    image: grafana/grafana:main-ubuntu
     volumes:
       - ./docker/blocks/hgmt/entity.ini:/etc/grafana/grafana.ini
     links:
       - core
+
+#  plugins:
+#    image: grafana/grafana:main-ubuntu
+#    volumes:
+#      - ./docker/blocks/hgmt/plugins.ini:/etc/grafana/grafana.ini
+#    links:
+#      - core
