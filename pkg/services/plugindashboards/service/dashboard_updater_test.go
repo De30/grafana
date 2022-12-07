@@ -8,11 +8,12 @@ import (
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/dashboardimport"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/pluginsettings/service"
 	"github.com/stretchr/testify/require"
@@ -85,8 +86,8 @@ func TestDashboardUpdater(t *testing.T) {
 				},
 				installedPlugins: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
-							Info: plugins.Info{
+						JSONData: pluginLib.JSONData{
+							Info: pluginLib.Info{
 								Version: "1.0.0",
 							},
 						},
@@ -117,8 +118,8 @@ func TestDashboardUpdater(t *testing.T) {
 				},
 				installedPlugins: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
-							Info: plugins.Info{
+						JSONData: pluginLib.JSONData{
+							Info: pluginLib.Info{
 								Version: "1.0.1",
 							},
 						},
@@ -153,9 +154,9 @@ func TestDashboardUpdater(t *testing.T) {
 				},
 				installedPlugins: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID: "test",
-							Info: plugins.Info{
+							Info: pluginLib.Info{
 								Version: "1.0.1",
 							},
 						},
@@ -227,7 +228,7 @@ func TestDashboardUpdater(t *testing.T) {
 			},
 			installedPlugins: []plugins.PluginDTO{
 				{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID: "test",
 					},
 				},
@@ -275,9 +276,9 @@ func TestDashboardUpdater(t *testing.T) {
 			},
 			installedPlugins: []plugins.PluginDTO{
 				{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID: "test",
-						Info: plugins.Info{
+						Info: pluginLib.Info{
 							Version: "1.0.0",
 						},
 					},

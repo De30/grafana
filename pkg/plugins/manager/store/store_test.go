@@ -46,10 +46,10 @@ func TestStore_Plugin(t *testing.T) {
 		p1.RegisterClient(&DecommissionedPlugin{})
 		p2 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-panel"}}
 
-		ps := New(newFakePluginRegistry(map[string]*plugins.Plugin{
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
 			p1.ID: p1,
 			p2.ID: p2,
-		}))
+		}), &fakes.FakeLoader{})
 
 		p, exists := ps.Plugin(context.Background(), p1.ID)
 		require.False(t, exists)
@@ -70,13 +70,13 @@ func TestStore_Plugins(t *testing.T) {
 		p5 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "e-test-panel", Type: plugins.Panel}}
 		p5.RegisterClient(&DecommissionedPlugin{})
 
-		ps := New(newFakePluginRegistry(map[string]*plugins.Plugin{
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
 			p1.ID: p1,
 			p2.ID: p2,
 			p3.ID: p3,
 			p4.ID: p4,
 			p5.ID: p5,
-		}))
+		}), &fakes.FakeLoader{})
 
 		pss := ps.Plugins(context.Background())
 		require.Equal(t, pss, []plugins.PluginDTO{p1.ToDTO(), p2.ToDTO(), p3.ToDTO(), p4.ToDTO()})
@@ -105,14 +105,14 @@ func TestStore_Routes(t *testing.T) {
 		p6 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "f-test-app", Type: plugins.App}}
 		p6.RegisterClient(&DecommissionedPlugin{})
 
-		ps := New(newFakePluginRegistry(map[string]*plugins.Plugin{
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
 			p1.ID: p1,
 			p2.ID: p2,
 			p3.ID: p3,
 			p4.ID: p4,
 			p5.ID: p5,
 			p6.ID: p6,
-		}))
+		}), &fakes.FakeLoader{})
 
 		sr := func(p *plugins.Plugin) *plugins.StaticRoute {
 			return &plugins.StaticRoute{PluginID: p.ID, Directory: p.PluginDir}
@@ -129,11 +129,11 @@ func TestStore_Renderer(t *testing.T) {
 		p2 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-panel", Type: plugins.Panel}}
 		p3 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-app", Type: plugins.App}}
 
-		ps := New(newFakePluginRegistry(map[string]*plugins.Plugin{
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
 			p1.ID: p1,
 			p2.ID: p2,
 			p3.ID: p3,
-		}))
+		}), &fakes.FakeLoader{})
 
 		r := ps.Renderer(context.Background())
 		require.Equal(t, p1, r)
@@ -147,12 +147,12 @@ func TestStore_SecretsManager(t *testing.T) {
 		p3 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-secrets", Type: plugins.SecretsManager}}
 		p4 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-datasource", Type: plugins.DataSource}}
 
-		ps := New(newFakePluginRegistry(map[string]*plugins.Plugin{
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
 			p1.ID: p1,
 			p2.ID: p2,
 			p3.ID: p3,
 			p4.ID: p4,
-		}))
+		}), &fakes.FakeLoader{})
 
 		r := ps.SecretsManager(context.Background())
 		require.Equal(t, p3, r)
@@ -165,12 +165,10 @@ func TestStore_availablePlugins(t *testing.T) {
 		p1.RegisterClient(&DecommissionedPlugin{})
 		p2 := &plugins.Plugin{JSONData: plugins.JSONData{ID: "test-app"}}
 
-		ps := New(
-			newFakePluginRegistry(map[string]*plugins.Plugin{
-				p1.ID: p1,
-				p2.ID: p2,
-			}),
-		)
+		ps := New(&setting.Cfg{}, &config.Cfg{}, newFakePluginRegistry(map[string]*plugins.Plugin{
+			p1.ID: p1,
+			p2.ID: p2,
+		}), &fakes.FakeLoader{})
 
 		aps := ps.availablePlugins(context.Background())
 		require.Len(t, aps, 1)

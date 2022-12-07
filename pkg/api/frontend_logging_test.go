@@ -16,7 +16,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 
 	"github.com/stretchr/testify/assert"

@@ -1,118 +1,19 @@
-package client
+package clienttest
 
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
+	"github.com/grafana/grafana/pkg/services/plugins"
+	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/web"
 	"github.com/stretchr/testify/require"
 )
-
-func TestDecorator(t *testing.T) {
-	var queryDataCalled bool
-	var callResourceCalled bool
-	var checkHealthCalled bool
-	c := &TestClient{
-		QueryDataFunc: func(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-			queryDataCalled = true
-			return nil, nil
-		},
-		CallResourceFunc: func(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
-			callResourceCalled = true
-			return nil
-		},
-		CheckHealthFunc: func(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-			checkHealthCalled = true
-			return nil, nil
-		},
-	}
-	require.NotNil(t, c)
-
-	ctx := MiddlewareScenarioContext{}
-
-	mwOne := ctx.NewMiddleware("mw1")
-	mwTwo := ctx.NewMiddleware("mw2")
-
-	d, err := NewDecorator(c, mwOne, mwTwo)
-	require.NoError(t, err)
-	require.NotNil(t, d)
-
-	_, _ = d.QueryData(context.Background(), &backend.QueryDataRequest{})
-	require.True(t, queryDataCalled)
-
-	sender := callResourceResponseSenderFunc(func(res *backend.CallResourceResponse) error {
-		return nil
-	})
-
-	_ = d.CallResource(context.Background(), &backend.CallResourceRequest{}, sender)
-	require.True(t, callResourceCalled)
-
-	_, _ = d.CheckHealth(context.Background(), &backend.CheckHealthRequest{})
-	require.True(t, checkHealthCalled)
-
-	require.Len(t, ctx.QueryDataCallChain, 4)
-	require.EqualValues(t, []string{"before mw1", "before mw2", "after mw2", "after mw1"}, ctx.QueryDataCallChain)
-	require.Len(t, ctx.CallResourceCallChain, 4)
-	require.EqualValues(t, []string{"before mw1", "before mw2", "after mw2", "after mw1"}, ctx.CallResourceCallChain)
-	require.Len(t, ctx.CheckHealthCallChain, 4)
-	require.EqualValues(t, []string{"before mw1", "before mw2", "after mw2", "after mw1"}, ctx.CheckHealthCallChain)
-}
-
-func TestReverseMiddlewares(t *testing.T) {
-	t.Run("Should reverse 1 middleware", func(t *testing.T) {
-		ctx := MiddlewareScenarioContext{}
-		middlewares := []plugins.ClientMiddleware{
-			ctx.NewMiddleware("mw1"),
-		}
-		reversed := reverseMiddlewares(middlewares)
-		require.Len(t, reversed, 1)
-		require.Equal(t, "mw1", reversed[0].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-	})
-
-	t.Run("Should reverse 2 middlewares", func(t *testing.T) {
-		ctx := MiddlewareScenarioContext{}
-		middlewares := []plugins.ClientMiddleware{
-			ctx.NewMiddleware("mw1"),
-			ctx.NewMiddleware("mw2"),
-		}
-		reversed := reverseMiddlewares(middlewares)
-		require.Len(t, reversed, 2)
-		require.Equal(t, "mw2", reversed[0].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw1", reversed[1].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-	})
-
-	t.Run("Should reverse 3 middlewares", func(t *testing.T) {
-		ctx := MiddlewareScenarioContext{}
-		middlewares := []plugins.ClientMiddleware{
-			ctx.NewMiddleware("mw1"),
-			ctx.NewMiddleware("mw2"),
-			ctx.NewMiddleware("mw3"),
-		}
-		reversed := reverseMiddlewares(middlewares)
-		require.Len(t, reversed, 3)
-		require.Equal(t, "mw3", reversed[0].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw2", reversed[1].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw1", reversed[2].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-	})
-
-	t.Run("Should reverse 4 middlewares", func(t *testing.T) {
-		ctx := MiddlewareScenarioContext{}
-		middlewares := []plugins.ClientMiddleware{
-			ctx.NewMiddleware("mw1"),
-			ctx.NewMiddleware("mw2"),
-			ctx.NewMiddleware("mw3"),
-			ctx.NewMiddleware("mw4"),
-		}
-		reversed := reverseMiddlewares(middlewares)
-		require.Len(t, reversed, 4)
-		require.Equal(t, "mw4", reversed[0].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw3", reversed[1].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw2", reversed[2].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-		require.Equal(t, "mw1", reversed[3].CreateClientMiddleware(nil).(*TestMiddleware).Name)
-	})
-}
 
 type TestClient struct {
 	plugins.Client
@@ -220,10 +121,84 @@ func (m *TestMiddleware) RunStream(ctx context.Context, req *backend.RunStreamRe
 	return err
 }
 
-type callResourceResponseSenderFunc func(res *backend.CallResourceResponse) error
+var _ plugins.Client = &TestClient{}
 
-func (fn callResourceResponseSenderFunc) Send(res *backend.CallResourceResponse) error {
-	return fn(res)
+type ClientDecoratorTest struct {
+	T               *testing.T
+	Context         context.Context
+	TestClient      *TestClient
+	Middlewares     []plugins.ClientMiddleware
+	Decorator       *plugins.Decorator
+	ReqContext      *models.ReqContext
+	QueryDataReq    *backend.QueryDataRequest
+	QueryDataCtx    context.Context
+	CallResourceReq *backend.CallResourceRequest
+	CallResourceCtx context.Context
+	CheckHealthReq  *backend.CheckHealthRequest
+	CheckHealthCtx  context.Context
 }
 
-var _ plugins.Client = &TestClient{}
+type ClientDecoratorTestOption func(*ClientDecoratorTest)
+
+func NewClientDecoratorTest(t *testing.T, opts ...ClientDecoratorTestOption) *ClientDecoratorTest {
+	cdt := &ClientDecoratorTest{
+		T:       t,
+		Context: context.Background(),
+	}
+	cdt.TestClient = &TestClient{
+		QueryDataFunc: func(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+			cdt.QueryDataReq = req
+			cdt.QueryDataCtx = ctx
+			return nil, nil
+		},
+		CallResourceFunc: func(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+			cdt.CallResourceReq = req
+			cdt.CallResourceCtx = ctx
+			return nil
+		},
+		CheckHealthFunc: func(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+			cdt.CheckHealthReq = req
+			cdt.CheckHealthCtx = ctx
+			return nil, nil
+		},
+	}
+	require.NotNil(t, cdt)
+
+	for _, opt := range opts {
+		opt(cdt)
+	}
+
+	d, err := plugins.NewDecorator(cdt.TestClient, cdt.Middlewares...)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	cdt.Decorator = d
+
+	return cdt
+}
+
+func WithReqContext(req *http.Request, user *user.SignedInUser) ClientDecoratorTestOption {
+	return ClientDecoratorTestOption(func(cdt *ClientDecoratorTest) {
+		if cdt.ReqContext == nil {
+			cdt.ReqContext = &models.ReqContext{
+				Context:      &web.Context{},
+				SignedInUser: user,
+			}
+		}
+
+		cdt.Context = ctxkey.Set(cdt.Context, cdt.ReqContext)
+
+		*req = *req.WithContext(cdt.Context)
+		cdt.ReqContext.Req = req
+	})
+}
+
+func WithMiddlewares(middlewares ...plugins.ClientMiddleware) ClientDecoratorTestOption {
+	return ClientDecoratorTestOption(func(cdt *ClientDecoratorTest) {
+		if cdt.Middlewares == nil {
+			cdt.Middlewares = []plugins.ClientMiddleware{}
+		}
+
+		cdt.Middlewares = append(cdt.Middlewares, middlewares...)
+	})
+}

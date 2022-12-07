@@ -28,7 +28,6 @@ import (
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/middleware/csrf"
 	"github.com/grafana/grafana/pkg/models"
-	pluginDashboards "github.com/grafana/grafana/pkg/plugins/manager/dashboards"
 	"github.com/grafana/grafana/pkg/registry/corekind"
 	"github.com/grafana/grafana/pkg/server/modules"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -92,6 +91,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	plugindashboardsservice "github.com/grafana/grafana/pkg/services/plugindashboards/service"
 	"github.com/grafana/grafana/pkg/services/plugins"
+	dashboards2 "github.com/grafana/grafana/pkg/services/plugins/dashboards"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration"
@@ -190,8 +190,8 @@ var wireBasicSet = wire.NewSet(
 	uss.ProvideService,
 	wire.Bind(new(usagestats.Service), new(*uss.UsageStats)),
 	pluginsintegration.WireSet,
-	pluginDashboards.ProvideFileStoreManager,
-	wire.Bind(new(pluginDashboards.FileStore), new(*pluginDashboards.FileStoreManager)),
+	dashboards2.ProvideFileStoreManager,
+	wire.Bind(new(dashboards2.FileStore), new(*dashboards2.FileStoreManager)),
 	cloudwatch.ProvideService,
 	cloudmonitoring.ProvideService,
 	azuremonitor.ProvideService,

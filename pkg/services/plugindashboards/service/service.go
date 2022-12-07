@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	pluginDashboardsManager "github.com/grafana/grafana/pkg/services/plugins/dashboards"
+
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
-	pluginDashboardsManager "github.com/grafana/grafana/pkg/plugins/manager/dashboards"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 )

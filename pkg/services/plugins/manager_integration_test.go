@@ -1,4 +1,4 @@
-package manager
+package plugins
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/provider"
 	"github.com/grafana/grafana/pkg/plugins/config"
@@ -115,16 +115,18 @@ func TestIntegrationPluginManager(t *testing.T) {
 		reg, provider.ProvideService(coreRegistry), fakes.NewFakeRoleRegistry())
 	ps, err := store.ProvideService(cfg, pCfg, reg, l)
 	require.NoError(t, err)
+	rr := ProvideRouteResolver(ps)
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	verifyCorePluginCatalogue(t, ctx, ps)
 	verifyBundledPlugins(t, ctx, ps, reg)
-	verifyPluginStaticRoutes(t, ctx, ps, reg)
+	verifyPluginStaticRoutes(t, ctx, rr, reg)
 	verifyBackendProcesses(t, reg.Plugins(ctx))
 	verifyPluginQuery(t, ctx, client.ProvideService(reg, pCfg, &fakeJWTAuth{}))
 }
 
-func verifyPluginQuery(t *testing.T, ctx context.Context, c plugins.Client) {
+func verifyPluginQuery(t *testing.T, ctx context.Context, c Client) {
 	now := time.Unix(1661420870, 0)
 	req := &backend.QueryDataRequest{
 		PluginContext: backend.PluginContext{
@@ -217,25 +219,25 @@ func verifyCorePluginCatalogue(t *testing.T, ctx context.Context, ps *store.Serv
 		"test-app": {},
 	}
 
-	panels := ps.Plugins(ctx, plugins.Panel)
+	panels := ps.Plugins(ctx, Panel)
 	require.Equal(t, len(expPanels), len(panels))
 	for _, p := range panels {
 		p, exists := ps.Plugin(ctx, p.ID)
-		require.NotEqual(t, plugins.PluginDTO{}, p)
+		require.NotEqual(t, PluginDTO{}, p)
 		require.True(t, exists)
 		require.Contains(t, expPanels, p.ID)
 	}
 
-	dataSources := ps.Plugins(ctx, plugins.DataSource)
+	dataSources := ps.Plugins(ctx, DataSource)
 	require.Equal(t, len(expDataSources), len(dataSources))
 	for _, ds := range dataSources {
 		p, exists := ps.Plugin(ctx, ds.ID)
-		require.NotEqual(t, plugins.PluginDTO{}, p)
+		require.NotEqual(t, PluginDTO{}, p)
 		require.True(t, exists)
 		require.Contains(t, expDataSources, ds.ID)
 	}
 
-	apps := ps.Plugins(ctx, plugins.App)
+	apps := ps.Plugins(ctx, App)
 	require.Equal(t, len(expApps), len(apps))
 	for _, app := range apps {
 		p, exists := ps.Plugin(ctx, app.ID)
@@ -251,19 +253,19 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 	t.Helper()
 
 	dsPlugins := make(map[string]struct{})
-	for _, p := range ps.Plugins(ctx, plugins.DataSource) {
+	for _, p := range ps.Plugins(ctx, DataSource) {
 		dsPlugins[p.ID] = struct{}{}
 	}
 
 	inputPlugin, exists := ps.Plugin(ctx, "input")
 	require.True(t, exists)
-	require.NotEqual(t, plugins.PluginDTO{}, inputPlugin)
+	require.NotEqual(t, PluginDTO{}, inputPlugin)
 	require.NotNil(t, dsPlugins["input"])
 
 	intInputPlugin, exists := reg.Plugin(ctx, "input")
 	require.True(t, exists)
 
-	pluginRoutes := make(map[string]*plugins.StaticRoute)
+	pluginRoutes := make(map[string]*pluginLib.StaticRoute)
 	for _, r := range ps.Routes() {
 		pluginRoutes[r.PluginID] = r
 	}
@@ -274,9 +276,9 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 	}
 }
 
-func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr plugins.StaticRouteResolver, reg registry.Service) {
-	routes := make(map[string]*plugins.StaticRoute)
-	for _, route := range rr.Routes() {
+func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr StaticRouteResolver, reg registry.Service) {
+	routes := make(map[string]*StaticRoute)
+	for _, route := range rr.Routes(ctx) {
 		routes[route.PluginID] = route
 	}
 
@@ -291,7 +293,7 @@ func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr plugins.Stat
 	require.Equal(t, routes["test-app"].Directory, testAppPlugin.PluginDir)
 }
 
-func verifyBackendProcesses(t *testing.T, ps []*plugins.Plugin) {
+func verifyBackendProcesses(t *testing.T, ps []*pluginLib.Plugin) {
 	for _, p := range ps {
 		if p.Backend {
 			pc, exists := p.Client()

@@ -8,10 +8,11 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/grafana/grafana/pkg/services/plugins/dashboards"
+
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/plugins/manager/dashboards"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	"github.com/stretchr/testify/require"
 )

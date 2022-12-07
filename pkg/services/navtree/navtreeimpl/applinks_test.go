@@ -32,7 +32,7 @@ func TestAddAppLinks(t *testing.T) {
 		JSONData: pluginLib.JSONData{
 			ID:   "test-app1",
 			Name: "Test app1 name",
-			Type: plugins.App,
+			Type: pluginLib.App,
 			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Catalog",
@@ -72,7 +72,7 @@ func TestAddAppLinks(t *testing.T) {
 		JSONData: pluginLib.JSONData{
 			ID:   "test-app3",
 			Name: "Test app3 name",
-			Type: plugins.App,
+			Type: pluginLib.App,
 			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Default page",
@@ -109,8 +109,8 @@ func TestAddAppLinks(t *testing.T) {
 		accessControl:  accesscontrolmock.New().WithPermissions(permissions),
 		pluginSettings: &pluginSettings,
 		features:       featuremgmt.WithFeatures(),
-		pluginStore: pluginLib.FakePluginStore{
-			PluginList: []pluginLib.PluginDTO{testApp1, testApp2, testApp3},
+		pluginStore: plugins.FakePluginStore{
+			PluginList: []plugins.PluginDTO{testApp1, testApp2, testApp3},
 		},
 	}
 
@@ -385,8 +385,8 @@ func TestAddAppLinksAccessControl(t *testing.T) {
 
 	testApp1 := plugins.PluginDTO{
 		JSONData: pluginLib.JSONData{
-			ID: "test-app1", Name: "Test app1 name", Type: plugins.App,
-			Includes: []*plugins.Includes{
+			ID: "test-app1", Name: "Test app1 name", Type: pluginLib.App,
+			Includes: []*pluginLib.Includes{
 				{
 					Name:       "Catalog",
 					Path:       "/a/test-app1/catalog",
@@ -419,8 +419,8 @@ func TestAddAppLinksAccessControl(t *testing.T) {
 		accessControl:  acimpl.ProvideAccessControl(cfg),
 		pluginSettings: &pluginSettings,
 		features:       featuremgmt.WithFeatures(),
-		pluginStore: pluginLib.FakePluginStore{
-			PluginList: []pluginLib.PluginDTO{testApp1},
+		pluginStore: plugins.FakePluginStore{
+			PluginList: []plugins.PluginDTO{testApp1},
 		},
 	}
 

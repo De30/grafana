@@ -10,7 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
 func TestPluginUpdateChecker_HasUpdate(t *testing.T) {
@@ -22,9 +23,9 @@ func TestPluginUpdateChecker_HasUpdate(t *testing.T) {
 			pluginStore: plugins.FakePluginStore{
 				PluginList: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-ds",
-							Info: plugins.Info{Version: "0.9.0"},
+							Info: pluginLib.Info{Version: "0.9.0"},
 						},
 					},
 				},
@@ -45,21 +46,21 @@ func TestPluginUpdateChecker_HasUpdate(t *testing.T) {
 			pluginStore: plugins.FakePluginStore{
 				PluginList: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-ds",
-							Info: plugins.Info{Version: "0.9.0"},
+							Info: pluginLib.Info{Version: "0.9.0"},
 						},
 					},
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-panel",
-							Info: plugins.Info{Version: "0.9.0"},
+							Info: pluginLib.Info{Version: "0.9.0"},
 						},
 					},
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-app",
-							Info: plugins.Info{Version: "0.9.0"},
+							Info: pluginLib.Info{Version: "0.9.0"},
 						},
 					},
 				},
@@ -87,9 +88,9 @@ func TestPluginUpdateChecker_HasUpdate(t *testing.T) {
 			pluginStore: plugins.FakePluginStore{
 				PluginList: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-ds",
-							Info: plugins.Info{Version: "1.0.0"},
+							Info: pluginLib.Info{Version: "1.0.0"},
 						},
 					},
 				},
@@ -130,32 +131,32 @@ func TestPluginUpdateChecker_checkForUpdates(t *testing.T) {
 			pluginStore: plugins.FakePluginStore{
 				PluginList: []plugins.PluginDTO{
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-ds",
-							Info: plugins.Info{Version: "0.9.0"},
-							Type: plugins.DataSource,
+							Info: pluginLib.Info{Version: "0.9.0"},
+							Type: pluginLib.DataSource,
 						},
 					},
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-app",
-							Info: plugins.Info{Version: "0.5.0"},
-							Type: plugins.App,
+							Info: pluginLib.Info{Version: "0.5.0"},
+							Type: pluginLib.App,
 						},
 					},
 					{
-						JSONData: plugins.JSONData{
+						JSONData: pluginLib.JSONData{
 							ID:   "test-panel",
-							Info: plugins.Info{Version: "2.5.7"},
-							Type: plugins.Panel,
+							Info: pluginLib.Info{Version: "2.5.7"},
+							Type: pluginLib.Panel,
 						},
 					},
 					{
-						Class: plugins.Core,
-						JSONData: plugins.JSONData{
+						Class: pluginLib.Core,
+						JSONData: pluginLib.JSONData{
 							ID:   "test-core-panel",
-							Info: plugins.Info{Version: "0.0.1"},
-							Type: plugins.Panel,
+							Info: pluginLib.Info{Version: "0.0.1"},
+							Type: pluginLib.Panel,
 						},
 					},
 				},

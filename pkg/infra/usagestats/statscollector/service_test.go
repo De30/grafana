@@ -18,10 +18,11 @@ import (
 	"github.com/grafana/grafana/pkg/infra/usagestats"
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/services/stats"
@@ -436,12 +437,12 @@ func (m *mockSocial) GetOAuthProviders() map[string]bool {
 func setupSomeDataSourcePlugins(t *testing.T, s *Service) {
 	t.Helper()
 
-	s.plugins = &plugins.FakePluginStore{
+	s.pluginStore = &plugins.FakePluginStore{
 		PluginList: []plugins.PluginDTO{
-			{JSONData: plugins.JSONData{ID: datasources.DS_ES}, Signature: "internal"},
-			{JSONData: plugins.JSONData{ID: datasources.DS_PROMETHEUS}, Signature: "internal"},
-			{JSONData: plugins.JSONData{ID: datasources.DS_GRAPHITE}, Signature: "internal"},
-			{JSONData: plugins.JSONData{ID: datasources.DS_MYSQL}, Signature: "internal"},
+			{JSONData: pluginLib.JSONData{ID: datasources.DS_ES}, Signature: "internal"},
+			{JSONData: pluginLib.JSONData{ID: datasources.DS_PROMETHEUS}, Signature: "internal"},
+			{JSONData: pluginLib.JSONData{ID: datasources.DS_GRAPHITE}, Signature: "internal"},
+			{JSONData: pluginLib.JSONData{ID: datasources.DS_MYSQL}, Signature: "internal"},
 		},
 	}
 }

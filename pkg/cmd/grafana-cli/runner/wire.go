@@ -6,6 +6,8 @@ package runner
 import (
 	"context"
 
+	dashboards2 "github.com/grafana/grafana/pkg/services/plugins/dashboards"
+
 	"github.com/google/wire"
 	"github.com/grafana/grafana/pkg/tsdb/parca"
 	"github.com/grafana/grafana/pkg/tsdb/phlare"
@@ -34,7 +36,6 @@ import (
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/middleware/csrf"
 	"github.com/grafana/grafana/pkg/models"
-	pluginDashboards "github.com/grafana/grafana/pkg/plugins/manager/dashboards"
 	"github.com/grafana/grafana/pkg/registry/corekind"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/acimpl"
@@ -172,8 +173,8 @@ var wireSet = wire.NewSet(
 	updatechecker.ProvidePluginsService,
 	uss.ProvideService,
 	pluginsintegration.WireSet,
-	pluginDashboards.ProvideFileStoreManager,
-	wire.Bind(new(pluginDashboards.FileStore), new(*pluginDashboards.FileStoreManager)),
+	dashboards2.ProvideFileStoreManager,
+	wire.Bind(new(dashboards2.FileStore), new(*dashboards2.FileStoreManager)),
 	cloudwatch.ProvideService,
 	cloudmonitoring.ProvideService,
 	azuremonitor.ProvideService,

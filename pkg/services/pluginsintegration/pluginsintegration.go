@@ -2,6 +2,7 @@ package pluginsintegration
 
 import (
 	"github.com/google/wire"
+	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
@@ -14,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/plugins/manager/signature"
 	"github.com/grafana/grafana/pkg/plugins/manager/store"
-	"github.com/grafana/grafana/pkg/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/plugins/repo"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
@@ -37,7 +37,7 @@ var WireSet = wire.NewSet(
 	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)),
 
 	ProvideClientDecorator,
-	wire.Bind(new(plugins.Client), new(*client.Decorator)),
+	wire.Bind(new(plugins.Client), new(*plugins.Decorator)),
 	process.ProvideService,
 	wire.Bind(new(process.Service), new(*process.Manager)),
 	coreplugin.ProvideCoreRegistry,
@@ -62,17 +62,17 @@ var WireExtensionSet = wire.NewSet(
 
 func ProvideClientDecorator(cfg *setting.Cfg, pCfg *config.Cfg,
 	pluginRegistry registry.Service,
-	oAuthTokenService oauthtoken.OAuthTokenService, pluginAuthService jwt.PluginAuthService) (*client.Decorator, error) {
+	oAuthTokenService oauthtoken.OAuthTokenService, pluginAuthService jwt.PluginAuthService) (*plugins.Decorator, error) {
 	return NewClientDecorator(cfg, pCfg, pluginRegistry, oAuthTokenService, pluginAuthService)
 }
 
 func NewClientDecorator(cfg *setting.Cfg, pCfg *config.Cfg,
 	pluginRegistry registry.Service,
-	oAuthTokenService oauthtoken.OAuthTokenService, pluginAuthService jwt.PluginAuthService) (*client.Decorator, error) {
+	oAuthTokenService oauthtoken.OAuthTokenService, pluginAuthService jwt.PluginAuthService) (*plugins.Decorator, error) {
 	c := client.ProvideService(pluginRegistry, pCfg, pluginAuthService)
 	middlewares := CreateMiddlewares(cfg, oAuthTokenService)
 
-	return client.NewDecorator(c, middlewares...)
+	return plugins.NewDecorator(c, middlewares...)
 }
 
 func CreateMiddlewares(cfg *setting.Cfg, oAuthTokenService oauthtoken.OAuthTokenService) []plugins.ClientMiddleware {

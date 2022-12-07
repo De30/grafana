@@ -7,7 +7,10 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
+
+	//"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -192,10 +195,10 @@ func TestDashboardFileStore(t *testing.T) {
 func setupPluginDashboardsForTest(t *testing.T) *FileStoreManager {
 	t.Helper()
 
-	p1 := &plugins.Plugin{
-		JSONData: plugins.JSONData{
+	p1 := plugins.PluginDTO{
+		JSONData: pluginLib.JSONData{
 			ID: "pluginWithoutDashboards",
-			Includes: []*plugins.Includes{
+			Includes: []*pluginLib.Includes{
 				{
 					Type: "page",
 				},
@@ -203,10 +206,10 @@ func setupPluginDashboardsForTest(t *testing.T) *FileStoreManager {
 		},
 	}
 
-	p2 := &plugins.Plugin{
-		JSONData: plugins.JSONData{
+	p2 := plugins.PluginDTO{
+		JSONData: pluginLib.JSONData{
 			ID: "pluginWithDashboards",
-			Includes: []*plugins.Includes{
+			Includes: []*pluginLib.Includes{
 				{
 					Type: "page",
 				},
@@ -224,7 +227,7 @@ func setupPluginDashboardsForTest(t *testing.T) *FileStoreManager {
 
 	return &FileStoreManager{
 		pluginStore: &plugins.FakePluginStore{
-			PluginList: []plugins.PluginDTO{p1.ToDTO(), p2.ToDTO()},
+			PluginList: []plugins.PluginDTO{p1, p2},
 		},
 	}
 }

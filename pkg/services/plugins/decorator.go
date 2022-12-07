@@ -1,21 +1,20 @@
-package client
+package plugins
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
 // Decorator allows a plugins.Client to be decorated with middlewares.
 type Decorator struct {
-	client      plugins.Client
-	middlewares []plugins.ClientMiddleware
+	client      Client
+	middlewares []ClientMiddleware
 }
 
 // NewDecorator creates a new plugins.client decorator.
-func NewDecorator(client plugins.Client, middlewares ...plugins.ClientMiddleware) (*Decorator, error) {
+func NewDecorator(client Client, middlewares ...ClientMiddleware) (*Decorator, error) {
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
@@ -97,7 +96,7 @@ func (d *Decorator) RunStream(ctx context.Context, req *backend.RunStreamRequest
 	return client.RunStream(ctx, req, sender)
 }
 
-func clientFromMiddlewares(middlewares []plugins.ClientMiddleware, finalClient plugins.Client) plugins.Client {
+func clientFromMiddlewares(middlewares []ClientMiddleware, finalClient Client) Client {
 	if len(middlewares) == 0 {
 		return finalClient
 	}
@@ -112,8 +111,8 @@ func clientFromMiddlewares(middlewares []plugins.ClientMiddleware, finalClient p
 	return next
 }
 
-func reverseMiddlewares(middlewares []plugins.ClientMiddleware) []plugins.ClientMiddleware {
-	reversed := make([]plugins.ClientMiddleware, len(middlewares))
+func reverseMiddlewares(middlewares []ClientMiddleware) []ClientMiddleware {
+	reversed := make([]ClientMiddleware, len(middlewares))
 	copy(reversed, middlewares)
 
 	for i, j := 0, len(reversed)-1; i < j; i, j = i+1, j-1 {
@@ -123,4 +122,4 @@ func reverseMiddlewares(middlewares []plugins.ClientMiddleware) []plugins.Client
 	return reversed
 }
 
-var _ plugins.Client = &Decorator{}
+var _ Client = &Decorator{}
