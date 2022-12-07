@@ -68,8 +68,8 @@ export const Page: PageType = ({
                 )}
                 {pageNav && pageNav.children && <PageTabs navItem={pageNav} />}
                 <div className={styles.pageContent}>{children}</div>
+                <Footer />
               </div>
-              <Footer />
             </CustomScrollbar>
           </div>
         </div>
@@ -99,6 +99,8 @@ Page.OldNavOnly = function OldNavOnly() {
 };
 
 const getStyles = (theme: GrafanaTheme2) => {
+  const noMargin = theme.components.standardPage.noMargin;
+
   const shadow = theme.isDark
     ? `0 0.6px 1.5px -1px rgb(0 0 0),0 2px 4px -1px rgb(0 0 0 / 40%),0 5px 10px -1px rgb(0 0 0 / 23%)`
     : '0 0.6px 1.5px -1px rgb(0 0 0 / 8%),0 2px 4px rgb(0 0 0 / 6%),0 5px 10px -1px rgb(0 0 0 / 5%)';
@@ -141,12 +143,19 @@ const getStyles = (theme: GrafanaTheme2) => {
       flexDirection: 'column',
       flexGrow: 1,
       margin: theme.spacing(0, 0, 0, 0),
+      borderStyle: 'solid',
+      borderColor: theme.components.standardPage.borderColor,
+      borderWidth: theme.components.standardPage.borderWidth,
 
       [theme.breakpoints.up('sm')]: {
-        margin: theme.spacing(0, 1, 1, 1),
+        ...(!noMargin && {
+          margin: theme.spacing(0, 1, 1, 1),
+        }),
       },
       [theme.breakpoints.up('md')]: {
-        margin: theme.spacing(2, 2, 2, 1),
+        ...(!noMargin && {
+          margin: theme.spacing(2, 2, 2, 1),
+        }),
         padding: theme.spacing(3),
       },
     }),

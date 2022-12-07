@@ -102,10 +102,10 @@ const getStyles = (theme: GrafanaTheme2) => {
       top: theme.spacing(0),
 
       [theme.breakpoints.up('md')]: {
-        transform: 'translateX(50%)',
-        top: theme.spacing(8),
-        left: theme.spacing(1),
-        right: theme.spacing(-1),
+        transform: 'translateX(00%)',
+        top: '45px',
+        left: theme.spacing(-2),
+        right: theme.spacing(0),
       },
     }),
   };

@@ -65,6 +65,11 @@ export interface ThemeComponents {
   sectionNav: {
     activeItemBackground: string;
   };
+  standardPage: {
+    noMargin?: boolean;
+    borderColor: string;
+    borderWidth: string;
+  };
 }
 
 export type ThemeComponentsInput = DeepPartial<ThemeComponents>;
@@ -137,6 +142,10 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     sectionNav: {
       activeItemBackground:
         overrides.sectionNav?.activeItemBackground ?? colors.emphasize(colors.background.canvas, 0.03),
+    },
+    standardPage: {
+      borderColor: colors.border.weak,
+      borderWidth: '0',
     },
   };
 
