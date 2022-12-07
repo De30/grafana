@@ -22,10 +22,10 @@ import { SpanLinkFunc, TraceSpan } from '@jaegertracing/jaeger-ui-components';
 import { TraceToLogsOptions } from 'app/core/components/TraceToLogs/TraceToLogsSettings';
 import { TraceToMetricQuery, TraceToMetricsOptions } from 'app/core/components/TraceToMetrics/TraceToMetricsSettings';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
+import { LokiQuery } from 'app/plugins/datasource/loki/types';
 import { PromQuery } from 'app/plugins/datasource/prometheus/types';
 
-import { LokiQuery } from '../../../plugins/datasource/loki/types';
-import { getFieldLinksForExplore } from '../utils/links';
+import { getFieldLinksForExplore } from '../../utils/links';
 
 /**
  * This is a factory for the link creator. It returns the function mainly so it can return undefined in which case

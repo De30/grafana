@@ -3,9 +3,10 @@ import { TopOfViewRefType } from '@jaegertracing/jaeger-ui-components/src/TraceT
 import React, { RefObject, useMemo, useState } from 'react';
 
 import { DataFrame, SplitOpen, PanelData } from '@grafana/data';
-import { Collapse } from '@grafana/ui';
 import { StoreState, useSelector } from 'app/types';
 import { ExploreId } from 'app/types/explore';
+
+import { PanelContainer } from '../../components/PanelContainer';
 
 import { TraceView } from './TraceView';
 import { useSearch } from './useSearch';
@@ -18,7 +19,7 @@ interface Props {
   queryResponse: PanelData;
   topOfViewRef: RefObject<HTMLDivElement>;
 }
-export function TraceViewContainer(props: Props) {
+export function TracePanel(props: Props) {
   // At this point we only show single trace
   const frame = props.dataFrames[0];
   const { dataFrames, splitOpenFn, exploreId, scrollElement, topOfViewRef, queryResponse } = props;
@@ -47,7 +48,7 @@ export function TraceViewContainer(props: Props) {
         setFocusedSpanIdForSearch={setFocusedSpanIdForSearch}
       />
 
-      <Collapse label="Trace View" isOpen>
+      <PanelContainer label="Trace View" isOpen>
         <TraceView
           exploreId={exploreId}
           dataFrames={dataFrames}
@@ -62,7 +63,7 @@ export function TraceViewContainer(props: Props) {
           topOfViewRef={topOfViewRef}
           topOfViewRefType={TopOfViewRefType.Explore}
         />
-      </Collapse>
+      </PanelContainer>
     </>
   );
 }

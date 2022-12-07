@@ -24,15 +24,14 @@ import {
   TraceTimelineViewer,
   TTraceTimeline,
 } from '@jaegertracing/jaeger-ui-components';
-import { TraceToLogsData } from 'app/core/components/TraceToLogs/TraceToLogsSettings';
-import { TraceToMetricsData } from 'app/core/components/TraceToMetrics/TraceToMetricsSettings';
+import { isTraceToLogsData } from 'app/core/components/TraceToLogs/TraceToLogsSettings';
+import { isTraceToMetricsData } from 'app/core/components/TraceToMetrics/TraceToMetricsSettings';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { getTimeZone } from 'app/features/profile/state/selectors';
-import { TempoQuery } from 'app/plugins/datasource/tempo/types';
 import { useDispatch, useSelector } from 'app/types';
 import { ExploreId } from 'app/types/explore';
 
-import { changePanelState } from '../state/explorePane';
+import { changePanelState } from '../../state/explorePane';
 
 import { createSpanLinkFactory } from './createSpanLink';
 import { useChildrenState } from './useChildrenState';
@@ -121,8 +120,16 @@ export function TraceView(props: Props) {
   );
 
   const instanceSettings = getDatasourceSrv().getInstanceSettings(datasource?.name);
-  const traceToLogsOptions = (instanceSettings?.jsonData as TraceToLogsData)?.tracesToLogs;
-  const traceToMetricsOptions = (instanceSettings?.jsonData as TraceToMetricsData)?.tracesToMetrics;
+
+  const traceToMetricsOptions =
+    instanceSettings?.jsonData && isTraceToMetricsData(instanceSettings.jsonData)
+      ? instanceSettings.jsonData.tracesToMetrics
+      : undefined;
+  const traceToLogsOptions =
+    instanceSettings?.jsonData && isTraceToLogsData(instanceSettings.jsonData)
+      ? instanceSettings.jsonData.tracesToLogs
+      : undefined;
+
   const spanBarOptions: SpanBarOptionsData | undefined = instanceSettings?.jsonData;
 
   const createSpanLink = useMemo(
@@ -188,7 +195,7 @@ export function TraceView(props: Props) {
             setTrace={noop}
             addHoverIndentGuideId={addHoverIndentGuideId}
             removeHoverIndentGuideId={removeHoverIndentGuideId}
-            linksGetter={noop as any}
+            linksGetter={() => []}
             uiFind={props.search}
             createSpanLink={createSpanLink}
             scrollElement={props.scrollElement}
@@ -255,7 +262,7 @@ function useFocusSpanLink(options: {
     // Check if the link is to a different trace or not.
     // If it's the same trace, only update panel state with setFocusedSpanId (no navigation).
     // If it's a different trace, use splitOpenFn to open a new explore panel
-    const sameTrace = query?.queryType === 'traceId' && (query as TempoQuery).query === traceId;
+    const sameTrace = query && query.queryType === 'traceId' && isTempoLikeQuery(query) && query.query === traceId;
 
     return mapInternalLinkToExplore({
       link,
@@ -285,4 +292,11 @@ function useFocusSpanLink(options: {
   };
 
   return [focusedSpanId, createFocusSpanLink];
+}
+
+interface TempoLikeQuery extends DataQuery {
+  query: string;
+}
+function isTempoLikeQuery(query: DataQuery): query is TempoLikeQuery {
+  return 'query' in query;
 }

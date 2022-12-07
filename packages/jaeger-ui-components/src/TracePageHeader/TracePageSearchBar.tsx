@@ -31,15 +31,13 @@ export const getStyles = (theme: GrafanaTheme2) => {
       float: right;
       position: sticky;
       top: 8px;
-      right: 0;
       z-index: ${theme.zIndex.navbarFixed};
+      margin-bottom: calc(-${theme.spacing(6)} - 2px);
       background: ${theme.colors.background.primary};
-      margin-top: 8px;
-      margin-bottom: -48px;
-      padding: 8px;
-      margin-right: 2px;
-      border-radius: 4px;
-      box-shadow: ${theme.shadows.z2};
+      background-clip: padding-box !important;
+      border: 1px solid transparent;
+      border-radius: ${theme.shape.borderRadius(1)};
+      padding: ${theme.spacing(1)};
     `,
     TracePageSearchBarBar: css`
       label: TracePageSearchBarBar;
@@ -69,7 +67,7 @@ export const getStyles = (theme: GrafanaTheme2) => {
   };
 };
 
-export type TracePageSearchBarProps = {
+type TracePageSearchBarProps = {
   navigable: boolean;
   searchValue: string;
   setSearch: (value: string) => void;

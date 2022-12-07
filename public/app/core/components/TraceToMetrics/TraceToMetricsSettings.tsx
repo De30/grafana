@@ -30,6 +30,12 @@ export interface TraceToMetricsData extends DataSourceJsonData {
   tracesToMetrics?: TraceToMetricsOptions;
 }
 
+export function isTraceToMetricsData(
+  jsonData: DataSourceJsonData | TraceToMetricsData
+): jsonData is TraceToMetricsData {
+  return 'tracesToMetrics' in jsonData;
+}
+
 interface Props extends DataSourcePluginOptionsEditorProps<TraceToMetricsData> {}
 
 export function TraceToMetricsSettings({ options, onOptionsChange }: Props) {

@@ -37,7 +37,6 @@ import { NoData } from './NoData';
 import { NoDataSourceCallToAction } from './NoDataSourceCallToAction';
 import { NodeGraphContainer } from './NodeGraphContainer';
 import TableContainer from './TableContainer';
-import { TraceViewContainer } from './TraceView/TraceViewContainer';
 import { QueriesSection } from './components/QueriesSection';
 import { changeSize } from './state/explorePane';
 import { splitOpen } from './state/main';
@@ -45,6 +44,7 @@ import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } fro
 import { isSplit } from './state/selectors';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';
 import { GraphPanel } from './visualizations/GraphPanel';
+import { TracePanel } from './visualizations/TracePanel';
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
@@ -323,7 +323,7 @@ export class Explore extends React.PureComponent<Props> {
     return (
       // If there is no data (like 404) we show a separate error so no need to show anything here
       dataFrames.length && (
-        <TraceViewContainer
+        <TracePanel
           exploreId={exploreId}
           dataFrames={dataFrames}
           splitOpenFn={this.onSplitOpen('traceView')}

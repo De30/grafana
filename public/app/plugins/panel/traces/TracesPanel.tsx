@@ -6,9 +6,9 @@ import { useAsync } from 'react-use';
 
 import { PanelProps } from '@grafana/data';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { TraceView } from 'app/features/explore/TraceView/TraceView';
-import { useSearch } from 'app/features/explore/TraceView/useSearch';
-import { transformDataFrames } from 'app/features/explore/TraceView/utils/transform';
+import { TraceView } from 'app/features/explore/visualizations/TracePanel/TraceView';
+import { useSearch } from 'app/features/explore/visualizations/TracePanel/useSearch';
+import { transformDataFrames } from 'app/features/explore/visualizations/TracePanel/utils/transform';
 
 const styles = {
   wrapper: css`

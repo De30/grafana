@@ -1,12 +1,11 @@
 import { DataSourceInstanceSettings, LinkModel, MutableDataFrame } from '@grafana/data';
 import { DataSourceSrv, setDataSourceSrv, setTemplateSrv } from '@grafana/runtime';
 import { TraceSpan } from '@jaegertracing/jaeger-ui-components';
+import { TraceToLogsOptions } from 'app/core/components/TraceToLogs/TraceToLogsSettings';
 import { TraceToMetricsOptions } from 'app/core/components/TraceToMetrics/TraceToMetricsSettings';
+import { LinkSrv, setLinkSrv } from 'app/features/panel/panellinks/link_srv';
 import { DatasourceSrv } from 'app/features/plugins/datasource_srv';
-
-import { TraceToLogsOptions } from '../../../core/components/TraceToLogs/TraceToLogsSettings';
-import { LinkSrv, setLinkSrv } from '../../panel/panellinks/link_srv';
-import { TemplateSrv } from '../../templating/template_srv';
+import { TemplateSrv } from 'app/features/templating/template_srv';
 
 import { createSpanLinkFactory } from './createSpanLink';
 

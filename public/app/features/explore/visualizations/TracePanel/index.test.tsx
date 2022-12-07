@@ -4,12 +4,12 @@ import React, { createRef } from 'react';
 import { Provider } from 'react-redux';
 
 import { getDefaultTimeRange, LoadingState } from '@grafana/data';
+import { configureStore } from 'app/store/configureStore';
 import { ExploreId } from 'app/types';
 
-import { configureStore } from '../../../store/configureStore';
-
 import { frameOld } from './TraceView.test';
-import { TraceViewContainer } from './TraceViewContainer';
+
+import { TracePanel } from '.';
 
 jest.mock('@grafana/runtime', () => {
   return {
@@ -29,7 +29,7 @@ function renderTraceViewContainer(frames = [frameOld]) {
 
   const { container, baseElement } = render(
     <Provider store={store}>
-      <TraceViewContainer
+      <TracePanel
         exploreId={ExploreId.left}
         dataFrames={frames}
         splitOpenFn={() => {}}
