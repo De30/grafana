@@ -34,6 +34,11 @@ export class DatasourceDataCatalogueBuilder extends DataCatalogueBuilder {
     this.addKeyValue('Annotations', datasource.meta.annotations ? 'supported' : 'not supported');
     this.addKeyValue('Streaming', datasource.meta.streaming ? 'supported' : 'not supported');
     this.addDescription(datasource.meta.info.description);
+
+    (datasource.meta.info.links || []).forEach((link) => {
+      this.addLink(link.url, link.name);
+    });
+
     datasource.meta.info.version && this.addKeyValue('Version', datasource.meta.info.version);
     this.addImage(datasource.meta.info.logos.small);
 
@@ -121,29 +126,35 @@ export class DatasourceDataCatalogueBuilder extends DataCatalogueBuilder {
         });
 
         const correlationItems: DataCatalogueItem[] = Object.values(connections).map((connection) => {
-          return new DataCatalogueBuilder(connection.datasource.name).setItems(
-            connection.correlations.map((correlation) =>
-              new DataCatalogueBuilder(correlation.label)
-                .addDescription(correlation.description || '')
-                .addKeyValue('Source', correlation.source.name)
-                .addKeyValue('Type', correlation.config.type)
-                .addKeyValue('Field', correlation.config.field)
-                .addKeyValue('Target', correlation.target.name)
-                .addKeyValue(
-                  'Query',
-                  JSON.stringify(correlation.config.target, undefined, 2),
-                  DataCatalogueItemAttributeKeyValueFormat.Code
-                )
-            )
-          );
+          return new DataCatalogueBuilder(connection.datasource.name, 'Correlated data source')
+            .addKeyValue('Total correlations', connections[connection.datasource.uid].correlations.length.toString())
+            .addDescription('Select correlation for more details')
+            .setItems(
+              connection.correlations.map((correlation) =>
+                new DataCatalogueBuilder(correlation.label, 'Correlation')
+                  .addDescription(correlation.description || '')
+                  .addKeyValue('Source', correlation.source.name)
+                  .addKeyValue('Type', correlation.config.type)
+                  .addKeyValue('Field', correlation.config.field)
+                  .addKeyValue('Target', correlation.target.name)
+                  .addKeyValue(
+                    'Query',
+                    JSON.stringify(correlation.config.target, undefined, 2),
+                    DataCatalogueItemAttributeKeyValueFormat.Code
+                  )
+              )
+            );
         });
         item.setItems(correlationItems);
+        item.addDescription(
+          'Correlations are data links that allow to navigate through different data sources that contain correlated data.'
+        );
 
         item.addCustom(
           <DataSourceCorrelationsGraph datasource={datasource} connections={Object.values(connections)} />
         );
 
-        item.addLink('/datasources/correlations', 'Add new correlations.');
+        item.addLink('/datasources/correlations', 'Go to correlations settings page');
       })
     );
 

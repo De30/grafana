@@ -1,5 +1,8 @@
+import React from 'react';
+
 import { DataCatalogueContext, DataCatalogueBuilder } from '@grafana/data';
 
+import { FeatureList } from './FeatureList';
 import { ElasticDatasource } from './datasource';
 import { ElasticsearchQuery } from './types';
 
@@ -62,22 +65,19 @@ export const getDataCatalogueCategories = ({
   };
 
   const configuration = (item: DataCatalogueBuilder) => {
-    item.setItems([
-      new DataCatalogueBuilder('Settings')
-        .addKeyValue('ES version', datasource.esVersion)
-        .addKeyValue('Time field', datasource.timeField)
-        .addKeyValue('Log message field', datasource.logMessageField || 'not set')
-        .addKeyValue('Log level field', datasource.logLevelField || 'not set')
-        .addKeyValue('XPack', datasource.xpack ? 'yes' : 'no'),
-      new DataCatalogueBuilder('Features').loadItems(async () => {
-        const { features } = await datasource.getMeta();
-        return Object.keys(features).map((featureName) => {
-          return new DataCatalogueBuilder(featureName, 'Feature')
-            .addKeyValue('available', features[featureName].available ? 'yes' : 'no')
-            .addKeyValue('enabled', features[featureName].enabled ? 'yes' : 'no');
-        });
-      }),
-    ]);
+    item
+      .addKeyValue('ES version', datasource.esVersion)
+      .addKeyValue('Time field', datasource.timeField)
+      .addKeyValue('Log message field', datasource.logMessageField || 'not set')
+      .addKeyValue('Log level field', datasource.logLevelField || 'not set')
+      .addKeyValue('XPack', datasource.xpack ? 'yes' : 'no')
+
+      .setItems([
+        new DataCatalogueBuilder('Features').loadAttributes(async (item) => {
+          const { features } = await datasource.getMeta();
+          item.addCustom(<FeatureList features={features} />);
+        }),
+      ]);
   };
 
   const statistics = (item: DataCatalogueBuilder) => {
@@ -85,7 +85,7 @@ export const getDataCatalogueCategories = ({
       const stats = await datasource.getStats();
       item
         .addKeyValue('Docs', stats._all.total.docs.count)
-        .addKeyValue('Field data memory', stats._all.total.fielddata.memory_size_in_bytes + 'B')
+        .addKeyValue('Store size', stats._all.total.store.size_in_bytes + 'B')
         .addKeyValue('Shards', stats._all.total.shard_stats.total_count);
     });
   };

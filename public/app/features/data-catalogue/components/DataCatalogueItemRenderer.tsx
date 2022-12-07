@@ -20,20 +20,23 @@ export const DataCatalogueItemRenderer = (props: Props) => {
   const [showFilter, setShowFilter] = useState(false);
   const [showAllChildren, setShowAllChildren] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [inProgress, setInProgress] = useState(false);
   const serachActive = searchTerm.length >= 3;
 
   const { item, setSelectedItem, selectedItem } = props;
   const isSelected = item === selectedItem;
 
   const toggle = async () => {
-    if (!expanded) {
+    if (!expanded && !inProgress) {
       if (isDataCatalogueFolder(props.item)) {
+        setExpanded(true);
         if (IsLazyDataCatalogueFolder(props.item)) {
           setChildren([{ name: 'Loading... ' }]);
+          setInProgress(true);
           await props.item.createItems();
+          setInProgress(false);
         }
         const items = props.item.items || [{ name: 'No items found. ' }];
-        setExpanded(true);
         if (items.length > MAX_CHILDREN) {
           setShowAllChildren(false);
           setShowFilter(true);

@@ -29,6 +29,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     border-radius: ${theme.shape.borderRadius()};
     background-color: ${theme.colors.background.primary};
     width: 100%;
+    margin-bottom: 10px;
 
     td {
       padding: ${theme.spacing(1)};

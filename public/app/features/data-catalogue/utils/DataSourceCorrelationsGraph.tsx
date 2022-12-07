@@ -15,12 +15,16 @@ export const DataSourceCorrelationsGraph = (props: Props) => {
   const angleStep = 360 / connections.length;
 
   return (
-    <svg width="70%" viewBox="-10 -10 120 120" transform="translate(0,0)" xmlns="http://www.w3.org/2000/svg">
+    <svg width="80%" viewBox="-10 -5 120 110" transform="translate(0,0)" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <marker id="arrowhead" markerWidth="5" markerHeight="5" refX="0" refY="2.5" orient="auto">
           <polygon points="0 0, 5 2.5, 0 5" fill="#666" />
         </marker>
       </defs>
+
+      <text transform="translate(-10,0)" style={{ fontSize: '4' }} fill="#ddd">
+        Data sources correlated with {datasource.name}:
+      </text>
 
       <g transform="translate(-10,-10)">
         <image transform="translate(50,50)" href={datasource.meta.info.logos.small} width="20" height="20"></image>
