@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { renderMarkdown, LinkModelSupplier, ScopedVars } from '@grafana/data';
+import { renderMarkdown, LinkModelSupplier, ScopedVars, Errata } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { locationService, getTemplateSrv } from '@grafana/runtime';
 import { Tooltip, PopoverContent } from '@grafana/ui';
@@ -21,14 +21,15 @@ export interface Props {
   scopedVars?: ScopedVars;
   links?: LinkModelSupplier<PanelModel>;
   error?: string;
+  errata?: Errata;
 }
 
 export class PanelHeaderCorner extends Component<Props> {
   timeSrv: TimeSrv = getTimeSrv();
 
   getInfoMode = () => {
-    const { panel, error } = this.props;
-    if (error) {
+    const { panel, error, errata } = this.props;
+    if (error || errata) {
       return InfoMode.Error;
     }
     if (!!panel.description) {
@@ -95,11 +96,22 @@ export class PanelHeaderCorner extends Component<Props> {
   }
 
   render() {
-    const { error } = this.props;
+    const { error, errata } = this.props;
     const infoMode: InfoMode | undefined = this.getInfoMode();
 
     if (!infoMode) {
       return null;
+    }
+
+    if (infoMode === InfoMode.Error && errata) {
+      const errorDiv = (
+        <div>
+          <div>{errata.message}</div>
+          <div>{errata.code}</div>
+          <div>{errata.guide}</div>
+        </div>
+      );
+      return this.renderCornerType(infoMode, errorDiv, this.onClickError);
     }
 
     if (infoMode === InfoMode.Error && error) {

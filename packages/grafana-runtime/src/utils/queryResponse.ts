@@ -13,6 +13,7 @@ import {
   DataFrameJSON,
   dataFrameFromJSON,
   QueryResultMetaNotice,
+  Errata,
 } from '@grafana/data';
 
 import { FetchError, FetchResponse } from '../services';
@@ -20,6 +21,11 @@ import { FetchError, FetchResponse } from '../services';
 import { toDataQueryError } from './toDataQueryError';
 
 export const cachedResponseNotice: QueryResultMetaNotice = { severity: 'info', text: 'Cached response' };
+
+export interface ErrorResponse {
+  errata: Errata;
+  message: string;
+}
 
 /**
  * Single response object from a backend data source. Properties are optional but response should contain at least
@@ -29,7 +35,7 @@ export const cachedResponseNotice: QueryResultMetaNotice = { severity: 'info', t
  * @internal
  */
 export interface DataResponse {
-  error?: string;
+  error?: string | ErrorResponse;
   refId?: string;
   frames?: DataFrameJSON[];
 
@@ -76,16 +82,34 @@ export function toDataQueryResponse(
         continue;
       }
       dr.refId = refId;
+      if (dr.error?.errata?.args) {
+        const asd = new Map<string, string | number>();
+        for (const [k, v] of Object.entries(dr.error.errata.args)) {
+          if (typeof v === 'string' || typeof v === 'number') {
+            asd.set(k, v);
+          }
+        }
+        dr.error.errata.args = asd;
+      }
       data.push(dr);
     }
 
     for (const dr of data) {
       if (dr.error) {
         if (!rsp.error) {
-          rsp.error = {
-            refId: dr.refId,
-            message: dr.error,
-          };
+          if (typeof dr.error === 'string') {
+            rsp.error = {
+              refId: dr.refId,
+              message: dr.error,
+            };
+          } else {
+            rsp.error = {
+              refId: dr.refId,
+              message: dr.error.message,
+              errata: dr.error.errata,
+            };
+          }
+
           rsp.state = LoadingState.Error;
         }
       }

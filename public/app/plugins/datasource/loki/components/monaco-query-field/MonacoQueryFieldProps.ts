@@ -1,4 +1,4 @@
-import { HistoryItem } from '@grafana/data';
+import { DataQueryError, HistoryItem } from '@grafana/data';
 
 import type LanguageProvider from '../../LanguageProvider';
 import { LokiQuery } from '../../types';
@@ -8,6 +8,7 @@ import { LokiQuery } from '../../types';
 // the react-component, and it needs the same
 // props as the sync-component.
 export type Props = {
+  error?: DataQueryError;
   initialValue: string;
   languageProvider: LanguageProvider;
   history: Array<HistoryItem<LokiQuery>>;

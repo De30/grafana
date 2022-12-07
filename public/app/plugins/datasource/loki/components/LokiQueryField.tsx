@@ -177,6 +177,7 @@ export class LokiQueryField extends React.PureComponent<LokiQueryFieldProps, Lok
       history,
       onRunQuery,
       onBlur,
+      data,
     } = this.props;
 
     return (
@@ -196,6 +197,7 @@ export class LokiQueryField extends React.PureComponent<LokiQueryFieldProps, Lok
                       history={history ?? []}
                       onChange={this.onChangeQuery}
                       onRunQuery={onRunQuery}
+                      error={data?.error}
                       initialValue={query.expr ?? ''}
                     />
                   ) : (

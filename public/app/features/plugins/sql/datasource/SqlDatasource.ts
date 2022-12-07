@@ -198,7 +198,7 @@ export abstract class SqlDatasource extends DataSourceWithBackend<SQLQuery, SQLO
           map((r) => {
             const error = r.data.results[refId].error;
             if (error) {
-              return { status: 'error', message: error };
+              return { status: 'error', message: typeof error === 'string' ? error : error.message };
             }
             return { status: 'success', message: 'Database Connection OK' };
           }),

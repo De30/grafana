@@ -1,7 +1,7 @@
 import { css, cx } from '@emotion/css';
 import React, { FC } from 'react';
 
-import { DataLink, GrafanaTheme2, PanelData } from '@grafana/data';
+import { DataLink, Errata, GrafanaTheme2, PanelData } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { Icon, useStyles2, ClickOutsideWrapper } from '@grafana/ui';
 import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
@@ -21,13 +21,14 @@ export interface Props {
   description?: string;
   links?: DataLink[];
   error?: string;
+  errata?: Errata;
   alertState?: string;
   isViewing: boolean;
   isEditing: boolean;
   data: PanelData;
 }
 
-export const PanelHeader: FC<Props> = ({ panel, error, isViewing, isEditing, data, alertState, dashboard }) => {
+export const PanelHeader: FC<Props> = ({ panel, error, errata, isViewing, isEditing, data, alertState, dashboard }) => {
   const onCancelQuery = () => panel.getQueryRunner().cancelQuery();
   const title = panel.getDisplayTitle();
   const className = cx('panel-header', !(isViewing || isEditing) ? 'grid-drag-handle' : '');
@@ -43,6 +44,7 @@ export const PanelHeader: FC<Props> = ({ panel, error, isViewing, isEditing, dat
         scopedVars={panel.scopedVars}
         links={getPanelLinksSupplier(panel)}
         error={error}
+        errata={errata}
       />
       <div className={className}>
         <PanelHeaderMenuTrigger data-testid={selectors.components.Panels.Panel.title(title)}>

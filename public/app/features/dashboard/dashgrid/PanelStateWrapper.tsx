@@ -8,6 +8,7 @@ import {
   AnnotationEventUIModel,
   CoreApp,
   DashboardCursorSync,
+  Errata,
   EventFilterOptions,
   FieldConfigSource,
   getDefaultTimeRange,
@@ -68,6 +69,7 @@ export interface State {
   isFirstLoad: boolean;
   renderCounter: number;
   errorMessage?: string;
+  errata?: Errata;
   refreshWhenInView: boolean;
   context: PanelContext;
   data: PanelData;
@@ -278,6 +280,7 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
 
     let { isFirstLoad } = this.state;
     let errorMessage: string | undefined;
+    let errata: Errata | undefined;
 
     switch (data.state) {
       case LoadingState.Loading:
@@ -290,6 +293,7 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
       case LoadingState.Error:
         const { error } = data;
         if (error) {
+          errata = error.errata;
           if (errorMessage !== error.message) {
             errorMessage = error.message;
           }
@@ -306,7 +310,7 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
         break;
     }
 
-    this.setState({ isFirstLoad, errorMessage, data, liveTime: undefined });
+    this.setState({ isFirstLoad, errorMessage, errata, data, liveTime: undefined });
   }
 
   onRefresh = () => {
@@ -568,7 +572,7 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
 
   render() {
     const { dashboard, panel, isViewing, isEditing, width, height, plugin } = this.props;
-    const { errorMessage, data } = this.state;
+    const { errorMessage, errata, data } = this.state;
     const { transparent } = panel;
 
     const alertState = data.alertState?.state;
@@ -623,6 +627,7 @@ export class PanelStateWrapper extends PureComponent<Props, State> {
             description={panel.description}
             links={panel.links}
             error={errorMessage}
+            errata={errata}
             isEditing={isEditing}
             isViewing={isViewing}
             alertState={alertState}

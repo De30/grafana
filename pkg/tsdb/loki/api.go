@@ -11,6 +11,7 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/util/converter"
@@ -101,10 +102,6 @@ func makeDataRequest(ctx context.Context, lokiDsUrl string, query lokiQuery, hea
 	return req, nil
 }
 
-type lokiError struct {
-	Message string
-}
-
 // we know there is an error,
 // based on the http-response-body
 // we have to make an informative error-object
@@ -127,21 +124,14 @@ func makeLokiError(body io.ReadCloser) error {
 	// - we take the value of the field "message"
 	// - if any of these steps fail, or if "message" is empty, we return the whole text
 
-	var data lokiError
+	var data backend.DatasourceErrataError
 	err = json.Unmarshal(bytes, &data)
 	if err != nil {
 		// we were unable to convert the bytes to JSON, we return the whole text
-		return fmt.Errorf("%v", string(bytes))
+		return fmt.Errorf(string(bytes))
 	}
 
-	errorMessage := data.Message
-
-	if errorMessage == "" {
-		// we got no usable error message, we return the whole text
-		return fmt.Errorf("%v", string(bytes))
-	}
-
-	return fmt.Errorf("%v", errorMessage)
+	return &data
 }
 
 func (api *LokiAPI) DataQuery(ctx context.Context, query lokiQuery) (data.Frames, error) {

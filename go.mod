@@ -13,6 +13,7 @@ replace k8s.io/client-go => k8s.io/client-go v0.22.1
 
 replace github.com/russellhaering/goxmldsig@v1.1.0 => github.com/russellhaering/goxmldsig v1.1.1
 
+
 // Avoid using v2.0.0+incompatible Redigo used by dependencies as the latest maintained branch of Redigo is v1.
 replace github.com/gomodule/redigo => github.com/gomodule/redigo v1.8.9
 
@@ -257,6 +258,7 @@ require (
 	github.com/grafana/dskit v0.0.0-20211011144203-3a88ec0b675f
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/matryer/is v1.4.0
+	github.com/parca-dev/parca v0.12.1
 	github.com/urfave/cli v1.22.9
 	go.etcd.io/etcd/api/v3 v3.5.4
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.32.0
@@ -284,7 +286,6 @@ require (
 	github.com/drone/envsubst v1.0.3 // indirect
 	github.com/drone/runner-go v1.12.0 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
-	github.com/google/go-github/v31 v31.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.0.0-20220520183353-fd19c99a87aa // indirect
 	github.com/googleapis/go-type-adapters v1.0.0 // indirect
@@ -301,13 +302,16 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
-	github.com/parca-dev/parca v0.12.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/segmentio/asm v1.1.4 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
+	github.com/unknwon/bra v0.0.0-20200517080246-1e3013ecaff8 // indirect
+	github.com/unknwon/com v1.0.1 // indirect
+	github.com/unknwon/log v0.0.0-20150304194804-e617c87089d3 // indirect
 	go.starlark.net v0.0.0-20221020143700-22309ac47eac // indirect
+	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
 )
 
 require (
@@ -401,3 +405,5 @@ replace github.com/prometheus/alertmanager => github.com/grafana/prometheus-aler
 replace google.golang.org/grpc => google.golang.org/grpc v1.45.0
 
 replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3
+
+replace github.com/grafana/grafana-plugin-sdk-go v0.142.0 => ../grafana-plugin-sdk-go

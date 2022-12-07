@@ -456,7 +456,15 @@ export enum DataQueryErrorType {
   Unknown = 'unknown',
 }
 
+export interface Errata {
+  code: number;
+  message: string;
+  guide: string;
+  url: string;
+  args: Map<string, number | string>;
+}
 export interface DataQueryError {
+  errata?: Errata;
   data?: {
     /**
      * Short information about the error

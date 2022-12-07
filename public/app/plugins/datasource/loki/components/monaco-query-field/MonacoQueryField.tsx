@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { MarkerSeverity } from 'monaco-editor';
 import React, { useRef, useEffect } from 'react';
 import { useLatest } from 'react-use';
 
@@ -77,7 +78,7 @@ const getStyles = (theme: GrafanaTheme2) => {
   };
 };
 
-const MonacoQueryField = ({ languageProvider, history, onBlur, onRunQuery, initialValue }: Props) => {
+const MonacoQueryField = ({ languageProvider, history, onBlur, onRunQuery, initialValue, error }: Props) => {
   // we need only one instance of `overrideServices` during the lifetime of the react component
   const overrideServicesRef = useRef(getOverrideServices());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +87,30 @@ const MonacoQueryField = ({ languageProvider, history, onBlur, onRunQuery, initi
   const historyRef = useLatest(history);
   const onRunQueryRef = useLatest(onRunQuery);
   const onBlurRef = useLatest(onBlur);
+  const monacoRef = useRef<(markerData: monacoTypes.editor.IMarkerData[]) => void>();
+  const errata = error?.errata;
+
+  if (errata && monacoRef.current) {
+    if (error.errata && error.errata.args) {
+      const args = error.errata.args;
+      const line = args.get('line');
+      const column = args.get('column');
+      const msg = args.get('msg');
+
+      if (typeof line === 'number' && typeof column === 'number' && typeof msg === 'string') {
+        monacoRef.current([
+          {
+            startLineNumber: line,
+            endLineNumber: 1,
+            startColumn: column,
+            endColumn: column + 5,
+            message: msg || '',
+            severity: MarkerSeverity.Error,
+          },
+        ]);
+      }
+    }
+  }
 
   const autocompleteCleanupCallback = useRef<(() => void) | null>(null);
 
@@ -115,6 +140,13 @@ const MonacoQueryField = ({ languageProvider, history, onBlur, onRunQuery, initi
           ensureLogQL(monaco);
         }}
         onMount={(editor, monaco) => {
+          monacoRef.current = (markerData: monacoTypes.editor.IMarkerData[]) => {
+            const model = editor.getModel();
+            if (model !== null) {
+              monaco.editor.setModelMarkers(model, 'owner', markerData);
+            }
+          };
+
           // we setup on-blur
           editor.onDidBlurEditorWidget(() => {
             onBlurRef.current(editor.getValue());
