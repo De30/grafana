@@ -89,15 +89,15 @@ export class TablePanel extends PureComponent<Props> {
     const subFrames = dataFrames?.filter((df) => df.meta?.custom?.parentRowIndex !== undefined);
 
     return (
-      <PanelContainer label="Table" loading={loading} isOpen>
-        {(width) =>
+      <PanelContainer label="Table" loading={loading} isOpen zoomable>
+        {(width, zoomedHeight) =>
           mainFrame?.length ? (
             <Table
               ariaLabel={ariaLabel}
               data={mainFrame}
               subData={subFrames}
               width={width}
-              height={height}
+              height={zoomedHeight || height}
               onCellFilterAdded={onCellFilterAdded}
             />
           ) : (

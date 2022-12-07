@@ -91,22 +91,25 @@ export const GraphPanel = ({
       ]}
       loading={loading}
       isOpen
+      zoomable
     >
-      {(width) => (
-        <Graph
-          graphStyle={graphStyle}
-          data={data}
-          height={height}
-          width={width}
-          absoluteRange={absoluteRange}
-          onChangeTime={onChangeTime}
-          timeZone={timeZone}
-          annotations={annotations}
-          splitOpenFn={splitOpenFn}
-          loadingState={loadingState}
-          eventBus={eventBus}
-        />
-      )}
+      {(width, zoomedHeight) => {
+        return (
+          <Graph
+            graphStyle={graphStyle}
+            data={data}
+            height={zoomedHeight || height}
+            width={width}
+            absoluteRange={absoluteRange}
+            onChangeTime={onChangeTime}
+            timeZone={timeZone}
+            annotations={annotations}
+            splitOpenFn={splitOpenFn}
+            loadingState={loadingState}
+            eventBus={eventBus}
+          />
+        );
+      }}
     </PanelContainer>
   );
 };

@@ -48,7 +48,7 @@ export function TracePanel(props: Props) {
         setFocusedSpanIdForSearch={setFocusedSpanIdForSearch}
       />
 
-      <PanelContainer label="Trace View" isOpen>
+      <PanelContainer label="Trace View" isOpen zoomable>
         <TraceView
           exploreId={exploreId}
           dataFrames={dataFrames}
