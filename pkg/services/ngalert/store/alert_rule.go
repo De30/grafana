@@ -397,36 +397,19 @@ func (st DBstore) GetNamespaceByUID(ctx context.Context, uid string, orgID int64
 	return folder, nil
 }
 
-func (st DBstore) getFilterByOrgsString() (string, []interface{}) {
-	if len(st.Cfg.DisabledOrgs) == 0 {
-		return "", nil
-	}
-	builder := strings.Builder{}
-	builder.WriteString("org_id NOT IN(")
-	idx := len(st.Cfg.DisabledOrgs)
-	args := make([]interface{}, 0, len(st.Cfg.DisabledOrgs))
-	for orgId := range st.Cfg.DisabledOrgs {
-		args = append(args, orgId)
-		builder.WriteString("?")
-		idx--
-		if idx == 0 {
-			builder.WriteString(")")
-			break
-		}
-		builder.WriteString(",")
-	}
-	return builder.String(), args
-}
-
 func (st DBstore) GetAlertRulesKeysForScheduling(ctx context.Context) ([]ngmodels.AlertRuleKeyWithVersion, error) {
 	var result []ngmodels.AlertRuleKeyWithVersion
 	err := st.SQLStore.WithDbSession(ctx, func(sess *db.Session) error {
-		alertRulesSql := "SELECT org_id, uid, version FROM alert_rule"
-		filter, args := st.getFilterByOrgsString()
-		if filter != "" {
-			alertRulesSql += " WHERE " + filter
+		alertRulesSql := sess.Table("alert_rule").Select("org_id, uid, version")
+		if len(st.Cfg.DisabledOrgs) > 0 {
+			var ids []int64
+			for orgID := range st.Cfg.DisabledOrgs {
+				ids = append(ids, orgID)
+			}
+
+			alertRulesSql = alertRulesSql.NotIn("org_id", ids)
 		}
-		if err := sess.SQL(alertRulesSql, args...).Find(&result); err != nil {
+		if err := alertRulesSql.Find(&result); err != nil {
 			return err
 		}
 		return nil
@@ -442,20 +425,36 @@ func (st DBstore) GetAlertRulesForScheduling(ctx context.Context, query *ngmodel
 	}
 	var rules []*ngmodels.AlertRule
 	return st.SQLStore.WithDbSession(ctx, func(sess *db.Session) error {
-		foldersSql := "SELECT D.uid, D.title FROM dashboard AS D WHERE is_folder IS TRUE AND EXISTS (SELECT 1 FROM alert_rule AS A WHERE D.uid = A.namespace_uid)"
-		alertRulesSql := "SELECT * FROM alert_rule"
-		filter, args := st.getFilterByOrgsString()
-		if filter != "" {
-			foldersSql += " AND " + filter
-			alertRulesSql += " WHERE " + filter
+		var ids []int64
+		if len(st.Cfg.DisabledOrgs) > 0 {
+			for orgID := range st.Cfg.DisabledOrgs {
+				ids = append(ids, orgID)
+			}
 		}
 
-		if err := sess.SQL(alertRulesSql, args...).Find(&rules); err != nil {
+		alertRulesSql := sess.Table("alert_rule").Select("*")
+		if len(ids) > 0 {
+			alertRulesSql.NotIn("org_id", ids)
+		}
+
+		if len(query.RuleGroups) > 0 {
+			alertRulesSql = alertRulesSql.In("rule_group", query.RuleGroups)
+		}
+
+		if err := alertRulesSql.Find(&rules); err != nil {
 			return fmt.Errorf("failed to fetch alert rules: %w", err)
 		}
 		query.ResultRules = rules
+
 		if query.PopulateFolders {
-			if err := sess.SQL(foldersSql, args...).Find(&folders); err != nil {
+			foldersSql := sess.Table("dashboard").Alias("D").Select("D.uid, D.title").
+				Where("is_folder = ?", true).
+				And("EXISTS (SELECT 1 FROM alert_rule A WHERE D.uid = A.namespace_uid)")
+			if len(ids) > 0 {
+				foldersSql = foldersSql.NotIn("org_id", ids)
+			}
+
+			if err := foldersSql.Find(&folders); err != nil {
 				return fmt.Errorf("failed to fetch a list of folders that contain alert rules: %w", err)
 			}
 			query.ResultFoldersTitles = make(map[string]string, len(folders))
