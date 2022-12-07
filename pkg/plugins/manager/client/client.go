@@ -15,7 +15,6 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/config"
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
-	"github.com/grafana/grafana/pkg/services/store"
 )
 
 type Service struct {
@@ -230,7 +229,7 @@ func (s *Service) attachJWT(ctx context.Context, pluginCtx backend.PluginContext
 		return ctx
 	}
 
-	token, err := s.jwtAuthService.Generate(store.GetUserIDString(user), pluginCtx.PluginID)
+	token, err := s.jwtAuthService.Generate(user, pluginCtx.PluginID)
 	if err != nil {
 		return ctx
 	}

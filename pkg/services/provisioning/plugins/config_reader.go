@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/services/plugins"
-	"gopkg.in/yaml.v2"
+	"github.com/grafana/grafana/pkg/plugins"
+	"gopkg.in/yaml.v3"
 )
 
 type configReader interface {

@@ -19,6 +19,7 @@ import (
 	"github.com/grafana/grafana/pkg/middleware/csrf"
 	"github.com/grafana/grafana/pkg/services/auth"
 	"github.com/grafana/grafana/pkg/services/folder"
+	"github.com/grafana/grafana/pkg/services/mtctx"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/querylibrary"
 	"github.com/grafana/grafana/pkg/services/searchV2"
@@ -190,6 +191,7 @@ type HTTPServer struct {
 	AvatarCacheServer            *avatar.AvatarCacheServer
 	preferenceService            pref.Service
 	Csrf                         csrf.Service
+	Mtctx                        mtctx.Service
 	folderPermissionsService     accesscontrol.FolderPermissionsService
 	dashboardPermissionsService  accesscontrol.DashboardPermissionsService
 	dashboardVersionService      dashver.Service
@@ -211,6 +213,7 @@ type HTTPServer struct {
 	tagService             tag.Service
 	oauthTokenService      oauthtoken.OAuthTokenService
 	statsService           stats.Service
+	mtctxService           mtctx.Service
 }
 
 type ServerOptions struct {
@@ -254,6 +257,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 	annotationRepo annotations.Repository, tagService tag.Service, searchv2HTTPService searchV2.SearchHTTPService,
 	queryLibraryHTTPService querylibrary.HTTPService, queryLibraryService querylibrary.Service, oauthTokenService oauthtoken.OAuthTokenService,
 	statsService stats.Service,
+	mtctxService mtctx.Service,
 ) (*HTTPServer, error) {
 	web.Env = cfg.Env
 	m := web.New()
@@ -359,6 +363,7 @@ func ProvideHTTPServer(opts ServerOptions, cfg *setting.Cfg, routeRegister routi
 		QueryLibraryService:          queryLibraryService,
 		oauthTokenService:            oauthTokenService,
 		statsService:                 statsService,
+		mtctxService:                 mtctxService,
 	}
 	if hs.Listener != nil {
 		hs.log.Debug("Using provided listener")
@@ -623,6 +628,7 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 	m.UseMiddleware(hs.ContextHandler.Middleware)
 	m.Use(middleware.OrgRedirect(hs.Cfg, hs.userService))
 	m.Use(accesscontrol.LoadPermissionsMiddleware(hs.accesscontrolService))
+	m.UseMiddleware(hs.mtctxService.Middleware)
 
 	// needs to be after context handler
 	if hs.Cfg.EnforceDomain {

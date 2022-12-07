@@ -723,7 +723,7 @@ func applyCommandLineDefaultProperties(props map[string]string, file *ini.File) 
 
 func applyCommandLineProperties(target string, props map[string]string, file *ini.File) {
 	defaultSection, err := file.GetSection("")
-	if err == nil {
+	if err == nil && target != "" {
 		key, err := defaultSection.GetKey("target")
 		if err == nil {
 			key.SetValue(target)
@@ -964,9 +964,38 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 	}
 
 	cfg.Raw = iniFile
+	return cfg.applyRaw()
+}
 
+// Load Cfg from a string map rather than a real ini file
+func FromJSON(config map[string]map[string]string) (*Cfg, error) {
+	inifile := ini.Empty()
+	for section, vals := range config {
+		s, err := inifile.NewSection(section)
+		if err != nil {
+			return nil, err
+		}
+		for key, val := range vals {
+			_, err := s.NewKey(key, val)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	cfg := NewCfg()
+	cfg.Raw = inifile
+	err := cfg.applyRaw()
+	return cfg, err
+}
+
+func (cfg *Cfg) applyRaw() error {
+	if cfg.Raw == nil {
+		return fmt.Errorf("missing inifile config")
+	}
 	// Temporarily keep global, to make refactor in steps
 	Raw = cfg.Raw
+	iniFile := cfg.Raw
+	var err error
 
 	cfg.BuildVersion = BuildVersion
 	cfg.BuildCommit = BuildCommit
@@ -976,9 +1005,6 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 	cfg.Packaging = Packaging
 
 	cfg.ErrTemplateName = "error"
-
-	Target := valueAsString(iniFile.Section(""), "target", "all")
-	cfg.Target = strings.Split(Target, " ")
 
 	Env = valueAsString(iniFile.Section(""), "app_mode", "development")
 	cfg.Env = Env
@@ -1010,7 +1036,7 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 		return err
 	}
 
-	if err := readObjectStoreSettings(cfg, iniFile); err != nil {
+	if err := readEntityStoreSettings(cfg, iniFile); err != nil {
 		return err
 	}
 
@@ -1157,10 +1183,14 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 	cacheServer := iniFile.Section("remote_cache")
 	dbName := valueAsString(cacheServer, "type", "database")
 	connStr := valueAsString(cacheServer, "connstr", "")
+	prefix := valueAsString(cacheServer, "prefix", "")
+	encryption := cacheServer.Key("encryption").MustBool(false)
 
 	cfg.RemoteCacheOptions = &RemoteCacheOptions{
-		Name:    dbName,
-		ConnStr: connStr,
+		Name:       dbName,
+		ConnStr:    connStr,
+		Prefix:     prefix,
+		Encryption: encryption,
 	}
 
 	geomapSection := iniFile.Section("geomap")
@@ -1194,8 +1224,10 @@ func valueAsString(section *ini.Section, keyName string, defaultValue string) st
 }
 
 type RemoteCacheOptions struct {
-	Name    string
-	ConnStr string
+	Name       string
+	ConnStr    string
+	Prefix     string
+	Encryption bool
 }
 
 func (cfg *Cfg) readLDAPConfig() {
@@ -1582,8 +1614,8 @@ type EntityStoreSettings struct {
 	Address string
 }
 
-func readObjectStoreSettings(cfg *Cfg, iniFile *ini.File) error {
-	os := iniFile.Section("object_store")
+func readEntityStoreSettings(cfg *Cfg, iniFile *ini.File) error {
+	os := iniFile.Section("entity_store")
 	address := os.Key("address").MustString("127.0.0.1:10000")
 	cfg.EntityStore = EntityStoreSettings{Address: address}
 	return nil
