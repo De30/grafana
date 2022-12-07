@@ -1,16 +1,15 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { DataQuery } from '@grafana/data';
+import { DataQuery, OrgRole } from '@grafana/data';
 import { setDataSourceSrv } from '@grafana/runtime';
 import { configureStore } from 'app/store/configureStore';
 import { ExploreId, ExploreState } from 'app/types';
 
-import { UserState } from '../profile/state/reducers';
+import { makeExplorePaneState } from '../state/utils';
 
 import { QueryRows } from './QueryRows';
-import { makeExplorePaneState } from './state/utils';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -58,12 +57,35 @@ function setup(queries: DataQuery[]) {
     },
     syncedTimes: false,
     correlations: [],
-    right: undefined,
     richHistoryStorageFull: false,
     richHistoryLimitExceededWarningShown: false,
     richHistoryMigrationFailed: false,
   };
-  const store = configureStore({ explore: initialState, user: { orgId: 1 } as UserState });
+  const store = configureStore({
+    explore: initialState,
+    user: {
+      orgId: 1,
+      fiscalYearStartMonth: 1,
+      isUpdating: false,
+      orgs: [{ name: 'Main Org.', orgId: 1, role: OrgRole.Admin }],
+      orgsAreLoading: false,
+      sessions: [],
+      sessionsAreLoading: false,
+      weekStart: 'monday',
+      teams: [],
+      teamsAreLoading: false,
+      timeZone: 'utc',
+      user: {
+        id: 1,
+        isGrafanaAdmin: true,
+        isDisabled: false,
+        email: 'test@grafana.com',
+        login: 'test',
+        name: 'test',
+        theme: 'dark',
+      },
+    },
+  });
 
   return {
     store,
@@ -84,11 +106,13 @@ describe('Explore QueryRows', () => {
     // waiting for the d&d component to fully render.
     await screen.findAllByText('someDs query editor');
 
-    let duplicateButton = screen.getByLabelText(/Duplicate query/i);
+    expect(screen.queryByLabelText('Query editor row title B')).not.toBeInTheDocument();
 
-    fireEvent.click(duplicateButton);
+    fireEvent.click(screen.getByRole('button', { name: /Duplicate query/i }));
 
     // We should have another row with refId B
-    expect(await screen.findByLabelText('Query editor row title B')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText('Query editor row title B')).toBeInTheDocument();
+    });
   });
 });

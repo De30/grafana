@@ -92,6 +92,7 @@ export function RichHistoryContainer(props: Props) {
     });
   }, [initRichHistory]);
 
+  // TODO: remove this loading message
   if (!richHistorySettings) {
     return <span>Loading...</span>;
   }

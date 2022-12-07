@@ -12,16 +12,17 @@ import { InspectStatsTab } from 'app/features/inspector/InspectStatsTab';
 import { QueryInspector } from 'app/features/inspector/QueryInspector';
 import { StoreState, ExploreItemState, ExploreId } from 'app/types';
 
+import { getTimeZone } from '../profile/state/selectors';
+
 import { runQueries } from './state/query';
 
-interface DispatchProps {
+interface OwnProps {
   width: number;
   exploreId: ExploreId;
-  timeZone: TimeZone;
   onClose: () => void;
 }
 
-type Props = DispatchProps & ConnectedProps<typeof connector>;
+type Props = OwnProps & ConnectedProps<typeof connector>;
 
 export function ExploreQueryInspector(props: Props) {
   const { loading, width, onClose, queryResponse, timeZone } = props;
@@ -89,10 +90,12 @@ function mapStateToProps(state: StoreState, { exploreId }: { exploreId: ExploreI
   const explore = state.explore;
   const item: ExploreItemState = explore[exploreId]!;
   const { loading, queryResponse } = item;
+  const timeZone = getTimeZone(state.user);
 
   return {
     loading,
     queryResponse,
+    timeZone,
   };
 }
 

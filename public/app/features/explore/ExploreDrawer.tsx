@@ -1,13 +1,9 @@
-// Libraries
 import { css, cx, keyframes } from '@emotion/css';
 import { Resizable, ResizeCallback } from 're-resizable';
 import React from 'react';
 
-// Services & Utils
 import { GrafanaTheme2 } from '@grafana/data';
-import { stylesFactory, useTheme2 } from '@grafana/ui';
-
-// Types
+import { useTheme2, useStyles2 } from '@grafana/ui';
 
 const drawerSlide = (theme: GrafanaTheme2) => keyframes`
   0% {
@@ -19,7 +15,7 @@ const drawerSlide = (theme: GrafanaTheme2) => keyframes`
   }
 `;
 
-const getStyles = stylesFactory((theme: GrafanaTheme2) => {
+const getStyles = (theme: GrafanaTheme2) => {
   return {
     container: css`
       position: fixed !important;
@@ -27,7 +23,6 @@ const getStyles = stylesFactory((theme: GrafanaTheme2) => {
       background: ${theme.colors.background.primary};
       border-top: 1px solid ${theme.colors.border.weak};
       margin: ${theme.spacing(0, -2, 0, -2)};
-      box-shadow: ${theme.shadows.z3};
       z-index: ${theme.zIndex.navbarFixed};
     `,
     drawerActive: css`
@@ -49,7 +44,7 @@ const getStyles = stylesFactory((theme: GrafanaTheme2) => {
       }
     `,
   };
-});
+};
 
 export interface Props {
   width: number;
@@ -60,7 +55,7 @@ export interface Props {
 export function ExploreDrawer(props: Props) {
   const { width, children, onResize } = props;
   const theme = useTheme2();
-  const styles = getStyles(theme);
+  const styles = useStyles2(getStyles);
   const drawerWidth = `${width + 31.5}px`;
 
   return (

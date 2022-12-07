@@ -18,11 +18,10 @@ import {
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { config, getDataSourceSrv, reportInteraction } from '@grafana/runtime';
-import { CustomScrollbar, ErrorBoundaryAlert, Themeable2, withTheme2, PanelContainer, Alert } from '@grafana/ui';
+import { CustomScrollbar, ErrorBoundaryAlert, Themeable2, withTheme2, Alert } from '@grafana/ui';
 import { FILTER_FOR_OPERATOR, FILTER_OUT_OPERATOR, FilterItem } from '@grafana/ui/src/components/Table/types';
 import appEvents from 'app/core/app_events';
 import { FadeIn } from 'app/core/components/Animations/FadeIn';
-import { supportedFeatures } from 'app/core/history/richHistoryStorageProvider';
 import { MIXED_DATASOURCE_NAME } from 'app/plugins/datasource/mixed/MixedDataSource';
 import { getNodeGraphDataFrames } from 'app/plugins/panel/nodeGraph/utils';
 import { StoreState } from 'app/types';
@@ -31,7 +30,6 @@ import { ExploreId, ExploreItemState } from 'app/types/explore';
 
 import { getTimeZone } from '../profile/state/selectors';
 
-import ExploreQueryInspector from './ExploreQueryInspector';
 import { ExploreToolbar } from './ExploreToolbar';
 import { FlameGraphExploreContainer } from './FlameGraphExploreContainer';
 import { GraphContainer } from './Graph/GraphContainer';
@@ -39,12 +37,9 @@ import LogsContainer from './LogsContainer';
 import { NoData } from './NoData';
 import { NoDataSourceCallToAction } from './NoDataSourceCallToAction';
 import { NodeGraphContainer } from './NodeGraphContainer';
-import { QueryRows } from './QueryRows';
-import { ResponseErrorContainer } from './ResponseErrorContainer';
-import RichHistoryContainer from './RichHistory/RichHistoryContainer';
-import { SecondaryActions } from './SecondaryActions';
 import TableContainer from './TableContainer';
 import { TraceViewContainer } from './TraceView/TraceViewContainer';
+import { QueriesSection } from './components/QueriesSection';
 import { changeSize } from './state/explorePane';
 import { splitOpen } from './state/main';
 import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } from './state/query';
@@ -63,14 +58,6 @@ const getStyles = (theme: GrafanaTheme2) => {
       label: button;
       margin: 1em 4px 0 0;
     `,
-    queryContainer: css`
-      label: queryContainer;
-      // Need to override normal css class and don't want to count on ordering of the classes in html.
-      height: auto !important;
-      flex: unset !important;
-      display: unset !important;
-      padding: ${theme.spacing(1)};
-    `,
     exploreContainer: css`
       display: flex;
       flex: 1 1 auto;
@@ -88,15 +75,6 @@ export interface ExploreProps extends Themeable2 {
   exploreId: ExploreId;
   theme: GrafanaTheme2;
   eventBus: EventBus;
-}
-
-enum ExploreDrawer {
-  RichHistory,
-  QueryInspector,
-}
-
-interface ExploreState {
-  openDrawer?: ExploreDrawer;
 }
 
 export type Props = ExploreProps & ConnectedProps<typeof connector>;
@@ -125,7 +103,7 @@ export type Props = ExploreProps & ConnectedProps<typeof connector>;
  * The result viewers determine some of the query options sent to the datasource, e.g.,
  * `format`, to indicate eventual transformations by the datasources' result transformers.
  */
-export class Explore extends React.PureComponent<Props, ExploreState> {
+export class Explore extends React.PureComponent<Props> {
   scrollElement: HTMLDivElement | undefined;
   absoluteTimeUnsubsciber: Unsubscribable | undefined;
   topOfViewRef = createRef<HTMLDivElement>();
@@ -134,9 +112,6 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
 
   constructor(props: Props) {
     super(props);
-    this.state = {
-      openDrawer: undefined,
-    };
     this.graphEventBus = props.eventBus.newScopedBus('graph', { onlyLocal: false });
     this.logsEventBus = props.eventBus.newScopedBus('logs', { onlyLocal: false });
   }
@@ -220,22 +195,6 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
   onUpdateTimeRange = (absoluteRange: AbsoluteTimeRange) => {
     const { exploreId, updateTimeRange } = this.props;
     updateTimeRange({ exploreId, absoluteRange });
-  };
-
-  toggleShowRichHistory = () => {
-    this.setState((state) => {
-      return {
-        openDrawer: state.openDrawer === ExploreDrawer.RichHistory ? undefined : ExploreDrawer.RichHistory,
-      };
-    });
-  };
-
-  toggleShowQueryInspector = () => {
-    this.setState((state) => {
-      return {
-        openDrawer: state.openDrawer === ExploreDrawer.QueryInspector ? undefined : ExploreDrawer.QueryInspector,
-      };
-    });
   };
 
   onSplitOpen = (panelType: string) => {
@@ -384,7 +343,6 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       exploreId,
       graphResult,
       queryResponse,
-      isLive,
       theme,
       showMetrics,
       showTable,
@@ -393,15 +351,10 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
       showNodeGraph,
       showFlameGraph,
       splitted,
-      timeZone,
       isFromCompactUrl,
     } = this.props;
-    const { openDrawer } = this.state;
     const styles = getStyles(theme);
     const showPanels = queryResponse && queryResponse.state !== LoadingState.NotStarted;
-    const showRichHistory = openDrawer === ExploreDrawer.RichHistory;
-    const richHistoryRowButtonHidden = !supportedFeatures().queryHistoryAvailable;
-    const showQueryInspector = openDrawer === ExploreDrawer.QueryInspector;
     const showNoData =
       queryResponse.state === LoadingState.Done &&
       [
@@ -428,22 +381,8 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
               [styles.exploreContainerTopnav]: Boolean(config.featureToggles.topnav && !splitted),
             })}
           >
-            <PanelContainer className={styles.queryContainer}>
-              <QueryRows exploreId={exploreId} />
-              <SecondaryActions
-                addQueryRowButtonDisabled={isLive}
-                // We cannot show multiple traces at the same time right now so we do not show add query button.
-                //TODO:unification
-                addQueryRowButtonHidden={false}
-                richHistoryRowButtonHidden={richHistoryRowButtonHidden}
-                richHistoryButtonActive={showRichHistory}
-                queryInspectorButtonActive={showQueryInspector}
-                onClickAddQueryRowButton={this.onClickAddQueryRowButton}
-                onClickRichHistoryButton={this.toggleShowRichHistory}
-                onClickQueryInspectorButton={this.toggleShowQueryInspector}
-              />
-              <ResponseErrorContainer exploreId={exploreId} />
-            </PanelContainer>
+            <QueriesSection exploreId={exploreId} onAddQueryButtonClick={this.onClickAddQueryRowButton} />
+
             <AutoSizer onResize={this.onResize} disableHeight>
               {({ width }) => {
                 if (width === 0) {
@@ -468,21 +407,6 @@ export class Explore extends React.PureComponent<Props, ExploreState> {
                           {showNoData && <ErrorBoundaryAlert>{this.renderNoData()}</ErrorBoundaryAlert>}
                         </>
                       )}
-                      {showRichHistory && (
-                        <RichHistoryContainer
-                          width={width}
-                          exploreId={exploreId}
-                          onClose={this.toggleShowRichHistory}
-                        />
-                      )}
-                      {showQueryInspector && (
-                        <ExploreQueryInspector
-                          exploreId={exploreId}
-                          width={width}
-                          onClose={this.toggleShowQueryInspector}
-                          timeZone={timeZone}
-                        />
-                      )}
                     </ErrorBoundaryAlert>
                   </main>
                 );
@@ -505,7 +429,6 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     datasourceMissing,
     queryKeys,
     queries,
-    isLive,
     graphResult,
     logsResult,
     showLogs,
@@ -525,7 +448,6 @@ function mapStateToProps(state: StoreState, { exploreId }: ExploreProps) {
     datasourceMissing,
     queryKeys,
     queries,
-    isLive,
     graphResult,
     logsResult: logsResult ?? undefined,
     absoluteRange,

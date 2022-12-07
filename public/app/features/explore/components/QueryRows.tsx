@@ -4,18 +4,13 @@ import React, { useCallback, useMemo } from 'react';
 import { CoreApp, DataQuery, DataSourceInstanceSettings } from '@grafana/data';
 import { getDataSourceSrv, reportInteraction } from '@grafana/runtime';
 import { getNextRefIdChar } from 'app/core/utils/query';
+import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
+import { QueryEditorRows } from 'app/features/query/components/QueryEditorRows';
 import { useDispatch, useSelector } from 'app/types';
 import { ExploreId } from 'app/types/explore';
 
-import { getDatasourceSrv } from '../plugins/datasource_srv';
-import { QueryEditorRows } from '../query/components/QueryEditorRows';
-
-import { runQueries, changeQueriesAction, importQueries } from './state/query';
-import { getExploreItemSelector } from './state/selectors';
-
-interface Props {
-  exploreId: ExploreId;
-}
+import { changeQueriesAction, importQueries, runQueries } from '../state/query';
+import { getExploreItemSelector } from '../state/selectors';
 
 const makeSelectors = (exploreId: ExploreId) => {
   const exploreItemSelector = getExploreItemSelector(exploreId);
@@ -30,6 +25,10 @@ const makeSelectors = (exploreId: ExploreId) => {
     ),
   };
 };
+
+interface Props {
+  exploreId: ExploreId;
+}
 
 export const QueryRows = ({ exploreId }: Props) => {
   const dispatch = useDispatch();

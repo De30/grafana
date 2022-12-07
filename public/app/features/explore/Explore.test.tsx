@@ -63,7 +63,6 @@ const dummyProps: Props = {
   setQueries: jest.fn(),
   queryKeys: [],
   queries: [],
-  isLive: false,
   syncedTimes: false,
   updateTimeRange: jest.fn(),
   makeAbsoluteTime: jest.fn(),
