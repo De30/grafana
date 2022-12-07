@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/infra/appcontext"
-	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/tsdb/grafanads"
 )
 
