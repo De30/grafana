@@ -24,6 +24,7 @@ export interface ThemeComponents {
   panel: {
     padding: number;
     headerHeight: number;
+    borderRadius: number;
     borderColor: string;
     boxShadow: string;
     background: string;
@@ -37,6 +38,7 @@ export interface ThemeComponents {
   dashboard: {
     background: string;
     padding: number;
+    cellMargin: number;
   };
   textHighlight: {
     background: string;
@@ -73,6 +75,7 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     headerHeight: 4,
     background: colors.background.primary,
     borderColor: colors.border.weak,
+    borderRadius: 1.5,
     boxShadow: 'none',
   };
 
@@ -101,6 +104,7 @@ export function createComponents(overrides: ThemeComponentsInput, colors: ThemeC
     dashboard: {
       background: colors.background.canvas,
       padding: 1,
+      cellMargin: 8,
     },
     overlay: {
       background: colors.mode === 'dark' ? 'rgba(63, 62, 62, 0.45)' : 'rgba(208, 209, 211, 0.24)',

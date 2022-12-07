@@ -5,6 +5,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { Subscription } from 'rxjs';
 
 import { config } from '@grafana/runtime';
+import { ThemeContext } from '@grafana/ui';
 import { GRID_CELL_HEIGHT, GRID_CELL_VMARGIN, GRID_COLUMN_COUNT } from 'app/core/constants';
 import { DashboardPanelsChangedEvent } from 'app/types/events';
 
@@ -26,6 +27,9 @@ export interface State {
 }
 
 export class DashboardGrid extends PureComponent<Props, State> {
+  declare context: React.ContextType<typeof ThemeContext>;
+  static contextType = ThemeContext;
+
   private panelMap: { [key: string]: PanelModel } = {};
   private eventSubs = new Subscription();
   private windowHeight = 1200;
@@ -76,7 +80,7 @@ export class DashboardGrid extends PureComponent<Props, State> {
 
       if (panel.type === 'row') {
         panelPos.w = GRID_COLUMN_COUNT;
-        panelPos.h = 1;
+        panelPos.h = 2;
         panelPos.isResizable = false;
         panelPos.isDraggable = panel.collapsed;
       }
@@ -122,15 +126,16 @@ export class DashboardGrid extends PureComponent<Props, State> {
   };
 
   getPanelScreenPos(panel: PanelModel, gridWidth: number): { top: number; bottom: number } {
+    const cellMargin = this.getCellMargin();
     let top = 0;
 
     // mobile layout
     if (gridWidth < config.theme2.breakpoints.values.md) {
       // In mobile layout panels are stacked so we just add the panel vertical margin to the last panel bottom position
-      top = this.lastPanelBottom + GRID_CELL_VMARGIN;
+      top = this.lastPanelBottom + cellMargin;
     } else {
       // For top position we need to add back the vertical margin removed by translateGridHeightToScreenHeight
-      top = translateGridHeightToScreenHeight(panel.gridPos.y) + GRID_CELL_VMARGIN;
+      top = translateGridHeightToScreenHeight(panel.gridPos.y) + cellMargin;
     }
 
     this.lastPanelBottom = top + translateGridHeightToScreenHeight(panel.gridPos.h);
@@ -176,6 +181,10 @@ export class DashboardGrid extends PureComponent<Props, State> {
     return panelElements;
   }
 
+  getCellMargin() {
+    return this.context.components.dashboard.cellMargin;
+  }
+
   renderPanel(panel: PanelModel, width: number, height: number) {
     if (panel.type === 'row') {
       return <DashboardRow key={panel.key} panel={panel} dashboard={this.props.dashboard} />;
@@ -216,6 +225,7 @@ export class DashboardGrid extends PureComponent<Props, State> {
             }
 
             const draggable = width <= 769 ? false : dashboard.meta.canEdit;
+            const cellMargin = this.getCellMargin();
 
             /*
             Disable draggable if mobile device, solving an issue with unintentionally
@@ -236,7 +246,7 @@ export class DashboardGrid extends PureComponent<Props, State> {
                   isResizable={dashboard.meta.canEdit}
                   containerPadding={[0, 0]}
                   useCSSTransforms={false}
-                  margin={[GRID_CELL_VMARGIN, GRID_CELL_VMARGIN]}
+                  margin={[cellMargin, cellMargin]}
                   cols={GRID_COLUMN_COUNT}
                   rowHeight={GRID_CELL_HEIGHT}
                   draggableHandle=".grid-drag-handle"

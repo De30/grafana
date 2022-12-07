@@ -17,7 +17,7 @@ export function getOldPanelStyles(theme: GrafanaTheme2) {
       background: ${theme.components.panel.background};
       border: 1px solid ${theme.components.panel.borderColor};
       position: relative;
-      border-radius: 3px;
+      border-radius: ${theme.shape.borderRadius(theme.components.panel.borderRadius)};
       height: 100%;
       width: 100%;
       display: flex;
