@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/infra/db"
-	"github.com/grafana/grafana/pkg/plugins"
 	accesscontrolmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/licensing"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"
 	"github.com/grafana/grafana/pkg/services/rendering"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"

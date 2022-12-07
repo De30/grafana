@@ -42,6 +42,14 @@ type PluginDTO struct {
 	backend.StreamHandler
 }
 
+func New(jsonData pluginLib.JSONData, class pluginLib.Class, pluginDir string) PluginDTO {
+	return PluginDTO{
+		JSONData:  jsonData,
+		Class:     class,
+		pluginDir: pluginDir,
+	}
+}
+
 func (p PluginDTO) SupportsStreaming() bool {
 	return p.StreamHandler != nil
 }
