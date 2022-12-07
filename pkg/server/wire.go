@@ -277,6 +277,7 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(datasources.DataSourceService), new(*datasourceservice.Service)),
 	wire.Bind(new(plugins.Store), new(*pluginsintegration.PluginManagerClientService)),
 	wire.Bind(new(plugins.Installer), new(*pluginsintegration.PluginManagerClientService)),
+	wire.Bind(new(plugins.Client), new(*pluginsintegration.PluginManagerClientService)),
 	pluginsintegration.ProvidePluginManagerClientService,
 	pluginSettings.ProvideService,
 	wire.Bind(new(pluginsettings.Service), new(*pluginSettings.Service)),

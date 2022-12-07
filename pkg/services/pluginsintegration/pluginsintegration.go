@@ -37,7 +37,7 @@ var WireSet = wire.NewSet(
 	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)),
 
 	ProvideClientDecorator,
-	wire.Bind(new(plugins.Client), new(*plugins.Decorator)),
+
 	process.ProvideService,
 	wire.Bind(new(process.Service), new(*process.Manager)),
 	coreplugin.ProvideCoreRegistry,

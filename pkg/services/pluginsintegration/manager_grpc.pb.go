@@ -22,7 +22,6 @@ type PluginManagerClient interface {
 	GetPlugins(ctx context.Context, in *GetPluginsRequest, opts ...grpc.CallOption) (*GetPluginsResponse, error)
 	AddPlugin(ctx context.Context, in *AddPluginRequest, opts ...grpc.CallOption) (*AddPluginResponse, error)
 	RemovePlugin(ctx context.Context, in *RemovePluginRequest, opts ...grpc.CallOption) (*RemovePluginResponse, error)
-	PluginErrors(ctx context.Context, in *GetPluginErrorsRequest, opts ...grpc.CallOption) (*GetPluginErrorsResponse, error)
 }
 
 type pluginManagerClient struct {
@@ -69,15 +68,6 @@ func (c *pluginManagerClient) RemovePlugin(ctx context.Context, in *RemovePlugin
 	return out, nil
 }
 
-func (c *pluginManagerClient) PluginErrors(ctx context.Context, in *GetPluginErrorsRequest, opts ...grpc.CallOption) (*GetPluginErrorsResponse, error) {
-	out := new(GetPluginErrorsResponse)
-	err := c.cc.Invoke(ctx, "/plugins.PluginManager/PluginErrors", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // PluginManagerServer is the server API for PluginManager service.
 // All implementations should embed UnimplementedPluginManagerServer
 // for forward compatibility
@@ -86,7 +76,6 @@ type PluginManagerServer interface {
 	GetPlugins(context.Context, *GetPluginsRequest) (*GetPluginsResponse, error)
 	AddPlugin(context.Context, *AddPluginRequest) (*AddPluginResponse, error)
 	RemovePlugin(context.Context, *RemovePluginRequest) (*RemovePluginResponse, error)
-	PluginErrors(context.Context, *GetPluginErrorsRequest) (*GetPluginErrorsResponse, error)
 }
 
 // UnimplementedPluginManagerServer should be embedded to have forward compatible implementations.
@@ -104,9 +93,6 @@ func (UnimplementedPluginManagerServer) AddPlugin(context.Context, *AddPluginReq
 }
 func (UnimplementedPluginManagerServer) RemovePlugin(context.Context, *RemovePluginRequest) (*RemovePluginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePlugin not implemented")
-}
-func (UnimplementedPluginManagerServer) PluginErrors(context.Context, *GetPluginErrorsRequest) (*GetPluginErrorsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PluginErrors not implemented")
 }
 
 // UnsafePluginManagerServer may be embedded to opt out of forward compatibility for this service.
@@ -192,24 +178,6 @@ func _PluginManager_RemovePlugin_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginManager_PluginErrors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPluginErrorsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PluginManagerServer).PluginErrors(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/plugins.PluginManager/PluginErrors",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginManagerServer).PluginErrors(ctx, req.(*GetPluginErrorsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // PluginManager_ServiceDesc is the grpc.ServiceDesc for PluginManager service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -232,10 +200,6 @@ var PluginManager_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemovePlugin",
 			Handler:    _PluginManager_RemovePlugin_Handler,
-		},
-		{
-			MethodName: "PluginErrors",
-			Handler:    _PluginManager_PluginErrors_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

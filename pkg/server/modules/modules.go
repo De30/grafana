@@ -41,7 +41,7 @@ type Modules struct {
 	db                        db.DB
 	entityReferenceResolver   resolver.EntityReferenceResolver
 	pluginStore               *store.Service
-	pluginClient              plugins.Client
+	pluginClient              *plugins.Decorator
 	pluginInstaller           *manager.PluginInstaller
 
 	ModuleManager  *modules.Manager
@@ -58,7 +58,7 @@ func ProvideService(
 	roleRegistry accesscontrol.RoleRegistry,
 	db db.DB,
 	entityReferenceResolver resolver.EntityReferenceResolver,
-	store *store.Service, client plugins.Client, installer *manager.PluginInstaller,
+	store *store.Service, client *plugins.Decorator, installer *manager.PluginInstaller,
 ) *Modules {
 	m := &Modules{
 		cfg: cfg,

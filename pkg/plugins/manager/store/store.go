@@ -21,7 +21,6 @@ type Service struct {
 
 func ProvideService(gCfg *setting.Cfg, cfg *config.Cfg, pluginRegistry registry.Service,
 	pluginLoader loader.Service) (*Service, error) {
-
 	return New(gCfg, cfg, pluginRegistry, pluginLoader), nil
 }
 
@@ -43,13 +42,12 @@ func (s *Service) Plugin(ctx context.Context, pluginID string) (plugins.PluginDT
 	return p.ToDTO(), true
 }
 
-func (s *Service) Run(ctx context.Context) error {
+func (s *Service) Run(_ context.Context) error {
 	for _, ps := range pluginSources(s.gCfg, s.cfg) {
 		if _, err := s.pluginLoader.Load(context.Background(), ps.Class, ps.Paths); err != nil {
 			return err
 		}
 	}
-	<-ctx.Done()
 	return nil
 }
 

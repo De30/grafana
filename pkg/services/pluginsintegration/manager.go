@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/dskit/services"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
@@ -21,19 +22,29 @@ var _ PluginManagerServer = (*PluginManagerServerService)(nil)
 type PluginManagerServerService struct {
 	*services.BasicService
 	store     *store.Service
-	client    plugins.Client
+	client    *plugins.Decorator
 	installer *pluginManagerLib.PluginInstaller
 	log       log.Logger
 }
 
-func ProvidePluginManagerServerService(grpcServerProvider grpcserver.Provider, store *store.Service, client plugins.Client, installer *pluginManagerLib.PluginInstaller) *PluginManagerServerService {
-	srv := NewPluginManagerServer(store, client, installer)
-	RegisterPluginManagerServer(grpcServerProvider.GetServer(), srv)
-	srv.BasicService = services.NewBasicService(srv.start, srv.run, srv.stop)
-	return srv
+func ProvidePluginManagerServerService(grpcServerProvider grpcserver.Provider, store *store.Service,
+	client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller) *PluginManagerServerService {
+	pm := NewPluginManagerServer(store, client, installer)
+	grpcSrv := grpcServerProvider.GetServer()
+
+	RegisterPluginManagerServer(grpcSrv, pm)
+
+	pluginv2.RegisterDataServer(grpcSrv, pm)
+	pluginv2.RegisterDiagnosticsServer(grpcSrv, pm)
+	pluginv2.RegisterResourceServer(grpcSrv, pm)
+	pluginv2.RegisterStreamServer(grpcSrv, pm)
+
+	pm.BasicService = services.NewBasicService(pm.start, pm.run, pm.stop)
+	return pm
 }
 
-func NewPluginManagerServer(store *store.Service, client plugins.Client, installer *pluginManagerLib.PluginInstaller) *PluginManagerServerService {
+func NewPluginManagerServer(store *store.Service, client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller,
+) *PluginManagerServerService {
 	return &PluginManagerServerService{
 		store:     store,
 		client:    client,
@@ -362,34 +373,74 @@ func (s *PluginManagerServerService) RemovePlugin(ctx context.Context, req *Remo
 	return &RemovePluginResponse{OK: true}, nil
 }
 
-func (s *PluginManagerServerService) PluginErrors(ctx context.Context, req *GetPluginErrorsRequest) (*GetPluginErrorsResponse, error) {
-	return nil, nil
+func (s *PluginManagerServerService) QueryData(ctx context.Context, req *pluginv2.QueryDataRequest) (*pluginv2.QueryDataResponse, error) {
+	protoResp, err := s.client.QueryData(ctx, backend.FromProto().QueryDataRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().QueryDataResponse(protoResp)
 }
 
-func (s *PluginManagerServerService) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-	return s.client.QueryData(ctx, req)
+func (s *PluginManagerServerService) CallResource(req *pluginv2.CallResourceRequest, server pluginv2.Resource_CallResourceServer) error {
+	fn := callResourceResponseSenderFunc(func(resp *backend.CallResourceResponse) error {
+		return server.Send(backend.ToProto().CallResourceResponse(resp))
+	})
+
+	return s.client.CallResource(server.Context(), backend.FromProto().CallResourceRequest(req), fn)
 }
 
-func (s *PluginManagerServerService) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
-	return s.client.CallResource(ctx, req, sender)
+func (s *PluginManagerServerService) CheckHealth(ctx context.Context, req *pluginv2.CheckHealthRequest) (*pluginv2.CheckHealthResponse, error) {
+	protoResp, err := s.client.CheckHealth(ctx, backend.FromProto().CheckHealthRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().CheckHealthResponse(protoResp), nil
 }
 
-func (s *PluginManagerServerService) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	return s.client.CheckHealth(ctx, req)
+func (s *PluginManagerServerService) CollectMetrics(ctx context.Context, req *pluginv2.CollectMetricsRequest) (*pluginv2.CollectMetricsResponse, error) {
+	protoResp, err := s.client.CollectMetrics(ctx, backend.FromProto().CollectMetricsRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().CollectMetricsResult(protoResp), nil
 }
 
-func (s *PluginManagerServerService) CollectMetrics(ctx context.Context, req *backend.CollectMetricsRequest) (*backend.CollectMetricsResult, error) {
-	return s.client.CollectMetrics(ctx, req)
+func (s *PluginManagerServerService) SubscribeStream(ctx context.Context, req *pluginv2.SubscribeStreamRequest) (*pluginv2.SubscribeStreamResponse, error) {
+	protoResp, err := s.client.SubscribeStream(ctx, backend.FromProto().SubscribeStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().SubscribeStreamResponse(protoResp), nil
 }
 
-func (s *PluginManagerServerService) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
-	return s.client.SubscribeStream(ctx, req)
+func (s *PluginManagerServerService) PublishStream(ctx context.Context, req *pluginv2.PublishStreamRequest) (*pluginv2.PublishStreamResponse, error) {
+	protoResp, err := s.client.PublishStream(ctx, backend.FromProto().PublishStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().PublishStreamResponse(protoResp), nil
 }
 
-func (s *PluginManagerServerService) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
-	return s.client.PublishStream(ctx, req)
+func (s *PluginManagerServerService) RunStream(req *pluginv2.RunStreamRequest, server pluginv2.Stream_RunStreamServer) error {
+	sender := backend.NewStreamSender(&runStreamServer{server: server})
+	return s.client.RunStream(server.Context(), backend.FromProto().RunStreamRequest(req), sender)
 }
 
-func (s *PluginManagerServerService) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
-	return s.client.RunStream(ctx, req, sender)
+type runStreamServer struct {
+	server pluginv2.Stream_RunStreamServer
+}
+
+func (r *runStreamServer) Send(packet *backend.StreamPacket) error {
+	return r.server.Send(backend.ToProto().StreamPacket(packet))
+}
+
+type callResourceResponseSenderFunc func(resp *backend.CallResourceResponse) error
+
+func (fn callResourceResponseSenderFunc) Send(resp *backend.CallResourceResponse) error {
+	return fn(resp)
 }

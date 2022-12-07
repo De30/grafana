@@ -24,7 +24,7 @@ func TestJWTGeneration(t *testing.T) {
 	}
 
 	pluginScenario(t, "verifies a generated token when feature is enabled", func(t *testing.T, sc pluginScenarioContext) {
-		token, err := sc.authJWTSvc.Generate(usr, 2, "grafana-example-datasource")
+		token, err := sc.authJWTSvc.Generate(usr, "grafana-example-datasource")
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		claims, err := sc.authJWTSvc.Verify(sc.ctx, token)
@@ -39,7 +39,7 @@ func TestJWTGeneration(t *testing.T) {
 	}, enableFeature)
 
 	pluginScenario(t, "rejects a generated token when feature is disabled", func(t *testing.T, sc pluginScenarioContext) {
-		token, err := sc.authJWTSvc.Generate(usr, 2, "grafana-example-datasource")
+		token, err := sc.authJWTSvc.Generate(usr, "grafana-example-datasource")
 		require.Error(t, err)
 		require.Empty(t, token)
 		_, err = sc.authJWTSvc.Verify(sc.ctx, token)

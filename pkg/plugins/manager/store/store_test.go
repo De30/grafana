@@ -13,8 +13,8 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-func TestStore_ProvideService(t *testing.T) {
-	t.Run("Plugin sources are added in order", func(t *testing.T) {
+func TestStore_Run(t *testing.T) {
+	t.Run("Plugin sources are added in order once Run is executed", func(t *testing.T) {
 		var addedPaths []string
 		l := &fakes.FakeLoader{
 			LoadFunc: func(ctx context.Context, class plugins.Class, paths []string) ([]*plugins.Plugin, error) {
@@ -34,7 +34,10 @@ func TestStore_ProvideService(t *testing.T) {
 			},
 		}
 
-		_, err := ProvideService(cfg, pCfg, fakes.NewFakePluginRegistry(), l)
+		svc, err := ProvideService(cfg, pCfg, fakes.NewFakePluginRegistry(), l)
+		require.NoError(t, err)
+		require.Empty(t, addedPaths)
+		err = svc.Run(context.Background())
 		require.NoError(t, err)
 		require.Equal(t, []string{"app/plugins/datasource", "app/plugins/panel", "path1", "path2", "path3"}, addedPaths)
 	})

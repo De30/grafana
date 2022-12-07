@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/grafana/grafana/pkg/api"
 	"github.com/grafana/grafana/pkg/server/modules"
 
 	_ "github.com/grafana/grafana/pkg/extensions"
@@ -29,9 +30,9 @@ type Options struct {
 
 // New returns a new instance of Server.
 func New(opts Options, cfg *setting.Cfg,
-	moduleService *modules.Modules,
+	moduleService *modules.Modules, httpServer *api.HTTPServer,
 ) (*Server, error) {
-	s, err := newServer(opts, cfg, moduleService)
+	s, err := newServer(opts, cfg, moduleService, httpServer)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,8 @@ func New(opts Options, cfg *setting.Cfg,
 	return s, nil
 }
 
-func newServer(opts Options, cfg *setting.Cfg, moduleService *modules.Modules) (*Server, error) {
+func newServer(opts Options, cfg *setting.Cfg, moduleService *modules.Modules, httpServer *api.HTTPServer,
+) (*Server, error) {
 	rootCtx, shutdownFn := context.WithCancel(context.Background())
 	childRoutines, childCtx := errgroup.WithContext(rootCtx)
 
@@ -59,6 +61,7 @@ func newServer(opts Options, cfg *setting.Cfg, moduleService *modules.Modules) (
 		commit:           opts.Commit,
 		buildBranch:      opts.BuildBranch,
 		moduleService:    moduleService,
+		HTTPServer:       httpServer,
 	}, nil
 }
 
@@ -80,6 +83,7 @@ type Server struct {
 	buildBranch string
 
 	moduleService *modules.Modules
+	HTTPServer    *api.HTTPServer
 }
 
 // init initializes the server and its services.

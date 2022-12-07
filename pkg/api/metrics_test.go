@@ -303,14 +303,14 @@ type fakeJWTAuth struct {
 	jwt.PluginAuthService
 }
 
-func (f *fakeJWTAuth) Generate(string, string) (string, error) {
+func (f *fakeJWTAuth) IsEnabled() bool {
+	return true
+}
+
+func (f *fakeJWTAuth) Generate(*user.SignedInUser, string) (string, error) {
 	return "", nil
 }
 
-func (f *fakeJWTAuth) Verify(context.Context, string) (models.JWTClaims, error) {
+func (f *fakeJWTAuth) Verify(ctx context.Context, token string) (models.JWTClaims, error) {
 	return models.JWTClaims{}, nil
-}
-
-func (f *fakeJWTAuth) IsEnabled() bool {
-	return true
 }
