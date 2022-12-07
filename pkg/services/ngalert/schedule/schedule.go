@@ -7,11 +7,11 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	prometheusModel "github.com/prometheus/common/model"
 	"go.opentelemetry.io/otel/attribute"
 
 	alertingModels "github.com/grafana/alerting/alerting/models"
+
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/services/datasources"
@@ -352,13 +352,10 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 		}
 		evalCtx := eval.Context(ctx, schedulerUser)
 		ruleEval, err := sch.evaluatorFactory.Create(evalCtx, e.rule.GetEvalCondition())
-		var results eval.Results
+		var results eval.EvaluationResult
 		var dur time.Duration
 		if err == nil {
-			results, err = ruleEval.Evaluate(ctx, e.scheduledAt)
-			if err != nil {
-				logger.Error("Failed to evaluate rule", "error", err, "duration", dur)
-			}
+			results = ruleEval.Evaluate(ctx, e.scheduledAt)
 		} else {
 			logger.Error("Failed to build rule evaluator", "error", err)
 		}
@@ -367,17 +364,10 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 		evalTotal.Inc()
 		evalDuration.Observe(dur.Seconds())
 
-		if err != nil || results.HasErrors() {
+		if err != nil || results.Error != nil {
 			evalTotalFailures.Inc()
-			if results == nil {
-				results = append(results, eval.NewResultFromError(err, e.scheduledAt, dur))
-			}
 			if err == nil {
-				for _, result := range results {
-					if result.Error != nil {
-						err = multierror.Append(err, result.Error)
-					}
-				}
+				err = results.Error
 			}
 			span.RecordError(err)
 			span.AddEvents(
@@ -392,7 +382,7 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 				[]string{"message", "results"},
 				[]tracing.EventValue{
 					{Str: "rule evaluated"},
-					{Num: int64(len(results))},
+					{Num: int64(len(results.Results))},
 				})
 		}
 		if ctx.Err() != nil { // check if the context is not cancelled. The evaluation can be a long-running task.
