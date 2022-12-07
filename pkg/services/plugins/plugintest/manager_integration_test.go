@@ -1,4 +1,4 @@
-package plugins
+package plugintest
 
 import (
 	"context"
@@ -8,11 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/grafana/pkg/services/user"
+
+	"github.com/grafana/grafana/pkg/services/plugins"
+
 	"github.com/grafana/grafana-azure-sdk-go/azsettings"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
-	"github.com/grafana/grafana/pkg/tsdb/parca"
-	"github.com/grafana/grafana/pkg/tsdb/phlare"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/ini.v1"
 
@@ -45,6 +47,8 @@ import (
 	"github.com/grafana/grafana/pkg/tsdb/mssql"
 	"github.com/grafana/grafana/pkg/tsdb/mysql"
 	"github.com/grafana/grafana/pkg/tsdb/opentsdb"
+	"github.com/grafana/grafana/pkg/tsdb/parca"
+	"github.com/grafana/grafana/pkg/tsdb/phlare"
 	"github.com/grafana/grafana/pkg/tsdb/postgres"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus"
 	"github.com/grafana/grafana/pkg/tsdb/tempo"
@@ -55,10 +59,10 @@ func TestIntegrationPluginManager(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
-	staticRootPath, err := filepath.Abs("../../../public/")
+	staticRootPath, err := filepath.Abs("../../../../public/")
 	require.NoError(t, err)
 
-	bundledPluginsPath, err := filepath.Abs("../../../plugins-bundled/internal")
+	bundledPluginsPath, err := filepath.Abs("../../../../plugins-bundled/internal")
 	require.NoError(t, err)
 
 	// We use the raw config here as it forms the basis for the setting.Provider implementation
@@ -68,7 +72,7 @@ func TestIntegrationPluginManager(t *testing.T) {
 		app_mode = production
 
 		[plugin.test-app]
-		path=testdata/test-app
+		path=../../../plugins/manager/testdata/test-app
 
 		[plugin.test-panel]
 		not=included
@@ -115,10 +119,13 @@ func TestIntegrationPluginManager(t *testing.T) {
 		reg, provider.ProvideService(coreRegistry), fakes.NewFakeRoleRegistry())
 	ps, err := store.ProvideService(cfg, pCfg, reg, l)
 	require.NoError(t, err)
-	rr := ProvideRouteResolver(ps)
+	rr := plugins.ProvideRouteResolver(ps)
 	require.NoError(t, err)
 
 	ctx := context.Background()
+	err = ps.Run(ctx)
+	require.NoError(t, err)
+
 	verifyCorePluginCatalogue(t, ctx, ps)
 	verifyBundledPlugins(t, ctx, ps, reg)
 	verifyPluginStaticRoutes(t, ctx, rr, reg)
@@ -126,7 +133,7 @@ func TestIntegrationPluginManager(t *testing.T) {
 	verifyPluginQuery(t, ctx, client.ProvideService(reg, pCfg, &fakeJWTAuth{}))
 }
 
-func verifyPluginQuery(t *testing.T, ctx context.Context, c Client) {
+func verifyPluginQuery(t *testing.T, ctx context.Context, c plugins.Client) {
 	now := time.Unix(1661420870, 0)
 	req := &backend.QueryDataRequest{
 		PluginContext: backend.PluginContext{
@@ -219,25 +226,25 @@ func verifyCorePluginCatalogue(t *testing.T, ctx context.Context, ps *store.Serv
 		"test-app": {},
 	}
 
-	panels := ps.Plugins(ctx, Panel)
+	panels := ps.Plugins(ctx, pluginLib.Panel)
 	require.Equal(t, len(expPanels), len(panels))
 	for _, p := range panels {
 		p, exists := ps.Plugin(ctx, p.ID)
-		require.NotEqual(t, PluginDTO{}, p)
+		require.NotEqual(t, plugins.PluginDTO{}, p)
 		require.True(t, exists)
 		require.Contains(t, expPanels, p.ID)
 	}
 
-	dataSources := ps.Plugins(ctx, DataSource)
+	dataSources := ps.Plugins(ctx, pluginLib.DataSource)
 	require.Equal(t, len(expDataSources), len(dataSources))
 	for _, ds := range dataSources {
 		p, exists := ps.Plugin(ctx, ds.ID)
-		require.NotEqual(t, PluginDTO{}, p)
+		require.NotEqual(t, plugins.PluginDTO{}, p)
 		require.True(t, exists)
 		require.Contains(t, expDataSources, ds.ID)
 	}
 
-	apps := ps.Plugins(ctx, App)
+	apps := ps.Plugins(ctx, pluginLib.App)
 	require.Equal(t, len(expApps), len(apps))
 	for _, app := range apps {
 		p, exists := ps.Plugin(ctx, app.ID)
@@ -253,13 +260,13 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 	t.Helper()
 
 	dsPlugins := make(map[string]struct{})
-	for _, p := range ps.Plugins(ctx, DataSource) {
+	for _, p := range ps.Plugins(ctx, pluginLib.DataSource) {
 		dsPlugins[p.ID] = struct{}{}
 	}
 
 	inputPlugin, exists := ps.Plugin(ctx, "input")
 	require.True(t, exists)
-	require.NotEqual(t, PluginDTO{}, inputPlugin)
+	require.NotEqual(t, plugins.PluginDTO{}, inputPlugin)
 	require.NotNil(t, dsPlugins["input"])
 
 	intInputPlugin, exists := reg.Plugin(ctx, "input")
@@ -276,8 +283,8 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 	}
 }
 
-func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr StaticRouteResolver, reg registry.Service) {
-	routes := make(map[string]*StaticRoute)
+func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr plugins.StaticRouteResolver, reg registry.Service) {
+	routes := make(map[string]*plugins.StaticRoute)
 	for _, route := range rr.Routes(ctx) {
 		routes[route.PluginID] = route
 	}
@@ -311,10 +318,10 @@ func (f *fakeJWTAuth) IsEnabled() bool {
 	return true
 }
 
-func (f *fakeJWTAuth) Generate(string, string) (string, error) {
+func (f *fakeJWTAuth) Generate(*user.SignedInUser, string) (string, error) {
 	return "", nil
 }
 
-func (f *fakeJWTAuth) Verify(context.Context, string) (models.JWTClaims, error) {
+func (f *fakeJWTAuth) Verify(_ context.Context, _ string) (models.JWTClaims, error) {
 	return models.JWTClaims{}, nil
 }
