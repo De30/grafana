@@ -4,29 +4,33 @@ import React, { useEffect, useState } from 'react';
 import {
   CoreApp,
   DataCatalogueContextWithExploreLinkBuilder,
-  DataCatalogueProvider,
+  DataCatalogueItem,
   DataQuery,
+  DataSourceApi,
   DataSourcePluginContextProvider,
   DataSourcePluginMeta,
   DataSourceSettings as DataSourceSettingsType,
+  withDataCatalogueSupport,
 } from '@grafana/data';
 import { getDataSourceSrv, locationService } from '@grafana/runtime';
 import PageLoader from 'app/core/components/PageLoader/PageLoader';
 import { DataSourceSettingsState, useDispatch } from 'app/types';
 
 import { DataCatalogue } from '../../data-catalogue';
+import { DatasourceDataCatalogueBuilder } from '../../data-catalogue/utils/datasource';
 import {
   dataSourceLoaded,
   setDataSourceName,
   setIsDefault,
   useDataSource,
+  useDataSourceApi,
+  useDataSourceExploreUrl,
   useDataSourceMeta,
   useDataSourceRights,
   useDataSourceSettings,
   useDeleteLoadedDataSource,
-  useExploreDisplay,
   useInitDataSourceSettings,
-  useLoadExploreDisplay,
+  useLoadDataSourceApi,
   useTestDataSource,
   useUpdateDatasource,
 } from '../state';
@@ -59,11 +63,12 @@ export function EditDataSource({ uid, pageId }: Props) {
   const dataSourceMeta = useDataSourceMeta(dataSource.type);
   const dataSourceSettings = useDataSourceSettings();
   const dataSourceRights = useDataSourceRights(uid);
+  const exploreUrl = useDataSourceExploreUrl(uid);
   const onDelete = useDeleteLoadedDataSource();
   const onTest = useTestDataSource(uid);
   const onUpdate = useUpdateDatasource();
-  const exploreDisplay = useExploreDisplay();
-  const loadExploreDisplay = useLoadExploreDisplay(uid);
+  const dataSourceApi = useDataSourceApi();
+  const loadDataSourceApi = useLoadDataSourceApi();
   const onDefaultChange = (value: boolean) => dispatch(setIsDefault(value));
   const onNameChange = (name: string) => dispatch(setDataSourceName(name));
   const onOptionsChange = (ds: DataSourceSettingsType) => dispatch(dataSourceLoaded(ds));
@@ -75,9 +80,9 @@ export function EditDataSource({ uid, pageId }: Props) {
       dataSourceMeta={dataSourceMeta}
       dataSourceSettings={dataSourceSettings}
       dataSourceRights={dataSourceRights}
-      dataCatalogueProvider={exploreDisplay.dataCatalogueProvider}
-      exploreUrl={exploreDisplay.exploreUrl}
-      loadExploreDisplay={loadExploreDisplay}
+      dataSourceApi={dataSourceApi}
+      loadDataSourceApi={loadDataSourceApi}
+      exploreUrl={exploreUrl}
       onDelete={onDelete}
       onDefaultChange={onDefaultChange}
       onNameChange={onNameChange}
@@ -90,13 +95,13 @@ export function EditDataSource({ uid, pageId }: Props) {
 
 export type ViewProps = {
   pageId?: string | null;
-  dataCatalogueProvider?: DataCatalogueProvider;
+  dataSourceApi?: DataSourceApi;
   dataSource: DataSourceSettingsType;
   dataSourceMeta: DataSourcePluginMeta;
   dataSourceSettings: DataSourceSettingsState;
   dataSourceRights: DataSourceRights;
   exploreUrl?: string;
-  loadExploreDisplay: () => void;
+  loadDataSourceApi: () => void;
   onDelete: () => void;
   onDefaultChange: (isDefault: boolean) => AnyAction;
   onNameChange: (name: string) => AnyAction;
@@ -107,13 +112,13 @@ export type ViewProps = {
 
 export function EditDataSourceView({
   pageId,
-  dataCatalogueProvider,
+  dataSourceApi,
   dataSource,
   dataSourceMeta,
   dataSourceSettings,
   dataSourceRights,
   exploreUrl,
-  loadExploreDisplay,
+  loadDataSourceApi,
   onDelete,
   onDefaultChange,
   onNameChange,
@@ -130,34 +135,39 @@ export function EditDataSourceView({
   const hasAlertingEnabled = Boolean(dsi?.meta?.alerting ?? false);
   const isAlertManagerDatasource = dsi?.type === 'alertmanager';
   const alertingSupported = hasAlertingEnabled || isAlertManagerDatasource;
-  const [showDataCatalogue, setShowDataCatalogue] = useState(false);
+
+  const [dataCatalogueRootItem, setDataCatalogueRootItem] = useState<DataCatalogueItem | undefined>();
   const [pendingExploreDisplay, setPendingExploreDisplay] = useState(false);
 
   const onExplore = () => {
     setPendingExploreDisplay(true);
-    loadExploreDisplay();
+    loadDataSourceApi();
   };
 
   useEffect(() => {
-    if (pendingExploreDisplay && (dataCatalogueProvider || exploreUrl)) {
+    if (pendingExploreDisplay && dataSourceApi) {
       setPendingExploreDisplay(false);
-      if (dataCatalogueProvider) {
-        setShowDataCatalogue(true);
+      if (withDataCatalogueSupport(dataSourceApi)) {
+        const dataCatalogueContext: DataCatalogueContextWithExploreLinkBuilder = {
+          app: CoreApp.Unknown,
+          closeDataCatalogue: () => {
+            setDataCatalogueRootItem(undefined);
+          },
+          createExploreUrl: (queries: DataQuery[]) => {
+            return constructDataSourceExploreUrl(dataSource, queries);
+          },
+        };
+        const dataCatalogueRootItem = new DatasourceDataCatalogueBuilder(
+          dataSourceApi,
+          dataCatalogueContext,
+          dataSourceApi.getDataCatalogueCategories(dataCatalogueContext)
+        );
+        setDataCatalogueRootItem(dataCatalogueRootItem);
       } else if (exploreUrl) {
         locationService.push(exploreUrl);
       }
     }
-  }, [pendingExploreDisplay, dataCatalogueProvider, exploreUrl]);
-
-  const dataCatalogueContext: DataCatalogueContextWithExploreLinkBuilder = {
-    app: CoreApp.Unknown,
-    closeDataCatalogue: () => {
-      setShowDataCatalogue(false);
-    },
-    createExploreUrl: (queries: DataQuery[]) => {
-      return constructDataSourceExploreUrl(dataSource, queries);
-    },
-  };
+  }, [pendingExploreDisplay, dataSourceApi, exploreUrl, dataSource]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -225,11 +235,10 @@ export function EditDataSourceView({
         canDelete={!readOnly && hasDeleteRights}
       />
 
-      {showDataCatalogue && dataCatalogueProvider && dataCatalogueContext && (
+      {dataCatalogueRootItem && (
         <DataCatalogue
-          onClose={() => setShowDataCatalogue(false)}
-          dataCatalogueProvider={dataCatalogueProvider}
-          dataCatalogueContext={dataCatalogueContext}
+          onClose={() => setDataCatalogueRootItem(undefined)}
+          dataCatalogueRootItem={dataCatalogueRootItem}
         />
       )}
     </form>

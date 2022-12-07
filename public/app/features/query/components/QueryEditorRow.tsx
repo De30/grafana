@@ -20,7 +20,7 @@ import {
   QueryResultMetaNotice,
   TimeRange,
   toLegacyResponseData,
-  hasDataCatalogueSupport,
+  withDataCatalogueSupport,
   DataCatalogueContextWithQuery,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
@@ -36,6 +36,7 @@ import { getTimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { DashboardModel } from 'app/features/dashboard/state/DashboardModel';
 import { PanelModel } from 'app/features/dashboard/state/PanelModel';
 import { DataCatalogue } from 'app/features/data-catalogue';
+import { DatasourceDataCatalogueBuilder } from 'app/features/data-catalogue/utils/datasource';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 
 import { RowActionComponents } from './QueryActionComponent';
@@ -420,7 +421,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     const isDisabled = query.hide;
 
     const hasEditorHelp = datasource?.components?.QueryEditorHelp;
-    const hasDataCatalogue = hasDataCatalogueSupport(datasource);
+    const hasDataCatalogue = withDataCatalogueSupport(datasource);
 
     return (
       <HorizontalGroup width="auto">
@@ -500,6 +501,23 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
     const editor = this.renderPluginEditor();
     const DatasourceCheatsheet = datasource.components?.QueryEditorHelp;
 
+    const context = {
+      app,
+      changeQuery: onChange,
+      queryRefId: query.refId,
+      runQuery: onRunQuery,
+      closeDataCatalogue: () => this.onToggleDataCatalogue(),
+    } as DataCatalogueContextWithQuery<TQuery>;
+
+    let dataCatalogueRootItem;
+    if (withDataCatalogueSupport(datasource)) {
+      dataCatalogueRootItem = new DatasourceDataCatalogueBuilder(
+        datasource as DataSourceApi<DataQuery>,
+        context,
+        datasource.getDataCatalogueCategories(context)
+      );
+    }
+
     return (
       <div aria-label={selectors.components.QueryEditorRows.rows}>
         <QueryOperationRow
@@ -512,19 +530,8 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
         >
           <div className={rowClasses} id={this.id}>
             <ErrorBoundaryAlert>
-              {showingDataCatalogue && hasDataCatalogueSupport(datasource) && (
-                <DataCatalogue
-                  dataCatalogueProvider={datasource}
-                  dataCatalogueContext={
-                    {
-                      app,
-                      changeQuery: onChange,
-                      queryRefId: query.refId,
-                      runQuery: onRunQuery,
-                    } as DataCatalogueContextWithQuery<TQuery>
-                  }
-                  onClose={() => this.onToggleDataCatalogue()}
-                />
+              {showingDataCatalogue && dataCatalogueRootItem && (
+                <DataCatalogue dataCatalogueRootItem={dataCatalogueRootItem} onClose={context.closeDataCatalogue} />
               )}
               {showingHelp && DatasourceCheatsheet && (
                 <OperationRowHelp>

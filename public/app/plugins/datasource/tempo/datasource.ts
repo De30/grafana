@@ -4,12 +4,12 @@ import { catchError, concatMap, map, mergeMap, toArray } from 'rxjs/operators';
 
 import {
   DataCatalogueContext,
-  DataCatalogueProvider,
   DataQueryRequest,
   DataQueryResponse,
   DataQueryResponseData,
   DataSourceApi,
   DataSourceInstanceSettings,
+  DataSourceWithDataCatalogueSupport,
   dateTime,
   FieldType,
   isValidGoDuration,
@@ -36,7 +36,7 @@ import { LokiOptions } from '../loki/types';
 import { PrometheusDatasource } from '../prometheus/datasource';
 import { PromQuery } from '../prometheus/types';
 
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import {
   failedMetric,
   histogramMetric,
@@ -60,7 +60,10 @@ import { SearchQueryParams, TempoQuery, TempoJsonData } from './types';
 
 export const DEFAULT_LIMIT = 20;
 
-export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJsonData> implements DataCatalogueProvider {
+export class TempoDatasource
+  extends DataSourceWithBackend<TempoQuery, TempoJsonData>
+  implements DataSourceWithDataCatalogueSupport
+{
   tracesToLogs?: TraceToLogsOptions;
   serviceMap?: {
     datasourceUid?: string;
@@ -447,8 +450,8 @@ export class TempoDatasource extends DataSourceWithBackend<TempoQuery, TempoJson
     return this.lokiSearch?.datasourceUid ?? legacyLogsDatasourceUid;
   };
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return await getRootDataCatalogueItem({ context, datasource: this });
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories({ context, datasource: this });
   }
 }
 

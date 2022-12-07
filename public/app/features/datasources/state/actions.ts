@@ -1,4 +1,4 @@
-import { DataSourcePluginMeta, DataSourceSettings, hasDataCatalogueSupport, locationUtil } from '@grafana/data';
+import { DataSourcePluginMeta, DataSourceSettings, locationUtil } from '@grafana/data';
 import {
   config,
   DataSourceWithBackend,
@@ -31,7 +31,7 @@ import {
   dataSourcesLoaded,
   initDataSourceSettingsFailed,
   initDataSourceSettingsSucceeded,
-  setExploreDisplay,
+  setDataSourceApi,
   testDataSourceFailed,
   testDataSourceStarting,
   testDataSourceSucceeded,
@@ -89,8 +89,7 @@ export const initDataSourceSettings = (
   };
 };
 
-export const loadExploreDisplay = (
-  exploreUrl: string,
+export const loadDataSourceApi = (
   dependencies: TestDataSourceDependencies = {
     getDatasourceSrv,
     getBackendSrv,
@@ -99,11 +98,7 @@ export const loadExploreDisplay = (
   return async (dispatch, getState) => {
     const dataSourceName = getState().dataSources.dataSource.name;
     const dsApi = await dependencies.getDatasourceSrv().get(dataSourceName);
-    if (hasDataCatalogueSupport(dsApi)) {
-      dispatch(setExploreDisplay({ dataCatalogueProvider: dsApi, exploreUrl }));
-    } else {
-      dispatch(setExploreDisplay({ exploreUrl }));
-    }
+    dispatch(setDataSourceApi(dsApi));
   };
 };
 

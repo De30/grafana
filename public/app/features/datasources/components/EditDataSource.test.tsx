@@ -36,6 +36,7 @@ const setup = (props?: Partial<ViewProps>) => {
         dataSourceSettings={getMockDataSourceSettingsState()}
         dataSourceRights={{ readOnly: false, hasWriteRights: true, hasDeleteRights: true }}
         exploreUrl={'/explore'}
+        loadDataSourceApi={jest.fn()}
         onDelete={jest.fn()}
         onDefaultChange={jest.fn()}
         onNameChange={jest.fn()}

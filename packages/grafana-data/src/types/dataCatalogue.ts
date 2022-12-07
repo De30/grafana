@@ -17,20 +17,32 @@ export enum DataCatalogueItemAttributeType {
   Link = 'Link',
   Description = 'Description',
   Tag = 'Tag',
+  Custom = 'Custom',
 }
 
 export interface DataCatalogueItemAttribute {
   type: DataCatalogueItemAttributeType;
 }
 
+export enum DataCatalogueItemAttributeKeyValueFormat {
+  Text = 'Text',
+  Code = 'Code',
+}
+
 export class DataCatalogueItemAttributeKeyValue implements DataCatalogueItemAttribute {
   type = DataCatalogueItemAttributeType.KeyValue;
   key: string;
   value: string;
+  format: DataCatalogueItemAttributeKeyValueFormat;
 
-  constructor(key: string, value: string) {
+  constructor(
+    key: string,
+    value: string,
+    format: DataCatalogueItemAttributeKeyValueFormat = DataCatalogueItemAttributeKeyValueFormat.Text
+  ) {
     this.key = key;
     this.value = value;
+    this.format = format;
   }
 }
 
@@ -56,6 +68,12 @@ export const IsDataCatalogueItemAttributeActionLink = (
   attribute: DataCatalogueItemAttribute
 ): attribute is DataCatalogueItemAttributeActionLink => {
   return attribute.type === DataCatalogueItemAttributeType.ActionLink;
+};
+
+export const IsDataCatalogueItemAttributeCustom = (
+  attribute: DataCatalogueItemAttribute
+): attribute is DataCatalogueItemAttributeCustom => {
+  return attribute.type === DataCatalogueItemAttributeType.Custom;
 };
 
 export const IsDataCatalogueItemAttributeTag = (
@@ -135,6 +153,14 @@ export class DataCatalogueItemAttributeLink implements DataCatalogueItemAttribut
   }
 }
 
+export class DataCatalogueItemAttributeCustom implements DataCatalogueItemAttribute {
+  type = DataCatalogueItemAttributeType.Custom;
+  component: React.ReactNode;
+
+  constructor(component: React.ReactNode) {
+    this.component = component;
+  }
+}
 export class DataCatalogueItemAttributeTag implements DataCatalogueItemAttribute {
   type = DataCatalogueItemAttributeType.Tag;
   tag: string;
@@ -184,11 +210,20 @@ export interface DataCatalogueProvider {
   getRootDataCatalogueItem(context: DataCatalogueContext): Promise<DataCatalogueItem>;
 }
 
+export interface DataSourceWithDataCatalogueSupport {
+  getDataCatalogueCategories(context: DataCatalogueContext): {
+    data?: (item: DataCatalogueBuilder) => void;
+    status?: (item: DataCatalogueBuilder) => void;
+    statistics?: (item: DataCatalogueBuilder) => void;
+    configuration?: (item: DataCatalogueBuilder) => void;
+  };
+}
+
 /**
  * @internal
  */
-export const hasDataCatalogueSupport = (datasource: unknown): datasource is DataCatalogueProvider => {
-  return (datasource as DataCatalogueProvider).getRootDataCatalogueItem !== undefined;
+export const withDataCatalogueSupport = (datasource: unknown): datasource is DataSourceWithDataCatalogueSupport => {
+  return (datasource as DataSourceWithDataCatalogueSupport).getDataCatalogueCategories !== undefined;
 };
 
 export const isDataCatalogueFolder = (item: DataCatalogueItem): item is DataCatalogueFolder => {
@@ -219,8 +254,8 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     this.type = type;
   }
 
-  addKeyValue(key: string, value: string) {
-    this.attributes.push(new DataCatalogueItemAttributeKeyValue(key, value));
+  addKeyValue(key: string, value: string, format?: DataCatalogueItemAttributeKeyValueFormat) {
+    this.attributes.push(new DataCatalogueItemAttributeKeyValue(key, value, format));
     return this;
   }
 
@@ -250,6 +285,11 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     } else if (url) {
       this.addActionLink(name, url);
     }
+    return this;
+  }
+
+  addCustom(component: React.ReactNode) {
+    this.attributes.push(new DataCatalogueItemAttributeCustom(component));
     return this;
   }
 
@@ -295,6 +335,7 @@ export class DataCatalogueBuilder implements DataCatalogueItem {
     return this;
   }
 
+  /* @deprecated */
   fromDataSource<TQuery extends DataQuery, TOptions extends DataSourceJsonData>(
     datasource: DataSourceApi<TQuery, TOptions>,
     context: DataCatalogueContext,

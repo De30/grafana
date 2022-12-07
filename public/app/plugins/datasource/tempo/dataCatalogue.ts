@@ -2,7 +2,7 @@ import { DataCatalogueBuilder, DataCatalogueContext } from '@grafana/data';
 
 import { TempoDatasource } from './datasource';
 
-export const getRootDataCatalogueItem = async ({
+export const getDataCatalogueCategories = ({
   context,
   datasource,
 }: {
@@ -29,14 +29,14 @@ export const getRootDataCatalogueItem = async ({
         addAttribute(
           line,
           item,
-          'tempo_request_duration_seconds_bucket{method="GET",route="api_traces_traceid",status_code="200",ws="false",le="50"}',
+          'tempo_request_duration_seconds_bucket{method="GET",route="metrics",status_code="200",ws="false",le="50"}',
           'Average request time (seconds)'
         );
       });
     });
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, { statistics, status });
+  return { statistics, status };
 };
 
 const addAttribute = (line: string, item: DataCatalogueBuilder, metricName: string, title: string) => {

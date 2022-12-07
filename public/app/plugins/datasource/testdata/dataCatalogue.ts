@@ -8,10 +8,7 @@ import {
 import { TestDataDataSource } from './datasource';
 import { TestDataQuery } from './types';
 
-export const getRootDataCatalogueItem = async (
-  context: DataCatalogueContext,
-  datasource: TestDataDataSource
-): Promise<DataCatalogueItem> => {
+export const getDataCatalogueCategories = (context: DataCatalogueContext, datasource: TestDataDataSource) => {
   const data = (item: DataCatalogueBuilder) => {
     item.setItems([
       new DataCatalogueBuilder('Metrics').setItems([
@@ -49,5 +46,16 @@ export const getRootDataCatalogueItem = async (
     ]);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, { data, status });
+  return { data, status };
+};
+
+export const getRootDataCatalogueItem = async (
+  context: DataCatalogueContext,
+  datasource: TestDataDataSource
+): Promise<DataCatalogueItem> => {
+  return new DataCatalogueBuilder().fromDataSource(
+    datasource,
+    context,
+    getDataCatalogueCategories(context, datasource)
+  );
 };

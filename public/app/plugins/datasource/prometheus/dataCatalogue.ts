@@ -2,20 +2,19 @@ import {
   DataCatalogueBuilder,
   DataCatalogueContext,
   DataCatalogueContextWithQuery,
-  DataCatalogueItem,
   isDataCatalogueContextWithQuery,
 } from '@grafana/data';
 
 import { PrometheusDatasource } from './datasource';
 import { PromQuery } from './types';
 
-export const getRootDataCatalogueItem = async ({
+export const getDataCatalogueCategories = ({
   datasource,
   context,
 }: {
   datasource: PrometheusDatasource;
   context: DataCatalogueContext;
-}): Promise<DataCatalogueItem> => {
+}) => {
   const data = (item: DataCatalogueBuilder) => {
     item.setItems([
       new DataCatalogueBuilder('Metrics').loadItems(async () => {
@@ -101,11 +100,11 @@ export const getRootDataCatalogueItem = async ({
     });
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
+  return {
     data,
     configuration,
     status,
-  });
+  };
 };
 
 const createRunActionQuery = (context: DataCatalogueContextWithQuery<PromQuery>, expr: string) => {

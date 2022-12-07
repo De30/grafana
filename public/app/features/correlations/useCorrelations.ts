@@ -2,7 +2,7 @@ import { useAsyncFn } from 'react-use';
 import { lastValueFrom } from 'rxjs';
 
 import { DataSourceInstanceSettings } from '@grafana/data';
-import { getDataSourceSrv, FetchResponse } from '@grafana/runtime';
+import { getDataSourceSrv, FetchResponse, BackendSrv } from '@grafana/runtime';
 import { useGrafana } from 'app/core/context/GrafanaContext';
 
 import { Correlation, CreateCorrelationParams, RemoveCorrelationParams, UpdateCorrelationParams } from './types';
@@ -23,6 +23,13 @@ function getData<T>(response: FetchResponse<T>) {
   return response.data;
 }
 
+export const fetchCorrelations = (backend: BackendSrv) =>
+  lastValueFrom(
+    backend.fetch<Correlation[]>({ url: '/api/datasources/correlations', method: 'GET', showErrorAlert: false })
+  )
+    .then(getData)
+    .then(toEnrichedCorrelationsData);
+
 /**
  * hook for managing correlations data.
  * TODO: ideally this hook shouldn't have any side effect like showing notifications on error
@@ -32,15 +39,7 @@ function getData<T>(response: FetchResponse<T>) {
 export const useCorrelations = () => {
   const { backend } = useGrafana();
 
-  const [getInfo, get] = useAsyncFn<() => Promise<CorrelationData[]>>(
-    () =>
-      lastValueFrom(
-        backend.fetch<Correlation[]>({ url: '/api/datasources/correlations', method: 'GET', showErrorAlert: false })
-      )
-        .then(getData)
-        .then(toEnrichedCorrelationsData),
-    [backend]
-  );
+  const [getInfo, get] = useAsyncFn<() => Promise<CorrelationData[]>>(() => fetchCorrelations(backend), [backend]);
 
   const [createInfo, create] = useAsyncFn<(params: CreateCorrelationParams) => Promise<CorrelationData>>(
     ({ sourceUID, ...correlation }) =>

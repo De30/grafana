@@ -1,20 +1,15 @@
-import {
-  DataCatalogueContext,
-  DataCatalogueItem,
-  DataCatalogueBuilder,
-  isDataCatalogueContextWithQuery,
-} from '@grafana/data';
+import { DataCatalogueContext, DataCatalogueBuilder, isDataCatalogueContextWithQuery } from '@grafana/data';
 
 import { SQLQuery } from '../../../features/plugins/sql';
 
 import { MySqlDatasource } from './MySqlDatasource';
 
-export const getRootDataCatalogueItem = ({
+export const getDataCatalogueCategories = ({
   context,
   datasource,
 }: {
-  context: DataCatalogueContext;
   datasource: MySqlDatasource;
+  context: DataCatalogueContext;
 }) => {
   const data = (item: DataCatalogueBuilder) => {
     item.setItems([
@@ -39,7 +34,7 @@ export const getRootDataCatalogueItem = ({
                   }
                 });
               });
-            }) as DataCatalogueItem[];
+            });
           });
           return schema;
         });
@@ -47,5 +42,5 @@ export const getRootDataCatalogueItem = ({
     ]);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, { data });
+  return { data };
 };

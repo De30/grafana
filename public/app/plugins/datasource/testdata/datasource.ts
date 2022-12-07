@@ -15,13 +15,13 @@ import {
   ScopedVars,
   toDataFrame,
   MutableDataFrame,
-  DataCatalogueProvider,
   DataCatalogueContext,
+  DataSourceWithDataCatalogueSupport,
 } from '@grafana/data';
 import { DataSourceWithBackend, getBackendSrv, getGrafanaLiveSrv, getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { getSearchFilterScopedVar } from 'app/features/variables/utils';
 
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import { queryMetricTree } from './metricTree';
 import { generateRandomEdges, generateRandomNodes, savedNodesResponse } from './nodeGraphUtils';
 import { runStream } from './runStreams';
@@ -29,7 +29,10 @@ import { flameGraphData } from './testData/flameGraphResponse';
 import { Scenario, TestDataQuery } from './types';
 import { TestDataVariableSupport } from './variables';
 
-export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> implements DataCatalogueProvider {
+export class TestDataDataSource
+  extends DataSourceWithBackend<TestDataQuery>
+  implements DataSourceWithDataCatalogueSupport
+{
   scenariosCache?: Promise<Scenario[]>;
 
   constructor(
@@ -40,8 +43,8 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> imp
     this.variables = new TestDataVariableSupport();
   }
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return await getRootDataCatalogueItem(context, this);
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories(context, this);
   }
 
   query(options: DataQueryRequest<TestDataQuery>): Observable<DataQueryResponse> {

@@ -24,8 +24,8 @@ import {
   toUtc,
   QueryFixAction,
   CoreApp,
-  DataCatalogueProvider,
   DataCatalogueContext,
+  DataSourceWithDataCatalogueSupport,
 } from '@grafana/data';
 import { BackendSrvRequest, DataSourceWithBackend, getBackendSrv, getDataSourceSrv, config } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -51,7 +51,7 @@ import {
   Logs,
 } from './components/QueryEditor/MetricAggregationsEditor/aggregations';
 import { metricAggregationConfig } from './components/QueryEditor/MetricAggregationsEditor/utils';
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import { defaultBucketAgg, hasMetricOfType } from './queryDef';
 import { DataLinkConfig, ElasticsearchOptions, ElasticsearchQuery, TermsQuery } from './types';
 import { coerceESVersion, getScriptValue, isSupportedVersion } from './utils';
@@ -76,7 +76,7 @@ export class ElasticDatasource
     DataSourceWithLogsContextSupport,
     DataSourceWithQueryImportSupport<ElasticsearchQuery>,
     DataSourceWithLogsVolumeSupport<ElasticsearchQuery>,
-    DataCatalogueProvider
+    DataSourceWithDataCatalogueSupport
 {
   basicAuth?: string;
   withCredentials?: boolean;
@@ -139,8 +139,8 @@ export class ElasticDatasource
     this.timeSrv = getTimeSrv();
   }
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return await getRootDataCatalogueItem({ datasource: this, context });
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories({ datasource: this, context });
   }
 
   private request(

@@ -1,15 +1,15 @@
-import { DataCatalogueBuilder, DataCatalogueContext, DataCatalogueItem } from '@grafana/data';
+import { DataCatalogueBuilder, DataCatalogueContext } from '@grafana/data';
 
 import { LokiDatasource } from './datasource';
 import { LokiQuery } from './types';
 
-export const getRootDataCatalogueItem = async ({
+export const getDataCatalogueCategories = ({
   context,
   datasource,
 }: {
   datasource: LokiDatasource;
   context: DataCatalogueContext;
-}): Promise<DataCatalogueItem> => {
+}) => {
   const data = (item: DataCatalogueBuilder) => {
     item.setItems([
       new DataCatalogueBuilder('Labels').loadItems(async () => {
@@ -44,5 +44,5 @@ export const getRootDataCatalogueItem = async ({
     ]);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, { data, status });
+  return { data, status };
 };

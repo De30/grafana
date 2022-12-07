@@ -1,7 +1,7 @@
 import {
   DataCatalogueContext,
-  DataCatalogueProvider,
   DataSourceInstanceSettings,
+  DataSourceWithDataCatalogueSupport,
   ScopedVars,
   TimeRange,
 } from '@grafana/data';
@@ -12,21 +12,21 @@ import { DB, SQLQuery } from 'app/features/plugins/sql/types';
 import { formatSQL } from 'app/features/plugins/sql/utils/formatSQL';
 
 import MySQLQueryModel from './MySqlQueryModel';
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import { mapFieldsToTypes } from './fields';
 import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQuery';
 import { getSqlCompletionProvider } from './sqlCompletionProvider';
 import { MySQLOptions } from './types';
 
-export class MySqlDatasource extends SqlDatasource implements DataCatalogueProvider {
+export class MySqlDatasource extends SqlDatasource implements DataSourceWithDataCatalogueSupport {
   sqlLanguageDefinition: LanguageDefinition | undefined;
 
   constructor(private instanceSettings: DataSourceInstanceSettings<MySQLOptions>) {
     super(instanceSettings);
   }
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return getRootDataCatalogueItem({ context, datasource: this });
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories({ context, datasource: this });
   }
 
   getQueryModel(target?: Partial<SQLQuery>, templateSrv?: TemplateSrv, scopedVars?: ScopedVars): MySQLQueryModel {

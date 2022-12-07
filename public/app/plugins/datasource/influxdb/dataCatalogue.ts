@@ -15,7 +15,7 @@ const MEASUREMENT_LINK = {
   title: 'Read more about InfluxDB measurements',
 };
 
-export const getRootDataCatalogueItem = async ({
+export const getDataCatalogueCategories = ({
   datasource,
   context,
 }: {
@@ -58,8 +58,8 @@ export const getRootDataCatalogueItem = async ({
     datasource.interval && item.addKeyValue('Interval', datasource.interval);
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
+  return {
     data: dataCategoryFactory,
     configuration: configurationCategoryFactory,
-  });
+  };
 };

@@ -32,9 +32,8 @@ import {
   QueryHint,
   getDefaultTimeRange,
   QueryFixAction,
-  DataCatalogueProvider,
-  DataCatalogueItem,
   DataCatalogueContext,
+  DataSourceWithDataCatalogueSupport,
 } from '@grafana/data';
 import { FetchError, config, DataSourceWithBackend } from '@grafana/runtime';
 import { queryLogsVolume } from 'app/core/logsModel';
@@ -52,7 +51,7 @@ import LanguageProvider from './LanguageProvider';
 import { LiveStreams, LokiLiveTarget } from './LiveStreams';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import { escapeLabelValueInExactSelector, escapeLabelValueInSelector, isRegexSelector } from './languageUtils';
 import { labelNamesRegex, labelValuesRegex } from './migrations/variableQueryMigrations';
 import {
@@ -110,7 +109,7 @@ export class LokiDatasource
     DataSourceWithLogsVolumeSupport<LokiQuery>,
     DataSourceWithQueryImportSupport<LokiQuery>,
     DataSourceWithQueryExportSupport<LokiQuery>,
-    DataCatalogueProvider
+    DataSourceWithDataCatalogueSupport
 {
   private streams = new LiveStreams();
   languageProvider: LanguageProvider;
@@ -132,8 +131,8 @@ export class LokiDatasource
     this.variables = new LokiVariableSupport(this);
   }
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext): Promise<DataCatalogueItem> {
-    return await getRootDataCatalogueItem({
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories({
       datasource: this,
       context,
     });

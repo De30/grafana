@@ -25,8 +25,8 @@ import {
   dateTime,
   AnnotationQueryRequest,
   QueryFixAction,
-  DataCatalogueProvider,
   DataCatalogueContext,
+  DataSourceWithDataCatalogueSupport,
 } from '@grafana/data';
 import {
   BackendSrvRequest,
@@ -47,7 +47,7 @@ import { PromApplication, PromApiFeatures } from 'app/types/unified-alerting-dto
 
 import { addLabelToQuery } from './add_label_to_query';
 import { AnnotationQueryEditor } from './components/AnnotationQueryEditor';
-import { getRootDataCatalogueItem } from './dataCatalogue';
+import { getDataCatalogueCategories } from './dataCatalogue';
 import PrometheusLanguageProvider from './language_provider';
 import { expandRecordingRules } from './language_utils';
 import { renderLegendFormat } from './legend';
@@ -77,7 +77,7 @@ export class PrometheusDatasource
   implements
     DataSourceWithQueryImportSupport<PromQuery>,
     DataSourceWithQueryExportSupport<PromQuery>,
-    DataCatalogueProvider
+    DataSourceWithDataCatalogueSupport
 {
   type: string;
   editorSrc: string;
@@ -1212,8 +1212,8 @@ export class PrometheusDatasource
     return this.templateSrv.replace(string, undefined, this.interpolateQueryExpr);
   }
 
-  async getRootDataCatalogueItem(context: DataCatalogueContext) {
-    return await getRootDataCatalogueItem({ context, datasource: this });
+  getDataCatalogueCategories(context: DataCatalogueContext) {
+    return getDataCatalogueCategories({ context, datasource: this });
   }
 }
 

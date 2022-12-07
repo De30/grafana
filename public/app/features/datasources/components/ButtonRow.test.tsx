@@ -11,8 +11,8 @@ const setup = (propOverrides?: object) => {
     canDelete: false,
     onSubmit: jest.fn(),
     onDelete: jest.fn(),
+    onExplore: jest.fn(),
     onTest: jest.fn(),
-    exploreUrl: '/explore',
   };
 
   Object.assign(props, propOverrides);

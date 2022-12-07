@@ -6,10 +6,12 @@ import {
   DataCatalogueItemAttributeAction,
   DataCatalogueItemAttributeActionLink,
   DataCatalogueItemAttributeKeyValue,
+  DataCatalogueItemAttributeKeyValueFormat,
   GrafanaTheme2,
   isDataCatalogueFolder,
   IsDataCatalogueItemAttributeAction,
   IsDataCatalogueItemAttributeActionLink,
+  IsDataCatalogueItemAttributeCustom,
   IsDataCatalogueItemAttributeDescription,
   IsDataCatalogueItemAttributeImage,
   IsDataCatalogueItemAttributeKeyValue,
@@ -50,6 +52,7 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
   const links = (item.attributes || []).filter(IsDataCatalogueItemAttributeLink);
   const images = (item.attributes || []).filter(IsDataCatalogueItemAttributeImage);
   const tags = (item.attributes || []).filter(IsDataCatalogueItemAttributeTag);
+  const custom = (item.attributes || []).filter(IsDataCatalogueItemAttributeCustom);
 
   const sparseContent = tableAttributes.length + actions.length + descriptions.length + links.length === 0;
 
@@ -89,16 +92,19 @@ export const DataCatalogueItemDetailsRenderer = (props: Props) => {
       })}
       {tableAttributes && (
         <table className={styles.table}>
-          {tableAttributes.map(({ key, value }: DataCatalogueItemAttributeKeyValue, index) => {
+          {tableAttributes.map(({ key, value, format }: DataCatalogueItemAttributeKeyValue, index) => {
             return (
               <tr key={index}>
                 <td>{key}</td>
-                <td>{value}</td>
+                <td>
+                  {format === DataCatalogueItemAttributeKeyValueFormat.Code ? <pre>{value}</pre> : <span>{value}</span>}
+                </td>
               </tr>
             );
           })}
         </table>
       )}
+      {custom && custom.length > 0 && custom.map((customAttribute) => customAttribute.component)}
       {actions.length + actionLinks.length > 0 && (
         <div>
           <p>Actions:</p>

@@ -3,17 +3,13 @@ import { DataCatalogueContext, DataCatalogueBuilder } from '@grafana/data';
 import { ElasticDatasource } from './datasource';
 import { ElasticsearchQuery } from './types';
 
-export const getRootDataCatalogueItem = async ({
+export const getDataCatalogueCategories = ({
   datasource,
   context,
 }: {
   datasource: ElasticDatasource;
   context: DataCatalogueContext;
 }) => {
-  const stats = await datasource.getStats();
-
-  const { license, build, features } = await datasource.getMeta();
-
   const data = (item: DataCatalogueBuilder) => {
     item
       .addLink(
@@ -30,6 +26,7 @@ export const getRootDataCatalogueItem = async ({
             'Learn mode about Elastic Indices'
           )
           .loadItems(async () => {
+            const stats = await datasource.getStats();
             let indexList = Object.keys(stats.indices);
             return indexList.map((indexName: string) =>
               new DataCatalogueBuilder(indexName, 'Index')
@@ -73,6 +70,7 @@ export const getRootDataCatalogueItem = async ({
         .addKeyValue('Log level field', datasource.logLevelField || 'not set')
         .addKeyValue('XPack', datasource.xpack ? 'yes' : 'no'),
       new DataCatalogueBuilder('Features').loadItems(async () => {
+        const { features } = await datasource.getMeta();
         return Object.keys(features).map((featureName) => {
           return new DataCatalogueBuilder(featureName, 'Feature')
             .addKeyValue('available', features[featureName].available ? 'yes' : 'no')
@@ -83,21 +81,27 @@ export const getRootDataCatalogueItem = async ({
   };
 
   const statistics = (item: DataCatalogueBuilder) => {
-    item
-      .addKeyValue('Docs', stats._all.total.docs.count)
-      .addKeyValue('Field data memory', stats._all.total.fielddata.memory_size_in_bytes + 'B')
-      .addKeyValue('Shards', stats._all.total.shard_stats.total_count);
+    item.loadAttributes(async (item) => {
+      const stats = await datasource.getStats();
+      item
+        .addKeyValue('Docs', stats._all.total.docs.count)
+        .addKeyValue('Field data memory', stats._all.total.fielddata.memory_size_in_bytes + 'B')
+        .addKeyValue('Shards', stats._all.total.shard_stats.total_count);
+    });
   };
 
   const status = async (item: DataCatalogueBuilder) => {
-    item.addKeyValue('License', license.status);
-    item.addKeyValue('Build data', build.date);
+    const { license, build } = await datasource.getMeta();
+    item.loadAttributes(async (item) => {
+      item.addKeyValue('License', license.status);
+      item.addKeyValue('Build data', build.date);
+    });
   };
 
-  return new DataCatalogueBuilder().fromDataSource(datasource, context, {
+  return {
     data,
     configuration,
     statistics,
     status,
-  });
+  };
 };

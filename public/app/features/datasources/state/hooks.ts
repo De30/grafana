@@ -20,7 +20,7 @@ import {
   addDataSource,
   updateDataSource,
   deleteLoadedDataSource,
-  loadExploreDisplay,
+  loadDataSourceApi,
 } from './actions';
 import { DataSourcesRoutesContext } from './contexts';
 import { getDataSourceLoadingNav, buildNavModel, getDataSourceNav } from './navModel';
@@ -87,15 +87,13 @@ export const useUpdateDatasource = () => {
   return async (dataSource: DataSourceSettings) => dispatch(updateDataSource(dataSource));
 };
 
-export const useExploreDisplay = () => {
-  return useSelector((state) => state.dataSourceSettings.exploreDisplay);
+export const useDataSourceApi = () => {
+  return useSelector((state) => state.dataSourceSettings.dataSourceApi);
 };
 
-export const useLoadExploreDisplay = (uid: string) => {
+export const useLoadDataSourceApi = () => {
   const dispatch = useDispatch();
-  const dataSource = useDataSource(uid);
-  const exploreUrl = constructDataSourceExploreUrl(dataSource);
-  return async () => dispatch(loadExploreDisplay(exploreUrl));
+  return async () => dispatch(loadDataSourceApi());
 };
 
 export const useDeleteLoadedDataSource = () => {
