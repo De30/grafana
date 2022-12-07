@@ -1,21 +1,17 @@
 package kind
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"sync"
 
 	"github.com/grafana/grafana/pkg/kindsys"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/registry/corekind"
 	"github.com/grafana/grafana/pkg/services/rendering"
-	"github.com/grafana/grafana/pkg/services/store/kind/dashboard"
 	"github.com/grafana/grafana/pkg/services/store/kind/dataframe"
 	"github.com/grafana/grafana/pkg/services/store/kind/folder"
 	"github.com/grafana/grafana/pkg/services/store/kind/geojson"
 	"github.com/grafana/grafana/pkg/services/store/kind/jsonobj"
-	"github.com/grafana/grafana/pkg/services/store/kind/playlist"
 	"github.com/grafana/grafana/pkg/services/store/kind/png"
 	"github.com/grafana/grafana/pkg/services/store/kind/snapshot"
 	"github.com/grafana/grafana/pkg/services/store/kind/svg"
@@ -32,28 +28,6 @@ type KindRegistry interface {
 
 func NewKindRegistry() KindRegistry {
 	kinds := make(map[string]*kindValues)
-	for _, k := range corekind.NewBase(nil).All() {
-		kv := &kindValues{
-			info: makeEKI(k.Props()),
-		}
-
-		// FIXME horrible hack, undermines SSoT, do this in kindsys/codegen
-		switch k.Props().Common().MachineName {
-		case "playlist":
-			kv.builder = playlist.GetEntitySummaryBuilder()
-		case "dashboard":
-			kv.builder = dashboard.GetEntitySummaryBuilder()
-		default:
-			// FIXME a generic implementation is needed, but this is piss-poor
-			kv.builder = func(ctx context.Context, uid string, body []byte) (*models.EntitySummary, []byte, error) {
-				return &models.EntitySummary{
-					UID:  uid,
-					Kind: k.Props().Common().Name,
-				}, nil, nil
-			}
-		}
-		kinds[k.Props().Common().MachineName] = kv
-	}
 
 	kinds[models.StandardKindSnapshot] = &kindValues{
 		info:    snapshot.GetEntityKindInfo(),
@@ -80,6 +54,16 @@ func NewKindRegistry() KindRegistry {
 		builder: jsonobj.GetEntitySummaryBuilder(),
 	}
 
+	for k, val := range doNewRegistry() {
+		if _, has := kinds[k]; has {
+			// Force removal of handwritten impl above. If you hit this panic - remember to
+			// remove not just the above entry, but also the GetEntityKindInfo() func being
+			// referenced, too!
+			panic(fmt.Sprintf("duplicate entry for %s backend kind - remove the manual registration", k))
+		}
+		kinds[k] = val
+	}
+
 	// create a registry
 	reg := &registry{
 		mutex: sync.RWMutex{},
@@ -89,14 +73,14 @@ func NewKindRegistry() KindRegistry {
 	return reg
 }
 
-func makeEKI(meta kindsys.SomeKindMeta) models.EntityKindInfo {
+func makeEKI(meta kindsys.SomeKindProperties) models.EntityKindInfo {
 	eki := models.EntityKindInfo{
 		ID:          meta.Common().MachineName,
 		Name:        meta.Common().Name,
 		Description: meta.Common().Description,
 		MimeType:    meta.Common().MimeType,
 	}
-	_, eki.IsRaw = meta.(kindsys.RawMeta)
+	_, eki.IsRaw = meta.(kindsys.RawProperties)
 	return eki
 }
 

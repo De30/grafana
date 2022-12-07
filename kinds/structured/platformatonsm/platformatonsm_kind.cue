@@ -3,6 +3,8 @@ package kind
 name: "PlatformatonSM"
 description: "A synthetic monitoring platformaton. Happy sloppy hackathoning!"
 
+summaryHandler: "generic"
+
 lineage: seqs: [
 	{
 		schemas: [
