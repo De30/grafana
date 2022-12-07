@@ -183,6 +183,7 @@ func verifyCorePluginCatalogue(t *testing.T, ctx context.Context, ps *store.Serv
 		"timeseries":     {},
 		"welcome":        {},
 		"xychart":        {},
+		"datagrid":       {},
 	}
 
 	expDataSources := map[string]struct{}{
