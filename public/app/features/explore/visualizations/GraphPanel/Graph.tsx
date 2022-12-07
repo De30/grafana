@@ -30,13 +30,12 @@ import {
   useStyles2,
   useTheme2,
 } from '@grafana/ui';
+import { seriesVisibilityConfigFactory } from 'app/features/dashboard/dashgrid/SeriesVisibilityConfigFactory';
 import { defaultGraphConfig, getGraphFieldConfig } from 'app/plugins/panel/timeseries/config';
 import { TimeSeriesOptions } from 'app/plugins/panel/timeseries/types';
-import { ExploreGraphStyle } from 'app/types';
 
-import { seriesVisibilityConfigFactory } from '../../dashboard/dashgrid/SeriesVisibilityConfigFactory';
-
-import { applyGraphStyle } from './exploreGraphStyleUtils';
+import { ExploreGraphStyle } from './types';
+import { applyGraphStyle } from './utils';
 
 const MAX_NUMBER_OF_TIME_SERIES = 20;
 
@@ -57,7 +56,7 @@ interface Props {
   eventBus: EventBus;
 }
 
-export function ExploreGraph({
+export function Graph({
   data,
   height,
   width,

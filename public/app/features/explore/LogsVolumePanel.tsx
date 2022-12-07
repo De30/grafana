@@ -13,7 +13,7 @@ import {
 } from '@grafana/data';
 import { Alert, Button, Collapse, InlineField, TooltipDisplayMode, useStyles2, useTheme2 } from '@grafana/ui';
 
-import { ExploreGraph } from './Graph/ExploreGraph';
+import { Graph } from './visualizations/GraphPanel/Graph';
 
 type Props = {
   logsVolumeData: DataQueryResponse | undefined;
@@ -120,7 +120,7 @@ export function LogsVolumePanel(props: Props) {
   } else if (logsVolumeData?.data) {
     if (logsVolumeData.data.length > 0) {
       LogsVolumePanelContent = (
-        <ExploreGraph
+        <Graph
           graphStyle="lines"
           loadingState={LoadingState.Done}
           data={logsVolumeData.data}

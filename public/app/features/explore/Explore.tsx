@@ -32,7 +32,6 @@ import { getTimeZone } from '../profile/state/selectors';
 
 import { ExploreToolbar } from './ExploreToolbar';
 import { FlameGraphExploreContainer } from './FlameGraphExploreContainer';
-import { GraphContainer } from './Graph/GraphContainer';
 import LogsContainer from './LogsContainer';
 import { NoData } from './NoData';
 import { NoDataSourceCallToAction } from './NoDataSourceCallToAction';
@@ -45,6 +44,7 @@ import { splitOpen } from './state/main';
 import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';
+import { GraphPanel } from './visualizations/GraphPanel';
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
@@ -245,11 +245,10 @@ export class Explore extends React.PureComponent<Props> {
     const { graphResult, absoluteRange, timeZone, queryResponse, loading, showFlameGraph } = this.props;
 
     return (
-      <GraphContainer
+      <GraphPanel
         loading={loading}
         data={graphResult!}
         height={showFlameGraph ? 180 : 400}
-        width={width}
         absoluteRange={absoluteRange}
         timeZone={timeZone}
         onChangeTime={this.onUpdateTimeRange}

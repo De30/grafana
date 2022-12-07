@@ -2,7 +2,8 @@ import produce from 'immer';
 
 import { FieldConfigSource } from '@grafana/data';
 import { GraphDrawStyle, GraphFieldConfig, StackingMode } from '@grafana/schema';
-import { ExploreGraphStyle } from 'app/types';
+
+import { ExploreGraphStyle } from './types';
 
 export type FieldConfig = FieldConfigSource<GraphFieldConfig>;
 
@@ -19,6 +20,7 @@ export function applyGraphStyle(config: FieldConfig, style: ExploreGraphStyle): 
     }
 
     switch (style) {
+      default:
       case 'lines':
         custom.drawStyle = GraphDrawStyle.Line;
         custom.stacking.mode = StackingMode.None;
@@ -44,14 +46,6 @@ export function applyGraphStyle(config: FieldConfig, style: ExploreGraphStyle): 
         custom.stacking.mode = StackingMode.Normal;
         custom.fillOpacity = 100;
         break;
-      default: {
-        // should never happen
-        // NOTE: casting to `never` will cause typescript
-        // to verify that the switch statement checks every possible
-        // enum-value
-        const invalidValue: never = style;
-        throw new Error(`Invalid graph-style: ${invalidValue}`);
-      }
     }
   });
 }
