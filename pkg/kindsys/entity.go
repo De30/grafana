@@ -84,6 +84,6 @@ func GenericSummarizer(kindname string) Summarizer {
 		return &EntitySummary{
 			UID:  uid,
 			Kind: kindname,
-		}, nil, nil
+		}, body, nil
 	}
 }

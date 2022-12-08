@@ -20,7 +20,7 @@ func getSummarizer() kindsys.Summarizer {
 			UID:    uid,
 			Kind:   "Check",
 			Labels: toStrmap(obj.Labels),
-		}, nil, nil
+		}, body, nil
 	}
 }
 
