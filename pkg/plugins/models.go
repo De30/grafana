@@ -251,9 +251,9 @@ type PanelDTO struct {
 }
 
 const (
-	ErrorCodeSignatureMissing  ErrorCode = "ErrorCodeSignatureMissing"
-	ErrorCodeSignatureModified ErrorCode = "ErrorCodeSignatureModified"
-	ErrorCodeSignatureInvalid  ErrorCode = "ErrorCodeSignatureInvalid"
+	ErrorCodeSignatureMissing  ErrorCode = "signatureMissing"
+	ErrorCodeSignatureModified ErrorCode = "signatureModified"
+	ErrorCodeSignatureInvalid  ErrorCode = "signatureInvalid"
 )
 
 type ErrorCode string

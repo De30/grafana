@@ -23,20 +23,20 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var _ PluginService = (*PluginManagerClientService)(nil)
+type PluginManagerRemoteClient struct {
+	PluginManagerClient
+	cfg *setting.Cfg
+	log log.Logger
 
-type PluginService interface {
-	Plugin(ctx context.Context, id string) (plugins.PluginDTO, bool)
-	Plugins(ctx context.Context, pluginTypes ...plugins.Type) []plugins.PluginDTO
-
-	Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error
-	Remove(ctx context.Context, pluginID string) error
+	qc pluginv2.DataClient
+	dc pluginv2.DiagnosticsClient
+	sc pluginv2.StreamClient
+	rc pluginv2.ResourceClient
 }
 
-func ProvidePluginManagerClientService(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService) (*PluginManagerClientService, error) {
-	s := &PluginManagerClientService{cfg: cfg, log: log.New("plugin.manager.client")}
+func ProvidePluginManagerRemoteClient(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService) (*PluginManagerRemoteClient, error) {
+	s := &PluginManagerRemoteClient{cfg: cfg, log: log.New("plugin.manager.client")}
 
-	s.log.Info("Dialling plugin manager...", "address", s.cfg.PluginManager.Address)
 	conn, err := grpc.Dial(
 		s.cfg.PluginManager.Address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -57,18 +57,7 @@ func ProvidePluginManagerClientService(cfg *setting.Cfg, pluginAuthService jwt.P
 	return s, nil
 }
 
-type PluginManagerClientService struct {
-	PluginManagerClient
-	cfg *setting.Cfg
-	log log.Logger
-
-	qc pluginv2.DataClient
-	dc pluginv2.DiagnosticsClient
-	sc pluginv2.StreamClient
-	rc pluginv2.ResourceClient
-}
-
-func (s *PluginManagerClientService) Plugin(ctx context.Context, id string) (plugins.PluginDTO, bool) {
+func (s *PluginManagerRemoteClient) Plugin(ctx context.Context, id string) (plugins.PluginDTO, bool) {
 	p, err := s.GetPlugin(ctx, &GetPluginRequest{
 		Id: id,
 	})
@@ -79,7 +68,7 @@ func (s *PluginManagerClientService) Plugin(ctx context.Context, id string) (plu
 	return fromProto(p.Plugin), true
 }
 
-func (s *PluginManagerClientService) Plugins(ctx context.Context, pluginTypes ...plugins.Type) []plugins.PluginDTO {
+func (s *PluginManagerRemoteClient) Plugins(ctx context.Context, pluginTypes ...plugins.Type) []plugins.PluginDTO {
 	var types []string
 	for _, t := range pluginTypes {
 		types = append(types, string(t))
@@ -281,7 +270,7 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 	return dto
 }
 
-func (s *PluginManagerClientService) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
+func (s *PluginManagerRemoteClient) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
 	resp, err := s.AddPlugin(ctx, &AddPluginRequest{
 		Id:      pluginID,
 		Version: version,
@@ -302,7 +291,7 @@ func (s *PluginManagerClientService) Add(ctx context.Context, pluginID, version 
 	return nil
 }
 
-func (s *PluginManagerClientService) Remove(ctx context.Context, pluginID string) error {
+func (s *PluginManagerRemoteClient) Remove(ctx context.Context, pluginID string) error {
 	resp, err := s.RemovePlugin(ctx, &RemovePluginRequest{
 		Id: pluginID,
 	})
@@ -319,7 +308,7 @@ func (s *PluginManagerClientService) Remove(ctx context.Context, pluginID string
 
 var ErrNotImplemented = errors.New("ErrMethodNotImplemented")
 
-func (s *PluginManagerClientService) CollectMetrics(ctx context.Context, req *backend.CollectMetricsRequest) (*backend.CollectMetricsResult, error) {
+func (s *PluginManagerRemoteClient) CollectMetrics(ctx context.Context, req *backend.CollectMetricsRequest) (*backend.CollectMetricsResult, error) {
 	if s.dc == nil {
 		return &backend.CollectMetricsResult{}, nil
 	}
@@ -336,7 +325,7 @@ func (s *PluginManagerClientService) CollectMetrics(ctx context.Context, req *ba
 	return backend.FromProto().CollectMetricsResponse(protoResp), nil
 }
 
-func (s *PluginManagerClientService) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+func (s *PluginManagerRemoteClient) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 	if s.dc == nil {
 		return nil, ErrNotImplemented
 	}
@@ -357,7 +346,7 @@ func (s *PluginManagerClientService) CheckHealth(ctx context.Context, req *backe
 	return backend.FromProto().CheckHealthResponse(protoResp), nil
 }
 
-func (s *PluginManagerClientService) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+func (s *PluginManagerRemoteClient) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
 	if s.qc == nil {
 		return nil, ErrNotImplemented
 	}
@@ -376,7 +365,7 @@ func (s *PluginManagerClientService) QueryData(ctx context.Context, req *backend
 	return backend.FromProto().QueryDataResponse(protoResp)
 }
 
-func (s *PluginManagerClientService) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+func (s *PluginManagerRemoteClient) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
 	if s.rc == nil {
 		return ErrNotImplemented
 	}
@@ -411,7 +400,7 @@ func (s *PluginManagerClientService) CallResource(ctx context.Context, req *back
 	}
 }
 
-func (s *PluginManagerClientService) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
+func (s *PluginManagerRemoteClient) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
 	if s.sc == nil {
 		return nil, ErrNotImplemented
 	}
@@ -422,7 +411,7 @@ func (s *PluginManagerClientService) SubscribeStream(ctx context.Context, req *b
 	return backend.FromProto().SubscribeStreamResponse(protoResp), nil
 }
 
-func (s *PluginManagerClientService) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
+func (s *PluginManagerRemoteClient) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
 	if s.sc == nil {
 		return nil, ErrNotImplemented
 	}
@@ -433,7 +422,7 @@ func (s *PluginManagerClientService) PublishStream(ctx context.Context, req *bac
 	return backend.FromProto().PublishStreamResponse(protoResp), nil
 }
 
-func (s *PluginManagerClientService) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
+func (s *PluginManagerRemoteClient) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
 	if s.sc == nil {
 		return ErrNotImplemented
 	}

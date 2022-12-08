@@ -134,7 +134,9 @@ func (m *Modules) Run() error {
 	m.ServiceManager = sm
 
 	healthy := func() { m.log.Info("Modules started") }
-	stopped := func() { m.log.Info("Modules stopped") }
+	stopped := func() {
+		m.log.Info("Modules stopped")
+	}
 	serviceFailed := func(service services.Service) {
 		// if any service fails, stop all services
 		sm.StopAsync()
@@ -194,5 +196,5 @@ func (m *Modules) initObjectStore() (services.Service, error) {
 }
 
 func (m *Modules) initPluginManager() (services.Service, error) {
-	return pluginsintegration.ProvidePluginManagerServerService(m.grpcServer, m.pluginStore, m.pluginClient, m.pluginInstaller), nil
+	return pluginsintegration.ProvidePluginManagerServer(m.grpcServer, m.pluginStore, m.pluginClient, m.pluginInstaller), nil
 }

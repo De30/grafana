@@ -42,9 +42,9 @@ func (s *Service) Plugin(ctx context.Context, pluginID string) (plugins.PluginDT
 	return p.ToDTO(), true
 }
 
-func (s *Service) Run(_ context.Context) error {
+func (s *Service) Run(ctx context.Context) error {
 	for _, ps := range pluginSources(s.gCfg, s.cfg) {
-		if _, err := s.pluginLoader.Load(context.Background(), ps.Class, ps.Paths); err != nil {
+		if _, err := s.pluginLoader.Load(ctx, ps.Class, ps.Paths); err != nil {
 			return err
 		}
 	}

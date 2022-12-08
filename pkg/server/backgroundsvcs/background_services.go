@@ -184,7 +184,6 @@ func (r *BackgroundServiceRegistry) run(ctx context.Context) error {
 }
 
 func (r *BackgroundServiceRegistry) stop(reason error) error {
-
 	return reason
 }
 

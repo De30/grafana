@@ -30,11 +30,13 @@ var WireSet = wire.NewSet(
 	wire.Bind(new(pluginLib.RendererManager), new(*store.Service)),
 	wire.Bind(new(pluginLib.SecretsPluginManager), new(*store.Service)),
 
+	ProvidePlugins,
+
 	plugins.ProvideRouteResolver,
-	wire.Bind(new(plugins.StaticRouteResolver), new(*plugins.RouteResolver)),
+	wire.Bind(new(plugins.StaticRouteResolver), new(*plugins.RouteResolver)), // TODO
 
 	plugins.ProvideErrorResolver,
-	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)),
+	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)), // TODO
 
 	ProvideClientDecorator,
 
@@ -49,6 +51,13 @@ var WireSet = wire.NewSet(
 	repo.ProvideService,
 	wire.Bind(new(repo.Service), new(*repo.Manager)),
 	plugincontext.ProvideService,
+)
+
+var ProvidePlugins = wire.NewSet(
+	ProvidePluginManager,
+	wire.Bind(new(plugins.Store), new(*PluginManager)),
+	wire.Bind(new(plugins.Installer), new(*PluginManager)),
+	wire.Bind(new(plugins.Client), new(*PluginManager)),
 )
 
 // WireExtensionSet provides a wire.ProviderSet of plugin providers that can be

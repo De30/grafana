@@ -254,7 +254,7 @@ func TestLoader_Load(t *testing.T) {
 			pluginErrors: map[string]*plugins.Error{
 				"test-datasource": {
 					PluginID:  "test-datasource",
-					ErrorCode: "ErrorCodeSignatureMissing",
+					ErrorCode: plugins.ErrorCodeSignatureMissing,
 				},
 			},
 		},
@@ -306,7 +306,7 @@ func TestLoader_Load(t *testing.T) {
 			pluginErrors: map[string]*plugins.Error{
 				"test-datasource": {
 					PluginID:  "test-datasource",
-					ErrorCode: "ErrorCodeSignatureInvalid",
+					ErrorCode: plugins.ErrorCodeSignatureInvalid,
 				},
 			},
 		},
@@ -321,7 +321,7 @@ func TestLoader_Load(t *testing.T) {
 			pluginErrors: map[string]*plugins.Error{
 				"test-datasource": {
 					PluginID:  "test-datasource",
-					ErrorCode: "ErrorCodeSignatureInvalid",
+					ErrorCode: plugins.ErrorCodeSignatureInvalid,
 				},
 			},
 		},
@@ -336,7 +336,7 @@ func TestLoader_Load(t *testing.T) {
 			pluginErrors: map[string]*plugins.Error{
 				"test-datasource": {
 					PluginID:  "test-datasource",
-					ErrorCode: "ErrorCodeSignatureModified",
+					ErrorCode: plugins.ErrorCodeSignatureModified,
 				},
 			},
 		},
@@ -351,7 +351,7 @@ func TestLoader_Load(t *testing.T) {
 			pluginErrors: map[string]*plugins.Error{
 				"test-datasource": {
 					PluginID:  "test-datasource",
-					ErrorCode: "ErrorCodeSignatureModified",
+					ErrorCode: plugins.ErrorCodeSignatureModified,
 				},
 			},
 		},
@@ -554,7 +554,7 @@ func TestLoader_Load_MultiplePlugins(t *testing.T) {
 				pluginErrors: map[string]*plugins.Error{
 					"test-panel": {
 						PluginID:  "test-panel",
-						ErrorCode: "ErrorCodeSignatureMissing",
+						ErrorCode: plugins.ErrorCodeSignatureMissing,
 					},
 				},
 			},
