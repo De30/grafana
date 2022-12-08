@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import {
@@ -76,7 +76,13 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
     showTransformation: [false, false],
     transformationOption: ['', ''],
     field: [0, 0],
-
+    variablesMap: {
+      Time: undefined,
+      'Log line': undefined,
+      app: undefined,
+      traceId: undefined,
+      event: undefined,
+    },
     showTransformations: false,
     globalTransformation: 0,
     globalTransformationDefined: false,
@@ -85,6 +91,19 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
   });
 
   const [showStep, setShowStep] = useState(1);
+
+  // useEffect(() => {
+  //   setData({
+  //     ...data,
+  //     sourceDatasource: 1,
+  //     targetDatasource: 2,
+  //     sourceQuery: 'test',
+  //     targetQuery: 'test',
+  //     sampleResult: true,
+  //     variablesInTarget: true,
+  //   });
+  //   setShowStep(2);
+  // }, []);
 
   const LOGFMT_FIELDS = [
     { label: 'app', value: 3 },
@@ -96,6 +115,35 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
     { label: 'regex', value: 1 },
     { label: 'lofgmt', value: 2 },
   ];
+
+  const VariablePicker = (row) => {
+    return (
+      <>
+        <HorizontalGroup>
+          <Label>Map to:</Label>
+          {data.sourceQuery ? (
+            <Select
+              onChange={(event) => {
+                const newMap = { ...data.variablesMap };
+                newMap[row.row.cells[0].value] = event.label;
+                setData({ ...data, variablesMap: newMap });
+              }}
+              options={[
+                { label: 'traceId', value: 'traceId' },
+                { label: 'applicationName', value: 'applicationName' },
+              ]}
+              value={{
+                label: data.variablesMap[row.row.cells[0].value],
+                value: data.variablesMap[row.row.cells[0].value],
+              }}
+            />
+          ) : (
+            <Input />
+          )}
+        </HorizontalGroup>
+      </>
+    );
+  };
 
   const FieldValuePicker = (row) => {
     return (
@@ -163,21 +211,51 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
 
   const ValuePreview = (row) => {
     let preview = 'no sample or field selected';
-    if (data.sampleResult && data.field[row.row.index] !== 0) {
-      if (data.field[row.row.index] === 2) {
-        return 'app=foo event=error traceId=16f15cd14';
-      } else if (data.field[row.row.index] === 3) {
-        return 'foo';
-      } else if (data.field[row.row.index] === 4) {
-        return 'error';
-      } else if (data.field[row.row.index] === 5) {
-        return '16f15cd14';
+    if (data.sampleResult) {
+      if (row.row.cells[0].value === 'log line') {
+        preview = 'app=foo event=error traceId=16f15cd14';
+      } else if (row.row.cells[0].value === 'app') {
+        preview = 'foo';
+      } else if (row.row.cells[0].value === 'event') {
+        preview = 'error';
+      } else if (row.row.cells[0].value === 'traceId') {
+        preview = '16f15cd14';
+      } else if (row.row.cells[0].value === 'time') {
+        preview = '2022-10-10 11:11';
       }
     }
 
     return (
       <div>
-        <HorizontalGroup>{preview}</HorizontalGroup>
+        <HorizontalGroup>
+          {preview}
+          {((!data.showTransformations && !data.globalTransformationDefined) ||
+            row.row.cells[0].value !== 'log line') && (
+            <Button
+              icon="process"
+              variant="secondary"
+              onClick={() => setData({ ...data, showTransformations: true })}
+            ></Button>
+          )}
+          {!data.showTransformations && data.globalTransformationDefined && row.row.cells[0].value === 'log line' && (
+            <Button variant="secondary" onClick={() => setData({ ...data, showTransformations: true })}>
+              edit logfmt
+            </Button>
+          )}
+          {data.showTransformations && row.row.cells[0].value === 'log line' && (
+            <div>
+              <HorizontalGroup>
+                <Select
+                  onChange={() => {
+                    setData({ ...data, globalTransformation: 2, globalTransformationDefined: true });
+                  }}
+                  options={TRANSFORMATIONS}
+                  value={data.globalTransformation}
+                />
+              </HorizontalGroup>
+            </div>
+          )}
+        </HorizontalGroup>
       </div>
     );
   };
@@ -195,26 +273,7 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
   };
 
   const FieldValueSelector = (row) => {
-    return (
-      <span>{row.cell.value}</span>
-      // <Button
-      //   variant="secondary"
-      //   onClick={() => {
-      //     const field = data.field.concat();
-      //     const M = {
-      //       time: 1,
-      //       line: 2,
-      //       app: 3,
-      //       event: 4,
-      //       traceId: 5,
-      //     };
-      //     field[row.row.index] = M[row.cell.column.id];
-      //     setData({ ...data, showSampler: false, sampleResult: true });
-      //   }}
-      // >
-      //   {row.cell.value}
-      // </Button>
-    );
+    return <span>{row.cell.value}</span>;
   };
 
   const step1View = (
@@ -321,108 +380,52 @@ export const AddCorrelationFormMockUp = ({ onClose }: Props) => {
                     {data.variablesInTarget && (
                       <p style={{ paddingTop: 10 }}>Extract more fields by adding transformations</p>
                     )}
-                    {data.showTransformations && (
-                      <div>
-                        <HorizontalGroup>
-                          <Label>Transformation:</Label>
-                          <Select
-                            onChange={() => {
-                              setData({ ...data, globalTransformation: 2 });
-                            }}
-                            options={TRANSFORMATIONS}
-                            value={data.globalTransformation}
-                          />
-                          {data.globalTransformation !== 0 && (
-                            <>
-                              <Label>Field:</Label>
-                              <Select
-                                onChange={() => {
-                                  setData({
-                                    ...data,
-                                    globalTransformationDefined: true,
-                                    dynamicFields: FIELDS.concat(data.globalTransformationDefined ? [] : LOGFMT_FIELDS),
-                                  });
-                                }}
-                                options={FIELDS}
-                              />
-                            </>
-                          )}
-                          <Button
-                            icon="plus"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setData({ ...data, showTransformations: true })}
-                          ></Button>
-                        </HorizontalGroup>
-                      </div>
-                    )}
-                    {!data.showTransformations && data.variablesInTarget && (
-                      <Button
-                        icon="plus"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setData({ ...data, showTransformations: true })}
-                      >
-                        add new transformation
-                      </Button>
-                    )}
-                    {!data.showTransformations && !data.variablesInTarget && (
-                      <p>
-                        You don't have any variables in your target query. Go to the next step to define where the data
-                        link is displayed.
-                      </p>
-                    )}
                   </div>
-                  {data.globalTransformationDefined && (
-                    <>
-                      <hr />
-                      <h6>Fields extracted from transformations</h6>
-                      <Table
-                        columns={[
-                          { id: 'app', header: 'app' },
-                          { id: 'event', header: 'event' },
-                          { id: 'traceId', header: 'traceId' },
-                        ]}
-                        data={[
-                          {
-                            time: '2022-10-10 11:11',
-                            line: 'app=foo event=error traceId=16f15cd14',
-                            app: 'foo',
-                            event: 'error',
-                            traceId: '16f15cd14',
-                          },
-                        ]}
-                      ></Table>
-                    </>
-                  )}
                 </>
               )}
-              {data.variablesInTarget && (
+              {data.variablesInTarget && data.sampleResult && (
                 <>
                   <hr />
                   <Table
                     columns={[
                       {
-                        id: 'variable',
-                        header: 'Variable name',
-                      },
-                      {
-                        id: 'value',
-                        header: 'Value',
-                        cell: FieldValuePicker,
+                        id: 'field',
+                        header: 'Field',
                       },
                       { id: 'preview', header: 'Sample preview', cell: ValuePreview },
+                      {
+                        id: 'variable',
+                        header: 'Variable',
+                        cell: VariablePicker,
+                      },
                     ]}
                     data={[
                       {
-                        variable: 'traceId',
-                        value: '',
+                        field: 'time',
+                        variable: '',
                       },
                       {
-                        variable: 'applicationName',
-                        value: '',
+                        field: 'log line',
+                        variable: '',
                       },
-                    ]}
+                    ].concat(
+                      data.globalTransformationDefined
+                        ? [
+                            {
+                              field: 'app',
+                              variable: '',
+                            },
+                            {
+                              field: 'event',
+                              variable: '',
+                            },
+                            {
+                              field: 'traceId',
+                              variable: '',
+                            },
+                          ]
+                        : []
+                    )}
                   />
                 </>
               )}
