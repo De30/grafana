@@ -1,1 +1,3 @@
-export interface PanelOptions {}
+export interface PanelOptions {
+  usePanelData: boolean;
+}

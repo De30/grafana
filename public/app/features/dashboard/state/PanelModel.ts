@@ -51,6 +51,11 @@ export interface GridPos {
   static?: boolean;
 }
 
+export interface DatagridData {
+  name: string;
+  values: string[];
+}
+
 type RunPanelQueryOptions = {
   /** @deprecate */
   dashboardId: number;
@@ -158,6 +163,7 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   thresholds?: any;
   pluginVersion?: string;
   savedQueryLink: SavedQueryLink | null = null; // Used by the experimental feature queryLibrary
+  data?: DatagridData[];
 
   snapshotData?: DataFrameDTO[];
   timeFrom?: any;
@@ -619,6 +625,14 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     if (this.queryRunner) {
       this.queryRunner.destroy();
     }
+  }
+
+  setData(data: DatagridData[]) {
+    this.data = data;
+  }
+
+  getData(): DatagridData[] {
+    return this.data || [];
   }
 
   setTransformations(transformations: DataTransformerConfig[]) {
