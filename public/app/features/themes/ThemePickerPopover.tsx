@@ -60,10 +60,10 @@ const getStyles = (theme: GrafanaTheme2) => {
   return {
     container: css({
       position: 'fixed',
-      width: '350px',
+      width: '320px',
       zIndex: theme.zIndex.modal,
-      bottom: 8,
-      top: '95px',
+      bottom: 0,
+      top: '88px',
       right: 0,
       borderRadius: theme.shape.borderRadius(2),
       background: theme.colors.background.primary,
