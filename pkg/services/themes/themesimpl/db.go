@@ -68,3 +68,12 @@ func (ts *Service) getThemesFolderPath() (string, error) {
 
 	return themesFolder, nil
 }
+
+func (ts *Service) deleteTheme(uid string) error {
+	themePath, err := ts.getThemeFilePath(uid)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(themePath)
+}

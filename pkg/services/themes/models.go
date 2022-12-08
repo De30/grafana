@@ -5,9 +5,10 @@ import (
 )
 
 type CustomThemeDTO struct {
-	UID  string                 `json:"uid"`
-	Name string                 `json:"name"`
-	Body map[string]interface{} `json:"body"`
+	UID         string                 `json:"uid"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Body        map[string]interface{} `json:"body"`
 }
 
 type Service interface {

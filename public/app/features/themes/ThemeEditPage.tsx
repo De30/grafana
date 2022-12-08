@@ -1,6 +1,18 @@
 import React, { useEffect } from 'react';
 
-import { Button, CodeEditor, Field, FieldSet, Input, Tab, TabContent, TabsBar, ThemeDemo } from '@grafana/ui';
+import {
+  Button,
+  CodeEditor,
+  ConfirmButton,
+  Field,
+  FieldSet,
+  Input,
+  Tab,
+  TabContent,
+  TabsBar,
+  TextArea,
+  ThemeDemo,
+} from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 
@@ -18,9 +30,21 @@ export function ThemeEditPage({ match, queryParams }: Props) {
   }, [match.params.uid, queryParams.safeMode, stateManager]);
 
   const actions = (
-    <Button type="submit" size="md" variant="primary" onClick={stateManager.onSave}>
-      Save
-    </Button>
+    <>
+      <ConfirmButton
+        confirmText="Delete"
+        confirmVariant="destructive"
+        onConfirm={stateManager.onDelete}
+        closeOnConfirm={true}
+      >
+        <Button variant="destructive" fill="outline">
+          Delete
+        </Button>
+      </ConfirmButton>
+      <Button type="submit" size="md" variant="primary" onClick={stateManager.onSave}>
+        Save
+      </Button>
+    </>
   );
 
   return (
@@ -36,6 +60,19 @@ export function ThemeEditPage({ match, queryParams }: Props) {
               width={50}
               placeholder="My pink theme"
               onChange={stateManager.onNameChange}
+              type="text"
+            />
+          </Field>
+          <Field label="Description" required>
+            <TextArea
+              aria-label="Theme description"
+              id="description"
+              defaultValue={theme.description ?? ''}
+              name="description"
+              style={{ maxWidth: '600px' }}
+              rows={4}
+              placeholder="Description"
+              onChange={stateManager.onDescriptionChange}
               type="text"
             />
           </Field>

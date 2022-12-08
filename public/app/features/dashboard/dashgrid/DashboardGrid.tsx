@@ -80,7 +80,7 @@ export class DashboardGrid extends PureComponent<Props, State> {
 
       if (panel.type === 'row') {
         panelPos.w = GRID_COLUMN_COUNT;
-        panelPos.h = 2;
+        panelPos.h = 1;
         panelPos.isResizable = false;
         panelPos.isDraggable = panel.collapsed;
       }

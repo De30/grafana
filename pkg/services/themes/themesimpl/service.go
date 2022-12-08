@@ -36,10 +36,11 @@ func (service *Service) RegisterHTTPRoutes(route routing.RouteRegister) {
 	reqGrafanaAdmin := middleware.ReqSignedIn //.ReqGrafanaAdmin
 
 	route.Group("/themes", func(r routing.RouteRegister) {
-		r.Get("/:uid", routing.Wrap(service.handleApiGet))
 		r.Post("/", routing.Wrap(service.handleApiCreate))
-		r.Put("/:uid", routing.Wrap(service.handleApiUpdate))
 		r.Get("/", routing.Wrap(service.handleApiGetAll))
+		r.Get("/:uid", routing.Wrap(service.handleApiGet))
+		r.Put("/:uid", routing.Wrap(service.handleApiUpdate))
+		r.Delete("/:uid", routing.Wrap(service.handleApiDelete))
 	}, reqGrafanaAdmin)
 }
 
@@ -85,6 +86,17 @@ func (ts *Service) handleApiGet(c *models.ReqContext) response.Response {
 	}
 
 	return response.JSON(200, theme)
+}
+
+// GET /api/themes/:uid
+func (ts *Service) handleApiDelete(c *models.ReqContext) response.Response {
+	err := ts.deleteTheme(web.Params(c.Req)[":uid"])
+
+	if err != nil {
+		return response.Error(500, "Failed to delete theme", err)
+	}
+
+	return response.Success("Theme deleted")
 }
 
 // GET /api/themes

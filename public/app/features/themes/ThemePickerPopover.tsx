@@ -39,7 +39,7 @@ export function ThemePickerPopover(props: { id: string }) {
       <div className={styles.body}>
         <CustomScrollbar autoHeightMin={0}>
           {state.themes.map((theme, index) => (
-            <div className={styles.card} key={index}>
+            <div className={styles.card} key={index} title={theme.description}>
               {theme.name}
               <div>
                 <Button fill="text" onClick={() => onSelectTheme(theme)}>

@@ -152,11 +152,14 @@ const getStyles = (theme: GrafanaTheme2) => {
           margin: theme.spacing(0, 1, 1, 1),
         }),
       },
+
       [theme.breakpoints.up('md')]: {
+        padding: theme.spacing(3),
+        paddingTop: '38px',
         ...(!noMargin && {
           margin: theme.spacing(2, 2, 2, 1),
+          paddingTop: theme.spacing(3),
         }),
-        padding: theme.spacing(3),
       },
     }),
     canvasContent: css({

@@ -1,7 +1,7 @@
 import { FormEvent } from 'react';
 
 import { AppEvents, GrafanaTheme2, NavModelItem, NewThemeOptions } from '@grafana/data';
-import { config, getBackendSrv } from '@grafana/runtime';
+import { config, getBackendSrv, locationService } from '@grafana/runtime';
 import appEvents from 'app/core/app_events';
 import { StateManagerBase } from 'app/core/services/StateManagerBase';
 
@@ -10,6 +10,7 @@ import { setRuntimeTheme } from './changeTheme';
 export interface CustomThemeDTO {
   uid: string;
   name: string;
+  description: string;
   body: NewThemeOptions;
 }
 
@@ -36,6 +37,7 @@ const defaultState: EditThemeState = {
     uid: 'new',
     name: 'New theme',
     body: {},
+    description: '',
   },
   loading: true,
   tab: 'def',
@@ -98,11 +100,25 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
     }
   };
 
+  onDelete = async () => {
+    await getBackendSrv().delete(`/api/themes/${this.state.theme.uid}`);
+    locationService.push('/themes');
+  };
+
   onNameChange = (evt: FormEvent<HTMLInputElement>) => {
     this.setState({
       theme: {
         ...this.state.theme,
         name: evt.currentTarget.value,
+      },
+    });
+  };
+
+  onDescriptionChange = (evt: FormEvent<HTMLTextAreaElement>) => {
+    this.setState({
+      theme: {
+        ...this.state.theme,
+        description: evt.currentTarget.value,
       },
     });
   };
