@@ -21,7 +21,7 @@ export const getDataCatalogueCategories = ({
             const tables = await datasource.fetchTables(dataset);
             schema.addKeyValue('Total tables', tables.length.toString());
             return tables.map((table) => {
-              return new DataCatalogueBuilder('table', 'Table').loadAttributes(async (item: DataCatalogueBuilder) => {
+              return new DataCatalogueBuilder(table, 'Table').loadAttributes(async (item: DataCatalogueBuilder) => {
                 const fields = await datasource.fetchFields({ table, dataset });
                 fields.forEach(({ name, type }) => {
                   item.addKeyValue(name, type || 'unknown');

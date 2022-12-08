@@ -428,7 +428,7 @@ export class QueryEditorRow<TQuery extends DataQuery> extends PureComponent<Prop
         {hasDataCatalogue && (
           <QueryOperationAction
             title="Show data catalogue"
-            icon="database"
+            icon="folder"
             onClick={this.onToggleDataCatalogue}
             active={showingDataCatalogue}
           />

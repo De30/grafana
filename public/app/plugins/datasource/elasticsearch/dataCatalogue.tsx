@@ -15,9 +15,12 @@ export const getDataCatalogueCategories = ({
 }) => {
   const data = (item: DataCatalogueBuilder) => {
     item
+      .addDescription(
+        'Elasticsearch is a distributed document store. Instead of storing information as rows of columnar data, Elasticsearch stores complex data structures that have been serialized as JSON documents. When you have multiple Elasticsearch nodes in a cluster, stored documents are distributed across the cluster and can be accessed immediately from any node.'
+      )
       .addLink(
-        'https://grafana.com/docs/grafana/latest/datasources/elasticsearch/query-editor/',
-        'Learn how to use query editor and write queries'
+        'https://www.elastic.co/guide/en/elasticsearch/reference/current/documents-indices.html',
+        'Learn more about Elasticserach data model'
       )
       .setItems([
         new DataCatalogueBuilder('Indices')
@@ -37,7 +40,7 @@ export const getDataCatalogueCategories = ({
                 .addKeyValue('Status', stats.indices[indexName].status)
                 .addKeyValue('Docs', stats.indices[indexName].total.docs.count)
                 .addRunQueryAction<Omit<ElasticsearchQuery, 'refId'>>(
-                  'Show data for this index',
+                  'Show documents in this index',
                   {
                     query: `_index:"${indexName}"`,
                     metrics: [{ type: 'raw_data', id: '1' }],
@@ -84,7 +87,7 @@ export const getDataCatalogueCategories = ({
     item.loadAttributes(async (item) => {
       const stats = await datasource.getStats();
       item
-        .addKeyValue('Docs', stats._all.total.docs.count)
+        .addKeyValue('Total documents', stats._all.total.docs.count)
         .addKeyValue('Store size', stats._all.total.store.size_in_bytes + 'B')
         .addKeyValue('Shards', stats._all.total.shard_stats.total_count);
     });

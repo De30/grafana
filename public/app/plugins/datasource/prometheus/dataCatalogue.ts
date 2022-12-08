@@ -44,9 +44,10 @@ export const getDataCatalogueCategories = ({
                     'https://prometheus.io/docs/concepts/metric_types/#histogram',
                     'Learn more about Prometheus histograms'
                   );
+                  metricItem.addKeyValue('Time series', 'Exposed as');
                   metricItem.addKeyValue(
                     'Bucket',
-                    metricName + '_bucket{le="<bound>"',
+                    metricName + '_bucket{le="<bound>}"',
                     DataCatalogueItemAttributeKeyValueFormat.Code
                   );
                   metricItem.addKeyValue(
@@ -87,7 +88,7 @@ export const getDataCatalogueCategories = ({
                       .addDescription('Select label value from the left.')
                       .setItems(
                         Object.keys(labels[labelName]).map((labelValue) =>
-                          new DataCatalogueBuilder(labelValue, `${metricName} / ${labelName}`)
+                          new DataCatalogueBuilder(labelValue, `${labelName}`)
                             .addKeyValue('Metric', metricName)
                             .addKeyValue('Info', metricInfo.help)
                             .addKeyValue('Label', labelName)
