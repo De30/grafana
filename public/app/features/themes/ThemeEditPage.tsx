@@ -10,7 +10,6 @@ import {
   Tab,
   TabContent,
   TabsBar,
-  TextArea,
   ThemeDemo,
 } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
@@ -64,13 +63,11 @@ export function ThemeEditPage({ match, queryParams }: Props) {
             />
           </Field>
           <Field label="Description" required>
-            <TextArea
+            <Input
               aria-label="Theme description"
               id="description"
               defaultValue={theme.description ?? ''}
               name="description"
-              style={{ maxWidth: '600px' }}
-              rows={4}
               placeholder="Description"
               onChange={stateManager.onDescriptionChange}
               type="text"

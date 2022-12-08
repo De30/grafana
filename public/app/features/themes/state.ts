@@ -116,7 +116,7 @@ export class ThemeEditPageState extends StateManagerBase<EditThemeState> {
     });
   };
 
-  onDescriptionChange = (evt: FormEvent<HTMLTextAreaElement>) => {
+  onDescriptionChange = (evt: FormEvent<HTMLInputElement>) => {
     this.setState({
       theme: {
         ...this.state.theme,

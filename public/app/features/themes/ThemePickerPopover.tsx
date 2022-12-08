@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useAsync } from 'react-use';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, CustomScrollbar, useStyles2 } from '@grafana/ui';
+import { Stack } from '@grafana/experimental';
+import { Button, CustomScrollbar, Tooltip, useStyles2 } from '@grafana/ui';
 import appEvents from 'app/core/app_events';
 import { RemoveGlobalComponentEvent } from 'app/types/events';
 
@@ -34,19 +35,20 @@ export function ThemePickerPopover(props: { id: string }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Button onClick={onClose} icon="times" variant="secondary" />
+        <div className="text-center flex-grow-1">Themes</div>
+        <Button onClick={onClose} icon="times" variant="secondary" size="sm" />
       </div>
       <div className={styles.body}>
         <CustomScrollbar autoHeightMin={0}>
           {state.themes.map((theme, index) => (
-            <div className={styles.card} key={index} title={theme.description}>
-              {theme.name}
-              <div>
-                <Button fill="text" onClick={() => onSelectTheme(theme)}>
-                  Select
-                </Button>
-              </div>
-            </div>
+            <Tooltip content="Click to select" key={index}>
+              <button className={styles.card} onClick={() => onSelectTheme(theme)}>
+                <Stack direction="column" gap={0.25}>
+                  {theme.name}
+                  <span className="muted small">{theme.description}</span>
+                </Stack>
+              </button>
+            </Tooltip>
           ))}
         </CustomScrollbar>
       </div>
@@ -58,23 +60,25 @@ const getStyles = (theme: GrafanaTheme2) => {
   return {
     container: css({
       position: 'fixed',
-      width: '300px',
+      width: '350px',
       zIndex: theme.zIndex.modal,
-      bottom: 0,
-      top: '80px',
+      bottom: 8,
+      top: '95px',
       right: 0,
       borderRadius: theme.shape.borderRadius(2),
       background: theme.colors.background.primary,
-      border: `1px solid ${theme.colors.border.medium}`,
+      borderLeft: `1px solid ${theme.colors.border.weak}`,
       boxShadow: theme.shadows.z3,
-      padding: theme.spacing(1),
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(1),
     }),
     header: css({
       display: 'flex',
-      justifyContent: 'flex-end',
+      justifyContent: 'space-between',
+      background: theme.colors.background.secondary,
+      padding: theme.spacing(1),
+      fontWeight: theme.typography.fontWeightMedium,
     }),
     body: css({
       label: 'body',
@@ -82,15 +86,25 @@ const getStyles = (theme: GrafanaTheme2) => {
       flex: '1 1 0',
       flexDirection: 'column',
       minHeight: 0,
+      padding: theme.spacing(1),
     }),
     card: css({
+      border: 'none',
+      boxShadow: 'none',
+      margin: 0,
       display: 'flex',
-      background: theme.colors.background.secondary,
+      background: 'transparent',
+      textAlign: 'left',
+      //background: theme.colors.background.secondary,
       padding: theme.spacing(1),
-      justifyContent: 'space-between',
+      //justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: theme.spacing(1),
-      borderRadius: theme.shape.borderRadius(1),
+      //marginBottom: theme.spacing(1),
+      borderBottom: `1px solid ${theme.colors.border.medium}`,
+      //borderRadius: theme.shape.borderRadius(1),
+      ['&:hover']: {
+        background: theme.colors.emphasize(theme.colors.background.primary, 0.03),
+      },
     }),
   };
 };

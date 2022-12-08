@@ -30,6 +30,7 @@ export function ThemeListPage() {
         {state.themes.map((theme) => (
           <Card key={theme.uid}>
             <Card.Heading>{theme.name}</Card.Heading>
+            <Card.Description>{theme.description}</Card.Description>
             <Card.Actions>
               <LinkButton href={`themes/${theme.uid}`} variant="secondary">
                 Edit
