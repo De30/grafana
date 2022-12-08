@@ -349,6 +349,7 @@ type Cfg struct {
 	JWTAuthRoleAttributePath       string
 	JWTAuthRoleAttributeStrict     bool
 	JWTAuthAllowAssignGrafanaAdmin bool
+	JWTAuthSigningKey              string
 
 	// Dataproxy
 	SendUserHeader                 bool
@@ -968,6 +969,8 @@ func (cfg *Cfg) Load(args CommandLineArgs) error {
 // Load Cfg from a string map rather than a real ini file
 func FromJSON(config map[string]map[string]string) (*Cfg, error) {
 	inifile := ini.Empty()
+	// TODO... gettting all defaults will be essential :grimmice:
+
 	for section, vals := range config {
 		s, err := inifile.NewSection(section)
 		if err != nil {
@@ -1486,6 +1489,7 @@ func readAuthSettings(iniFile *ini.File, cfg *Cfg) (err error) {
 	cfg.JWTAuthRoleAttributePath = valueAsString(authJWT, "role_attribute_path", "")
 	cfg.JWTAuthRoleAttributeStrict = authJWT.Key("role_attribute_strict").MustBool(false)
 	cfg.JWTAuthAllowAssignGrafanaAdmin = authJWT.Key("allow_assign_grafana_admin").MustBool(false)
+	cfg.JWTAuthSigningKey = valueAsString(authJWT, "signing_key", "")
 
 	authProxy := iniFile.Section("auth.proxy")
 	AuthProxyEnabled = authProxy.Key("enabled").MustBool(false)
