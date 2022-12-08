@@ -63,8 +63,8 @@ type AlertRuleService interface {
 	GetRuleGroup(ctx context.Context, orgID int64, folder, group string) (alerting_models.AlertRuleGroup, error)
 	ReplaceRuleGroup(ctx context.Context, orgID int64, group alerting_models.AlertRuleGroup, userID int64, provenance alerting_models.Provenance) error
 	GetAlertRuleWithFolderTitle(ctx context.Context, orgID int64, ruleUID string) (provisioning.AlertRuleWithFolderTitle, error)
-	GetRuleGroupWithTitle(ctx context.Context, orgID int64, folder, group string) (provisioning.AlertRuleGroupWithTitle, error)
-	GetAlertGroupsWithTitle(ctx context.Context, orgID int64) ([]provisioning.AlertRuleGroupWithTitle, error)
+	GetRuleGroupWithFolderTitle(ctx context.Context, orgID int64, folder, group string) (provisioning.AlertRuleGroupWithFolderTitle, error)
+	GetAlertGroupsWithFolderTitle(ctx context.Context, orgID int64) ([]provisioning.AlertRuleGroupWithFolderTitle, error)
 }
 
 func (srv *ProvisioningSrv) RouteGetPolicyTree(c *models.ReqContext) response.Response {
@@ -341,12 +341,12 @@ func (srv *ProvisioningSrv) RouteGetAlertRuleGroup(c *models.ReqContext, folder 
 
 // RouteGetAlertRulesExport retrieves all alert rules in a format compatible with file provisioning.
 func (srv *ProvisioningSrv) RouteGetAlertRulesExport(c *models.ReqContext) response.Response {
-	groupWithTitles, err := srv.alertRules.GetAlertGroupsWithTitle(c.Req.Context(), c.OrgID)
+	groupWithTitles, err := srv.alertRules.GetAlertGroupsWithFolderTitle(c.Req.Context(), c.OrgID)
 	if err != nil {
 		return ErrResp(http.StatusInternalServerError, err, "failed to get alert rules")
 	}
 
-	e := definitions.AlertRuleFileExport{APIVersion: 1}
+	e := definitions.AlertingFileExport{APIVersion: 1}
 	for _, group := range groupWithTitles {
 		export, err := definitions.NewAlertRuleGroupExport(c.OrgID, group.FolderTitle, group.AlertRuleGroup)
 		if err != nil {
@@ -360,7 +360,7 @@ func (srv *ProvisioningSrv) RouteGetAlertRulesExport(c *models.ReqContext) respo
 
 // RouteGetAlertRuleGroupExport retrieves the given alert rule group in a format compatible with file provisioning.
 func (srv *ProvisioningSrv) RouteGetAlertRuleGroupExport(c *models.ReqContext, folder string, group string) response.Response {
-	g, err := srv.alertRules.GetRuleGroupWithTitle(c.Req.Context(), c.OrgID, folder, group)
+	g, err := srv.alertRules.GetRuleGroupWithFolderTitle(c.Req.Context(), c.OrgID, folder, group)
 	if err != nil {
 		if errors.Is(err, store.ErrAlertRuleGroupNotFound) {
 			return ErrResp(http.StatusNotFound, err, "")
@@ -373,7 +373,7 @@ func (srv *ProvisioningSrv) RouteGetAlertRuleGroupExport(c *models.ReqContext, f
 		return ErrResp(http.StatusInternalServerError, err, "")
 	}
 
-	return exportResponse(c, definitions.AlertRuleFileExport{
+	return exportResponse(c, definitions.AlertingFileExport{
 		APIVersion: 1,
 		Groups:     []definitions.AlertRuleGroupExport{e},
 	})
@@ -399,7 +399,7 @@ func (srv *ProvisioningSrv) RouteGetAlertRuleExport(c *models.ReqContext, UID st
 		return ErrResp(http.StatusInternalServerError, err, "")
 	}
 
-	return exportResponse(c, definitions.AlertRuleFileExport{
+	return exportResponse(c, definitions.AlertingFileExport{
 		APIVersion: 1,
 		Groups:     []definitions.AlertRuleGroupExport{e},
 	})
