@@ -15,7 +15,6 @@ export function ThemeListPage() {
 
   useAsync(async () => {
     const result = await loadAllThemes();
-    result.sort((a, b) => a.name.localeCompare(b.name));
     setState({ themes: result });
   }, []);
 

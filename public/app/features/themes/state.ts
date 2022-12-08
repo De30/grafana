@@ -19,8 +19,10 @@ export enum CustomThemeType {
   Dashboard = 'dashboard',
 }
 
-export function loadAllThemes(): Promise<CustomThemeDTO[]> {
-  return getBackendSrv().get(`/api/themes`);
+export async function loadAllThemes(): Promise<CustomThemeDTO[]> {
+  const result = await getBackendSrv().get<CustomThemeDTO[]>(`/api/themes`);
+  result.sort((a, b) => a.name.localeCompare(b.name));
+  return result;
 }
 
 export interface EditThemeState {
