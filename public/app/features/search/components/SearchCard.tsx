@@ -8,6 +8,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { Icon, Portal, TagList, useTheme2 } from '@grafana/ui';
 import { backendSrv } from 'app/core/services/backend_srv';
+import { Item } from 'app/plugins/panel/savedlist/SavedList';
 
 import { DashboardSectionItem, OnToggleChecked } from '../types';
 
@@ -18,7 +19,7 @@ const DELAY_BEFORE_EXPANDING = 500;
 
 export interface Props {
   editable?: boolean;
-  item: DashboardSectionItem;
+  item: DashboardSectionItem | Item;
   onTagSelected?: (name: string) => any;
   onToggleChecked?: OnToggleChecked;
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -153,7 +154,7 @@ export function SearchCard({ editable, item, onTagSelected, onToggleChecked, onC
       </div>
       <div className={styles.info}>
         <div className={styles.title}>{item.title}</div>
-        <TagList displayMax={1} tags={item.tags} onClick={onTagClick} />
+        <TagList displayMax={1} tags={item.tags || []} onClick={onTagClick} />
       </div>
       {showExpandedView && (
         <Portal className={styles.portal}>

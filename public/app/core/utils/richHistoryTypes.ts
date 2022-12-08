@@ -20,11 +20,12 @@ export interface RichHistorySettings {
 
 export type RichHistorySearchFilters = {
   /** Names of data sources (not uids) - used by local and remote storage **/
-  datasourceFilters: string[];
   from: number;
   to: number;
+  datasourceFilters?: string[];
   search?: string;
   sortOrder?: SortOrder;
   starred?: boolean;
   page?: number;
+  limit?: number;
 };

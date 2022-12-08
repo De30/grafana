@@ -140,12 +140,17 @@ export default class RichHistoryRemoteStorage implements RichHistoryStorage {
 }
 
 function buildQueryParams(filters: RichHistorySearchFilters): string {
-  let params = `${filters.datasourceFilters
-    .map((datasourceName) => {
-      const uid = getDataSourceSrv().getInstanceSettings(datasourceName)!.uid;
-      return `datasourceUid=${encodeURIComponent(uid)}`;
-    })
-    .join('&')}`;
+  let params;
+
+  if (filters.datasourceFilters) {
+    params = `${filters.datasourceFilters
+      .map((datasourceName) => {
+        const uid = getDataSourceSrv().getInstanceSettings(datasourceName)!.uid;
+        return `datasourceUid=${encodeURIComponent(uid)}`;
+      })
+      .join('&')}`;
+  }
+
   if (filters.search) {
     params = params + `&searchString=${filters.search}`;
   }
@@ -157,7 +162,7 @@ function buildQueryParams(filters: RichHistorySearchFilters): string {
   // TODO: Unify: remote storage from/to params are swapped comparing to frontend and local storage filters
   params = params + `&to=${relativeFrom}`;
   params = params + `&from=${relativeTo}`;
-  params = params + `&limit=100`;
+  params = params + `&limit=${filters.limit || 100}`;
   params = params + `&page=${filters.page || 1}`;
   if (filters.starred) {
     params = params + `&onlyStarred=${filters.starred}`;

@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 
 import { SelectableValue, WithAccessControlMetadata } from '@grafana/data';
+import { Item } from 'app/plugins/panel/savedlist/SavedList';
 
 import { QueryResponse } from './service';
 
@@ -89,7 +90,7 @@ export interface SearchState {
   eventTrackingNamespace: EventTrackingNamespace;
 }
 
-export type OnToggleChecked = (item: DashboardSectionItem | DashboardSection) => void;
+export type OnToggleChecked = (item: DashboardSectionItem | DashboardSection | Item) => void;
 
 export enum SearchLayout {
   List = 'list',

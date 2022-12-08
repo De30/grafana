@@ -11,7 +11,7 @@ import { SortOrder } from '../utils/richHistoryTypes';
 
 export function filterAndSortQueries(
   queries: RichHistoryQuery[],
-  listOfDatasourceFilters: string[],
+  listOfDatasourceFilters?: string[],
   sortOrder?: SortOrder,
   searchFilter?: string,
   timeFilter?: [number, number]
@@ -43,8 +43,8 @@ function filterQueriesByTime(queries: RichHistoryQuery[], timeFilter: [number, n
   return queries.filter((q) => q.createdAt < filter1 && q.createdAt > filter2);
 }
 
-function filterQueriesByDataSource(queries: RichHistoryQuery[], listOfDatasourceFilters: string[]) {
-  return listOfDatasourceFilters.length > 0
+function filterQueriesByDataSource(queries: RichHistoryQuery[], listOfDatasourceFilters?: string[]) {
+  return listOfDatasourceFilters !== undefined && listOfDatasourceFilters.length > 0
     ? queries.filter((q) => listOfDatasourceFilters.includes(q.datasourceName))
     : queries;
 }
