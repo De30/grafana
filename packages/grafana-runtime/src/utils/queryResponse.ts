@@ -83,13 +83,13 @@ export function toDataQueryResponse(
       }
       dr.refId = refId;
       if (dr.error?.errata?.args) {
-        const asd = new Map<string, string | number>();
+        const argsMap = new Map<string, string | number>();
         for (const [k, v] of Object.entries(dr.error.errata.args)) {
           if (typeof v === 'string' || typeof v === 'number') {
-            asd.set(k, v);
+            argsMap.set(k, v);
           }
         }
-        dr.error.errata.args = asd;
+        dr.error.errata.args = argsMap;
       }
       data.push(dr);
     }
