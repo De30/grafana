@@ -24,7 +24,7 @@ export function setRuntimeTheme(custom: CustomThemeDTO, safeMode?: boolean) {
     if (areVizColorsDifferent(currentTheme, runtimeTheme)) {
       console.log('colors are dif');
       setTimeout(() => {
-        getDashboardSrv().getCurrent()?.refresh();
+        getDashboardSrv().getCurrent()?.startRefresh();
       }, 100);
     }
 
@@ -38,7 +38,7 @@ export function setRuntimeTheme(custom: CustomThemeDTO, safeMode?: boolean) {
 function areVizColorsDifferent(theme: GrafanaTheme2, newTheme: GrafanaTheme2) {
   for (const [hueIndex, hue] of theme.visualization.hues.entries()) {
     for (const [colorIndex, color] of hue.shades.entries()) {
-      if (color !== newTheme.visualization.hues[hueIndex].shades[colorIndex]) {
+      if (color.color !== newTheme.visualization.hues[hueIndex].shades[colorIndex].color) {
         return true;
       }
     }
