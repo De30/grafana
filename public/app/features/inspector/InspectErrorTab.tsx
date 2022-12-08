@@ -3,6 +3,8 @@ import React from 'react';
 import { DataQueryError } from '@grafana/data';
 import { JSONFormatter } from '@grafana/ui';
 
+import { ErrataBox } from '../dashboard/components/ErrataBox/ErrataBox';
+
 interface InspectErrorTabProps {
   error?: DataQueryError;
 }
@@ -23,6 +25,9 @@ const parseErrorMessage = (message: string): { msg: string; json?: any } => {
 export const InspectErrorTab: React.FC<InspectErrorTabProps> = ({ error }) => {
   if (!error) {
     return null;
+  }
+  if (error.errata) {
+    return <ErrataBox errata={error.errata}></ErrataBox>;
   }
   if (error.data) {
     return (

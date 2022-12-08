@@ -101,9 +101,9 @@ const MonacoQueryField = ({ languageProvider, history, onBlur, onRunQuery, initi
         monacoRef.current([
           {
             startLineNumber: line,
-            endLineNumber: 1,
+            endLineNumber: line,
             startColumn: column,
-            endColumn: column + 5,
+            endColumn: column + 7, //hack for the hackathon, this should really look up the length of the token startColumn is pointing at
             message: msg || '',
             severity: MarkerSeverity.Error,
           },

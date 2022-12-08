@@ -107,8 +107,6 @@ export class PanelHeaderCorner extends Component<Props> {
       const errorDiv = (
         <div>
           <div>{errata.message}</div>
-          <div>{errata.code}</div>
-          <div>{errata.guide}</div>
         </div>
       );
       return this.renderCornerType(infoMode, errorDiv, this.onClickError);
