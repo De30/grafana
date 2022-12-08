@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/bus"
+	"github.com/grafana/grafana/pkg/infra/appcontext"
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/slugify"
@@ -112,7 +113,10 @@ func (s *sqlEntityServer) validateGRN(ctx context.Context, grn *entity.GRN) (*en
 	if grn == nil {
 		return nil, fmt.Errorf("missing GRN")
 	}
-	user := store.UserFromContext(ctx)
+	user, err := appcontext.User(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if grn.TenantId == 0 {
 		grn.TenantId = user.OrgID
 	} else if grn.TenantId != user.OrgID {
@@ -294,7 +298,10 @@ func (s *sqlEntityServer) adminWrite(ctx context.Context, r *entity.AdminWriteEn
 	updatedAt := r.UpdatedAt
 	updatedBy := r.UpdatedBy
 	if updatedBy == "" {
-		modifier := store.UserFromContext(ctx)
+		modifier, err := appcontext.User(ctx)
+		if err != nil {
+			return nil, err
+		}
 		if modifier == nil {
 			return nil, fmt.Errorf("can not find user in context")
 		}
@@ -631,7 +638,10 @@ func (s *sqlEntityServer) History(ctx context.Context, r *entity.EntityHistoryRe
 }
 
 func (s *sqlEntityServer) Search(ctx context.Context, r *entity.EntitySearchRequest) (*entity.EntitySearchResponse, error) {
-	user := store.UserFromContext(ctx)
+	user, err := appcontext.User(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, fmt.Errorf("missing user in context")
 	}
