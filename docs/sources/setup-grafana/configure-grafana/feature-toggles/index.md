@@ -53,6 +53,7 @@ Alpha features might be changed or removed without prior notice.
 
 | Feature toggle name                | Description                                                                                                                                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `returnUnameHeader`                | Return user login as header for authenticated requests                                                                                                                       |
 | `alertingBigTransactions`          | Use big transactions for alerting database writes                                                                                                                            |
 | `dashboardPreviews`                | Create and show thumbnails for dashboard search results                                                                                                                      |
 | `live-config`                      | Save Grafana Live configuration in SQL tables                                                                                                                                |
@@ -92,6 +93,7 @@ Alpha features might be changed or removed without prior notice.
 | `secureSocksDatasourceProxy`       | Enable secure socks tunneling for supported core datasources                                                                                                                 |
 | `authnService`                     | Use new auth service to perform authentication                                                                                                                               |
 | `customThemes`                     | Enable new custom themes feature                                                                                                                                             |
+| `sessionRemoteCache`               | Enable using remote cache for user sessions                                                                                                                                  |
 
 ## Development feature toggles
 
