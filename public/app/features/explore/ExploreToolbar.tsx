@@ -1,4 +1,4 @@
-import React, { lazy, PureComponent, RefObject, Suspense } from 'react';
+import React, { PureComponent, RefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
@@ -12,9 +12,7 @@ import {
   ToolbarButtonRow,
 } from '@grafana/ui';
 import { AppChromeUpdate } from 'app/core/components/AppChrome/AppChromeUpdate';
-import { contextSrv } from 'app/core/core';
 import { createAndCopyShortLink } from 'app/core/utils/shortLinks';
-import { AccessControlAction } from 'app/types';
 import { ExploreId } from 'app/types/explore';
 import { StoreState } from 'app/types/store';
 
@@ -31,10 +29,6 @@ import { cancelQueries, runQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { syncTimes, changeRefreshInterval } from './state/time';
 import { LiveTailControls } from './useLiveTailControls';
-
-const AddToDashboard = lazy(() =>
-  import('./AddToDashboard').then(({ AddToDashboard }) => ({ default: AddToDashboard }))
-);
 
 interface OwnProps {
   exploreId: ExploreId;
@@ -139,10 +133,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
 
     const isLargerExploreId = largerExploreId === exploreId;
 
-    const showExploreToDashboard =
-      contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
-      contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
-
     const onClickResize = () => {
       if (isLargerExploreId) {
         this.props.evenPaneResizeAction();
@@ -178,12 +168,6 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
             Close
           </ToolbarButton>
         </React.Fragment>
-      ),
-
-      showExploreToDashboard && (
-        <Suspense key="addToDashboard" fallback={null}>
-          <AddToDashboard exploreId={exploreId} />
-        </Suspense>
       ),
 
       !isLive && (

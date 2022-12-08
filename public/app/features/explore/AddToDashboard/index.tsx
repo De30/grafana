@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { ToolbarButton } from '@grafana/ui';
+import { Button } from '@grafana/ui';
 import { ExploreId, useSelector } from 'app/types';
 
 import { getExploreItemSelector } from '../state/selectors';
@@ -18,14 +18,16 @@ export const AddToDashboard = ({ exploreId }: Props) => {
 
   return (
     <>
-      <ToolbarButton
+      <Button
         icon="apps"
+        size="sm"
+        variant="secondary"
         onClick={() => setIsOpen(true)}
         aria-label="Add to dashboard"
         disabled={!explorePaneHasQueries}
       >
         Add to dashboard
-      </ToolbarButton>
+      </Button>
 
       {isOpen && <AddToDashboardModal onClose={() => setIsOpen(false)} exploreId={exploreId} />}
     </>

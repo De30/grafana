@@ -3,9 +3,11 @@ import { useToggle } from 'react-use';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { IconButton, Button } from '@grafana/ui';
+import { contextSrv } from 'app/core/core';
 import { supportedFeatures } from 'app/core/history/richHistoryStorageProvider';
-import { ExploreId, useSelector } from 'app/types';
+import { AccessControlAction, ExploreId, useSelector } from 'app/types';
 
+import { AddToDashboard } from '../../AddToDashboard';
 import ExploreQueryInspector from '../../ExploreQueryInspector';
 import { ResponseErrorContainer } from '../../ResponseErrorContainer';
 import RichHistoryContainer from '../../RichHistory/RichHistoryContainer';
@@ -32,6 +34,9 @@ export function QueriesSection({
   const richHistoryRowButtonVisible = supportedFeatures().queryHistoryAvailable;
   const isLive = useSelector((state) => state.explore[exploreId]!.isLive);
   const [activeDrawer, setActiveDrawer] = useState<ExploreDrawer>();
+  const showExploreToDashboard =
+    contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
+    contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
 
   return (
     <>
@@ -58,6 +63,7 @@ export function QueriesSection({
             variant="secondary"
             onClick={() => setActiveDrawer(ExploreDrawer.QueryInspector)}
           />,
+          showExploreToDashboard && <AddToDashboard key="add-to-dashboard" exploreId={exploreId} />,
           <Button
             type="button"
             size="sm"
