@@ -17,7 +17,7 @@ interface Props extends PanelProps<PanelOptions> {}
 export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, height }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const panelModel = getDashboardSrv().getCurrent()?.getPanelById(id);
-  const [gridData, setGridData] = useState<DatagridData[]>([]);
+  const [gridData, setGridData] = useState<DatagridData[]>(options.usePanelData ? panelModel?.data || [] : []);
 
   const theme = useTheme2();
   const gridTheme = {
@@ -36,12 +36,20 @@ export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, heigh
   };
 
   useEffect(() => {
+    const panelModel = getDashboardSrv().getCurrent()?.getPanelById(id);
+
+    if (panelModel) {
+      console.log('Updating panel model', gridData);
+      panelModel.setData(gridData);
+    }
+  }, [gridData, id]);
+
+  useEffect(() => {
     if (!options.usePanelData) {
       setGridData([]);
-      panelModel?.setData([]);
       return;
     } else {
-      if (panelModel?.data?.length) {
+      if (gridData.length) {
         return;
       }
     }
@@ -60,15 +68,13 @@ export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, heigh
     });
 
     setGridData(datagridData);
-    panelModel?.setData(datagridData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.series, id, options.usePanelData, panelModel?.data]);
+  }, [data.series, gridData.length, id, options.usePanelData]);
 
   const getCorrectData = (): DataFrame => {
     if (options.usePanelData) {
-      if (panelModel?.data?.length) {
+      if (gridData.length) {
         const fields: Field[] = [];
-        panelModel.data.forEach((data) => {
+        gridData.forEach((data) => {
           fields.push({
             name: data.name,
             type: FieldType.string,
@@ -78,7 +84,7 @@ export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, heigh
         });
         return {
           fields,
-          length: panelModel.data[0].values.length,
+          length: gridData[0].values.length,
         };
       }
     }
@@ -167,47 +173,40 @@ export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, heigh
     const values = field.values.toArray();
     values[row] = newValue.data;
 
-    if (panelModel !== undefined && panelModel !== null && panelModel.data !== undefined && panelModel.data.length) {
-      panelModel.data[col].values[row] = newValue.data;
+    if (gridData.length && gridData[col]) {
+      setGridData((prev) => {
+        prev[col].values[row] = String(newValue.data) ?? '';
+        return prev;
+      });
     }
 
     field.values = new ArrayVector(values);
   };
 
   const createNewCol = () => {
-    if (!panelModel || !panelModel.data) {
-      return;
-    }
-
     let len = 50;
-    if (panelModel.data.length) {
-      len = panelModel.data[0].values.length;
+    if (gridData.length) {
+      len = gridData[0].values.length;
     }
 
-    const newData = [...panelModel.data];
-
-    newData.push({
-      name: inputRef.current?.value ?? 'PLACEHOLDER',
-      values: new Array(len).fill(''),
+    setGridData((prev) => {
+      const newData = [...prev];
+      newData.push({
+        name: inputRef.current?.value ?? 'PLACEHOLDER',
+        values: new Array(len).fill(''),
+      });
+      return newData;
     });
-
-    setGridData(newData);
-    panelModel.setData(newData);
   };
 
   const createNewRow = () => {
-    if (!panelModel || !panelModel.data) {
-      return;
-    }
-
-    const newData = [...panelModel.data];
-
-    newData.forEach((data) => {
-      data.values.push('');
+    setGridData((prev) => {
+      const newData = [...prev];
+      newData.forEach((data, i) => {
+        data.values.push('');
+      });
+      return newData;
     });
-
-    setGridData(newData);
-    panelModel.setData(newData);
   };
 
   if (!document.getElementById('portal')) {
@@ -219,6 +218,7 @@ export const DataGridPanel: React.FC<Props> = ({ options, data, id, width, heigh
   //TODO multiple series support
   const numRows = getCorrectData().length;
 
+  console.log('rerender');
   return (
     <>
       <DataEditor
