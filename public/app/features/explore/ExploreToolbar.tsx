@@ -2,7 +2,7 @@ import React, { PureComponent, RefObject } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DataSourceInstanceSettings, RawTimeRange } from '@grafana/data';
-import { config, DataSourcePicker, reportInteraction } from '@grafana/runtime';
+import { config, reportInteraction } from '@grafana/runtime';
 import {
   defaultIntervals,
   PageToolbar,
@@ -184,10 +184,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
   };
 
   render() {
-    const { datasourceMissing, exploreId, splitted, containerWidth, topOfViewRef, largerExploreId, isLive } =
-      this.props;
+    const { exploreId, splitted, topOfViewRef, largerExploreId, isLive } = this.props;
 
-    const showSmallDataSourcePicker = (splitted ? containerWidth < 700 : containerWidth < 800) || false;
     const isTopnav = config.featureToggles.topnav;
 
     const getDashNav = () => (
@@ -200,21 +198,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       />
     );
 
-    const getDataSourcePicker = () =>
-      !datasourceMissing && (
-        <DataSourcePicker
-          key={`${exploreId}-ds-picker`}
-          mixed={config.featureToggles.exploreMixedDatasource === true}
-          onChange={this.onChangeDatasource}
-          current={this.props.datasourceRef}
-          hideTextValue={showSmallDataSourcePicker}
-          width={showSmallDataSourcePicker ? 8 : undefined}
-        />
-      );
-
     const topNavActions = [
       getDashNav(),
-      !splitted && getDataSourcePicker(),
       !splitted && (
         <ToolbarButton
           key="split"
@@ -232,7 +217,7 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       </ToolbarButtonRow>,
     ].filter(Boolean);
 
-    const toolbarLeftItems = [exploreId === ExploreId.left && getDashNav(), getDataSourcePicker()].filter(Boolean);
+    const toolbarLeftItems = [exploreId === ExploreId.left && getDashNav()].filter(Boolean);
 
     const isLargerExploreId = largerExploreId === exploreId;
 
@@ -246,13 +231,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
 
     const toolbarLeftItemsTopNav = [
       exploreId === ExploreId.left && (
-        <AppChromeUpdate
-          actions={[getDashNav(), !splitted && getDataSourcePicker(), <div style={{ flex: 1 }} key="spacer" />].filter(
-            Boolean
-          )}
-        />
+        <AppChromeUpdate actions={[getDashNav(), <div style={{ flex: 1 }} key="spacer" />].filter(Boolean)} />
       ),
-      getDataSourcePicker(),
       <React.Fragment key="splitActions">
         <ToolbarButton
           tooltip={`${isLargerExploreId ? 'Narrow' : 'Widen'} pane`}

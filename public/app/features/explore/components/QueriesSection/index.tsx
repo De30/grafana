@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { useToggle } from 'react-use';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { DataSourceInstanceSettings } from '@grafana/data';
+import { DataSourcePicker } from '@grafana/runtime';
 import { IconButton, Button } from '@grafana/ui';
+import { useGrafana } from 'app/core/context/GrafanaContext';
 import { contextSrv } from 'app/core/core';
 import { supportedFeatures } from 'app/core/history/richHistoryStorageProvider';
-import { AccessControlAction, ExploreId, useSelector } from 'app/types';
+import { AccessControlAction, ExploreId, useDispatch, useSelector } from 'app/types';
 
 import { AddToDashboard } from '../../AddToDashboard';
 import ExploreQueryInspector from '../../ExploreQueryInspector';
 import { ResponseErrorContainer } from '../../ResponseErrorContainer';
 import RichHistoryContainer from '../../RichHistory/RichHistoryContainer';
 import { PanelContainer } from '../../components/PanelContainer';
+import { changeDatasource } from '../../state/datasource';
 import { QueryRows } from '../QueryRows';
 
 enum ExploreDrawer {
@@ -37,6 +41,17 @@ export function QueriesSection({
   const showExploreToDashboard =
     contextSrv.hasAccess(AccessControlAction.DashboardsCreate, contextSrv.isEditor) ||
     contextSrv.hasAccess(AccessControlAction.DashboardsWrite, contextSrv.isEditor);
+  const dispatch = useDispatch();
+  const dsRef = useSelector((state) => state.explore[exploreId]!.datasourceInstance?.getRef());
+  const {
+    config: {
+      featureToggles: { exploreMixedDatasource },
+    },
+  } = useGrafana();
+
+  const onChangeDatasource = async (dsSettings: DataSourceInstanceSettings) => {
+    dispatch(changeDatasource(exploreId, dsSettings.uid, { importQueries: true }));
+  };
 
   return (
     <>
@@ -45,6 +60,14 @@ export function QueriesSection({
         collapsible
         isOpen={isOpen}
         onToggle={toggleIsOpen}
+        primaryActions={[
+          <DataSourcePicker
+            key="ds-picker"
+            mixed={exploreMixedDatasource}
+            onChange={onChangeDatasource}
+            current={dsRef}
+          />,
+        ]}
         secondaryActions={[
           richHistoryRowButtonVisible && (
             <IconButton
