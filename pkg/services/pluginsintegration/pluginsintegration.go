@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins/licensing"
 	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/clientmiddleware"
 	"github.com/grafana/grafana/pkg/setting"
@@ -37,6 +38,9 @@ var WireSet = wire.NewSet(
 
 	plugins.ProvideErrorResolver,
 	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)), // TODO
+
+	licensing.ProvideLicensing,
+	wire.Bind(new(pluginLib.Licensing), new(*licensing.Service)),
 
 	ProvideClientDecorator,
 

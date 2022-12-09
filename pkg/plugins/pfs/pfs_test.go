@@ -226,7 +226,7 @@ func TestParseTreeZips(t *testing.T) {
 		},
 	}
 
-	staticRootPath, err := filepath.Abs("../storage/testdata")
+	staticRootPath, err := filepath.Abs("../manager/storage/testdata")
 	require.NoError(t, err)
 	ents, err := os.ReadDir(staticRootPath)
 	require.NoError(t, err)
