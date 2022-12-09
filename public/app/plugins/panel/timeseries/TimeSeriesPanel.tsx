@@ -4,7 +4,8 @@ import { Field, PanelProps } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
 import { TooltipDisplayMode } from '@grafana/schema';
 import { usePanelContext, TimeSeries, TooltipPlugin, ZoomPlugin, KeyboardPlugin } from '@grafana/ui';
-import { config } from 'app/core/config';
+import { HighlightPlugin } from '@grafana/ui/src/components/uPlot/plugins/HighlightPlugin';
+import { config as grafanaConfig } from 'app/core/config';
 import { getFieldLinksForExplore } from 'app/features/explore/utils/links';
 
 import { AnnotationEditorPlugin } from './plugins/AnnotationEditorPlugin';
@@ -36,7 +37,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
     return getFieldLinksForExplore({ field, rowIndex, splitOpenFn: onSplitOpen, range: timeRange });
   };
 
-  const frames = useMemo(() => prepareGraphableFields(data.series, config.theme2, timeRange), [data, timeRange]);
+  const frames = useMemo(() => prepareGraphableFields(data.series, grafanaConfig.theme2, timeRange), [data, timeRange]);
   const timezones = useMemo(() => getTimezones(options.timezone, timeZone), [options.timezone, timeZone]);
 
   if (!frames) {
@@ -75,6 +76,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
           <>
             <KeyboardPlugin config={config} />
             <ZoomPlugin config={config} onZoom={onChangeTimeRange} />
+            <HighlightPlugin config={config} theme={grafanaConfig.theme2} />
             {options.tooltip.mode === TooltipDisplayMode.None || (
               <TooltipPlugin
                 frames={frames}
