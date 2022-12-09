@@ -1,7 +1,6 @@
 package frontendlogging
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -41,10 +40,10 @@ func fmtLine(frame sentry.Frame) string {
 	return fmt.Sprintf("\n  at %s (%s%s:%v:%v)", frame.Function, module, frame.Filename, frame.Lineno, frame.Colno)
 }
 
-func (value *FrontendSentryExceptionValue) FmtStacktrace(ctx context.Context, store *SourceMapStore) string {
+func (value *FrontendSentryExceptionValue) FmtStacktrace(store *SourceMapStore) string {
 	var stacktrace = value.FmtMessage()
 	for _, frame := range value.Stacktrace.Frames {
-		mappedFrame, err := store.resolveSourceLocation(ctx, frame)
+		mappedFrame, err := store.resolveSourceLocation(frame)
 		if err != nil {
 			logger.Error("Error resolving stack trace frame source location", "err", err)
 			stacktrace += fmtLine(frame) // even if reading source map fails for unexpected reason, still better to log compiled location than nothing at all
@@ -59,10 +58,10 @@ func (value *FrontendSentryExceptionValue) FmtStacktrace(ctx context.Context, st
 	return stacktrace
 }
 
-func (exception *FrontendSentryException) FmtStacktraces(ctx context.Context, store *SourceMapStore) string {
+func (exception *FrontendSentryException) FmtStacktraces(store *SourceMapStore) string {
 	stacktraces := make([]string, 0, len(exception.Values))
 	for _, value := range exception.Values {
-		stacktraces = append(stacktraces, value.FmtStacktrace(ctx, store))
+		stacktraces = append(stacktraces, value.FmtStacktrace(store))
 	}
 	return strings.Join(stacktraces, "\n\n")
 }
@@ -79,12 +78,12 @@ func addEventContextToLogContext(rootPrefix string, logCtx *CtxVector, eventCtx 
 	}
 }
 
-func (event *FrontendSentryEvent) ToLogContext(ctx context.Context, store *SourceMapStore) []interface{} {
+func (event *FrontendSentryEvent) ToLogContext(store *SourceMapStore) []interface{} {
 	var ctxV = CtxVector{"url", event.Request.URL, "user_agent", event.Request.Headers["User-Agent"],
 		"event_id", event.EventID, "original_timestamp", event.Timestamp}
 
 	if event.Exception != nil {
-		ctxV = append(ctxV, "stacktrace", event.Exception.FmtStacktraces(ctx, store))
+		ctxV = append(ctxV, "stacktrace", event.Exception.FmtStacktraces(store))
 	}
 	addEventContextToLogContext("context", &ctxV, event.Contexts)
 	if len(event.User.Email) > 0 {

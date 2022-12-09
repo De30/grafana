@@ -15,7 +15,6 @@
   #   - .:/output
   #   ports:
   #   - 6443:6443
-
   mysql25:
     image: arm64v8/mysql:oracle
     environment:
@@ -83,7 +82,6 @@
     depends_on:
       mysql25:
         condition: service_healthy
-
   entity-store:
     image: grafana/grafana:dev-ubuntu
     volumes:

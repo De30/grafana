@@ -15,9 +15,9 @@ import (
 	"github.com/grafana/grafana/pkg/expr"
 	"github.com/grafana/grafana/pkg/expr/classic"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -606,7 +606,7 @@ func (e *evaluatorImpl) Validate(ctx EvaluationContext, condition models.Conditi
 		}
 		p, found := e.pluginsStore.Plugin(ctx.Ctx, query.DataSource.Type)
 		if !found { // technically this should fail earlier during datasource resolution phase.
-			return fmt.Errorf("datasource refID %s could not be found: %w", query.RefID, plugins.ErrPluginUnavailable)
+			return fmt.Errorf("datasource refID %s could not be found", query.RefID)
 		}
 		if !p.Backend {
 			return fmt.Errorf("datasource refID %s is not a backend datasource", query.RefID)

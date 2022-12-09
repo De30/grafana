@@ -59,7 +59,7 @@ func (fn ClientMiddlewareFunc) CreateClientMiddleware(next Client) Client {
 }
 
 type StaticRouteResolver interface {
-	Routes(ctx context.Context) []*StaticRoute
+	Routes() []*StaticRoute
 }
 
 type PluginErrorResolver interface {

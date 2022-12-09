@@ -1,8 +1,6 @@
 package plugins
 
 import (
-	"context"
-
 	pluginStoreLib "github.com/grafana/grafana/pkg/plugins/manager/store"
 )
 
@@ -16,7 +14,7 @@ func ProvideRouteResolver(store *pluginStoreLib.Service) *RouteResolver {
 	return &RouteResolver{store: store}
 }
 
-func (r RouteResolver) Routes(ctx context.Context) []*StaticRoute {
+func (r RouteResolver) Routes() []*StaticRoute {
 	var routes []*StaticRoute
 	for _, r := range r.store.Routes() {
 		routes = append(routes, &StaticRoute{
