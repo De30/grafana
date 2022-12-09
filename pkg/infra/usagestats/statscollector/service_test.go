@@ -437,7 +437,7 @@ func (m *mockSocial) GetOAuthProviders() map[string]bool {
 func setupSomeDataSourcePlugins(t *testing.T, s *Service) {
 	t.Helper()
 
-	s.pluginStore = &plugins.FakePluginStore{
+	s.plugins = &plugins.FakePluginStore{
 		PluginList: []plugins.PluginDTO{
 			{JSONData: pluginLib.JSONData{ID: datasources.DS_ES}, Signature: "internal"},
 			{JSONData: pluginLib.JSONData{ID: datasources.DS_PROMETHEUS}, Signature: "internal"},
