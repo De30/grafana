@@ -9,7 +9,8 @@ import {
   NodeGraphDataFrameFieldNames,
 } from '@grafana/data';
 
-import { nodes, edges } from './testData/serviceMapResponse';
+import * as serviceMapResponseSmall from './testData/serviceMapResponse';
+import * as serviceMapResponsMedium from './testData/serviceMapResponse2';
 
 export function generateRandomNodes(count = 10, seed?: number) {
   const nodes = [];
@@ -163,8 +164,9 @@ function makeRandomNode(index: number) {
   };
 }
 
-export function savedNodesResponse(): any {
-  return [new MutableDataFrame(nodes), new MutableDataFrame(edges)];
+export function savedNodesResponse(size: 'small' | 'medium'): any {
+  const response = size === 'small' ? serviceMapResponseSmall : serviceMapResponsMedium;
+  return [new MutableDataFrame(response.nodes), new MutableDataFrame(response.edges)];
 }
 
 // Generates node graph data but only returns the edges

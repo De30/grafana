@@ -92,18 +92,39 @@ export function useLayout(
       if (!graphviz) {
         graphviz = await Graphviz.load();
       }
-      // const dot = edgesToDOT(rawEdges);
-      // const dotLayout = JSON.parse(graphviz.dot(dot, 'json0'));
-      // const dot = edgesToDOTNeato(rawEdges);
+      const mappedEdges: Array<{ source: string; target: string }> = [];
+      const idToDOTMap: Record<string, string> = {};
+      const DOTToIdMap: Record<string, string> = {};
+      let index = 0;
+      for (const edge of rawEdges) {
+        if (!idToDOTMap[edge.source]) {
+          idToDOTMap[edge.source] = index.toString(10);
+          DOTToIdMap[index.toString(10)] = edge.source;
+          index++;
+        }
+
+        if (!idToDOTMap[edge.target]) {
+          idToDOTMap[edge.target] = index.toString(10);
+          DOTToIdMap[index.toString(10)] = edge.target;
+          index++;
+        }
+        mappedEdges.push({ source: idToDOTMap[edge.source], target: idToDOTMap[edge.target] });
+      }
+
+      console.time('layout');
+      const dot = edgesToDOT(mappedEdges);
+      const dotLayout = JSON.parse(graphviz.dot(dot, 'json0'));
+      // const dot = edgesToDOTNeato(mappedEdges);
       // const dotLayout = JSON.parse(graphviz.neato(dot, 'json0'));
-      const dot = edgesToDOTfdp(rawEdges);
-      const dotLayout = JSON.parse(graphviz.fdp(dot, 'json0'));
-      // const dot = edgesToDOTsfdp(rawEdges);
+      // const dot = edgesToDOTfdp(mappedEdges);
+      // const dotLayout = JSON.parse(graphviz.fdp(dot, 'json0'));
+      // const dot = edgesToDOTsfdp(mappedEdges);
       // const dotLayout = JSON.parse(graphviz.sfdp(dot, 'json0'));
+      console.timeEnd('layout');
 
       const nodesMap: Record<string, { obj: { pos: string }; datum: NodeDatum }> = dotLayout.objects.reduce(
         (acc: Record<string, { obj: { pos: string } }>, obj: { pos: string; name: string }) => {
-          acc[obj.name] = {
+          acc[DOTToIdMap[obj.name]] = {
             obj,
           };
           return acc;
@@ -121,7 +142,7 @@ export function useLayout(
           },
         };
       }
-      const edges = rawEdges.map((e) => {
+      const edges: EdgeDatumLayout[] = rawEdges.map((e) => {
         return {
           ...e,
           source: nodesMap[e.source].datum,
@@ -130,7 +151,7 @@ export function useLayout(
       });
 
       setNodesGraph(Object.values(nodesMap).map((v) => v.datum));
-      setEdgesGraph(edges as EdgeDatumLayout[]);
+      setEdgesGraph(edges);
       setLoading(false);
     })();
 
@@ -138,9 +159,9 @@ export function useLayout(
     // having callback seems ok here.
     const cancel = defaultLayout(rawNodes, rawEdges, ({ nodes, edges }) => {
       if (isMounted()) {
-        // console.log({ nodes, edges });
-        // setNodesGraph(nodes);
-        // setEdgesGraph(edges as EdgeDatumLayout[]);
+        console.log({ nodes, edges });
+        setNodesGraph(nodes);
+        setEdgesGraph(edges);
         setLoading(false);
       }
     });
@@ -199,7 +220,7 @@ export function useLayout(
 function defaultLayout(
   nodes: NodeDatum[],
   edges: EdgeDatum[],
-  done: (data: { nodes: NodeDatum[]; edges: EdgeDatum[] }) => void
+  done: (data: { nodes: NodeDatum[]; edges: EdgeDatumLayout[] }) => void
 ) {
   const worker = createWorker();
   worker.onmessage = (event: MessageEvent<{ nodes: NodeDatum[]; edges: EdgeDatumLayout[] }>) => {
@@ -262,58 +283,36 @@ function gridLayout(
   }
 }
 
-function edgesToDOT(edges: EdgeDatum[]) {
+function toDOT(edges: Array<{ source: string; target: string }>, graphAttr = '', edgeAttr = '') {
   let dot = `
   digraph G {
+    ${graphAttr}
   `;
   for (const edge of edges) {
-    dot += edge.source + '->' + edge.target + ' [ minlen=3 ]\n';
+    dot += edge.source + '->' + edge.target + ' ' + edgeAttr + '\n';
   }
   dot += nodesDOT(edges);
   dot += '}';
   return dot;
 }
 
-function edgesToDOTNeato(edges: EdgeDatum[]) {
-  let dot = `
-  digraph G {
-    sep=1; overlap=false; mode="hier";
-  `;
-  for (const edge of edges) {
-    dot += edge.source + '->' + edge.target + ' [ len=1 ]\n';
-  }
-  dot += nodesDOT(edges);
-  dot += '}';
-  return dot;
+function edgesToDOT(edges: Array<{ source: string; target: string }>) {
+  return toDOT(edges, '', '[ minlen=3 ]');
 }
 
-function edgesToDOTfdp(edges: EdgeDatum[]) {
-  let dot = `
-  digraph G {
-    sep=1;
-  `;
-  for (const edge of edges) {
-    dot += edge.source + '->' + edge.target + ' [ len=3 ]\n';
-  }
-  dot += nodesDOT(edges);
-  dot += '}';
-  return dot;
+function edgesToDOTNeato(edges: Array<{ source: string; target: string }>) {
+  return toDOT(edges, 'sep=1; overlap=false; mode="hier";', '[ len=1 ]');
 }
 
-function edgesToDOTsfdp(edges: EdgeDatum[]) {
-  let dot = `
-  digraph G {
-    overlap_scaling=40; overlap_shrink=false;
-  `;
-  for (const edge of edges) {
-    dot += edge.source + '->' + edge.target + '\n';
-  }
-  dot += nodesDOT(edges);
-  dot += '}';
-  return dot;
+function edgesToDOTfdp(edges: Array<{ source: string; target: string }>) {
+  return toDOT(edges, 'sep=1;', '[ len=3 ]');
 }
 
-function nodesDOT(edges: EdgeDatum[]) {
+function edgesToDOTsfdp(edges: Array<{ source: string; target: string }>) {
+  return toDOT(edges, 'overlap_scaling=40; overlap_shrink=false;');
+}
+
+function nodesDOT(edges: Array<{ source: string; target: string }>) {
   let dot = '';
   const visitedNodes = new Set();
   const attr = '[fixedsize=true, width=1.2, height=1.2] \n';

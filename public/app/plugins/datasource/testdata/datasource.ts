@@ -211,8 +211,11 @@ export class TestDataDataSource extends DataSourceWithBackend<TestDataQuery> {
       case 'random':
         frames = generateRandomNodes(target.nodes?.count, target.nodes?.seed);
         break;
-      case 'response':
-        frames = savedNodesResponse();
+      case 'response small':
+        frames = savedNodesResponse('small');
+        break;
+      case 'response medium':
+        frames = savedNodesResponse('medium');
         break;
       case 'random edges':
         frames = [generateRandomEdges(target.nodes?.count, target.nodes?.seed)];
