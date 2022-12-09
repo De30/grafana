@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { get } from 'lodash';
+import { debounce, get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React, { createRef } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
@@ -179,9 +179,9 @@ export class Explore extends React.PureComponent<Props> {
     this.props.modifyQueries(this.props.exploreId, action, modifier);
   };
 
-  onResize = (size: { height: number; width: number }) => {
+  onResize = debounce((size: { height: number; width: number }) => {
     this.props.changeSize(this.props.exploreId, size);
-  };
+  }, 500);
 
   onStartScanning = () => {
     // Scanner will trigger a query
