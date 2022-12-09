@@ -127,49 +127,10 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
       isPaused,
       hasLiveOption,
       containerWidth,
-      largerExploreId,
     } = this.props;
     const showSmallTimePicker = splitted || containerWidth < 1210;
 
-    const isLargerExploreId = largerExploreId === exploreId;
-
-    const onClickResize = () => {
-      if (isLargerExploreId) {
-        this.props.evenPaneResizeAction();
-      } else {
-        this.props.maximizePaneAction({ exploreId: exploreId });
-      }
-    };
-
     return [
-      !splitted ? (
-        <ToolbarButton
-          key="split"
-          tooltip="Split the pane"
-          onClick={this.onOpenSplitView}
-          icon="columns"
-          disabled={isLive}
-        >
-          Split
-        </ToolbarButton>
-      ) : (
-        <React.Fragment key="splitActions">
-          <ToolbarButton
-            tooltip={`${isLargerExploreId ? 'Narrow' : 'Widen'} pane`}
-            disabled={isLive}
-            onClick={onClickResize}
-            icon={
-              (exploreId === 'left' && isLargerExploreId) || (exploreId === 'right' && !isLargerExploreId)
-                ? 'angle-left'
-                : 'angle-right'
-            }
-          />
-          <ToolbarButton tooltip="Close split pane" onClick={this.onCloseSplitView} icon="times">
-            Close
-          </ToolbarButton>
-        </React.Fragment>
-      ),
-
       !isLive && (
         <ExploreTimeControls
           key="timeControls"
@@ -223,7 +184,8 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
   };
 
   render() {
-    const { datasourceMissing, exploreId, splitted, containerWidth, topOfViewRef } = this.props;
+    const { datasourceMissing, exploreId, splitted, containerWidth, topOfViewRef, largerExploreId, isLive } =
+      this.props;
 
     const showSmallDataSourcePicker = (splitted ? containerWidth < 700 : containerWidth < 800) || false;
     const isTopnav = config.featureToggles.topnav;
@@ -253,6 +215,17 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
     const topNavActions = [
       getDashNav(),
       !splitted && getDataSourcePicker(),
+      !splitted && (
+        <ToolbarButton
+          key="split"
+          tooltip="Split the pane"
+          onClick={this.onOpenSplitView}
+          icon="columns"
+          disabled={isLive}
+        >
+          Split
+        </ToolbarButton>
+      ),
       <div style={{ flex: 1 }} key="spacer" />,
       <ToolbarButtonRow key="actions" alignment="right">
         {this.renderActions()}
@@ -260,6 +233,16 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
     ].filter(Boolean);
 
     const toolbarLeftItems = [exploreId === ExploreId.left && getDashNav(), getDataSourcePicker()].filter(Boolean);
+
+    const isLargerExploreId = largerExploreId === exploreId;
+
+    const onClickResize = () => {
+      if (isLargerExploreId) {
+        this.props.evenPaneResizeAction();
+      } else {
+        this.props.maximizePaneAction({ exploreId: exploreId });
+      }
+    };
 
     const toolbarLeftItemsTopNav = [
       exploreId === ExploreId.left && (
@@ -270,6 +253,21 @@ class UnConnectedExploreToolbar extends PureComponent<Props> {
         />
       ),
       getDataSourcePicker(),
+      <React.Fragment key="splitActions">
+        <ToolbarButton
+          tooltip={`${isLargerExploreId ? 'Narrow' : 'Widen'} pane`}
+          disabled={isLive}
+          onClick={onClickResize}
+          icon={
+            (exploreId === 'left' && isLargerExploreId) || (exploreId === 'right' && !isLargerExploreId)
+              ? 'angle-left'
+              : 'angle-right'
+          }
+        />
+        <ToolbarButton tooltip="Close split pane" onClick={this.onCloseSplitView} icon="times">
+          Close
+        </ToolbarButton>
+      </React.Fragment>,
     ].filter(Boolean);
 
     return isTopnav && !splitted ? (
