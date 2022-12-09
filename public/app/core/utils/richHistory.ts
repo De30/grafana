@@ -84,8 +84,11 @@ export async function addToRichHistory(
   return {};
 }
 
-export async function getRichHistory(filters: RichHistorySearchFilters): Promise<RichHistoryResults> {
-  return await getRichHistoryStorage().getRichHistory(filters);
+export async function getRichHistory(
+  filters: RichHistorySearchFilters,
+  supressDuplicateCallCancel?: boolean
+): Promise<RichHistoryResults> {
+  return await getRichHistoryStorage().getRichHistory(filters, supressDuplicateCallCancel);
 }
 
 export async function updateRichHistorySettings(settings: RichHistorySettings): Promise<void> {

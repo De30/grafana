@@ -35,7 +35,7 @@ export type RichHistoryResults = { richHistory: RichHistoryQuery[]; total?: numb
  * @alpha
  */
 export default interface RichHistoryStorage {
-  getRichHistory(filters: RichHistorySearchFilters): Promise<RichHistoryResults>;
+  getRichHistory(filters: RichHistorySearchFilters, supressDuplicateCallCancel?: boolean): Promise<RichHistoryResults>;
 
   /**
    * Creates new RichHistoryQuery, returns object with unique id and created date

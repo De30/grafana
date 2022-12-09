@@ -155,12 +155,12 @@ async function fetchExploreItems(options: PanelOptions) {
 
   let recentRichHistoryResults: Promise<RichHistoryResults> = Promise.resolve({ richHistory: [] });
   if (options.showRecentlyViewed) {
-    recentRichHistoryResults = getRichHistory({ from: 0, to: 7, limit: 50 });
+    recentRichHistoryResults = getRichHistory({ from: 0, to: 7, limit: 50 }, true);
   }
 
   let starredRichHistoryResults: Promise<RichHistoryResults> = Promise.resolve({ richHistory: [] });
   if (options.showStarred) {
-    starredRichHistoryResults = getRichHistory({ starred: true, from: 0, to: 7, limit: 50 });
+    starredRichHistoryResults = getRichHistory({ starred: true, from: 0, to: 7, limit: 50 }, true);
   }
 
   const [recent, starred] = await Promise.all([recentRichHistoryResults, starredRichHistoryResults]);
