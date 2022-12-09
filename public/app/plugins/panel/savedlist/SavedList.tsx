@@ -69,7 +69,6 @@ function dashboardToItem(dash: Dashboard): Item {
 
 function exploreToItem(explorer: ExploreQuery): Item {
   const descString = explorer.queryStrings ? explorer.queryStrings.map((query) => query.queryString).join(' / ') : '';
-  console.log(explorer.queryStrings, explorer.queryStrings?.length);
   const exploreUrlState: ExploreUrlState = {
     datasource: explorer.datasourceUid,
     queries: explorer.queries,
@@ -163,29 +162,20 @@ async function fetchExploreItems(options: PanelOptions) {
     starredRichHistoryResults = getRichHistory({ starred: true, from: 0, to: 7, limit: 50 }, true);
   }
 
-  const [recent, starred] = await Promise.all([recentRichHistoryResults, starredRichHistoryResults]);
+  const richHistoryResults = await Promise.all([recentRichHistoryResults, starredRichHistoryResults]);
 
-  recent.richHistory.forEach(async (explorer) => {
-    const rootDs = await getDataSourceSrv().get(explorer.datasourceUid);
-    const queryStringArr: ExploreQueryDisplay[] = [];
-    explorer.queries.forEach(async (query) => {
-      const queryDS = await getDataSourceSrv().get(query.datasource?.uid);
-      queryStringArr.push({ datasourceString: queryDS.name, queryString: createQueryText(query, queryDS) });
-    });
-    const item = exploreToItem({ ...explorer, isRecent: true, rootDs: rootDs, queryStrings: queryStringArr });
-    exploreItems.set(explorer.id, item);
-  });
-
-  starred.richHistory.forEach(async (explorer) => {
-    const rootDs = await getDataSourceSrv().get(explorer.datasourceUid);
-    const queryStringArr: ExploreQueryDisplay[] = [];
-    explorer.queries.forEach(async (query) => {
-      const queryDS = await getDataSourceSrv().get(query.datasource?.uid);
-      queryStringArr.push({ datasourceString: queryDS.name, queryString: createQueryText(query, queryDS) });
-    });
-    const item = exploreToItem({ ...explorer, isRecent: true, rootDs: rootDs, queryStrings: queryStringArr });
-    exploreItems.set(explorer.id, item);
-  });
+  for (const result of richHistoryResults) {
+    for (const explorer of result.richHistory) {
+      const rootDs = await getDataSourceSrv().get(explorer.datasourceUid);
+      const queryStringArr: ExploreQueryDisplay[] = [];
+      for (const query of explorer.queries) {
+        const queryDS = await getDataSourceSrv().get(query.datasource?.uid);
+        queryStringArr.push({ datasourceString: queryDS.name, queryString: createQueryText(query, queryDS) });
+      }
+      const item = exploreToItem({ ...explorer, isRecent: true, rootDs: rootDs, queryStrings: queryStringArr });
+      exploreItems.set(explorer.id, item);
+    }
+  }
 
   return exploreItems;
 }
@@ -264,7 +254,7 @@ export function SavedList(props: PanelProps<PanelOptions>) {
           <div className={css.savedlistLink}>
             <div className={css.savedlistLinkBody}>
               <a className={css.savedlistTitle} href={item.url}>
-                {item.title} {item.description}
+                {item.title} {item.description ? `"${item.description}"` : ''}
               </a>
               {item.folderTitle && <div className={css.savedlistFolder}>{item.folderTitle}</div>}
             </div>

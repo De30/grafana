@@ -139,9 +139,6 @@ export default class RichHistoryRemoteStorage implements RichHistoryStorage {
 
 function buildQueryParams(filters: RichHistorySearchFilters): string {
   let params;
-
-  console.log(filters);
-
   if (filters.datasourceFilters) {
     params = `${filters.datasourceFilters
       .map((datasourceName) => {
@@ -163,7 +160,7 @@ function buildQueryParams(filters: RichHistorySearchFilters): string {
   const relativeTo = filters.to === 0 ? 'now' : `now-${filters.to}d`;
   // TODO: Unify: remote storage from/to params are swapped comparing to frontend and local storage filters
 
-  params = params + `${params.length === 0 ? '' : '&'}to=${relativeFrom}`;
+  params = params + `&to=${relativeFrom}`;
   params = params + `&from=${relativeTo}`;
   params = params + `&limit=${filters.limit || 100}`;
   params = params + `&page=${filters.page || 1}`;
