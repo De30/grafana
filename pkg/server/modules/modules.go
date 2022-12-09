@@ -96,7 +96,7 @@ func (m *Modules) Init() error {
 		EntityStore:   {GRPCServer},
 		PluginManager: {GRPCServer},
 		Core:          {},
-		All:           {Core, EntityStore, PluginManager},
+		All:           {Core, EntityStore},
 	}
 
 	for mod, targets := range deps {

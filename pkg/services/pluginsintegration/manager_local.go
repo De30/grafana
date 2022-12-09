@@ -5,7 +5,6 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
-	"github.com/grafana/grafana/pkg/infra/log"
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/manager"
 	"github.com/grafana/grafana/pkg/plugins/manager/store"
@@ -20,7 +19,6 @@ type PluginManagerLocalService struct {
 	store     *store.Service
 	client    *plugins.Decorator
 	installer *manager.PluginInstaller
-	log       log.Logger
 }
 
 func ProvidePluginManagerLocalService(store *store.Service, client *plugins.Decorator,
@@ -29,9 +27,7 @@ func ProvidePluginManagerLocalService(store *store.Service, client *plugins.Deco
 		store:     store,
 		client:    client,
 		installer: installer,
-		log:       log.New("plugin.manager.local"),
 	}
-
 }
 
 func (s *PluginManagerLocalService) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
