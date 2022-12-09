@@ -31,7 +31,6 @@ import { ExploreId, ExploreItemState } from 'app/types/explore';
 import { getTimeZone } from '../profile/state/selectors';
 
 import { ExploreToolbar } from './ExploreToolbar';
-import { FlameGraphExploreContainer } from './FlameGraphExploreContainer';
 import LogsContainer from './LogsContainer';
 import { NoData } from './NoData';
 import { NoDataSourceCallToAction } from './NoDataSourceCallToAction';
@@ -42,6 +41,7 @@ import { splitOpen } from './state/main';
 import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } from './state/query';
 import { isSplit } from './state/selectors';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';
+import { FlameGraphPanel } from './visualizations/FlameGraphPanel';
 import { GraphPanel } from './visualizations/GraphPanel';
 import TablePanel from './visualizations/TablePanel';
 import { TracePanel } from './visualizations/TracePanel';
@@ -312,7 +312,7 @@ export class Explore extends React.PureComponent<Props> {
 
   renderFlameGraphPanel() {
     const { queryResponse } = this.props;
-    return <FlameGraphExploreContainer dataFrames={queryResponse.flameGraphFrames} />;
+    return <FlameGraphPanel dataFrames={queryResponse.flameGraphFrames} />;
   }
 
   renderTraceViewPanel() {
