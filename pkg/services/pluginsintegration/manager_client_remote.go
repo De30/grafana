@@ -34,9 +34,10 @@ type PluginManagerRemoteClient struct {
 	rc pluginv2.ResourceClient
 }
 
-func ProvidePluginManagerRemoteClient(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService) (*PluginManagerRemoteClient, error) {
+func newPluginManagerRemoteClient(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService) (*PluginManagerRemoteClient, error) {
 	s := &PluginManagerRemoteClient{cfg: cfg, log: log.New("plugin.manager.client")}
 
+	s.log.Info("Creating plugin manager client")
 	conn, err := grpc.Dial(
 		s.cfg.PluginManager.Address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -85,6 +86,191 @@ func (s *PluginManagerRemoteClient) Plugins(ctx context.Context, pluginTypes ...
 		res = append(res, fromProto(p))
 	}
 	return res
+}
+
+func (s *PluginManagerRemoteClient) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
+	resp, err := s.AddPlugin(ctx, &AddPluginRequest{
+		Id:      pluginID,
+		Version: version,
+		Opts: &AddPluginOpts{
+			GrafanaVersion: opts.GrafanaVersion,
+			Os:             opts.OS,
+			Arch:           opts.Arch,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	if !resp.OK {
+		return errors.New("could not add plugin")
+	}
+
+	return nil
+}
+
+func (s *PluginManagerRemoteClient) Remove(ctx context.Context, pluginID string) error {
+	resp, err := s.RemovePlugin(ctx, &RemovePluginRequest{
+		Id: pluginID,
+	})
+	if err != nil {
+		return err
+	}
+
+	if !resp.OK {
+		return errors.New("could not remove plugin")
+	}
+
+	return nil
+}
+
+var ErrNotImplemented = errors.New("ErrMethodNotImplemented")
+
+func (s *PluginManagerRemoteClient) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+	if s.qc == nil {
+		return nil, ErrNotImplemented
+	}
+
+	protoReq := backend.ToProto().QueryDataRequest(req)
+	protoResp, err := s.qc.QueryData(ctx, protoReq)
+
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return nil, ErrNotImplemented
+		}
+
+		return nil, fmt.Errorf("%v: %w", "Failed to query data", err)
+	}
+
+	return backend.FromProto().QueryDataResponse(protoResp)
+}
+
+func (s *PluginManagerRemoteClient) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+	if s.rc == nil {
+		return ErrNotImplemented
+	}
+
+	protoReq := backend.ToProto().CallResourceRequest(req)
+	protoStream, err := s.rc.CallResource(ctx, protoReq)
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return ErrNotImplemented
+		}
+
+		return fmt.Errorf("%v: %w", "Failed to call resource", err)
+	}
+
+	for {
+		protoResp, err := protoStream.Recv()
+		if err != nil {
+			if status.Code(err) == codes.Unimplemented {
+				return ErrNotImplemented
+			}
+
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
+
+			return fmt.Errorf("%v: %w", "failed to receive call resource response", err)
+		}
+
+		if err := sender.Send(backend.FromProto().CallResourceResponse(protoResp)); err != nil {
+			return err
+		}
+	}
+}
+
+func (s *PluginManagerRemoteClient) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+	if s.dc == nil {
+		return nil, ErrNotImplemented
+	}
+
+	protoContext := backend.ToProto().PluginContext(req.PluginContext)
+	protoResp, err := s.dc.CheckHealth(ctx, &pluginv2.CheckHealthRequest{PluginContext: protoContext, Headers: req.Headers})
+
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return &backend.CheckHealthResult{
+				Status:  backend.HealthStatusUnknown,
+				Message: "Health check not implemented",
+			}, nil
+		}
+		return nil, err
+	}
+
+	return backend.FromProto().CheckHealthResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteClient) CollectMetrics(ctx context.Context, req *backend.CollectMetricsRequest) (*backend.CollectMetricsResult, error) {
+	if s.dc == nil {
+		return &backend.CollectMetricsResult{}, nil
+	}
+
+	protoResp, err := s.dc.CollectMetrics(ctx, backend.ToProto().CollectMetricsRequest(req))
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return &backend.CollectMetricsResult{}, nil
+		}
+
+		return nil, err
+	}
+
+	return backend.FromProto().CollectMetricsResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteClient) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
+	if s.sc == nil {
+		return nil, ErrNotImplemented
+	}
+	protoResp, err := s.sc.SubscribeStream(ctx, backend.ToProto().SubscribeStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+	return backend.FromProto().SubscribeStreamResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteClient) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
+	if s.sc == nil {
+		return nil, ErrNotImplemented
+	}
+	protoResp, err := s.sc.PublishStream(ctx, backend.ToProto().PublishStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+	return backend.FromProto().PublishStreamResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteClient) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
+	if s.sc == nil {
+		return ErrNotImplemented
+	}
+
+	protoReq := backend.ToProto().RunStreamRequest(req)
+	protoStream, err := s.sc.RunStream(ctx, protoReq)
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return ErrNotImplemented
+		}
+		return fmt.Errorf("%v: %w", "Failed to call resource", err)
+	}
+
+	for {
+		p, err := protoStream.Recv()
+		if err != nil {
+			if status.Code(err) == codes.Unimplemented {
+				return ErrNotImplemented
+			}
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
+			return fmt.Errorf("error running stream: %w", err)
+		}
+		// From GRPC connection we receive already prepared JSON.
+		err = sender.SendJSON(p.Data)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func fromProto(p *PluginData) plugins.PluginDTO {
@@ -268,189 +454,4 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 	}
 
 	return dto
-}
-
-func (s *PluginManagerRemoteClient) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
-	resp, err := s.AddPlugin(ctx, &AddPluginRequest{
-		Id:      pluginID,
-		Version: version,
-		Opts: &AddPluginOpts{
-			GrafanaVersion: opts.GrafanaVersion,
-			Os:             opts.OS,
-			Arch:           opts.Arch,
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	if !resp.OK {
-		return errors.New("could not add plugin")
-	}
-
-	return nil
-}
-
-func (s *PluginManagerRemoteClient) Remove(ctx context.Context, pluginID string) error {
-	resp, err := s.RemovePlugin(ctx, &RemovePluginRequest{
-		Id: pluginID,
-	})
-	if err != nil {
-		return err
-	}
-
-	if !resp.OK {
-		return errors.New("could not remove plugin")
-	}
-
-	return nil
-}
-
-var ErrNotImplemented = errors.New("ErrMethodNotImplemented")
-
-func (s *PluginManagerRemoteClient) CollectMetrics(ctx context.Context, req *backend.CollectMetricsRequest) (*backend.CollectMetricsResult, error) {
-	if s.dc == nil {
-		return &backend.CollectMetricsResult{}, nil
-	}
-
-	protoResp, err := s.dc.CollectMetrics(ctx, backend.ToProto().CollectMetricsRequest(req))
-	if err != nil {
-		if status.Code(err) == codes.Unimplemented {
-			return &backend.CollectMetricsResult{}, nil
-		}
-
-		return nil, err
-	}
-
-	return backend.FromProto().CollectMetricsResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteClient) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	if s.dc == nil {
-		return nil, ErrNotImplemented
-	}
-
-	protoContext := backend.ToProto().PluginContext(req.PluginContext)
-	protoResp, err := s.dc.CheckHealth(ctx, &pluginv2.CheckHealthRequest{PluginContext: protoContext, Headers: req.Headers})
-
-	if err != nil {
-		if status.Code(err) == codes.Unimplemented {
-			return &backend.CheckHealthResult{
-				Status:  backend.HealthStatusUnknown,
-				Message: "Health check not implemented",
-			}, nil
-		}
-		return nil, err
-	}
-
-	return backend.FromProto().CheckHealthResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteClient) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-	if s.qc == nil {
-		return nil, ErrNotImplemented
-	}
-
-	protoReq := backend.ToProto().QueryDataRequest(req)
-	protoResp, err := s.qc.QueryData(ctx, protoReq)
-
-	if err != nil {
-		if status.Code(err) == codes.Unimplemented {
-			return nil, ErrNotImplemented
-		}
-
-		return nil, fmt.Errorf("%v: %w", "Failed to query data", err)
-	}
-
-	return backend.FromProto().QueryDataResponse(protoResp)
-}
-
-func (s *PluginManagerRemoteClient) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
-	if s.rc == nil {
-		return ErrNotImplemented
-	}
-
-	protoReq := backend.ToProto().CallResourceRequest(req)
-	protoStream, err := s.rc.CallResource(ctx, protoReq)
-	if err != nil {
-		if status.Code(err) == codes.Unimplemented {
-			return ErrNotImplemented
-		}
-
-		return fmt.Errorf("%v: %w", "Failed to call resource", err)
-	}
-
-	for {
-		protoResp, err := protoStream.Recv()
-		if err != nil {
-			if status.Code(err) == codes.Unimplemented {
-				return ErrNotImplemented
-			}
-
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
-
-			return fmt.Errorf("%v: %w", "failed to receive call resource response", err)
-		}
-
-		if err := sender.Send(backend.FromProto().CallResourceResponse(protoResp)); err != nil {
-			return err
-		}
-	}
-}
-
-func (s *PluginManagerRemoteClient) SubscribeStream(ctx context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
-	if s.sc == nil {
-		return nil, ErrNotImplemented
-	}
-	protoResp, err := s.sc.SubscribeStream(ctx, backend.ToProto().SubscribeStreamRequest(req))
-	if err != nil {
-		return nil, err
-	}
-	return backend.FromProto().SubscribeStreamResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteClient) PublishStream(ctx context.Context, req *backend.PublishStreamRequest) (*backend.PublishStreamResponse, error) {
-	if s.sc == nil {
-		return nil, ErrNotImplemented
-	}
-	protoResp, err := s.sc.PublishStream(ctx, backend.ToProto().PublishStreamRequest(req))
-	if err != nil {
-		return nil, err
-	}
-	return backend.FromProto().PublishStreamResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteClient) RunStream(ctx context.Context, req *backend.RunStreamRequest, sender *backend.StreamSender) error {
-	if s.sc == nil {
-		return ErrNotImplemented
-	}
-
-	protoReq := backend.ToProto().RunStreamRequest(req)
-	protoStream, err := s.sc.RunStream(ctx, protoReq)
-	if err != nil {
-		if status.Code(err) == codes.Unimplemented {
-			return ErrNotImplemented
-		}
-		return fmt.Errorf("%v: %w", "Failed to call resource", err)
-	}
-
-	for {
-		p, err := protoStream.Recv()
-		if err != nil {
-			if status.Code(err) == codes.Unimplemented {
-				return ErrNotImplemented
-			}
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
-			return fmt.Errorf("error running stream: %w", err)
-		}
-		// From GRPC connection we receive already prepared JSON.
-		err = sender.SendJSON(p.Data)
-		if err != nil {
-			return err
-		}
-	}
 }

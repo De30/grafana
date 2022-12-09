@@ -11,7 +11,7 @@ func ProvideErrorResolver(loader *pluginStoreLib.Loader) *ErrorResolver {
 }
 
 func (e ErrorResolver) PluginErrors() []*Error {
-	var errs []*Error
+	errs := make([]*Error, 0)
 	for _, e := range e.loader.PluginErrors() {
 		errs = append(errs, &Error{
 			PluginID:  e.PluginID,

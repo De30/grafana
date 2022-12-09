@@ -28,10 +28,10 @@ func ProvidePluginManager(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthServ
 
 	var svc pluginsService
 	if cfg.ModuleEnabled("all") {
-		svc = ProvidePluginManagerLocalService(store, client, installer)
-	} else {
+		svc = newPluginManagerLocalService(store, client, installer)
+	} else if !cfg.ModuleEnabled("plugin-manager") {
 		var err error
-		svc, err = ProvidePluginManagerRemoteClient(cfg, pluginAuthService)
+		svc, err = newPluginManagerRemoteClient(cfg, pluginAuthService)
 		if err != nil {
 			return nil, err
 		}

@@ -21,7 +21,7 @@ type PluginManagerLocalService struct {
 	installer *manager.PluginInstaller
 }
 
-func ProvidePluginManagerLocalService(store *store.Service, client *plugins.Decorator,
+func newPluginManagerLocalService(store *store.Service, client *plugins.Decorator,
 	installer *manager.PluginInstaller) *PluginManagerLocalService {
 	return &PluginManagerLocalService{
 		store:     store,

@@ -110,14 +110,6 @@ func (s *PluginManagerRemoteServer) Plugins(ctx context.Context, types ...plugin
 	return res
 }
 
-func toLibTypes(types []plugins.Type) []pluginLib.Type {
-	var libTypes []pluginLib.Type
-	for _, t := range types {
-		libTypes = append(libTypes, pluginLib.Type(t))
-	}
-	return libTypes
-}
-
 func (s *PluginManagerRemoteServer) Add(ctx context.Context, pluginID, version string, opts plugins.CompatOpts) error {
 	return s.installer.Add(ctx, pluginID, version, pluginLib.CompatOpts{
 		GrafanaVersion: opts.GrafanaVersion,
@@ -157,6 +149,98 @@ func (s *PluginManagerRemoteServer) GetPlugins(ctx context.Context, req *GetPlug
 	return &GetPluginsResponse{
 		Plugins: ps,
 	}, nil
+}
+
+func (s *PluginManagerRemoteServer) AddPlugin(ctx context.Context, req *AddPluginRequest) (*AddPluginResponse, error) {
+	err := s.installer.Add(ctx, req.Id, req.Version, pluginLib.CompatOpts{
+		GrafanaVersion: req.Opts.GrafanaVersion,
+		OS:             req.Opts.Os,
+		Arch:           req.Opts.Arch,
+	})
+	if err != nil {
+		return &AddPluginResponse{OK: false}, err
+	}
+	return &AddPluginResponse{OK: true}, nil
+}
+
+func (s *PluginManagerRemoteServer) RemovePlugin(ctx context.Context, req *RemovePluginRequest) (*RemovePluginResponse, error) {
+	err := s.installer.Remove(ctx, req.Id)
+	if err != nil {
+		return &RemovePluginResponse{OK: false}, err
+	}
+	return &RemovePluginResponse{OK: true}, nil
+}
+
+func (s *PluginManagerRemoteServer) QueryData(ctx context.Context, req *pluginv2.QueryDataRequest) (*pluginv2.QueryDataResponse, error) {
+	protoResp, err := s.client.QueryData(ctx, backend.FromProto().QueryDataRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().QueryDataResponse(protoResp)
+}
+
+func (s *PluginManagerRemoteServer) CallResource(req *pluginv2.CallResourceRequest, server pluginv2.Resource_CallResourceServer) error {
+	fn := callResourceResponseSenderFunc(func(resp *backend.CallResourceResponse) error {
+		return server.Send(backend.ToProto().CallResourceResponse(resp))
+	})
+
+	return s.client.CallResource(server.Context(), backend.FromProto().CallResourceRequest(req), fn)
+}
+
+func (s *PluginManagerRemoteServer) CheckHealth(ctx context.Context, req *pluginv2.CheckHealthRequest) (*pluginv2.CheckHealthResponse, error) {
+	protoResp, err := s.client.CheckHealth(ctx, backend.FromProto().CheckHealthRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().CheckHealthResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteServer) CollectMetrics(ctx context.Context, req *pluginv2.CollectMetricsRequest) (*pluginv2.CollectMetricsResponse, error) {
+	protoResp, err := s.client.CollectMetrics(ctx, backend.FromProto().CollectMetricsRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().CollectMetricsResult(protoResp), nil
+}
+
+func (s *PluginManagerRemoteServer) SubscribeStream(ctx context.Context, req *pluginv2.SubscribeStreamRequest) (*pluginv2.SubscribeStreamResponse, error) {
+	protoResp, err := s.client.SubscribeStream(ctx, backend.FromProto().SubscribeStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().SubscribeStreamResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteServer) PublishStream(ctx context.Context, req *pluginv2.PublishStreamRequest) (*pluginv2.PublishStreamResponse, error) {
+	protoResp, err := s.client.PublishStream(ctx, backend.FromProto().PublishStreamRequest(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return backend.ToProto().PublishStreamResponse(protoResp), nil
+}
+
+func (s *PluginManagerRemoteServer) RunStream(req *pluginv2.RunStreamRequest, server pluginv2.Stream_RunStreamServer) error {
+	sender := backend.NewStreamSender(&runStreamServer{server: server})
+	return s.client.RunStream(server.Context(), backend.FromProto().RunStreamRequest(req), sender)
+}
+
+type runStreamServer struct {
+	server pluginv2.Stream_RunStreamServer
+}
+
+func (r *runStreamServer) Send(packet *backend.StreamPacket) error {
+	return r.server.Send(backend.ToProto().StreamPacket(packet))
+}
+
+type callResourceResponseSenderFunc func(resp *backend.CallResourceResponse) error
+
+func (fn callResourceResponseSenderFunc) Send(resp *backend.CallResourceResponse) error {
+	return fn(resp)
 }
 
 func toProto(p pluginLib.PluginDTO) *PluginData {
@@ -353,94 +437,10 @@ func protoRole(r org.RoleType) PluginData_JsonData_Role {
 	return PluginData_JsonData_VIEWER
 }
 
-func (s *PluginManagerRemoteServer) AddPlugin(ctx context.Context, req *AddPluginRequest) (*AddPluginResponse, error) {
-	err := s.installer.Add(ctx, req.Id, req.Version, pluginLib.CompatOpts{
-		GrafanaVersion: req.Opts.GrafanaVersion,
-		OS:             req.Opts.Os,
-		Arch:           req.Opts.Arch,
-	})
-	if err != nil {
-		return &AddPluginResponse{OK: false}, err
+func toLibTypes(types []plugins.Type) []pluginLib.Type {
+	var libTypes []pluginLib.Type
+	for _, t := range types {
+		libTypes = append(libTypes, pluginLib.Type(t))
 	}
-	return &AddPluginResponse{OK: true}, nil
-}
-
-func (s *PluginManagerRemoteServer) RemovePlugin(ctx context.Context, req *RemovePluginRequest) (*RemovePluginResponse, error) {
-	err := s.installer.Remove(ctx, req.Id)
-	if err != nil {
-		return &RemovePluginResponse{OK: false}, err
-	}
-	return &RemovePluginResponse{OK: true}, nil
-}
-
-func (s *PluginManagerRemoteServer) QueryData(ctx context.Context, req *pluginv2.QueryDataRequest) (*pluginv2.QueryDataResponse, error) {
-	protoResp, err := s.client.QueryData(ctx, backend.FromProto().QueryDataRequest(req))
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.ToProto().QueryDataResponse(protoResp)
-}
-
-func (s *PluginManagerRemoteServer) CallResource(req *pluginv2.CallResourceRequest, server pluginv2.Resource_CallResourceServer) error {
-	fn := callResourceResponseSenderFunc(func(resp *backend.CallResourceResponse) error {
-		return server.Send(backend.ToProto().CallResourceResponse(resp))
-	})
-
-	return s.client.CallResource(server.Context(), backend.FromProto().CallResourceRequest(req), fn)
-}
-
-func (s *PluginManagerRemoteServer) CheckHealth(ctx context.Context, req *pluginv2.CheckHealthRequest) (*pluginv2.CheckHealthResponse, error) {
-	protoResp, err := s.client.CheckHealth(ctx, backend.FromProto().CheckHealthRequest(req))
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.ToProto().CheckHealthResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteServer) CollectMetrics(ctx context.Context, req *pluginv2.CollectMetricsRequest) (*pluginv2.CollectMetricsResponse, error) {
-	protoResp, err := s.client.CollectMetrics(ctx, backend.FromProto().CollectMetricsRequest(req))
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.ToProto().CollectMetricsResult(protoResp), nil
-}
-
-func (s *PluginManagerRemoteServer) SubscribeStream(ctx context.Context, req *pluginv2.SubscribeStreamRequest) (*pluginv2.SubscribeStreamResponse, error) {
-	protoResp, err := s.client.SubscribeStream(ctx, backend.FromProto().SubscribeStreamRequest(req))
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.ToProto().SubscribeStreamResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteServer) PublishStream(ctx context.Context, req *pluginv2.PublishStreamRequest) (*pluginv2.PublishStreamResponse, error) {
-	protoResp, err := s.client.PublishStream(ctx, backend.FromProto().PublishStreamRequest(req))
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.ToProto().PublishStreamResponse(protoResp), nil
-}
-
-func (s *PluginManagerRemoteServer) RunStream(req *pluginv2.RunStreamRequest, server pluginv2.Stream_RunStreamServer) error {
-	sender := backend.NewStreamSender(&runStreamServer{server: server})
-	return s.client.RunStream(server.Context(), backend.FromProto().RunStreamRequest(req), sender)
-}
-
-type runStreamServer struct {
-	server pluginv2.Stream_RunStreamServer
-}
-
-func (r *runStreamServer) Send(packet *backend.StreamPacket) error {
-	return r.server.Send(backend.ToProto().StreamPacket(packet))
-}
-
-type callResourceResponseSenderFunc func(resp *backend.CallResourceResponse) error
-
-func (fn callResourceResponseSenderFunc) Send(resp *backend.CallResourceResponse) error {
-	return fn(resp)
+	return libTypes
 }
