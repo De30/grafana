@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins/manager"
 	"github.com/grafana/grafana/pkg/plugins/manager/store"
-	"github.com/grafana/grafana/pkg/server/backgroundsvcs"
+	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
 	"github.com/grafana/grafana/pkg/services/plugins"
@@ -37,7 +37,7 @@ type Modules struct {
 
 	grpcServer                grpcserver.Provider
 	kindRegistry              kind.KindRegistry
-	backgroundServiceRegistry *backgroundsvcs.BackgroundServiceRegistry
+	backgroundServiceRegistry registry.BackgroundServiceRegistry
 	db                        db.DB
 	entityReferenceResolver   resolver.EntityReferenceResolver
 	pluginStore               *store.Service
@@ -54,7 +54,7 @@ func ProvideService(
 	cfg *setting.Cfg,
 	server grpcserver.Provider,
 	kindRegistry kind.KindRegistry,
-	backgroundServiceRegistry *backgroundsvcs.BackgroundServiceRegistry,
+	backgroundServiceRegistry registry.BackgroundServiceRegistry,
 	roleRegistry accesscontrol.RoleRegistry,
 	db db.DB,
 	entityReferenceResolver resolver.EntityReferenceResolver,
