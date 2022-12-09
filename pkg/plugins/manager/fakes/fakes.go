@@ -10,8 +10,8 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
-	"github.com/grafana/grafana/pkg/plugins/repo"
-	"github.com/grafana/grafana/pkg/plugins/storage"
+	"github.com/grafana/grafana/pkg/plugins/manager/repo"
+	"github.com/grafana/grafana/pkg/plugins/manager/storage"
 )
 
 type FakePluginInstaller struct {

@@ -11,8 +11,8 @@ import (
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/models"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/services"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/utils"
-	"github.com/grafana/grafana/pkg/plugins/repo"
-	"github.com/grafana/grafana/pkg/plugins/storage"
+	"github.com/grafana/grafana/pkg/plugins/manager/repo"
+	"github.com/grafana/grafana/pkg/plugins/manager/storage"
 )
 
 func validateInput(c utils.CommandLine, pluginFolder string) error {

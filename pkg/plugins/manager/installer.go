@@ -10,8 +10,8 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/logger"
 	"github.com/grafana/grafana/pkg/plugins/manager/loader"
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
-	"github.com/grafana/grafana/pkg/plugins/repo"
-	"github.com/grafana/grafana/pkg/plugins/storage"
+	"github.com/grafana/grafana/pkg/plugins/manager/repo"
+	"github.com/grafana/grafana/pkg/plugins/manager/storage"
 )
 
 type PluginInstaller struct {
