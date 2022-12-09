@@ -152,7 +152,7 @@ func (p *SMPlato) Reconcile() error {
 
 	kpsm := p.kreg.PlatformatonSM()
 
-	resp, err := p.store.Search(ctx, &entity.EntitySearchRequest{
+	resp, err = p.store.Search(ctx, &entity.EntitySearchRequest{
 		Kind: []string{
 			kpsm.MachineName(),
 		},
@@ -176,13 +176,47 @@ func (p *SMPlato) Reconcile() error {
 	}
 
 	if len(psms) == 0 {
-		// Use default config
+		psms = append(psms, kpsm.ConvergentLineage().TypedSchema().NewT())
 	}
-
-	// repeat to load platformaton config
 
 	// then, implement logic to create checks, etc. from svc + pfsm
 	// then, write 'em to the places they need to go
+
+	curChecks, err := p.client.ListChecks(ctx)
+	if err != nil {
+		p.log.Debug("listing SM checks", "err", err)
+	}
+
+	_ = curChecks
+
+	// 1. Generate a list of desired checks
+	for _, psm := range psms {
+		for _, svc := range svcs {
+			for _, endpoint := range *svc.Endpoints {
+				switch endpoint.Type {
+				case service.EndpointTypeHttp:
+					if psm.GenerateFor.Http {
+					}
+
+				case service.EndpointTypePing:
+					if psm.GenerateFor.Ping {
+					}
+
+				case service.EndpointTypeTcp:
+					if psm.GenerateFor.Tcp {
+					}
+
+				case service.EndpointTypeDns:
+					if psm.GenerateFor.Dns {
+					}
+				}
+			}
+		}
+	}
+
+	// 2. Compare against the list of actual checks
+
+	// 3. Prune excess
 
 	return nil
 }
