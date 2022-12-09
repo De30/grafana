@@ -69,6 +69,7 @@ func (s *QueryHistoryService) searchHandler(c *models.ReqContext) response.Respo
 		DatasourceUIDs: c.QueryStrings("datasourceUid"),
 		SearchString:   c.QueryStringWithDefault("searchString", ""),
 		OnlyStarred:    c.QueryBoolWithDefault("onlyStarred", false),
+		Distinct:       c.QueryBoolWithDefault("distinct", false),
 		Sort:           c.QueryStringWithDefault("sort", ""),
 		Page:           c.QueryInt("page"),
 		Limit:          c.QueryInt("limit"),

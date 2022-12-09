@@ -28,4 +28,5 @@ export type RichHistorySearchFilters = {
   starred?: boolean;
   page?: number;
   limit?: number;
+  distinct?: boolean;
 };

@@ -70,6 +70,7 @@ func coreTreeList(rt *thema.Runtime) pfs.TreeList {
 		makeTreeOrPanic("public/app/plugins/panel/news", "news", rt),
 		makeTreeOrPanic("public/app/plugins/panel/nodeGraph", "nodeGraph", rt),
 		makeTreeOrPanic("public/app/plugins/panel/piechart", "piechart", rt),
+		makeTreeOrPanic("public/app/plugins/panel/savedlist", "savedlist", rt),
 		makeTreeOrPanic("public/app/plugins/panel/stat", "stat", rt),
 		makeTreeOrPanic("public/app/plugins/panel/table-old", "table_old", rt),
 		makeTreeOrPanic("public/app/plugins/panel/text", "text", rt),

@@ -67,7 +67,14 @@ func (s QueryHistoryService) searchQueries(ctx context.Context, user *user.Signe
 
 	err := s.store.WithDbSession(ctx, func(session *db.Session) error {
 		dtosBuilder := db.SQLBuilder{}
-		dtosBuilder.Write(`SELECT
+
+		if query.Distinct {
+			dtosBuilder.Write(`SELECT CAST(ROW_NUMBER () OVER (ORDER BY created_at) AS text) uid,
+			datasource_uid, created_by, 1 created_at, '' comment, queries FROM (
+			SELECT query_history.datasource_uid, query_history.created_by, MAX(query_history.created_at) created_at, query_history.queries,
+		`)
+		} else {
+			dtosBuilder.Write(`SELECT
 			query_history.uid,
 			query_history.datasource_uid,
 			query_history.created_by,
@@ -75,12 +82,17 @@ func (s QueryHistoryService) searchQueries(ctx context.Context, user *user.Signe
 			query_history.comment,
 			query_history.queries,
 		`)
+		}
 		writeStarredSQL(query, s.store, &dtosBuilder)
 		writeFiltersSQL(query, user, s.store, &dtosBuilder)
+
+		if query.Distinct {
+			dtosBuilder.Write(` GROUP BY query_history.datasource_uid, query_history.created_by, query_history.queries)`)
+		}
+
 		writeSortSQL(query, s.store, &dtosBuilder)
 		writeLimitSQL(query, s.store, &dtosBuilder)
 		writeOffsetSQL(query, s.store, &dtosBuilder)
-
 		err := session.SQL(dtosBuilder.GetSQLString(), dtosBuilder.GetParams()...).Find(&dtos)
 		if err != nil {
 			return err

@@ -154,7 +154,7 @@ async function fetchExploreItems(options: PanelOptions) {
 
   let recentRichHistoryResults: Promise<RichHistoryResults> = Promise.resolve({ richHistory: [] });
   if (options.showRecentlyViewed) {
-    recentRichHistoryResults = getRichHistory({ from: 0, to: 7, limit: 50 }, true);
+    recentRichHistoryResults = getRichHistory({ from: 0, to: 7, limit: 50, distinct: true }, true);
   }
 
   let starredRichHistoryResults: Promise<RichHistoryResults> = Promise.resolve({ richHistory: [] });

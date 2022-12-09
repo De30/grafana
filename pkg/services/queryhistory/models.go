@@ -35,6 +35,7 @@ type SearchInQueryHistoryQuery struct {
 	DatasourceUIDs []string `json:"datasourceUids"`
 	SearchString   string   `json:"searchString"`
 	OnlyStarred    bool     `json:"onlyStarred"`
+	Distinct       bool     `json:"distinct"`
 	Sort           string   `json:"sort"`
 	Page           int      `json:"page"`
 	Limit          int      `json:"limit"`

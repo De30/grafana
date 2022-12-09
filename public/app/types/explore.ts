@@ -231,7 +231,9 @@ export interface QueryTransaction {
   scanning?: boolean;
 }
 
-export type RichHistoryQuery<T extends DataQuery = DataQuery> = {
+type DataQueryToSave = Omit<DataQuery, 'key'>;
+
+export type RichHistoryQuery<T extends DataQueryToSave = DataQueryToSave> = {
   id: string;
   createdAt: number;
   datasourceUid: string;

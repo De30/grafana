@@ -167,5 +167,8 @@ function buildQueryParams(filters: RichHistorySearchFilters): string {
   if (filters.starred) {
     params = params + `&onlyStarred=${filters.starred}`;
   }
+  if (filters.distinct) {
+    params = params + `&distinct=${filters.distinct}`;
+  }
   return params;
 }

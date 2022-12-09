@@ -434,8 +434,21 @@ export const runQueries = (
       datasource: query.datasource || datasourceInstance?.getRef(),
     }));
 
+    const historyQueries = queries.map((query) => {
+      const newQuery = { ...query };
+      delete newQuery.key;
+      return newQuery;
+    });
+
     if (datasourceInstance != null) {
-      handleHistory(dispatch, getState().explore, exploreItemState.history, datasourceInstance, queries, exploreId);
+      handleHistory(
+        dispatch,
+        getState().explore,
+        exploreItemState.history,
+        datasourceInstance,
+        historyQueries,
+        exploreId
+      );
     }
 
     dispatch(stateSave({ replace: options?.replaceUrl }));
