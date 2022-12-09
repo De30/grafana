@@ -2,26 +2,25 @@ import React, { PureComponent } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { ValueLinkConfig, applyFieldOverrides, TimeZone, SplitOpen, DataFrame } from '@grafana/data';
-import { Collapse, Table } from '@grafana/ui';
+import { Table } from '@grafana/ui';
 import { FilterItem } from '@grafana/ui/src/components/Table/types';
 import { config } from 'app/core/config';
-import { PANEL_BORDER } from 'app/core/constants';
 import { StoreState } from 'app/types';
 import { ExploreId, ExploreItemState } from 'app/types/explore';
 
-import { MetaInfoText } from './MetaInfoText';
-import { getFieldLinksForExplore } from './utils/links';
+import { MetaInfoText } from '../../MetaInfoText';
+import { PanelContainer } from '../../components/PanelContainer';
+import { getFieldLinksForExplore } from '../../utils/links';
 
-interface TableContainerProps {
+interface OwnProps {
   ariaLabel?: string;
   exploreId: ExploreId;
-  width: number;
   timeZone: TimeZone;
   onCellFilterAdded?: (filter: FilterItem) => void;
   splitOpenFn: SplitOpen;
 }
 
-function mapStateToProps(state: StoreState, { exploreId }: TableContainerProps) {
+function mapStateToProps(state: StoreState, { exploreId }: OwnProps) {
   const explore = state.explore;
   // @ts-ignore
   const item: ExploreItemState = explore[exploreId];
@@ -32,9 +31,9 @@ function mapStateToProps(state: StoreState, { exploreId }: TableContainerProps) 
 
 const connector = connect(mapStateToProps, {});
 
-type Props = TableContainerProps & ConnectedProps<typeof connector>;
+type Props = OwnProps & ConnectedProps<typeof connector>;
 
-export class TableContainer extends PureComponent<Props> {
+export class TablePanel extends PureComponent<Props> {
   getMainFrame(frames: DataFrame[] | null) {
     return frames?.find((df) => df.meta?.custom?.parentRowIndex === undefined) || frames?.[0];
   }
@@ -52,9 +51,8 @@ export class TableContainer extends PureComponent<Props> {
   }
 
   render() {
-    const { loading, onCellFilterAdded, tableResult, width, splitOpenFn, range, ariaLabel, timeZone } = this.props;
+    const { loading, onCellFilterAdded, tableResult, splitOpenFn, range, ariaLabel, timeZone } = this.props;
     const height = this.getTableHeight();
-    const tableWidth = width - config.theme.panelPadding * 2 - PANEL_BORDER;
 
     let dataFrames = tableResult;
 
@@ -91,22 +89,24 @@ export class TableContainer extends PureComponent<Props> {
     const subFrames = dataFrames?.filter((df) => df.meta?.custom?.parentRowIndex !== undefined);
 
     return (
-      <Collapse label="Table" loading={loading} isOpen>
-        {mainFrame?.length ? (
-          <Table
-            ariaLabel={ariaLabel}
-            data={mainFrame}
-            subData={subFrames}
-            width={tableWidth}
-            height={height}
-            onCellFilterAdded={onCellFilterAdded}
-          />
-        ) : (
-          <MetaInfoText metaItems={[{ value: '0 series returned' }]} />
-        )}
-      </Collapse>
+      <PanelContainer label="Table" loading={loading} isOpen>
+        {(width) =>
+          mainFrame?.length ? (
+            <Table
+              ariaLabel={ariaLabel}
+              data={mainFrame}
+              subData={subFrames}
+              width={width}
+              height={height}
+              onCellFilterAdded={onCellFilterAdded}
+            />
+          ) : (
+            <MetaInfoText metaItems={[{ value: '0 series returned' }]} />
+          )
+        }
+      </PanelContainer>
     );
   }
 }
 
-export default connector(TableContainer);
+export default connector(TablePanel);

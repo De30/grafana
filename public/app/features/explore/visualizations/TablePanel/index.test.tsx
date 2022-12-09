@@ -4,7 +4,7 @@ import React from 'react';
 import { DataFrame, toDataFrame, FieldType, InternalTimeZones } from '@grafana/data';
 import { ExploreId } from 'app/types/explore';
 
-import { TableContainer } from './TableContainer';
+import { TablePanel } from '.';
 
 function getTable(): HTMLElement {
   return screen.getAllByRole('table')[0];
@@ -60,7 +60,7 @@ const defaultProps = {
 
 describe('TableContainer', () => {
   it('should render component', () => {
-    render(<TableContainer {...defaultProps} />);
+    render(<TablePanel {...defaultProps} />);
     expect(getTable()).toBeInTheDocument();
     const rows = within(getTable()).getAllByRole('row');
     expect(rows).toHaveLength(5);
@@ -80,12 +80,12 @@ describe('TableContainer', () => {
         length: 0,
       },
     ] as DataFrame[];
-    render(<TableContainer {...defaultProps} tableResult={emptyFrames} />);
+    render(<TablePanel {...defaultProps} tableResult={emptyFrames} />);
     expect(screen.getByText('0 series returned')).toBeInTheDocument();
   });
 
   it('should update time when timezone changes', () => {
-    const { rerender } = render(<TableContainer {...defaultProps} />);
+    const { rerender } = render(<TablePanel {...defaultProps} />);
     const rowsBeforeChange = within(getTable()).getAllByRole('row');
     expect(getRowsData(rowsBeforeChange)).toEqual([
       { time: '2021-01-01 00:00:00', text: 'test_string_1' },
@@ -94,7 +94,7 @@ describe('TableContainer', () => {
       { time: '2021-01-01 02:00:00', text: 'test_string_4' },
     ]);
 
-    rerender(<TableContainer {...defaultProps} timeZone="cest" />);
+    rerender(<TablePanel {...defaultProps} timeZone="cest" />);
     const rowsAfterChange = within(getTable()).getAllByRole('row');
     expect(getRowsData(rowsAfterChange)).toEqual([
       { time: '2020-12-31 19:00:00', text: 'test_string_1' },

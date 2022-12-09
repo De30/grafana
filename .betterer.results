@@ -3850,10 +3850,6 @@ exports[`better eslint`] = {
     "public/app/features/explore/RichHistory/RichHistoryStarredTab.test.tsx:5381": [
       [0, 0, 0, "Unexpected any. Specify a different type.", "0"]
     ],
-    "public/app/features/explore/TableContainer.test.tsx:5381": [
-      [0, 0, 0, "Unexpected any. Specify a different type.", "0"],
-      [0, 0, 0, "Unexpected any. Specify a different type.", "1"]
-    ],
     "public/app/features/explore/Wrapper.test.tsx:5381": [
       [0, 0, 0, "Unexpected any. Specify a different type.", "0"],
       [0, 0, 0, "Unexpected any. Specify a different type.", "1"],
@@ -3937,6 +3933,10 @@ exports[`better eslint`] = {
     ],
     "public/app/features/explore/utils/links.ts:5381": [
       [0, 0, 0, "Unexpected any. Specify a different type.", "0"]
+    ],
+    "public/app/features/explore/visualizations/TablePanel/index.test.tsx:5381": [
+      [0, 0, 0, "Unexpected any. Specify a different type.", "0"],
+      [0, 0, 0, "Unexpected any. Specify a different type.", "1"]
     ],
     "public/app/features/explore/visualizations/TracePanel/TraceView.test.tsx:5381": [
       [0, 0, 0, "Unexpected any. Specify a different type.", "0"]

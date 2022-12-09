@@ -36,7 +36,6 @@ import LogsContainer from './LogsContainer';
 import { NoData } from './NoData';
 import { NoDataSourceCallToAction } from './NoDataSourceCallToAction';
 import { NodeGraphContainer } from './NodeGraphContainer';
-import TableContainer from './TableContainer';
 import { QueriesSection } from './components/QueriesSection';
 import { changeSize } from './state/explorePane';
 import { splitOpen } from './state/main';
@@ -44,6 +43,7 @@ import { addQueryRow, modifyQueries, scanStart, scanStopAction, setQueries } fro
 import { isSplit } from './state/selectors';
 import { makeAbsoluteTime, updateTimeRange } from './state/time';
 import { GraphPanel } from './visualizations/GraphPanel';
+import TablePanel from './visualizations/TablePanel';
 import { TracePanel } from './visualizations/TracePanel';
 
 const getStyles = (theme: GrafanaTheme2) => {
@@ -260,12 +260,11 @@ export class Explore extends React.PureComponent<Props> {
     );
   }
 
-  renderTablePanel(width: number) {
+  renderTablePanel() {
     const { exploreId, timeZone } = this.props;
     return (
-      <TableContainer
+      <TablePanel
         ariaLabel={selectors.pages.Explore.General.table}
-        width={width}
         exploreId={exploreId}
         onCellFilterAdded={this.onCellFilterAdded}
         timeZone={timeZone}
@@ -396,7 +395,7 @@ export class Explore extends React.PureComponent<Props> {
                           {showMetrics && graphResult && (
                             <ErrorBoundaryAlert>{this.renderGraphPanel(width)}</ErrorBoundaryAlert>
                           )}
-                          {showTable && <ErrorBoundaryAlert>{this.renderTablePanel(width)}</ErrorBoundaryAlert>}
+                          {showTable && <ErrorBoundaryAlert>{this.renderTablePanel()}</ErrorBoundaryAlert>}
                           {showLogs && <ErrorBoundaryAlert>{this.renderLogsPanel(width)}</ErrorBoundaryAlert>}
                           {showNodeGraph && <ErrorBoundaryAlert>{this.renderNodeGraphPanel()}</ErrorBoundaryAlert>}
                           {showFlameGraph && config.featureToggles.flameGraph && (
