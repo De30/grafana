@@ -5,18 +5,22 @@ import (
 	"sync"
 
 	"github.com/grafana/grafana/pkg/bus"
+	"github.com/grafana/grafana/pkg/infra/appcontext"
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/kinds/platformatonsm"
+	"github.com/grafana/grafana/pkg/kinds/service"
 	"github.com/grafana/grafana/pkg/registry/corekind"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	"github.com/grafana/grafana/pkg/services/store/entity"
 	"github.com/grafana/grafana/pkg/services/store/entity/sqlstash"
+	"github.com/grafana/grafana/pkg/services/user"
 	smapi "github.com/grafana/synthetic-monitoring-api-go-client"
 )
 
 // We can do one of these platformatons per file - this'll be the first, for SM.
 // k8s app can go in a separate file
 
-func ProvideSMPlatformaton(store entity.EntityStoreServer, kreg *corekind.Base, bus bus.Bus, ps pluginsettings.Service) *SMPlato {
+func ProvideSMPlatformaton(store entity.EntityStoreServer, kreg *corekind.Base, bus bus.Bus, ps pluginsettings.Service, usersvc user.Service) *SMPlato {
 	logger := log.New("platformaton-sm")
 
 	logger.Info("ProvideSMPlatformaton")
@@ -27,6 +31,7 @@ func ProvideSMPlatformaton(store entity.EntityStoreServer, kreg *corekind.Base, 
 		kreg:           kreg,
 		bus:            bus,
 		pluginSettings: ps,
+		usersvc:        usersvc,
 	}
 }
 
@@ -38,6 +43,7 @@ type SMPlato struct {
 	pluginSettings pluginsettings.Service
 	clientMutex    sync.Mutex
 	client         *smapi.Client
+	usersvc        user.Service
 }
 
 func (p *SMPlato) Run(ctx context.Context) error {
@@ -55,9 +61,8 @@ func (p *SMPlato) Run(ctx context.Context) error {
 	c := make(chan (any))
 
 	p.bus.AddEventListener(func(ctx context.Context, event *sqlstash.EntityWriteEvent) error {
-		// not sure offhand if these will be the capital or lowercase name strings :/
-		p.log.Info("processing event", "event", event)
-		if event.Kind == "Service" || event.Kind == "PlatformatonSM" {
+		switch event.Kind {
+		case p.kreg.Service().MachineName(), p.kreg.PlatformatonSM().MachineName():
 			// Don't block, just try to notify
 			select {
 			case c <- nil:
@@ -106,24 +111,80 @@ func (p *SMPlato) getSMClient(ctx context.Context) error {
 // 2. state of all types of matched inputs
 
 func (p *SMPlato) Reconcile() error {
+	p.log.Info("reconciling...")
 	// 1. load all entities we could possibly care about
 	// 2. load all known transformaton configs from storage
 	// 3. run generation process for all input uids according to loaded tf configs
 	// 4. save generated objects to appropriate targets (local storage + SM API)
 
+	ctx := context.Background()
+
+	anonuser, err := p.usersvc.NewAnonymousSignedInUser(ctx)
+
+	ctx = appcontext.WithUser(ctx, anonuser)
+
 	ksvc := p.kreg.Service()
 
-	// Pretend these bytes came back from an p.store.Read() call
-	var b []byte
-	// Transform the bytes into
-	svc, _, err := ksvc.JSONValueMux(b)
-	_ = svc
+	resp, err := p.store.Search(ctx, &entity.EntitySearchRequest{
+		Kind: []string{
+			ksvc.MachineName(),
+		},
+		WithBody: true,
+	})
+	if err != nil {
+		p.log.Info("searching services", "err", err)
+		return err
+	}
+
+	var svcs []*service.Service
+
+	for _, res := range resp.GetResults() {
+		svc, _, err := ksvc.JSONValueMux(res.Body)
+		if err != nil {
+			p.log.Debug("reading services", "err", err)
+			continue // XXX(mem): probably not correct
+		}
+
+		p.log.Info("service search result", "name", svc.Name, "uid", svc.Uid)
+
+		svcs = append(svcs, svc)
+	}
+
+	kpsm := p.kreg.PlatformatonSM()
+
+	resp, err := p.store.Search(ctx, &entity.EntitySearchRequest{
+		Kind: []string{
+			kpsm.MachineName(),
+		},
+		WithBody: true,
+	})
+	if err != nil {
+		p.log.Info("searching platformaton SM configs", "err", err)
+		return err
+	}
+
+	var psms []*platformatonsm.PlatformatonSM
+
+	for _, res := range resp.GetResults() {
+		psm, _, err := kpsm.JSONValueMux(res.Body)
+		if err != nil {
+			p.log.Debug("reading platformaton SM config", "err", err)
+			continue // XXX(mem): probably not correct
+		}
+
+		psms = append(psms, psm)
+	}
+
+	if len(psms) == 0 {
+		// Use default config
+	}
+
 	// repeat to load platformaton config
 
 	// then, implement logic to create checks, etc. from svc + pfsm
 	// then, write 'em to the places they need to go
 
-	return err
+	return nil
 }
 
 type smconfig struct {

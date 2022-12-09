@@ -276,7 +276,7 @@ func (s *sqlEntityServer) Write(ctx context.Context, r *entity.WriteEntityReques
 
 func (s *sqlEntityServer) AdminWrite(ctx context.Context, r *entity.AdminWriteEntityRequest) (*entity.WriteEntityResponse, error) {
 	resp, err := s.adminWrite(ctx, r)
-	if err != nil {
+	if err == nil {
 		s.bus.Publish(ctx, &EntityWriteEvent{
 			Kind: r.GRN.Kind,
 		})
