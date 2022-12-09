@@ -1765,9 +1765,9 @@
         ],
         "responses": {
           "200": {
-            "description": "AlertRuleFileExport",
+            "description": "AlertingFileExport",
             "schema": {
-              "$ref": "#/definitions/AlertRuleFileExport"
+              "$ref": "#/definitions/AlertingFileExport"
             }
           },
           "404": {
@@ -1905,9 +1905,9 @@
         ],
         "responses": {
           "200": {
-            "description": "AlertRuleExport",
+            "description": "AlertingFileExport",
             "schema": {
-              "$ref": "#/definitions/AlertRuleExport"
+              "$ref": "#/definitions/AlertingFileExport"
             }
           },
           "404": {
@@ -2161,9 +2161,9 @@
         ],
         "responses": {
           "200": {
-            "description": "AlertRuleGroupExport",
+            "description": "AlertingFileExport",
             "schema": {
-              "$ref": "#/definitions/AlertRuleGroupExport"
+              "$ref": "#/definitions/AlertingFileExport"
             }
           },
           "404": {
@@ -2766,7 +2766,7 @@
     },
     "AlertRuleExport": {
       "type": "object",
-      "title": "AlertRuleExport is the provisioned export of models.AlertRule.",
+      "title": "AlertRuleExport is the provisioned file export of models.AlertRule.",
       "properties": {
         "annotations": {
           "type": "object",
@@ -2823,18 +2823,6 @@
         }
       }
     },
-    "AlertRuleFileExport": {
-      "type": "object",
-      "title": "AlertRuleFileExport is the provisioned export of multiple models.AlertRuleGroup.",
-      "properties": {
-        "groups": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AlertRuleGroupExport"
-          }
-        }
-      }
-    },
     "AlertRuleGroup": {
       "type": "object",
       "properties": {
@@ -2858,7 +2846,7 @@
     },
     "AlertRuleGroupExport": {
       "type": "object",
-      "title": "AlertRuleGroupExport is the provisioned export of models.AlertRuleGroup.",
+      "title": "AlertRuleGroupExport is the provisioned file export of AlertRuleGroupV1.",
       "properties": {
         "folder": {
           "type": "string"
@@ -2892,6 +2880,23 @@
     },
     "AlertStateType": {
       "type": "string"
+    },
+    "AlertingFileExport": {
+      "type": "object",
+      "title": "AlertingFileExport is the full provisioned file export.",
+      "properties": {
+        "apiVersion": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AlertRuleGroupExport"
+          }
+        }
+      },
+      "$ref": "#/definitions/AlertingFileExport"
     },
     "AlertingRule": {
       "description": "adapted from cortex",

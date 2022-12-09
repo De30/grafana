@@ -219,19 +219,7 @@
      "type": "string"
     }
    },
-   "title": "AlertRuleExport is the provisioned export of models.AlertRule.",
-   "type": "object"
-  },
-  "AlertRuleFileExport": {
-   "properties": {
-    "groups": {
-     "items": {
-      "$ref": "#/definitions/AlertRuleGroupExport"
-     },
-     "type": "array"
-    }
-   },
-   "title": "AlertRuleFileExport is the provisioned export of multiple models.AlertRuleGroup.",
+   "title": "AlertRuleExport is the provisioned file export of models.AlertRule.",
    "type": "object"
   },
   "AlertRuleGroup": {
@@ -277,7 +265,7 @@
      "type": "array"
     }
    },
-   "title": "AlertRuleGroupExport is the provisioned export of models.AlertRuleGroup.",
+   "title": "AlertRuleGroupExport is the provisioned file export of AlertRuleGroupV1.",
    "type": "object"
   },
   "AlertRuleGroupMetadata": {
@@ -291,6 +279,22 @@
   },
   "AlertStateType": {
    "type": "string"
+  },
+  "AlertingFileExport": {
+   "properties": {
+    "apiVersion": {
+     "format": "int64",
+     "type": "integer"
+    },
+    "groups": {
+     "items": {
+      "$ref": "#/definitions/AlertRuleGroupExport"
+     },
+     "type": "array"
+    }
+   },
+   "title": "AlertingFileExport is the full provisioned file export.",
+   "type": "object"
   },
   "AlertingRule": {
    "description": "adapted from cortex",
@@ -3694,6 +3698,7 @@
    "type": "array"
   },
   "integration": {
+   "description": "Integration integration",
    "properties": {
     "lastNotifyAttempt": {
      "description": "A timestamp indicating the last attempt to deliver a notification regardless of the outcome.\nFormat: date-time",
@@ -3874,6 +3879,7 @@
    "type": "object"
   },
   "receiver": {
+   "description": "Receiver receiver",
    "properties": {
     "active": {
      "description": "active",
@@ -4062,9 +4068,9 @@
     ],
     "responses": {
      "200": {
-      "description": "AlertRuleFileExport",
+      "description": "AlertingFileExport",
       "schema": {
-       "$ref": "#/definitions/AlertRuleFileExport"
+       "$ref": "#/definitions/AlertingFileExport"
       }
      },
      "404": {
@@ -4198,9 +4204,9 @@
     ],
     "responses": {
      "200": {
-      "description": "AlertRuleExport",
+      "description": "AlertingFileExport",
       "schema": {
-       "$ref": "#/definitions/AlertRuleExport"
+       "$ref": "#/definitions/AlertingFileExport"
       }
      },
      "404": {
@@ -4447,9 +4453,9 @@
     ],
     "responses": {
      "200": {
-      "description": "AlertRuleGroupExport",
+      "description": "AlertingFileExport",
       "schema": {
-       "$ref": "#/definitions/AlertRuleGroupExport"
+       "$ref": "#/definitions/AlertingFileExport"
       }
      },
      "404": {
