@@ -18,8 +18,7 @@ import {
   DataSourceRef,
   CoreApp,
 } from '@grafana/data';
-import { getTemplateSrv, RefreshEvent } from '@grafana/runtime';
-import config from 'app/core/config';
+import { config, getTemplateSrv, RefreshEvent } from '@grafana/runtime';
 import { safeStringifyValue } from 'app/core/utils/explore';
 import { getNextRefIdChar } from 'app/core/utils/query';
 import { SavedQueryLink } from 'app/features/query-library/types';

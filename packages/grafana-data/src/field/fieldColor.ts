@@ -163,6 +163,7 @@ export class FieldColorSchemeMode implements FieldColorMode {
 
     this.colorCache = this.getNamedColors(theme).map(theme.visualization.getColorByName);
     this.colorCacheTheme = theme;
+    this.interpolator = undefined;
 
     return this.colorCache;
   }
