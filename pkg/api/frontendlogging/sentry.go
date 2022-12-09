@@ -79,18 +79,18 @@ func addEventContextToLogContext(rootPrefix string, logCtx *CtxVector, eventCtx 
 }
 
 func (event *FrontendSentryEvent) ToLogContext(store *SourceMapStore) []interface{} {
-	var ctxV = CtxVector{"url", event.Request.URL, "user_agent", event.Request.Headers["User-Agent"],
+	var ctx = CtxVector{"url", event.Request.URL, "user_agent", event.Request.Headers["User-Agent"],
 		"event_id", event.EventID, "original_timestamp", event.Timestamp}
 
 	if event.Exception != nil {
-		ctxV = append(ctxV, "stacktrace", event.Exception.FmtStacktraces(store))
+		ctx = append(ctx, "stacktrace", event.Exception.FmtStacktraces(store))
 	}
-	addEventContextToLogContext("context", &ctxV, event.Contexts)
+	addEventContextToLogContext("context", &ctx, event.Contexts)
 	if len(event.User.Email) > 0 {
-		ctxV = append(ctxV, "user_email", event.User.Email, "user_id", event.User.ID)
+		ctx = append(ctx, "user_email", event.User.Email, "user_id", event.User.ID)
 	}
 
-	return ctxV
+	return ctx
 }
 
 func (event *FrontendSentryEvent) MarshalJSON() ([]byte, error) {
