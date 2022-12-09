@@ -370,6 +370,7 @@ export class UnthemedDashboardPage extends PureComponent<Props, State> {
     const pageClassName = cx({
       'panel-in-fullscreen': Boolean(viewPanel),
       'page-hidden': Boolean(queryParams.editview || editPanel),
+      'dashboard-bg': true,
     });
 
     return (

@@ -11,10 +11,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
   collapse: css`
     label: collapse;
     margin-bottom: ${theme.spacing(1)};
-    background-color: ${theme.colors.background.primary};
-    border: 1px solid ${theme.colors.border.medium};
+    background: ${theme.components.panel.background};
+    border: 1px solid ${theme.components.panel.borderColor};
     position: relative;
-    border-radius: 3px;
+    border-radius: ${theme.components.panel.borderRadius};
     width: 100%;
     display: flex;
     flex-direction: column;

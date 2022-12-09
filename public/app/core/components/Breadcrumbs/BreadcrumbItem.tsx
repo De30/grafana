@@ -45,6 +45,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       padding: theme.spacing(0, 0.5),
       whiteSpace: 'nowrap',
       color: theme.colors.text.secondary,
+      fontWeight: theme.typography.fontWeightMedium,
     }),
     breadcrumbLink: css({
       color: theme.colors.text.primary,

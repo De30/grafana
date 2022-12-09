@@ -189,5 +189,10 @@ export function getOldPanelStyles(theme: GrafanaTheme2) {
       top: 25px;
       left: -100px;
     }
+
+    .dashboard-bg {
+      background: ${theme.components.dashboard.background};
+      background-blend-mode: screen;
+    }
   `;
 }
