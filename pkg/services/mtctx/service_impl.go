@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana/pkg/api/response"
-	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 	"github.com/grafana/grafana/pkg/infra/appcontext"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
@@ -94,7 +93,7 @@ func (s *serviceImpl) Middleware(next http.Handler) http.Handler {
 
 		// If no config, get one
 		if !ok {
-			var config *v1.ConfigMap
+			var _ *v1.ConfigMap
 			info = &TenantInfo{StackID: user.StackID}
 
 			// get the initial config map
@@ -103,8 +102,6 @@ func (s *serviceImpl) Middleware(next http.Handler) http.Handler {
 			} else {
 				info.Err = fmt.Errorf("missing client")
 			}
-
-			logger.Info("POTATO: context set: %v", config)
 
 			//	s.cache[user.StackID] = info
 

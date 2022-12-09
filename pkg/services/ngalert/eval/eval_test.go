@@ -12,10 +12,11 @@ import (
 	ptr "github.com/xorcare/pointer"
 
 	"github.com/grafana/grafana/pkg/expr"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	fakes "github.com/grafana/grafana/pkg/services/datasources/fakes"
 	"github.com/grafana/grafana/pkg/services/ngalert/models"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -384,7 +385,7 @@ func TestValidate(t *testing.T) {
 				}
 				services.cache.DataSources = append(services.cache.DataSources, ds)
 				services.pluginsStore.PluginList = append(services.pluginsStore.PluginList, plugins.PluginDTO{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID:      ds.Type,
 						Backend: true,
 					},
@@ -410,7 +411,7 @@ func TestValidate(t *testing.T) {
 				}
 				services.cache.DataSources = append(services.cache.DataSources, ds)
 				services.pluginsStore.PluginList = append(services.pluginsStore.PluginList, plugins.PluginDTO{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID:      ds.Type,
 						Backend: true,
 					},
@@ -473,12 +474,12 @@ func TestValidate(t *testing.T) {
 				}
 				services.cache.DataSources = append(services.cache.DataSources, ds1, ds2)
 				services.pluginsStore.PluginList = append(services.pluginsStore.PluginList, plugins.PluginDTO{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID:      ds1.Type,
 						Backend: false,
 					},
 				}, plugins.PluginDTO{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID:      ds2.Type,
 						Backend: true,
 					},
@@ -504,7 +505,7 @@ func TestValidate(t *testing.T) {
 				}
 				services.cache.DataSources = append(services.cache.DataSources, ds)
 				services.pluginsStore.PluginList = append(services.pluginsStore.PluginList, plugins.PluginDTO{
-					JSONData: plugins.JSONData{
+					JSONData: pluginLib.JSONData{
 						ID:      ds.Type,
 						Backend: true,
 					},

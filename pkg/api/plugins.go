@@ -418,7 +418,7 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 		Arch:           runtime.GOARCH,
 	})
 	if err != nil {
-		var dupeErr plugins.DuplicateError
+		var dupeErr pluginLib.DuplicateError
 		if errors.As(err, &dupeErr) {
 			return response.Error(http.StatusConflict, "Plugin already installed", err)
 		}
@@ -434,7 +434,7 @@ func (hs *HTTPServer) InstallPlugin(c *models.ReqContext) response.Response {
 		if errors.As(err, &clientError) {
 			return response.Error(clientError.StatusCode, clientError.Message, err)
 		}
-		if errors.Is(err, plugins.ErrInstallCorePlugin) {
+		if errors.Is(err, pluginLib.ErrInstallCorePlugin) {
 			return response.Error(http.StatusForbidden, "Cannot install or change a Core plugin", err)
 		}
 
@@ -449,10 +449,10 @@ func (hs *HTTPServer) UninstallPlugin(c *models.ReqContext) response.Response {
 
 	err := hs.pluginInstaller.Remove(c.Req.Context(), pluginID)
 	if err != nil {
-		if errors.Is(err, plugins.ErrPluginNotInstalled) {
+		if errors.Is(err, pluginLib.ErrPluginNotInstalled) {
 			return response.Error(http.StatusNotFound, "Plugin not installed", err)
 		}
-		if errors.Is(err, plugins.ErrUninstallCorePlugin) {
+		if errors.Is(err, pluginLib.ErrUninstallCorePlugin) {
 			return response.Error(http.StatusForbidden, "Cannot uninstall a Core plugin", err)
 		}
 		if errors.Is(err, storage.ErrUninstallOutsideOfPluginDir) {

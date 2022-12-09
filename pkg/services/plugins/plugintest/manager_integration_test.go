@@ -283,7 +283,7 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 
 func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr plugins.StaticRouteResolver, reg registry.Service) {
 	routes := make(map[string]*plugins.StaticRoute)
-	for _, route := range rr.Routes(ctx) {
+	for _, route := range rr.Routes() {
 		routes[route.PluginID] = route
 	}
 

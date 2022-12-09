@@ -50,23 +50,23 @@ func TestPlugins(t *testing.T) {
 
 		t.Run("Request is forbidden if not from an admin", func(t *testing.T) {
 			status, body := makePostRequest(t, grafanaAPIURL(usernameNonAdmin, grafanaListedAddr, "plugins/grafana-plugin/install"))
-			assert.Equal(t, 403, status)
-			assert.Equal(t, "You'll need additional permissions to perform this action. Permissions needed: plugins:install", body["message"])
+			require.Equal(t, 403, status)
+			require.Equal(t, "You'll need additional permissions to perform this action. Permissions needed: plugins:install", body["message"])
 
 			status, body = makePostRequest(t, grafanaAPIURL(usernameNonAdmin, grafanaListedAddr, "plugins/grafana-plugin/uninstall"))
-			assert.Equal(t, 403, status)
-			assert.Equal(t, "You'll need additional permissions to perform this action. Permissions needed: plugins:install", body["message"])
+			require.Equal(t, 403, status)
+			require.Equal(t, "You'll need additional permissions to perform this action. Permissions needed: plugins:install", body["message"])
 		})
 
 		t.Run("Request is not forbidden if from an admin", func(t *testing.T) {
 			statusCode, body := makePostRequest(t, grafanaAPIURL(usernameAdmin, grafanaListedAddr, "plugins/test/install"))
 
-			assert.Equal(t, 404, statusCode)
-			assert.Equal(t, "Plugin not found", body["message"])
+			require.Equal(t, 404, statusCode)
+			require.Equal(t, "Plugin not found", body["message"])
 
 			statusCode, body = makePostRequest(t, grafanaAPIURL(usernameAdmin, grafanaListedAddr, "plugins/test/uninstall"))
-			assert.Equal(t, 404, statusCode)
-			assert.Equal(t, "Plugin not installed", body["message"])
+			require.Equal(t, 404, statusCode)
+			require.Equal(t, "Plugin not installed", body["message"])
 		})
 	})
 
@@ -135,8 +135,8 @@ func makePostRequest(t *testing.T, URL string) (int, map[string]interface{}) {
 	resp, err := http.Post(URL, "application/json", bytes.NewBufferString(""))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_ = resp.Body.Close()
-		fmt.Printf("Failed to close response body err: %s", err)
+		err = resp.Body.Close()
+		require.NoError(t, err)
 	})
 	b, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)

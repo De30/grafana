@@ -8,7 +8,6 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
-	"github.com/grafana/grafana/pkg/infra/log"
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -18,7 +17,6 @@ var ErrFileNotExist = fmt.Errorf("file does not exist")
 type PluginDTO struct {
 	pluginLib.JSONData
 
-	logger    log.Logger
 	pluginDir string
 
 	Class pluginLib.Class

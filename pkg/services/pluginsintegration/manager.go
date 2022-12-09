@@ -23,7 +23,6 @@ type pluginsService interface {
 
 func ProvidePluginManager(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService, store *store.Service,
 	client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller) (*PluginManager, error) {
-
 	pm := &PluginManager{log: log.New("plugin.manager")}
 
 	var svc pluginsService

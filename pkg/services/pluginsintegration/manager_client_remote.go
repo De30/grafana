@@ -362,7 +362,7 @@ func fromProto(p *PluginData) plugins.PluginDTO {
 			}
 		}
 
-		routes = append(routes)
+		routes = append(routes, rt)
 	}
 
 	var roleRegistration []pluginLib.RoleRegistration
