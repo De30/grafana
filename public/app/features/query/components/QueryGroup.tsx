@@ -1,25 +1,32 @@
 import { css } from '@emotion/css';
 import React, { PureComponent } from 'react';
+import DropZone from 'react-dropzone';
 import { Unsubscribable } from 'rxjs';
 
 import {
   CoreApp,
+  DataFrameJSON,
+  dataFrameToJSON,
   DataQuery,
   DataSourceApi,
   DataSourceInstanceSettings,
+  dateTimeParse,
   getDefaultTimeRange,
+  GrafanaTheme2,
   LoadingState,
   PanelData,
+  readCSV,
 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { DataSourcePicker, getDataSourceSrv } from '@grafana/runtime';
-import { Button, CustomScrollbar, HorizontalGroup, InlineFormLabel, Modal, stylesFactory } from '@grafana/ui';
+import { Button, CustomScrollbar, HorizontalGroup, InlineFormLabel, Modal, Themeable2, withTheme2 } from '@grafana/ui';
 import { PluginHelp } from 'app/core/components/PluginHelp/PluginHelp';
 import config from 'app/core/config';
 import { backendSrv } from 'app/core/services/backend_srv';
-import { addQuery } from 'app/core/utils/query';
+import { addQuery, queryIsEmpty } from 'app/core/utils/query';
 import { dataSource as expressionDatasource } from 'app/features/expressions/ExpressionDatasource';
 import { DashboardQueryEditor, isSharedDashboardQuery } from 'app/plugins/datasource/dashboard';
+import { GrafanaQuery, GrafanaQueryType } from 'app/plugins/datasource/grafana/types';
 import { QueryGroupDataSource, QueryGroupOptions } from 'app/types';
 
 import { isQueryWithMixedDatasource } from '../../query-library/api/SavedQueriesApi';
@@ -32,7 +39,7 @@ import { QueryEditorRows } from './QueryEditorRows';
 import { QueryGroupOptionsEditor } from './QueryGroupOptions';
 import { SavedQueryPicker } from './SavedQueryPicker';
 
-interface Props {
+interface Props extends Themeable2 {
   queryRunner: PanelQueryRunner;
   options: QueryGroupOptions;
   onOpenQueryInspector?: () => void;
@@ -60,7 +67,7 @@ interface State {
   };
 }
 
-export class QueryGroup extends PureComponent<Props, State> {
+class UnThemedQueryGroup extends PureComponent<Props, State> {
   backendSrv = backendSrv;
   dataSourceSrv = getDataSourceSrv();
   querySubscription: Unsubscribable | null = null;
@@ -96,7 +103,11 @@ export class QueryGroup extends PureComponent<Props, State> {
       const dsSettings = this.dataSourceSrv.getInstanceSettings(options.dataSource);
       const defaultDataSource = await this.dataSourceSrv.get();
       const datasource = ds.getRef();
-      const queries = options.queries.map((q) => (q.datasource ? q : { ...q, datasource }));
+      const queries = options.queries.map((q) => ({
+        ...(queryIsEmpty(q) && ds?.getDefaultQuery?.(CoreApp.PanelEditor)),
+        datasource,
+        ...q,
+      }));
       this.setState({
         queries,
         dataSource: ds,
@@ -448,59 +459,121 @@ export class QueryGroup extends PureComponent<Props, State> {
     this.setState({ scrollElement });
   };
 
+  onFileDrop = (files: File[]) => {
+    const snapshot: DataFrameJSON[] = [];
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.readAsText(file);
+      // TODO Add error and progress handling
+      reader.onload = () => {
+        const result = reader.result?.toString();
+        if (result) {
+          // We only put one dataframe to the result
+          const dataFrame = readCSV(result)[0];
+
+          dataFrame.fields.forEach((f) => {
+            if (f.name.toLowerCase() === 'time') {
+              for (let i = 0; i < f.values.length; i++) {
+                const val = f.values.get(i);
+                const dateAndTime = dateTimeParse(val);
+                if (dateAndTime.isValid()) {
+                  f.values.set(i, dateAndTime.valueOf());
+                } else {
+                  const timeAsNumber = Number.parseInt(val, 10);
+                  f.values.set(i, timeAsNumber);
+                }
+              }
+            }
+          });
+          const dataframeJson = dataFrameToJSON(dataFrame);
+          snapshot.push(dataframeJson);
+        }
+        // TODO only update state when all the files are loaded
+        this.props.onRunQueries();
+      };
+    });
+
+    const grafanaDS = {
+      type: 'grafana',
+      uid: 'grafana',
+    };
+    const query = {
+      queryType: GrafanaQueryType.Snapshot,
+      snapshot,
+      datasource: grafanaDS,
+    } as GrafanaQuery;
+    this.onChange({
+      dataSource: grafanaDS,
+      queries: [query],
+    });
+
+    this.setState({
+      queries: [query],
+    });
+  };
+
   render() {
     const { isHelpOpen, dsSettings } = this.state;
-    const styles = getStyles();
 
     return (
       <CustomScrollbar autoHeightMin="100%" scrollRefCallback={this.setScrollRef}>
-        <div className={styles.innerWrapper}>
-          {this.renderTopSection(styles)}
-          {dsSettings && (
-            <>
-              <div className={styles.queriesWrapper}>{this.renderQueries(dsSettings)}</div>
-              {this.renderAddQueryRow(dsSettings, styles)}
-              {isHelpOpen && (
-                <Modal title="Data source help" isOpen={true} onDismiss={this.onCloseHelp}>
-                  <PluginHelp plugin={dsSettings.meta} type="query_help" />
-                </Modal>
-              )}
-            </>
-          )}
-        </div>
+        <DropZone onDrop={this.onFileDrop}>
+          {({ getRootProps, isDragActive }) => {
+            const styles = getStyles(this.props.theme, isDragActive);
+            return (
+              <div {...getRootProps({ className: styles.dropzone })}>
+                {this.renderTopSection(styles)}
+                {dsSettings && (
+                  <>
+                    <div className={styles.queriesWrapper}>{this.renderQueries(dsSettings)}</div>
+                    {this.renderAddQueryRow(dsSettings, styles)}
+                    {isHelpOpen && (
+                      <Modal title="Data source help" isOpen={true} onDismiss={this.onCloseHelp}>
+                        <PluginHelp plugin={dsSettings.meta} type="query_help" />
+                      </Modal>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          }}
+        </DropZone>
       </CustomScrollbar>
     );
   }
 }
 
-const getStyles = stylesFactory(() => {
-  const { theme } = config;
+export const QueryGroup = withTheme2(UnThemedQueryGroup);
 
+function getStyles(theme: GrafanaTheme2, isDragActive?: boolean) {
   return {
-    innerWrapper: css`
+    dropzone: css`
       display: flex;
       flex-direction: column;
-      padding: ${theme.spacing.md};
+      padding: ${theme.spacing(2)};
+      border: ${isDragActive ? `2px dashed ${theme.colors.border.medium}` : 0};
+      background-color: ${isDragActive ? theme.colors.action.hover : theme.colors.background.primary};
     `,
     dataSourceRow: css`
       display: flex;
-      margin-bottom: ${theme.spacing.md};
+      margin-bottom: ${theme.spacing(2)};
     `,
     dataSourceRowItem: css`
-      margin-right: ${theme.spacing.inlineFormMargin};
+      margin-right: ${theme.spacing(0.5)};
     `,
     dataSourceRowItemOptions: css`
       flex-grow: 1;
-      margin-right: ${theme.spacing.inlineFormMargin};
+      margin-right: ${theme.spacing(0.5)};
     `,
     queriesWrapper: css`
       padding-bottom: 16px;
     `,
     expressionWrapper: css``,
     expressionButton: css`
-      margin-right: ${theme.spacing.sm};
+      margin-right: ${theme.spacing(1)};
     `,
   };
-});
+}
 
 type QueriesTabStyles = ReturnType<typeof getStyles>;

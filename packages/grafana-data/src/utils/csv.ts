@@ -42,7 +42,7 @@ export interface CSVOptions {
   callback?: CSVParseCallbacks;
 }
 
-export function readCSV(csv: string, options?: CSVOptions): DataFrame[] {
+export function readCSV(csv: string, options?: CSVOptions): MutableDataFrame[] {
   return new CSVReader(options).readCSV(csv);
 }
 
