@@ -80,25 +80,6 @@ func (s *PluginManagerRemoteServer) Plugin(ctx context.Context, pluginID string)
 	return toGrafanaDTO(libDTO), true
 }
 
-func toGrafanaDTO(gDTO pluginLib.PluginDTO) plugins.PluginDTO {
-	dto := plugins.PluginDTO{
-		JSONData:        gDTO.JSONData,
-		Class:           gDTO.Class,
-		IncludedInAppID: gDTO.IncludedInAppID,
-		DefaultNavURL:   gDTO.DefaultNavURL,
-		Pinned:          gDTO.Pinned,
-		Signature:       gDTO.Signature,
-		SignatureType:   gDTO.SignatureType,
-		SignatureOrg:    gDTO.SignatureOrg,
-		SignatureError:  gDTO.SignatureError,
-		Module:          gDTO.Module,
-		BaseURL:         gDTO.BaseURL,
-		//StreamHandler:   nil,
-	}
-
-	return dto
-}
-
 func (s *PluginManagerRemoteServer) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
 	libTypes := toLibTypes(types)
 
@@ -419,6 +400,25 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		SignatureError:  "",
 		Module:          p.Module,
 		BaseUrl:         p.BaseURL,
+		//StreamHandler:   nil,
+	}
+
+	return dto
+}
+
+func toGrafanaDTO(gDTO pluginLib.PluginDTO) plugins.PluginDTO {
+	dto := plugins.PluginDTO{
+		JSONData:        gDTO.JSONData,
+		Class:           gDTO.Class,
+		IncludedInAppID: gDTO.IncludedInAppID,
+		DefaultNavURL:   gDTO.DefaultNavURL,
+		Pinned:          gDTO.Pinned,
+		Signature:       gDTO.Signature,
+		SignatureType:   gDTO.SignatureType,
+		SignatureOrg:    gDTO.SignatureOrg,
+		SignatureError:  gDTO.SignatureError,
+		Module:          gDTO.Module,
+		BaseURL:         gDTO.BaseURL,
 		//StreamHandler:   nil,
 	}
 

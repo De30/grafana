@@ -37,7 +37,6 @@ type PluginManagerRemoteClient struct {
 func newPluginManagerRemoteClient(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService) (*PluginManagerRemoteClient, error) {
 	s := &PluginManagerRemoteClient{cfg: cfg, log: log.New("plugin.manager.client")}
 
-	s.log.Info("Creating plugin manager client")
 	conn, err := grpc.Dial(
 		s.cfg.PluginManager.Address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -53,6 +52,7 @@ func newPluginManagerRemoteClient(cfg *setting.Cfg, pluginAuthService jwt.Plugin
 	s.sc = pluginv2.NewStreamClient(conn)
 	s.rc = pluginv2.NewResourceClient(conn)
 
+	s.log.Info("Starting Plugin Manager Client")
 	s.PluginManagerClient = NewPluginManagerClient(conn)
 
 	return s, nil
