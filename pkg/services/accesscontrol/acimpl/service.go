@@ -24,7 +24,7 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-//var _ plugins.RoleRegistry = &Service{}
+var _ pluginLib.RoleRegistry = &Service{}
 
 const (
 	cacheTTL = 10 * time.Second

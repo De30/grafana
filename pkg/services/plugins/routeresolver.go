@@ -6,7 +6,7 @@ import (
 	pluginStoreLib "github.com/grafana/grafana/pkg/plugins/manager/store"
 )
 
-var _ StaticRouteResolver = (*RouteResolver)(nil) // gRPC
+var _ StaticRouteResolver = (*RouteResolver)(nil)
 
 type RouteResolver struct {
 	store *pluginStoreLib.Service

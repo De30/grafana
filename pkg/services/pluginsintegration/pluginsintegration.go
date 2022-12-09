@@ -2,7 +2,6 @@ package pluginsintegration
 
 import (
 	"github.com/google/wire"
-	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
@@ -19,6 +18,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/clientmiddleware"
 	"github.com/grafana/grafana/pkg/setting"
 )

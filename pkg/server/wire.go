@@ -91,7 +91,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/playlist/playlistimpl"
 	"github.com/grafana/grafana/pkg/services/plugindashboards"
 	plugindashboardsservice "github.com/grafana/grafana/pkg/services/plugindashboards/service"
-	dashboards2 "github.com/grafana/grafana/pkg/services/plugins/dashboards"
+	pluginDashboards "github.com/grafana/grafana/pkg/services/plugins/dashboards"
 	"github.com/grafana/grafana/pkg/services/pluginsettings"
 	pluginSettings "github.com/grafana/grafana/pkg/services/pluginsettings/service"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration"
@@ -190,8 +190,8 @@ var wireBasicSet = wire.NewSet(
 	uss.ProvideService,
 	wire.Bind(new(usagestats.Service), new(*uss.UsageStats)),
 	pluginsintegration.WireSet,
-	dashboards2.ProvideFileStoreManager,
-	wire.Bind(new(dashboards2.FileStore), new(*dashboards2.FileStoreManager)),
+	pluginDashboards.ProvideFileStoreManager,
+	wire.Bind(new(pluginDashboards.FileStore), new(*pluginDashboards.FileStoreManager)),
 	cloudwatch.ProvideService,
 	cloudmonitoring.ProvideService,
 	azuremonitor.ProvideService,

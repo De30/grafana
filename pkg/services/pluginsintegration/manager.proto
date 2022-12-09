@@ -228,7 +228,4 @@ service PluginManager {
   rpc GetPlugins(GetPluginsRequest) returns (GetPluginsResponse);
   rpc AddPlugin(AddPluginRequest) returns (AddPluginResponse);
   rpc RemovePlugin(RemovePluginRequest) returns (RemovePluginResponse);
-
-  //  pluginv2.Data
-  // Renderer + SecretsManager
 }

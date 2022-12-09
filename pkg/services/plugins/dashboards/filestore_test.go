@@ -7,12 +7,11 @@ import (
 	"testing"
 	"testing/fstest"
 
-	pluginLib "github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/services/plugins"
-
-	//"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
 func TestDashboardFileStore(t *testing.T) {

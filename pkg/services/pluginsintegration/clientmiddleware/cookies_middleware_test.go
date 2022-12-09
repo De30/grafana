@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/grafana/grafana/pkg/services/plugins/clienttest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+
 	"github.com/grafana/grafana/pkg/infra/httpclient/httpclientprovider"
+	"github.com/grafana/grafana/pkg/services/plugins/clienttest"
 	"github.com/grafana/grafana/pkg/services/user"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCookiesMiddleware(t *testing.T) {
