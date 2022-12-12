@@ -6,44 +6,44 @@ import { catchError, filter, map, tap } from 'rxjs/operators';
 import semver from 'semver/preload';
 
 import {
+  AbstractQuery,
   AnnotationEvent,
+  AnnotationQueryRequest,
   CoreApp,
+  DataCatalogueContext,
+  DataFrame,
   DataQueryError,
   DataQueryRequest,
   DataQueryResponse,
   DataSourceInstanceSettings,
+  DataSourceWithDataCatalogueSupport,
   DataSourceWithQueryExportSupport,
   DataSourceWithQueryImportSupport,
   dateMath,
   DateTime,
-  AbstractQuery,
+  dateTime,
   LoadingState,
+  QueryFixAction,
   rangeUtil,
   ScopedVars,
   TimeRange,
-  DataFrame,
-  dateTime,
-  AnnotationQueryRequest,
-  QueryFixAction,
-  DataCatalogueContext,
-  DataSourceWithDataCatalogueSupport,
 } from '@grafana/data';
 import {
+  BackendDataSourceResponse,
   BackendSrvRequest,
+  DataSourceWithBackend,
   FetchError,
   FetchResponse,
   getBackendSrv,
-  DataSourceWithBackend,
-  BackendDataSourceResponse,
-  toDataQueryResponse,
   isFetchError,
+  toDataQueryResponse,
 } from '@grafana/runtime';
 import { Badge, BadgeColor, Tooltip } from '@grafana/ui';
 import { safeStringifyValue } from 'app/core/utils/explore';
 import { discoverDataSourceFeatures } from 'app/features/alerting/unified/api/buildInfo';
 import { getTimeSrv, TimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { getTemplateSrv, TemplateSrv } from 'app/features/templating/template_srv';
-import { PromApplication, PromApiFeatures } from 'app/types/unified-alerting-dto';
+import { PromApiFeatures, PromApplication } from 'app/types/unified-alerting-dto';
 
 import { addLabelToQuery } from './add_label_to_query';
 import { AnnotationQueryEditor } from './components/AnnotationQueryEditor';
@@ -901,13 +901,15 @@ export class PrometheusDatasource
       return uniqueLabels.map((value: any) => ({ text: value }));
     } else {
       // Get all tags
-      const result = await this.metadataRequest('/api/v1/labels');
+      const params = this.getTimeRangeParams();
+      const result = await this.metadataRequest('/api/v1/labels', params);
       return result?.data?.data?.map((value: any) => ({ text: value })) ?? [];
     }
   }
 
   async getTagValues(options: { key?: string } = {}) {
-    const result = await this.metadataRequest(`/api/v1/label/${options.key}/values`);
+    const params = this.getTimeRangeParams();
+    const result = await this.metadataRequest(`/api/v1/label/${options.key}/values`, params);
     return result?.data?.data?.map((value: any) => ({ text: value })) ?? [];
   }
 
