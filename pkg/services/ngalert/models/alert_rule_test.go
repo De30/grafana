@@ -199,6 +199,12 @@ func TestPatchPartialAlertRule(t *testing.T) {
 					r.For = -1
 				},
 			},
+			{
+				name: "ForError is -1",
+				mutator: func(r *AlertRule) {
+					r.ForError = -1
+				},
+			},
 		}
 
 		for _, testCase := range testCases {
@@ -434,6 +440,13 @@ func TestDiff(t *testing.T) {
 			assert.Len(t, diff, 1)
 			assert.Equal(t, rule1.For, diff[0].Left.Interface())
 			assert.Equal(t, rule2.For, diff[0].Right.Interface())
+			difCnt++
+		}
+		if rule1.ForError != rule2.ForError {
+			diff := diffs.GetDiffsForField("ForError")
+			assert.Len(t, diff, 1)
+			assert.Equal(t, rule1.ForError, diff[0].Left.Interface())
+			assert.Equal(t, rule2.ForError, diff[0].Right.Interface())
 			difCnt++
 		}
 		if rule1.RuleGroupIndex != rule2.RuleGroupIndex {

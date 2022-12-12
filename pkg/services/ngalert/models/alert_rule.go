@@ -154,6 +154,7 @@ type AlertRule struct {
 	// ideally this field should have been apimodels.ApiDuration
 	// but this is currently not possible because of circular dependencies
 	For         time.Duration
+	ForError    time.Duration
 	Annotations map[string]string
 	Labels      map[string]string
 }
@@ -458,6 +459,9 @@ func PatchPartialAlertRule(existingRule *AlertRule, ruleToPatch *AlertRule) {
 	}
 	if ruleToPatch.For == -1 {
 		ruleToPatch.For = existingRule.For
+	}
+	if ruleToPatch.ForError == -1 {
+		ruleToPatch.ForError = existingRule.ForError
 	}
 }
 
