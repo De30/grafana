@@ -245,8 +245,6 @@ datasources:
         description: "Related metrics stored in Prometheus"
         config:
           type: query
-          transformations:
-            logfmt: line
           target:
             expr: "{ job=\"test\" }"
           field: "traceID"
