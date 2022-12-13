@@ -47,8 +47,11 @@ export const QueryEditorField = ({ dsUid, invalid, error, name }: Props) => {
       } else {
         setIsValidQuery(undefined);
       }
-      return runner.destroy;
     });
+
+    return () => {
+      runner.destroy();
+    };
   }, [runner]);
 
   const {
