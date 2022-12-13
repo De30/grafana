@@ -1,7 +1,7 @@
 syntax = "proto3";
 package plugins;
 
-option go_package = "./;pluginsintegration";
+option go_package = "./;store";
 
 message PluginData {
 

@@ -16,4 +16,4 @@ cd "$DIR"
 protoc -I ./ \
   --go_out=${DST_DIR} \
   --go-grpc_out=${DST_DIR} --go-grpc_opt=require_unimplemented_servers=false \
-  manager.proto
+  store.proto

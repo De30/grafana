@@ -15,9 +15,10 @@ import (
 	"github.com/grafana/grafana/pkg/services/grpcserver"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugins"
+	managerStore "github.com/grafana/grafana/pkg/services/pluginsintegration/store"
 )
 
-var _ PluginManagerServer = (*PluginManagerRemoteServer)(nil)
+var _ managerStore.PluginManagerServer = (*PluginManagerRemoteServer)(nil)
 
 type PluginManagerRemoteServer struct {
 	*services.BasicService
@@ -32,7 +33,7 @@ func ProvidePluginManagerServer(grpcServerProvider grpcserver.Provider, store *s
 	pm := NewPluginManagerServer(store, client, installer)
 	grpcSrv := grpcServerProvider.GetServer()
 
-	RegisterPluginManagerServer(grpcSrv, pm)
+	managerStore.RegisterPluginManagerServer(grpcSrv, pm)
 
 	pluginv2.RegisterDataServer(grpcSrv, pm)
 	pluginv2.RegisterDiagnosticsServer(grpcSrv, pm)
@@ -77,15 +78,15 @@ func (s *PluginManagerRemoteServer) Plugin(ctx context.Context, pluginID string)
 		return plugins.PluginDTO{}, false
 	}
 
-	return toGrafanaDTO(libDTO), true
+	return managerStore.ToGrafanaDTO(libDTO), true
 }
 
 func (s *PluginManagerRemoteServer) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
-	libTypes := toLibTypes(types)
+	libTypes := managerStore.ToLibTypes(types)
 
 	var res []plugins.PluginDTO
 	for _, p := range s.store.Plugins(ctx, libTypes...) {
-		res = append(res, toGrafanaDTO(p))
+		res = append(res, managerStore.ToGrafanaDTO(p))
 	}
 
 	return res
@@ -103,18 +104,18 @@ func (s *PluginManagerRemoteServer) Remove(ctx context.Context, pluginID string)
 	return s.installer.Remove(ctx, pluginID)
 }
 
-func (s *PluginManagerRemoteServer) GetPlugin(ctx context.Context, req *GetPluginRequest) (*GetPluginResponse, error) {
+func (s *PluginManagerRemoteServer) GetPlugin(ctx context.Context, req *managerStore.GetPluginRequest) (*managerStore.GetPluginResponse, error) {
 	p, exists := s.store.Plugin(ctx, req.Id)
 	if !exists {
 		return nil, errors.New("plugin not found")
 	}
 
-	return &GetPluginResponse{
+	return &managerStore.GetPluginResponse{
 		Plugin: toProto(p),
 	}, nil
 }
 
-func (s *PluginManagerRemoteServer) GetPlugins(ctx context.Context, req *GetPluginsRequest) (*GetPluginsResponse, error) {
+func (s *PluginManagerRemoteServer) GetPlugins(ctx context.Context, req *managerStore.GetPluginsRequest) (*managerStore.GetPluginsResponse, error) {
 	var types []plugins.Type
 	for _, t := range req.Types {
 		if plugins.Type(t).IsValid() {
@@ -122,34 +123,34 @@ func (s *PluginManagerRemoteServer) GetPlugins(ctx context.Context, req *GetPlug
 		}
 	}
 
-	var ps []*PluginData
-	for _, p := range s.store.Plugins(ctx, toLibTypes(types)...) {
+	var ps []*managerStore.PluginData
+	for _, p := range s.store.Plugins(ctx, managerStore.ToLibTypes(types)...) {
 		ps = append(ps, toProto(p))
 	}
 
-	return &GetPluginsResponse{
+	return &managerStore.GetPluginsResponse{
 		Plugins: ps,
 	}, nil
 }
 
-func (s *PluginManagerRemoteServer) AddPlugin(ctx context.Context, req *AddPluginRequest) (*AddPluginResponse, error) {
+func (s *PluginManagerRemoteServer) AddPlugin(ctx context.Context, req *managerStore.AddPluginRequest) (*managerStore.AddPluginResponse, error) {
 	err := s.installer.Add(ctx, req.Id, req.Version, pluginLib.CompatOpts{
 		GrafanaVersion: req.Opts.GrafanaVersion,
 		OS:             req.Opts.Os,
 		Arch:           req.Opts.Arch,
 	})
 	if err != nil {
-		return &AddPluginResponse{OK: false}, err
+		return &managerStore.AddPluginResponse{OK: false}, err
 	}
-	return &AddPluginResponse{OK: true}, nil
+	return &managerStore.AddPluginResponse{OK: true}, nil
 }
 
-func (s *PluginManagerRemoteServer) RemovePlugin(ctx context.Context, req *RemovePluginRequest) (*RemovePluginResponse, error) {
+func (s *PluginManagerRemoteServer) RemovePlugin(ctx context.Context, req *managerStore.RemovePluginRequest) (*managerStore.RemovePluginResponse, error) {
 	err := s.installer.Remove(ctx, req.Id)
 	if err != nil {
-		return &RemovePluginResponse{OK: false}, err
+		return &managerStore.RemovePluginResponse{OK: false}, err
 	}
-	return &RemovePluginResponse{OK: true}, nil
+	return &managerStore.RemovePluginResponse{OK: true}, nil
 }
 
 func (s *PluginManagerRemoteServer) QueryData(ctx context.Context, req *pluginv2.QueryDataRequest) (*pluginv2.QueryDataResponse, error) {
@@ -224,26 +225,26 @@ func (fn callResourceResponseSenderFunc) Send(resp *backend.CallResourceResponse
 	return fn(resp)
 }
 
-func toProto(p pluginLib.PluginDTO) *PluginData {
-	var links []*PluginData_JsonData_Info_Link
+func toProto(p pluginLib.PluginDTO) *managerStore.PluginData {
+	var links []*managerStore.PluginData_JsonData_Info_Link
 	for _, l := range p.Info.Links {
-		links = append(links, &PluginData_JsonData_Info_Link{
+		links = append(links, &managerStore.PluginData_JsonData_Info_Link{
 			Name: l.Name,
 			Url:  l.URL,
 		})
 	}
 
-	var screenshots []*PluginData_JsonData_Info_Screenshot
+	var screenshots []*managerStore.PluginData_JsonData_Info_Screenshot
 	for _, s := range p.Info.Screenshots {
-		screenshots = append(screenshots, &PluginData_JsonData_Info_Screenshot{
+		screenshots = append(screenshots, &managerStore.PluginData_JsonData_Info_Screenshot{
 			Name: s.Name,
 			Path: s.Path,
 		})
 	}
 
-	var pluginDeps []*PluginData_JsonData_Dependencies_PluginDependency
+	var pluginDeps []*managerStore.PluginData_JsonData_Dependencies_PluginDependency
 	for _, pd := range p.Dependencies.Plugins {
-		pluginDeps = append(pluginDeps, &PluginData_JsonData_Dependencies_PluginDependency{
+		pluginDeps = append(pluginDeps, &managerStore.PluginData_JsonData_Dependencies_PluginDependency{
 			Id:      pd.ID,
 			Type:    pd.Type,
 			Name:    pd.Name,
@@ -251,9 +252,9 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		})
 	}
 
-	var includes []*PluginData_JsonData_Includes
+	var includes []*managerStore.PluginData_JsonData_Includes
 	for _, i := range p.Includes {
-		includes = append(includes, &PluginData_JsonData_Includes{
+		includes = append(includes, &managerStore.PluginData_JsonData_Includes{
 			Name:       i.Name,
 			Path:       i.Path,
 			Type:       i.Type,
@@ -269,24 +270,24 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		})
 	}
 
-	var routes []*PluginData_JsonData_Route
+	var routes []*managerStore.PluginData_JsonData_Route
 	for _, r := range p.Routes {
-		var urlParams []*PluginData_JsonData_Route_URLParam
+		var urlParams []*managerStore.PluginData_JsonData_Route_URLParam
 		for _, up := range r.URLParams {
-			urlParams = append(urlParams, &PluginData_JsonData_Route_URLParam{
+			urlParams = append(urlParams, &managerStore.PluginData_JsonData_Route_URLParam{
 				Name:    up.Name,
 				Content: up.Content,
 			})
 		}
-		var headers []*PluginData_JsonData_Route_Header
+		var headers []*managerStore.PluginData_JsonData_Route_Header
 		for _, h := range r.Headers {
-			headers = append(headers, &PluginData_JsonData_Route_Header{
+			headers = append(headers, &managerStore.PluginData_JsonData_Route_Header{
 				Name:    h.Name,
 				Content: h.Content,
 			})
 		}
 
-		rt := &PluginData_JsonData_Route{
+		rt := &managerStore.PluginData_JsonData_Route{
 			Path:      r.Path,
 			Method:    r.Method,
 			ReqRole:   protoRole(r.ReqRole),
@@ -298,7 +299,7 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		}
 
 		if r.TokenAuth != nil {
-			rt.TokenAuth = &PluginData_JsonData_Route_JWTTokenAuth{
+			rt.TokenAuth = &managerStore.PluginData_JsonData_Route_JWTTokenAuth{
 				Url:    r.TokenAuth.Url,
 				Scopes: r.TokenAuth.Scopes,
 				Params: r.TokenAuth.Params,
@@ -306,7 +307,7 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		}
 
 		if r.JwtTokenAuth != nil {
-			rt.JwtTokenAuth = &PluginData_JsonData_Route_JWTTokenAuth{
+			rt.JwtTokenAuth = &managerStore.PluginData_JsonData_Route_JWTTokenAuth{
 				Url:    r.JwtTokenAuth.Url,
 				Scopes: r.JwtTokenAuth.Scopes,
 				Params: r.JwtTokenAuth.Params,
@@ -315,18 +316,18 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		routes = append(routes, rt)
 	}
 
-	var roleRegistration []*PluginData_JsonData_RoleRegistration
+	var roleRegistration []*managerStore.PluginData_JsonData_RoleRegistration
 	for _, rr := range p.Roles {
-		var permissions []*PluginData_JsonData_RoleRegistration_Permission
+		var permissions []*managerStore.PluginData_JsonData_RoleRegistration_Permission
 		for _, p := range rr.Role.Permissions {
-			permissions = append(permissions, &PluginData_JsonData_RoleRegistration_Permission{
+			permissions = append(permissions, &managerStore.PluginData_JsonData_RoleRegistration_Permission{
 				Action: p.Action,
 				Scope:  p.Scope,
 			})
 		}
 
-		roleRegistration = append(roleRegistration, &PluginData_JsonData_RoleRegistration{
-			Role: &PluginData_JsonData_RoleRegistration_RBACRole{
+		roleRegistration = append(roleRegistration, &managerStore.PluginData_JsonData_RoleRegistration{
+			Role: &managerStore.PluginData_JsonData_RoleRegistration_RBACRole{
 				Name:        rr.Role.Name,
 				Description: rr.Role.Description,
 				Permissions: permissions,
@@ -335,23 +336,23 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 		})
 	}
 
-	dto := &PluginData{
-		JsonData: &PluginData_JsonData{
+	dto := &managerStore.PluginData{
+		JsonData: &managerStore.PluginData_JsonData{
 			Id:   p.ID,
 			Type: string(p.Type),
 			Name: p.Name,
-			Info: &PluginData_JsonData_Info{
-				Author: &PluginData_JsonData_Info_Author{
+			Info: &managerStore.PluginData_JsonData_Info{
+				Author: &managerStore.PluginData_JsonData_Info_Author{
 					Name: p.Info.Author.Name,
 					Url:  p.Info.Author.URL,
 				},
 				Description: p.Info.Description,
 				Links:       links,
-				Logos: &PluginData_JsonData_Info_Logos{
+				Logos: &managerStore.PluginData_JsonData_Info_Logos{
 					Small: p.Info.Logos.Small,
 					Large: p.Info.Logos.Large,
 				},
-				Build: &PluginData_JsonData_Info_Build{
+				Build: &managerStore.PluginData_JsonData_Info_Build{
 					Time:   p.Info.Build.Time,
 					Repo:   p.Info.Build.Repo,
 					Branch: p.Info.Build.Branch,
@@ -361,7 +362,7 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 				Version:     p.Info.Version,
 				Updated:     p.Info.Updated,
 			},
-			Dependencies: &PluginData_JsonData_Dependencies{
+			Dependencies: &managerStore.PluginData_JsonData_Dependencies{
 				GrafanaDependency: p.Dependencies.GrafanaDependency,
 				GrafanaVersion:    p.Dependencies.GrafanaVersion,
 				Plugins:           pluginDeps,
@@ -406,41 +407,14 @@ func toProto(p pluginLib.PluginDTO) *PluginData {
 	return dto
 }
 
-func toGrafanaDTO(gDTO pluginLib.PluginDTO) plugins.PluginDTO {
-	dto := plugins.PluginDTO{
-		JSONData:        gDTO.JSONData,
-		Class:           gDTO.Class,
-		IncludedInAppID: gDTO.IncludedInAppID,
-		DefaultNavURL:   gDTO.DefaultNavURL,
-		Pinned:          gDTO.Pinned,
-		Signature:       gDTO.Signature,
-		SignatureType:   gDTO.SignatureType,
-		SignatureOrg:    gDTO.SignatureOrg,
-		SignatureError:  gDTO.SignatureError,
-		Module:          gDTO.Module,
-		BaseURL:         gDTO.BaseURL,
-		//StreamHandler:   nil,
-	}
-
-	return dto
-}
-
-func protoRole(r org.RoleType) PluginData_JsonData_Role {
+func protoRole(r org.RoleType) managerStore.PluginData_JsonData_Role {
 	switch r {
 	case org.RoleAdmin:
-		return PluginData_JsonData_ADMIN
+		return managerStore.PluginData_JsonData_ADMIN
 	case org.RoleViewer:
-		return PluginData_JsonData_VIEWER
+		return managerStore.PluginData_JsonData_VIEWER
 	case org.RoleEditor:
-		return PluginData_JsonData_EDITOR
+		return managerStore.PluginData_JsonData_EDITOR
 	}
-	return PluginData_JsonData_VIEWER
-}
-
-func toLibTypes(types []plugins.Type) []pluginLib.Type {
-	var libTypes []pluginLib.Type
-	for _, t := range types {
-		libTypes = append(libTypes, pluginLib.Type(t))
-	}
-	return libTypes
+	return managerStore.PluginData_JsonData_VIEWER
 }

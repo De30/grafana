@@ -1,4 +1,4 @@
-package pluginsintegration
+package client
 
 import (
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -9,25 +9,23 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-type PluginManager struct {
+type Service struct {
 	pluginsService
 
 	log log.Logger
 }
 
 type pluginsService interface {
-	plugins.Store
-	plugins.Installer
 	plugins.Client
 }
 
-func ProvidePluginManager(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService, store *store.Service,
-	client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller) (*PluginManager, error) {
-	pm := &PluginManager{log: log.New("plugin.manager")}
+func ProvideClientService(cfg *setting.Cfg, pluginAuthService jwt.PluginAuthService, store *store.Service,
+	client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller) (*Service, error) {
+	pm := &Service{log: log.New("plugin.manager")}
 
 	var svc pluginsService
 	if cfg.ModuleEnabled("all") {
-		svc = newPluginManagerLocalService(store, client, installer)
+		svc = newLocalClientService(client)
 	} else if !cfg.ModuleEnabled("plugin-manager") {
 		var err error
 		svc, err = newPluginManagerRemoteClient(cfg, pluginAuthService)
