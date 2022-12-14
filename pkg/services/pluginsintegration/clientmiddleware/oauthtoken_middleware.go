@@ -92,7 +92,11 @@ func (m *OAuthTokenMiddleware) applyToken(ctx context.Context, pCtx backend.Plug
 				httpHeaders.Set(idTokenHeaderName, idTokenHeader)
 			}
 
-			ctx = httpclient.WithContextualMiddleware(ctx, httpclientprovider.SetHeadersMiddleware(httpHeaders))
+			ctx = httpclient.WithContextualMiddleware(
+				ctx,
+				httpclientprovider.SetHeadersMiddleware(httpHeaders),
+				httpclientprovider.CanonicalizedHeadersMiddleware(),
+			)
 		}
 	}
 
