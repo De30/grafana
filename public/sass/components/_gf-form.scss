@@ -145,6 +145,7 @@ $input-border: 1px solid $input-border-color;
 
   &--variable {
     border: $panel-border;
+    background: $panel-bg;
   }
 
   &--dashlink {
