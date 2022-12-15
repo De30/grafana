@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { VariableHide } from '@grafana/data';
-import { selectors } from '@grafana/e2e-selectors';
-import { Tooltip } from '@grafana/ui';
 
 import { SceneObjectBase } from '../../core/SceneObjectBase';
 import { sceneGraph } from '../../core/sceneGraph';
 import { SceneComponentProps, SceneObject, SceneObjectStatePlain } from '../../core/types';
 import { SceneVariableState } from '../types';
+
+import { VariableLabel } from './VariableLabel';
 
 export class VariableValueSelectors extends SceneObjectBase<SceneObjectStatePlain> {
   public static Component = VariableValueSelectorsRenderer;
@@ -33,42 +33,9 @@ function VariableValueSelectWrapper({ variable }: { variable: SceneObject<SceneV
   }
 
   return (
-    <div className="gf-form">
+    <div className="gf-form-inline">
       <VariableLabel state={state} />
       <variable.Component model={variable} />
     </div>
-  );
-}
-
-function VariableLabel({ state }: { state: SceneVariableState }) {
-  if (state.hide === VariableHide.hideLabel) {
-    return null;
-  }
-
-  const elementId = `var-${state.key}`;
-  const labelOrName = state.label ?? state.name;
-
-  if (state.description) {
-    return (
-      <Tooltip content={state.description} placement={'bottom'}>
-        <label
-          className="gf-form-label gf-form-label--variable"
-          data-testid={selectors.pages.Dashboard.SubMenu.submenuItemLabels(labelOrName)}
-          htmlFor={elementId}
-        >
-          {labelOrName}
-        </label>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <label
-      className="gf-form-label gf-form-label--variable"
-      data-testid={selectors.pages.Dashboard.SubMenu.submenuItemLabels(labelOrName)}
-      htmlFor={elementId}
-    >
-      {labelOrName}
-    </label>
   );
 }
