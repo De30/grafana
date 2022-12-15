@@ -3,6 +3,7 @@ package channels
 import (
 	"context"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
@@ -34,7 +35,9 @@ func TestTelegramNotifier(t *testing.T) {
 			name: "A single alert with default template",
 			settings: `{
 				"bottoken": "abcdefgh0123456789",
-				"chatid": "someid"
+				"chatid": "someid",
+				"parse_mode": "markdown",
+				"disable_notifications": true
 			}`,
 			alerts: []*types.Alert{
 				{
@@ -46,8 +49,9 @@ func TestTelegramNotifier(t *testing.T) {
 				},
 			},
 			expMsg: map[string]string{
-				"parse_mode": "html",
-				"text":       "**Firing**\n\nValue: [no value]\nLabels:\n - alertname = alert1\n - lbl1 = val1\nAnnotations:\n - ann1 = annv1\nSource: a URL\nSilence: http://localhost/alerting/silence/new?alertmanager=grafana&matcher=alertname%3Dalert1&matcher=lbl1%3Dval1\nDashboard: http://localhost/d/abcd\nPanel: http://localhost/d/abcd?viewPanel=efgh\n",
+				"parse_mode":           "Markdown",
+				"text":                 "**Firing**\n\nValue: [no value]\nLabels:\n - alertname = alert1\n - lbl1 = val1\nAnnotations:\n - ann1 = annv1\nSource: a URL\nSilence: http://localhost/alerting/silence/new?alertmanager=grafana&matcher=alertname%3Dalert1&matcher=lbl1%3Dval1\nDashboard: http://localhost/d/abcd\nPanel: http://localhost/d/abcd?viewPanel=efgh\n",
+				"disable_notification": "true",
 			},
 			expMsgError: nil,
 		}, {
@@ -72,14 +76,41 @@ func TestTelegramNotifier(t *testing.T) {
 				},
 			},
 			expMsg: map[string]string{
-				"parse_mode": "html",
+				"parse_mode": "HTML",
 				"text":       "__Custom Firing__\n2 Firing\n\nValue: [no value]\nLabels:\n - alertname = alert1\n - lbl1 = val1\nAnnotations:\n - ann1 = annv1\nSource: a URL\nSilence: http://localhost/alerting/silence/new?alertmanager=grafana&matcher=alertname%3Dalert1&matcher=lbl1%3Dval1\n\nValue: [no value]\nLabels:\n - alertname = alert1\n - lbl1 = val2\nAnnotations:\n - ann1 = annv2\nSilence: http://localhost/alerting/silence/new?alertmanager=grafana&matcher=alertname%3Dalert1&matcher=lbl1%3Dval2\n",
+			},
+			expMsgError: nil,
+		}, {
+			name: "Truncate long message",
+			settings: `{
+				"bottoken": "abcdefgh0123456789",
+				"chatid": "someid",
+				"message": "{{ .CommonLabels.alertname }}"
+			}`,
+			alerts: []*types.Alert{
+				{
+					Alert: model.Alert{
+						Labels: model.LabelSet{"alertname": model.LabelValue(strings.Repeat("1", 4097))},
+					},
+				},
+			},
+			expMsg: map[string]string{
+				"parse_mode": "HTML",
+				"text":       strings.Repeat("1", 4096-1) + "…",
 			},
 			expMsgError: nil,
 		}, {
 			name:         "Error in initing",
 			settings:     `{}`,
 			expInitError: `could not find Bot Token in settings`,
+		}, {
+			name: "Invalid parse mode",
+			settings: `{ 
+				"bottoken": "abcdefgh0123456789",
+				"chatid": "someid",
+				"parse_mode": "test"
+			}`,
+			expInitError: "unknown parse_mode, must be Markdown, MarkdownV2, HTML or None",
 		},
 	}
 
@@ -103,17 +134,17 @@ func TestTelegramNotifier(t *testing.T) {
 				ImageStore:          images,
 				NotificationService: notificationService,
 				DecryptFunc:         decryptFn,
+				Template:            tmpl,
+				Logger:              &FakeLogger{},
 			}
 
-			cfg, err := NewTelegramConfig(fc.Config, decryptFn)
+			n, err := NewTelegramNotifier(fc)
 			if c.expInitError != "" {
 				require.Error(t, err)
 				require.Equal(t, c.expInitError, err.Error())
 				return
 			}
 			require.NoError(t, err)
-
-			n := NewTelegramNotifier(cfg, images, notificationService, tmpl)
 
 			ctx := notify.WithGroupKey(context.Background(), "alertname")
 			ctx = notify.WithGroupLabels(ctx, model.LabelSet{"alertname": ""})

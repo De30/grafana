@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
 	"github.com/stretchr/testify/require"
 )
 
-func TestProvisioning(t *testing.T) {
+func TestIntegrationProvisioning(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
 		EnableUnifiedAlerting: true,
@@ -25,17 +27,17 @@ func TestProvisioning(t *testing.T) {
 
 	// Create a users to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_VIEWER),
+		DefaultOrgRole: string(org.RoleViewer),
 		Password:       "viewer",
 		Login:          "viewer",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_ADMIN),
+		DefaultOrgRole: string(org.RoleAdmin),
 		Password:       "admin",
 		Login:          "admin",
 	})
@@ -59,7 +61,7 @@ func TestProvisioning(t *testing.T) {
 			"name": "test-receiver",
 			"type": "slack",
 			"settings": {
-				"recipient": "value_recipient", 
+				"recipient": "value_recipient",
 				"token": "value_token"
 			}
 		}`
@@ -157,7 +159,7 @@ func TestProvisioning(t *testing.T) {
 			"name": "my-contact-point",
 			"type": "slack",
 			"settings": {
-				"recipient": "value_recipient", 
+				"recipient": "value_recipient",
 				"token": "value_token"
 			}
 		}`

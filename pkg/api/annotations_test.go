@@ -14,18 +14,23 @@ import (
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	"github.com/grafana/grafana/pkg/components/simplejson"
+	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/annotations"
+	"github.com/grafana/grafana/pkg/services/annotations/annotationstest"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
+	"github.com/grafana/grafana/pkg/services/team/teamtest"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 func TestAnnotationsAPIEndpoint(t *testing.T) {
 	hs := setupSimpleHTTPServer(nil)
-	store := sqlstore.InitTestDB(t)
+	store := db.InitTestDB(t)
 	store.Cfg = hs.Cfg
 	hs.SQLStore = store
 
@@ -49,7 +54,7 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 		}
 
 		t.Run("When user is an Org Viewer", func(t *testing.T) {
-			role := models.ROLE_VIEWER
+			role := org.RoleViewer
 			t.Run("Should not be allowed to save an annotation", func(t *testing.T) {
 				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role,
 					cmd, store, nil, func(sc *scenarioContext) {
@@ -72,8 +77,6 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 				mock := mockstore.NewSQLStoreMock()
 				loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/annotations/1",
 					"/api/annotations/:annotationId", role, func(sc *scenarioContext) {
-						fakeAnnoRepo = NewFakeAnnotationsRepo()
-						annotations.SetRepository(fakeAnnoRepo)
 						sc.handlerFunc = hs.DeleteAnnotationByID
 						sc.fakeReqWithParams("DELETE", sc.url, map[string]string{}).exec()
 						assert.Equal(t, 403, sc.resp.Code)
@@ -82,7 +85,7 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 		})
 
 		t.Run("When user is an Org Editor", func(t *testing.T) {
-			role := models.ROLE_EDITOR
+			role := org.RoleEditor
 			t.Run("Should be able to save an annotation", func(t *testing.T) {
 				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role,
 					cmd, store, nil, func(sc *scenarioContext) {
@@ -102,8 +105,6 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 				mock := mockstore.NewSQLStoreMock()
 				loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/annotations/1",
 					"/api/annotations/:annotationId", role, func(sc *scenarioContext) {
-						fakeAnnoRepo = NewFakeAnnotationsRepo()
-						annotations.SetRepository(fakeAnnoRepo)
 						sc.handlerFunc = hs.DeleteAnnotationByID
 						sc.fakeReqWithParams("DELETE", sc.url, map[string]string{}).exec()
 						assert.Equal(t, 200, sc.resp.Code)
@@ -154,9 +155,10 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 		}
 
 		t.Run("When user is an Org Viewer", func(t *testing.T) {
-			role := models.ROLE_VIEWER
+			role := org.RoleViewer
+			dashSvc := dashboards.NewFakeDashboardService(t)
 			t.Run("Should not be allowed to save an annotation", func(t *testing.T) {
-				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, nil, func(sc *scenarioContext) {
+				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, dashSvc, func(sc *scenarioContext) {
 					setUpACL()
 					sc.fakeReqWithParams("POST", sc.url, map[string]string{}).exec()
 					assert.Equal(t, 403, sc.resp.Code)
@@ -177,8 +179,6 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 				loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/annotations/1",
 					"/api/annotations/:annotationId", role, func(sc *scenarioContext) {
 						setUpACL()
-						fakeAnnoRepo = NewFakeAnnotationsRepo()
-						annotations.SetRepository(fakeAnnoRepo)
 						sc.handlerFunc = hs.DeleteAnnotationByID
 						sc.fakeReqWithParams("DELETE", sc.url, map[string]string{}).exec()
 						assert.Equal(t, 403, sc.resp.Code)
@@ -187,9 +187,10 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 		})
 
 		t.Run("When user is an Org Editor", func(t *testing.T) {
-			role := models.ROLE_EDITOR
+			role := org.RoleEditor
 			t.Run("Should be able to save an annotation", func(t *testing.T) {
-				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, nil, func(sc *scenarioContext) {
+				dashSvc := dashboards.NewFakeDashboardService(t)
+				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, dashSvc, func(sc *scenarioContext) {
 					setUpACL()
 					sc.fakeReqWithParams("POST", sc.url, map[string]string{}).exec()
 					assert.Equal(t, 200, sc.resp.Code)
@@ -210,8 +211,6 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 				loggedInUserScenarioWithRole(t, "When calling DELETE on", "DELETE", "/api/annotations/1",
 					"/api/annotations/:annotationId", role, func(sc *scenarioContext) {
 						setUpACL()
-						fakeAnnoRepo = NewFakeAnnotationsRepo()
-						annotations.SetRepository(fakeAnnoRepo)
 						sc.handlerFunc = hs.DeleteAnnotationByID
 						sc.fakeReqWithParams("DELETE", sc.url, map[string]string{}).exec()
 						assert.Equal(t, 200, sc.resp.Code)
@@ -220,17 +219,11 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 		})
 
 		t.Run("When user is an Admin", func(t *testing.T) {
-			role := models.ROLE_ADMIN
+			role := org.RoleAdmin
 
 			mockStore := mockstore.NewSQLStoreMock()
 
 			t.Run("Should be able to do anything", func(t *testing.T) {
-				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, nil, func(sc *scenarioContext) {
-					setUpACL()
-					sc.fakeReqWithParams("POST", sc.url, map[string]string{}).exec()
-					assert.Equal(t, 200, sc.resp.Code)
-				})
-
 				dashSvc := dashboards.NewFakeDashboardService(t)
 				dashSvc.On("GetDashboard", mock.Anything, mock.AnythingOfType("*models.GetDashboardQuery")).Run(func(args mock.Arguments) {
 					q := args.Get(1).(*models.GetDashboardQuery)
@@ -239,6 +232,12 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 						Uid: q.Uid,
 					}
 				}).Return(nil)
+				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, cmd, store, dashSvc, func(sc *scenarioContext) {
+					setUpACL()
+					sc.fakeReqWithParams("POST", sc.url, map[string]string{}).exec()
+					assert.Equal(t, 200, sc.resp.Code)
+				})
+
 				postAnnotationScenario(t, "When calling POST on", "/api/annotations", "/api/annotations", role, dashboardUIDCmd, mockStore, dashSvc, func(sc *scenarioContext) {
 					setUpACL()
 					sc.fakeReqWithParams("POST", sc.url, map[string]string{}).exec()
@@ -285,61 +284,8 @@ func TestAnnotationsAPIEndpoint(t *testing.T) {
 	})
 }
 
-type fakeAnnotationsRepo struct {
-	annotations map[int64]annotations.Item
-}
-
-func NewFakeAnnotationsRepo() *fakeAnnotationsRepo {
-	return &fakeAnnotationsRepo{
-		annotations: map[int64]annotations.Item{},
-	}
-}
-
-func (repo *fakeAnnotationsRepo) Delete(_ context.Context, params *annotations.DeleteParams) error {
-	if params.Id != 0 {
-		delete(repo.annotations, params.Id)
-	} else {
-		for _, v := range repo.annotations {
-			if params.DashboardId == v.DashboardId && params.PanelId == v.PanelId {
-				delete(repo.annotations, v.Id)
-			}
-		}
-	}
-
-	return nil
-}
-func (repo *fakeAnnotationsRepo) Save(item *annotations.Item) error {
-	if item.Id == 0 {
-		item.Id = int64(len(repo.annotations) + 1)
-	}
-	repo.annotations[item.Id] = *item
-	return nil
-}
-func (repo *fakeAnnotationsRepo) Update(_ context.Context, item *annotations.Item) error {
-	return nil
-}
-func (repo *fakeAnnotationsRepo) Find(_ context.Context, query *annotations.ItemQuery) ([]*annotations.ItemDTO, error) {
-	if annotation, has := repo.annotations[query.AnnotationId]; has {
-		return []*annotations.ItemDTO{{Id: annotation.Id, DashboardId: annotation.DashboardId}}, nil
-	}
-	annotations := []*annotations.ItemDTO{{Id: 1, DashboardId: 0}}
-	return annotations, nil
-}
-func (repo *fakeAnnotationsRepo) FindTags(_ context.Context, query *annotations.TagsQuery) (annotations.FindTagsResult, error) {
-	result := annotations.FindTagsResult{
-		Tags: []*annotations.TagsDTO{},
-	}
-	return result, nil
-}
-
-func (repo *fakeAnnotationsRepo) LoadItems() {
-
-}
-
-var fakeAnnoRepo *fakeAnnotationsRepo
-
-func postAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role models.RoleType,
-	cmd dtos.PostAnnotationsCmd, store sqlstore.Store, dashSvc dashboards.DashboardService, fn scenarioFunc) {
+func postAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role org.RoleType,
+	cmd dtos.PostAnnotationsCmd, store db.DB, dashSvc dashboards.DashboardService, fn scenarioFunc) {
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		hs := setupSimpleHTTPServer(nil)
 		hs.SQLStore = store
@@ -350,15 +296,12 @@ func postAnnotationScenario(t *testing.T, desc string, url string, routePattern 
 			c.Req.Body = mockRequestBody(cmd)
 			c.Req.Header.Add("Content-Type", "application/json")
 			sc.context = c
-			sc.context.UserId = testUserID
-			sc.context.OrgId = testOrgID
+			sc.context.UserID = testUserID
+			sc.context.OrgID = testOrgID
 			sc.context.OrgRole = role
 
 			return hs.PostAnnotation(c)
 		})
-
-		fakeAnnoRepo = NewFakeAnnotationsRepo()
-		annotations.SetRepository(fakeAnnoRepo)
 
 		sc.m.Post(routePattern, sc.defaultHandler)
 
@@ -366,11 +309,11 @@ func postAnnotationScenario(t *testing.T, desc string, url string, routePattern 
 	})
 }
 
-func putAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role models.RoleType,
+func putAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role org.RoleType,
 	cmd dtos.UpdateAnnotationsCmd, fn scenarioFunc) {
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		hs := setupSimpleHTTPServer(nil)
-		store := sqlstore.InitTestDB(t)
+		store := db.InitTestDB(t)
 		store.Cfg = hs.Cfg
 		hs.SQLStore = store
 
@@ -379,15 +322,12 @@ func putAnnotationScenario(t *testing.T, desc string, url string, routePattern s
 			c.Req.Body = mockRequestBody(cmd)
 			c.Req.Header.Add("Content-Type", "application/json")
 			sc.context = c
-			sc.context.UserId = testUserID
-			sc.context.OrgId = testOrgID
+			sc.context.UserID = testUserID
+			sc.context.OrgID = testOrgID
 			sc.context.OrgRole = role
 
 			return hs.UpdateAnnotation(c)
 		})
-
-		fakeAnnoRepo = NewFakeAnnotationsRepo()
-		annotations.SetRepository(fakeAnnoRepo)
 
 		sc.m.Put(routePattern, sc.defaultHandler)
 
@@ -395,10 +335,10 @@ func putAnnotationScenario(t *testing.T, desc string, url string, routePattern s
 	})
 }
 
-func patchAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role models.RoleType, cmd dtos.PatchAnnotationsCmd, fn scenarioFunc) {
+func patchAnnotationScenario(t *testing.T, desc string, url string, routePattern string, role org.RoleType, cmd dtos.PatchAnnotationsCmd, fn scenarioFunc) {
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		hs := setupSimpleHTTPServer(nil)
-		store := sqlstore.InitTestDB(t)
+		store := db.InitTestDB(t)
 		store.Cfg = hs.Cfg
 		hs.SQLStore = store
 
@@ -407,15 +347,12 @@ func patchAnnotationScenario(t *testing.T, desc string, url string, routePattern
 			c.Req.Body = mockRequestBody(cmd)
 			c.Req.Header.Add("Content-Type", "application/json")
 			sc.context = c
-			sc.context.UserId = testUserID
-			sc.context.OrgId = testOrgID
+			sc.context.UserID = testUserID
+			sc.context.OrgID = testOrgID
 			sc.context.OrgRole = role
 
 			return hs.PatchAnnotation(c)
 		})
-
-		fakeAnnoRepo = NewFakeAnnotationsRepo()
-		annotations.SetRepository(fakeAnnoRepo)
 
 		sc.m.Patch(routePattern, sc.defaultHandler)
 
@@ -423,8 +360,8 @@ func patchAnnotationScenario(t *testing.T, desc string, url string, routePattern
 	})
 }
 
-func deleteAnnotationsScenario(t *testing.T, desc string, url string, routePattern string, role models.RoleType,
-	cmd dtos.MassDeleteAnnotationsCmd, store sqlstore.Store, dashSvc dashboards.DashboardService, fn scenarioFunc) {
+func deleteAnnotationsScenario(t *testing.T, desc string, url string, routePattern string, role org.RoleType,
+	cmd dtos.MassDeleteAnnotationsCmd, store db.DB, dashSvc dashboards.DashboardService, fn scenarioFunc) {
 	t.Run(fmt.Sprintf("%s %s", desc, url), func(t *testing.T) {
 		hs := setupSimpleHTTPServer(nil)
 		hs.SQLStore = store
@@ -435,15 +372,12 @@ func deleteAnnotationsScenario(t *testing.T, desc string, url string, routePatte
 			c.Req.Body = mockRequestBody(cmd)
 			c.Req.Header.Add("Content-Type", "application/json")
 			sc.context = c
-			sc.context.UserId = testUserID
-			sc.context.OrgId = testOrgID
+			sc.context.UserID = testUserID
+			sc.context.OrgID = testOrgID
 			sc.context.OrgRole = role
 
 			return hs.MassDeleteAnnotations(c)
 		})
-
-		fakeAnnoRepo = NewFakeAnnotationsRepo()
-		annotations.SetRepository(fakeAnnoRepo)
 
 		sc.m.Post(routePattern, sc.defaultHandler)
 
@@ -452,19 +386,40 @@ func deleteAnnotationsScenario(t *testing.T, desc string, url string, routePatte
 }
 
 func TestAPI_Annotations_AccessControl(t *testing.T) {
-	sc := setupHTTPServer(t, true, true)
+	sc := setupHTTPServer(t, true)
 	setInitCtxSignedInEditor(sc.initCtx)
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateWithMember(context.Background(), &org.CreateOrgCommand{Name: "TestOrg", UserID: testUserID})
 	require.NoError(t, err)
 
-	dashboardAnnotation := &annotations.Item{Id: 1, DashboardId: 1}
+	origNewGuardian := guardian.New
+	t.Cleanup(func() {
+		guardian.New = origNewGuardian
+	})
+
+	// Create a dashboard
+	guardian.MockDashboardGuardian(&guardian.FakeDashboardGuardian{CanSaveValue: true})
+	sc.dashboardPermissionsService.On("SetPermissions", mock.Anything, mock.AnythingOfType("int64"), mock.AnythingOfType("string"), mock.Anything).Return([]accesscontrol.ResourcePermission{}, nil)
+	cmd := &dashboards.SaveDashboardDTO{
+		OrgId: testOrgID,
+		User:  &user.SignedInUser{UserID: testUserID, OrgID: testOrgID},
+		Dashboard: &models.Dashboard{
+			OrgId: testOrgID,
+			Title: "1 test dash",
+			Data:  simplejson.NewFromAny(map[string]interface{}{}),
+		}}
+	dashboard, err := sc.hs.DashboardService.SaveDashboard(context.Background(), cmd, false)
+	require.NoError(t, err)
+	require.NotNil(t, dashboard)
+	t.Cleanup(func() {
+		err := sc.hs.DashboardService.DeleteDashboard(context.Background(), dashboard.Id, dashboard.OrgId)
+		require.NoError(t, err)
+	})
+
+	dashboardAnnotation := &annotations.Item{Id: 1, DashboardId: dashboard.Id}
 	organizationAnnotation := &annotations.Item{Id: 2, DashboardId: 0}
 
-	fakeAnnoRepo = NewFakeAnnotationsRepo()
-	_ = fakeAnnoRepo.Save(dashboardAnnotation)
-	_ = fakeAnnoRepo.Save(organizationAnnotation)
-
-	annotations.SetRepository(fakeAnnoRepo)
+	_ = sc.hs.annotationsRepo.Save(context.Background(), dashboardAnnotation)
+	_ = sc.hs.annotationsRepo.Save(context.Background(), organizationAnnotation)
 
 	postOrganizationCmd := dtos.PostAnnotationsCmd{
 		Time:    1000,
@@ -787,8 +742,8 @@ func TestAPI_Annotations_AccessControl(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			setUpRBACGuardian(t)
 			sc.acmock.
-				RegisterScopeAttributeResolver(AnnotationTypeScopeResolver())
-			setAccessControlPermissions(sc.acmock, tt.args.permissions, sc.initCtx.OrgId)
+				RegisterScopeAttributeResolver(AnnotationTypeScopeResolver(sc.hs.annotationsRepo))
+			setAccessControlPermissions(sc.acmock, tt.args.permissions, sc.initCtx.OrgID)
 
 			r := callAPI(sc.server, tt.args.method, tt.args.url, tt.args.body, t)
 			assert.Equalf(t, tt.want, r.Code, "Annotations API(%v)", tt.args.url)
@@ -834,13 +789,11 @@ func TestService_AnnotationTypeScopeResolver(t *testing.T) {
 	dashboardAnnotation := annotations.Item{Id: 1, DashboardId: 1}
 	organizationAnnotation := annotations.Item{Id: 2}
 
-	fakeAnnoRepo = NewFakeAnnotationsRepo()
-	_ = fakeAnnoRepo.Save(&dashboardAnnotation)
-	_ = fakeAnnoRepo.Save(&organizationAnnotation)
+	fakeAnnoRepo := annotationstest.NewFakeAnnotationsRepo()
+	_ = fakeAnnoRepo.Save(context.Background(), &dashboardAnnotation)
+	_ = fakeAnnoRepo.Save(context.Background(), &organizationAnnotation)
 
-	annotations.SetRepository(fakeAnnoRepo)
-
-	prefix, resolver := AnnotationTypeScopeResolver()
+	prefix, resolver := AnnotationTypeScopeResolver(fakeAnnoRepo)
 	require.Equal(t, "annotations:id:", prefix)
 
 	for _, tc := range testCases {
@@ -859,9 +812,9 @@ func TestService_AnnotationTypeScopeResolver(t *testing.T) {
 }
 
 func TestAPI_MassDeleteAnnotations_AccessControl(t *testing.T) {
-	sc := setupHTTPServer(t, true, true)
+	sc := setupHTTPServer(t, true)
 	setInitCtxSignedInEditor(sc.initCtx)
-	_, err := sc.db.CreateOrgWithMember("TestOrg", testUserID)
+	_, err := sc.hs.orgService.CreateWithMember(context.Background(), &org.CreateOrgCommand{Name: "TestOrg", UserID: testUserID})
 	require.NoError(t, err)
 
 	type args struct {
@@ -870,6 +823,30 @@ func TestAPI_MassDeleteAnnotations_AccessControl(t *testing.T) {
 		body        io.Reader
 		method      string
 	}
+
+	origNewGuardian := guardian.New
+	t.Cleanup(func() {
+		guardian.New = origNewGuardian
+	})
+
+	// Create a dashboard
+	guardian.MockDashboardGuardian(&guardian.FakeDashboardGuardian{CanSaveValue: true})
+	sc.dashboardPermissionsService.On("SetPermissions", mock.Anything, mock.AnythingOfType("int64"), mock.AnythingOfType("string"), mock.Anything).Return([]accesscontrol.ResourcePermission{}, nil)
+	cmd := &dashboards.SaveDashboardDTO{
+		OrgId: testOrgID,
+		User:  &user.SignedInUser{UserID: testUserID, OrgID: testOrgID},
+		Dashboard: &models.Dashboard{
+			OrgId: testOrgID,
+			Title: "1 test dash",
+			Data:  simplejson.NewFromAny(map[string]interface{}{}),
+		}}
+	dashboard, err := sc.hs.DashboardService.SaveDashboard(context.Background(), cmd, false)
+	require.NoError(t, err)
+	require.NotNil(t, dashboard)
+	t.Cleanup(func() {
+		err := sc.hs.DashboardService.DeleteDashboard(context.Background(), dashboard.Id, dashboard.OrgId)
+		require.NoError(t, err)
+	})
 
 	tests := []struct {
 		name string
@@ -909,7 +886,7 @@ func TestAPI_MassDeleteAnnotations_AccessControl(t *testing.T) {
 				url:         "/api/annotations/mass-delete",
 				method:      http.MethodPost,
 				body: mockRequestBody(dtos.MassDeleteAnnotationsCmd{
-					DashboardId: 1,
+					DashboardId: dashboard.Id,
 					PanelId:     1,
 				}),
 			},
@@ -981,15 +958,12 @@ func TestAPI_MassDeleteAnnotations_AccessControl(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setUpRBACGuardian(t)
-			setAccessControlPermissions(sc.acmock, tt.args.permissions, sc.initCtx.OrgId)
+			setAccessControlPermissions(sc.acmock, tt.args.permissions, sc.initCtx.OrgID)
 			dashboardAnnotation := &annotations.Item{Id: 1, DashboardId: 1}
 			organizationAnnotation := &annotations.Item{Id: 2, DashboardId: 0}
 
-			fakeAnnoRepo = NewFakeAnnotationsRepo()
-			_ = fakeAnnoRepo.Save(dashboardAnnotation)
-			_ = fakeAnnoRepo.Save(organizationAnnotation)
-
-			annotations.SetRepository(fakeAnnoRepo)
+			_ = sc.hs.annotationsRepo.Save(context.Background(), dashboardAnnotation)
+			_ = sc.hs.annotationsRepo.Save(context.Background(), organizationAnnotation)
 
 			r := callAPI(sc.server, tt.args.method, tt.args.url, tt.args.body, t)
 			assert.Equalf(t, tt.want, r.Code, "Annotations API(%v)", tt.args.url)
@@ -998,10 +972,10 @@ func TestAPI_MassDeleteAnnotations_AccessControl(t *testing.T) {
 }
 
 func setUpACL() {
-	viewerRole := models.ROLE_VIEWER
-	editorRole := models.ROLE_EDITOR
+	viewerRole := org.RoleViewer
+	editorRole := org.RoleEditor
 	store := mockstore.NewSQLStoreMock()
-	store.ExpectedTeamsByUser = []*models.TeamDTO{}
+	teamSvc := &teamtest.FakeService{}
 	dashSvc := &dashboards.FakeDashboardService{}
 	dashSvc.On("GetDashboardACLInfoList", mock.Anything, mock.AnythingOfType("*models.GetDashboardACLInfoListQuery")).Run(func(args mock.Arguments) {
 		q := args.Get(1).(*models.GetDashboardACLInfoListQuery)
@@ -1010,8 +984,15 @@ func setUpACL() {
 			{Role: &editorRole, Permission: models.PERMISSION_EDIT},
 		}
 	}).Return(nil)
+	dashSvc.On("GetDashboard", mock.Anything, mock.AnythingOfType("*models.GetDashboardQuery")).Run(func(args mock.Arguments) {
+		q := args.Get(1).(*models.GetDashboardQuery)
+		q.Result = &models.Dashboard{
+			Id:  q.Id,
+			Uid: q.Uid,
+		}
+	}).Return(nil)
 
-	guardian.InitLegacyGuardian(store, dashSvc)
+	guardian.InitLegacyGuardian(store, dashSvc, teamSvc)
 }
 
 func setUpRBACGuardian(t *testing.T) {

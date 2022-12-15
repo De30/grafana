@@ -4,12 +4,19 @@ import (
 	"context"
 
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/guardian"
+	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/user"
 )
 
 func isGeneralFolder(folderID int64) bool {
 	return folderID == 0
+}
+
+func isUIDGeneralFolder(folderUID string) bool {
+	return folderUID == accesscontrol.GeneralFolderUID
 }
 
 func (l *LibraryElementService) requireSupportedElementKind(kindAsInt int64) error {
@@ -24,20 +31,19 @@ func (l *LibraryElementService) requireSupportedElementKind(kindAsInt int64) err
 	}
 }
 
-func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Context, user *models.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(models.ROLE_EDITOR) {
+func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
+	if isGeneralFolder(folderID) && user.HasRole(org.RoleEditor) {
 		return nil
 	}
 
-	if isGeneralFolder(folderID) && user.HasRole(models.ROLE_VIEWER) {
+	if isGeneralFolder(folderID) && user.HasRole(org.RoleViewer) {
 		return dashboards.ErrFolderAccessDenied
 	}
-	folder, err := l.folderService.GetFolderByID(ctx, user, folderID, user.OrgId)
+
+	g, err := guardian.New(ctx, folderID, user.OrgID, user)
 	if err != nil {
 		return err
 	}
-
-	g := guardian.New(ctx, folder.Id, user.OrgId, user)
 
 	canEdit, err := g.CanEdit()
 	if err != nil {
@@ -50,17 +56,15 @@ func (l *LibraryElementService) requireEditPermissionsOnFolder(ctx context.Conte
 	return nil
 }
 
-func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Context, user *models.SignedInUser, folderID int64) error {
-	if isGeneralFolder(folderID) && user.HasRole(models.ROLE_VIEWER) {
+func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Context, user *user.SignedInUser, folderID int64) error {
+	if isGeneralFolder(folderID) && user.HasRole(org.RoleViewer) {
 		return nil
 	}
 
-	folder, err := l.folderService.GetFolderByID(ctx, user, folderID, user.OrgId)
+	g, err := guardian.New(ctx, folderID, user.OrgID, user)
 	if err != nil {
 		return err
 	}
-
-	g := guardian.New(ctx, folder.Id, user.OrgId, user)
 
 	canView, err := g.CanView()
 	if err != nil {
@@ -68,20 +72,6 @@ func (l *LibraryElementService) requireViewPermissionsOnFolder(ctx context.Conte
 	}
 	if !canView {
 		return dashboards.ErrFolderAccessDenied
-	}
-
-	return nil
-}
-
-func (l *LibraryElementService) requireEditPermissionsOnDashboard(ctx context.Context, user *models.SignedInUser, dashboardID int64) error {
-	g := guardian.New(ctx, dashboardID, user.OrgId, user)
-
-	canEdit, err := g.CanEdit()
-	if err != nil {
-		return err
-	}
-	if !canEdit {
-		return dashboards.ErrDashboardUpdateAccessDenied
 	}
 
 	return nil

@@ -1,39 +1,41 @@
-import { css } from '@emotion/css';
 import React, { useMemo, useRef, useState } from 'react';
 
 import {
   CartesianCoords2D,
   compareDataFrameStructures,
   DataFrame,
+  Field,
+  FieldColorModeId,
+  FieldType,
   getFieldDisplayName,
-  GrafanaTheme2,
   PanelProps,
   TimeRange,
   VizOrientation,
 } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
 import {
+  GraphGradientMode,
   GraphNG,
   GraphNGProps,
   measureText,
   PlotLegend,
   Portal,
+  TooltipDisplayMode,
   UPlotConfigBuilder,
   UPLOT_AXIS_FONT_SIZE,
   usePanelContext,
-  useStyles2,
   useTheme2,
   VizLayout,
   VizLegend,
   VizTooltipContainer,
 } from '@grafana/ui';
 import { PropDiffFn } from '@grafana/ui/src/components/GraphNG/GraphNG';
+import { HoverEvent, addTooltipSupport } from '@grafana/ui/src/components/uPlot/config/addTooltipSupport';
 import { CloseButton } from 'app/core/components/CloseButton/CloseButton';
 
 import { DataHoverView } from '../geomap/components/DataHoverView';
 import { getFieldLegendItem } from '../state-timeline/utils';
 
-import { HoverEvent, setupConfig } from './config';
 import { PanelOptions } from './models.gen';
 import { prepareBarChartDisplayValues, preparePlotConfigBuilder } from './utils';
 
@@ -74,16 +76,16 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
   id,
 }) => {
   const theme = useTheme2();
-  const styles = useStyles2(getStyles);
   const { eventBus } = usePanelContext();
 
   const oldConfig = useRef<UPlotConfigBuilder | undefined>(undefined);
   const isToolTipOpen = useRef<boolean>(false);
 
   const [hover, setHover] = useState<HoverEvent | undefined>(undefined);
-  const [coords, setCoords] = useState<CartesianCoords2D | null>(null);
+  const [coords, setCoords] = useState<{ viewport: CartesianCoords2D; canvas: CartesianCoords2D } | null>(null);
   const [focusedSeriesIdx, setFocusedSeriesIdx] = useState<number | null>(null);
   const [focusedPointIdx, setFocusedPointIdx] = useState<number | null>(null);
+  const [isActive, setIsActive] = useState<boolean>(false);
   const [shouldDisplayCloseButton, setShouldDisplayCloseButton] = useState<boolean>(false);
 
   const onCloseToolTip = () => {
@@ -100,10 +102,15 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
   };
 
   const frame0Ref = useRef<DataFrame>();
+  const colorByFieldRef = useRef<Field>();
+
   const info = useMemo(() => prepareBarChartDisplayValues(data?.series, theme, options), [data, theme, options]);
   const chartDisplay = 'viz' in info ? info : null;
 
+  colorByFieldRef.current = chartDisplay?.colorByField;
+
   const structureRef = useRef(10000);
+
   useMemo(() => {
     structureRef.current++;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,16 +172,30 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
     return (
       <>
         {shouldDisplayCloseButton && (
-          <>
-            <CloseButton onClick={onCloseToolTip} />
-            <div className={styles.closeButtonSpacer} />
-          </>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <CloseButton
+              onClick={onCloseToolTip}
+              style={{
+                position: 'relative',
+                top: 'auto',
+                right: 'auto',
+                marginRight: 0,
+              }}
+            />
+          </div>
         )}
         <DataHoverView
           data={info.aligned}
           rowIndex={datapointIdx}
           columnIndex={seriesIdx}
           sortOrder={options.tooltip.sort}
+          mode={options.tooltip.mode}
         />
       </>
     );
@@ -214,7 +235,37 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
     const disp = colorByField.display!;
     fillOpacity = (colorByField.config.custom.fillOpacity ?? 100) / 100;
     // gradientMode? ignore?
-    getColor = (seriesIdx: number, valueIdx: number) => disp(colorByField.values.get(valueIdx)).color!;
+    getColor = (seriesIdx: number, valueIdx: number) => disp(colorByFieldRef.current?.values.get(valueIdx)).color!;
+  } else {
+    const hasPerBarColor = frame0Ref.current!.fields.some((f) => {
+      const fromThresholds =
+        f.config.custom?.gradientMode === GraphGradientMode.Scheme &&
+        f.config.color?.mode === FieldColorModeId.Thresholds;
+
+      return (
+        fromThresholds ||
+        f.config.mappings?.some((m) => {
+          // ValueToText mappings have a different format, where all of them are grouped into an object keyed by value
+          if (m.type === 'value') {
+            // === MappingType.ValueToText
+            return Object.values(m.options).some((result) => result.color != null);
+          }
+          return m.options.result.color != null;
+        })
+      );
+    });
+
+    if (hasPerBarColor) {
+      // use opacity from first numeric field
+      let opacityField = frame0Ref.current!.fields.find((f) => f.type === FieldType.number)!;
+
+      fillOpacity = (opacityField.config.custom.fillOpacity ?? 100) / 100;
+
+      getColor = (seriesIdx: number, valueIdx: number) => {
+        let field = frame0Ref.current!.fields[seriesIdx];
+        return field.display!(field.values.get(valueIdx)).color!;
+      };
+    }
   }
 
   const prepConfig = (alignedFrame: DataFrame, allFrames: DataFrame[], getTimeRange: () => TimeRange) => {
@@ -234,6 +285,7 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
     return preparePlotConfigBuilder({
       frame: alignedFrame,
       getTimeRange,
+      timeZone,
       theme,
       timeZones: [timeZone],
       eventBus,
@@ -265,7 +317,7 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
       preparePlotFrame={(f) => f[0]} // already processed in by the panel above!
       renderLegend={renderLegend}
       legend={options.legend}
-      timeZones={timeZone}
+      timeZone={timeZone}
       timeRange={{ from: 1, to: 1 } as unknown as TimeRange} // HACK
       structureRev={structureRev}
       width={width}
@@ -273,7 +325,7 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
     >
       {(config) => {
         if (oldConfig.current !== config) {
-          oldConfig.current = setupConfig({
+          oldConfig.current = addTooltipSupport({
             config,
             onUPlotClick,
             setFocusedSeriesIdx,
@@ -281,14 +333,20 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
             setCoords,
             setHover,
             isToolTipOpen,
+            isActive,
+            setIsActive,
           });
+        }
+
+        if (options.tooltip.mode === TooltipDisplayMode.None) {
+          return null;
         }
 
         return (
           <Portal>
-            {hover && coords && (
+            {hover && coords && focusedSeriesIdx && (
               <VizTooltipContainer
-                position={{ x: coords.x, y: coords.y }}
+                position={{ x: coords.viewport.x, y: coords.viewport.y }}
                 offset={{ x: TOOLTIP_OFFSET, y: TOOLTIP_OFFSET }}
                 allowPointerEvents={isToolTipOpen.current}
               >
@@ -301,9 +359,3 @@ export const BarChartPanel: React.FunctionComponent<Props> = ({
     </GraphNG>
   );
 };
-
-const getStyles = (theme: GrafanaTheme2) => ({
-  closeButtonSpacer: css`
-    margin-bottom: 15px;
-  `,
-});

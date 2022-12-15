@@ -9,6 +9,7 @@ import { EmptyLanguageProviderMock } from '../../language_provider.mock';
 import { PromQuery } from '../../types';
 import { QueryEditorMode } from '../shared/types';
 
+import { EXPLAIN_LABEL_FILTER_CONTENT } from './PromQueryBuilderExplained';
 import { PromQueryEditorSelector } from './PromQueryEditorSelector';
 
 // We need to mock this because it seems jest has problem importing monaco in tests
@@ -55,6 +56,7 @@ const defaultProps = {
       url: '',
       jsonData: {},
       meta: {} as any,
+      readOnly: false,
     },
     undefined,
     undefined,
@@ -82,11 +84,6 @@ describe('PromQueryEditorSelector', () => {
     expectBuilder();
   });
 
-  it('shows explain when explain mode is set', async () => {
-    renderWithMode(QueryEditorMode.Explain);
-    expectExplain();
-  });
-
   it('changes to builder mode', async () => {
     const { onChange } = renderWithMode(QueryEditorMode.Code);
     await switchToMode(QueryEditorMode.Builder);
@@ -98,19 +95,19 @@ describe('PromQueryEditorSelector', () => {
     });
   });
 
-  it('Can enable raw query', async () => {
-    renderWithMode(QueryEditorMode.Builder);
-    expect(screen.queryByLabelText('selector')).toBeInTheDocument();
-    screen.getByLabelText('Raw query').click();
-    expect(screen.queryByLabelText('selector')).not.toBeInTheDocument();
-  });
-
-  it('Should show raw query by default', async () => {
+  it('Should show raw query', async () => {
     renderWithProps({
       editorMode: QueryEditorMode.Builder,
       expr: 'my_metric',
     });
     expect(screen.getByLabelText('selector').textContent).toBe('my_metric');
+  });
+
+  it('Can enable explain', async () => {
+    renderWithMode(QueryEditorMode.Builder);
+    expect(screen.queryByText(EXPLAIN_LABEL_FILTER_CONTENT)).not.toBeInTheDocument();
+    screen.getByLabelText('Explain').click();
+    expect(await screen.findByText(EXPLAIN_LABEL_FILTER_CONTENT)).toBeInTheDocument();
   });
 
   it('changes to code mode', async () => {
@@ -121,17 +118,6 @@ describe('PromQueryEditorSelector', () => {
       expr: defaultQuery.expr,
       range: true,
       editorMode: QueryEditorMode.Code,
-    });
-  });
-
-  it('changes to explain mode', async () => {
-    const { onChange } = renderWithMode(QueryEditorMode.Code);
-    await switchToMode(QueryEditorMode.Explain);
-    expect(onChange).toBeCalledWith({
-      refId: 'A',
-      expr: defaultQuery.expr,
-      range: true,
-      editorMode: QueryEditorMode.Explain,
     });
   });
 
@@ -181,15 +167,9 @@ function expectBuilder() {
   expect(screen.getByText('Metric')).toBeInTheDocument();
 }
 
-function expectExplain() {
-  // Base message when there is no query
-  expect(screen.getByText(/Fetch all series/)).toBeInTheDocument();
-}
-
 async function switchToMode(mode: QueryEditorMode) {
   const label = {
     [QueryEditorMode.Code]: /Code/,
-    [QueryEditorMode.Explain]: /Explain/,
     [QueryEditorMode.Builder]: /Builder/,
   }[mode];
 

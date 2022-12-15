@@ -11,6 +11,8 @@ export interface OrgUser extends WithAccessControlMetadata {
   orgId: number;
   role: OrgRole;
   userId: number;
+  isDisabled: boolean;
+  authLabels?: string[];
 }
 
 export interface User {

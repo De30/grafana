@@ -7,6 +7,8 @@ import angular from 'angular';
 import { configure } from 'enzyme';
 
 import { EventBusSrv } from '@grafana/data';
+import { GrafanaBootConfig } from '@grafana/runtime';
+import 'blob-polyfill';
 import 'mutationobserver-shim';
 import './mocks/workers';
 
@@ -16,6 +18,16 @@ import '../vendor/flot/jquery.flot.time';
 const testAppEvents = new EventBusSrv();
 const global = window as any;
 global.$ = global.jQuery = $;
+
+// mock the default window.grafanaBootData settings
+const settings: Partial<GrafanaBootConfig> = {
+  angularSupportEnabled: true,
+};
+global.grafanaBootData = {
+  settings,
+  user: {},
+  navTree: [],
+};
 
 // https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 Object.defineProperty(global, 'matchMedia', {
@@ -39,6 +51,14 @@ angular.module('grafana.controllers', []);
 angular.module('grafana.directives', []);
 angular.module('grafana.filters', []);
 angular.module('grafana.routes', ['ngRoute']);
+
+// Mock IntersectionObserver
+const mockIntersectionObserver = jest.fn().mockReturnValue({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+});
+global.IntersectionObserver = mockIntersectionObserver;
 
 jest.mock('../app/core/core', () => ({
   ...jest.requireActual('../app/core/core'),

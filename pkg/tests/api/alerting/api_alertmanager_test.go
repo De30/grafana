@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -16,12 +16,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/grafana/grafana/pkg/models"
 	apimodels "github.com/grafana/grafana/pkg/services/ngalert/api/tooling/definitions"
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	ngstore "github.com/grafana/grafana/pkg/services/ngalert/store"
+	"github.com/grafana/grafana/pkg/services/org"
+	"github.com/grafana/grafana/pkg/services/org/orgimpl"
+	"github.com/grafana/grafana/pkg/services/quota/quotaimpl"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/services/user/userimpl"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
 )
@@ -31,7 +34,9 @@ type Response struct {
 	TraceID string `json:"traceID"`
 }
 
-func TestAMConfigAccess(t *testing.T) {
+func TestIntegrationAMConfigAccess(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
 		EnableUnifiedAlerting: true,
@@ -43,17 +48,17 @@ func TestAMConfigAccess(t *testing.T) {
 
 	// Create a users to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_VIEWER),
+		DefaultOrgRole: string(org.RoleViewer),
 		Password:       "viewer",
 		Login:          "viewer",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_ADMIN),
+		DefaultOrgRole: string(org.RoleAdmin),
 		Password:       "admin",
 		Login:          "admin",
 	})
@@ -126,7 +131,7 @@ func TestAMConfigAccess(t *testing.T) {
 				})
 				require.NoError(t, err)
 				require.Equal(t, tc.expStatus, resp.StatusCode)
-				b, err := ioutil.ReadAll(resp.Body)
+				b, err := io.ReadAll(resp.Body)
 				require.NoError(t, err)
 				require.Contains(t, string(b), tc.expBody)
 			})
@@ -193,7 +198,7 @@ func TestAMConfigAccess(t *testing.T) {
 				})
 				require.NoError(t, err)
 				require.Equal(t, tc.expStatus, resp.StatusCode)
-				b, err := ioutil.ReadAll(resp.Body)
+				b, err := io.ReadAll(resp.Body)
 				if tc.expStatus == http.StatusOK {
 					re := regexp.MustCompile(`"uid":"([\w|-]+)"`)
 					b = re.ReplaceAll(b, []byte(`"uid":""`))
@@ -238,13 +243,11 @@ func TestAMConfigAccess(t *testing.T) {
 				desc:      "editor request should succeed",
 				url:       "http://editor:editor@%s/api/alertmanager/grafana/api/v2/silences",
 				expStatus: http.StatusAccepted,
-				expBody:   `{"id":"0","message":"silence created"}`,
 			},
 			{
 				desc:      "admin request should succeed",
 				url:       "http://admin:admin@%s/api/alertmanager/grafana/api/v2/silences",
 				expStatus: http.StatusAccepted,
-				expBody:   `{"id":"0","message":"silence created"}`,
 			},
 		}
 
@@ -259,11 +262,13 @@ func TestAMConfigAccess(t *testing.T) {
 				})
 				require.NoError(t, err)
 				require.Equal(t, tc.expStatus, resp.StatusCode)
-				b, err := ioutil.ReadAll(resp.Body)
+				b, err := io.ReadAll(resp.Body)
 				require.NoError(t, err)
 				if tc.expStatus == http.StatusAccepted {
-					re := regexp.MustCompile(`"id":"([\w|-]+)"`)
-					b = re.ReplaceAll(b, []byte(`"id":"0"`))
+					response := apimodels.PostSilencesOKBody{}
+					require.NoError(t, json.Unmarshal(b, &response))
+					require.NotEmpty(t, response.SilenceID)
+					return
 				}
 				require.Contains(t, string(b), tc.expBody)
 			})
@@ -308,7 +313,7 @@ func TestAMConfigAccess(t *testing.T) {
 				require.Equal(t, tc.expStatus, resp.StatusCode)
 				require.NoError(t, err)
 				if tc.expStatus == http.StatusOK {
-					b, err := ioutil.ReadAll(resp.Body)
+					b, err := io.ReadAll(resp.Body)
 					require.NoError(t, err)
 					blob = b
 				}
@@ -378,7 +383,7 @@ func TestAMConfigAccess(t *testing.T) {
 				})
 				require.NoError(t, err)
 				require.Equal(t, tc.expStatus, resp.StatusCode)
-				b, err := ioutil.ReadAll(resp.Body)
+				b, err := io.ReadAll(resp.Body)
 				require.NoError(t, err)
 				if tc.expStatus == http.StatusOK {
 					unconsumedSilenceIdx++
@@ -389,7 +394,9 @@ func TestAMConfigAccess(t *testing.T) {
 	})
 }
 
-func TestAlertAndGroupsQuery(t *testing.T) {
+func TestIntegrationAlertAndGroupsQuery(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
 		EnableUnifiedAlerting: true,
@@ -409,7 +416,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 		require.JSONEq(t, `{"message": "Unauthorized"}`, string(b))
@@ -417,7 +424,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 
 	// Create a user to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "password",
 		Login:          "grafana",
 	})
@@ -434,7 +441,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
@@ -453,7 +460,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode)
 		require.JSONEq(t, "[]", string(b))
@@ -469,7 +476,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode)
@@ -528,7 +535,7 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 				err := resp.Body.Close()
 				require.NoError(t, err)
 			})
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode)
 
@@ -546,7 +553,9 @@ func TestAlertAndGroupsQuery(t *testing.T) {
 	}
 }
 
-func TestRulerAccess(t *testing.T) {
+func TestIntegrationRulerAccess(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -561,17 +570,17 @@ func TestRulerAccess(t *testing.T) {
 
 	// Create a users to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_VIEWER),
+		DefaultOrgRole: string(org.RoleViewer),
 		Password:       "viewer",
 		Login:          "viewer",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_ADMIN),
+		DefaultOrgRole: string(org.RoleAdmin),
 		Password:       "admin",
 		Login:          "admin",
 	})
@@ -661,7 +670,9 @@ func TestRulerAccess(t *testing.T) {
 	}
 }
 
-func TestDeleteFolderWithRules(t *testing.T) {
+func TestIntegrationDeleteFolderWithRules(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -675,12 +686,12 @@ func TestDeleteFolderWithRules(t *testing.T) {
 	grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
 
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_VIEWER),
+		DefaultOrgRole: string(org.RoleViewer),
 		Password:       "viewer",
 		Login:          "viewer",
 	})
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "editor",
 		Login:          "editor",
 	})
@@ -703,7 +714,7 @@ func TestDeleteFolderWithRules(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, 200, resp.StatusCode)
@@ -780,7 +791,7 @@ func TestDeleteFolderWithRules(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 		require.JSONEq(t, `{"message":"folder cannot be deleted: folder contains alert rules"}`, string(b))
@@ -798,10 +809,9 @@ func TestDeleteFolderWithRules(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		_, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode)
-		require.JSONEq(t, `{"id":1,"message":"Folder default deleted","title":"default"}`, string(b))
 	}
 
 	// Finally, we ensure the rules were deleted.
@@ -814,7 +824,7 @@ func TestDeleteFolderWithRules(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, 200, resp.StatusCode)
@@ -822,7 +832,9 @@ func TestDeleteFolderWithRules(t *testing.T) {
 	}
 }
 
-func TestAlertRuleCRUD(t *testing.T) {
+func TestIntegrationAlertRuleCRUD(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -835,7 +847,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 	grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
 
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "password",
 		Login:          "grafana",
 	})
@@ -1025,7 +1037,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedMessage: "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: invalid query A: data source not found: unknown",
+				expectedMessage: "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: failed to build query 'A': data source not found",
 			},
 			{
 				desc:      "alert rule with invalid condition",
@@ -1055,7 +1067,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 						},
 					},
 				},
-				expectedMessage: "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: condition B not found in any query or expression: it should be one of: [A]",
+				expectedMessage: "invalid rule specification at index [0]: failed to validate condition of alert rule AlwaysFiring: condition B does not exist, must be one of [A]",
 			},
 		}
 
@@ -1073,8 +1085,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 				err = json.Unmarshal([]byte(body), &res)
 				require.NoError(t, err)
 
-				assert.Equal(t, res.Message, tc.expectedMessage)
-				assert.NotEmpty(t, res.TraceID)
+				assert.Equal(t, tc.expectedMessage, res.Message)
 
 				assert.Equal(t, http.StatusBadRequest, status)
 			})
@@ -1154,7 +1165,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1321,7 +1332,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1427,7 +1438,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1499,7 +1510,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1616,7 +1627,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1701,7 +1712,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1773,7 +1784,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 				err := resp.Body.Close()
 				require.NoError(t, err)
 			})
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 
 			require.Equal(t, http.StatusAccepted, resp.StatusCode)
@@ -1792,7 +1803,7 @@ func TestAlertRuleCRUD(t *testing.T) {
 				err := resp.Body.Close()
 				require.NoError(t, err)
 			})
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 
 			require.Equal(t, http.StatusAccepted, resp.StatusCode)
@@ -1801,7 +1812,9 @@ func TestAlertRuleCRUD(t *testing.T) {
 	}
 }
 
-func TestAlertmanagerStatus(t *testing.T) {
+func TestIntegrationAlertmanagerStatus(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -1821,7 +1834,7 @@ func TestAlertmanagerStatus(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode)
 		require.JSONEq(t, `
@@ -1864,7 +1877,9 @@ func TestAlertmanagerStatus(t *testing.T) {
 	}
 }
 
-func TestQuota(t *testing.T) {
+func TestIntegrationQuota(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -1878,7 +1893,9 @@ func TestQuota(t *testing.T) {
 
 	// Create a user to make authenticated requests
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		// needs permission to update org quota
+		IsAdmin:        true,
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "password",
 		Login:          "grafana",
 	})
@@ -1903,7 +1920,7 @@ func TestQuota(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -1918,30 +1935,10 @@ func TestQuota(t *testing.T) {
 	// check quota limits
 	t.Run("when quota limit exceed creating new rule should fail", func(t *testing.T) {
 		// get existing org quota
-		query := models.GetOrgQuotaByTargetQuery{OrgId: 1, Target: "alert_rule"}
-		err = store.GetOrgQuotaByTarget(context.Background(), &query)
-		require.NoError(t, err)
-		used := query.Result.Used
-		limit := query.Result.Limit
-
-		// set org quota limit to equal used
-		orgCmd := models.UpdateOrgQuotaCmd{
-			OrgId:  1,
-			Target: "alert_rule",
-			Limit:  used,
-		}
-		err := store.UpdateOrgQuota(context.Background(), &orgCmd)
-		require.NoError(t, err)
-
+		limit, used := apiClient.GetOrgQuotaLimits(t, 1)
+		apiClient.UpdateAlertRuleOrgQuota(t, 1, used)
 		t.Cleanup(func() {
-			// reset org quota to original value
-			orgCmd := models.UpdateOrgQuotaCmd{
-				OrgId:  1,
-				Target: "alert_rule",
-				Limit:  limit,
-			}
-			err := store.UpdateOrgQuota(context.Background(), &orgCmd)
-			require.NoError(t, err)
+			apiClient.UpdateAlertRuleOrgQuota(t, 1, limit)
 		})
 
 		// try to create an alert rule
@@ -2021,7 +2018,7 @@ func TestQuota(t *testing.T) {
 			err := resp.Body.Close()
 			require.NoError(t, err)
 		})
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, 202)
@@ -2081,7 +2078,9 @@ func TestQuota(t *testing.T) {
 	})
 }
 
-func TestEval(t *testing.T) {
+func TestIntegrationEval(t *testing.T) {
+	testinfra.SQLiteIntegrationTest(t)
+
 	// Setup Grafana and its Database
 	dir, path := testinfra.CreateGrafDir(t, testinfra.GrafanaOpts{
 		DisableLegacyAlerting: true,
@@ -2094,7 +2093,7 @@ func TestEval(t *testing.T) {
 	grafanaListedAddr, store := testinfra.StartGrafana(t, dir, path)
 
 	createUser(t, store, user.CreateUserCommand{
-		DefaultOrgRole: string(models.ROLE_EDITOR),
+		DefaultOrgRole: string(org.RoleEditor),
 		Password:       "password",
 		Login:          "grafana",
 	})
@@ -2264,7 +2263,7 @@ func TestEval(t *testing.T) {
 			`,
 			expectedStatusCode: func() int { return http.StatusBadRequest },
 			expectedMessage: func() string {
-				return "invalid condition: condition B not found in any query or expression: it should be one of: [A]"
+				return "invalid condition: condition B does not exist, must be one of [A]"
 			},
 			expectedResponse: func() string { return "" },
 		},
@@ -2300,7 +2299,7 @@ func TestEval(t *testing.T) {
 				if setting.IsEnterprise {
 					return "user is not authorized to query one or many data sources used by the rule"
 				}
-				return "invalid condition: invalid query A: data source not found: unknown"
+				return "invalid condition: failed to build query 'A': data source not found"
 			},
 			expectedResponse: func() string { return "" },
 		},
@@ -2317,7 +2316,7 @@ func TestEval(t *testing.T) {
 				err := resp.Body.Close()
 				require.NoError(t, err)
 			})
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			res := Response{}
 			err = json.Unmarshal(b, &res)
@@ -2329,7 +2328,6 @@ func TestEval(t *testing.T) {
 			}
 			if tc.expectedMessage() != "" {
 				assert.Equal(t, tc.expectedMessage(), res.Message)
-				assert.NotEmpty(t, res.TraceID)
 			}
 		})
 	}
@@ -2369,6 +2367,7 @@ func TestEval(t *testing.T) {
 				return `{
 				"results": {
 				  "A": {
+					"status": 200,
 					"frames": [
 					  {
 						"schema": {
@@ -2425,6 +2424,7 @@ func TestEval(t *testing.T) {
 				return `{
 				"results": {
 				  "A": {
+					"status": 200,
 					"frames": [
 					  {
 						"schema": {
@@ -2484,7 +2484,7 @@ func TestEval(t *testing.T) {
 				if setting.IsEnterprise {
 					return "user is not authorized to query one or many data sources used by the rule"
 				}
-				return "invalid queries or expressions: invalid query A: data source not found: unknown"
+				return "Failed to build evaluator for queries and expressions: failed to build query 'A': data source not found"
 			},
 		},
 	}
@@ -2500,7 +2500,7 @@ func TestEval(t *testing.T) {
 				err := resp.Body.Close()
 				require.NoError(t, err)
 			})
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			res := Response{}
 			err = json.Unmarshal(b, &res)
@@ -2512,7 +2512,6 @@ func TestEval(t *testing.T) {
 			}
 			if tc.expectedMessage() != "" {
 				require.Equal(t, tc.expectedMessage(), res.Message)
-				require.NotEmpty(t, res.TraceID)
 			}
 		})
 	}
@@ -2554,15 +2553,15 @@ func createUser(t *testing.T, store *sqlstore.SQLStore, cmd user.CreateUserComma
 	store.Cfg.AutoAssignOrg = true
 	store.Cfg.AutoAssignOrgId = 1
 
-	u, err := store.CreateUser(context.Background(), cmd)
+	quotaService := quotaimpl.ProvideService(store, store.Cfg)
+	orgService, err := orgimpl.ProvideService(store, store.Cfg, quotaService)
+	require.NoError(t, err)
+	usrSvc, err := userimpl.ProvideService(store, orgService, store.Cfg, nil, nil, quotaService)
+	require.NoError(t, err)
+
+	u, err := usrSvc.CreateUserForTests(context.Background(), &cmd)
 	require.NoError(t, err)
 	return u.ID
-}
-
-func createOrg(t *testing.T, store *sqlstore.SQLStore, name string, userID int64) int64 {
-	org, err := store.CreateOrgWithMember(name, userID)
-	require.NoError(t, err)
-	return org.Id
 }
 
 func getLongString(t *testing.T, n int) string {

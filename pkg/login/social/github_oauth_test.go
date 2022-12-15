@@ -9,6 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
+
+	"github.com/grafana/grafana/pkg/services/featuremgmt"
 )
 
 const testGHUserTeamsJSON = `[
@@ -127,13 +129,12 @@ func TestSocialGitHub_UserInfo(t *testing.T) {
 			autoAssignOrgRole: "",
 			roleAttributePath: "",
 			want: &BasicUserInfo{
-				Id:      "1",
-				Name:    "monalisa octocat",
-				Email:   "octocat@github.com",
-				Login:   "octocat",
-				Company: "",
-				Role:    "",
-				Groups:  []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
+				Id:     "1",
+				Name:   "monalisa octocat",
+				Email:  "octocat@github.com",
+				Login:  "octocat",
+				Role:   "",
+				Groups: []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
 			},
 		},
 		{
@@ -143,13 +144,12 @@ func TestSocialGitHub_UserInfo(t *testing.T) {
 			autoAssignOrgRole: "Editor",
 			userTeamsRawJSON:  testGHUserTeamsJSON,
 			want: &BasicUserInfo{
-				Id:      "1",
-				Name:    "monalisa octocat",
-				Email:   "octocat@github.com",
-				Login:   "octocat",
-				Company: "",
-				Role:    "Admin",
-				Groups:  []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
+				Id:     "1",
+				Name:   "monalisa octocat",
+				Email:  "octocat@github.com",
+				Login:  "octocat",
+				Role:   "Admin",
+				Groups: []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
 			},
 		},
 		{
@@ -159,29 +159,27 @@ func TestSocialGitHub_UserInfo(t *testing.T) {
 			autoAssignOrgRole: "Editor",
 			userTeamsRawJSON:  testGHUserTeamsJSON,
 			want: &BasicUserInfo{
-				Id:      "1",
-				Name:    "monalisa octocat",
-				Email:   "octocat@github.com",
-				Login:   "octocat",
-				Company: "",
-				Role:    "Editor",
-				Groups:  []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
+				Id:     "1",
+				Name:   "monalisa octocat",
+				Email:  "octocat@github.com",
+				Login:  "octocat",
+				Role:   "Editor",
+				Groups: []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
 			},
 		},
-		{
-			name:              "auto assign org role",
+		{ // Case that's going to change with Grafana 10
+			name:              "No fallback to default org role (will change in Grafana 10)",
 			roleAttributePath: "",
 			userRawJSON:       testGHUserJSON,
 			autoAssignOrgRole: "Editor",
 			userTeamsRawJSON:  testGHUserTeamsJSON,
 			want: &BasicUserInfo{
-				Id:      "1",
-				Name:    "monalisa octocat",
-				Email:   "octocat@github.com",
-				Login:   "octocat",
-				Company: "",
-				Role:    "Editor",
-				Groups:  []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
+				Id:     "1",
+				Name:   "monalisa octocat",
+				Email:  "octocat@github.com",
+				Login:  "octocat",
+				Role:   "",
+				Groups: []string{"https://github.com/orgs/github/teams/justice-league", "@github/justice-league"},
 			},
 		},
 	}
@@ -206,7 +204,7 @@ func TestSocialGitHub_UserInfo(t *testing.T) {
 
 			s := &SocialGithub{
 				SocialBase: newSocialBase("github", &oauth2.Config{},
-					&OAuthInfo{RoleAttributePath: tt.roleAttributePath}, tt.autoAssignOrgRole),
+					&OAuthInfo{RoleAttributePath: tt.roleAttributePath}, tt.autoAssignOrgRole, false, *featuremgmt.WithFeatures()),
 				allowedOrganizations: []string{},
 				apiUrl:               server.URL + "/user",
 				teamIds:              []int{},

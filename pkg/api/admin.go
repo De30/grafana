@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/models"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -46,14 +47,14 @@ func (hs *HTTPServer) AdminGetSettings(c *models.ReqContext) response.Response {
 func (hs *HTTPServer) AdminGetStats(c *models.ReqContext) response.Response {
 	statsQuery := models.GetAdminStatsQuery{}
 
-	if err := hs.SQLStore.GetAdminStats(c.Req.Context(), &statsQuery); err != nil {
+	if err := hs.statsService.GetAdminStats(c.Req.Context(), &statsQuery); err != nil {
 		return response.Error(500, "Failed to get admin stats from database", err)
 	}
 
 	return response.JSON(http.StatusOK, statsQuery.Result)
 }
 
-func (hs *HTTPServer) getAuthorizedSettings(ctx context.Context, user *models.SignedInUser, bag setting.SettingsBag) (setting.SettingsBag, error) {
+func (hs *HTTPServer) getAuthorizedSettings(ctx context.Context, user *user.SignedInUser, bag setting.SettingsBag) (setting.SettingsBag, error) {
 	if hs.AccessControl.IsDisabled() {
 		return bag, nil
 	}

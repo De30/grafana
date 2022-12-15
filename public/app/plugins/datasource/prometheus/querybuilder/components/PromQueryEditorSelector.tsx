@@ -1,23 +1,35 @@
+import { map } from 'lodash';
 import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react';
 
-import { CoreApp, LoadingState } from '@grafana/data';
+import { CoreApp, LoadingState, SelectableValue } from '@grafana/data';
+import { EditorHeader, EditorRows, FlexItem, InlineSelect, Space } from '@grafana/experimental';
 import { reportInteraction } from '@grafana/runtime';
-import { Button, ConfirmModal, EditorHeader, EditorRows, FlexItem, InlineSelect, Space } from '@grafana/ui';
+import { ConfirmModal, Button } from '@grafana/ui';
 
 import { PromQueryEditorProps } from '../../components/types';
 import { PromQuery } from '../../types';
 import { promQueryModeller } from '../PromQueryModeller';
 import { buildVisualQueryFromString } from '../parsing';
-import { FeedbackLink } from '../shared/FeedbackLink';
 import { QueryEditorModeToggle } from '../shared/QueryEditorModeToggle';
 import { QueryHeaderSwitch } from '../shared/QueryHeaderSwitch';
+import { promQueryEditorExplainKey, useFlag } from '../shared/hooks/useFlag';
 import { QueryEditorMode } from '../shared/types';
-import { changeEditorMode, getQueryWithDefaults, useRawQuery } from '../state';
+import { changeEditorMode, getQueryWithDefaults } from '../state';
 
 import { PromQueryBuilderContainer } from './PromQueryBuilderContainer';
-import { PromQueryBuilderExplained } from './PromQueryBuilderExplained';
 import { PromQueryBuilderOptions } from './PromQueryBuilderOptions';
 import { PromQueryCodeEditor } from './PromQueryCodeEditor';
+
+export const FORMAT_OPTIONS: Array<SelectableValue<string>> = [
+  { label: 'Time series', value: 'time_series' },
+  { label: 'Table', value: 'table' },
+  { label: 'Heatmap', value: 'heatmap' },
+];
+
+export const INTERVAL_FACTOR_OPTIONS: Array<SelectableValue<number>> = map([1, 2, 3, 4, 5, 10], (value: number) => ({
+  value,
+  label: '1/' + value,
+}));
 
 type Props = PromQueryEditorProps;
 
@@ -25,9 +37,9 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
   const { onChange, onRunQuery, data, app } = props;
   const [parseModalOpen, setParseModalOpen] = useState(false);
   const [dataIsStale, setDataIsStale] = useState(false);
+  const { flag: explain, setFlag: setExplain } = useFlag(promQueryEditorExplainKey);
 
   const query = getQueryWithDefaults(props.query, app);
-  const [rawQuery, setRawQuery] = useRawQuery();
   // This should be filled in from the defaults by now.
   const editorMode = query.editorMode!;
 
@@ -42,7 +54,7 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
 
       if (newMetricEditorMode === QueryEditorMode.Builder) {
         const result = buildVisualQueryFromString(query.expr || '');
-        // If there are errors, give user a chance to decide if they want to go to builder as that can loose some data.
+        // If there are errors, give user a chance to decide if they want to go to builder as that can lose some data.
         if (result.errors.length) {
           setParseModalOpen(true);
           return;
@@ -57,14 +69,13 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
     setDataIsStale(false);
   }, [data]);
 
-  const onQueryPreviewChange = (event: SyntheticEvent<HTMLInputElement>) => {
-    const isEnabled = event.currentTarget.checked;
-    setRawQuery(isEnabled);
-  };
-
   const onChangeInternal = (query: PromQuery) => {
     setDataIsStale(true);
     onChange(query);
+  };
+
+  const onShowExplainChange = (e: SyntheticEvent<HTMLInputElement>) => {
+    setExplain(e.currentTarget.checked);
   };
 
   return (
@@ -72,7 +83,7 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
       <ConfirmModal
         isOpen={parseModalOpen}
         title="Query parsing"
-        body="There were errors while trying to parse the query. Continuing to visual builder may loose some parts of the query."
+        body="There were errors while trying to parse the query. Continuing to visual builder may lose some parts of the query."
         confirmText="Continue"
         onConfirm={() => {
           changeEditorMode(query, QueryEditorMode.Builder, onChange);
@@ -97,13 +108,7 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
           }}
           options={promQueryModeller.getQueryPatterns().map((x) => ({ label: x.name, value: x }))}
         />
-
-        {editorMode === QueryEditorMode.Builder && (
-          <>
-            <QueryHeaderSwitch label="Raw query" value={rawQuery} onChange={onQueryPreviewChange} />
-            <FeedbackLink feedbackUrl="https://github.com/grafana/grafana/discussions/47693" />
-          </>
-        )}
+        <QueryHeaderSwitch label="Explain" value={explain} onChange={onShowExplainChange} />
         <FlexItem grow={1} />
         {app !== CoreApp.Explore && (
           <Button
@@ -120,7 +125,7 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
       </EditorHeader>
       <Space v={0.5} />
       <EditorRows>
-        {editorMode === QueryEditorMode.Code && <PromQueryCodeEditor {...props} />}
+        {editorMode === QueryEditorMode.Code && <PromQueryCodeEditor {...props} query={query} showExplain={explain} />}
         {editorMode === QueryEditorMode.Builder && (
           <PromQueryBuilderContainer
             query={query}
@@ -128,13 +133,10 @@ export const PromQueryEditorSelector = React.memo<Props>((props) => {
             onChange={onChangeInternal}
             onRunQuery={props.onRunQuery}
             data={data}
-            showRawQuery={rawQuery}
+            showExplain={explain}
           />
         )}
-        {editorMode === QueryEditorMode.Explain && <PromQueryBuilderExplained query={query.expr} />}
-        {editorMode !== QueryEditorMode.Explain && (
-          <PromQueryBuilderOptions query={query} app={props.app} onChange={onChange} onRunQuery={onRunQuery} />
-        )}
+        <PromQueryBuilderOptions query={query} app={props.app} onChange={onChange} onRunQuery={onRunQuery} />
       </EditorRows>
     </>
   );

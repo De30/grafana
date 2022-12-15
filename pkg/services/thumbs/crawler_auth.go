@@ -5,24 +5,25 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts"
 	"github.com/grafana/grafana/pkg/services/serviceaccounts/database"
-	"github.com/grafana/grafana/pkg/services/sqlstore"
 )
 
 type CrawlerAuthSetupService interface {
 	Setup(ctx context.Context) (CrawlerAuth, error)
 }
 
-func ProvideCrawlerAuthSetupService(serviceAccounts serviceaccounts.Service, serviceAccountsStore serviceaccounts.Store, sqlStore *sqlstore.SQLStore) *OSSCrawlerAuthSetupService {
+func ProvideCrawlerAuthSetupService(serviceAccounts serviceaccounts.Service,
+	sqlStore db.DB, orgService org.Service) *OSSCrawlerAuthSetupService {
 	return &OSSCrawlerAuthSetupService{
 		serviceAccountNamePrefix: "dashboard-previews-crawler-org-",
 		serviceAccounts:          serviceAccounts,
 		log:                      log.New("oss_crawler_account_setup_service"),
 		sqlStore:                 sqlStore,
-		serviceAccountsStore:     serviceAccountsStore,
+		orgService:               orgService,
 	}
 }
 
@@ -30,26 +31,27 @@ type OSSCrawlerAuthSetupService struct {
 	log                      log.Logger
 	serviceAccountNamePrefix string
 	serviceAccounts          serviceaccounts.Service
-	serviceAccountsStore     serviceaccounts.Store
-	sqlStore                 *sqlstore.SQLStore
+	sqlStore                 db.DB
+	orgService               org.Service
 }
 
 type CrawlerAuth interface {
 	GetUserId(orgId int64) int64
 	GetLogin(orgId int64) string
-	GetOrgRole() models.RoleType
+	GetOrgRole() org.RoleType
 }
 
 func (o *OSSCrawlerAuthSetupService) findAllOrgIds(ctx context.Context) ([]int64, error) {
-	searchAllOrgsQuery := &models.SearchOrgsQuery{}
-	if err := o.sqlStore.SearchOrgs(ctx, searchAllOrgsQuery); err != nil {
+	searchAllOrgsQuery := &org.SearchOrgsQuery{}
+	result, err := o.orgService.Search(ctx, searchAllOrgsQuery)
+	if err != nil {
 		o.log.Error("Error when searching for orgs", "err", err)
 		return nil, err
 	}
 
 	orgIds := make([]int64, 0)
-	for i := range searchAllOrgsQuery.Result {
-		orgIds = append(orgIds, searchAllOrgsQuery.Result[i].Id)
+	for i := range result {
+		orgIds = append(orgIds, result[i].ID)
 	}
 
 	return orgIds, nil
@@ -58,10 +60,10 @@ func (o *OSSCrawlerAuthSetupService) findAllOrgIds(ctx context.Context) ([]int64
 type crawlerAuth struct {
 	accountIdByOrgId map[int64]int64
 	loginByOrgId     map[int64]string
-	orgRole          models.RoleType
+	orgRole          org.RoleType
 }
 
-func (o *crawlerAuth) GetOrgRole() models.RoleType {
+func (o *crawlerAuth) GetOrgRole() org.RoleType {
 	return o.orgRole
 }
 
@@ -79,9 +81,9 @@ func (o *OSSCrawlerAuthSetupService) Setup(ctx context.Context) (CrawlerAuth, er
 		return nil, err
 	}
 
-	// userId:0 and ROLE_ADMIN grants the crawler process permissions to view all dashboards in all folders & orgs
+	// userId:0 and RoleAdmin grants the crawler process permissions to view all dashboards in all folders & orgs
 	// the process doesn't and shouldn't actually need to edit/modify any resources from the UI
-	orgRole := models.ROLE_ADMIN
+	orgRole := org.RoleAdmin
 
 	accountIdByOrgId := make(map[int64]int64)
 	loginByOrgId := make(map[int64]string)
@@ -113,7 +115,7 @@ func (o *OSSCrawlerAuthSetupService) Setup(ctx context.Context) (CrawlerAuth, er
 			}
 
 			// update org_role to make sure everything works properly if someone has changed the role since SA's original creation
-			dto, err := o.serviceAccountsStore.UpdateServiceAccount(ctx, orgId, id, &serviceaccounts.UpdateServiceAccountForm{
+			dto, err := o.serviceAccounts.UpdateServiceAccount(ctx, orgId, id, &serviceaccounts.UpdateServiceAccountForm{
 				Name: &serviceAccountNameOrg,
 				Role: &orgRole,
 			})

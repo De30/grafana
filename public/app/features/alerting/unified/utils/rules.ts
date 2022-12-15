@@ -35,8 +35,8 @@ export function isAlertingRule(rule: Rule | undefined): rule is AlertingRule {
   return typeof rule === 'object' && rule.type === PromRuleType.Alerting;
 }
 
-export function isRecordingRule(rule: Rule): rule is RecordingRule {
-  return rule.type === PromRuleType.Recording;
+export function isRecordingRule(rule: Rule | undefined): rule is RecordingRule {
+  return typeof rule === 'object' && rule.type === PromRuleType.Recording;
 }
 
 export function isAlertingRulerRule(rule?: RulerRuleDTO): rule is RulerAlertingRuleDTO {
@@ -144,4 +144,19 @@ export function getFirstActiveAt(promRule: AlertingRule) {
  */
 export function isFederatedRuleGroup(group: CombinedRuleGroup) {
   return Array.isArray(group.source_tenants);
+}
+
+export function getRuleName(rule: RulerRuleDTO) {
+  if (isGrafanaRulerRule(rule)) {
+    return rule.grafana_alert.title;
+  }
+  if (isAlertingRulerRule(rule)) {
+    return rule.alert;
+  }
+
+  if (isRecordingRulerRule(rule)) {
+    return rule.record;
+  }
+
+  return '';
 }

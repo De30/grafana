@@ -2,6 +2,8 @@ import { Action } from 'redux';
 
 import { SelectableValue, WithAccessControlMetadata } from '@grafana/data';
 
+import { QueryResponse } from './service';
+
 export enum DashboardSearchItemType {
   DashDB = 'dash-db',
   DashHome = 'dash-home',
@@ -12,7 +14,7 @@ export enum DashboardSearchItemType {
  * @deprecated
  */
 export interface DashboardSection {
-  id: number;
+  id?: number;
   uid?: string;
   title: string;
   expanded?: boolean;
@@ -37,7 +39,7 @@ export interface DashboardSectionItem {
   folderTitle?: string;
   folderUid?: string;
   folderUrl?: string;
-  id: number;
+  id?: number;
   isStarred: boolean;
   selected?: boolean;
   tags: string[];
@@ -52,17 +54,25 @@ export interface DashboardSectionItem {
 }
 
 /**
- * @deprecated - It uses dashboard ID which is depreacted in favor of dashboard UID. Please, use DashboardSearchItem instead.
+ * @deprecated - It uses dashboard ID which is deprecated in favor of dashboard UID. Please, use DashboardSearchItem instead.
  */
 export interface DashboardSearchHit extends DashboardSectionItem, DashboardSection, WithAccessControlMetadata {}
 
-export interface DashboardSearchItem extends Omit<DashboardSearchHit, 'id'> {}
+export interface DashboardSearchItem
+  extends Omit<
+    DashboardSearchHit,
+    'id' | 'uid' | 'expanded' | 'selected' | 'checked' | 'folderId' | 'icon' | 'sortMeta' | 'sortMetaName'
+  > {
+  uid: string;
+}
 
 export interface SearchAction extends Action {
   payload?: any;
 }
 
-export interface DashboardQuery {
+export type EventTrackingNamespace = 'manage_dashboards' | 'dashboard_search';
+
+export interface SearchState {
   query: string;
   tag: string[];
   starred: boolean;
@@ -72,6 +82,11 @@ export interface DashboardQuery {
   // Save sorting data between layouts
   prevSort: SelectableValue | null;
   layout: SearchLayout;
+  result?: QueryResponse;
+  loading?: boolean;
+  folderUid?: string;
+  includePanels?: boolean;
+  eventTrackingNamespace: EventTrackingNamespace;
 }
 
 export type OnToggleChecked = (item: DashboardSectionItem | DashboardSection) => void;

@@ -50,7 +50,7 @@ export class TimelineChart extends React.Component<TimelineProps> {
   };
 
   prepConfig = (alignedFrame: DataFrame, allFrames: DataFrame[], getTimeRange: () => TimeRange) => {
-    this.panelContext = this.context as PanelContext;
+    this.panelContext = this.context;
     const { eventBus, sync } = this.panelContext;
 
     return preparePlotConfigBuilder({
@@ -62,7 +62,7 @@ export class TimelineChart extends React.Component<TimelineProps> {
       ...this.props,
 
       // Ensure timezones is passed as an array
-      timeZones: Array.isArray(this.props.timeZones) ? this.props.timeZones : [this.props.timeZones],
+      timeZones: Array.isArray(this.props.timeZone) ? this.props.timeZone : [this.props.timeZone],
 
       // When there is only one row, use the full space
       rowHeight: alignedFrame.fields.length > 2 ? this.props.rowHeight : 1,

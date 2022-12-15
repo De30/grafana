@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/data"
@@ -12,23 +11,22 @@ import (
 
 const rootStorageTypeDisk = "disk"
 
-type rootStorageDisk struct {
-	baseStorageRuntime
+var _ storageRuntime = &rootStorageDisk{}
 
+type rootStorageDisk struct {
 	settings *StorageLocalDiskConfig
+	meta     RootStorageMeta
+	store    filestorage.FileStorage
 }
 
-func newDiskStorage(scfg RootStorageConfig) *rootStorageDisk {
+func newDiskStorage(meta RootStorageMeta, scfg RootStorageConfig) *rootStorageDisk {
 	cfg := scfg.Disk
 	if cfg == nil {
 		cfg = &StorageLocalDiskConfig{}
 		scfg.Disk = cfg
 	}
 	scfg.Type = rootStorageTypeDisk
-
-	meta := RootStorageMeta{
-		Config: scfg,
-	}
+	meta.Config = scfg
 	if scfg.Prefix == "" {
 		meta.Notice = append(meta.Notice, data.Notice{
 			Severity: data.NoticeSeverityError,
@@ -42,10 +40,13 @@ func newDiskStorage(scfg RootStorageConfig) *rootStorageDisk {
 		})
 	}
 
-	s := &rootStorageDisk{}
+	s := &rootStorageDisk{
+		settings: cfg,
+	}
 
 	if meta.Notice == nil {
-		path := fmt.Sprintf("file://%s", cfg.Path)
+		protocol := "file:///"
+		path := protocol + cfg.Path
 		bucket, err := blob.OpenBucket(context.Background(), path)
 		if err != nil {
 			grafanaStorageLogger.Warn("error loading storage", "prefix", scfg.Prefix, "err", err)
@@ -63,8 +64,15 @@ func newDiskStorage(scfg RootStorageConfig) *rootStorageDisk {
 	}
 
 	s.meta = meta
-	s.settings = cfg
 	return s
+}
+
+func (s *rootStorageDisk) Meta() RootStorageMeta {
+	return s.meta
+}
+
+func (s *rootStorageDisk) Store() filestorage.FileStorage {
+	return s.store
 }
 
 func (s *rootStorageDisk) Sync() error {

@@ -18,6 +18,7 @@ import (
 	dashboardservice "github.com/grafana/grafana/pkg/services/dashboards/service"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -26,7 +27,13 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 	t.Run("Dashboard permissions test", func(t *testing.T) {
 		settings := setting.NewCfg()
 		dashboardStore := &dashboards.FakeDashboardStore{}
-		dashboardStore.On("GetDashboard", mock.Anything, mock.AnythingOfType("*models.GetDashboardQuery")).Return(nil, nil)
+		dashboardStore.On("GetDashboard", mock.Anything, mock.AnythingOfType("*models.GetDashboardQuery")).Run(func(args mock.Arguments) {
+			q := args.Get(1).(*models.GetDashboardQuery)
+			q.Result = &models.Dashboard{
+				Id:  q.Id,
+				Uid: q.Uid,
+			}
+		}).Return(nil, nil)
 		defer dashboardStore.AssertExpectations(t)
 
 		features := featuremgmt.WithFeatures()
@@ -53,7 +60,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 
 			guardian.MockDashboardGuardian(&guardian.FakeDashboardGuardian{CanAdminValue: false})
 			loggedInUserScenarioWithRole(t, "When calling GET on", "GET", "/api/dashboards/id/1/permissions",
-				"/api/dashboards/id/:dashboardId/permissions", models.ROLE_EDITOR, func(sc *scenarioContext) {
+				"/api/dashboards/id/:dashboardId/permissions", org.RoleEditor, func(sc *scenarioContext) {
 					callGetDashboardPermissions(sc, hs)
 					assert.Equal(t, 403, sc.resp.Code)
 				}, mockSQLStore)
@@ -96,7 +103,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 			})
 
 			loggedInUserScenarioWithRole(t, "When calling GET on", "GET", "/api/dashboards/id/1/permissions",
-				"/api/dashboards/id/:dashboardId/permissions", models.ROLE_ADMIN, func(sc *scenarioContext) {
+				"/api/dashboards/id/:dashboardId/permissions", org.RoleAdmin, func(sc *scenarioContext) {
 					callGetDashboardPermissions(sc, hs)
 					assert.Equal(t, 200, sc.resp.Code)
 
@@ -189,7 +196,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 		})
 
 		t.Run("When trying to update team or user permissions with a role", func(t *testing.T) {
-			role := models.ROLE_EDITOR
+			role := org.RoleEditor
 			cmds := []dtos.UpdateDashboardACLCommand{
 				{
 					Items: []dtos.DashboardACLUpdateItem{
@@ -264,7 +271,7 @@ func TestDashboardPermissionAPIEndpoint(t *testing.T) {
 			mockSQLStore := mockstore.NewSQLStoreMock()
 			var resp []*models.DashboardACLInfoDTO
 			loggedInUserScenarioWithRole(t, "When calling GET on", "GET", "/api/dashboards/id/1/permissions",
-				"/api/dashboards/id/:dashboardId/permissions", models.ROLE_ADMIN, func(sc *scenarioContext) {
+				"/api/dashboards/id/:dashboardId/permissions", org.RoleAdmin, func(sc *scenarioContext) {
 					setUp()
 					guardian.MockDashboardGuardian(&guardian.FakeDashboardGuardian{
 						CanAdminValue:                    true,
@@ -351,8 +358,8 @@ func updateDashboardPermissionScenario(t *testing.T, ctx updatePermissionContext
 			c.Req.Body = mockRequestBody(ctx.cmd)
 			c.Req.Header.Add("Content-Type", "application/json")
 			sc.context = c
-			sc.context.OrgId = testOrgID
-			sc.context.UserId = testUserID
+			sc.context.OrgID = testOrgID
+			sc.context.UserID = testUserID
 
 			return hs.UpdateDashboardPermissions(c)
 		})

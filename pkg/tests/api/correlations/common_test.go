@@ -7,12 +7,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/grafana/grafana/pkg/server"
 	"github.com/grafana/grafana/pkg/services/correlations"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/org/orgimpl"
+	"github.com/grafana/grafana/pkg/services/quota/quotaimpl"
 	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/services/user/userimpl"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
-	"github.com/stretchr/testify/require"
 )
 
 type errorResponseBody struct {
@@ -43,6 +47,20 @@ type User struct {
 	password string
 }
 
+type GetParams struct {
+	url  string
+	user User
+}
+
+func (c TestContext) Get(params GetParams) *http.Response {
+	c.t.Helper()
+
+	resp, err := http.Get(c.getURL(params.url, params.user))
+	require.NoError(c.t, err)
+
+	return resp
+}
+
 type PostParams struct {
 	url  string
 	body string
@@ -59,6 +77,25 @@ func (c TestContext) Post(params PostParams) *http.Response {
 		"application/json",
 		buf,
 	)
+	require.NoError(c.t, err)
+
+	return resp
+}
+
+type PatchParams struct {
+	url  string
+	body string
+	user User
+}
+
+func (c TestContext) Patch(params PatchParams) *http.Response {
+	c.t.Helper()
+
+	req, err := http.NewRequest(http.MethodPatch, c.getURL(params.url, params.user), bytes.NewBuffer([]byte(params.body)))
+	req.Header.Set("Content-Type", "application/json")
+	require.NoError(c.t, err)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(c.t, err)
 	require.NoError(c.t, err)
 
 	return resp
@@ -97,18 +134,24 @@ func (c TestContext) getURL(url string, user User) string {
 
 func (c TestContext) createUser(cmd user.CreateUserCommand) {
 	c.t.Helper()
+	store := c.env.SQLStore
+	store.Cfg.AutoAssignOrg = true
+	store.Cfg.AutoAssignOrgId = 1
 
-	c.env.SQLStore.Cfg.AutoAssignOrg = true
-	c.env.SQLStore.Cfg.AutoAssignOrgId = 1
+	quotaService := quotaimpl.ProvideService(store, store.Cfg)
+	orgService, err := orgimpl.ProvideService(store, store.Cfg, quotaService)
+	require.NoError(c.t, err)
+	usrSvc, err := userimpl.ProvideService(store, orgService, store.Cfg, nil, nil, quotaService)
+	require.NoError(c.t, err)
 
-	_, err := c.env.SQLStore.CreateUser(context.Background(), cmd)
+	_, err = usrSvc.CreateUserForTests(context.Background(), &cmd)
 	require.NoError(c.t, err)
 }
 
 func (c TestContext) createDs(cmd *datasources.AddDataSourceCommand) {
 	c.t.Helper()
 
-	err := c.env.SQLStore.AddDataSource(context.Background(), cmd)
+	err := c.env.Server.HTTPServer.DataSourcesService.AddDataSource(context.Background(), cmd)
 	require.NoError(c.t, err)
 }
 

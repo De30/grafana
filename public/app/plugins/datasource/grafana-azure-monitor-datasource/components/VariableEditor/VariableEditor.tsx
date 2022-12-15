@@ -6,9 +6,11 @@ import { SelectableValue } from '@grafana/data';
 import { Alert, InlineField, Select } from '@grafana/ui';
 
 import DataSource from '../../datasource';
+import { selectors } from '../../e2e/selectors';
 import { migrateQuery } from '../../grafanaTemplateVariableFns';
 import { AzureMonitorOption, AzureMonitorQuery, AzureQueryType } from '../../types';
 import useLastError from '../../utils/useLastError';
+import ArgQueryEditor from '../ArgQueryEditor';
 import LogsQueryEditor from '../LogsQueryEditor';
 import { Space } from '../Space';
 
@@ -31,6 +33,7 @@ const VariableEditor = (props: Props) => {
     { label: 'Resource Names', value: AzureQueryType.ResourceNamesQuery },
     { label: 'Metric Names', value: AzureQueryType.MetricNamesQuery },
     { label: 'Workspaces', value: AzureQueryType.WorkspacesQuery },
+    { label: 'Resource Graph', value: AzureQueryType.AzureResourceGraph },
     { label: 'Logs', value: AzureQueryType.LogAnalytics },
   ];
   if (typeof props.query === 'object' && props.query.queryType === AzureQueryType.GrafanaTemplateVariableFn) {
@@ -193,13 +196,17 @@ const VariableEditor = (props: Props) => {
     });
   };
 
-  const onLogsQueryChange = (queryChange: AzureMonitorQuery) => {
+  const onQueryChange = (queryChange: AzureMonitorQuery) => {
     onChange(queryChange);
   };
 
   return (
     <>
-      <InlineField label="Select query type" labelWidth={20}>
+      <InlineField
+        label="Select query type"
+        labelWidth={20}
+        data-testid={selectors.components.variableEditor.queryType.input}
+      >
         <Select
           aria-label="select query type"
           onChange={onQueryTypeChange}
@@ -214,7 +221,7 @@ const VariableEditor = (props: Props) => {
             subscriptionId={query.subscription}
             query={query}
             datasource={datasource}
-            onChange={onLogsQueryChange}
+            onChange={onQueryChange}
             variableOptionGroup={variableOptionGroup}
             setError={setError}
             hideFormatAs={true}
@@ -233,7 +240,11 @@ const VariableEditor = (props: Props) => {
         <GrafanaTemplateVariableFnInput query={query} updateQuery={props.onChange} datasource={datasource} />
       )}
       {requireSubscription && (
-        <InlineField label="Select subscription" labelWidth={20}>
+        <InlineField
+          label="Select subscription"
+          labelWidth={20}
+          data-testid={selectors.components.variableEditor.subscription.input}
+        >
           <Select
             aria-label="select subscription"
             onChange={onChangeSubscription}
@@ -244,7 +255,11 @@ const VariableEditor = (props: Props) => {
         </InlineField>
       )}
       {(requireResourceGroup || hasResourceGroup) && (
-        <InlineField label="Select resource group" labelWidth={20}>
+        <InlineField
+          label="Select resource group"
+          labelWidth={20}
+          data-testid={selectors.components.variableEditor.resourceGroup.input}
+        >
           <Select
             aria-label="select resource group"
             onChange={onChangeResourceGroup}
@@ -260,7 +275,11 @@ const VariableEditor = (props: Props) => {
         </InlineField>
       )}
       {(requireNamespace || hasNamespace) && (
-        <InlineField label="Select namespace" labelWidth={20}>
+        <InlineField
+          label="Select namespace"
+          labelWidth={20}
+          data-testid={selectors.components.variableEditor.namespace.input}
+        >
           <Select
             aria-label="select namespace"
             onChange={onChangeNamespace}
@@ -276,7 +295,11 @@ const VariableEditor = (props: Props) => {
         </InlineField>
       )}
       {requireResource && (
-        <InlineField label="Select resource" labelWidth={20}>
+        <InlineField
+          label="Select resource"
+          labelWidth={20}
+          data-testid={selectors.components.variableEditor.resource.input}
+        >
           <Select
             aria-label="select resource"
             onChange={onChangeResource}
@@ -285,6 +308,26 @@ const VariableEditor = (props: Props) => {
             value={query.resource || null}
           />
         </InlineField>
+      )}
+      {query.queryType === AzureQueryType.AzureResourceGraph && (
+        <>
+          <ArgQueryEditor
+            subscriptionId={datasource.azureLogAnalyticsDatasource.defaultSubscriptionId}
+            query={query}
+            datasource={datasource}
+            onChange={onQueryChange}
+            variableOptionGroup={variableOptionGroup}
+            setError={setError}
+          />
+          {errorMessage && (
+            <>
+              <Space v={2} />
+              <Alert severity="error" title="An error occurred while requesting metadata from Azure Monitor">
+                {errorMessage}
+              </Alert>
+            </>
+          )}
+        </>
       )}
     </>
   );

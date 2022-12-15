@@ -1,16 +1,11 @@
-import {
-  ArrayVector,
-  DataTransformerConfig,
-  DataTransformerID,
-  Field,
-  FieldType,
-  toDataFrame,
-  transformDataFrame,
-} from '@grafana/data';
-
+import { toDataFrame } from '../../dataframe';
+import { DataTransformerConfig, FieldType, Field } from '../../types';
 import { mockTransformationsRegistry } from '../../utils/tests/mockTransformationsRegistry';
+import { ArrayVector } from '../../vector';
+import { transformDataFrame } from '../transformDataFrame';
 
 import { GroupingToMatrixTransformerOptions, groupingToMatrixTransformer } from './groupingToMatrix';
+import { DataTransformerID } from './ids';
 
 describe('Grouping to Matrix', () => {
   beforeAll(() => {
@@ -133,34 +128,34 @@ describe('Grouping to Matrix', () => {
       const processed = received[0];
 
       expect(processed[0].fields).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "config": Object {},
-            "name": "Row\\\\Column",
+        [
+          {
+            "config": {},
+            "name": "Row\\Column",
             "type": "string",
-            "values": Array [
+            "values": [
               "R1",
               "R2",
             ],
           },
-          Object {
-            "config": Object {
+          {
+            "config": {
               "units": "celsius",
             },
             "name": "C1",
             "type": "number",
-            "values": Array [
+            "values": [
               1,
               4,
             ],
           },
-          Object {
-            "config": Object {
+          {
+            "config": {
               "units": "celsius",
             },
             "name": "C2",
             "type": "number",
-            "values": Array [
+            "values": [
               5,
               "",
             ],

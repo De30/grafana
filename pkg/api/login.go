@@ -16,6 +16,8 @@ import (
 	"github.com/grafana/grafana/pkg/login"
 	"github.com/grafana/grafana/pkg/middleware/cookies"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/auth"
+	loginService "github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -90,19 +92,6 @@ func (hs *HTTPServer) LoginView(c *models.ReqContext) {
 		return
 	}
 
-	enabledOAuths := make(map[string]interface{})
-	providers := hs.SocialService.GetOAuthInfoProviders()
-	for key, oauth := range providers {
-		enabledOAuths[key] = map[string]string{
-			"name": oauth.Name,
-			"icon": oauth.Icon,
-		}
-	}
-
-	viewData.Settings["oauth"] = enabledOAuths
-	viewData.Settings["samlEnabled"] = hs.samlEnabled()
-	viewData.Settings["samlName"] = hs.samlName()
-
 	if loginError, ok := hs.tryGetEncryptedCookie(c, loginErrorCookieName); ok {
 		// this cookie is only set whenever an OAuth login fails
 		// therefore the loginError should be passed to the view data
@@ -121,7 +110,7 @@ func (hs *HTTPServer) LoginView(c *models.ReqContext) {
 	if c.IsSignedIn {
 		// Assign login token to auth proxy users if enable_login_token = true
 		if hs.Cfg.AuthProxyEnabled && hs.Cfg.AuthProxyEnableLoginToken {
-			user := &user.User{ID: c.SignedInUser.UserId, Email: c.SignedInUser.Email, Login: c.SignedInUser.Login}
+			user := &user.User{ID: c.SignedInUser.UserID, Email: c.SignedInUser.Email, Login: c.SignedInUser.Login}
 			err := hs.loginUserWithUser(user, c)
 			if err != nil {
 				c.Handle(hs.Cfg, http.StatusInternalServerError, "Failed to sign in user", err)
@@ -206,7 +195,7 @@ func (hs *HTTPServer) LoginPost(c *models.ReqContext) response.Response {
 		ReqContext: c,
 		Username:   cmd.User,
 		Password:   cmd.Password,
-		IpAddress:  c.Req.RemoteAddr,
+		IpAddress:  c.RemoteAddr(),
 		Cfg:        hs.Cfg,
 	}
 
@@ -216,6 +205,11 @@ func (hs *HTTPServer) LoginPost(c *models.ReqContext) response.Response {
 		resp = response.Error(401, "Invalid username or password", err)
 		if errors.Is(err, login.ErrInvalidCredentials) || errors.Is(err, login.ErrTooManyLoginAttempts) || errors.Is(err,
 			user.ErrUserNotFound) {
+			return resp
+		}
+
+		if errors.Is(err, login.ErrNoAuthProvider) {
+			resp = response.Error(http.StatusInternalServerError, "No authorization providers enabled", err)
 			return resp
 		}
 
@@ -234,7 +228,7 @@ func (hs *HTTPServer) LoginPost(c *models.ReqContext) response.Response {
 
 	err = hs.loginUserWithUser(usr, c)
 	if err != nil {
-		var createTokenErr *models.CreateTokenErr
+		var createTokenErr *auth.CreateTokenErr
 		if errors.As(err, &createTokenErr) {
 			resp = response.Error(createTokenErr.StatusCode, createTokenErr.ExternalErr, createTokenErr.InternalErr)
 		} else {
@@ -287,13 +281,26 @@ func (hs *HTTPServer) loginUserWithUser(user *user.User, c *models.ReqContext) e
 }
 
 func (hs *HTTPServer) Logout(c *models.ReqContext) {
+	// If SAML is enabled and this is a SAML user use saml logout
 	if hs.samlSingleLogoutEnabled() {
-		c.Redirect(hs.Cfg.AppSubURL + "/logout/saml")
-		return
+		getAuthQuery := models.GetAuthInfoQuery{UserId: c.UserID}
+		if err := hs.authInfoService.GetAuthInfo(c.Req.Context(), &getAuthQuery); err == nil {
+			if getAuthQuery.Result.AuthModule == loginService.SAMLAuthModule {
+				c.Redirect(hs.Cfg.AppSubURL + "/logout/saml")
+				return
+			}
+		}
+	}
+
+	// Invalidate the OAuth tokens in case the User logged in with OAuth or the last external AuthEntry is an OAuth one
+	if entry, exists, _ := hs.oauthTokenService.HasOAuthEntry(c.Req.Context(), c.SignedInUser); exists {
+		if err := hs.oauthTokenService.InvalidateOAuthTokens(c.Req.Context(), entry); err != nil {
+			hs.log.Warn("failed to invalidate oauth tokens for user", "userId", c.UserID, "error", err)
+		}
 	}
 
 	err := hs.AuthTokenService.RevokeToken(c.Req.Context(), c.UserToken, false)
-	if err != nil && !errors.Is(err, models.ErrUserTokenNotFound) {
+	if err != nil && !errors.Is(err, auth.ErrUserTokenNotFound) {
 		hs.log.Error("failed to revoke auth token", "error", err)
 	}
 
@@ -334,7 +341,7 @@ func (hs *HTTPServer) trySetEncryptedCookie(ctx *models.ReqContext, cookieName s
 }
 
 func (hs *HTTPServer) redirectWithError(ctx *models.ReqContext, err error, v ...interface{}) {
-	ctx.Logger.Error(err.Error(), v...)
+	ctx.Logger.Warn(err.Error(), v...)
 	if err := hs.trySetEncryptedCookie(ctx, loginErrorCookieName, getLoginExternalError(err), 60); err != nil {
 		hs.log.Error("Failed to set encrypted cookie", "err", err)
 	}
@@ -360,11 +367,11 @@ func (hs *HTTPServer) samlName() string {
 }
 
 func (hs *HTTPServer) samlSingleLogoutEnabled() bool {
-	return hs.SettingsProvider.KeyValue("auth.saml", "single_logout").MustBool(false) && hs.samlEnabled()
+	return hs.samlEnabled() && hs.SettingsProvider.KeyValue("auth.saml", "single_logout").MustBool(false) && hs.samlEnabled()
 }
 
 func getLoginExternalError(err error) string {
-	var createTokenErr *models.CreateTokenErr
+	var createTokenErr *auth.CreateTokenErr
 	if errors.As(err, &createTokenErr) {
 		return createTokenErr.ExternalErr
 	}

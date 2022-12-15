@@ -1,8 +1,7 @@
 ---
 aliases:
-  - /docs/grafana/latest/administration/configuration/
-  - /docs/grafana/latest/installation/configuration/
-  - /docs/grafana/latest/setup-grafana/configure-grafana/
+  - ../administration/configuration/
+  - ../installation/configuration/
 description: Configuration documentation
 title: Configure Grafana
 weight: 200
@@ -71,6 +70,9 @@ client_secret = 0ldS3cretKey
 
 [plugin.grafana-image-renderer]
 rendering_ignore_https_errors = true
+
+[feature_toggles]
+enable = newNavigation
 ```
 
 You can override them on Linux machines with:
@@ -80,6 +82,7 @@ export GF_DEFAULT_INSTANCE_NAME=my-instance
 export GF_SECURITY_ADMIN_USER=owner
 export GF_AUTH_GOOGLE_CLIENT_SECRET=newS3cretKey
 export GF_PLUGIN_GRAFANA_IMAGE_RENDERER_RENDERING_IGNORE_HTTPS_ERRORS=true
+export GF_FEATURE_TOGGLES_ENABLE=newNavigation
 ```
 
 ## Variable expansion
@@ -124,7 +127,7 @@ password = $__file{/etc/secrets/gf_sql_password}
 
 The `vault` provider allows you to manage your secrets with [Hashicorp Vault](https://www.hashicorp.com/products/vault).
 
-> Vault provider is only available in Grafana Enterprise v7.1+. For more information, refer to [Vault integration]({{< relref "../configure-security/configure-database-encryption/integrate-with-hashicorp-vault/" >}}) in [Grafana Enterprise]({{< relref "../../enterprise/" >}}).
+> Vault provider is only available in Grafana Enterprise v7.1+. For more information, refer to [Vault integration]({{< relref "../configure-security/configure-database-encryption/integrate-with-hashicorp-vault/" >}}) in [Grafana Enterprise]({{< relref "../../introduction/grafana-enterprise" >}}).
 
 <hr />
 
@@ -257,9 +260,20 @@ Path to the certificate file (if `protocol` is set to `https` or `h2`).
 
 Path to the certificate key file (if `protocol` is set to `https` or `h2`).
 
+### socket_gid
+
+GID where the socket should be set when `protocol=socket`.
+Make sure that the target group is in the group of Grafana process and that Grafana process is the file owner before you change this setting.
+It is recommended to set the gid as http server user gid.
+Not set when the value is -1.
+
+### socket_mode
+
+Mode where the socket should be set when `protocol=socket`. Make sure that Grafana process is the file owner before you change this setting.
+
 ### socket
 
-Path where the socket should be created when `protocol=socket`. Make sure that Grafana has appropriate permissions before you change this setting.
+Path where the socket should be created when `protocol=socket`. Make sure Grafana has appropriate permissions for that path before you change this setting.
 
 ### cdn_url
 
@@ -274,6 +288,17 @@ For example, given a cdn url like `https://cdn.myserver.com` grafana will try to
 
 Sets the maximum time using a duration format (5s/5m/5ms) before timing out read of an incoming request and closing idle connections.
 `0` means there is no timeout for reading the request.
+
+<hr />
+
+## [server.custom_response_headers]
+
+This setting enables you to specify additional headers that the server adds to HTTP(S) responses.
+
+```
+exampleHeader1 = exampleValue1
+exampleHeader2 = exampleValue2
+```
 
 <hr />
 
@@ -365,11 +390,23 @@ will be stored.
 For "sqlite3" only. [Shared cache](https://www.sqlite.org/sharedcache.html) setting used for connecting to the database. (private, shared)
 Defaults to `private`.
 
+### wal
+
+For "sqlite3" only. Setting to enable/disable [Write-Ahead Logging](https://sqlite.org/wal.html). The default value is `false` (disabled).
+
+### query_retries
+
+This setting applies to `sqlite` only and controls the number of times the system retries a query when the database is locked. The default value is `0` (disabled).
+
+### transaction_retries
+
+This setting applies to `sqlite` only and controls the number of times the system retries a transaction when the database is locked. The default value is `5`.
+
 <hr />
 
 ## [remote_cache]
 
-Caches authentication details and session information in the configured database, Redis or Memcached. This setting does not configure [Query Caching in Grafana Enterprise]({{< relref "../../enterprise/query-caching/" >}}).
+Caches authentication details and session information in the configured database, Redis or Memcached. This setting does not configure [Query Caching in Grafana Enterprise]({{< relref "../../administration/data-source-management/#query-caching" >}}).
 
 ### type
 
@@ -474,6 +511,10 @@ Set to false disables checking for new versions of installed plugins from https:
 If you want to track Grafana usage via Google analytics specify _your_ Universal
 Analytics ID here. By default this feature is disabled.
 
+### google_analytics_4_id
+
+If you want to track Grafana usage via Google Analytics 4 specify _your_ GA4 ID here. By default this feature is disabled.
+
 ### google_tag_manager_id
 
 Google Tag Manager ID, only enabled if you enter an ID here.
@@ -529,6 +570,10 @@ Default is `admin`.
 ### admin_password
 
 The password of the default Grafana Admin. Set once on first-run. Default is `admin`.
+
+### admin_email
+
+The email of the default Grafana Admin, created on startup. Default is `admin@localhost`.
 
 ### secret_key
 
@@ -592,7 +637,16 @@ Set to `true` to add the Content-Security-Policy header to your requests. CSP al
 
 ### content_security_policy_template
 
-Set Content Security Policy template used when adding the Content-Security-Policy header to your requests. `$NONCE` in the template includes a random nonce.
+Set the policy template that will be used when adding the `Content-Security-Policy` header to your requests. `$NONCE` in the template includes a random nonce.
+
+### content_security_policy_report_only
+
+Set to `true` to add the `Content-Security-Policy-Report-Only` header to your requests. CSP in Report Only mode enables you to experiment with policies by monitoring their effects without enforcing them.
+You can enable both policies simultaneously.
+
+### content_security_policy_template
+
+Set the policy template that will be used when adding the `Content-Security-Policy-Report-Only` header to your requests. `$NONCE` in the template includes a random nonce.
 
 <hr />
 
@@ -716,6 +770,10 @@ Text used as placeholder text on login page for password input.
 
 Set the default UI theme: `dark` or `light`. Default is `dark`.
 
+### default_language
+
+This setting configures the default UI language, which must be a supported IETF language tag, such as `en-US`.
+
 ### home_page
 
 Path to a custom home page. Users are only redirected to this if the default home dashboard is used. It should match a frontend route and contain a leading slash.
@@ -792,8 +850,13 @@ Administrators can increase this if they experience OAuth login state mismatch e
 ### oauth_skip_org_role_update_sync
 
 Skip forced assignment of OrgID `1` or `auto_assign_org_id` for external logins. Default is `false`.
-Use this setting to distribute users with external login to multiple organizations.
-Otherwise, the users' organization would get reset on every new login, for example, via AzureAD.
+Use this setting to allow users with external login to be manually assigned to multiple organizations.
+
+By default, the users' organization and role is reset on every new login.
+
+> **Warning**: Currently if no organization role mapping is found for a user, Grafana doesn't update the user's organization role.
+> With Grafana 10, if `oauth_skip_org_role_update_sync` option is set to `false`, users with no mapping will be
+> reset to the default organization role on every login. [See `auto_assign_org_role` option]({{< relref ".#auto_assign_org_role" >}}).
 
 ### api_key_max_seconds_to_live
 
@@ -1210,7 +1273,7 @@ For more information about the Grafana alerts, refer to [About Grafana Alerting]
 
 ### enabled
 
-Enable or disable Grafana Alerting. If enabled, we’ll migrate all your alert rules and notification channels to the new system as alert rules and notification channels you had previously defined will be converted into an Alertmanager configuration. Legacy alerting data is preserved to enable backwards compatibility. If disabled, all your legacy alerting data will be available again, but the data you created using Grafana Alerting will be deleted. Set force_migration=true to avoid deletion of data. The default value is `true`.
+Enable or disable Grafana Alerting. If disabled, all your legacy alerting data will be available again, but the data you created using Grafana Alerting will be deleted. Set force_migration=true to avoid deletion of data. The default value is `true`.
 
 Alerting Rules migrated from dashboards and panels will include a link back via the `annotations`.
 
@@ -1232,11 +1295,11 @@ The interval string is a possibly signed sequence of decimal numbers, followed b
 
 ### ha_listen_address
 
-Listen address/hostname and port to receive unified alerting messages for other Grafana instances. The port is used for both TCP and UDP. It is assumed other Grafana instances are also running on the same port. The default value is `0.0.0.0:9094`.
+Listen IP address and port to receive unified alerting messages for other Grafana instances. The port is used for both TCP and UDP. It is assumed other Grafana instances are also running on the same port. The default value is `0.0.0.0:9094`.
 
 ### ha_advertise_address
 
-Explicit address/hostname and port to advertise other Grafana instances. The port is used for both TCP and UDP.
+Explicit IP address and port to advertise other Grafana instances. The port is used for both TCP and UDP.
 
 ### ha_peers
 
@@ -1290,7 +1353,7 @@ The interval string is a possibly signed sequence of decimal numbers, followed b
 
 ## [unified_alerting.screenshots]
 
-For more information about screenshots, refer to [Images in notifications]({{< relref "../../alerting/images-in-notifications/" >}}).
+For more information about screenshots, refer to [Images in notifications(https://grafana.com/docs/grafana/next/alerting/manage-notifications/images-in-notifications)].
 
 ### capture
 
@@ -1308,7 +1371,7 @@ Uploads screenshots to the local Grafana server or remote storage such as Azure,
 
 ## [unified_alerting.reserved_labels]
 
-For more information about Grafana Reserved Labels, refer to [Labels in Grafana Alerting]({{< relref "../../alerting/fundamentals/annotation-label/how-to-use-labels/#grafana-reserved-labels" >}}).
+For more information about Grafana Reserved Labels, refer to [Labels in Grafana Alerting](https://grafana.com/docs/grafana/next/alerting/fundamentals/annotation-label/how-to-use-labels/)
 
 ### disabled_labels
 
@@ -1320,11 +1383,11 @@ For example: `disabled_labels=grafana_folder`
 
 ## [alerting]
 
-For more information about the legacy dashboard alerting feature in Grafana, refer to [Alerts overview]({{< relref "../../alerting/" >}}).
+For more information about the legacy dashboard alerting feature in Grafana, refer to [the legacy Grafana alerts]({{< relref "https://grafana.com/docs/grafana/v8.5/alerting/old-alerting/" >}}).
 
 ### enabled
 
-Set to `false` to [enable Grafana Alerting]({{<relref "#unified_alerting">}}) and to disable legacy alerting engine. to disable Grafana Alerting, set to `true`.
+Set to `true` to [enable legacy dashboard alerting]({{<relref "#unified_alerting">}}). The default value is `false`.
 
 ### execute_alerts
 
@@ -1377,6 +1440,10 @@ Configures max number of alert annotations that Grafana stores. Default value is
 ### cleanupjob_batchsize
 
 Configures the batch size for the annotation clean-up job. This setting is used for dashboard, API, and alert annotations.
+
+### tags_length
+
+Enforces the maximum allowed length of the tags for any newly introduced annotations. It can be between 500 and 4096 (inclusive). Default value is 500. Setting it to a higher value would impact performance therefore is not recommended.
 
 ## [annotations.dashboard]
 
@@ -1566,6 +1633,18 @@ Setting this to `true` turns off shared RPC spans. Leaving this available is the
 
 <hr>
 
+## [tracing.opentelemetry]
+
+Configure general parameters shared between OpenTelemetry providers.
+
+### custom_attributes
+
+Comma-separated list of attributes to include in all new spans, such as `key1:value1,key2:value2`.
+
+Can be set with the environment variable `OTEL_RESOURCE_ATTRIBUTES` (use `=` instead of `:` with the environment variable).
+
+<hr>
+
 ## [tracing.opentelemetry.jaeger]
 
 Configure Grafana's Jaeger client for distributed tracing.
@@ -1709,6 +1788,10 @@ Storage account key
 ### container_name
 
 Container name where to store "Blob" images with random names. Creating the blob container beforehand is required. Only public containers are supported.
+
+### sas_token_expiration_days
+
+Number of days for SAS token validity. If specified SAS token will be attached to image URL. Allow storing images in private containers.
 
 <hr>
 
@@ -1926,7 +2009,7 @@ Change the listening port of the gRPC server. Default port is `0` and will autom
 
 ## [enterprise]
 
-For more information about Grafana Enterprise, refer to [Grafana Enterprise]({{< relref "../../enterprise/" >}}).
+For more information about Grafana Enterprise, refer to [Grafana Enterprise]({{< relref "../../introduction/grafana-enterprise" >}}).
 
 <hr>
 
@@ -2029,7 +2112,7 @@ Maximum duration of a single crawl. Default is 1h.
 
 Minimum interval between two subsequent scheduler runs. Default is 12h.
 
-Refer to the [dashboards previews]({{< relref "../../dashboards/previews/" >}}) documentation for detailed instructions.
+Refer to the [dashboards previews]({{< relref "../../search/dashboard-previews/" >}}) documentation for detailed instructions.
 
 ## [rbac]
 

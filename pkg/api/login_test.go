@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -24,9 +23,11 @@ import (
 	"github.com/grafana/grafana/pkg/login"
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/services/auth"
+	"github.com/grafana/grafana/pkg/services/auth/authtest"
 	"github.com/grafana/grafana/pkg/services/hooks"
 	"github.com/grafana/grafana/pkg/services/licensing"
+	loginservice "github.com/grafana/grafana/pkg/services/login"
+	"github.com/grafana/grafana/pkg/services/navtree"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
 	secretsManager "github.com/grafana/grafana/pkg/services/secrets/manager"
@@ -43,7 +44,7 @@ func fakeSetIndexViewData(t *testing.T) {
 		data := &dtos.IndexViewData{
 			User:     &dtos.CurrentUser{},
 			Settings: map[string]interface{}{},
-			NavTree:  []*dtos.NavLink{},
+			NavTree:  &navtree.NavTreeRoot{},
 		}
 		return data, nil
 	}
@@ -60,7 +61,7 @@ func fakeViewIndex(t *testing.T) {
 }
 
 func getBody(resp *httptest.ResponseRecorder) (string, error) {
-	responseData, err := ioutil.ReadAll(resp.Body)
+	responseData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -153,8 +154,8 @@ func TestLoginViewRedirect(t *testing.T) {
 
 	sc.defaultHandler = routing.Wrap(func(c *models.ReqContext) response.Response {
 		c.IsSignedIn = true
-		c.SignedInUser = &models.SignedInUser{
-			UserId: 10,
+		c.SignedInUser = &user.SignedInUser{
+			UserID: 10,
 		}
 		hs.LoginView(c)
 		return response.Empty(http.StatusOK)
@@ -322,7 +323,7 @@ func TestLoginPostRedirect(t *testing.T) {
 		Cfg:              setting.NewCfg(),
 		HooksService:     &hooks.HooksService{},
 		License:          &licensing.OSSLicensingService{},
-		AuthTokenService: auth.NewFakeUserAuthTokenService(),
+		AuthTokenService: authtest.NewFakeUserAuthTokenService(),
 	}
 	hs.Cfg.CookieSecure = true
 
@@ -563,15 +564,15 @@ func setupAuthProxyLoginTest(t *testing.T, enableLoginToken bool) *scenarioConte
 		Cfg:              sc.cfg,
 		SettingsProvider: &setting.OSSImpl{Cfg: sc.cfg},
 		License:          &licensing.OSSLicensingService{},
-		AuthTokenService: auth.NewFakeUserAuthTokenService(),
+		AuthTokenService: authtest.NewFakeUserAuthTokenService(),
 		log:              log.New("hello"),
 		SocialService:    &mockSocialService{},
 	}
 
 	sc.defaultHandler = routing.Wrap(func(c *models.ReqContext) response.Response {
 		c.IsSignedIn = true
-		c.SignedInUser = &models.SignedInUser{
-			UserId: 10,
+		c.SignedInUser = &user.SignedInUser{
+			UserID: 10,
 		}
 		hs.LoginView(c)
 		return response.Empty(http.StatusOK)
@@ -601,7 +602,7 @@ func TestLoginPostRunLokingHook(t *testing.T) {
 		log:              log.New("test"),
 		Cfg:              setting.NewCfg(),
 		License:          &licensing.OSSLicensingService{},
-		AuthTokenService: auth.NewFakeUserAuthTokenService(),
+		AuthTokenService: authtest.NewFakeUserAuthTokenService(),
 		HooksService:     hookService,
 	}
 
@@ -658,9 +659,9 @@ func TestLoginPostRunLokingHook(t *testing.T) {
 		{
 			desc:       "valid LDAP user",
 			authUser:   testUser,
-			authModule: "ldap",
+			authModule: loginservice.LDAPAuthModule,
 			info: models.LoginInfo{
-				AuthModule: "ldap",
+				AuthModule: loginservice.LDAPAuthModule,
 				User:       testUser,
 				HTTPStatus: 200,
 			},

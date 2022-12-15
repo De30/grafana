@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { Provider } from 'react-redux';
 
 import config from 'app/core/config';
 
 import { backendSrv } from '../../core/services/backend_srv';
+import { configureStore } from '../../store/configureStore';
 
 import { Props, ChangePasswordPage } from './ChangePasswordPage';
 import { initialUserState } from './state/reducers';
@@ -26,6 +28,7 @@ const defaultProps: Props = {
 };
 
 async function getTestContext(overrides: Partial<Props> = {}) {
+  const store = configureStore();
   jest.clearAllMocks();
   jest.spyOn(backendSrv, 'get').mockResolvedValue({
     id: 1,
@@ -38,7 +41,11 @@ async function getTestContext(overrides: Partial<Props> = {}) {
   });
 
   const props = { ...defaultProps, ...overrides };
-  const { rerender } = render(<ChangePasswordPage {...props} />);
+  const { rerender } = render(
+    <Provider store={store}>
+      <ChangePasswordPage {...props} />
+    </Provider>
+  );
 
   await waitFor(() => expect(props.loadUser).toHaveBeenCalledTimes(1));
 
@@ -84,19 +91,19 @@ describe('ChangePasswordPage', () => {
       );
     });
   });
-  it('should cannot change password form if ldap or authProxy enabled', async () => {
-    config.ldapEnabled = true;
-    const { rerender } = await getTestContext();
-    expect(
-      screen.getByText('You cannot change password when LDAP or auth proxy authentication is enabled.')
-    ).toBeInTheDocument();
-    config.ldapEnabled = false;
-    config.authProxyEnabled = true;
-    rerender(<ChangePasswordPage {...defaultProps} />);
-    expect(
-      screen.getByText('You cannot change password when LDAP or auth proxy authentication is enabled.')
-    ).toBeInTheDocument();
-    config.authProxyEnabled = false;
+  it('should cannot change password form if user signed in with LDAP', async () => {
+    await getTestContext({
+      user: { ...defaultProps.user!, authLabels: ['LDAP'] },
+    });
+
+    expect(screen.getByText('You cannot change password when signed in with LDAP or auth proxy.')).toBeInTheDocument();
+  });
+  it('should cannot change password form if user signed in with auth proxy', async () => {
+    await getTestContext({
+      user: { ...defaultProps.user!, authLabels: ['Auth Proxy'] },
+    });
+
+    expect(screen.getByText('You cannot change password when signed in with LDAP or auth proxy.')).toBeInTheDocument();
   });
   it('should show cannot change password if disableLoginForm is true and auth', async () => {
     config.disableLoginForm = true;

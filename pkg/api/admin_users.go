@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/auth"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/web"
@@ -37,6 +42,10 @@ func (hs *HTTPServer) AdminCreateUser(c *models.ReqContext) response.Response {
 	if err := web.Bind(c.Req, &form); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
+
+	form.Email = strings.TrimSpace(form.Email)
+	form.Login = strings.TrimSpace(form.Login)
+
 	cmd := user.CreateUserCommand{
 		Login:    form.Login,
 		Email:    form.Email,
@@ -56,7 +65,7 @@ func (hs *HTTPServer) AdminCreateUser(c *models.ReqContext) response.Response {
 		return response.Error(400, "Password is missing or too short", nil)
 	}
 
-	usr, err := hs.Login.CreateUser(cmd)
+	usr, err := hs.userService.Create(c.Req.Context(), &cmd)
 	if err != nil {
 		if errors.Is(err, models.ErrOrgNotFound) {
 			return response.Error(400, err.Error(), nil)
@@ -109,23 +118,24 @@ func (hs *HTTPServer) AdminUpdateUserPassword(c *models.ReqContext) response.Res
 		return response.Error(400, "New password too short", nil)
 	}
 
-	userQuery := models.GetUserByIdQuery{Id: userID}
+	userQuery := user.GetUserByIDQuery{ID: userID}
 
-	if err := hs.SQLStore.GetUserById(c.Req.Context(), &userQuery); err != nil {
+	usr, err := hs.userService.GetByID(c.Req.Context(), &userQuery)
+	if err != nil {
 		return response.Error(500, "Could not read user from database", err)
 	}
 
-	passwordHashed, err := util.EncodePassword(form.Password, userQuery.Result.Salt)
+	passwordHashed, err := util.EncodePassword(form.Password, usr.Salt)
 	if err != nil {
 		return response.Error(500, "Could not encode password", err)
 	}
 
-	cmd := models.ChangeUserPasswordCommand{
-		UserId:      userID,
+	cmd := user.ChangeUserPasswordCommand{
+		UserID:      userID,
 		NewPassword: passwordHashed,
 	}
 
-	if err := hs.SQLStore.ChangeUserPassword(c.Req.Context(), &cmd); err != nil {
+	if err := hs.userService.ChangePassword(c.Req.Context(), &cmd); err != nil {
 		return response.Error(500, "Failed to update user password", err)
 	}
 
@@ -155,7 +165,7 @@ func (hs *HTTPServer) AdminUpdateUserPermissions(c *models.ReqContext) response.
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
 	}
 
-	err = hs.SQLStore.UpdateUserPermissions(userID, form.IsGrafanaAdmin)
+	err = hs.userService.UpdatePermissions(c.Req.Context(), userID, form.IsGrafanaAdmin)
 	if err != nil {
 		if errors.Is(err, user.ErrLastGrafanaAdmin) {
 			return response.Error(400, user.ErrLastGrafanaAdmin.Error(), nil)
@@ -188,12 +198,71 @@ func (hs *HTTPServer) AdminDeleteUser(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
 	}
 
-	cmd := models.DeleteUserCommand{UserId: userID}
+	cmd := user.DeleteUserCommand{UserID: userID}
 
-	if err := hs.SQLStore.DeleteUser(c.Req.Context(), &cmd); err != nil {
+	if err := hs.userService.Delete(c.Req.Context(), &cmd); err != nil {
 		if errors.Is(err, user.ErrUserNotFound) {
 			return response.Error(404, user.ErrUserNotFound.Error(), nil)
 		}
+		return response.Error(500, "Failed to delete user", err)
+	}
+
+	g, ctx := errgroup.WithContext(c.Req.Context())
+	g.Go(func() error {
+		if err := hs.starService.DeleteByUser(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.orgService.DeleteUserFromAll(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.DashboardService.DeleteACLByUser(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.preferenceService.DeleteByUser(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.teamGuardian.DeleteByUser(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.authInfoService.DeleteUserAuthInfo(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.AuthTokenService.RevokeAllUserTokens(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.QuotaService.DeleteQuotaForUser(ctx, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		if err := hs.accesscontrolService.DeleteUserPermissions(ctx, accesscontrol.GlobalOrgID, cmd.UserID); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
 		return response.Error(500, "Failed to delete user", err)
 	}
 
@@ -227,8 +296,8 @@ func (hs *HTTPServer) AdminDisableUser(c *models.ReqContext) response.Response {
 		return response.Error(500, "Could not disable external user", nil)
 	}
 
-	disableCmd := models.DisableUserCommand{UserId: userID, IsDisabled: true}
-	if err := hs.SQLStore.DisableUser(c.Req.Context(), &disableCmd); err != nil {
+	disableCmd := user.DisableUserCommand{UserID: userID, IsDisabled: true}
+	if err := hs.userService.Disable(c.Req.Context(), &disableCmd); err != nil {
 		if errors.Is(err, user.ErrUserNotFound) {
 			return response.Error(404, user.ErrUserNotFound.Error(), nil)
 		}
@@ -270,8 +339,8 @@ func (hs *HTTPServer) AdminEnableUser(c *models.ReqContext) response.Response {
 		return response.Error(500, "Could not enable external user", nil)
 	}
 
-	disableCmd := models.DisableUserCommand{UserId: userID, IsDisabled: false}
-	if err := hs.SQLStore.DisableUser(c.Req.Context(), &disableCmd); err != nil {
+	disableCmd := user.DisableUserCommand{UserID: userID, IsDisabled: false}
+	if err := hs.userService.Disable(c.Req.Context(), &disableCmd); err != nil {
 		if errors.Is(err, user.ErrUserNotFound) {
 			return response.Error(404, user.ErrUserNotFound.Error(), nil)
 		}
@@ -302,7 +371,7 @@ func (hs *HTTPServer) AdminLogoutUser(c *models.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
 	}
 
-	if c.UserId == userID {
+	if c.UserID == userID {
 		return response.Error(400, "You cannot logout yourself", nil)
 	}
 
@@ -348,7 +417,7 @@ func (hs *HTTPServer) AdminGetUserAuthTokens(c *models.ReqContext) response.Resp
 // 404: notFoundError
 // 500: internalServerError
 func (hs *HTTPServer) AdminRevokeUserAuthToken(c *models.ReqContext) response.Response {
-	cmd := models.RevokeAuthTokenCmd{}
+	cmd := auth.RevokeAuthTokenCmd{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
@@ -408,7 +477,7 @@ type AdminLogoutUserParams struct {
 type AdminRevokeUserAuthTokenParams struct {
 	// in:body
 	// required:true
-	Body models.RevokeAuthTokenCmd `json:"body"`
+	Body auth.RevokeAuthTokenCmd `json:"body"`
 	// in:path
 	// required:true
 	UserID int64 `json:"user_id"`
@@ -440,5 +509,5 @@ type AdminCreateUserResponseResponse struct {
 // swagger:response adminGetUserAuthTokensResponse
 type AdminGetUserAuthTokensResponse struct {
 	// in:body
-	Body []*models.UserToken `json:"body"`
+	Body []*auth.UserToken `json:"body"`
 }

@@ -75,7 +75,7 @@ export const getStyles = (theme: GrafanaTheme2) => {
 
 const jsonObjectOrArrayStartRegex = /^(\[|\{)/;
 
-function parseIfComplexJson(value: any) {
+function parseIfComplexJson(value: unknown) {
   // if the value is a string representing actual json object or array, then use json-markup
   if (typeof value === 'string' && jsonObjectOrArrayStartRegex.test(value)) {
     // otherwise just return as is
@@ -99,7 +99,7 @@ LinkValue.defaultProps = {
   title: '',
 };
 
-type KeyValuesTableProps = {
+export type KeyValuesTableProps = {
   data: TraceKeyValuePair[];
   linksGetter: ((pairs: TraceKeyValuePair[], index: number) => TraceLink[]) | TNil;
 };

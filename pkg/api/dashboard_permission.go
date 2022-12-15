@@ -51,16 +51,15 @@ func (hs *HTTPServer) GetDashboardPermissionList(c *models.ReqContext) response.
 		}
 	}
 
-	dash, rsp := hs.getDashboardHelper(c.Req.Context(), c.OrgId, dashID, dashUID)
+	dash, rsp := hs.getDashboardHelper(c.Req.Context(), c.OrgID, dashID, dashUID)
 	if rsp != nil {
 		return rsp
 	}
 
-	if dashID == 0 {
-		dashID = dash.Id
+	g, err := guardian.NewByDashboard(c.Req.Context(), dash, c.OrgID, c.SignedInUser)
+	if err != nil {
+		return response.Err(err)
 	}
-
-	g := guardian.New(c.Req.Context(), dashID, c.OrgId, c.SignedInUser)
 
 	if canAdmin, err := g.CanAdmin(); err != nil || !canAdmin {
 		return dashboardGuardianResponse(err)
@@ -142,24 +141,24 @@ func (hs *HTTPServer) UpdateDashboardPermissions(c *models.ReqContext) response.
 		}
 	}
 
-	dash, rsp := hs.getDashboardHelper(c.Req.Context(), c.OrgId, dashID, dashUID)
+	dash, rsp := hs.getDashboardHelper(c.Req.Context(), c.OrgID, dashID, dashUID)
 	if rsp != nil {
 		return rsp
 	}
 
-	if dashUID != "" {
-		dashID = dash.Id
+	g, err := guardian.NewByDashboard(c.Req.Context(), dash, c.OrgID, c.SignedInUser)
+	if err != nil {
+		return response.Err(err)
 	}
 
-	g := guardian.New(c.Req.Context(), dashID, c.OrgId, c.SignedInUser)
 	if canAdmin, err := g.CanAdmin(); err != nil || !canAdmin {
 		return dashboardGuardianResponse(err)
 	}
 
-	var items []*models.DashboardACL
+	items := make([]*models.DashboardACL, 0, len(apiCmd.Items))
 	for _, item := range apiCmd.Items {
 		items = append(items, &models.DashboardACL{
-			OrgID:       c.OrgId,
+			OrgID:       c.OrgID,
 			DashboardID: dashID,
 			UserID:      item.UserID,
 			TeamID:      item.TeamID,

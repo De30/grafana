@@ -83,7 +83,7 @@ const mockPreferences: UserPreferencesDTO = {
   queryHistory: {
     homeTab: '',
   },
-  locale: '',
+  language: '',
 };
 
 const mockPrefsPatch = jest.fn();
@@ -102,6 +102,7 @@ jest.mock('app/core/services/PreferencesService', () => ({
 
 const props = {
   resourceUri: '/fake-api/user/1',
+  preferenceType: 'user' as const,
 };
 
 describe('SharedPreferences', () => {
@@ -152,7 +153,7 @@ describe('SharedPreferences', () => {
     expect(weekSelect).toHaveTextContent('Monday');
   });
 
-  it('renders the locale preference', async () => {
+  it('renders the language preference', async () => {
     const weekSelect = getSelectParent(screen.getByLabelText(/language/i));
     expect(weekSelect).toHaveTextContent('Default');
   });
@@ -161,21 +162,20 @@ describe('SharedPreferences', () => {
     const darkThemeRadio = assertInstanceOf(screen.getByLabelText('Dark'), HTMLInputElement);
     await userEvent.click(darkThemeRadio);
 
-    await selectOptionInTest(screen.getByLabelText('Home Dashboard'), 'Another Dashboard');
     await selectOptionInTest(screen.getByLabelText('Timezone'), 'Australia/Sydney');
     await selectOptionInTest(screen.getByLabelText('Week start'), 'Saturday');
-    await selectOptionInTest(screen.getByLabelText(/language/i), 'French');
+    await selectOptionInTest(screen.getByLabelText(/language/i), 'Français');
 
     await userEvent.click(screen.getByText('Save'));
     expect(mockPrefsUpdate).toHaveBeenCalledWith({
       timezone: 'Australia/Sydney',
       weekStart: 'saturday',
       theme: 'dark',
-      homeDashboardUID: 'anotherDash',
+      homeDashboardUID: 'myDash',
       queryHistory: {
         homeTab: '',
       },
-      locale: 'fr-FR',
+      language: 'fr-FR',
     });
   });
 
@@ -193,11 +193,11 @@ describe('SharedPreferences', () => {
       timezone: 'browser',
       weekStart: '',
       theme: '',
-      homeDashboardUID: undefined,
+      homeDashboardUID: 'myDash',
       queryHistory: {
         homeTab: '',
       },
-      locale: '',
+      language: '',
     });
   });
 

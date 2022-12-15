@@ -16,6 +16,7 @@ import { createWarningNotification } from 'app/core/copy/appNotification';
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { store } from 'app/store/store';
 
+import { SelectableResourceValue } from '../api';
 import { CloudWatchDatasource } from '../datasource';
 import { CloudWatchJsonData, CloudWatchSecureJsonData } from '../types';
 
@@ -61,12 +62,22 @@ export const ConfigEditor: FC<Props> = (props: Props) => {
     <>
       <ConnectionConfig
         {...props}
+        labelWidth={29}
         loadRegions={
           datasource &&
-          (() => datasource!.getRegions().then((r) => r.filter((r) => r.value !== 'default').map((v) => v.value)))
+          (async () => {
+            return datasource.api
+              .getRegions()
+              .then((regions) =>
+                regions.reduce(
+                  (acc: string[], curr: SelectableResourceValue) => (curr.value ? [...acc, curr.value] : acc),
+                  []
+                )
+              );
+          })
         }
       >
-        <InlineField label="Namespaces of Custom Metrics" labelWidth={28} tooltip="Namespaces of Custom Metrics.">
+        <InlineField label="Namespaces of Custom Metrics" labelWidth={29} tooltip="Namespaces of Custom Metrics.">
           <Input
             width={60}
             placeholder="Namespace1,Namespace2"

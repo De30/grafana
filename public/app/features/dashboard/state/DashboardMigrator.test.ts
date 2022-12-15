@@ -1258,15 +1258,15 @@ describe('DashboardModel', () => {
         ],
       });
       expect(model.panels[0].options).toMatchInlineSnapshot(`
-        Object {
-          "tooltip": Object {
+        {
+          "tooltip": {
             "mode": "multi",
           },
         }
       `);
       expect(model.panels[1].options).toMatchInlineSnapshot(`
-        Object {
-          "tooltip": Object {
+        {
+          "tooltip": {
             "mode": "single",
           },
         }
@@ -1314,18 +1314,18 @@ describe('DashboardModel', () => {
         ],
       });
       expect(model.panels[0].fieldConfig.defaults.mappings).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "options": Object {
-              "20": Object {
+        [
+          {
+            "options": {
+              "20": {
                 "color": undefined,
                 "text": "test",
               },
-              "30": Object {
+              "30": {
                 "color": undefined,
                 "text": "test1",
               },
-              "40": Object {
+              "40": {
                 "color": "orange",
                 "text": "50",
               },
@@ -1375,11 +1375,11 @@ describe('DashboardModel', () => {
         ],
       });
       expect(model.panels[0].fieldConfig.defaults.mappings).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "options": Object {
+        [
+          {
+            "options": {
               "from": 20,
-              "result": Object {
+              "result": {
                 "color": undefined,
                 "text": "text1",
               },
@@ -1387,10 +1387,10 @@ describe('DashboardModel', () => {
             },
             "type": "range",
           },
-          Object {
-            "options": Object {
+          {
+            "options": {
               "from": 1,
-              "result": Object {
+              "result": {
                 "color": undefined,
                 "text": "text2",
               },
@@ -1398,10 +1398,10 @@ describe('DashboardModel', () => {
             },
             "type": "range",
           },
-          Object {
-            "options": Object {
+          {
+            "options": {
               "from": 5,
-              "result": Object {
+              "result": {
                 "color": "orange",
                 "text": "50",
               },
@@ -1471,13 +1471,13 @@ describe('DashboardModel', () => {
     it('should create two transormatoins', () => {
       const xforms = model.panels[0].transformations;
       expect(xforms).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "id": "labelsToFields",
           },
-          Object {
+          {
             "id": "merge",
-            "options": Object {},
+            "options": {},
           },
         ]
       `);
@@ -1813,6 +1813,12 @@ describe('DashboardModel', () => {
               {
                 datasource: 'prom',
               },
+              {
+                datasource: 'default',
+              },
+              {
+                datasource: null,
+              },
             ],
           },
           {
@@ -1847,6 +1853,8 @@ describe('DashboardModel', () => {
 
     it('should update target datasource props to refs', () => {
       expect(model.panels[2].targets[0].datasource).toEqual({ type: 'prometheus', uid: 'prom-uid' });
+      expect(model.panels[2].targets[1].datasource).toEqual({ type: 'prometheus', uid: 'prom2-uid' });
+      expect(model.panels[2].targets[2].datasource).toEqual({ type: 'prometheus', uid: 'prom2-uid' });
     });
 
     it('should update datasources in panels collapsed rows', () => {
@@ -1901,14 +1909,14 @@ describe('DashboardModel', () => {
       });
 
       expect(model.panels[0].fieldConfig.overrides).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "matcher": Object {
+        [
+          {
+            "matcher": {
               "id": "byType",
               "options": "time",
             },
-            "properties": Array [
-              Object {
+            "properties": [
+              {
                 "id": "custom.axisPlacement",
                 "value": "auto",
               },

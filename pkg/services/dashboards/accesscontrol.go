@@ -28,6 +28,7 @@ const (
 	ActionDashboardsDelete           = "dashboards:delete"
 	ActionDashboardsPermissionsRead  = "dashboards.permissions:read"
 	ActionDashboardsPermissionsWrite = "dashboards.permissions:write"
+	ActionDashboardsPublicWrite      = "dashboards.public:write"
 )
 
 var (
@@ -52,7 +53,7 @@ func NewFolderNameScopeResolver(db Store) (string, ac.ScopeAttributeResolver) {
 		if err != nil {
 			return nil, err
 		}
-		return []string{ScopeFoldersProvider.GetResourceScopeUID(folder.Uid)}, nil
+		return []string{ScopeFoldersProvider.GetResourceScopeUID(folder.UID)}, nil
 	})
 }
 
@@ -78,7 +79,7 @@ func NewFolderIDScopeResolver(db Store) (string, ac.ScopeAttributeResolver) {
 			return nil, err
 		}
 
-		return []string{ScopeFoldersProvider.GetResourceScopeUID(folder.Uid)}, nil
+		return []string{ScopeFoldersProvider.GetResourceScopeUID(folder.UID)}, nil
 	})
 }
 
@@ -130,6 +131,10 @@ func NewDashboardUIDScopeResolver(db Store) (string, ac.ScopeAttributeResolver) 
 
 func resolveDashboardScope(ctx context.Context, db Store, orgID int64, dashboard *models.Dashboard) ([]string, error) {
 	var folderUID string
+	if dashboard.FolderId < 0 {
+		return []string{ScopeDashboardsProvider.GetResourceScopeUID(dashboard.Uid)}, nil
+	}
+
 	if dashboard.FolderId == 0 {
 		folderUID = ac.GeneralFolderUID
 	} else {
@@ -137,8 +142,9 @@ func resolveDashboardScope(ctx context.Context, db Store, orgID int64, dashboard
 		if err != nil {
 			return nil, err
 		}
-		folderUID = folder.Uid
+		folderUID = folder.UID
 	}
+
 	return []string{
 		ScopeDashboardsProvider.GetResourceScopeUID(dashboard.Uid),
 		ScopeFoldersProvider.GetResourceScopeUID(folderUID),

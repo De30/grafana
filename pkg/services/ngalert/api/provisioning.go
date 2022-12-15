@@ -76,6 +76,10 @@ func (f *ProvisioningApiHandler) handleRouteDeleteMuteTiming(ctx *models.ReqCont
 	return f.svc.RouteDeleteMuteTiming(ctx, name)
 }
 
+func (f *ProvisioningApiHandler) handleRouteGetAlertRules(ctx *models.ReqContext) response.Response {
+	return f.svc.RouteGetAlertRules(ctx)
+}
+
 func (f *ProvisioningApiHandler) handleRouteGetAlertRule(ctx *models.ReqContext, UID string) response.Response {
 	return f.svc.RouteRouteGetAlertRule(ctx, UID)
 }
@@ -100,6 +104,6 @@ func (f *ProvisioningApiHandler) handleRouteGetAlertRuleGroup(ctx *models.ReqCon
 	return f.svc.RouteGetAlertRuleGroup(ctx, folder, group)
 }
 
-func (f *ProvisioningApiHandler) handleRoutePutAlertRuleGroup(ctx *models.ReqContext, ag apimodels.AlertRuleGroupMetadata, folder, group string) response.Response {
+func (f *ProvisioningApiHandler) handleRoutePutAlertRuleGroup(ctx *models.ReqContext, ag apimodels.AlertRuleGroup, folder, group string) response.Response {
 	return f.svc.RoutePutAlertRuleGroup(ctx, ag, folder, group)
 }

@@ -2,6 +2,7 @@ import { css } from '@emotion/css';
 import { promLanguageDefinition } from 'monaco-promql';
 import React, { useRef, useEffect } from 'react';
 import { useLatest } from 'react-use';
+import { v4 as uuidv4 } from 'uuid';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
@@ -70,30 +71,40 @@ function ensurePromQL(monaco: Monaco) {
   }
 }
 
-const getStyles = (theme: GrafanaTheme2) => {
+const getStyles = (theme: GrafanaTheme2, placeholder: string) => {
   return {
     container: css`
       border-radius: ${theme.shape.borderRadius()};
       border: 1px solid ${theme.components.input.borderColor};
     `,
+    placeholder: css`
+      ::after {
+        content: '${placeholder}';
+        font-family: ${theme.typography.fontFamilyMonospace};
+        opacity: 0.3;
+      }
+    `,
   };
 };
 
 const MonacoQueryField = (props: Props) => {
+  const id = uuidv4();
+
   // we need only one instance of `overrideServices` during the lifetime of the react component
   const overrideServicesRef = useRef(getOverrideServices());
   const containerRef = useRef<HTMLDivElement>(null);
-  const { languageProvider, history, onBlur, onRunQuery, initialValue } = props;
+  const { languageProvider, history, onBlur, onRunQuery, initialValue, placeholder, onChange } = props;
 
   const lpRef = useLatest(languageProvider);
   const historyRef = useLatest(history);
   const onRunQueryRef = useLatest(onRunQuery);
   const onBlurRef = useLatest(onBlur);
+  const onChangeRef = useLatest(onChange);
 
   const autocompleteDisposeFun = useRef<(() => void) | null>(null);
 
   const theme = useTheme2();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, placeholder);
 
   useEffect(() => {
     // when we unmount, we unregister the autocomplete-function, if it was registered
@@ -118,9 +129,14 @@ const MonacoQueryField = (props: Props) => {
           ensurePromQL(monaco);
         }}
         onMount={(editor, monaco) => {
+          const isEditorFocused = editor.createContextKey<boolean>('isEditorFocused' + id, false);
           // we setup on-blur
           editor.onDidBlurEditorWidget(() => {
+            isEditorFocused.set(false);
             onBlurRef.current(editor.getValue());
+          });
+          editor.onDidFocusEditorText(() => {
+            isEditorFocused.set(true);
           });
 
           // we construct a DataProvider object
@@ -194,18 +210,59 @@ const MonacoQueryField = (props: Props) => {
           editor.onDidContentSizeChange(updateElementHeight);
           updateElementHeight();
 
-          // handle: shift + enter
-          // FIXME: maybe move this functionality into CodeEditor?
-          editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-            onRunQueryRef.current(editor.getValue());
+          // Whenever the editor changes, lets save the last value so the next query for this editor will be up-to-date.
+          // This change is being introduced to fix a bug where you can submit a query via shift+enter:
+          // If you clicked into another field and haven't un-blurred the active field,
+          // then the query that is run will be stale, as the reference is only updated
+          // with the value of the last blurred input.
+          editor.getModel()?.onDidChangeContent(() => {
+            onChangeRef.current(editor.getValue());
           });
 
-          /* Something in this configuration of monaco doesn't bubble up [mod]+K, which the 
+          // handle: shift + enter
+          // FIXME: maybe move this functionality into CodeEditor?
+          editor.addCommand(
+            monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+            () => {
+              onRunQueryRef.current(editor.getValue());
+            },
+            'isEditorFocused' + id
+          );
+
+          /* Something in this configuration of monaco doesn't bubble up [mod]+K, which the
           command palette uses. Pass the event out of monaco manually
           */
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, function () {
             global.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
           });
+
+          if (placeholder) {
+            const placeholderDecorators = [
+              {
+                range: new monaco.Range(1, 1, 1, 1),
+                options: {
+                  className: styles.placeholder,
+                  isWholeLine: true,
+                },
+              },
+            ];
+
+            let decorators: string[] = [];
+
+            const checkDecorators: () => void = () => {
+              const model = editor.getModel();
+
+              if (!model) {
+                return;
+              }
+
+              const newDecorators = model.getValueLength() === 0 ? placeholderDecorators : [];
+              decorators = model.deltaDecorations(decorators, newDecorators);
+            };
+
+            checkDecorators();
+            editor.onDidChangeModelContent(checkDecorators);
+          }
         }}
       />
     </div>
