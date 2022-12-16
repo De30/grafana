@@ -395,4 +395,3 @@ func addGeoHashGridAgg(aggBuilder es.AggBuilder, bucketAgg *BucketAgg) es.AggBui
 
 	return aggBuilder
 }
-

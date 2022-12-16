@@ -5,7 +5,6 @@ import (
 	"github.com/grafana/grafana/pkg/components/simplejson"
 )
 
-
 func parseQuery(tsdbQuery []backend.DataQuery) ([]*Query, error) {
 	queries := make([]*Query, 0)
 	for _, q := range tsdbQuery {
@@ -68,7 +67,6 @@ func parseBucketAggs(model *simplejson.Json) ([]*BucketAgg, error) {
 	}
 	return result, nil
 }
-
 
 func parseMetrics(model *simplejson.Json) ([]*MetricAgg, error) {
 	var err error
