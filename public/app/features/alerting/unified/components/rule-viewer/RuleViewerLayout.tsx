@@ -19,12 +19,11 @@ const defaultPageNav: Partial<NavModelItem> = {
 
 export function RuleViewerLayout(props: Props): JSX.Element | null {
   const { wrapInContent = true, children, title } = props;
-  const styles = useStyles2(getPageStyles);
 
   return (
     <Page pageNav={{ ...defaultPageNav, text: title }} navId="alert-list">
       <Page.Contents>
-        <div className={styles.content}>{wrapInContent ? <RuleViewerLayoutContent {...props} /> : children}</div>
+        <div>{wrapInContent ? <RuleViewerLayoutContent {...props} /> : children}</div>
       </Page.Contents>
     </Page>
   );
@@ -39,14 +38,6 @@ export function RuleViewerLayoutContent({ children, padding = 2 }: ContentProps)
   const styles = useStyles2(getContentStyles(padding));
   return <div className={styles.wrapper}>{children}</div>;
 }
-
-const getPageStyles = (theme: GrafanaTheme2) => {
-  return {
-    content: css`
-      max-width: ${theme.breakpoints.values.xxl}px;
-    `,
-  };
-};
 
 const getContentStyles = (padding: number) => (theme: GrafanaTheme2) => {
   return {

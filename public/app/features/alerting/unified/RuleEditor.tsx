@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
 import { useAsync } from 'react-use';
 
-import { NavModelItem } from '@grafana/data';
-import { withErrorBoundary } from '@grafana/ui';
+import { NavModelItem, PageLayoutType } from '@grafana/data';
+import { Button, ToolbarButtonRow, withErrorBoundary } from '@grafana/ui';
+import { AppChromeUpdate } from 'app/core/components/AppChrome/AppChromeUpdate';
 import { GrafanaRouteComponentProps } from 'app/core/navigation/types';
 import { useDispatch } from 'app/types';
 
@@ -64,16 +65,51 @@ const RuleEditor = ({ match }: RuleEditorProps) => {
       return <AlertWarning title="Cannot edit rules">Sorry! You are not allowed to edit rules.</AlertWarning>;
     }
 
-    if (identifier) {
-      return <ExistingRuleEditor key={id} identifier={identifier} />;
-    }
-
     if (copyFromIdentifier) {
       return <CloneRuleEditor sourceRuleId={copyFromIdentifier} />;
     }
 
     return <AlertRuleForm />;
-  }, [canCreateCloudRules, canCreateGrafanaRules, canEditRules, copyFromIdentifier, id, identifier, loading]);
+  }, [canCreateCloudRules, canCreateGrafanaRules, canEditRules, copyFromIdentifier, identifier, loading]);
+
+  if (identifier && canEditRules(identifier.ruleSourceName)) {
+    return (
+      <AlertingPageWrapper
+        isLoading={loading}
+        pageId="alert-list"
+        pageNav={getPageNav('edit')}
+        layout={PageLayoutType.Custom}
+      >
+        <ExistingRuleEditor key={id} identifier={identifier} />;
+      </AlertingPageWrapper>
+    );
+  }
+
+  if (!identifier) {
+    return (
+      <AlertingPageWrapper
+        pageId="alert-list"
+        pageNav={getPageNav('add')}
+        layout={PageLayoutType.Custom}
+        toolbar={
+          <AppChromeUpdate
+            actions={
+              <ToolbarButtonRow alignment="right">
+                <Button type="button" variant="destructive" size="sm" fill="outline">
+                  Discard
+                </Button>
+                <Button type="button" size="sm">
+                  Save
+                </Button>
+              </ToolbarButtonRow>
+            }
+          />
+        }
+      >
+        <AlertRuleForm />
+      </AlertingPageWrapper>
+    );
+  }
 
   return (
     <AlertingPageWrapper isLoading={loading} pageId="alert-list" pageNav={getPageNav(identifier ? 'edit' : 'add')}>

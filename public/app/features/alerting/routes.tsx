@@ -241,7 +241,7 @@ const unifiedRoutes: RouteDescriptor[] = [
       [OrgRole.Viewer, OrgRole.Editor, OrgRole.Admin]
     ),
     component: SafeDynamicImport(
-      () => import(/* webpackChunkName: "AlertingRule"*/ 'app/features/alerting/unified/RuleViewer')
+      () => import(/* webpackChunkName: "AlertingRule"*/ 'app/features/alerting/unified/RuleDetailPage')
     ),
   },
   {

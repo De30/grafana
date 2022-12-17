@@ -4,8 +4,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FieldArrayMethodProps, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { Stack } from '@grafana/experimental';
-import { Button, Field, InlineLabel, Label, useStyles2, Tooltip, Icon, Input, LoadingPlaceholder } from '@grafana/ui';
+import { Button, Field, InlineLabel, useStyles2, Input, LoadingPlaceholder } from '@grafana/ui';
 import { useDispatch } from 'app/types';
 import { RulerRuleGroupDTO } from 'app/types/unified-alerting-dto';
 
@@ -250,30 +249,13 @@ const LabelsField: FC<Props> = ({ className, dataSourceName }) => {
 
   return (
     <div className={cx(className, styles.wrapper)}>
-      <Label>
-        <Stack gap={0.5}>
-          <span>Custom Labels</span>
-          <Tooltip
-            content={
-              <div>
-                The dropdown only displays labels that you have previously used for alerts. Select a label from the
-                dropdown or type in a new one.
-              </div>
-            }
-          >
-            <Icon className={styles.icon} name="info-circle" size="sm" />
-          </Tooltip>
-        </Stack>
-      </Label>
-      <>
-        <div className={styles.flexRow}>
-          <InlineLabel width={18}>Labels</InlineLabel>
-          <div className={styles.flexColumn}>
-            {dataSourceName && <LabelsWithSuggestions dataSourceName={dataSourceName} />}
-            {!dataSourceName && <LabelsWithoutSuggestions />}
-          </div>
+      <div className={styles.flexRow}>
+        <InlineLabel width={18}>Labels</InlineLabel>
+        <div className={styles.flexColumn}>
+          {dataSourceName && <LabelsWithSuggestions dataSourceName={dataSourceName} />}
+          {!dataSourceName && <LabelsWithoutSuggestions />}
         </div>
-      </>
+      </div>
     </div>
   );
 };

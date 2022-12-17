@@ -1,17 +1,26 @@
 import React from 'react';
 
-import { NavModelItem } from '@grafana/data';
+import { NavModelItem, PageLayoutType } from '@grafana/data';
 import { Page } from 'app/core/components/Page/Page';
 
 interface Props {
   pageId: string;
   isLoading?: boolean;
   pageNav?: NavModelItem;
+  layout?: PageLayoutType;
+  toolbar?: React.ReactNode;
 }
 
-export const AlertingPageWrapper = ({ children, pageId, pageNav, isLoading }: React.PropsWithChildren<Props>) => {
+export const AlertingPageWrapper = ({
+  children,
+  pageId,
+  pageNav,
+  isLoading,
+  layout,
+  toolbar,
+}: React.PropsWithChildren<Props>) => {
   return (
-    <Page pageNav={pageNav} navId={pageId}>
+    <Page pageNav={pageNav} navId={pageId} layout={layout} toolbar={toolbar}>
       <Page.Contents isLoading={isLoading}>{children}</Page.Contents>
     </Page>
   );

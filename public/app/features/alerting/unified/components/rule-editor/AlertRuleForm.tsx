@@ -4,12 +4,14 @@ import { DeepMap, FieldError, FormProvider, useForm, useFormContext, UseFormWatc
 import { Link } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
+import { Stack } from '@grafana/experimental';
 import { logInfo, config } from '@grafana/runtime';
 import { Button, ConfirmModal, CustomScrollbar, Spinner, useStyles2, HorizontalGroup, Field, Input } from '@grafana/ui';
 import { useAppNotification } from 'app/core/copy/appNotification';
 import { contextSrv } from 'app/core/core';
 import { useCleanup } from 'app/core/hooks/useCleanup';
 import { useQueryParams } from 'app/core/hooks/useQueryParams';
+import { OptionsPaneCategory } from 'app/features/dashboard/components/PanelEditor/OptionsPaneCategory';
 import { useDispatch } from 'app/types';
 import { RuleWithLocation } from 'app/types/unified-alerting';
 
@@ -45,11 +47,10 @@ const AlertRuleNameInput = () => {
 
   const ruleFormType = watch('type');
   return (
-    <RuleEditorSection stepNo={1} title="Set an alert rule name">
+    <RuleEditorSection>
       <Field
         className={styles.formInput}
         label="Rule name"
-        description="Name for the alert rule."
         error={errors?.name?.message}
         invalid={!!errors.name?.message}
       >
@@ -59,7 +60,7 @@ const AlertRuleNameInput = () => {
             required: { value: true, message: 'Must enter an alert name' },
             pattern: ruleFormType === RuleFormType.cloudRecording ? recordingRuleNameValidationPattern : undefined,
           })}
-          placeholder="Give your alert rule a name."
+          placeholder="Use a descriptive name"
         />
       </Field>
     </RuleEditorSection>
@@ -115,9 +116,6 @@ export const AlertRuleForm: FC<Props> = ({ existing, prefill }) => {
   const { handleSubmit, watch } = formAPI;
 
   const type = watch('type');
-  const dataSourceName = watch('dataSourceName');
-
-  const showStep2 = Boolean(type && (type === RuleFormType.grafana || !!dataSourceName));
 
   const submitState = useUnifiedAlertingSelector((state) => state.ruleForm.saveRule) || initialAsyncRequestState;
   useCleanup((state) => (state.unifiedAlerting.ruleForm.saveRule = initialAsyncRequestState));
@@ -185,89 +183,104 @@ export const AlertRuleForm: FC<Props> = ({ existing, prefill }) => {
 
   return (
     <FormProvider {...formAPI}>
-      <form onSubmit={(e) => e.preventDefault()} className={styles.form}>
-        <HorizontalGroup height="auto" justify="flex-end">
-          <Link to={returnTo}>
-            <Button
-              variant="secondary"
-              disabled={submitState.loading}
-              type="button"
-              fill="outline"
-              onClick={cancelRuleCreation}
-            >
-              Cancel
-            </Button>
-          </Link>
-          {existing ? (
-            <Button variant="destructive" type="button" onClick={() => setShowDeleteModal(true)}>
-              Delete
-            </Button>
-          ) : null}
-          {isCortexLokiOrRecordingRule(watch) && (
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => setShowEditYaml(true)}
-              disabled={submitState.loading}
-            >
-              Edit yaml
-            </Button>
-          )}
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleSubmit((values) => submit(values, false), onInvalid)}
-            disabled={submitState.loading}
-          >
-            {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
-            Save
-          </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleSubmit((values) => submit(values, true), onInvalid)}
-            disabled={submitState.loading}
-          >
-            {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
-            Save and exit
-          </Button>
-        </HorizontalGroup>
-        <div className={styles.contentOuter}>
-          <CustomScrollbar autoHeightMin="100%" hideHorizontalTrack={true}>
-            <div className={styles.contentInner}>
-              <AlertRuleNameInput />
-              <QueryAndExpressionsStep editingExistingRule={!!existing} />
-              {showStep2 && (
-                <>
-                  {type === RuleFormType.grafana ? (
-                    <GrafanaEvaluationBehavior
-                      initialFolder={defaultValues.folder}
-                      evaluateEvery={evaluateEvery}
-                      setEvaluateEvery={setEvaluateEvery}
-                    />
-                  ) : (
-                    <CloudEvaluationBehavior />
-                  )}
-                  <DetailsStep />
-                  <NotificationsStep />
-                </>
+      <Stack direction={'row'}>
+        <div style={{ flex: 1 }}>
+          <form onSubmit={(e) => e.preventDefault()} className={styles.form}>
+            {/* TODO move these buttons to the breadcrumbs (like in panel edit) */}
+            {/* <HorizontalGroup height="auto" justify="flex-end">
+              <Link to={returnTo}>
+                <Button
+                  variant="secondary"
+                  disabled={submitState.loading}
+                  type="button"
+                  fill="outline"
+                  onClick={cancelRuleCreation}
+                >
+                  Cancel
+                </Button>
+              </Link>
+              {existing ? (
+                <Button variant="destructive" type="button" onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              ) : null}
+              {isCortexLokiOrRecordingRule(watch) && (
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => setShowEditYaml(true)}
+                  disabled={submitState.loading}
+                >
+                  Edit yaml
+                </Button>
               )}
+              <Button
+                variant="primary"
+                type="button"
+                onClick={handleSubmit((values) => submit(values, false), onInvalid)}
+                disabled={submitState.loading}
+              >
+                {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
+                Save
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                onClick={handleSubmit((values) => submit(values, true), onInvalid)}
+                disabled={submitState.loading}
+              >
+                {submitState.loading && <Spinner className={styles.buttonSpinner} inline={true} />}
+                Save and exit
+              </Button>
+            </HorizontalGroup> */}
+            <div className={styles.contentOuter}>
+              <CustomScrollbar autoHeightMin="100%" hideHorizontalTrack={true}>
+                <div className={styles.contentInner}>
+                  <QueryAndExpressionsStep editingExistingRule={!!existing} />
+                </div>
+              </CustomScrollbar>
             </div>
-          </CustomScrollbar>
+          </form>
+          {showDeleteModal ? (
+            <ConfirmModal
+              isOpen={true}
+              title="Delete rule"
+              body="Deleting this rule will permanently remove it. Are you sure you want to delete this rule?"
+              confirmText="Yes, delete"
+              icon="exclamation-triangle"
+              onConfirm={deleteRule}
+              onDismiss={() => setShowDeleteModal(false)}
+            />
+          ) : null}
+          {showEditYaml ? <RuleInspector onClose={() => setShowEditYaml(false)} /> : null}
         </div>
-      </form>
-      {showDeleteModal ? (
-        <ConfirmModal
-          isOpen={true}
-          title="Delete rule"
-          body="Deleting this rule will permanently remove it. Are you sure you want to delete this rule?"
-          confirmText="Yes, delete"
-          icon="exclamation-triangle"
-          onConfirm={deleteRule}
-          onDismiss={() => setShowDeleteModal(false)}
-        />
-      ) : null}
-      {showEditYaml ? <RuleInspector onClose={() => setShowEditYaml(false)} /> : null}
+        <div style={{ width: 640 }} className={styles.paneWrapper}>
+          <Stack direction={'column'} gap={0}>
+            <OptionsPaneCategory title="Name" id={'name'}>
+              <AlertRuleNameInput />
+            </OptionsPaneCategory>
+            <OptionsPaneCategory title="Alert evaluation behavior" id={'evaluation'}>
+              <>
+                {type === RuleFormType.grafana ? (
+                  <GrafanaEvaluationBehavior
+                    initialFolder={defaultValues.folder}
+                    evaluateEvery={evaluateEvery}
+                    setEvaluateEvery={setEvaluateEvery}
+                  />
+                ) : (
+                  <CloudEvaluationBehavior />
+                )}
+              </>
+            </OptionsPaneCategory>
+            <OptionsPaneCategory title="Annotations" id={'annotations'}>
+              <DetailsStep />
+            </OptionsPaneCategory>
+            <OptionsPaneCategory title="Labels" id={'labels'}>
+              <NotificationsStep />
+            </OptionsPaneCategory>
+          </Stack>
+        </div>
+      </Stack>
     </FormProvider>
   );
 };
@@ -280,6 +293,11 @@ const isCortexLokiOrRecordingRule = (watch: UseFormWatch<RuleFormValues>) => {
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
+    paneWrapper: css`
+      padding: 0;
+      background: ${theme.colors.background.primary};
+      border: 1px solid ${theme.components.panel.borderColor};
+    `,
     buttonSpinner: css`
       margin-right: ${theme.spacing(1)};
     `,

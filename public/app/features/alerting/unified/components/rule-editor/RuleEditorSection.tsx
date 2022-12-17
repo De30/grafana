@@ -5,26 +5,16 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { FieldSet, useStyles2 } from '@grafana/ui';
 
 export interface RuleEditorSectionProps {
-  title: string;
-  stepNo: number;
   description?: string;
 }
 
-export const RuleEditorSection = ({
-  title,
-  stepNo,
-  children,
-  description,
-}: React.PropsWithChildren<RuleEditorSectionProps>) => {
+export const RuleEditorSection = ({ children, description }: React.PropsWithChildren<RuleEditorSectionProps>) => {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={styles.parent}>
-      <div>
-        <span className={styles.stepNo}>{stepNo}</span>
-      </div>
       <div className={styles.content}>
-        <FieldSet label={title} className={styles.fieldset}>
+        <FieldSet className={styles.fieldset}>
           {description && <p className={styles.description}>{description}</p>}
           {children}
         </FieldSet>
@@ -43,10 +33,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
   parent: css`
     display: flex;
     flex-direction: row;
-    max-width: ${theme.breakpoints.values.xl};
-    & + & {
-      margin-top: ${theme.spacing(4)};
-    }
+
+    margin: ${theme.spacing(2)} 0;
   `,
   description: css`
     margin-top: -${theme.spacing(2)};
