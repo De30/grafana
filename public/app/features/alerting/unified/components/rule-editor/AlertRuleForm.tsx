@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { DeepMap, FieldError, FormProvider, useForm, useFormContext, UseFormWatch } from 'react-hook-form';
-import { Link } from 'react-router-dom';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { Stack } from '@grafana/experimental';
 import { logInfo, config } from '@grafana/runtime';
-import { Button, ConfirmModal, CustomScrollbar, Spinner, useStyles2, HorizontalGroup, Field, Input } from '@grafana/ui';
+import { ConfirmModal, CustomScrollbar, useStyles2, Field, Input } from '@grafana/ui';
 import { useAppNotification } from 'app/core/copy/appNotification';
 import { contextSrv } from 'app/core/core';
 import { useCleanup } from 'app/core/hooks/useCleanup';
@@ -254,7 +253,7 @@ export const AlertRuleForm: FC<Props> = ({ existing, prefill }) => {
           ) : null}
           {showEditYaml ? <RuleInspector onClose={() => setShowEditYaml(false)} /> : null}
         </div>
-        <div style={{ width: 640 }} className={styles.paneWrapper}>
+        <div style={{ width: 450 }} className={styles.paneWrapper}>
           <Stack direction={'column'} gap={0}>
             <OptionsPaneCategory title="Name" id={'name'}>
               <AlertRuleNameInput />

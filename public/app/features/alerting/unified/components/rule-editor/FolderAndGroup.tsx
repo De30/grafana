@@ -144,7 +144,7 @@ export function FolderAndGroup({ initialFolder }: FolderAndGroupProps) {
   );
 
   return (
-    <div className={styles.container}>
+    <Stack direction="column">
       <Field
         label={
           <Label htmlFor="folder" description={'Select a folder for your rule.'}>
@@ -231,7 +231,7 @@ export function FolderAndGroup({ initialFolder }: FolderAndGroupProps) {
           }}
         />
       </Field>
-    </div>
+    </Stack>
   );
 }
 const getStyles = (theme: GrafanaTheme2) => ({
@@ -244,8 +244,5 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
   formInput: css`
     width: 275px;
-    & + & {
-      margin-left: ${theme.spacing(3)};
-    }
   `,
 });

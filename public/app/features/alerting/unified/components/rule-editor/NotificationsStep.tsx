@@ -3,6 +3,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { GrafanaTheme2 } from '@grafana/data';
+import { Stack } from '@grafana/experimental';
 import { useStyles2 } from '@grafana/ui';
 
 import { RuleFormValues } from '../../types/rule-form';
@@ -20,9 +21,9 @@ export const NotificationsStep = () => {
   return (
     <RuleEditorSection description="Grafana handles the notifications for alerts by assigning labels to alerts. These labels connect alerts to contact points and silence alert instances that have matching labels.">
       <div className={styles.contentWrapper}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <Stack direction="column">
           <LabelsField dataSourceName={dataSourceName} />
-        </div>
+        </Stack>
       </div>
     </RuleEditorSection>
   );

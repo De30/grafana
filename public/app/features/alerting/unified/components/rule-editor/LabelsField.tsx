@@ -4,6 +4,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FieldArrayMethodProps, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { Stack } from '@grafana/experimental';
 import { Button, Field, InlineLabel, useStyles2, Input, LoadingPlaceholder } from '@grafana/ui';
 import { useDispatch } from 'app/types';
 import { RulerRuleGroupDTO } from 'app/types/unified-alerting-dto';
@@ -128,7 +129,7 @@ const LabelsWithSuggestions: FC<{ dataSourceName: string }> = ({ dataSourceName 
     <>
       {loading && <LoadingPlaceholder text="Loading" />}
       {!loading && (
-        <>
+        <Stack direction="column" gap={0}>
           {fields.map((field, index) => {
             return (
               <div key={field.id}>
@@ -174,14 +175,13 @@ const LabelsWithSuggestions: FC<{ dataSourceName: string }> = ({ dataSourceName 
                       type="value"
                     />
                   </Field>
-
                   <RemoveButton className={styles.deleteLabelButton} index={index} remove={remove} />
                 </div>
               </div>
             );
           })}
           <AddButton className={styles.addLabelButton} append={append} />
-        </>
+        </Stack>
       )}
     </>
   );
@@ -249,13 +249,10 @@ const LabelsField: FC<Props> = ({ className, dataSourceName }) => {
 
   return (
     <div className={cx(className, styles.wrapper)}>
-      <div className={styles.flexRow}>
-        <InlineLabel width={18}>Labels</InlineLabel>
-        <div className={styles.flexColumn}>
-          {dataSourceName && <LabelsWithSuggestions dataSourceName={dataSourceName} />}
-          {!dataSourceName && <LabelsWithoutSuggestions />}
-        </div>
-      </div>
+      <Stack direction="row">
+        {dataSourceName && <LabelsWithSuggestions dataSourceName={dataSourceName} />}
+        {!dataSourceName && <LabelsWithoutSuggestions />}
+      </Stack>
     </div>
   );
 };
@@ -299,11 +296,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       margin-left: ${theme.spacing(0.5)};
     `,
     labelInput: css`
-      width: 175px;
-      margin-bottom: ${theme.spacing(1)};
-      & + & {
-        margin-left: ${theme.spacing(1)};
-      }
+      width: 150px;
+      margin-bottom: 0;
     `,
   };
 };

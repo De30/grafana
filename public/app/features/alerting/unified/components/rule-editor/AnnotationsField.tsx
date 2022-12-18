@@ -62,7 +62,7 @@ const AnnotationsField = () => {
   return (
     <>
       <Label>Summary and annotations</Label>
-      <div className={styles.flexColumn}>
+      <Stack direction="column">
         {fields.map((annotationField, index) => {
           const isUrl = annotations[index]?.key?.toLocaleLowerCase().endsWith('url');
           const ValueInputComponent = isUrl ? Input : TextArea;
@@ -116,7 +116,6 @@ const AnnotationsField = () => {
         })}
         <Stack direction="row" gap={1}>
           <Button
-            className={styles.addAnnotationsButton}
             icon="plus-circle"
             type="button"
             variant="secondary"
@@ -130,23 +129,23 @@ const AnnotationsField = () => {
             Set dashboard and panel
           </Button>
         </Stack>
-        {showPanelSelector && (
-          <DashboardPicker
-            isOpen={true}
-            dashboardUid={selectedDashboardUid}
-            panelId={selectedPanelId}
-            onChange={setSelectedDashboardAndPanelId}
-            onDismiss={() => setShowPanelSelector(false)}
-          />
-        )}
-      </div>
+      </Stack>
+      {showPanelSelector && (
+        <DashboardPicker
+          isOpen={true}
+          dashboardUid={selectedDashboardUid}
+          panelId={selectedPanelId}
+          onChange={setSelectedDashboardAndPanelId}
+          onDismiss={() => setShowPanelSelector(false)}
+        />
+      )}
     </>
   );
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
   annotationValueInput: css`
-    width: 394px;
+    width: 220px;
   `,
   textarea: css`
     height: 76px;
