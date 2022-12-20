@@ -118,7 +118,7 @@ export function getHttpHandlerListScene(): EmbeddedScene {
       return new SceneFlexLayout({
         key: `panel-${frameIndex}`,
         direction: 'row',
-        size: { minHeight: 200 },
+        size: { minHeight: 170 },
         $data: new SceneDataNode({
           data: {
             ...data,

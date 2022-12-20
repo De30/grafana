@@ -51,6 +51,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       padding: 8,
       border: `1px dashed ${theme.colors.primary.main}`,
       cursor: 'pointer',
+      position: 'relative',
     }),
     hover: css({
       border: `1px solid ${theme.colors.primary.border}`,

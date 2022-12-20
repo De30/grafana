@@ -1,49 +1,99 @@
 import { Scene, SceneTimePicker, SceneFlexLayout, VizPanel } from '../components';
 import { BigText } from '../components/BigText';
-import { EmbeddedScene } from '../components/Scene';
 import { SceneTimeRange } from '../core/SceneTimeRange';
 
 import { getQueryRunnerWithRandomWalkQuery } from './queries';
 
-export function getTuesdayDemo(standalone: boolean): Scene {
-  const state = {
+export function getTuesdayDemo(): Scene {
+  const scene = new Scene({
     title: 'Tuesday demo',
     layout: new SceneFlexLayout({
-      direction: 'column',
+      direction: 'row',
       children: [
         new VizPanel({
           pluginId: 'timeseries',
-          title: 'Fill height',
+          title: 'Requests/s',
         }),
-        new VizPanel({
-          pluginId: 'timeseries',
-          title: 'Fill height',
-        }),
-        new VizPanel({
-          pluginId: 'timeseries',
-          title: 'Fill height',
+        new SceneFlexLayout({
+          direction: 'column',
+          size: { width: '20%' },
+          children: [
+            new BigText({
+              text: 'Tuesday demo',
+              size: { ySizing: 'content' },
+              fontSize: 20,
+            }),
+            new BigText({
+              text: 'Tuesday demo2',
+              size: { ySizing: 'content' },
+              fontSize: 20,
+            }),
+            new VizPanel({
+              pluginId: 'stat',
+              title: 'Last',
+              options: {
+                graphMode: 'none',
+                textMode: 'value',
+              },
+            }),
+          ],
         }),
       ],
     }),
     $timeRange: new SceneTimeRange(),
     $data: getQueryRunnerWithRandomWalkQuery(),
     actions: [new SceneTimePicker({})],
-  };
+  });
 
-  return standalone ? new Scene(state) : new EmbeddedScene(state);
+  return scene;
 }
 
 // new SceneFlexLayout({
-//   direction: 'row',
+//   direction: 'column',
+//   size: { width: '20%' },
 //   children: [
-//     new VizPanel({
-//       pluginId: 'timeseries',
-//       title: 'Fill height',
+//     new BigText({
+//       text: 'Tuesday demo',
+//       fontSize: 20,
 //     }),
+//     new VizPanel({
+//       pluginId: 'stat',
+//       title: 'Last',
+//       options: {
+//         graphMode: 'none',
+//         textMode: 'value',
+//       },
+//     })
 //   ],
 // }),
 
-// new BigText({
-//   text: 'Tuesday demo',
-//   fontSize: 20,
-// })
+// Starting state
+
+// export function getTuesdayDemo(): Scene {
+//   const scene = new Scene({
+//     title: 'Tuesday demo',
+//     layout: new SceneFlexLayout({
+//       direction: 'row',
+//       children: [
+//         new VizPanel({
+//           pluginId: 'timeseries',
+//           title: 'Requests/s',
+//         }),
+//         new VizPanel({
+//           pluginId: 'stat',
+//           title: 'Last',
+//           size: { width: '20%' },
+//           options: {
+//             graphMode: 'none',
+//             textMode: 'value',
+//           },
+//         }),
+//       ],
+//     }),
+//     $timeRange: new SceneTimeRange(),
+//     $data: getQueryRunnerWithRandomWalkQuery(),
+//     actions: [new SceneTimePicker({})],
+//   });
+
+//   return scene;
+// }
