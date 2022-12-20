@@ -7913,13 +7913,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prometheus-io/lezer-promql@npm:^0.37.0-rc.1":
-  version: 0.37.0
-  resolution: "@prometheus-io/lezer-promql@npm:0.37.0"
+"@prometheus-io/lezer-promql@npm:^0.41.0":
+  version: 0.41.0
+  resolution: "@prometheus-io/lezer-promql@npm:0.41.0"
   peerDependencies:
-    "@lezer/highlight": ^1.0.0
-    "@lezer/lr": ^1.0.0
-  checksum: 17722456a67dbbbc92c923656f43c65d99e0e8f7d4a7086fb63438286cc51b02bc1713506ec1b1f3a7337aa4dd9840261d8abdcb6518c90d8b8ebaf2608bb672
+    "@lezer/highlight": ^1.1.2
+    "@lezer/lr": ^1.2.3
+  checksum: 9baf6ddabd19e1235c561cbd66098d937d092def95f185863ef89592e8510d3539bd3adf062ff09088808b281e52a064d731aefca11ec94846e56d239fa94ea6
   languageName: node
   linkType: hard
 
@@ -21944,7 +21944,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": 1.8.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.8
     "@popperjs/core": 2.11.6
-    "@prometheus-io/lezer-promql": ^0.37.0-rc.1
+    "@prometheus-io/lezer-promql": ^0.41.0
     "@react-aria/button": 3.6.1
     "@react-aria/dialog": 3.3.1
     "@react-aria/focus": 3.8.0
