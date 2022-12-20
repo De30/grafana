@@ -105,10 +105,10 @@ export function formValuesToRulerGrafanaRuleDTO(values: RuleFormValues): Postabl
         condition,
         no_data_state: noDataState,
         exec_err_state: execErrState,
+        for_error: evaluateForError,
         data: queries.map(fixBothInstantAndRangeQuery),
       },
       for: evaluateFor,
-      for_error: evaluateForError,
       annotations: arrayToRecord(values.annotations || []),
       labels: arrayToRecord(values.labels || []),
     };

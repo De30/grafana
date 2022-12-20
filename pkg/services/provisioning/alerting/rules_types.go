@@ -99,14 +99,13 @@ func (rule *AlertRuleV1) mapToModel(orgID int64) (models.AlertRule, error) {
 		return models.AlertRule{}, fmt.Errorf("rule '%s' failed to parse: %w", alertRule.Title, err)
 	}
 	alertRule.For = time.Duration(duration)
-	var errorDuration model.Duration
 	if rule.ForError.Value() != "" {
-		errorDuration, err = model.ParseDuration(rule.ForError.Value())
+		errorDuration, err := model.ParseDuration(rule.ForError.Value())
+		if err != nil {
+			return models.AlertRule{}, fmt.Errorf("rule '%s' failed to parse: %w", alertRule.Title, err)
+		}
+		alertRule.ForError = time.Duration(errorDuration)
 	}
-	if err != nil {
-		return models.AlertRule{}, fmt.Errorf("rule '%s' failed to parse: %w", alertRule.Title, err)
-	}
-	alertRule.ForError = time.Duration(errorDuration)
 	dashboardUID := rule.DashboardUID.Value()
 	alertRule.DashboardUID = &dashboardUID
 	panelID := rule.PanelID.Value()
