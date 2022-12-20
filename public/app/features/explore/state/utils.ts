@@ -12,7 +12,7 @@ import {
   PanelData,
 } from '@grafana/data';
 import { ExplorePanelData } from 'app/types';
-import { ExploreItemState } from 'app/types/explore';
+import { ExploreItemState, SupplementaryQueryType } from 'app/types/explore';
 
 import store from '../../../core/store';
 import { clearQueryKeys, lastUsedDatasourceKeyForOrgId } from '../../../core/utils/explore';
@@ -30,19 +30,17 @@ export const storeGraphStyle = (graphStyle: string): void => {
   store.set(GRAPH_STYLE_KEY, graphStyle);
 };
 
-const LOGS_VOLUME_ENABLED_KEY = SETTINGS_KEYS.enableVolumeHistogram;
-export const storeLogsVolumeEnabled = (enabled: boolean): void => {
-  store.set(LOGS_VOLUME_ENABLED_KEY, enabled ? 'true' : 'false');
+export const storeSupplementaryQueryEnabled = (enabled: boolean, type: SupplementaryQueryType): void => {
+  store.set(supplementaryQueriesKeys[type], enabled ? 'true' : 'false');
 };
 
-const loadLogsVolumeEnabled = (): boolean => {
-  const data = store.get(LOGS_VOLUME_ENABLED_KEY);
+export const loadInitialSupplementaryQueryState = (type: SupplementaryQueryType) => {
+  const data = store.get(supplementaryQueriesKeys[type]);
   // we default to `enabled=true`
   if (data === 'false') {
-    return false;
+    return { enabled: false, type };
   }
-
-  return true;
+  return { enabled: false, type };
 };
 
 /**
@@ -76,9 +74,9 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   eventBridge: null as unknown as EventBusExtended,
   cache: [],
   richHistory: [],
-  logsVolumeEnabled: loadLogsVolumeEnabled(),
-  logsVolumeDataProvider: undefined,
-  logsVolumeData: undefined,
+  supplementaryQuery: undefined,
+  supplementaryQueryDataProvider: undefined,
+  supplementaryQueryData: undefined,
   panelsState: {},
 });
 
@@ -172,3 +170,9 @@ export function getResultsFromCache(
   const cacheValue = cacheIdx >= 0 ? cache[cacheIdx].value : undefined;
   return cacheValue;
 }
+
+const supplementaryQueriesKeys: {
+  [key in SupplementaryQueryType]: string;
+} = {
+  [SupplementaryQueryType.LogsVolume]: SETTINGS_KEYS.enableVolumeHistogram,
+};

@@ -36,7 +36,7 @@ import { getTimeZone } from 'app/features/profile/state/selectors';
 import { MIXED_DATASOURCE_NAME } from 'app/plugins/datasource/mixed/MixedDataSource';
 import { store } from 'app/store/store';
 import { ExploreItemState, ExplorePanelData, ThunkDispatch, ThunkResult } from 'app/types';
-import { ExploreId, ExploreState, QueryOptions } from 'app/types/explore';
+import { ExploreId, ExploreState, QueryOptions, SupplementaryQueryType } from 'app/types/explore';
 
 import { notifyApp } from '../../../core/actions';
 import { createErrorNotification } from '../../../core/copy/appNotification';
@@ -46,7 +46,7 @@ import { decorateData } from '../utils/decorators';
 import { addHistoryItem, historyUpdatedAction, loadRichHistory } from './history';
 import { stateSave } from './main';
 import { updateTime } from './time';
-import { createCacheKey, getResultsFromCache, storeLogsVolumeEnabled } from './utils';
+import { createCacheKey, getResultsFromCache, storeSupplementaryQueryEnabled } from './utils';
 
 //
 // Actions and Payloads
@@ -95,43 +95,51 @@ export const queryStoreSubscriptionAction = createAction<QueryStoreSubscriptionP
   'explore/queryStoreSubscription'
 );
 
-const setLogsVolumeEnabledAction = createAction<{ exploreId: ExploreId; enabled: boolean }>(
-  'explore/setLogsVolumeEnabledAction'
+const setSupplementaryQueryEnabledAction = createAction<{
+  exploreId: ExploreId;
+  enabled: boolean;
+  type: SupplementaryQueryType;
+}>('explore/setSupplementaryQueryEnabledAction');
+
+const setSupplementaryQueryTypeAction = createAction<{ exploreId: ExploreId; type: string }>(
+  'explore/setSupplementaryQueryTypeAction'
 );
 
-export interface StoreLogsVolumeDataProvider {
+export interface StoreSupplementaryQueryDataProvider {
   exploreId: ExploreId;
-  logsVolumeDataProvider?: Observable<DataQueryResponse>;
+  supplementaryQueryDataProvider?: Observable<DataQueryResponse>;
 }
 
 /**
- * Stores available logs volume provider after running the query. Used internally by runQueries().
+ * Stores available supplementary query provider after running the query. Used internally by runQueries().
  */
-export const storeLogsVolumeDataProviderAction = createAction<StoreLogsVolumeDataProvider>(
-  'explore/storeLogsVolumeDataProviderAction'
+export const storeSupplementaryQueryDataProviderAction = createAction<StoreSupplementaryQueryDataProvider>(
+  'explore/storeSupplementaryQueryDataProviderAction'
 );
 
-export const cleanLogsVolumeAction = createAction<{ exploreId: ExploreId }>('explore/cleanLogsVolumeAction');
+export const cleanSupplementaryQueryAction = createAction<{ exploreId: ExploreId }>(
+  'explore/cleanSupplementaryQueryAction'
+);
 
-export interface StoreLogsVolumeDataSubscriptionPayload {
+export interface StoreSupplementaryQueryDataSubscriptionPayload {
   exploreId: ExploreId;
-  logsVolumeDataSubscription?: SubscriptionLike;
+  supplementaryQueryDataSubscription?: SubscriptionLike;
 }
 
 /**
- * Stores current logs volume subscription for given explore pane.
+ * Stores current supplementary query subscription for given explore pane.
  */
-const storeLogsVolumeDataSubscriptionAction = createAction<StoreLogsVolumeDataSubscriptionPayload>(
-  'explore/storeLogsVolumeDataSubscriptionAction'
+const storeSupplementaryQueryDataSubscriptionAction = createAction<StoreSupplementaryQueryDataSubscriptionPayload>(
+  'explore/storeSupplementaryQueryDataSubscriptionAction'
 );
 
 /**
- * Stores data returned by the provider. Used internally by loadLogsVolumeData().
+ * Stores data returned by the provider.
  */
-const updateLogsVolumeDataAction = createAction<{
+const updateSupplementaryQueryDataAction = createAction<{
   exploreId: ExploreId;
-  logsVolumeData: DataQueryResponse;
-}>('explore/updateLogsVolumeDataAction');
+  supplementaryQueryData: DataQueryResponse;
+}>('explore/updateSupplementaryQueryDataAction');
 
 export interface QueryEndedPayload {
   exploreId: ExploreId;
@@ -232,14 +240,14 @@ export function cancelQueries(exploreId: ExploreId): ThunkResult<void> {
     dispatch(scanStopAction({ exploreId }));
     dispatch(cancelQueriesAction({ exploreId }));
     dispatch(
-      storeLogsVolumeDataProviderAction({
+      storeSupplementaryQueryDataProviderAction({
         exploreId,
-        logsVolumeDataProvider: undefined,
+        supplementaryQueryDataProvider: undefined,
       })
     );
     // clear any incomplete data
-    if (getState().explore[exploreId]!.logsVolumeData?.state !== LoadingState.Done) {
-      dispatch(cleanLogsVolumeAction({ exploreId }));
+    if (getState().explore[exploreId]!.supplementaryQueryData?.state !== LoadingState.Done) {
+      dispatch(cleanSupplementaryQueryAction({ exploreId }));
     }
     dispatch(stateSave());
   };
@@ -425,7 +433,7 @@ export const runQueries = (
       refreshInterval,
       absoluteRange,
       cache,
-      logsVolumeEnabled,
+      supplementaryQuery,
     } = exploreItemState;
     let newQuerySub;
 
@@ -454,7 +462,7 @@ export const runQueries = (
               refreshInterval,
               queries,
               correlations,
-              datasourceInstance != null && hasLogsVolumeSupport(datasourceInstance)
+              hasLogsVolumeSupport(datasourceInstance)
             )
           )
         )
@@ -489,8 +497,6 @@ export const runQueries = (
         // Loki - used for logs streaming for buffer size, with undefined it falls back to datasource config if it supports that.
         // Elastic - limits the number of datapoints for the counts query and for logs it has hardcoded limit.
         // Influx - used to correctly display logs in graph
-        // TODO:unification
-        // maxDataPoints: mode === ExploreMode.Logs && datasourceId === 'loki' ? undefined : containerWidth,
         maxDataPoints: containerWidth,
         liveStreaming: live,
       };
@@ -517,7 +523,7 @@ export const runQueries = (
               refreshInterval,
               queries,
               correlations,
-              datasourceInstance != null && hasLogsVolumeSupport(datasourceInstance)
+              hasLogsVolumeSupport(datasourceInstance)
             )
           )
         )
@@ -559,42 +565,48 @@ export const runQueries = (
 
       if (live) {
         dispatch(
-          storeLogsVolumeDataProviderAction({
+          storeSupplementaryQueryDataProviderAction({
             exploreId,
-            logsVolumeDataProvider: undefined,
+            supplementaryQueryDataProvider: undefined,
           })
         );
-        dispatch(cleanLogsVolumeAction({ exploreId }));
-      } else if (hasLogsVolumeSupport(datasourceInstance)) {
-        // we always prepare the logsVolumeProvider,
-        // but we only load it, if the logs-volume-histogram is enabled.
-        // (we need to have the logsVolumeProvider always actual,
-        // even when the visuals are disabled, because when the user
-        // enables the visuals again, we need to load the histogram,
-        // so we need the provider)
+        dispatch(cleanSupplementaryQueryAction({ exploreId }));
+      } else if (supplementaryQuery?.type) {
+        console.log(supplementaryQuery.type);
+        // We always prepare the provider for supplementary query, but we only load it, if the correct supplementary
+        // query type is enabled. We need to have the provider always actual,  even when the visuals are disabled,
+        // because when the user enables the visuals again, we need to load the query.
+        let supplementaryQueryDataProvider;
         const sourceRequest = {
           ...transaction.request,
-          requestId: transaction.request.requestId + '_log_volume',
+          requestId: transaction.request.requestId + supplementaryQuery.type,
         };
-        const logsVolumeDataProvider = datasourceInstance.getLogsVolumeDataProvider(sourceRequest);
+
+        switch (supplementaryQuery.type) {
+          case SupplementaryQueryType.LogsVolume:
+            if (hasLogsVolumeSupport(datasourceInstance)) {
+              supplementaryQueryDataProvider = datasourceInstance.getLogsVolumeDataProvider(sourceRequest);
+            }
+        }
+
         dispatch(
-          storeLogsVolumeDataProviderAction({
+          storeSupplementaryQueryDataProviderAction({
             exploreId,
-            logsVolumeDataProvider,
+            supplementaryQueryDataProvider,
           })
         );
-        const { logsVolumeData, absoluteRange } = getState().explore[exploreId]!;
-        if (!canReuseLogsVolumeData(logsVolumeData, queries, absoluteRange)) {
-          dispatch(cleanLogsVolumeAction({ exploreId }));
-          if (logsVolumeEnabled) {
-            dispatch(loadLogsVolumeData(exploreId));
+        const { supplementaryQueryData, absoluteRange } = getState().explore[exploreId]!;
+        if (!canReuseSupplementaryQueryData(supplementaryQueryData, queries, absoluteRange)) {
+          dispatch(cleanSupplementaryQueryAction({ exploreId }));
+          if (supplementaryQuery.enabled) {
+            dispatch(loadSupplementaryQueryData(exploreId));
           }
         }
       } else {
         dispatch(
-          storeLogsVolumeDataProviderAction({
+          storeSupplementaryQueryDataProviderAction({
             exploreId,
-            logsVolumeDataProvider: undefined,
+            supplementaryQueryDataProvider: undefined,
           })
         );
       }
@@ -605,21 +617,24 @@ export const runQueries = (
 };
 
 /**
- * Checks if after changing the time range the existing data can be used to show logs volume.
+ * Checks if after changing the time range the existing data can be used.
  * It can happen if queries are the same and new time range is within existing data time range.
  */
-function canReuseLogsVolumeData(
-  logsVolumeData: DataQueryResponse | undefined,
+function canReuseSupplementaryQueryData(
+  supplementaryQueryData: DataQueryResponse | undefined,
   queries: DataQuery[],
   selectedTimeRange: AbsoluteTimeRange
 ): boolean {
-  if (logsVolumeData && logsVolumeData.data[0]) {
+  if (supplementaryQueryData && supplementaryQueryData.data[0]) {
     // check if queries are the same
-    if (!deepEqual(logsVolumeData.data[0].meta?.custom?.targets, queries)) {
+    if (!deepEqual(supplementaryQueryData.data[0].meta?.custom?.targets, queries)) {
       return false;
     }
-    const dataRange = logsVolumeData && logsVolumeData.data[0] && logsVolumeData.data[0].meta?.custom?.absoluteRange;
-    // if selected range is within loaded logs volume
+    const dataRange =
+      supplementaryQueryData &&
+      supplementaryQueryData.data[0] &&
+      supplementaryQueryData.data[0].meta?.custom?.absoluteRange;
+    // if selected range is within loaded data range
     if (dataRange && dataRange.from <= selectedTimeRange.from && selectedTimeRange.to <= dataRange.to) {
       return true;
     }
@@ -678,28 +693,33 @@ export function clearCache(exploreId: ExploreId): ThunkResult<void> {
 }
 
 /**
- * Initializes loading logs volume data and stores emitted value.
+ * Initializes loading supplementary query data and stores emitted value.
  */
-export function loadLogsVolumeData(exploreId: ExploreId): ThunkResult<void> {
+export function loadSupplementaryQueryData(exploreId: ExploreId): ThunkResult<void> {
   return (dispatch, getState) => {
-    const { logsVolumeDataProvider } = getState().explore[exploreId]!;
-    if (logsVolumeDataProvider) {
-      const logsVolumeDataSubscription = logsVolumeDataProvider.subscribe({
-        next: (logsVolumeData: DataQueryResponse) => {
-          dispatch(updateLogsVolumeDataAction({ exploreId, logsVolumeData }));
+    const { supplementaryQueryDataProvider } = getState().explore[exploreId]!;
+    if (supplementaryQueryDataProvider) {
+      const supplementaryQueryDataSubscription = supplementaryQueryDataProvider.subscribe({
+        next: (supplementaryQueryData: DataQueryResponse) => {
+          dispatch(updateSupplementaryQueryDataAction({ exploreId, supplementaryQueryData }));
         },
       });
-      dispatch(storeLogsVolumeDataSubscriptionAction({ exploreId, logsVolumeDataSubscription }));
+      dispatch(storeSupplementaryQueryDataSubscriptionAction({ exploreId, supplementaryQueryDataSubscription }));
     }
   };
 }
 
-export function setLogsVolumeEnabled(exploreId: ExploreId, enabled: boolean): ThunkResult<void> {
+export function setSupplementaryQueryEnabled(
+  exploreId: ExploreId,
+  enabled: boolean,
+  type: SupplementaryQueryType
+): ThunkResult<void> {
   return (dispatch, getState) => {
-    dispatch(setLogsVolumeEnabledAction({ exploreId, enabled }));
-    storeLogsVolumeEnabled(enabled);
+    dispatch(setSupplementaryQueryEnabledAction({ exploreId, enabled, type }));
+    dispatch(setSupplementaryQueryTypeAction({ exploreId, type }));
+    storeSupplementaryQueryEnabled(enabled, type);
     if (enabled) {
-      dispatch(loadLogsVolumeData(exploreId));
+      dispatch(loadSupplementaryQueryData(exploreId));
     }
   };
 }
@@ -763,53 +783,53 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     };
   }
 
-  if (setLogsVolumeEnabledAction.match(action)) {
-    const { enabled } = action.payload;
-    if (!enabled && state.logsVolumeDataSubscription) {
-      state.logsVolumeDataSubscription.unsubscribe();
+  if (setSupplementaryQueryEnabledAction.match(action)) {
+    const { enabled, type } = action.payload;
+    if (!enabled && state.supplementaryQueryDataSubscription) {
+      state.supplementaryQueryDataSubscription.unsubscribe();
     }
     return {
       ...state,
-      logsVolumeEnabled: enabled,
+      supplementaryQuery: { enabled, type },
       // NOTE: the dataProvider is not cleared, we may need it later,
       // if the user re-enables the histogram-visualization
-      logsVolumeData: undefined,
+      supplementaryQueryData: undefined,
     };
   }
 
-  if (storeLogsVolumeDataProviderAction.match(action)) {
-    let { logsVolumeDataProvider } = action.payload;
-    if (state.logsVolumeDataSubscription) {
-      state.logsVolumeDataSubscription.unsubscribe();
+  if (storeSupplementaryQueryDataProviderAction.match(action)) {
+    let { supplementaryQueryDataProvider } = action.payload;
+    if (state.supplementaryQueryDataSubscription) {
+      state.supplementaryQueryDataSubscription.unsubscribe();
     }
     return {
       ...state,
-      logsVolumeDataProvider,
-      logsVolumeDataSubscription: undefined,
+      supplementaryQueryDataProvider,
+      supplementaryQueryDataSubscription: undefined,
     };
   }
 
-  if (cleanLogsVolumeAction.match(action)) {
+  if (cleanSupplementaryQueryAction.match(action)) {
     return {
       ...state,
-      logsVolumeData: undefined,
+      supplementaryQueryData: undefined,
     };
   }
 
-  if (storeLogsVolumeDataSubscriptionAction.match(action)) {
-    const { logsVolumeDataSubscription } = action.payload;
+  if (storeSupplementaryQueryDataSubscriptionAction.match(action)) {
+    const { supplementaryQueryDataSubscription } = action.payload;
     return {
       ...state,
-      logsVolumeDataSubscription,
+      supplementaryQueryDataSubscription,
     };
   }
 
-  if (updateLogsVolumeDataAction.match(action)) {
-    let { logsVolumeData } = action.payload;
+  if (updateSupplementaryQueryDataAction.match(action)) {
+    let { supplementaryQueryData } = action.payload;
 
     return {
       ...state,
-      logsVolumeData,
+      supplementaryQueryData,
     };
   }
 

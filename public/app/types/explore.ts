@@ -197,10 +197,10 @@ export interface ExploreItemState {
 
   // properties below should be more generic if we add more providers
   // see also: DataSourceWithLogsVolumeSupport
-  logsVolumeEnabled: boolean;
-  logsVolumeDataProvider?: Observable<DataQueryResponse>;
-  logsVolumeDataSubscription?: SubscriptionLike;
-  logsVolumeData?: DataQueryResponse;
+  supplementaryQuery?: { enabled: boolean; type: SupplementaryQueryType };
+  supplementaryQueryDataProvider?: Observable<DataQueryResponse>;
+  supplementaryQueryDataSubscription?: SubscriptionLike;
+  supplementaryQueryData?: DataQueryResponse;
 
   panelsState: ExplorePanelsState;
 
@@ -251,4 +251,8 @@ export interface ExplorePanelData extends PanelData {
   graphResult: DataFrame[] | null;
   tableResult: DataFrame[] | null;
   logsResult: LogsModel | null;
+}
+
+export enum SupplementaryQueryType {
+  LogsVolume = 'logsVolume',
 }
