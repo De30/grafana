@@ -433,7 +433,7 @@ export const runQueries = (
       refreshInterval,
       absoluteRange,
       cache,
-      supplementaryQuery,
+      supplementaryQueriesEnabled,
     } = exploreItemState;
     let newQuerySub;
 
@@ -571,22 +571,44 @@ export const runQueries = (
           })
         );
         dispatch(cleanSupplementaryQueryAction({ exploreId }));
-      } else if (supplementaryQuery?.type) {
-        console.log(supplementaryQuery.type);
+        // Ale co checkneme tu ci data source vobec nejaku supplementary query podporuje a ktore
+        // Tu sme checkovali ci podporuje logVolume histogram cez hasLogsVolumeSupport
+        // Mozno vytvorit function (terax je to true), kde checkneme ci posporuje aspon jednu
+      } else if (true && supplementaryQueriesEnabled?.length) {
         // We always prepare the provider for supplementary query, but we only load it, if the correct supplementary
         // query type is enabled. We need to have the provider always actual,  even when the visuals are disabled,
         // because when the user enables the visuals again, we need to load the query.
         let supplementaryQueryDataProvider;
-        const sourceRequest = {
-          ...transaction.request,
-          requestId: transaction.request.requestId + supplementaryQuery.type,
-        };
 
-        switch (supplementaryQuery.type) {
-          case SupplementaryQueryType.LogsVolume:
-            if (hasLogsVolumeSupport(datasourceInstance)) {
-              supplementaryQueryDataProvider = datasourceInstance.getLogsVolumeDataProvider(sourceRequest);
-            }
+        // Problem:
+        // Mozeme podporovat more supplementary queries, ale to ci je enabled alebo nie je zistime len z local storage
+        // V tom pripade moze byt viacero supplementary queries enabled
+        // Kedy zistime, ze ktoru odporucit
+        // Mame sa spoliehat na to, ze data source data provders budu vracat undefined ak query nie je sutable
+
+        //
+        // Tuto by sme uz mali mat zoznam enabled supplementary queries
+        // Problem je to, ze potrebujeme zistit, ktoru z nich  runovat, ak je viacej enabled
+        // Tuto by sme mali vzdy chekcnut ci datasource podporuje supplementary query a ci je enabled
+        // Musime sa spoliehat na to, ze getLogsVolumeDataProvider vrati undefined ak query nie je sutable
+        //supplementaryQueriesEnabled
+        for (const supplementaryQuery of supplementaryQueriesEnabled) {
+          switch (supplementaryQuery) {
+            case SupplementaryQueryType.LogsVolume:
+              if (hasLogsVolumeSupport(datasourceInstance) && !supplementaryQueryDataProvider) {
+                supplementaryQueryDataProvider = datasourceInstance.getLogsVolumeDataProvider({
+                  ...transaction.request,
+                  requestId: transaction.request.requestId + '_logs_volume',
+                });
+              }
+            case SupplementaryQueryType.LogsVolume:
+              if (hasLogsVolumeSupport(datasourceInstance) && !supplementaryQueryDataProvider) {
+                supplementaryQueryDataProvider = datasourceInstance.getLogsVolumeDataProvider({
+                  ...transaction.request,
+                  requestId: transaction.request.requestId + '_logs_samples',
+                });
+              }
+          }
         }
 
         dispatch(
@@ -598,6 +620,7 @@ export const runQueries = (
         const { supplementaryQueryData, absoluteRange } = getState().explore[exploreId]!;
         if (!canReuseSupplementaryQueryData(supplementaryQueryData, queries, absoluteRange)) {
           dispatch(cleanSupplementaryQueryAction({ exploreId }));
+
           if (supplementaryQuery.enabled) {
             dispatch(loadSupplementaryQueryData(exploreId));
           }
@@ -725,8 +748,7 @@ export function setSupplementaryQueryEnabled(
 }
 
 //
-// Reducer
-//
+// Reduce
 
 // Redux Toolkit uses ImmerJs as part of their solution to ensure that state objects are not mutated.
 // ImmerJs has an autoFreeze option that freezes objects from change which means this reducer can't be migrated to createSlice
