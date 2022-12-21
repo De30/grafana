@@ -3,15 +3,18 @@ package sqlstore
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"time"
 
 	"xorm.io/xorm"
 
+	"github.com/mattn/go-sqlite3"
+
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
 	"github.com/grafana/grafana/pkg/util/errutil"
 	"github.com/grafana/grafana/pkg/util/retryer"
-	"github.com/mattn/go-sqlite3"
 )
 
 var sessionLogger = log.New("sqlstore.session")
@@ -114,7 +117,7 @@ func (ss *SQLStore) withDbSession(ctx context.Context, engine *xorm.Engine, call
 	return retryer.Retry(ss.retryOnLocks(ctx, callback, sess, retry), ss.dbCfg.QueryRetries, time.Millisecond*time.Duration(10), time.Second)
 }
 
-func (sess *DBSession) InsertId(bean interface{}) (int64, error) {
+func (sess *DBSession) InsertId(bean interface{}, dialect migrator.Dialect) (int64, error) {
 	table := sess.DB().Mapper.Obj2Table(getTypeName(bean))
 
 	if err := dialect.PreInsertId(table, sess.Session); err != nil {
@@ -128,6 +131,28 @@ func (sess *DBSession) InsertId(bean interface{}) (int64, error) {
 		return 0, err
 	}
 
+	return id, nil
+}
+
+func (sess *DBSession) WithReturningID(driverName string, query string, args []interface{}) (int64, error) {
+	supported := driverName != migrator.Postgres
+	var id int64
+	if !supported {
+		query = fmt.Sprintf("%s RETURNING id", query)
+		if _, err := sess.SQL(query, args...).Get(&id); err != nil {
+			return id, err
+		}
+	} else {
+		sqlOrArgs := append([]interface{}{query}, args...)
+		res, err := sess.Exec(sqlOrArgs...)
+		if err != nil {
+			return id, err
+		}
+		id, err = res.LastInsertId()
+		if err != nil {
+			return id, err
+		}
+	}
 	return id, nil
 }
 
