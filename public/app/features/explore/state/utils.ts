@@ -34,13 +34,17 @@ export const storeSupplementaryQueryEnabled = (enabled: boolean, type: Supplemen
   store.set(supplementaryQueriesKeys[type], enabled ? 'true' : 'false');
 };
 
-export const loadInitialSupplementaryQueryState = (type: SupplementaryQueryType) => {
-  const data = store.get(supplementaryQueriesKeys[type]);
-  // we default to `enabled=true`
-  if (data === 'false') {
-    return { enabled: false, type };
+export const loadSupplementaryQueriesEnabled = () => {
+  const enabledArray = [];
+  for (const supplementaryQueriesKey of Object.values(supplementaryQueriesKeys)) {
+    const data = store.get(supplementaryQueriesKey);
+    if (data === 'false') {
+      continue;
+    }
+    enabledArray.push(supplementaryQueriesKeys);
   }
-  return { enabled: false, type };
+
+  return enabledArray;
 };
 
 /**
@@ -74,7 +78,7 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   eventBridge: null as unknown as EventBusExtended,
   cache: [],
   richHistory: [],
-  supplementaryQueriesEnabled: [],
+  supplementaryQueriesEnabled: loadSupplementaryQueriesEnabled(),
   supplementaryQueryDataProvider: undefined,
   supplementaryQueryData: undefined,
   panelsState: {},

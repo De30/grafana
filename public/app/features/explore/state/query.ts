@@ -505,7 +505,7 @@ export const runQueries = (
       const transaction = buildQueryTransaction(exploreId, queries, queryOptions, range, scanning, timeZone);
 
       dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Loading }));
-
+      console.log('se', supplementaryQueriesEnabled);
       newQuerySub = combineLatest([
         runRequest(datasourceInstance, transaction.request)
           // Simple throttle for live tailing, in case of > 1000 rows per interval we spend about 200ms on processing and
@@ -572,9 +572,11 @@ export const runQueries = (
         );
         dispatch(cleanSupplementaryQueryAction({ exploreId }));
         // Ale co checkneme tu ci data source vobec nejaku supplementary query podporuje a ktore
-        // Tu sme checkovali ci podporuje logVolume histogram cez hasLogsVolumeSupport
-        // Mozno vytvorit function (terax je to true), kde checkneme ci posporuje aspon jednu
-      } else if (true && supplementaryQueriesEnabled?.length) {
+        // TODO: Change this to check for supplementary queries support
+      } else if (
+        supplementaryQueriesEnabled.includes(SupplementaryQueryType.LogsVolume) &&
+        hasLogsVolumeSupport(datasourceInstance)
+      ) {
         // We always prepare the provider for supplementary query, but we only load it, if the correct supplementary
         // query type is enabled. We need to have the provider always actual,  even when the visuals are disabled,
         // because when the user enables the visuals again, we need to load the query.
@@ -593,7 +595,6 @@ export const runQueries = (
         // Musime sa spoliehat na to, ze getLogsVolumeDataProvider vrati undefined ak query nie je sutable
         //supplementaryQueriesEnabled
         for (const supplementaryQuery of supplementaryQueriesEnabled) {
-          console.log(supplementaryQuery);
           switch (supplementaryQuery) {
             case SupplementaryQueryType.LogsVolume:
               if (hasLogsVolumeSupport(datasourceInstance) && !supplementaryQueryDataProvider) {
@@ -602,6 +603,7 @@ export const runQueries = (
                   requestId: transaction.request.requestId + '_logs_volume',
                 });
               }
+              break;
             case SupplementaryQueryType.LogsVolume:
               if (hasLogsVolumeSupport(datasourceInstance) && !supplementaryQueryDataProvider) {
                 supplementaryQueryDataProvider = datasourceInstance.getLogsVolumeDataProvider({
@@ -722,6 +724,7 @@ export function clearCache(exploreId: ExploreId): ThunkResult<void> {
 export function loadSupplementaryQueryData(exploreId: ExploreId): ThunkResult<void> {
   return (dispatch, getState) => {
     const { supplementaryQueryDataProvider } = getState().explore[exploreId]!;
+
     if (supplementaryQueryDataProvider) {
       const supplementaryQueryDataSubscription = supplementaryQueryDataProvider.subscribe({
         next: (supplementaryQueryData: DataQueryResponse) => {
@@ -822,7 +825,6 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
       ...state,
       supplementaryQueriesEnabled: enabledQueries,
       supplementaryQueryData: undefined,
-      supplementaryQueryDataProvider: undefined,
     };
   }
 
