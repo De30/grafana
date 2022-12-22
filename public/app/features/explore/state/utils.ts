@@ -74,7 +74,7 @@ export const makeExplorePaneState = (): ExploreItemState => ({
   eventBridge: null as unknown as EventBusExtended,
   cache: [],
   richHistory: [],
-  supplementaryQuery: undefined,
+  supplementaryQueriesEnabled: [],
   supplementaryQueryDataProvider: undefined,
   supplementaryQueryData: undefined,
   panelsState: {},

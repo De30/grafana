@@ -197,7 +197,7 @@ export interface ExploreItemState {
 
   // properties below should be more generic if we add more providers
   // see also: DataSourceWithLogsVolumeSupport
-  supplementaryQueriesEnabled?: SupplementaryQueryType[];
+  supplementaryQueriesEnabled: SupplementaryQueryType[];
   supplementaryQueryDataProvider?: Observable<DataQueryResponse>;
   supplementaryQueryDataSubscription?: SubscriptionLike;
   supplementaryQueryData?: DataQueryResponse;

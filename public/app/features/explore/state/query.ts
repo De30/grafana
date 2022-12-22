@@ -1,6 +1,6 @@
 import { AnyAction, createAction, PayloadAction } from '@reduxjs/toolkit';
 import deepEqual from 'fast-deep-equal';
-import { flatten, groupBy } from 'lodash';
+import { flatten, groupBy, remove } from 'lodash';
 import { identity, Observable, of, SubscriptionLike, Unsubscribable, combineLatest } from 'rxjs';
 import { mergeMap, throttleTime } from 'rxjs/operators';
 
@@ -593,6 +593,7 @@ export const runQueries = (
         // Musime sa spoliehat na to, ze getLogsVolumeDataProvider vrati undefined ak query nie je sutable
         //supplementaryQueriesEnabled
         for (const supplementaryQuery of supplementaryQueriesEnabled) {
+          console.log(supplementaryQuery);
           switch (supplementaryQuery) {
             case SupplementaryQueryType.LogsVolume:
               if (hasLogsVolumeSupport(datasourceInstance) && !supplementaryQueryDataProvider) {
@@ -621,7 +622,7 @@ export const runQueries = (
         if (!canReuseSupplementaryQueryData(supplementaryQueryData, queries, absoluteRange)) {
           dispatch(cleanSupplementaryQueryAction({ exploreId }));
 
-          if (supplementaryQuery.enabled) {
+          if (supplementaryQueriesEnabled.length > 0) {
             dispatch(loadSupplementaryQueryData(exploreId));
           }
         }
@@ -810,12 +811,18 @@ export const queryReducer = (state: ExploreItemState, action: AnyAction): Explor
     if (!enabled && state.supplementaryQueryDataSubscription) {
       state.supplementaryQueryDataSubscription.unsubscribe();
     }
+    const enabledQueries = [...state.supplementaryQueriesEnabled];
+    if (enabled) {
+      enabledQueries.push(type);
+    } else {
+      remove(enabledQueries, (q) => q === type);
+    }
+
     return {
       ...state,
-      supplementaryQuery: { enabled, type },
-      // NOTE: the dataProvider is not cleared, we may need it later,
-      // if the user re-enables the histogram-visualization
+      supplementaryQueriesEnabled: enabledQueries,
       supplementaryQueryData: undefined,
+      supplementaryQueryDataProvider: undefined,
     };
   }
 

@@ -85,7 +85,7 @@ class LogsContainer extends PureComponent<LogsContainerProps> {
       logsMeta,
       logsSeries,
       logsQueries,
-      supplementaryQuery,
+      supplementaryQueriesEnabled,
       supplementaryQueryData,
       loadSupplementaryQueryData,
       setSupplementaryQueryEnabled,
@@ -136,7 +136,7 @@ class LogsContainer extends PureComponent<LogsContainerProps> {
             logRows={logRows}
             logsMeta={logsMeta}
             logsSeries={logsSeries}
-            logsVolumeEnabled={!!supplementaryQuery?.enabled}
+            logsVolumeEnabled={supplementaryQueriesEnabled.includes(SupplementaryQueryType.LogsVolume)}
             onSetLogsVolumeEnabled={(enabled) =>
               setSupplementaryQueryEnabled(exploreId, enabled, SupplementaryQueryType.LogsVolume)
             }
@@ -184,7 +184,7 @@ function mapStateToProps(state: StoreState, { exploreId }: { exploreId: string }
     isPaused,
     range,
     absoluteRange,
-    supplementaryQuery,
+    supplementaryQueriesEnabled,
     supplementaryQueryDataProvider,
     supplementaryQueryData,
   } = item;
@@ -204,7 +204,7 @@ function mapStateToProps(state: StoreState, { exploreId }: { exploreId: string }
     isPaused,
     range,
     absoluteRange,
-    supplementaryQuery,
+    supplementaryQueriesEnabled,
     supplementaryQueryDataProvider,
     supplementaryQueryData,
   };
