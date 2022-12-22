@@ -166,6 +166,7 @@ type AlertRule struct {
 	For         time.Duration
 	Annotations map[string]string
 	Labels      map[string]string
+	IsPaused    bool
 }
 
 // GetDashboardUID returns the DashboardUID or "".
@@ -345,6 +346,7 @@ type AlertRuleVersion struct {
 	For         time.Duration
 	Annotations map[string]string
 	Labels      map[string]string
+	IsPaused    bool
 }
 
 // GetAlertRuleByUIDQuery is the query for retrieving/deleting an alert rule by UID and organisation ID.
@@ -468,6 +470,9 @@ func PatchPartialAlertRule(existingRule *AlertRule, ruleToPatch *AlertRule) {
 	}
 	if ruleToPatch.For == -1 {
 		ruleToPatch.For = existingRule.For
+	}
+	if !ruleToPatch.IsPaused {
+		ruleToPatch.IsPaused = existingRule.IsPaused
 	}
 }
 
