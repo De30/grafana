@@ -101,10 +101,6 @@ const setSupplementaryQueryEnabledAction = createAction<{
   type: SupplementaryQueryType;
 }>('explore/setSupplementaryQueryEnabledAction');
 
-const setSupplementaryQueryTypeAction = createAction<{ exploreId: ExploreId; type: string }>(
-  'explore/setSupplementaryQueryTypeAction'
-);
-
 export interface StoreSupplementaryQueryDataProvider {
   exploreId: ExploreId;
   supplementaryQueryDataProvider?: Observable<DataQueryResponse>;
@@ -563,6 +559,7 @@ export const runQueries = (
           },
         });
 
+      console.log('supplementaryQueriesEnabled', supplementaryQueriesEnabled);
       if (live) {
         dispatch(
           storeSupplementaryQueryDataProviderAction({
@@ -743,7 +740,6 @@ export function setSupplementaryQueryEnabled(
 ): ThunkResult<void> {
   return (dispatch, getState) => {
     dispatch(setSupplementaryQueryEnabledAction({ exploreId, enabled, type }));
-    dispatch(setSupplementaryQueryTypeAction({ exploreId, type }));
     storeSupplementaryQueryEnabled(enabled, type);
     if (enabled) {
       dispatch(loadSupplementaryQueryData(exploreId));

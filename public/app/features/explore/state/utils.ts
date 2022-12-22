@@ -36,14 +36,15 @@ export const storeSupplementaryQueryEnabled = (enabled: boolean, type: Supplemen
 
 export const loadSupplementaryQueriesEnabled = () => {
   const enabledArray = [];
-  for (const supplementaryQueriesKey of Object.values(supplementaryQueriesKeys)) {
-    const data = store.get(supplementaryQueriesKey);
+  for (const key of Object.keys(supplementaryQueriesKeys)) {
+    const data = store.get(supplementaryQueriesKeys[key]);
     if (data === 'false') {
       continue;
     }
-    enabledArray.push(supplementaryQueriesKeys);
-  }
 
+    enabledArray.push(key as SupplementaryQueryType);
+  }
+  console.log('enabledArray', enabledArray);
   return enabledArray;
 };
 
@@ -175,8 +176,6 @@ export function getResultsFromCache(
   return cacheValue;
 }
 
-const supplementaryQueriesKeys: {
-  [key in SupplementaryQueryType]: string;
-} = {
-  [SupplementaryQueryType.LogsVolume]: SETTINGS_KEYS.enableVolumeHistogram,
+const supplementaryQueriesKeys: { [key: string]: string } = {
+  logsVolume: SETTINGS_KEYS.enableVolumeHistogram,
 };
