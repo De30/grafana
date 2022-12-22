@@ -12,9 +12,10 @@ import {
   DataHoverEvent,
   CoreApp,
 } from '@grafana/data';
-import { CustomScrollbar, useStyles2, usePanelContext } from '@grafana/ui';
+import { CustomScrollbar, useStyles2, usePanelContext, useTheme2 } from '@grafana/ui';
 import { dataFrameToLogsModel, dedupLogRows, COMMON_LABELS } from 'app/core/logsModel';
 import { getFieldLinksForExplore } from 'app/features/explore/utils/links';
+import { getLogStyles } from 'app/features/logs/components/getLogRowStyles';
 import { PanelDataErrorView } from 'app/features/panel/components/PanelDataErrorView';
 
 import { LogLabels } from '../../../features/logs/components/LogLabels';
@@ -42,6 +43,7 @@ export const LogsPanel: React.FunctionComponent<LogsPanelProps> = ({
   id,
 }) => {
   const isAscending = sortOrder === LogsSortOrder.Ascending;
+  const styles = getLogStyles(useTheme2());
   const style = useStyles2(getStyles(title, isAscending));
   const [scrollTop, setScrollTop] = useState(0);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -106,6 +108,7 @@ export const LogsPanel: React.FunctionComponent<LogsPanelProps> = ({
       <div className={style.container} ref={logsContainerRef}>
         {showCommonLabels && !isAscending && renderCommonLabels()}
         <LogRows
+          styles={styles}
           logRows={logRows}
           deduplicatedRows={deduplicatedRows}
           dedupStrategy={dedupStrategy}

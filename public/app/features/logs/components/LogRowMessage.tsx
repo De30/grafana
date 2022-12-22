@@ -10,7 +10,7 @@ import { withTheme2, Themeable2, IconButton, Tooltip } from '@grafana/ui';
 import { LogMessageAnsi } from './LogMessageAnsi';
 import { LogRowContext } from './LogRowContext';
 import { LogRowContextQueryErrors, HasMoreContextRows, LogRowContextRows } from './LogRowContextProvider';
-import { getLogRowStyles } from './getLogRowStyles';
+import { LogStyles } from './getLogRowStyles';
 
 export const MAX_CHARACTERS = 100000;
 
@@ -22,6 +22,7 @@ interface Props extends Themeable2 {
   prettifyLogMessage: boolean;
   errors?: LogRowContextQueryErrors;
   context?: LogRowContextRows;
+  styles: LogStyles;
   showRowMenu?: boolean;
   app?: CoreApp;
   scrollElement?: HTMLDivElement;
@@ -149,12 +150,12 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
       wrapLogMessage,
       prettifyLogMessage,
       onToggleContext,
+      styles: logStyles,
       app,
       logsSortOrder,
       showContextToggle,
     } = this.props;
 
-    const style = getLogRowStyles(theme, row.logLevel);
     const { hasAnsi, raw } = row;
     const restructuredEntry = restructureLog(raw, prettifyLogMessage);
     const shouldShowContextToggle = showContextToggle ? showContextToggle(row) : false;
@@ -169,7 +170,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
         <td
           ref={this.logRowRef}
           style={contextIsOpen ? { position: 'unset' } : undefined}
-          className={style.logsRowMessage}
+          className={logStyles.logsRowMessage}
         >
           <div
             className={cx(
@@ -194,7 +195,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
               />
             )}
             <span className={cx(styles.positionRelative, { [styles.rowWithContext]: contextIsOpen })}>
-              {renderLogMessage(hasAnsi, restructuredEntry, row.searchWords, style.logsRowMatchHighLight)}
+              {renderLogMessage(hasAnsi, restructuredEntry, row.searchWords, logStyles.logsRowMatchHighLight)}
             </span>
           </div>
         </td>

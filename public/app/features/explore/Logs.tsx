@@ -37,6 +37,7 @@ import {
   withTheme2,
   Themeable2,
   Collapse,
+  stylesFactory,
 } from '@grafana/ui';
 import { dedupLogRows, filterLogLevels } from 'app/core/logsModel';
 import store from 'app/core/store';
@@ -44,6 +45,7 @@ import { ExploreId } from 'app/types/explore';
 
 import { RowContextOptions } from '../logs/components/LogRowContextProvider';
 import { LogRows } from '../logs/components/LogRows';
+import { getLogStyles } from '../logs/components/getLogRowStyles';
 
 import { LogsMetaRow } from './LogsMetaRow';
 import LogsNavigation from './LogsNavigation';
@@ -359,7 +361,7 @@ class UnthemedLogs extends PureComponent<Props, State> {
       forceEscape,
     } = this.state;
 
-    const styles = getStyles(theme, wrapLogMessage);
+    const styles = getLogStyles(theme);
     const hasData = logRows && logRows.length > 0;
     const hasUnescapedContent = this.checkUnescapedContent(logRows);
 
@@ -492,6 +494,7 @@ class UnthemedLogs extends PureComponent<Props, State> {
                 onClickFilterOutLabel={onClickFilterOutLabel}
                 showContextToggle={showContextToggle}
                 showLabels={showLabels}
+                styles={styles}
                 showTime={showTime}
                 enableLogDetails={true}
                 forceEscape={forceEscape}
@@ -544,48 +547,3 @@ class UnthemedLogs extends PureComponent<Props, State> {
 }
 
 export const Logs = withTheme2(UnthemedLogs);
-
-const getStyles = (theme: GrafanaTheme2, wrapLogMessage: boolean) => {
-  return {
-    noData: css`
-      > * {
-        margin-left: 0.5em;
-      }
-    `,
-    logOptions: css`
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      background-color: ${theme.colors.background.primary};
-      padding: ${theme.spacing(1, 2)};
-      border-radius: ${theme.shape.borderRadius()};
-      margin: ${theme.spacing(0, 0, 1)};
-      border: 1px solid ${theme.colors.border.medium};
-    `,
-    headerButton: css`
-      margin: ${theme.spacing(0.5, 0, 0, 1)};
-    `,
-    horizontalInlineLabel: css`
-      > label {
-        margin-right: 0;
-      }
-    `,
-    horizontalInlineSwitch: css`
-      padding: 0 ${theme.spacing(1)} 0 0;
-    `,
-    radioButtons: css`
-      margin: 0;
-    `,
-    logsSection: css`
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    `,
-    logRows: css`
-      overflow-x: ${wrapLogMessage ? 'unset' : 'scroll'};
-      overflow-y: visible;
-      width: 100%;
-    `,
-  };
-};

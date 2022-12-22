@@ -11,18 +11,17 @@ import {
   CoreApp,
   DataFrame,
 } from '@grafana/data';
-import { withTheme2, Themeable2 } from '@grafana/ui';
 
 import { sortLogRows } from '../utils';
 
 //Components
 import { LogRow } from './LogRow';
 import { RowContextOptions } from './LogRowContextProvider';
-import { getLogRowStyles } from './getLogRowStyles';
+import { LogStyles } from './getLogRowStyles';
 
 export const PREVIEW_LIMIT = 100;
 
-export interface Props extends Themeable2 {
+export interface Props {
   logRows?: LogRowModel[];
   deduplicatedRows?: LogRowModel[];
   dedupStrategy: LogsDedupStrategy;
@@ -37,6 +36,7 @@ export interface Props extends Themeable2 {
   forceEscape?: boolean;
   showDetectedFields?: string[];
   app?: CoreApp;
+  styles: LogStyles;
   scrollElement?: HTMLDivElement;
   showContextToggle?: (row?: LogRowModel) => boolean;
   onClickFilterLabel?: (key: string, value: string) => void;
@@ -53,7 +53,7 @@ interface State {
   contextIsOpen: boolean;
 }
 
-class UnThemedLogRows extends PureComponent<Props, State> {
+export class LogRows extends PureComponent<Props, State> {
   renderAllTimer: number | null = null;
 
   static defaultProps = {
@@ -116,7 +116,6 @@ class UnThemedLogRows extends PureComponent<Props, State> {
       timeZone,
       onClickFilterLabel,
       onClickFilterOutLabel,
-      theme,
       enableLogDetails,
       previewLimit,
       getFieldLinks,
@@ -125,12 +124,12 @@ class UnThemedLogRows extends PureComponent<Props, State> {
       onClickShowDetectedField,
       onClickHideDetectedField,
       forceEscape,
+      styles,
       onLogRowHover,
       app,
       scrollElement,
     } = this.props;
     const { renderAll, contextIsOpen } = this.state;
-    const { logsRowsTable } = getLogRowStyles(theme);
     const dedupedRows = deduplicatedRows ? deduplicatedRows : logRows;
     const hasData = logRows && logRows.length > 0;
     const dedupCount = dedupedRows
@@ -148,7 +147,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
     const getRowContext = this.props.getRowContext ? this.props.getRowContext : () => Promise.resolve([]);
 
     return (
-      <table className={logsRowsTable}>
+      <table className={styles.logsRowsTable}>
         <tbody>
           {hasData &&
             firstRows.map((row, index) => (
@@ -157,6 +156,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
                 getRows={getRows}
                 getRowContext={getRowContext}
                 row={row}
+                styles={styles}
                 showContextToggle={showContextToggle}
                 showRowMenu={!contextIsOpen}
                 showDuplicates={showDuplicates}
@@ -188,6 +188,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
                 getRows={getRows}
                 getRowContext={getRowContext}
                 row={row}
+                styles={styles}
                 showContextToggle={showContextToggle}
                 showRowMenu={!contextIsOpen}
                 showDuplicates={showDuplicates}
@@ -221,6 +222,3 @@ class UnThemedLogRows extends PureComponent<Props, State> {
     );
   }
 }
-
-export const LogRows = withTheme2(UnThemedLogRows);
-LogRows.displayName = 'LogsRows';

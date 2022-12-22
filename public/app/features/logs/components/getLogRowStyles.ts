@@ -1,35 +1,36 @@
 import { css } from '@emotion/css';
 
 import { GrafanaTheme2, LogLevel } from '@grafana/data';
-import { styleMixins } from '@grafana/ui';
+import { styleMixins, stylesFactory } from '@grafana/ui';
 
-export const getLogRowStyles = (theme: GrafanaTheme2, logLevel?: LogLevel) => {
+export const getLogStyles = stylesFactory((theme: GrafanaTheme2) => {
   let logColor = theme.isLight ? theme.v1.palette.gray5 : theme.v1.palette.gray2;
+  const wrapLogMessage = false;
   const hoverBgColor = styleMixins.hoverColor(theme.colors.background.secondary, theme);
 
-  switch (logLevel) {
-    case LogLevel.crit:
-    case LogLevel.critical:
-      logColor = '#705da0';
-      break;
-    case LogLevel.error:
-    case LogLevel.err:
-      logColor = '#e24d42';
-      break;
-    case LogLevel.warning:
-    case LogLevel.warn:
-      logColor = theme.colors.warning.main;
-      break;
-    case LogLevel.info:
-      logColor = '#7eb26d';
-      break;
-    case LogLevel.debug:
-      logColor = '#1f78c1';
-      break;
-    case LogLevel.trace:
-      logColor = '#6ed0e0';
-      break;
-  }
+  // switch (logLevel) {
+  //   case LogLevel.crit:
+  //   case LogLevel.critical:
+  //     logColor = '#705da0';
+  //     break;
+  //   case LogLevel.error:
+  //   case LogLevel.err:
+  //     logColor = '#e24d42';
+  //     break;
+  //   case LogLevel.warning:
+  //   case LogLevel.warn:
+  //     logColor = theme.colors.warning.main;
+  //     break;
+  //   case LogLevel.info:
+  //     logColor = '#7eb26d';
+  //     break;
+  //   case LogLevel.debug:
+  //     logColor = '#1f78c1';
+  //     break;
+  //   case LogLevel.trace:
+  //     logColor = '#6ed0e0';
+  //     break;
+  // }
 
   return {
     logsRowMatchHighLight: css`
@@ -172,5 +173,61 @@ export const getLogRowStyles = (theme: GrafanaTheme2, logLevel?: LogLevel) => {
         background-color: ${hoverBgColor};
       }
     `,
+    noData: css`
+      > * {
+        margin-left: 0.5em;
+      }
+    `,
+    logOptions: css`
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      background-color: ${theme.colors.background.primary};
+      padding: ${theme.spacing(1, 2)};
+      border-radius: ${theme.shape.borderRadius()};
+      margin: ${theme.spacing(0, 0, 1)};
+      border: 1px solid ${theme.colors.border.medium};
+    `,
+    headerButton: css`
+      margin: ${theme.spacing(0.5, 0, 0, 1)};
+    `,
+    horizontalInlineLabel: css`
+      > label {
+        margin-right: 0;
+      }
+    `,
+    horizontalInlineSwitch: css`
+      padding: 0 ${theme.spacing(1)} 0 0;
+    `,
+    radioButtons: css`
+      margin: 0;
+    `,
+    logsSection: css`
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    `,
+    logRows: css`
+      overflow-x: ${wrapLogMessage ? 'unset' : 'scroll'};
+      overflow-y: visible;
+      width: 100%;
+    `,
+    topVerticalAlign: css`
+      label: topVerticalAlign;
+      margin-top: -${theme.spacing(0.9)};
+      margin-left: -${theme.spacing(0.25)};
+    `,
+    detailsOpen: css`
+      &:hover {
+        background-color: ${styleMixins.hoverColor(theme.colors.background.primary, theme)};
+      }
+    `,
+    errorLogRow: css`
+      label: erroredLogRow;
+      color: ${theme.colors.text.secondary};
+    `,
   };
-};
+});
+
+export type LogStyles = ReturnType<typeof getLogStyles>;
