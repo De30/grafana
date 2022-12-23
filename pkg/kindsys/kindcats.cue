@@ -47,8 +47,8 @@ _sharedKind: {
 	// In addition to lowercase normalization, dashes are transformed to underscores.
 	machineName: strings.ToLower(strings.Replace(name, "-", "_", -1))
 
-	// pluralName is the pluralized form of name.	Defaults to name + "s".
-	pluralName: =~"^([A-Z][a-zA-Z0-9-]{0,61}[a-zA-Z])$" | *(name + "s")
+	// pluralName is the pluralized form of name. Defaults to name + "s".
+	pluralName:                                   =~"^([A-Z][a-zA-Z0-9-]{0,61}[a-zA-Z])$" | *(name + "s")
 
 	// pluralMachineName is the pluralized form of [machineName]. The same case
 	// normalization and dash transformation is applied to [pluralName] as [machineName]
@@ -97,7 +97,7 @@ _sharedKind: {
 
 	// lineage is the Thema lineage containing all the schemas that have existed for this kind.
 	// It is required that lineage.name is the same as the [machineName].
-	lineage: thema.#Lineage & { name: S.machineName }
+	lineage: thema.#Lineage & {name: S.machineName}
 
 	currentVersion: thema.#SyntacticVersion & (thema.#LatestVersion & {lin: lineage}).out
 }
@@ -127,31 +127,3 @@ _sharedKind: {
 	lineageIsGroup: false
 }
 
-// Composable is a category of structured kind that provides schema elements for
-// composition into CoreStructured and CustomStructured kinds. Grafana plugins
-// provide composable kinds; for example, a datasource plugin provides one to
-// describe the structure of its queries, which is then composed into dashboards
-// and alerting rules.
-//
-// Each Composable is an implementation of exactly one Slot, a shared meta-schema
-// defined by Grafana itself that constrains the shape of schemas declared in
-// that ComposableKind.
-#Composable: S={
-	_sharedKind
-	form: "structured"
-
-	// TODO docs
-	// TODO unify this with the existing slots decls in pkg/framework/coremodel
-	slot: "Panel" | "Query" | "DSConfig"
-
-	// TODO unify this with the existing slots decls in pkg/framework/coremodel
-	lineageIsGroup: bool & [
-		if slot == "Panel" { true },
-		if slot == "DSConfig" { true },
-		if slot == "Query" { false },
-	][0]
-
-	// lineage is the Thema lineage containing all the schemas that have existed for this kind.
-	// It is required that lineage.name is the same as the [machineName].
-	lineage: thema.#Lineage & { name: S.machineName }
-}

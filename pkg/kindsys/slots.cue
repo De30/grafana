@@ -23,34 +23,42 @@ package kindsys
 // Conformance to meta-schema is achieved by Thema's native lineage joinSchema,
 // which Thema internals automatically enforce across all schemas in a lineage.
 
-// Meta-schema for the Panel slot, as implemented in Grafana panel plugins.
+// Meta-schema for the panel slot, as implemented in Grafana panel plugins.
 //
 // This is a grouped meta-schema, intended solely for use in composition. Object
 // literals conforming to it are not expected to exist.
-slots: Panel: {
-  // Defines plugin-specific options for a panel that should be persisted. Required,
-  // though a panel without any options may specify an empty struct.
-  //
-  // Currently mapped to #Panel.options within the dashboard schema.
-  PanelOptions: {...}
-  // Plugin-specific custom field properties. Optional.
-  //
-  // Currently mapped to #Panel.fieldConfig.defaults.custom within the dashboard schema.
-  PanelFieldConfig?: {...}
+slots: panel: {
+	// Defines plugin-specific options for a panel that should be persisted. Required,
+	// though a panel without any options may specify an empty struct.
+	//
+	// Currently mapped to #Panel.options within the dashboard schema.
+	PanelOptions: {...}
+	// Plugin-specific custom field properties. Optional.
+	//
+	// Currently mapped to #Panel.fieldConfig.defaults.custom within the dashboard schema.
+	PanelFieldConfig?: {...}
 }
 
-// Meta-schema for the Query slot, as implemented in Grafana datasource plugins.
-slots: Query: {...}
+// Meta-schema for the queries slot, as implemented in Grafana datasource plugins.
+// Sounds like we can turn this into a dynamic grouped lineage, where all we care
+// about is string keys, then something on the value like queryType
+slots: queries: {
+	// joinSchema is a template, requiring that if a queryType field exists, it must have
+	// the same string value as the declaring key
+	[QT=string]: {
+		queryType?: QT
+	}
+}
 
-// Meta-schema for the DSOptions slot, as implemented in Grafana datasource plugins.
+// Meta-schema for the dsoptions slot, as implemented in Grafana datasource plugins.
 //
 // This is a grouped meta-schema, intended solely for use in composition. Object
 // literals conforming to it are not expected to exist.
-slots: DSOptions: {
-  // Normal datasource configuration options.
-  Options: {...}
-  // Sensitive datasource configuration options that require encryption.
-  SecureOptions: {...}
+slots: dsoptions: {
+	// Normal datasource configuration options.
+	Options: {...}
+	// Sensitive datasource configuration options that require encryption.
+	SecureOptions: {...}
 }
 
 // pluginTypeMetaSchema defines which plugin types should use which metaschemas
@@ -60,12 +68,12 @@ pluginTypeMetaSchema: {
 	// Panel plugins are expected to provide a lineage at path Panel conforming to
 	// the Panel joinSchema.
 	panel: {
-		Panel: slots.Panel
+		panel: slots.panel
 	}
 	// Datasource plugins are expected to provide lineages at paths Query and
 	// DSOptions, conforming to those joinSchemas respectively.
 	datasource: {
-		Query: slots.Query
-		DSOptions: slots.DSOptions
+		queries:     slots.queries
+		dsoptions: slots.dsoptions
 	}
 }
