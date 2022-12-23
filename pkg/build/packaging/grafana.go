@@ -434,7 +434,7 @@ func copyPubDir(grafanaDir, tmpDir string) error {
 	srcPubDir := filepath.Join(grafanaDir, "public")
 	tgtPubDir := filepath.Join(tmpDir, "public")
 	log.Printf("Copying %q to %q...", srcPubDir, tgtPubDir)
-	if err := fs.CopyRecursive(srcPubDir, tgtPubDir); err != nil {
+	if err := fs.CopyRecursive(srcPubDir, tgtPubDir, regexp.MustCompile("[.](tsx?|scss|snap|md|go)$")); err != nil {
 		return fmt.Errorf("failed to copy %q to %q: %w", srcPubDir, tgtPubDir, err)
 	}
 

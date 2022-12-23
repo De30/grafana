@@ -27,7 +27,7 @@ COPY emails emails
 
 ENV NODE_ENV production
 RUN yarn build && \
-    find public -type f -regex '.*[.]\(tsx*\|scss\)' -delete
+    find public -type f -regex '.*[.]\(tsx*\|scss\|snap\|md\|go\)' -delete
 
 FROM ${GO_IMAGE} as go-builder
 

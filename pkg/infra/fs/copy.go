@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 // CopyFile copies a file from src to dst.
@@ -111,7 +112,7 @@ func copyPermissions(src, dst string) error {
 }
 
 // CopyRecursive copies files and directories recursively.
-func CopyRecursive(src, dst string) error {
+func CopyRecursive(src, dst string, excludeRegexes ...*regexp.Regexp) error {
 	sfi, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -120,31 +121,62 @@ func CopyRecursive(src, dst string) error {
 		return CopyFile(src, dst)
 	}
 
-	if _, err := os.Stat(dst); os.IsNotExist(err) {
-		if err := os.MkdirAll(dst, sfi.Mode()); err != nil {
-			return fmt.Errorf("failed to create directory %q: %s", dst, err)
-		}
-	}
-
 	entries, err := os.ReadDir(src)
 	if err != nil {
 		return err
 	}
+
+ENTRIES:
 	for _, entry := range entries {
 		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
+		for _, excludeRegex := range excludeRegexes {
+			if excludeRegex.MatchString(srcPath) {
+				continue ENTRIES
+			}
+		}
 
-		srcFi, err := os.Stat(srcPath)
+		srcFi, err := entry.Info()
 		if err != nil {
 			return err
 		}
 
-		switch srcFi.Mode() & os.ModeType {
+		dstPath := filepath.Join(dst, entry.Name())
+
+		switch entry.Type() {
+		case os.ModeNamedPipe:
+			break
+		case os.ModeSocket:
+			break
+		case os.ModeDevice:
+			break
+		case os.ModeCharDevice:
+			break
+		case os.ModeIrregular:
+			break
 		case os.ModeDir:
-			if err := CopyRecursive(srcPath, dstPath); err != nil {
+			if err := CopyRecursive(srcPath, dstPath, excludeRegexes...); err != nil {
 				return err
 			}
+
+			// if directory was created, chmod it
+			if _, err := os.Stat(dstPath); os.IsNotExist(err) {
+				// directory wasn't created, no files found
+			} else if err != nil {
+				return err
+			} else {
+				if err := os.Chmod(dstPath, srcFi.Mode()); err != nil {
+					return err
+				}
+			}
 		case os.ModeSymlink:
+			fmt.Printf("copying symlink %s\n", srcPath)
+
+			if _, err := os.Stat(dst); os.IsNotExist(err) {
+				if err := os.MkdirAll(dst, sfi.Mode()); err != nil {
+					return fmt.Errorf("failed to create directory %q: %s", dst, err)
+				}
+			}
+
 			link, err := os.Readlink(srcPath)
 			if err != nil {
 				return err
@@ -152,16 +184,23 @@ func CopyRecursive(src, dst string) error {
 			if err := os.Symlink(link, dstPath); err != nil {
 				return err
 			}
-		default:
-			if err := CopyFile(srcPath, dstPath); err != nil {
-				return err
-			}
-		}
-
-		if srcFi.Mode()&os.ModeSymlink != 0 {
 			if err := os.Chmod(dstPath, srcFi.Mode()); err != nil {
 				return err
 			}
+		case 0: // regular File
+			fmt.Printf("copying file %s\n", srcPath)
+
+			if _, err := os.Stat(dst); os.IsNotExist(err) {
+				if err := os.MkdirAll(dst, sfi.Mode()); err != nil {
+					return fmt.Errorf("failed to create directory %q: %s", dst, err)
+				}
+			}
+
+			if err := CopyFile(srcPath, dstPath); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unknown file type for path %s: %s", srcPath, entry.Type())
 		}
 	}
 
