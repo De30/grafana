@@ -38,11 +38,14 @@ func (s *Service) Get(ctx context.Context, query *dashver.GetDashboardVersionQue
 	version.Data.Set("id", version.DashboardID)
 
 	// Populate the DashboardUID
-	uid, err := s.getDashUIDMaybeEmpty(ctx, version.DashboardID)
-	if err != nil {
-		return nil, err
+	if query.DashboardUID == "" {
+		uid, err := s.getDashUIDMaybeEmpty(ctx, version.DashboardID)
+		if err != nil {
+			return nil, err
+		}
+		return version.ToDTO(uid), nil
 	}
-	return version.ToDTO(uid), nil
+	return version.ToDTO(query.DashboardUID), nil
 }
 
 func (s *Service) DeleteExpired(ctx context.Context, cmd *dashver.DeleteExpiredVersionsCommand) error {
