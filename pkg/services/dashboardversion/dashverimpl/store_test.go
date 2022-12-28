@@ -35,8 +35,8 @@ func testIntegrationGetDashboardVersion(t *testing.T, fn getStore) {
 
 		res, err := dashVerStore.Get(context.Background(), &query)
 		require.Nil(t, err)
-		assert.Equal(t, query.DashboardID, savedDash.Id)
-		assert.Equal(t, query.Version, savedDash.Version)
+		assert.Equal(t, savedDash.Id, res.ID)
+		assert.Equal(t, savedDash.Version, res.Version)
 		assert.Equal(t, createdById, res.CreatedBy)
 
 		dashCmd := &models.Dashboard{
