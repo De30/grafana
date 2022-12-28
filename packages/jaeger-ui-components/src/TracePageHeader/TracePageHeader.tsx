@@ -16,17 +16,32 @@ import { css } from '@emotion/css';
 import cx from 'classnames';
 import { get as _get, maxBy as _maxBy, values as _values } from 'lodash';
 import * as React from 'react';
+import { useState } from 'react';
 import MdKeyboardArrowRight from 'react-icons/lib/md/keyboard-arrow-right';
 
 import { dateTimeFormat, GrafanaTheme2, TimeZone } from '@grafana/data';
-import { useStyles2 } from '@grafana/ui';
+import {
+  Badge,
+  Button,
+  Collapse,
+  HorizontalGroup,
+  Icon,
+  InlineField,
+  InlineFieldRow,
+  Input,
+  QueryField,
+  RadioButtonGroup,
+  Select,
+  useStyles2,
+  VerticalGroup,
+} from '@grafana/ui';
 
 import { autoColor, TUpdateViewRangeTimeFunction, ViewRange, ViewRangeTimeUpdate } from '..';
+import { SelectedView } from '../../../../public/app/plugins/panel/flamegraph/components/types';
 import ExternalLinks from '../common/ExternalLinks';
-import LabeledList from '../common/LabeledList';
 import TraceName from '../common/TraceName';
 import { getTraceLinks } from '../model/link-patterns';
-import { getTraceName } from '../model/trace-viewer';
+import { getCandidateSpan, getTraceName } from '../model/trace-viewer';
 import { Trace } from '../types/trace';
 import { uTxMuted } from '../uberUtilityStyles';
 import { formatDuration } from '../utils/date';
@@ -52,6 +67,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       label: TracePageHeaderTitleRow;
       align-items: center;
       display: flex;
+      width: 100%;
+      margin-bottom: 1rem;
     `,
     TracePageHeaderBack: css`
       label: TracePageHeaderBack;
@@ -104,7 +121,6 @@ const getStyles = (theme: GrafanaTheme2) => {
       font-size: 1.7em;
       line-height: 1em;
       margin: 0 0 0 0.5em;
-      padding-bottom: 0.5em;
     `,
     TracePageHeaderTitleCollapsible: css`
       label: TracePageHeaderTitleCollapsible;
@@ -112,7 +128,6 @@ const getStyles = (theme: GrafanaTheme2) => {
     `,
     TracePageHeaderOverviewItems: css`
       label: TracePageHeaderOverviewItems;
-      border-bottom: 1px solid #e4e4e4;
       padding: 0.25rem 0.5rem !important;
     `,
     TracePageHeaderOverviewItemValueDetail: cx(
@@ -136,6 +151,14 @@ const getStyles = (theme: GrafanaTheme2) => {
     TracePageHeaderTraceId: css`
       label: TracePageHeaderTraceId;
       white-space: nowrap;
+    `,
+    TempHttpUrl: css`
+      label: TempHttpUrl;
+      white-space: nowrap;
+      color: #aaa;
+      background: ${autoColor(theme, '#ddd')};
+      padding: 1px 8px;
+      font-size: 12px;
     `,
   };
 };
@@ -198,7 +221,6 @@ export default function TracePageHeader(props: TracePageHeaderEmbedProps) {
   const {
     canCollapse,
     hideMap,
-    hideSummary,
     onSlimViewClicked,
     slimView,
     trace,
@@ -215,59 +237,171 @@ export default function TracePageHeader(props: TracePageHeaderEmbedProps) {
     }
     return getTraceLinks(trace);
   }, [trace]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   if (!trace) {
     return null;
   }
 
-  const summaryItems =
-    !hideSummary &&
-    !slimView &&
-    HEADER_ITEMS.map((item) => {
-      const { renderer, ...rest } = item;
-      return { ...rest, value: renderer(trace, timeZone, styles) };
-    });
+  const dateStr = dateTimeFormat(trace.startTime / 1000, { timeZone, defaultWithMS: true });
+  const match = dateStr.match(/^(.+)(:\d\d\.\d+)$/);
+  const formattedDate = match ? (
+    <span className={styles.TracePageHeaderOverviewItemValue}>
+      {match[1]}
+      <span className={styles.TracePageHeaderOverviewItemValueDetail}>{match[2]}</span>
+    </span>
+  ) : (
+    dateStr
+  );
+
+  const candidateSpan = getCandidateSpan(trace.spans);
 
   const title = (
-    <h1 className={cx(styles.TracePageHeaderTitle, canCollapse && styles.TracePageHeaderTitleCollapsible)}>
-      <TraceName traceName={getTraceName(trace.spans)} />{' '}
-      <small className={cx(styles.TracePageHeaderTraceId, uTxMuted)}>{trace.traceID}</small>
-    </h1>
+    <VerticalGroup spacing={'xs'}>
+      <HorizontalGroup justify={'space-between'}>
+        <h1 className={cx(styles.TracePageHeaderTitle, canCollapse && styles.TracePageHeaderTitleCollapsible)}>
+          <HorizontalGroup spacing={'sm'} align={'center'}>
+            <Icon name={'globe'} />
+            <TraceName traceName={getTraceName(trace.spans)} />
+            <small>|</small>
+            <small className={cx(styles.TracePageHeaderTraceId, uTxMuted)}>{formatDuration(trace.duration)}</small>
+          </HorizontalGroup>
+        </h1>
+        <Button icon={'link'} size={'sm'} fill={'outline'}>
+          Logs
+        </Button>
+      </HorizontalGroup>
+
+      <HorizontalGroup>
+        <small
+          className={cx(
+            css`
+              margin: 0 0 0 0.5em;
+            `
+          )}
+        >
+          {formattedDate}
+        </small>
+        <small>|</small>
+        <div
+          className={cx(
+            css`
+              display: inline-flex;
+
+              * {
+                border: none;
+              }
+            `
+          )}
+        >
+          <Badge text={candidateSpan?.tags.find((t) => t.key === 'http.method')?.value} color={'blue'} />
+          <div className={cx(styles.TempHttpUrl)}>
+            {candidateSpan?.tags.find((t) => t.key === 'http.url')?.value ||
+              candidateSpan?.tags.find((t) => t.key === 'http.target')?.value}
+          </div>
+          {candidateSpan?.tags.find((t) => t.key === 'http.status_code')?.value && (
+            <Badge text={candidateSpan?.tags.find((t) => t.key === 'http.status_code')?.value} color={'red'} />
+          )}
+        </div>
+      </HorizontalGroup>
+    </VerticalGroup>
   );
+
+  let viewOptions: Array<{ value: SelectedView; label: string; description: string }> = [
+    { value: SelectedView.TopTable, label: 'Minimap', description: 'Show the minimap' },
+    { value: SelectedView.FlameGraph, label: 'Flame Graph', description: 'Show the flame graph' },
+  ];
 
   return (
     <header className={styles.TracePageHeader}>
-      <div className={styles.TracePageHeaderTitleRow}>
-        {links && links.length > 0 && <ExternalLinks links={links} className={styles.TracePageHeaderBack} />}
-        {canCollapse ? (
-          <button
-            type="button"
-            className={styles.TracePageHeaderTitleLink}
-            onClick={onSlimViewClicked}
-            role="switch"
-            aria-checked={!slimView}
+      <VerticalGroup spacing={'xs'}>
+        <div className={styles.TracePageHeaderTitleRow}>
+          {links && links.length > 0 && <ExternalLinks links={links} className={styles.TracePageHeaderBack} />}
+          {canCollapse ? (
+            <button
+              type="button"
+              className={styles.TracePageHeaderTitleLink}
+              onClick={onSlimViewClicked}
+              role="switch"
+              aria-checked={!slimView}
+            >
+              <MdKeyboardArrowRight
+                className={cx(
+                  styles.TracePageHeaderDetailToggle,
+                  !slimView && styles.TracePageHeaderDetailToggleExpanded
+                )}
+              />
+              {title}
+            </button>
+          ) : (
+            title
+          )}
+        </div>
+        <Collapse label={'Span Filters'} collapsible isOpen={filtersOpen} onToggle={setFiltersOpen}>
+          <InlineFieldRow>
+            <InlineField label="Span Name" labelWidth={14} grow>
+              <Select
+                inputId="spanName"
+                options={[]}
+                placeholder="Select a span"
+                isClearable
+                aria-label={'select-span-name'}
+                allowCustomValue={true}
+                onChange={() => {}}
+              />
+            </InlineField>
+            <InlineField label="Tags" labelWidth={14} grow tooltip="Values should be in logfmt.">
+              <QueryField placeholder="http.status_code=200 error=true" portalOrigin="tempo" />
+            </InlineField>
+          </InlineFieldRow>
+          <InlineFieldRow>
+            <InlineField label="Min Duration" labelWidth={14} grow>
+              <Input id="minDuration" value={''} placeholder={'e.g. 1.2s, 100ms'} />
+            </InlineField>
+            <InlineField label="Max Duration" labelWidth={14} grow>
+              <Input id="maxDuration" value={''} placeholder={'e.g. 1.2s, 100ms'} />
+            </InlineField>
+          </InlineFieldRow>
+          <HorizontalGroup justify={'space-between'} align={'flex-start'}>
+            <Button size={'sm'} variant={'secondary'} fill={'outline'}>
+              Critical Path
+            </Button>
+            <HorizontalGroup justify={'flex-end'}>
+              <Button size={'sm'} variant={'secondary'} fill={'outline'}>
+                Reset
+              </Button>
+            </HorizontalGroup>
+          </HorizontalGroup>
+        </Collapse>
+        <HorizontalGroup justify={'space-between'}>
+          <div
+            className={cx(
+              css`
+                color: #aaa;
+              `
+            )}
           >
-            <MdKeyboardArrowRight
-              className={cx(
-                styles.TracePageHeaderDetailToggle,
-                !slimView && styles.TracePageHeaderDetailToggleExpanded
-              )}
+            Displaying 19/34 spans
+          </div>
+          <RadioButtonGroup<SelectedView> options={viewOptions} value={SelectedView.TopTable} onChange={() => {}} />
+        </HorizontalGroup>
+        {!hideMap && !slimView && (
+          <div
+            className={cx(
+              css`
+                width: 100%;
+              `
+            )}
+          >
+            <SpanGraph
+              trace={trace}
+              viewRange={viewRange}
+              updateNextViewRangeTime={updateNextViewRangeTime}
+              updateViewRangeTime={updateViewRangeTime}
             />
-            {title}
-          </button>
-        ) : (
-          title
+          </div>
         )}
-      </div>
-      {summaryItems && <LabeledList className={styles.TracePageHeaderOverviewItems} items={summaryItems} />}
-      {!hideMap && !slimView && (
-        <SpanGraph
-          trace={trace}
-          viewRange={viewRange}
-          updateNextViewRangeTime={updateNextViewRangeTime}
-          updateViewRangeTime={updateViewRangeTime}
-        />
-      )}
+      </VerticalGroup>
     </header>
   );
 }
