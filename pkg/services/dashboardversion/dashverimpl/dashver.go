@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/grafana/grafana/pkg/infra/db"
+	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/dashboards"
 	dashver "github.com/grafana/grafana/pkg/services/dashboardversion"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -14,15 +16,17 @@ const (
 )
 
 type Service struct {
-	store store
+	store   store
+	dashSvc dashboards.DashboardService
 }
 
-func ProvideService(db db.DB) dashver.Service {
+func ProvideService(db db.DB, dashboardService dashboards.DashboardService) dashver.Service {
 	return &Service{
 		store: &sqlStore{
 			db:      db,
 			dialect: db.GetDialect(),
 		},
+		dashSvc: dashboardService,
 	}
 }
 
@@ -33,8 +37,12 @@ func (s *Service) Get(ctx context.Context, query *dashver.GetDashboardVersionQue
 	}
 	version.Data.Set("id", version.DashboardID)
 
-	// FIXME: the next PR will add the dashboardService so we can grab the DashboardUID
-	return version.ToDTO(""), nil
+	// Populate the DashboardUID
+	uid, err := s.getDashUIDMaybeEmpty(ctx, version.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	return version.ToDTO(uid), nil
 }
 
 func (s *Service) DeleteExpired(ctx context.Context, cmd *dashver.DeleteExpiredVersionsCommand) error {
@@ -69,6 +77,26 @@ func (s *Service) DeleteExpired(ctx context.Context, cmd *dashver.DeleteExpiredV
 
 // List all dashboard versions for the given dashboard ID.
 func (s *Service) List(ctx context.Context, query *dashver.ListDashboardVersionsQuery) ([]*dashver.DashboardVersionDTO, error) {
+	// Get the DashboardUID if not populated
+	var uid = query.DashboardUID
+	if uid == "" {
+		u, err := s.getDashUIDMaybeEmpty(ctx, query.DashboardID)
+		if err != nil {
+			return nil, err
+		}
+		uid = u
+	}
+
+	// The store methods require the dashboard ID (uid is not in the dashboard
+	// versions table, at time of this writing), so get the DashboardID if it
+	// was not populated.
+	if query.DashboardID == 0 {
+		id, err := s.getDashIDMaybeEmpty(ctx, uid)
+		if err != nil {
+			return nil, err
+		}
+		query.DashboardID = id
+	}
 	if query.Limit == 0 {
 		query.Limit = 1000
 	}
@@ -78,8 +106,38 @@ func (s *Service) List(ctx context.Context, query *dashver.ListDashboardVersions
 	}
 	dtos := make([]*dashver.DashboardVersionDTO, len(dvs))
 	for i, v := range dvs {
-		// FIXME: the next PR will add the dashboardService so we can grab the DashboardUID
-		dtos[i] = v.ToDTO("")
+		dtos[i] = v.ToDTO(uid)
 	}
 	return dtos, nil
+}
+
+// getDashUIDMaybeEmpty is a helper function which takes a dashboardID and
+// returns the UID. If the dashboard is not found, it will return an empty
+// string.
+func (s *Service) getDashUIDMaybeEmpty(ctx context.Context, id int64) (string, error) {
+	q := models.GetDashboardRefByIdQuery{Id: id}
+	err := s.dashSvc.GetDashboardUIDById(ctx, &q)
+	if err != nil {
+		if err == dashboards.ErrDashboardNotFound {
+			return "", nil
+		} else {
+			return "", err
+		}
+	}
+	return q.Result.Uid, nil
+}
+
+// getDashIDMaybeEmpty is a helper function which takes a dashboardUID and
+// returns the ID. If the dashboard is not found, it will return -1.
+func (s *Service) getDashIDMaybeEmpty(ctx context.Context, uid string) (int64, error) {
+	q := models.GetDashboardQuery{Uid: uid}
+	err := s.dashSvc.GetDashboard(ctx, &q)
+	if err != nil {
+		if err == dashboards.ErrDashboardNotFound {
+			return -1, nil
+		} else {
+			return -1, err
+		}
+	}
+	return q.Result.Id, nil
 }
