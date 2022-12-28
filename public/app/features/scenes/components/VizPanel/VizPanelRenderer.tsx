@@ -2,26 +2,37 @@ import React, { RefCallback } from 'react';
 import { useMeasure } from 'react-use';
 
 import { PluginContextProvider } from '@grafana/data';
-import { PanelChrome, ErrorBoundaryAlert } from '@grafana/ui';
+import { LoadingState } from '@grafana/schema';
+import { PanelChrome, ErrorBoundaryAlert, PanelPadding } from '@grafana/ui';
 import { appEvents } from 'app/core/core';
+import { PanelHeaderState } from 'app/features/dashboard/dashgrid/PanelHeader/PanelHeaderState';
 import { useFieldOverrides } from 'app/features/panel/components/PanelRenderer';
 
 import { sceneGraph } from '../../core/sceneGraph';
 import { SceneComponentProps } from '../../core/types';
 import { SceneQueryRunner } from '../../querying/SceneQueryRunner';
-import { SceneDragHandle } from '../SceneDragHandle';
+// import { SceneDragHandle } from '../SceneDragHandle';
 
 import { VizPanel } from './VizPanel';
 
 export function VizPanelRenderer({ model }: SceneComponentProps<VizPanel>) {
-  const { title, options, fieldConfig, pluginId, pluginLoadError, $data, ...state } = model.useState();
+  const { title, options, fieldConfig, pluginId, pluginLoadError, $data } = model.useState();
   const [ref, { width, height }] = useMeasure();
   const plugin = model.getPlugin();
   const { data } = sceneGraph.getData(model).useState();
-  const layout = sceneGraph.getLayout(model);
+  // const layout = sceneGraph.getLayout(model);
+  const padding: PanelPadding = plugin?.noPadding ? 'none' : 'md';
+  const dataState = (
+    <PanelHeaderState
+      panelId={data?.request?.panelId!}
+      errorMessage={data?.error?.message}
+      dataState={data?.state || LoadingState.NotStarted}
+      key="state"
+    />
+  );
 
-  const isDraggable = layout.state.isDraggable ? state.isDraggable : false;
-  const dragHandle = <SceneDragHandle layoutKey={layout.state.key!} />;
+  // const isDraggable = layout.state.isDraggable ? state.isDraggable : false;
+  // const dragHandle = <SceneDragHandle layoutKey={layout.state.key!} />;
 
   const titleInterpolated = sceneGraph.interpolate(model, title);
 
@@ -37,7 +48,6 @@ export function VizPanelRenderer({ model }: SceneComponentProps<VizPanel>) {
   if (!plugin || !plugin.hasPluginId(pluginId)) {
     return <div>Loading plugin panel...</div>;
   }
-
   if (!plugin.panel) {
     return <div>Panel plugin has no panel component</div>;
   }
@@ -55,7 +65,9 @@ export function VizPanelRenderer({ model }: SceneComponentProps<VizPanel>) {
         title={titleInterpolated}
         width={width}
         height={height}
-        leftItems={isDraggable ? [dragHandle] : undefined}
+        loadingState={data?.state}
+        dataStateNode={dataState}
+        padding={padding}
       >
         {(innerWidth, innerHeight) => (
           <>
