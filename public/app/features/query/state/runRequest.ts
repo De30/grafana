@@ -192,6 +192,14 @@ export function callQueryMethod(
     }
   }
 
+  // handle adding in datasource specific variables if not mixed. Mixed datasources handle them when it loops through queries
+  let reqScopedVars = request.scopedVars;
+  if (!datasource.meta.mixed && request.datasourceScopedVars && request.datasourceScopedVars[datasource.uid]) {
+    reqScopedVars = { ...request.scopedVars, ...request.datasourceScopedVars[datasource.uid] };
+  }
+
+  request = { ...request, scopedVars: reqScopedVars };
+
   // Otherwise it is a standard datasource request
   const returnVal = queryFunction ? queryFunction(request) : datasource.query(request);
   return from(returnVal);

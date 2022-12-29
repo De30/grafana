@@ -482,6 +482,7 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   maxDataPoints?: number;
   range: TimeRange;
   scopedVars: ScopedVars;
+  datasourceScopedVars?: Record<string, ScopedVars>;
   targets: TQuery[];
   timezone: string;
   app: CoreApp | string;

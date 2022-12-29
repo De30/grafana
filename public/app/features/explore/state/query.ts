@@ -2,7 +2,7 @@ import { AnyAction, createAction, PayloadAction } from '@reduxjs/toolkit';
 import deepEqual from 'fast-deep-equal';
 import { flatten, groupBy } from 'lodash';
 import { identity, Observable, of, SubscriptionLike, Unsubscribable, combineLatest } from 'rxjs';
-import { mergeMap, throttleTime } from 'rxjs/operators';
+import { mergeMap, take, throttleTime } from 'rxjs/operators';
 
 import {
   AbsoluteTimeRange,
@@ -496,7 +496,24 @@ export const runQueries = (
       };
 
       const timeZone = getTimeZone(getState().user);
-      const transaction = buildQueryTransaction(exploreId, queries, queryOptions, range, scanning, timeZone);
+      /* const corSub = correlations$.subscribe(correlations => {
+        console.log('wat', correlations);
+      }); */
+
+      //corSub.unsubscribe();
+      let correlations;
+      const correlationsSub = correlations$.pipe(take(1)).subscribe((value) => (correlations = value));
+      correlationsSub.unsubscribe();
+
+      const transaction = buildQueryTransaction(
+        exploreId,
+        queries,
+        queryOptions,
+        range,
+        scanning,
+        timeZone,
+        correlations
+      );
 
       dispatch(changeLoadingStateAction({ exploreId, loadingState: LoadingState.Loading }));
 

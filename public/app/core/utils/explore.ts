@@ -1,4 +1,4 @@
-import { flatten, omit, uniq } from 'lodash';
+import { flatten, omit, uniq, groupBy } from 'lodash';
 import { Unsubscribable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,6 +19,8 @@ import {
   LogsSortOrder,
   rangeUtil,
   RawTimeRange,
+  ScopedVar,
+  ScopedVars,
   TimeFragment,
   TimeRange,
   TimeZone,
@@ -28,6 +30,7 @@ import {
 import { DataSourceSrv, getDataSourceSrv } from '@grafana/runtime';
 import { RefreshPicker } from '@grafana/ui';
 import store from 'app/core/store';
+import { CorrelationData } from 'app/features/correlations/useCorrelations';
 import { TimeSrv } from 'app/features/dashboard/services/TimeSrv';
 import { PanelModel } from 'app/features/dashboard/state';
 import { ExploreId, QueryOptions, QueryTransaction } from 'app/types/explore';
@@ -120,7 +123,8 @@ export function buildQueryTransaction(
   queryOptions: QueryOptions,
   range: TimeRange,
   scanning: boolean,
-  timeZone?: TimeZone
+  timeZone?: TimeZone,
+  correlations?: CorrelationData[]
 ): QueryTransaction {
   const key = queries.reduce((combinedKey, query) => {
     combinedKey += query.key;
@@ -134,6 +138,22 @@ export function buildQueryTransaction(
   // However, some datasources don't use `panelId + query.refId`, but only `panelId`.
   // Therefore panel id has to be unique.
   const panelId = `${key}`;
+
+  const queryDSUids = queries.map((query) => query.datasource?.uid);
+  const dsCorrelationsOrig = groupBy(correlations, (correlation) => correlation.target.uid);
+  let datasourceScopedVars: Record<string, ScopedVars> = {};
+  Object.keys(dsCorrelationsOrig).forEach((key) => {
+    if (queryDSUids.includes(key)) {
+      let outObj: Record<string, ScopedVar> = {};
+      dsCorrelationsOrig[key].forEach((correlation) => {
+        outObj[correlation.config.field] = {
+          text: `__data.fields.${correlation.config.field}`,
+          value: `__data.fields.${correlation.config.field}`,
+        };
+      });
+      datasourceScopedVars[key] = outObj;
+    }
+  });
 
   const request: DataQueryRequest = {
     app: CoreApp.Explore,
@@ -154,6 +174,7 @@ export function buildQueryTransaction(
       __interval: { text: interval, value: interval },
       __interval_ms: { text: intervalMs, value: intervalMs },
     },
+    datasourceScopedVars,
     maxDataPoints: queryOptions.maxDataPoints,
     liveStreaming: queryOptions.liveStreaming,
   };

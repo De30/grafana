@@ -41,8 +41,15 @@ export class MixedDatasource extends DataSourceApi<DataQuery> {
     for (const key in sets) {
       const targets = sets[key];
 
+      let totalScopedVars = request.scopedVars;
+      const datasourceVars = request.datasourceScopedVars ? request.datasourceScopedVars[key] : undefined;
+
+      if (datasourceVars && Object.keys(datasourceVars).length > 0) {
+        totalScopedVars = { ...request.scopedVars, ...datasourceVars };
+      }
+
       mixed.push({
-        datasource: getDataSourceSrv().get(targets[0].datasource, request.scopedVars),
+        datasource: getDataSourceSrv().get(targets[0].datasource, totalScopedVars),
         targets,
       });
     }
