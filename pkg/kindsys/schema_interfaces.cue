@@ -66,6 +66,16 @@ package kindsys
 	// and producers (composable kind lineages).
 	interface: {...}
 
+	// pluginTypes is a list of plugin types that are expected to produce composable
+	// kinds following this interface.
+	//
+	// Note that Grafana's plugin architecture intentionally does not enforce this.
+	// The worst that a violation (impl expected and absent, or impl present and not expected)
+	// will currently produce is a warning.
+	//
+	// TODO this relies on information in pkg/plugins/plugindef, awkward having it here
+	pluginTypes: [...string]
+
 	// Whether lineages implementing this are considered "grouped" or not. Generally
 	// this refers to whether an e.g. JSON object is ever expected to exist that
 	// corresponds to the whole schema, or to top-level fields within the schema.
@@ -79,7 +89,7 @@ package kindsys
 }
 
 // The canonical list of all Grafana schema interfaces.
-schemaInterfaces: [string]: #SchemaInterface
+schemaInterfaces: [N=string]: #SchemaInterface & { name: N }
 schemaInterfaces: {
 	panelcfg: {
 		interface: {
@@ -95,15 +105,21 @@ schemaInterfaces: {
 			PanelFieldConfig?: {...}
 		}
 
+		pluginTypes: ["panel"]
+
 		// grouped b/c separate non-cross-referring elements always occur together in larger structure (panel)
 		group: true
 	}
 	queries: {
-		// joinSchema is a struct template enforcing that if a queryType field exists,
-		// it must have the same string value as the declaring key
+		// The contract for the queries schema interface is itself a pattern:
+		// Each of its top-level fields must be represent a distinct query type for
+		// the datasource plugin. The queryType field acts as a discriminator, and
+		// is constrained to be the same as the name of the top-level field declaring it.
 		interface: [QT=string]: {
 			queryType?: QT
 		}
+
+		pluginTypes: ["datasource"]
 
 		// grouped b/c separate, non-cross-referring elements are actually themselves each impls of the concept
 		// and it avoids us having to put more levels in the slot system (uggghhh)
@@ -116,6 +132,8 @@ schemaInterfaces: {
 			// Sensitive datasource configuration options that require encryption.
 			SecureOptions: {...}
 		}
+
+		pluginTypes: ["datasource"]
 
 		// group b/c separate, non-cross-referring elements have diff runtime representation due to encryption
 		group: true
