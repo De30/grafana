@@ -11,7 +11,6 @@ import (
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/parser"
 	"github.com/grafana/grafana"
-	"github.com/grafana/grafana/pkg/kindsys"
 	"github.com/grafana/grafana/pkg/plugins/plugindef"
 	"github.com/grafana/thema"
 	"github.com/grafana/thema/load"
@@ -43,7 +42,7 @@ var allowedImportsStr string
 
 type slotandname struct {
 	name string
-	slot *kindsys.Slot
+	slot *SchemaInterface
 }
 
 var allslots []slotandname
@@ -55,7 +54,7 @@ func init() {
 	}
 	allowedImportsStr = strings.Join(all, "\n")
 
-	for n, s := range kindsys.AllSlots(nil) {
+	for n, s := range SchemaInterfaces(nil) {
 		allslots = append(allslots, slotandname{
 			name: n,
 			slot: s,
@@ -93,7 +92,7 @@ func (t *Tree) SubPlugins() map[string]PluginInfo {
 type TreeList []*Tree
 
 // LineagesForSlot returns the set of plugin-defined lineages that implement a
-// particular named Grafana slot (See ["github.com/grafana/grafana/pkg/framework/coremodel".Slot]).
+// particular named Grafana slot (See ["github.com/grafana/grafana/pkg/framework/coremodel".SchemaInterface]).
 func (tl TreeList) LineagesForSlot(slotname string) map[string]thema.Lineage {
 	m := make(map[string]thema.Lineage)
 	for _, tree := range tl {
@@ -207,7 +206,7 @@ func ParsePluginFS(f fs.FS, rt *thema.Runtime) (*Tree, error) {
 		for _, im := range pf.Imports {
 			ip := strings.Trim(im.Path.Value, "\"")
 			if !importAllowed(ip) {
-				return nil, ewrap(errors.Newf(im.Pos(), "import %q in models.cue not allowed, plugins may only import from:\n%s\n", ip, allowedImportsStr), ErrDisallowedCUEImport)
+				return nil, ewrap(errors.Newf(im.Pos(), "import %q in grafanaplugin cue package not allowed, plugins may only import from:\n%s\n", ip, allowedImportsStr), ErrDisallowedCUEImport)
 			}
 			r.imports = append(r.imports, im)
 		}
@@ -231,31 +230,23 @@ func ParsePluginFS(f fs.FS, rt *thema.Runtime) (*Tree, error) {
 	return tree, nil
 }
 
-func bindSlotLineage(v cue.Value, s *kindsys.Slot, meta plugindef.PluginDef, rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
-	accept, required := s.ForPluginType(string(meta.Type))
+func bindSlotLineage(v cue.Value, s *SchemaInterface, meta plugindef.PluginDef, rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
+	should := s.Should(meta.Type)
 	exists := v.Exists()
 
-	if !accept {
-		if exists {
-			// If it's not accepted for the type, but is declared, error out. This keeps a
-			// precise boundary on what's actually expected for plugins to do, which makes
-			// for clearer docs and guarantees for users.
-			return nil, ewrap(fmt.Errorf("%s: %s plugins may not provide a %s slot implementation in models.cue", meta.Id, meta.Type, s.Name()), ErrImplementedSlots)
+	if !exists {
+		if should {
+			return nil, ewrap(fmt.Errorf("%s: %s plugins should provide a %s composable kind in grafanaplugin cue package", meta.Id, meta.Type, s.Name()), ErrExpectedComposable)
 		}
 		return nil, nil
 	}
 
-	if !exists && required {
-		return nil, ewrap(fmt.Errorf("%s: %s plugins must provide a %s slot implementation in models.cue", meta.Id, meta.Type, s.Name()), ErrImplementedSlots)
-	}
-
-	// TODO make this opt real in thema, then uncomment to enforce joinSchema
-	// lin, err := thema.BindLineage(iv, rt, thema.SatisfiesJoinSchema(s.MetaSchema()))
 	lin, err := thema.BindLineage(v, rt, opts...)
 	if err != nil {
-		return nil, ewrap(fmt.Errorf("%s: invalid thema lineage for slot %s: %w", meta.Id, s.Name(), err), ErrInvalidLineage)
+		return nil, ewrap(fmt.Errorf("%s: invalid thema lineage for %s composable kind: %w", meta.Id, s.Name(), err), ErrInvalidLineage)
 	}
 
+	// TODO reconsider all this in the context of #GrafanaPlugin and new thema decl structure/name constraints
 	sanid := sanitizePluginId(meta.Id)
 	if lin.Name() != sanid {
 		errf := func(format string, args ...interface{}) error {
@@ -268,10 +259,14 @@ func bindSlotLineage(v cue.Value, s *kindsys.Slot, meta plugindef.PluginDef, rt 
 			return ewrap(errin, ErrLineageNameMismatch)
 		}
 		if sanid != meta.Id {
-			return nil, errf("%s: %q slot lineage name must be the sanitized plugin id (%q), got %q", meta.Id, s.Name(), sanid, lin.Name())
+			return nil, errf("%s: %q composable kind lineage name must be the sanitized plugin id (%q), got %q", meta.Id, s.Name(), sanid, lin.Name())
 		} else {
-			return nil, errf("%s: %q slot lineage name must be the plugin id, got %q", meta.Id, s.Name(), lin.Name())
+			return nil, errf("%s: %q composable kind lineage name must be the plugin id, got %q", meta.Id, s.Name(), lin.Name())
 		}
+	}
+
+	if !should {
+		return lin, ewrap(fmt.Errorf("%s: %s plugins should not provide a %s composable kind in grafanaplugin cue package", meta.Id, meta.Type, s.Name()), ErrComposableNotExpected)
 	}
 	return lin, nil
 }

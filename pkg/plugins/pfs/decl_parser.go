@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/grafana/grafana/pkg/kindsys"
 	"github.com/grafana/thema"
 )
 
@@ -54,7 +53,7 @@ func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
 		}
 
 		for slotName, lin := range slots {
-			slot, err := kindsys.FindSlot(slotName)
+			slot, err := FindSlot(slotName)
 			if err != nil {
 				log.Println(fmt.Errorf("parsing plugin failed for %s: %s", dir, err))
 				continue

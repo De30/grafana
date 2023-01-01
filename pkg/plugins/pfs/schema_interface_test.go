@@ -14,7 +14,7 @@ import (
 // If this test fails, it's either because:
 // - They're not being loaded correctly - there's a bug in kindsys or pfs somewhere, fix it
 // - The set of schema interfaces has been modified - update the static list here
-func TestSlotsAreLoaded(t *testing.T) {
+func TestSchemaInterfacesAreLoaded(t *testing.T) {
 	knownSI := []string{"panelcfg", "queries", "dscfg"}
 	all := SchemaInterfaces(cuecontext.New())
 	var loadedSI []string

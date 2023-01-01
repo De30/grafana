@@ -113,10 +113,10 @@ func TestParseTreeTestdata(t *testing.T) {
 		"valid-model-panel":      {},
 		"valid-model-datasource": {},
 		"wrong-slot-panel": {
-			err: ErrImplementedSlots,
+			err: ErrComposableNotExpected,
 		},
 		"missing-slot-impl": {
-			err: ErrImplementedSlots,
+			err: ErrComposableNotExpected,
 		},
 		"panel-conflicting-joinschema": {
 			err:  ErrInvalidLineage,
