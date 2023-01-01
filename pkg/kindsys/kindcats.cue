@@ -48,7 +48,7 @@ _sharedKind: {
 	machineName: strings.ToLower(strings.Replace(name, "-", "_", -1))
 
 	// pluralName is the pluralized form of name. Defaults to name + "s".
-	pluralName:                                   =~"^([A-Z][a-zA-Z0-9-]{0,61}[a-zA-Z])$" | *(name + "s")
+	pluralName: =~"^([A-Z][a-zA-Z0-9-]{0,61}[a-zA-Z])$" | *(name + "s")
 
 	// pluralMachineName is the pluralized form of [machineName]. The same case
 	// normalization and dash transformation is applied to [pluralName] as [machineName]
@@ -59,8 +59,8 @@ _sharedKind: {
 	// grouped lineage, each top-level field in the schema specifies a discrete
 	// object that is expected to exist in the wild
 	//
-	// This field is set at the framework level, and cannot be in the declaration of
-	// any individual kind.
+	// This value of this field is set by the kindsys framework. It cannot be changed
+	// in the declaration of any individual kind.
 	//
 	// This is likely to eventually become a first-class property in Thema:
 	// https://github.com/grafana/thema/issues/62
@@ -126,4 +126,3 @@ _sharedKind: {
 
 	lineageIsGroup: false
 }
-
