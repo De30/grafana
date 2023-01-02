@@ -186,7 +186,7 @@ func TestParseTreeTestdata(t *testing.T) {
 			}
 
 			rootp := tree.RootPlugin()
-			require.Equal(t, tst.rootid, rootp.Meta().Id, "expected root plugin id and actual root plugin id differ")
+			require.Equal(t, tst.rootid, rootp.Properties.Id, "expected root plugin id and actual root plugin id differ")
 		})
 	}
 }
@@ -285,7 +285,7 @@ func TestParseTreeZips(t *testing.T) {
 			}
 
 			rootp := tree.RootPlugin()
-			require.Equal(t, tst.rootid, rootp.Meta().Id, "expected root plugin id and actual root plugin id differ")
+			require.Equal(t, tst.rootid, rootp.Properties.Id, "expected root plugin id and actual root plugin id differ")
 		})
 	}
 }

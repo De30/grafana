@@ -32,6 +32,6 @@ var ErrInvalidLineage = errors.New("invalid lineage")
 // ErrLineageNameMismatch indicates a plugin slot lineage name did not match the id of the plugin.
 var ErrLineageNameMismatch = errors.New("lineage name not the same as plugin id")
 
-// ErrDisallowedCUEImport indicates that a plugin's models.cue file imports a
-// CUE package that is not on the whitelist for safe imports.
+// ErrDisallowedCUEImport indicates that a plugin's models.cue file CUEImports a
+// CUE package that is not on the whitelist for safe CUEImports.
 var ErrDisallowedCUEImport = errors.New("CUE import is not allowed")

@@ -85,12 +85,12 @@ type Structured interface {
 	Decl() *Decl[CoreStructuredProperties] // TODO figure out how to reconcile this interface with CustomStructuredProperties
 }
 
-// type Composable interface {
-// 	Interface
-//
-// 	// TODO docs
-// 	Lineage() thema.Lineage
-//
-// 	// TODO docs
-// 	Properties() CoreStructuredProperties // TODO figure out how to reconcile this interface with CustomStructuredProperties
-// }
+type Composable interface {
+	Interface
+
+	// TODO docs
+	Lineage() thema.Lineage
+
+	// TODO docs
+	Properties() ComposableProperties // TODO figure out how to reconcile this interface with CustomStructuredProperties
+}

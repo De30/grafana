@@ -1,4 +1,4 @@
-package pfs
+package kindsys
 
 import (
 	"fmt"
@@ -6,8 +6,6 @@ import (
 
 	"cuelang.org/go/cue"
 	"github.com/grafana/grafana/pkg/cuectx"
-	"github.com/grafana/grafana/pkg/kindsys"
-	"github.com/grafana/grafana/pkg/plugins/plugindef"
 )
 
 // SchemaInterface represents one of Grafana's named schema interfaces.
@@ -42,8 +40,8 @@ var ip = cue.ParsePath("interface")
 
 // Should indicates whether the given plugin type is expected (but not required)
 // to produce a composable kind that implements this SchemaInterface.
-func (s SchemaInterface) Should(plugintype plugindef.Type) bool {
-	pt := string(plugintype)
+func (s SchemaInterface) Should(plugintype string) bool {
+	pt := plugintype
 	for _, t := range s.plugins {
 		if pt == t {
 			return true
@@ -94,7 +92,7 @@ func SchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
 }
 
 func doSchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
-	fw := kindsys.CUEFramework(ctx)
+	fw := CUEFramework(ctx)
 
 	defs := fw.LookupPath(cue.ParsePath("schemaInterfaces"))
 	if !defs.Exists() {

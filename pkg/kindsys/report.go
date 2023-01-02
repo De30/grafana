@@ -15,7 +15,6 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/grafana/pkg/kindsys"
-	"github.com/grafana/grafana/pkg/plugins/pfs"
 	"github.com/grafana/grafana/pkg/plugins/pfs/corelist"
 	"github.com/grafana/grafana/pkg/registry/corekind"
 )
@@ -98,7 +97,7 @@ func buildKindStateReport() KindStateReport {
 		})
 	}
 
-	all := pfs.SchemaInterfaces(nil)
+	all := kindsys.SchemaInterfaces(nil)
 	// TODO this is all hacks until #59001, which will unite plugins with kindsys
 	for _, tree := range corelist.New(nil) {
 		rp := tree.RootPlugin()

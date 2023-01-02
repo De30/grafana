@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/grafana/grafana/pkg/kindsys"
 	"github.com/grafana/thema"
 )
 
@@ -23,7 +24,9 @@ func NewDeclParser(rt *thema.Runtime, skip map[string]bool) *declParser {
 	}
 }
 
+// TODO convert this to be the new parser for Tree
 func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
+	// TODO remove hardcoded tree structure assumption, work from root of provided fs
 	plugins, err := fs.Glob(root, "**/**/plugin.json")
 	if err != nil {
 		return nil, fmt.Errorf("error finding plugin dirs: %w", err)
@@ -48,12 +51,12 @@ func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
 		slots := p.SlotImplementations()
 
 		if len(slots) == 0 {
-			decls = append(decls, EmptyPluginDecl(path, p.Meta()))
+			decls = append(decls, EmptyPluginDecl(path, p.Properties))
 			continue
 		}
 
 		for slotName, lin := range slots {
-			slot, err := FindSlot(slotName)
+			slot, err := kindsys.FindSlot(slotName)
 			if err != nil {
 				log.Println(fmt.Errorf("parsing plugin failed for %s: %s", dir, err))
 				continue
@@ -61,8 +64,8 @@ func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
 			decls = append(decls, &PluginDecl{
 				Slot:       slot,
 				Lineage:    lin,
-				Imports:    p.CUEImports(),
-				PluginMeta: p.Meta(),
+				Imports:    p.CUEImports,
+				PluginMeta: p.Properties,
 				PluginPath: path,
 			})
 		}

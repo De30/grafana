@@ -71,9 +71,9 @@ func doLoadFrameworkCUE(ctx *cue.Context) (cue.Value, error) {
 // us declare all the frameworky CUE bits in a single package. Other Go types
 // make the constructs in this value easy to use.
 //
-// All calling code within grafana/grafana is expected to use Grafana's
-// singleton [cue.Context], returned from [cuectx.GrafanaCUEContext]. If nil
-// is passed, the singleton will be used.
+// Calling this with a nil [cue.Context] (the singleton returned from
+// [cuectx.GrafanaCUEContext] is used) will memoize certain CUE operations.
+// Prefer passing nil unless a different cue.Context is specifically required.
 func CUEFramework(ctx *cue.Context) cue.Value {
 	if ctx == nil || ctx == cuectx.GrafanaCUEContext() {
 		// Ensure framework is loaded, even if this func is called
@@ -86,9 +86,9 @@ func CUEFramework(ctx *cue.Context) cue.Value {
 	return v
 }
 
-// ToKindMeta takes a cue.Value expected to represent a kind of the category
+// ToKindProps takes a cue.Value expected to represent a kind of the category
 // specified by the type parameter and populates the Go type from the cue.Value.
-func ToKindMeta[T KindProperties](v cue.Value) (T, error) {
+func ToKindProps[T KindProperties](v cue.Value) (T, error) {
 	props := new(T)
 	if !v.Exists() {
 		return *props, ErrValueNotExist
@@ -124,11 +124,10 @@ func ToKindMeta[T KindProperties](v cue.Value) (T, error) {
 	return *props, nil
 }
 
-// SomeDecl represents a single kind declaration, having been loaded
-// and validated by a func such as [LoadCoreKind].
+// SomeDecl represents a single kind declaration, having been loaded and
+// validated by a func such as [LoadCoreKind].
 //
-// The underlying type of the Properties field indicates the category of
-// kind.
+// The underlying type of the Properties field indicates the category of kind.
 type SomeDecl struct {
 	// V is the cue.Value containing the entire Kind declaration.
 	V cue.Value
@@ -136,11 +135,12 @@ type SomeDecl struct {
 	Properties SomeKindProperties
 }
 
-// BindKindLineage binds the lineage for the kind declaration. nil, nil is returned
-// for raw kinds.
+// BindKindLineage binds the lineage for the kind declaration. nil, nil is
+// returned for raw kinds.
 //
 // For kinds with a corresponding Go type, it is left to the caller to associate
-// that Go type with the lineage returned from this function by a call to [thema.BindType].
+// that Go type with the lineage returned from this function by a call to
+// [thema.BindType].
 func (decl *SomeDecl) BindKindLineage(rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
 	if rt == nil {
 		rt = cuectx.GrafanaThemaRuntime()
@@ -223,7 +223,7 @@ func LoadCoreKind[T RawProperties | CoreStructuredProperties](declpath string, c
 	decl := &Decl[T]{
 		V: vk,
 	}
-	decl.Properties, err = ToKindMeta[T](vk)
+	decl.Properties, err = ToKindProps[T](vk)
 	if err != nil {
 		return nil, err
 	}
