@@ -171,9 +171,7 @@ func (sch *schedule) removeAlertRules(err error, keys []ngmodels.AlertRuleKey) {
 		// Delete the rule routine
 		ruleInfo, ok := sch.registry.del(key)
 		if !ok {
-			if err != nil {
-				sch.log.Info("Alert rule cannot be stopped as it is not running", key.LogContext()...)
-			}
+			sch.log.Info("Alert rule cannot be stopped as it is not running", key.LogContext()...)
 			return
 		}
 		// stop rule evaluation
@@ -238,6 +236,7 @@ func (sch *schedule) processTick(ctx context.Context, dispatcherGroup *errgroup.
 		key := item.GetKey()
 		if item.IsPaused {
 			sch.PauseAlertRule(key)
+			sch.stateManager.ResetStateByRuleUID(ctx, key)
 			continue
 		}
 
