@@ -23,8 +23,8 @@ import (
 	schemaInterface: or([ for k, _ in schemaInterfaces {k}, string])
 
 	// lineage is the Thema lineage containing all the schemas that have existed for this kind.
-	// It is required that lineage.name is the same as the [machineName].
-	lineage: thema.#Lineage & {name: S.machineName}
+	// The name of the lineage is constrained to the name of the schema interface being implemented.
+	lineage: thema.#Lineage & {name: S.schemaInterface}
 
 	or([ for k, v in schemaInterfaces {
 		schemaInterface: k
