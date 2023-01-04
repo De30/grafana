@@ -69,7 +69,7 @@ func doLoadFrameworkCUE(ctx *cue.Context) (cue.Value, error) {
 //
 // For low-level use in constructing other types and APIs, while still letting
 // us declare all the frameworky CUE bits in a single package. Other Go types
-// make the constructs in this value easy to use.
+// make the constructs in the returned cue.Value easy to use.
 //
 // Calling this with a nil [cue.Context] (the singleton returned from
 // [cuectx.GrafanaCUEContext] is used) will memoize certain CUE operations.
@@ -141,7 +141,7 @@ type SomeDecl struct {
 // For kinds with a corresponding Go type, it is left to the caller to associate
 // that Go type with the lineage returned from this function by a call to
 // [thema.BindType].
-func (decl *SomeDecl) BindKindLineage(rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
+func (decl SomeDecl) BindKindLineage(rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
 	if rt == nil {
 		rt = cuectx.GrafanaThemaRuntime()
 	}
@@ -156,25 +156,25 @@ func (decl *SomeDecl) BindKindLineage(rt *thema.Runtime, opts ...thema.BindOptio
 }
 
 // IsRaw indicates whether the represented kind is a raw kind.
-func (decl *SomeDecl) IsRaw() bool {
+func (decl SomeDecl) IsRaw() bool {
 	_, is := decl.Properties.(RawProperties)
 	return is
 }
 
 // IsCoreStructured indicates whether the represented kind is a core structured kind.
-func (decl *SomeDecl) IsCoreStructured() bool {
+func (decl SomeDecl) IsCoreStructured() bool {
 	_, is := decl.Properties.(CoreStructuredProperties)
 	return is
 }
 
 // IsCustomStructured indicates whether the represented kind is a custom structured kind.
-func (decl *SomeDecl) IsCustomStructured() bool {
+func (decl SomeDecl) IsCustomStructured() bool {
 	_, is := decl.Properties.(CustomStructuredProperties)
 	return is
 }
 
 // IsComposable indicates whether the represented kind is a composable kind.
-func (decl *SomeDecl) IsComposable() bool {
+func (decl SomeDecl) IsComposable() bool {
 	_, is := decl.Properties.(ComposableProperties)
 	return is
 }
@@ -191,7 +191,7 @@ type Decl[T KindProperties] struct {
 }
 
 // Some converts the typed Decl to the equivalent typeless SomeDecl.
-func (decl *Decl[T]) Some() *SomeDecl {
+func (decl Decl[T]) Some() *SomeDecl {
 	return &SomeDecl{
 		V:          decl.V,
 		Properties: any(decl.Properties).(SomeKindProperties),
@@ -215,17 +215,18 @@ func (decl *Decl[T]) Some() *SomeDecl {
 // This is a low-level function, primarily intended for use in code generation.
 // For representations of core kinds that are useful in Go programs at runtime,
 // see ["github.com/grafana/grafana/pkg/registry/corekind"].
-func LoadCoreKind[T RawProperties | CoreStructuredProperties](declpath string, ctx *cue.Context, overlay fs.FS) (*Decl[T], error) {
+func LoadCoreKind[T RawProperties | CoreStructuredProperties](declpath string, ctx *cue.Context, overlay fs.FS) (Decl[T], error) {
+	none := Decl[T]{}
 	vk, err := cuectx.BuildGrafanaInstance(ctx, declpath, "kind", overlay)
 	if err != nil {
-		return nil, err
+		return none, err
 	}
-	decl := &Decl[T]{
+	decl := Decl[T]{
 		V: vk,
 	}
 	decl.Properties, err = ToKindProps[T](vk)
 	if err != nil {
-		return nil, err
+		return none, err
 	}
 	return decl, nil
 }

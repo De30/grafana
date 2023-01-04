@@ -83,7 +83,7 @@ func SchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
 		// Ensure framework is loaded, even if this func is called
 		// from an init() somewhere.
 		onceIfaces.Do(func() {
-			doSchemaInterfaces(nil)
+			defaultIfaces = doSchemaInterfaces(nil)
 		})
 		return defaultIfaces
 	}

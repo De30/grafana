@@ -21,11 +21,11 @@ type ParsedPlugin struct {
 	// Composable kind defs are only populated in this map by [ParsePluginFS] if
 	// they are implementations of a known schema interface, or are for
 	// an unknown schema interface.
-	ComposableKinds map[string]kindsys.Decl[kindsys.ComposableProperties]
+	ComposableKinds map[string]kindsys.Composable
 
 	// CustomKinds is a map of all the custom kinds declared in this plugin.
 	// Keys are the machineName of the custom kind.
-	CustomKinds map[string]kindsys.Decl[kindsys.CustomStructuredProperties]
+	// CustomKinds map[string]kindsys.Custom
 
 	// CUEImports lists the CUE import statements in the plugin's grafanaplugin CUE
 	// package, if any.

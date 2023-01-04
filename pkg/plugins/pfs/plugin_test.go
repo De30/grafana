@@ -1,12 +1,9 @@
 package pfs
 
 import (
-	"reflect"
 	"sort"
-	"strings"
 	"testing"
 
-	"cuelang.org/go/cue/cuecontext"
 	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/grafana/pkg/kindsys"
 )
@@ -18,12 +15,13 @@ import (
 // - They're not being loaded correctly - there's a bug in kindsys or pfs somewhere, fix it
 // - The set of schema interfaces has been modified - update the static list here
 func TestSchemaInterfacesAreLoaded(t *testing.T) {
-	rt := reflect.TypeOf(ComposableKinds{})
-	var knownSI []string
-	for i := 0; i < rt.NumField(); i++ {
-		knownSI = append(knownSI, strings.ToLower(rt.Field(i).Name))
-	}
-	all := kindsys.SchemaInterfaces(cuecontext.New())
+	// rt := reflect.TypeOf(ComposableKinds{})
+	// var knownSI []string
+	// for i := 0; i < rt.NumField(); i++ {
+	// 	knownSI = append(knownSI, strings.ToLower(rt.Field(i).Name))
+	// }
+	knownSI := []string{"panelcfg", "queries", "dscfg"}
+	all := kindsys.SchemaInterfaces(nil)
 	var loadedSI []string
 	for k := range all {
 		loadedSI = append(loadedSI, k)

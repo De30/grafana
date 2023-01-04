@@ -36,7 +36,7 @@ func doLoadGP(ctx *cue.Context) cue.Value {
 		// should be unreachable
 		panic(err)
 	}
-	return v
+	return v.LookupPath(cue.MakePath(cue.Def("GrafanaPlugin")))
 }
 
 func loadGP(ctx *cue.Context) cue.Value {
@@ -56,6 +56,7 @@ func loadGP(ctx *cue.Context) cue.Value {
 func PermittedCUEImports() []string {
 	return []string{
 		"github.com/grafana/thema",
+		"github.com/grafana/grafana/pkg/plugins/pfs",
 		"github.com/grafana/grafana/packages/grafana-schema/src/schema",
 	}
 }
@@ -121,8 +122,8 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 	}
 
 	pp := ParsedPlugin{
-		ComposableKinds: make(map[string]kindsys.Decl[kindsys.ComposableProperties]),
-		CustomKinds:     make(map[string]kindsys.Decl[kindsys.CustomStructuredProperties]),
+		ComposableKinds: make(map[string]kindsys.Composable),
+		// CustomKinds:     make(map[string]kindsys.Custom),
 	}
 
 	// Pass the raw bytes into the muxer, get the populated PluginDef type out that we want.
@@ -187,15 +188,17 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 	})
 	bi.Files = append(bi.Files, f)
 
-	gpi := ctx.BuildInstance(bi).Unify(gpv)
+	built := ctx.BuildInstance(bi)
+	gpi := built.Unify(gpv)
 	var cerr errors.Error
 	gpi.Walk(func(v cue.Value) bool {
 		if lab, has := v.Label(); has {
-			fmt.Println(lab)
-			if err := v.Validate(cue.Concrete(lab != "lineage")); err != nil {
+			if lab == "lineage" {
+				return false
+			}
+			if err := v.Err(); err != nil {
 				cerr = errors.Append(cerr, errors.Promote(err, ""))
 			}
-			return lab != "lineage"
 		}
 		return true
 	}, nil)
@@ -203,13 +206,9 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 		return ParsedPlugin{}, fmt.Errorf("%s not an instance of grafanaplugin: %w", pp.Properties.Id, cerr)
 	}
 
-	// for _, top := range []string{"customKinds", "composableKinds"} {
-	//
-	// }
-
 	val := ctx.BuildInstance(bi)
 	if val.Err() != nil {
-		return ParsedPlugin{}, ewrap(fmt.Errorf("grafanaplugin package contains invalid CUE: %w", val.Err()), ErrInvalidCUE)
+		return ParsedPlugin{}, ewrap(fmt.Errorf("grafanaplugin package contains invalid CUE: %s", errors.Details(val.Err(), nil)), ErrInvalidCUE)
 	}
 	for _, si := range allsi {
 		iv := val.LookupPath(cue.ParsePath(si.Name()))
@@ -217,16 +216,19 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 		if err != nil {
 			return ParsedPlugin{}, err
 		}
-		lin, err := bindCompoLineage(iv, si, pp.Properties, rt)
-		if lin != nil {
-			pp.ComposableKinds[si.Name()] = kindsys.Decl[kindsys.ComposableProperties]{
-				Properties: props,
-			}
+
+		meta := kindsys.Decl[kindsys.ComposableProperties]{
+			Properties: props,
+			V:          iv,
 		}
+		compo, err := kindsys.BindComposable(rt, meta)
 		if err != nil {
 			return ParsedPlugin{}, err
 		}
+		pp.ComposableKinds[si.Name()] = compo
 	}
+	// TODO custom kinds
+	return pp, nil
 }
 
 func ensureCueMod(fsys fs.FS, pdef plugindef.PluginDef) (fs.FS, error) {
@@ -242,68 +244,6 @@ func ensureCueMod(fsys fs.FS, pdef plugindef.PluginDef) (fs.FS, error) {
 	}
 
 	return fsys, nil
-}
-
-func bindCompoLineage(v cue.Value, s *kindsys.SchemaInterface, meta plugindef.PluginDef, rt *thema.Runtime, opts ...thema.BindOption) (thema.Lineage, error) {
-	should := s.Should(meta.Type)
-	exists := v.Exists()
-
-	if !exists {
-		if should {
-			return nil, ewrap(fmt.Errorf("%s: %s plugins should provide a %s composable kind in grafanaplugin cue package", meta.Id, meta.Type, s.Name()), ErrExpectedComposable)
-		}
-		return nil, nil
-	}
-
-	lin, err := thema.BindLineage(v, rt, opts...)
-	if err != nil {
-		return nil, ewrap(fmt.Errorf("%s: invalid thema lineage for %s composable kind: %w", meta.Id, s.Name(), err), ErrInvalidLineage)
-	}
-
-	// TODO reconsider all this in the context of #GrafanaPlugin and new thema decl structure/name constraints
-	sanid := sanitizePluginId(meta.Id)
-	if lin.Name() != sanid {
-		errf := func(format string, args ...interface{}) error {
-			var errin error
-			if n := v.LookupPath(cue.ParsePath("name")).Source(); n != nil {
-				errin = errors.Newf(n.Pos(), format, args...)
-			} else {
-				errin = fmt.Errorf(format, args...)
-			}
-			return ewrap(errin, ErrLineageNameMismatch)
-		}
-		if sanid != meta.Id {
-			return nil, errf("%s: %q composable kind lineage name must be the sanitized plugin id (%q), got %q", meta.Id, s.Name(), sanid, lin.Name())
-		} else {
-			return nil, errf("%s: %q composable kind lineage name must be the plugin id, got %q", meta.Id, s.Name(), lin.Name())
-		}
-	}
-
-	if !should {
-		return lin, ewrap(fmt.Errorf("%s: %s plugins should not provide a %s composable kind in grafanaplugin cue package", meta.Id, meta.Type, s.Name()), ErrComposableNotExpected)
-	}
-	return lin, nil
-}
-
-// ParsedPlugin IDs are allowed to contain characters that aren't allowed in thema
-// Lineage names, CUE package names, Go package names, TS or Go type names, etc.
-func sanitizePluginId(s string) string {
-	return strings.Map(func(r rune) rune {
-		switch {
-		case r >= 'a' && r <= 'z':
-			fallthrough
-		case r >= 'A' && r <= 'Z':
-			fallthrough
-		case r >= '0' && r <= '9':
-			fallthrough
-		case r == '_':
-			return r
-		case r == '-':
-			return '_'
-		default:
-			return -1
-		}
-	}, s)
 }
 
 func ewrap(actual, is error) error {

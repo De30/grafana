@@ -172,7 +172,7 @@ func TestParseTreeTestdata(t *testing.T) {
 				t.Skip(tst.skip)
 			}
 
-			tree, err := ParsePluginFS(tst.tfs, lib)
+			pp, err := ParsePluginFS(tst.tfs, lib)
 			if tst.err == nil {
 				require.NoError(t, err, "unexpected error while parsing plugin tree")
 			} else {
@@ -185,8 +185,7 @@ func TestParseTreeTestdata(t *testing.T) {
 				tst.rootid = name
 			}
 
-			rootp := tree.RootPlugin()
-			require.Equal(t, tst.rootid, rootp.Properties.Id, "expected root plugin id and actual root plugin id differ")
+			require.Equal(t, tst.rootid, pp.Properties.Id, "expected plugin id and actual plugin id differ")
 		})
 	}
 }
@@ -272,11 +271,11 @@ func TestParseTreeZips(t *testing.T) {
 				t.Skip(tst.skip)
 			}
 
-			tree, err := ParsePluginFS(tst.tfs, lib)
+			pp, err := ParsePluginFS(tst.tfs, lib)
 			if tst.err == nil {
-				require.NoError(t, err, "unexpected error while parsing plugin tree")
+				require.NoError(t, err, "unexpected error while parsing plugin fs")
 			} else {
-				require.ErrorIs(t, err, tst.err, "unexpected error type while parsing plugin tree")
+				require.ErrorIs(t, err, tst.err, "unexpected error type while parsing plugin fs")
 				return
 			}
 
@@ -284,8 +283,7 @@ func TestParseTreeZips(t *testing.T) {
 				tst.rootid = name
 			}
 
-			rootp := tree.RootPlugin()
-			require.Equal(t, tst.rootid, rootp.Properties.Id, "expected root plugin id and actual root plugin id differ")
+			require.Equal(t, tst.rootid, pp.Properties.Id, "expected plugin id and actual plugin id differ")
 		})
 	}
 }

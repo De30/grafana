@@ -51,7 +51,7 @@ package kindsys
 // the timeseries composable kind, are directly aware of (import) each other.
 
 // A SchemaInterface defines a single Grafana schema interface.
-#SchemaInterface: {
+SchemaInterface: {
 	// name is the unique identifier of the schema interface.
 	//
 	// Often used to provide namespacing of schema interface implementations
@@ -89,7 +89,7 @@ package kindsys
 }
 
 // The canonical list of all Grafana schema interfaces.
-schemaInterfaces: [N=string]: #SchemaInterface & { name: N }
+schemaInterfaces: [N=string]: SchemaInterface & { name: N }
 schemaInterfaces: {
 	panelcfg: {
 		interface: {

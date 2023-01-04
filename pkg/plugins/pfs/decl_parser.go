@@ -3,7 +3,6 @@ package pfs
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -41,31 +40,26 @@ func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
 		}
 
 		dir := os.DirFS(path)
-		ptree, err := ParsePluginFS(dir, psr.rt)
+		pp, err := ParsePluginFS(dir, psr.rt)
 		if err != nil {
-			log.Println(fmt.Errorf("parsing plugin failed for %s: %s", dir, err))
+			return nil, fmt.Errorf("parsing plugin failed for %s: %s", dir, err)
+		}
+
+		if len(pp.ComposableKinds) == 0 {
+			decls = append(decls, EmptyPluginDecl(path, pp.Properties))
 			continue
 		}
 
-		p := ptree.RootPlugin()
-		slots := p.SlotImplementations()
-
-		if len(slots) == 0 {
-			decls = append(decls, EmptyPluginDecl(path, p.Properties))
-			continue
-		}
-
-		for slotName, lin := range slots {
+		for slotName, kind := range pp.ComposableKinds {
 			slot, err := kindsys.FindSlot(slotName)
 			if err != nil {
-				log.Println(fmt.Errorf("parsing plugin failed for %s: %s", dir, err))
-				continue
+				return nil, fmt.Errorf("parsing plugin failed for %s: %s", dir, err)
 			}
 			decls = append(decls, &PluginDecl{
 				Slot:       slot,
-				Lineage:    lin,
-				Imports:    p.CUEImports,
-				PluginMeta: p.Properties,
+				Lineage:    kind.Lineage(),
+				Imports:    pp.CUEImports,
+				PluginMeta: pp.Properties,
 				PluginPath: path,
 			})
 		}
