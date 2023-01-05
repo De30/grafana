@@ -223,7 +223,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 			go func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				t.Cleanup(cancel)
-				_ = sch.ruleRoutine(ctx, rule.GetKey(), evalChan, make(chan ruleVersion))
+				_ = sch.ruleRoutine(ctx, rule, evalChan, make(chan ruleVersion))
 			}()
 
 			expectedTime := time.UnixMicro(rand.Int63())
@@ -335,7 +335,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 
 			ctx, cancel := context.WithCancel(context.Background())
 			go func() {
-				err := sch.ruleRoutine(ctx, models.AlertRuleKey{}, make(chan *evaluation), make(chan ruleVersion))
+				err := sch.ruleRoutine(ctx, rule, make(chan *evaluation), make(chan ruleVersion))
 				stoppedChan <- err
 			}()
 
@@ -354,11 +354,11 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 
 			ctx, cancel := util.WithCancelCause(context.Background())
 			go func() {
-				err := sch.ruleRoutine(ctx, rule.GetKey(), make(chan *evaluation), make(chan ruleVersion))
+				err := sch.ruleRoutine(ctx, rule, make(chan *evaluation), make(chan ruleVersion))
 				stoppedChan <- err
 			}()
 
-			cancel(errRuleDeleted)
+			cancel(ErrRuleDeleted)
 			err := waitForErrChannel(t, stoppedChan)
 			require.NoError(t, err)
 
@@ -382,7 +382,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(cancel)
-			_ = sch.ruleRoutine(ctx, rule.GetKey(), evalChan, updateChan)
+			_ = sch.ruleRoutine(ctx, rule, evalChan, updateChan)
 		}()
 
 		// init evaluation loop so it got the rule version
@@ -462,7 +462,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(cancel)
-			_ = sch.ruleRoutine(ctx, rule.GetKey(), evalChan, make(chan ruleVersion))
+			_ = sch.ruleRoutine(ctx, rule, evalChan, make(chan ruleVersion))
 		}()
 
 		evalChan <- &evaluation{
@@ -532,7 +532,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 			go func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				t.Cleanup(cancel)
-				_ = sch.ruleRoutine(ctx, rule.GetKey(), evalChan, make(chan ruleVersion))
+				_ = sch.ruleRoutine(ctx, rule, evalChan, make(chan ruleVersion))
 			}()
 
 			evalChan <- &evaluation{
@@ -565,7 +565,7 @@ func TestSchedule_ruleRoutine(t *testing.T) {
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(cancel)
-			_ = sch.ruleRoutine(ctx, rule.GetKey(), evalChan, make(chan ruleVersion))
+			_ = sch.ruleRoutine(ctx, rule, evalChan, make(chan ruleVersion))
 		}()
 
 		evalChan <- &evaluation{
@@ -624,7 +624,7 @@ func TestSchedule_DeleteAlertRule(t *testing.T) {
 			key := rule.GetKey()
 			info, _ := sch.registry.getOrCreateInfo(context.Background(), key)
 			sch.DeleteAlertRule(key)
-			require.ErrorIs(t, info.ctx.Err(), errRuleDeleted)
+			require.ErrorIs(t, info.ctx.Err(), ErrRuleDeleted)
 			require.False(t, sch.registry.exists(key))
 		})
 	})
