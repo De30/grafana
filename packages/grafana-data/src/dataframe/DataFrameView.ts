@@ -27,7 +27,7 @@ export class DataFrameView<T = any> extends FunctionalVector<T> {
 
     for (let i = 0; i < data.fields.length; i++) {
       const field = data.fields[i];
-      if (!field.name) {
+      if (!field?.name?.length || field.name === 'hasOwnProperty') {
         continue; // unsupported
       }
 

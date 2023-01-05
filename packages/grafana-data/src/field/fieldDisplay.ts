@@ -102,6 +102,9 @@ export const getFieldDisplayValues = (options: GetFieldDisplayValuesOptions): Fi
 
   for (let s = 0; s < data.length && !hitLimit; s++) {
     const dataFrame = data[s]; // Name is already set
+    if (!dataFrame) {
+      continue;
+    }
 
     const { timeField } = getTimeField(dataFrame);
     const view = new DataFrameView(dataFrame);

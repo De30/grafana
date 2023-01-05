@@ -44,6 +44,7 @@ const (
 	csvFileQueryType                  queryType = "csv_file"
 	csvContentQueryType               queryType = "csv_content"
 	traceType                         queryType = "trace"
+	naughtyType                       queryType = "naughty"
 )
 
 type queryType string
@@ -222,6 +223,12 @@ Timestamps will line up evenly on timeStepSeconds (For example, 60 seconds means
 	s.registerScenario(&Scenario{
 		ID:   string(traceType),
 		Name: "Trace",
+	})
+
+	s.registerScenario(&Scenario{
+		ID:      string(naughtyType),
+		Name:    "Naughty",
+		handler: s.handleNaughtyScenario,
 	})
 
 	s.queryMux.HandleFunc("", s.handleFallbackScenario)
