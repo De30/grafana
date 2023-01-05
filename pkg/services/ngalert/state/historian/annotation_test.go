@@ -1,6 +1,7 @@
 package historian
 
 import (
+	"encoding/json"
 	"math"
 	"testing"
 
@@ -22,10 +23,8 @@ func TestBuildAnnotations(t *testing.T) {
 		items := buildAnnotations(rule, states, logger)
 
 		require.Len(t, items, 1)
-		require.NotNil(t, items[0].Data)
-		v, has := items[0].Data.MustMap()["values"]
-		require.Nil(t, v)
-		require.True(t, has)
+		j := assertValidJSON(t, items[0].Data)
+		require.JSONEq(t, `{"values": null}`, j)
 	})
 
 	t.Run("data approximately contains expected values", func(t *testing.T) {
@@ -37,7 +36,8 @@ func TestBuildAnnotations(t *testing.T) {
 		items := buildAnnotations(rule, states, logger)
 
 		require.Len(t, items, 1)
-		require.NotNil(t, items[0].Data)
+		assertValidJSON(t, items[0].Data)
+		// Since we're comparing floats, avoid require.JSONEq to avoid intermittency caused by floating point rounding.
 		vs, _ := items[0].Data.MustMap()["values"]
 		require.NotNil(t, vs)
 		vals := vs.(*simplejson.Json).MustMap()
@@ -49,19 +49,13 @@ func TestBuildAnnotations(t *testing.T) {
 		logger := log.NewNopLogger()
 		rule := &models.AlertRule{}
 		states := []state.StateTransition{makeStateTransition()}
-		states[0].State.Values = map[string]float64{"a": 1.0, "nan": math.NaN(), "inf": math.Inf(1), "-inf": math.Inf(-1)}
+		states[0].State.Values = map[string]float64{"nan": math.NaN(), "inf": math.Inf(1), "ninf": math.Inf(-1)}
 
 		items := buildAnnotations(rule, states, logger)
 
 		require.Len(t, items, 1)
-		require.NotNil(t, items[0].Data)
-		vs, _ := items[0].Data.MustMap()["values"]
-		require.NotNil(t, vs)
-		vals := vs.(*simplejson.Json).MustMap()
-		require.InDelta(t, 1.0, vals["a"], 0.1)
-		require.Equal(t, "NaN", vals["nan"])
-		require.Equal(t, "+Inf", vals["inf"])
-		require.Equal(t, "-Inf", vals["-inf"])
+		j := assertValidJSON(t, items[0].Data)
+		require.JSONEq(t, `{"values": {"nan": "NaN", "inf": "+Inf", "ninf": "-Inf"}}`, j)
 	})
 }
 
@@ -72,4 +66,11 @@ func makeStateTransition() state.StateTransition {
 		},
 		PreviousState: eval.Normal,
 	}
+}
+
+func assertValidJSON(t *testing.T, j *simplejson.Json) string {
+	require.NotNil(t, j)
+	ser, err := json.Marshal(j)
+	require.NoError(t, err)
+	return string(ser)
 }
