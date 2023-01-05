@@ -100,13 +100,13 @@ func ToKindProps[T KindProperties](v cue.Value) (T, error) {
 	anyprops := any(*props).(SomeKindProperties)
 	switch anyprops.(type) {
 	case RawProperties:
-		kdef = fw.LookupPath(cue.MakePath(cue.Def("Raw")))
+		kdef = fw.LookupPath(cue.MakePath(cue.Str("Raw")))
 	case CoreStructuredProperties:
-		kdef = fw.LookupPath(cue.MakePath(cue.Def("CoreStructured")))
+		kdef = fw.LookupPath(cue.MakePath(cue.Str("CoreStructured")))
 	case CustomStructuredProperties:
-		kdef = fw.LookupPath(cue.MakePath(cue.Def("CustomStructured")))
+		kdef = fw.LookupPath(cue.MakePath(cue.Str("CustomStructured")))
 	case ComposableProperties:
-		kdef = fw.LookupPath(cue.MakePath(cue.Def("Composable")))
+		kdef = fw.LookupPath(cue.MakePath(cue.Str("Composable")))
 	default:
 		// unreachable so long as all the possibilities in KindProperties have switch branches
 		panic("unreachable")

@@ -14,10 +14,9 @@ import (
 // this type simply represent that information in Go.
 // TODO link to framework docs
 type SchemaInterface struct {
-	name  string
-	group bool
-	raw   cue.Value
-	// plugins map[plugindef.Type]bool
+	name    string
+	group   bool
+	raw     cue.Value
 	plugins []string
 }
 
@@ -58,15 +57,15 @@ func (s SchemaInterface) IsGroup() bool {
 	return s.group
 }
 
-func FindSlot(name string) (*SchemaInterface, error) {
+func FindSlot(name string) (SchemaInterface, error) {
 	sl, has := SchemaInterfaces(nil)[name]
 	if !has {
-		return nil, fmt.Errorf("unsupported slot: %s", name)
+		return SchemaInterface{}, fmt.Errorf("unsupported slot: %s", name)
 	}
 	return sl, nil
 }
 
-var defaultIfaces map[string]*SchemaInterface
+var defaultIfaces map[string]SchemaInterface
 var onceIfaces sync.Once
 
 // SchemaInterfaces returns a map of all [SchemaInterface]s defined by
@@ -78,7 +77,7 @@ var onceIfaces sync.Once
 // code, as well.
 //
 // TODO link to framework docs
-func SchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
+func SchemaInterfaces(ctx *cue.Context) map[string]SchemaInterface {
 	if ctx == nil || ctx == cuectx.GrafanaCUEContext() {
 		// Ensure framework is loaded, even if this func is called
 		// from an init() somewhere.
@@ -91,27 +90,26 @@ func SchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
 	return doSchemaInterfaces(ctx)
 }
 
-func doSchemaInterfaces(ctx *cue.Context) map[string]*SchemaInterface {
+func doSchemaInterfaces(ctx *cue.Context) map[string]SchemaInterface {
 	fw := CUEFramework(ctx)
 
 	defs := fw.LookupPath(cue.ParsePath("schemaInterfaces"))
 	if !defs.Exists() {
 		panic("schemaInterfaces key does not exist in kindsys framework")
 	}
-	// TODO could probably just make SchemaInterface into this...?
-	raw := make(map[string]struct {
-		Name        string
-		PluginTypes []string
-		Group       bool
-	})
-	defs.Decode(raw)
+	type typ struct {
+		Name        string   `json:"name"`
+		PluginTypes []string `json:"pluginTypes"`
+		Group       bool     `json:"group"`
+	}
 
-	ifaces := make(map[string]*SchemaInterface)
+	ifaces := make(map[string]SchemaInterface)
 	iter, _ := defs.Fields() // nolint:errcheck
 	for iter.Next() {
 		k := iter.Selector().String()
-		v := raw[k]
-		ifaces[k] = &SchemaInterface{
+		v := &typ{}
+		iter.Value().Decode(&v)
+		ifaces[k] = SchemaInterface{
 			name:    v.Name,
 			plugins: v.PluginTypes,
 			group:   v.Group,

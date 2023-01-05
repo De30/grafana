@@ -24,9 +24,8 @@ import (
 //
 // There are four categories of kinds: Raw, Composable, CoreStructured,
 // and CustomStructured.
-#Kind: #Raw | #Composable | #CoreStructured | #CustomStructured
+Kind: Raw | Composable | CoreStructured | CustomStructured
 
-// properties shared between all kind categories.
 _sharedKind: {
 	// name is the canonical name of a Kind, as expressed in PascalCase.
 	//
@@ -66,7 +65,7 @@ _sharedKind: {
 	// https://github.com/grafana/thema/issues/62
 	lineageIsGroup: bool
 
-	maturity: #Maturity
+	maturity: Maturity
 
 	// The kind system itself is not mature enough yet for any single
 	// kind to advance beyond "experimental"
@@ -79,7 +78,7 @@ _sharedKind: {
 
 // Maturity indicates the how far a given kind declaration is in its initial
 // journey. Mature kinds still evolve, but with guarantees about compatibility.
-#Maturity: "merged" | "experimental" | "stable" | "mature"
+Maturity: "merged" | "experimental" | "stable" | "mature"
 
 // Structured encompasses all three of the structured kind categories, in which
 // a schema specifies validity rules for the byte sequence. These represent all
@@ -91,7 +90,7 @@ _sharedKind: {
 // reduced set of capabilities, due to the constraints imposed by them being run
 // in separate processes, and the risks arising from executing code from
 // potentially untrusted third parties.
-#Structured: S={
+Structured: S={
 	_sharedKind
 	form: "structured"
 
@@ -106,7 +105,7 @@ _sharedKind: {
 // like an image, or an svg or parquet file. Grafana mostly acts as asset storage for raw
 // kinds: the byte sequence is a black box to Grafana, and type is determined
 // through metadata such as file extension.
-#Raw: {
+Raw: {
 	_sharedKind
 	form: "raw"
 
@@ -121,8 +120,8 @@ _sharedKind: {
 }
 
 // TODO
-#CoreStructured: {
-	#Structured
+CoreStructured: {
+	Structured
 
 	lineageIsGroup: false
 }

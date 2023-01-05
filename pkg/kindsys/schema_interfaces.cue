@@ -59,12 +59,12 @@ SchemaInterface: {
 	//  - In-memory indexes in the Grafana backend
 	//  - Documentation URLs
 	//  - Parent directory paths or names in generated code
-	name: string & =~"^[a-z]{1,20}$"
+	name: string & =~"^[A-Z][A-Za-z]{1,19}$"
 
 	// interface is the body of the SchemaInterface - the actual meta-schema that
 	// forms the shared contract between consumers (core & custom kind lineages)
 	// and producers (composable kind lineages).
-	interface: {...}
+	interface: {}
 
 	// pluginTypes is a list of plugin types that are expected to produce composable
 	// kinds following this interface.
@@ -91,18 +91,18 @@ SchemaInterface: {
 // The canonical list of all Grafana schema interfaces.
 schemaInterfaces: [N=string]: SchemaInterface & { name: N }
 schemaInterfaces: {
-	panelcfg: {
+	PanelCfg: {
 		interface: {
 			// Defines plugin-specific options for a panel that should be persisted. Required,
 			// though a panel without any options may specify an empty struct.
 			//
 			// Currently mapped to #Panel.options within the dashboard schema.
-			PanelOptions: {...}
+			PanelOptions: {}
 
 			// Plugin-specific custom field properties. Optional.
 			//
 			// Currently mapped to #Panel.fieldConfig.defaults.custom within the dashboard schema.
-			PanelFieldConfig?: {...}
+			PanelFieldConfig?: {}
 		}
 
 		pluginTypes: ["panel"]
@@ -110,7 +110,7 @@ schemaInterfaces: {
 		// grouped b/c separate non-cross-referring elements always occur together in larger structure (panel)
 		group: true
 	}
-	queries: {
+	Queries: {
 		// The contract for the queries schema interface is itself a pattern:
 		// Each of its top-level fields must be represent a distinct query type for
 		// the datasource plugin. The queryType field acts as a discriminator, and
@@ -125,12 +125,12 @@ schemaInterfaces: {
 		// and it avoids us having to put more levels in the slot system (uggghhh)
 		group: true
 	}
-	dscfg: {
+	DSCfg: {
 		interface: {
 			// Normal datasource configuration options.
-			Options: {...}
+			Options: {}
 			// Sensitive datasource configuration options that require encryption.
-			SecureOptions: {...}
+			SecureOptions: {}
 		}
 
 		pluginTypes: ["datasource"]

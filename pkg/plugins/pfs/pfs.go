@@ -36,7 +36,7 @@ func doLoadGP(ctx *cue.Context) cue.Value {
 		// should be unreachable
 		panic(err)
 	}
-	return v.LookupPath(cue.MakePath(cue.Def("GrafanaPlugin")))
+	return v.LookupPath(cue.MakePath(cue.Str("GrafanaPlugin")))
 }
 
 func loadGP(ctx *cue.Context) cue.Value {
@@ -56,7 +56,7 @@ func loadGP(ctx *cue.Context) cue.Value {
 func PermittedCUEImports() []string {
 	return []string{
 		"github.com/grafana/thema",
-		"github.com/grafana/grafana/pkg/plugins/pfs",
+		"github.com/grafana/grafana/pkg/kindsys",
 		"github.com/grafana/grafana/packages/grafana-schema/src/schema",
 	}
 }
@@ -72,7 +72,7 @@ func importAllowed(path string) bool {
 
 var allowedImportsStr string
 
-var allsi []*kindsys.SchemaInterface
+var allsi []kindsys.SchemaInterface
 
 func init() {
 	all := make([]string, 0, len(PermittedCUEImports()))
@@ -176,7 +176,7 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 	// become a no-op, and we'd lose enforcement of import restrictions in plugins without
 	// realizing it.
 	if len(bi.Files) != len(bi.BuildFiles) {
-		panic("Upstream CUE implementation changed, bi.Files is no longer populated")
+		panic("Refactor required - upstream CUE implementation changed, bi.Files is no longer populated")
 	}
 
 	// Inject the JSON directly into the build so it gets loaded together
@@ -188,8 +188,7 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 	})
 	bi.Files = append(bi.Files, f)
 
-	built := ctx.BuildInstance(bi)
-	gpi := built.Unify(gpv)
+	gpi := ctx.BuildInstance(bi).Unify(gpv)
 	var cerr errors.Error
 	gpi.Walk(func(v cue.Value) bool {
 		if lab, has := v.Label(); has {
@@ -206,27 +205,27 @@ func ParsePluginFS(fsys fs.FS, rt *thema.Runtime) (ParsedPlugin, error) {
 		return ParsedPlugin{}, fmt.Errorf("%s not an instance of grafanaplugin: %w", pp.Properties.Id, cerr)
 	}
 
-	val := ctx.BuildInstance(bi)
-	if val.Err() != nil {
-		return ParsedPlugin{}, ewrap(fmt.Errorf("grafanaplugin package contains invalid CUE: %s", errors.Details(val.Err(), nil)), ErrInvalidCUE)
-	}
 	for _, si := range allsi {
-		iv := val.LookupPath(cue.ParsePath(si.Name()))
+		iv := gpi.LookupPath(cue.MakePath(cue.Str("composableKinds"), cue.Str(si.Name())))
+		if !iv.Exists() {
+			continue
+		}
+
 		props, err := kindsys.ToKindProps[kindsys.ComposableProperties](iv)
 		if err != nil {
 			return ParsedPlugin{}, err
 		}
 
-		meta := kindsys.Decl[kindsys.ComposableProperties]{
+		compo, err := kindsys.BindComposable(rt, kindsys.Decl[kindsys.ComposableProperties]{
 			Properties: props,
 			V:          iv,
-		}
-		compo, err := kindsys.BindComposable(rt, meta)
+		})
 		if err != nil {
 			return ParsedPlugin{}, err
 		}
 		pp.ComposableKinds[si.Name()] = compo
 	}
+
 	// TODO custom kinds
 	return pp, nil
 }

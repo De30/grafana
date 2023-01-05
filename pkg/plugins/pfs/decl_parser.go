@@ -56,7 +56,7 @@ func (psr *declParser) Parse(root fs.FS) ([]*PluginDecl, error) {
 				return nil, fmt.Errorf("parsing plugin failed for %s: %s", dir, err)
 			}
 			decls = append(decls, &PluginDecl{
-				Slot:       slot,
+				Slot:       &slot,
 				Lineage:    kind.Lineage(),
 				Imports:    pp.CUEImports,
 				PluginMeta: pp.Properties,
