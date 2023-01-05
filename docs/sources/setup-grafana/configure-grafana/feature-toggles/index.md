@@ -30,6 +30,7 @@ Some stable features are enabled by default. You can disable a stable feature by
 | `internationalization`              | Enables internationalization                                                         | Yes                |
 | `accessTokenExpirationCheck`        | Enable OAuth access_token expiration check and token refresh using the refresh_token |                    |
 | `disablePrometheusExemplarSampling` | Disable Prometheus examplar sampling                                                 |                    |
+| `alertingTracing`                   | Enables support for tracing in Unified Alerting                                      |                    |
 
 ## Beta feature toggles
 

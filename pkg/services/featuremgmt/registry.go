@@ -403,5 +403,10 @@ var (
 			Description: "Rule backtesting API for alerting",
 			State:       FeatureStateAlpha,
 		},
+		{
+			Name:        "alertingTracing",
+			Description: "Enables support for tracing in Unified Alerting",
+			State:       FeatureStateStable,
+		},
 	}
 )

@@ -294,4 +294,8 @@ const (
 	// FlagAlertingBacktesting
 	// Rule backtesting API for alerting
 	FlagAlertingBacktesting = "alertingBacktesting"
+
+	// FlagAlertingTracing
+	// Enables support for tracing in Unified Alerting
+	FlagAlertingTracing = "alertingTracing"
 )

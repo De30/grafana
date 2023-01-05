@@ -191,6 +191,7 @@ func (ng *AlertNG) init() error {
 	ng.AlertsRouter = alertsRouter
 
 	evalFactory := eval.NewEvaluatorFactory(ng.Cfg.UnifiedAlerting, ng.DataSourceCache, ng.ExpressionService, ng.pluginsStore)
+
 	schedCfg := schedule.SchedulerCfg{
 		MaxAttempts:          ng.Cfg.UnifiedAlerting.MaxAttempts,
 		C:                    clk,
@@ -202,7 +203,10 @@ func (ng *AlertNG) init() error {
 		RuleStore:            store,
 		Metrics:              ng.Metrics.GetSchedulerMetrics(),
 		AlertSender:          alertsRouter,
-		Tracer:               ng.tracer,
+	}
+
+	if ng.FeatureToggles.IsEnabled(featuremgmt.FlagAlertingTracing) {
+		schedCfg.Tracer = ng.tracer
 	}
 
 	historian := historian.NewAnnotationHistorian(ng.annotationsRepo, ng.dashboardService)

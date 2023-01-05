@@ -370,28 +370,32 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 			if results == nil {
 				results = append(results, eval.NewResultFromError(err, e.scheduledAt, dur))
 			}
-			if err == nil {
-				for _, result := range results {
-					if result.Error != nil {
-						err = multierror.Append(err, result.Error)
+			if span != nil {
+				if err == nil {
+					for _, result := range results {
+						if result.Error != nil {
+							err = multierror.Append(err, result.Error)
+						}
 					}
 				}
+				span.RecordError(err)
+				span.AddEvents(
+					[]string{"error", "message"},
+					[]tracing.EventValue{
+						{Str: fmt.Sprintf("%v", err)},
+						{Str: "rule evaluation failed"},
+					})
 			}
-			span.RecordError(err)
-			span.AddEvents(
-				[]string{"error", "message"},
-				[]tracing.EventValue{
-					{Str: fmt.Sprintf("%v", err)},
-					{Str: "rule evaluation failed"},
-				})
 		} else {
 			logger.Debug("Alert rule evaluated", "results", results, "duration", dur)
-			span.AddEvents(
-				[]string{"message", "results"},
-				[]tracing.EventValue{
-					{Str: "rule evaluated"},
-					{Num: int64(len(results))},
-				})
+			if span != nil {
+				span.AddEvents(
+					[]string{"message", "results"},
+					[]tracing.EventValue{
+						{Str: "rule evaluated"},
+						{Num: int64(len(results))},
+					})
+			}
 		}
 		if ctx.Err() != nil { // check if the context is not cancelled. The evaluation can be a long-running task.
 			logger.Debug("Skip updating the state because the context has been cancelled")
@@ -399,13 +403,15 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 		}
 		processedStates := sch.stateManager.ProcessEvalResults(ctx, e.scheduledAt, e.rule, results, sch.getRuleExtraLabels(e))
 		alerts := FromStateTransitionToPostableAlerts(processedStates, sch.stateManager, sch.appURL)
-		span.AddEvents(
-			[]string{"message", "state_transitions", "alerts_to_send"},
-			[]tracing.EventValue{
-				{Str: "results processed"},
-				{Num: int64(len(processedStates))},
-				{Num: int64(len(alerts.PostableAlerts))},
-			})
+		if span != nil {
+			span.AddEvents(
+				[]string{"message", "state_transitions", "alerts_to_send"},
+				[]tracing.EventValue{
+					{Str: "results processed"},
+					{Num: int64(len(processedStates))},
+					{Num: int64(len(alerts.PostableAlerts))},
+				})
+		}
 		if len(alerts.PostableAlerts) > 0 {
 			sch.alertsSender.Send(key, alerts)
 		}
@@ -468,14 +474,18 @@ func (sch *schedule) ruleRoutine(grafanaCtx context.Context, key ngmodels.AlertR
 						}
 						currentRuleVersion = newVersion
 					}
-					tracingCtx, span := sch.tracer.Start(grafanaCtx, "alert rule execution")
-					defer span.End()
+					var span tracing.Span
+					tracingCtx := grafanaCtx
+					if sch.tracer != nil { // tracer is optional.
+						tracingCtx, span = sch.tracer.Start(grafanaCtx, "alert rule execution")
+						defer span.End()
 
-					span.SetAttributes("rule_uid", ctx.rule.UID, attribute.String("rule_uid", ctx.rule.UID))
-					span.SetAttributes("org_id", ctx.rule.OrgID, attribute.Int64("org_id", ctx.rule.OrgID))
-					span.SetAttributes("rule_version", ctx.rule.Version, attribute.Int64("rule_version", ctx.rule.Version))
-					utcTick := ctx.scheduledAt.UTC().Format(time.RFC3339Nano)
-					span.SetAttributes("tick", utcTick, attribute.String("tick", utcTick))
+						span.SetAttributes("rule_uid", ctx.rule.UID, attribute.String("rule_uid", ctx.rule.UID))
+						span.SetAttributes("org_id", ctx.rule.OrgID, attribute.Int64("org_id", ctx.rule.OrgID))
+						span.SetAttributes("rule_version", ctx.rule.Version, attribute.Int64("rule_version", ctx.rule.Version))
+						utcTick := ctx.scheduledAt.UTC().Format(time.RFC3339Nano)
+						span.SetAttributes("tick", utcTick, attribute.String("tick", utcTick))
+					}
 
 					evaluate(tracingCtx, attempt, ctx, span)
 					return nil
