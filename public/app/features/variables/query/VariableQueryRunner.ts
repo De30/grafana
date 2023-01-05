@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   CoreApp,
   DataQuery,
+  DataQueryKind,
   DataQueryRequest,
   DataSourceApi,
   getDefaultTimeRange,
@@ -117,7 +118,7 @@ export class VariableQueryRunner {
       const request = this.getRequest(variable, args, target);
 
       runner
-        .runRequest(runnerArgs, request)
+        .runRequest(runnerArgs, { ...request, queryKind: DataQueryKind.Variable })
         .pipe(
           filter(() => {
             // Lets check if we started another batch during the execution of the observable. If so we just want to abort the rest.

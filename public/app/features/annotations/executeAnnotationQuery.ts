@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
-import { CoreApp, DataQueryRequest, DataSourceApi, rangeUtil, ScopedVars } from '@grafana/data';
+import { CoreApp, DataQueryKind, DataQueryRequest, DataSourceApi, rangeUtil, ScopedVars } from '@grafana/data';
 
 import { runRequest } from '../query/state/runRequest';
 
@@ -53,6 +53,7 @@ export function executeAnnotationQuery(
     scopedVars,
     ...interval,
     app: CoreApp.Dashboard,
+    queryKind: DataQueryKind.Annotation,
     publicDashboardAccessToken: options.dashboard.meta.publicDashboardAccessToken,
 
     timezone: options.dashboard.timezone,

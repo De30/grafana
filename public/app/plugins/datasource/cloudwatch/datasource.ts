@@ -34,6 +34,7 @@ import {
   CloudWatchLogsQuery,
   CloudWatchMetricsQuery,
   CloudWatchQuery,
+  VariableQueryType,
 } from './types';
 import { CloudWatchVariableSupport } from './variables';
 
@@ -178,7 +179,21 @@ export class CloudWatchDatasource
     return region;
   }
 
-  getDefaultQuery(_: CoreApp): Partial<CloudWatchQuery> {
+  getDefaultQuery(_: CoreApp, dataQueryType?: any): Partial<CloudWatchQuery> {
+    if (dataQueryType === 'variable') {
+      return {
+        queryType: VariableQueryType.Metrics,
+        region: 'us-east-2',
+        namespace: 'AWS/EC2',
+      };
+    } else if (dataQueryType === 'annotations') {
+      return {
+        statistic: 'Average',
+        region: 'default',
+        queryMode: 'Annotations',
+      };
+    }
+
     return {
       ...getDefaultLogsQuery(this.defaultLogGroups),
       ...DEFAULT_METRICS_QUERY,

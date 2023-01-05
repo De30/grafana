@@ -105,7 +105,7 @@ export interface CloudWatchLogsQuery extends DataQuery {
   logGroupNames?: string[];
 }
 // We want to allow setting defaults for both Logs and Metrics queries
-export type CloudWatchDefaultQuery = Omit<CloudWatchLogsQuery, 'queryMode'> & CloudWatchMetricsQuery;
+export type CloudWatchDefaultQuery = Omit<CloudWatchLogsQuery, 'queryMode'> & CloudWatchMetricsQuery & VariableQuery;
 
 export type CloudWatchQuery =
   | CloudWatchMetricsQuery

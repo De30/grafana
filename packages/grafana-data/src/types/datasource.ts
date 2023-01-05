@@ -10,7 +10,7 @@ import { KeyValue, LoadingState, TableData, TimeSeries } from './data';
 import { DataFrame, DataFrameDTO } from './dataFrame';
 import { PanelData } from './panel';
 import { GrafanaPlugin, PluginMeta } from './plugin';
-import { DataQuery } from './query';
+import { DataQuery, DataQueryKind } from './query';
 import { RawTimeRange, TimeRange } from './time';
 import { CustomVariableSupport, DataSourceVariableSupport, StandardVariableSupport } from './variables';
 
@@ -357,7 +357,7 @@ abstract class DataSourceApi<
    * Optionally, use this method to set default values for a query
    * @alpha -- experimental
    */
-  getDefaultQuery?(app: CoreApp): Partial<TQuery>;
+  getDefaultQuery?(app: CoreApp, dataQueryType?: string): Partial<TQuery>;
 }
 
 export interface MetadataInspectorProps<
@@ -485,6 +485,7 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   targets: TQuery[];
   timezone: string;
   app: CoreApp | string;
+  queryKind?: DataQueryKind;
 
   cacheTimeout?: string | null;
   rangeRaw?: RawTimeRange;
