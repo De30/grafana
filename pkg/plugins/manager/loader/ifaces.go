@@ -13,3 +13,8 @@ type Service interface {
 	// Unload will unload a specified plugin from the file system.
 	Unload(ctx context.Context, pluginID string) error
 }
+
+// RoleRegistry handles the plugin RBAC roles and their assignments
+type RoleRegistry interface {
+	DeclarePluginRoles(ctx context.Context, ID, name string, registrations []plugins.RoleRegistration) error
+}

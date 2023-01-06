@@ -5,6 +5,7 @@ import (
 
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/plugins"
+	"github.com/grafana/grafana/pkg/services/rendering"
 )
 
 type fakePluginInstaller struct {
@@ -34,7 +35,7 @@ func (pm *fakePluginInstaller) Remove(_ context.Context, pluginID string) error 
 }
 
 type fakeRendererManager struct {
-	pluginLib.RendererManager
+	rendering.RendererPluginManager
 }
 
 func (ps *fakeRendererManager) Renderer(_ context.Context) *pluginLib.Plugin {

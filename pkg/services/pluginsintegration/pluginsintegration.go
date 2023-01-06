@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/manager"
 	"github.com/grafana/grafana/pkg/plugins/manager/client"
 	"github.com/grafana/grafana/pkg/plugins/manager/loader"
+	"github.com/grafana/grafana/pkg/plugins/manager/loader/initializer"
 	"github.com/grafana/grafana/pkg/plugins/manager/process"
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/plugins/manager/repo"
@@ -21,6 +22,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/plugins/licensing"
 	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/clientmiddleware"
+	"github.com/grafana/grafana/pkg/services/rendering"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -28,7 +30,7 @@ import (
 var WireSet = wire.NewSet(
 	config.ProvideConfig,
 	store.ProvideService,
-	wire.Bind(new(pluginLib.RendererManager), new(*store.Service)),
+	wire.Bind(new(rendering.RendererPluginManager), new(*store.Service)),
 	wire.Bind(new(pluginLib.SecretsPluginManager), new(*store.Service)),
 
 	ProvidePlugins,
@@ -40,7 +42,7 @@ var WireSet = wire.NewSet(
 	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)), // TODO
 
 	licensing.ProvideLicensing,
-	wire.Bind(new(pluginLib.Licensing), new(*licensing.Service)),
+	wire.Bind(new(initializer.Licensing), new(*licensing.Service)),
 
 	ProvideClientDecorator,
 
@@ -68,7 +70,7 @@ var ProvidePlugins = wire.NewSet(
 // extended.
 var WireExtensionSet = wire.NewSet(
 	provider.ProvideService,
-	wire.Bind(new(pluginLib.BackendFactoryProvider), new(*provider.Service)),
+	wire.Bind(new(initializer.BackendFactoryProvider), new(*provider.Service)),
 	signature.ProvideOSSAuthorizer,
 	wire.Bind(new(signature.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
 )

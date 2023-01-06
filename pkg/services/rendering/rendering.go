@@ -47,10 +47,10 @@ type RenderingService struct {
 	perRequestRenderKeyProvider renderKeyProvider
 	Cfg                         *setting.Cfg
 	RemoteCacheService          *remotecache.RemoteCache
-	RendererPluginManager       plugins.RendererManager
+	RendererPluginManager       RendererPluginManager
 }
 
-func ProvideService(cfg *setting.Cfg, remoteCache *remotecache.RemoteCache, rm plugins.RendererManager) (*RenderingService, error) {
+func ProvideService(cfg *setting.Cfg, remoteCache *remotecache.RemoteCache, rm RendererPluginManager) (*RenderingService, error) {
 	// ensure ImagesDir exists
 	err := os.MkdirAll(cfg.ImagesDir, 0700)
 	if err != nil {

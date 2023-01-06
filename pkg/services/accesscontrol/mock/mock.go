@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/plugins/manager/loader"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/user"
 )
@@ -13,7 +14,7 @@ import (
 type fullAccessControl interface {
 	accesscontrol.AccessControl
 	accesscontrol.Service
-	plugins.RoleRegistry
+	loader.RoleRegistry
 	RegisterFixedRoles(context.Context) error
 }
 

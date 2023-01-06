@@ -15,6 +15,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/plugins/manager/loader"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/api"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/database"
@@ -24,7 +25,7 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-var _ pluginLib.RoleRegistry = &Service{}
+var _ loader.RoleRegistry = &Service{}
 
 const (
 	cacheTTL = 10 * time.Second

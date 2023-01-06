@@ -202,7 +202,7 @@ func Test_pluginSettings_ToEnv(t *testing.T) {
 }
 
 type fakeBackendProvider struct {
-	plugins.BackendFactoryProvider
+	BackendFactoryProvider
 
 	plugin *plugins.Plugin
 }

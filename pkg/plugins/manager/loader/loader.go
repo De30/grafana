@@ -38,7 +38,7 @@ type Loader struct {
 	pluginFinder       finder.Finder
 	processManager     process.Service
 	pluginRegistry     registry.Service
-	roleRegistry       plugins.RoleRegistry
+	roleRegistry       RoleRegistry
 	pluginInitializer  initializer.Initializer
 	signatureValidator signature.Validator
 	pluginStorage      storage.Manager
@@ -47,16 +47,16 @@ type Loader struct {
 	errs map[string]*plugins.SignatureError
 }
 
-func ProvideService(cfg *config.Cfg, license plugins.Licensing, authorizer signature.PluginLoaderAuthorizer,
-	pluginRegistry registry.Service, backendProvider plugins.BackendFactoryProvider,
-	roleRegistry plugins.RoleRegistry) *Loader {
+func ProvideService(cfg *config.Cfg, license initializer.Licensing, authorizer signature.PluginLoaderAuthorizer,
+	pluginRegistry registry.Service, backendProvider initializer.BackendFactoryProvider,
+	roleRegistry RoleRegistry) *Loader {
 	return New(cfg, license, authorizer, pluginRegistry, backendProvider, process.NewManager(pluginRegistry),
 		storage.FileSystem(logger.NewLogger("loader.fs"), cfg.PluginsPath), roleRegistry)
 }
 
-func New(cfg *config.Cfg, license plugins.Licensing, authorizer signature.PluginLoaderAuthorizer,
-	pluginRegistry registry.Service, backendProvider plugins.BackendFactoryProvider,
-	processManager process.Service, pluginStorage storage.Manager, roleRegistry plugins.RoleRegistry) *Loader {
+func New(cfg *config.Cfg, license initializer.Licensing, authorizer signature.PluginLoaderAuthorizer,
+	pluginRegistry registry.Service, backendProvider initializer.BackendFactoryProvider,
+	processManager process.Service, pluginStorage storage.Manager, roleRegistry RoleRegistry) *Loader {
 	return &Loader{
 		pluginFinder:       finder.New(),
 		pluginRegistry:     pluginRegistry,
