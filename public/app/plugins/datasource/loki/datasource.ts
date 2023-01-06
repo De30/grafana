@@ -162,7 +162,13 @@ export class LokiDatasource
       }
     });
 
-    const ui = LokiContextUi({
+    for (const [key] of this.contextFilters) {
+      if (!Object.keys(row.labels).includes(key)) {
+        this.contextFilters.delete(key);
+      }
+    }
+
+    return LokiContextUi({
       filters: this.contextFilters,
       updateFilter: (label: string, value: Map<string, ContextFilter>) => {
         this.contextFilters = value;
@@ -171,8 +177,6 @@ export class LokiDatasource
         }
       },
     });
-
-    return ui;
   }
 
   getLogsVolumeDataProvider(request: DataQueryRequest<LokiQuery>): Observable<DataQueryResponse> | undefined {
