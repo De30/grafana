@@ -38,7 +38,7 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 
 	plugin, exists := s.plugin(ctx, req.PluginContext.PluginID)
 	if !exists {
-		return nil, plugins.ErrPluginNotRegistered.Errorf("%w", backendplugin.ErrPluginNotRegistered)
+		return nil, ErrPluginNotRegistered.Errorf("%w", backendplugin.ErrPluginNotRegistered)
 	}
 
 	ctx = s.attachJWT(ctx, req.PluginContext)
@@ -51,14 +51,14 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 
 	if err != nil {
 		if errors.Is(err, backendplugin.ErrMethodNotImplemented) {
-			return nil, plugins.ErrMethodNotImplemented.Errorf("%w", backendplugin.ErrMethodNotImplemented)
+			return nil, ErrMethodNotImplemented.Errorf("%w", backendplugin.ErrMethodNotImplemented)
 		}
 
 		if errors.Is(err, backendplugin.ErrPluginUnavailable) {
-			return nil, plugins.ErrPluginUnavailable.Errorf("%w", backendplugin.ErrPluginUnavailable)
+			return nil, ErrPluginUnavailable.Errorf("%w", backendplugin.ErrPluginUnavailable)
 		}
 
-		return nil, plugins.ErrPluginDownstreamError.Errorf("%v: %w", "failed to query data", err)
+		return nil, ErrPluginDownstreamError.Errorf("%v: %w", "failed to query data", err)
 	}
 
 	for refID, res := range resp.Responses {

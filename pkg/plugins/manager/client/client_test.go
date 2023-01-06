@@ -24,7 +24,7 @@ func TestQueryData(t *testing.T) {
 		client := ProvideService(registry, &config.Cfg{}, pluginAuth)
 		_, err := client.QueryData(context.Background(), &backend.QueryDataRequest{})
 		require.Error(t, err)
-		require.ErrorIs(t, err, plugins.ErrPluginNotRegistered)
+		require.ErrorIs(t, err, ErrPluginNotRegistered)
 	})
 
 	t.Run("Non-empty registry", func(t *testing.T) {
@@ -34,15 +34,15 @@ func TestQueryData(t *testing.T) {
 		}{
 			{
 				err:           backendplugin.ErrPluginUnavailable,
-				expectedError: plugins.ErrPluginUnavailable,
+				expectedError: ErrPluginUnavailable,
 			},
 			{
 				err:           backendplugin.ErrMethodNotImplemented,
-				expectedError: plugins.ErrMethodNotImplemented,
+				expectedError: ErrMethodNotImplemented,
 			},
 			{
 				err:           errors.New("surprise surprise"),
-				expectedError: plugins.ErrPluginDownstreamError,
+				expectedError: ErrPluginDownstreamError,
 			},
 		}
 

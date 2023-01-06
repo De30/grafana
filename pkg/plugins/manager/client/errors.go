@@ -1,4 +1,4 @@
-package plugins
+package client
 
 import "github.com/grafana/grafana/pkg/util/errutil"
 
