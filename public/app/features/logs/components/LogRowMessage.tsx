@@ -26,9 +26,11 @@ interface Props extends Themeable2 {
   app?: CoreApp;
   scrollElement?: HTMLDivElement;
   showContextToggle?: (row?: LogRowModel) => boolean;
+  getLogRowContextUi?: (row: LogRowModel) => React.ReactNode;
   getRows: () => LogRowModel[];
   onToggleContext: (method: string) => void;
   updateLimit?: () => void;
+  refresh?: () => void;
   logsSortOrder?: LogsSortOrder | null;
 }
 
@@ -154,6 +156,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
       errors,
       hasMoreContextRows,
       updateLimit,
+      refresh,
       context,
       contextIsOpen,
       showRowMenu,
@@ -163,6 +166,7 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
       app,
       logsSortOrder,
       showContextToggle,
+      getLogRowContextUi,
     } = this.props;
 
     const style = getLogRowStyles(theme, row.logLevel);
@@ -191,6 +195,8 @@ class UnThemedLogRowMessage extends PureComponent<Props> {
             {contextIsOpen && context && (
               <LogRowContext
                 row={row}
+                getLogRowContextUi={getLogRowContextUi}
+                refresh={refresh}
                 context={context}
                 errors={errors}
                 wrapLogMessage={wrapLogMessage}

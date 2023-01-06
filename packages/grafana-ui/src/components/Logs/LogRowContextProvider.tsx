@@ -49,6 +49,7 @@ interface LogRowContextProviderProps {
     errors: LogRowContextQueryErrors;
     hasMoreContextRows: HasMoreContextRows;
     updateLimit: () => void;
+    refresh: () => void;
     limit: number;
   }) => JSX.Element;
 }
@@ -216,6 +217,7 @@ export const LogRowContextProvider: React.FunctionComponent<LogRowContextProvide
     },
     hasMoreContextRows,
     updateLimit: () => setLimit(limit + 10),
+    refresh: () => setLimit(limit),
     limit,
   });
 };

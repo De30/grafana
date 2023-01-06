@@ -53,6 +53,7 @@ interface Props extends Themeable2 {
   onClickFilterOutLabel?: (key: string, value: string) => void;
   onContextClick?: () => void;
   getRowContext: (row: LogRowModel, options?: RowContextOptions) => Promise<DataQueryResponse>;
+  getRowContextUi?: (row: LogRowModel) => React.ReactNode;
   getFieldLinks?: (field: Field, rowIndex: number, dataFrame: DataFrame) => Array<LinkModel<Field>>;
   showContextToggle?: (row?: LogRowModel) => boolean;
   onClickShowDetectedField?: (key: string) => void;
@@ -143,7 +144,9 @@ class UnThemedLogRow extends PureComponent<Props, State> {
     errors?: LogRowContextQueryErrors,
     hasMoreContextRows?: HasMoreContextRows,
     updateLimit?: () => void,
-    logsSortOrder?: LogsSortOrder | null
+    logsSortOrder?: LogsSortOrder | null,
+    getLogRowContextUi?: (row: LogRowModel) => React.ReactNode,
+    refresh?: () => void
   ) {
     const {
       getRows,
@@ -230,6 +233,8 @@ class UnThemedLogRow extends PureComponent<Props, State> {
               getRows={getRows}
               errors={errors}
               hasMoreContextRows={hasMoreContextRows}
+              getLogRowContextUi={getLogRowContextUi}
+              refresh={refresh}
               updateLimit={updateLimit}
               context={context}
               contextIsOpen={showContext}
@@ -273,8 +278,20 @@ class UnThemedLogRow extends PureComponent<Props, State> {
       return (
         <>
           <LogRowContextProvider row={row} getRowContext={getRowContext} logsSortOrder={logsSortOrder}>
-            {({ result, errors, hasMoreContextRows, updateLimit, logsSortOrder }) => {
-              return <>{this.renderLogRow(result, errors, hasMoreContextRows, updateLimit, logsSortOrder)}</>;
+            {({ result, errors, hasMoreContextRows, updateLimit, refresh, logsSortOrder }) => {
+              return (
+                <>
+                  {this.renderLogRow(
+                    result,
+                    errors,
+                    hasMoreContextRows,
+                    updateLimit,
+                    logsSortOrder,
+                    this.props.getRowContextUi,
+                    refresh
+                  )}
+                </>
+              );
             }}
           </LogRowContextProvider>
         </>

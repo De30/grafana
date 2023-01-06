@@ -79,6 +79,7 @@ interface Props extends Themeable2 {
   onStartScanning?: () => void;
   onStopScanning?: () => void;
   getRowContext?: (row: LogRowModel, options?: RowContextOptions) => Promise<any>;
+  getRowContextUi?: (row: LogRowModel) => React.ReactNode;
   getFieldLinks: (field: Field, rowIndex: number, dataFrame: DataFrame) => Array<LinkModel<Field>>;
   addResultsToCache: () => void;
   clearCache: () => void;
@@ -488,6 +489,7 @@ class UnthemedLogs extends PureComponent<Props, State> {
                 deduplicatedRows={dedupedRows}
                 dedupStrategy={dedupStrategy}
                 getRowContext={this.props.getRowContext}
+                getRowContextUi={this.props.getRowContextUi}
                 onClickFilterLabel={onClickFilterLabel}
                 onClickFilterOutLabel={onClickFilterOutLabel}
                 showContextToggle={showContextToggle}

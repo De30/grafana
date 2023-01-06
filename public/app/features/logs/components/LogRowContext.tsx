@@ -22,6 +22,8 @@ interface LogRowContextProps {
   logsSortOrder?: LogsSortOrder | null;
   onOutsideClick: (method: string) => void;
   onLoadMoreContext: () => void;
+  refresh?: () => void;
+  getLogRowContextUi?: (row: LogRowModel) => React.ReactNode;
 }
 
 const getLogRowContextStyles = (theme: GrafanaTheme2, wrapLogMessage?: boolean) => {
@@ -132,13 +134,14 @@ interface LogRowContextGroupHeaderProps {
   shouldScrollToBottom?: boolean;
   canLoadMoreRows?: boolean;
   logsSortOrder?: LogsSortOrder | null;
+  getLogRowContextUi?: (row: LogRowModel, refresh?: () => void) => React.ReactNode;
+  refresh?: () => void;
 }
 interface LogRowContextGroupProps extends LogRowContextGroupHeaderProps {
   rows: Array<string | DataQueryError>;
   groupPosition: LogGroupPosition;
   className?: string;
   error?: string;
-  logsSortOrder?: LogsSortOrder | null;
 }
 
 const LogRowContextGroupHeader: React.FunctionComponent<LogRowContextGroupHeaderProps> = ({
@@ -148,6 +151,8 @@ const LogRowContextGroupHeader: React.FunctionComponent<LogRowContextGroupHeader
   canLoadMoreRows,
   groupPosition,
   logsSortOrder,
+  getLogRowContextUi,
+  refresh,
 }) => {
   const { header, headerButton } = useStyles2(getLogRowContextStyles);
 
@@ -163,20 +168,23 @@ const LogRowContextGroupHeader: React.FunctionComponent<LogRowContextGroupHeader
   }
 
   return (
-    <div className={header}>
-      <span
-        className={css`
-          opacity: 0.6;
-        `}
-      >
-        Showing {rows.length} lines {logGroupPosition} match.
-      </span>
-      {(rows.length >= 10 || (rows.length > 10 && rows.length % 10 !== 0)) && canLoadMoreRows && (
-        <Button className={headerButton} variant="secondary" size="sm" onClick={onLoadMoreContext}>
-          Load 10 more lines
-        </Button>
-      )}
-    </div>
+    <>
+      {getLogRowContextUi && <div className={header}>{getLogRowContextUi(row, refresh)}</div>}
+      <div className={header}>
+        <span
+          className={css`
+            opacity: 0.6;
+          `}
+        >
+          Showing {rows.length} lines {logGroupPosition} match.
+        </span>
+        {(rows.length >= 10 || (rows.length > 10 && rows.length % 10 !== 0)) && canLoadMoreRows && (
+          <Button className={headerButton} variant="secondary" size="sm" onClick={onLoadMoreContext}>
+            Load 10 more lines
+          </Button>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -190,6 +198,8 @@ export const LogRowContextGroup: React.FunctionComponent<LogRowContextGroupProps
   onLoadMoreContext,
   groupPosition,
   logsSortOrder,
+  getLogRowContextUi,
+  refresh,
 }) => {
   const { commonStyles, logs } = useStyles2(getLogRowContextStyles);
   const [scrollTop, setScrollTop] = useState(0);
@@ -243,6 +253,8 @@ export const LogRowContextGroup: React.FunctionComponent<LogRowContextGroupProps
     canLoadMoreRows,
     groupPosition,
     logsSortOrder,
+    getLogRowContextUi,
+    refresh,
   };
 
   return (
@@ -284,9 +296,11 @@ export const LogRowContext: React.FunctionComponent<LogRowContextProps> = ({
   errors,
   onOutsideClick,
   onLoadMoreContext,
+  refresh,
   hasMoreContextRows,
   wrapLogMessage,
   logsSortOrder,
+  getLogRowContextUi,
 }) => {
   useEffect(() => {
     const handleEscKeyDown = (e: KeyboardEvent): void => {
@@ -319,6 +333,8 @@ export const LogRowContext: React.FunctionComponent<LogRowContextProps> = ({
             onLoadMoreContext={onLoadMoreContext}
             groupPosition={LogGroupPosition.Top}
             logsSortOrder={logsSortOrder}
+            getLogRowContextUi={getLogRowContextUi}
+            refresh={refresh}
           />
         )}
 

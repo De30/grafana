@@ -42,6 +42,7 @@ export interface Props extends Themeable2 {
   onClickFilterLabel?: (key: string, value: string) => void;
   onClickFilterOutLabel?: (key: string, value: string) => void;
   getRowContext?: (row: LogRowModel, options?: RowContextOptions) => Promise<any>;
+  getRowContextUi?: (row: LogRowModel) => React.ReactNode;
   getFieldLinks?: (field: Field, rowIndex: number, dataFrame: DataFrame) => Array<LinkModel<Field>>;
   onClickShowDetectedField?: (key: string) => void;
   onClickHideDetectedField?: (key: string) => void;
@@ -156,6 +157,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
                 key={row.uid}
                 getRows={getRows}
                 getRowContext={getRowContext}
+                getRowContextUi={this.props.getRowContextUi}
                 row={row}
                 showContextToggle={showContextToggle}
                 showRowMenu={!contextIsOpen}
@@ -187,6 +189,7 @@ class UnThemedLogRows extends PureComponent<Props, State> {
                 key={row.uid}
                 getRows={getRows}
                 getRowContext={getRowContext}
+                getRowContextUi={this.props.getRowContextUi}
                 row={row}
                 showContextToggle={showContextToggle}
                 showRowMenu={!contextIsOpen}

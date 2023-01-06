@@ -160,7 +160,7 @@ export function isQueryWithParser(query: string): { queryWithParser: boolean; pa
 
 export function getParserFromQuery(query: string) {
   const tree = parser.parse(query);
-  let logParser;
+  let logParser = '';
   tree.iterate({
     enter: (node: SyntaxNode): false | void => {
       if (node.type.id === LabelParser || node.type.id === JsonExpressionParser) {
