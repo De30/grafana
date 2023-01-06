@@ -21,11 +21,6 @@ type SecretsPluginManager interface {
 	SecretsManager(ctx context.Context) *Plugin
 }
 
-type PluginLoaderAuthorizer interface {
-	// CanLoadPlugin confirms if a plugin is authorized to load
-	CanLoadPlugin(plugin *Plugin) bool
-}
-
 type Licensing interface {
 	Environment() []string
 

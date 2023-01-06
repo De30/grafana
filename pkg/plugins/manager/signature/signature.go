@@ -6,11 +6,11 @@ import (
 )
 
 type Validator struct {
-	authorizer plugins.PluginLoaderAuthorizer
+	authorizer PluginLoaderAuthorizer
 	log        log.Logger
 }
 
-func NewValidator(authorizer plugins.PluginLoaderAuthorizer) Validator {
+func NewValidator(authorizer PluginLoaderAuthorizer) Validator {
 	return Validator{
 		authorizer: authorizer,
 		log:        log.New("plugin.signature.validator"),

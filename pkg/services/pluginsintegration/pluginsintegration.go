@@ -70,7 +70,7 @@ var WireExtensionSet = wire.NewSet(
 	provider.ProvideService,
 	wire.Bind(new(pluginLib.BackendFactoryProvider), new(*provider.Service)),
 	signature.ProvideOSSAuthorizer,
-	wire.Bind(new(pluginLib.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
+	wire.Bind(new(signature.PluginLoaderAuthorizer), new(*signature.UnsignedPluginAuthorizer)),
 )
 
 func ProvideClientDecorator(cfg *setting.Cfg, pCfg *config.Cfg,
