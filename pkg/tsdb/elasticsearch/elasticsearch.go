@@ -20,16 +20,13 @@ import (
 var eslog = log.New("tsdb.elasticsearch")
 
 type Service struct {
-	httpClientProvider httpclient.Provider
-	im                 instancemgmt.InstanceManager
+	im instancemgmt.InstanceManager
 }
 
 func ProvideService(httpClientProvider httpclient.Provider) *Service {
 	eslog.Debug("Initializing")
-
 	return &Service{
-		im:                 datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
-		httpClientProvider: httpClientProvider,
+		im: datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
 	}
 }
 

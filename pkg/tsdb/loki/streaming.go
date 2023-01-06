@@ -13,8 +13,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 )
 
 func (s *Service) SubscribeStream(_ context.Context, req *backend.SubscribeStreamRequest) (*backend.SubscribeStreamResponse, error) {
@@ -84,11 +82,8 @@ func (s *Service) RunStream(ctx context.Context, req *backend.RunStreamRequest, 
 	params := url.Values{}
 	params.Add("query", query.Expr)
 
-	lokiDataframeApi := s.features.IsEnabled(featuremgmt.FlagLokiDataframeApi)
-
 	wsurl, _ := url.Parse(dsInfo.URL)
-
-	if lokiDataframeApi {
+	if s.cfg.LokiDataframeAPIEnabled {
 		wsurl.Path = "/loki/api/v2alpha/tail"
 	} else {
 		wsurl.Path = "/loki/api/v1/tail"
@@ -133,7 +128,7 @@ func (s *Service) RunStream(ctx context.Context, req *backend.RunStreamRequest, 
 			}
 
 			frame := &data.Frame{}
-			if !lokiDataframeApi {
+			if !s.cfg.LokiDataframeAPIEnabled {
 				frame, err = lokiBytesToLabeledFrame(message)
 			} else {
 				err = json.Unmarshal(message, &frame)

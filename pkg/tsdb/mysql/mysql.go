@@ -34,8 +34,7 @@ const (
 var logger = log.New("tsdb.mysql")
 
 type Service struct {
-	Cfg *setting.Cfg
-	im  instancemgmt.InstanceManager
+	im instancemgmt.InstanceManager
 }
 
 func characterEscape(s string, escapeChar string) string {

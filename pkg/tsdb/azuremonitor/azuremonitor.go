@@ -42,10 +42,9 @@ func ProvideService(cfg *setting.Cfg, httpClientProvider *httpclient.Provider, t
 	s := &Service{
 		im:        im,
 		executors: executors,
-		tracer:    tracer,
 	}
 
-	s.queryMux = s.newQueryMux()
+	s.queryMux = s.newQueryMux(tracer)
 	s.resourceHandler = httpadapter.New(s.newResourceMux())
 
 	return s
@@ -65,7 +64,6 @@ type Service struct {
 
 	queryMux        *datasource.QueryTypeMux
 	resourceHandler backend.CallResourceHandler
-	tracer          tracing.Tracer
 }
 
 func getDatasourceService(cfg *setting.Cfg, clientProvider *httpclient.Provider, dsInfo types.DatasourceInfo, routeName string, httpClientOptions httpclient.Options) (types.DatasourceService, error) {
@@ -184,7 +182,7 @@ func (s *Service) getDataSourceFromPluginReq(req *backend.QueryDataRequest) (typ
 	return dsInfo, nil
 }
 
-func (s *Service) newQueryMux() *datasource.QueryTypeMux {
+func (s *Service) newQueryMux(tracer tracing.Tracer) *datasource.QueryTypeMux {
 	mux := datasource.NewQueryTypeMux()
 	for dsType := range s.executors {
 		// Make a copy of the string to keep the reference after the iterator
@@ -199,7 +197,7 @@ func (s *Service) newQueryMux() *datasource.QueryTypeMux {
 			if !ok {
 				return nil, fmt.Errorf("missing service for %s", dst)
 			}
-			return executor.ExecuteTimeSeriesQuery(ctx, logger, req.Queries, dsInfo, service.HTTPClient, service.URL, s.tracer)
+			return executor.ExecuteTimeSeriesQuery(ctx, logger, req.Queries, dsInfo, service.HTTPClient, service.URL, tracer)
 		})
 	}
 	return mux

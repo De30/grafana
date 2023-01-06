@@ -16,8 +16,19 @@ import (
 )
 
 func ProvideService(cfg *setting.Cfg, features featuremgmt.FeatureToggles) *Service {
+	return New(Config{
+		StaticRootPath:      cfg.StaticRootPath,
+		LivePipelineEnabled: features.IsEnabled(featuremgmt.FlagLivePipeline),
+	})
+}
+
+type Config struct {
+	StaticRootPath      string
+	LivePipelineEnabled bool
+}
+
+func New(cfg Config) *Service {
 	s := &Service{
-		features:  features,
 		queryMux:  datasource.NewQueryTypeMux(),
 		scenarios: map[string]*Scenario{},
 		frame: data.NewFrame("testdata",
@@ -48,14 +59,13 @@ func ProvideService(cfg *setting.Cfg, features featuremgmt.FeatureToggles) *Serv
 }
 
 type Service struct {
-	cfg             *setting.Cfg
+	cfg             Config
 	logger          log.Logger
 	scenarios       map[string]*Scenario
 	frame           *data.Frame
 	labelFrame      *data.Frame
 	queryMux        *datasource.QueryTypeMux
 	resourceHandler backend.CallResourceHandler
-	features        featuremgmt.FeatureToggles
 	sims            *sims.SimulationEngine
 }
 

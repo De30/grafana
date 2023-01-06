@@ -65,10 +65,8 @@ const (
 
 func ProvideService(httpClientProvider httpclient.Provider, tracer tracing.Tracer) *Service {
 	s := &Service{
-		tracer:             tracer,
-		httpClientProvider: httpClientProvider,
-		im:                 datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
-
+		tracer:                  tracer,
+		im:                      datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
 		gceDefaultProjectGetter: utils.GCEDefaultProject,
 	}
 
@@ -124,9 +122,8 @@ func (s *Service) CheckHealth(ctx context.Context, req *backend.CheckHealthReque
 }
 
 type Service struct {
-	httpClientProvider httpclient.Provider
-	im                 instancemgmt.InstanceManager
-	tracer             tracing.Tracer
+	im     instancemgmt.InstanceManager
+	tracer tracing.Tracer
 
 	resourceHandler backend.CallResourceHandler
 

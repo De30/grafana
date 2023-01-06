@@ -36,8 +36,8 @@ func ProvideService(httpClientProvider httpclient.Provider) *Service {
 }
 
 type datasourceInfo struct {
-	HTTPClient *http.Client
-	URL        string
+	httpClient *http.Client
+	url        string
 }
 
 type DsAccess string
@@ -55,8 +55,8 @@ func newInstanceSettings(httpClientProvider httpclient.Provider) datasource.Inst
 		}
 
 		model := &datasourceInfo{
-			HTTPClient: client,
-			URL:        settings.URL,
+			httpClient: client,
+			url:        settings.URL,
 		}
 
 		return model, nil
@@ -93,7 +93,7 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 		return &backend.QueryDataResponse{}, err
 	}
 
-	res, err := dsInfo.HTTPClient.Do(request)
+	res, err := dsInfo.httpClient.Do(request)
 	if err != nil {
 		return &backend.QueryDataResponse{}, err
 	}
@@ -107,7 +107,7 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 }
 
 func (s *Service) createRequest(ctx context.Context, logger log.Logger, dsInfo *datasourceInfo, data OpenTsdbQuery) (*http.Request, error) {
-	u, err := url.Parse(dsInfo.URL)
+	u, err := url.Parse(dsInfo.url)
 	if err != nil {
 		return nil, err
 	}

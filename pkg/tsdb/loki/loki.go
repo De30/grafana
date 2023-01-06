@@ -24,9 +24,13 @@ import (
 var logger = log.New("tsdb.loki")
 
 type Service struct {
-	im       instancemgmt.InstanceManager
-	features featuremgmt.FeatureToggles
-	tracer   tracing.Tracer
+	im     instancemgmt.InstanceManager
+	tracer tracing.Tracer
+	cfg    Config
+}
+
+type Config struct {
+	LokiDataframeAPIEnabled bool
 }
 
 var (
@@ -37,9 +41,9 @@ var (
 
 func ProvideService(httpClientProvider httpclient.Provider, features featuremgmt.FeatureToggles, tracer tracing.Tracer) *Service {
 	return &Service{
-		im:       datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
-		features: features,
-		tracer:   tracer,
+		im:     datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
+		tracer: tracer,
+		cfg:    Config{LokiDataframeAPIEnabled: features.IsEnabled(featuremgmt.FlagLokiDataframeApi)},
 	}
 }
 

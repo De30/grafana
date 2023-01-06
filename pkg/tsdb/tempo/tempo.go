@@ -30,8 +30,8 @@ func ProvideService(httpClientProvider httpclient.Provider) *Service {
 }
 
 type datasourceInfo struct {
-	HTTPClient *http.Client
-	URL        string
+	httpClient *http.Client
+	url        string
 }
 
 type QueryModel struct {
@@ -51,8 +51,8 @@ func newInstanceSettings(httpClientProvider httpclient.Provider) datasource.Inst
 		}
 
 		model := &datasourceInfo{
-			HTTPClient: client,
-			URL:        settings.URL,
+			httpClient: client,
+			url:        settings.URL,
 		}
 		return model, nil
 	}
@@ -79,7 +79,7 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 		return result, err
 	}
 
-	resp, err := dsInfo.HTTPClient.Do(request)
+	resp, err := dsInfo.httpClient.Do(request)
 	if err != nil {
 		return result, fmt.Errorf("failed get to tempo: %w", err)
 	}
@@ -121,9 +121,9 @@ func (s *Service) QueryData(ctx context.Context, req *backend.QueryDataRequest) 
 func (s *Service) createRequest(ctx context.Context, dsInfo *datasourceInfo, traceID string, start int64, end int64) (*http.Request, error) {
 	var tempoQuery string
 	if start == 0 || end == 0 {
-		tempoQuery = fmt.Sprintf("%s/api/traces/%s", dsInfo.URL, traceID)
+		tempoQuery = fmt.Sprintf("%s/api/traces/%s", dsInfo.url, traceID)
 	} else {
-		tempoQuery = fmt.Sprintf("%s/api/traces/%s?start=%d&end=%d", dsInfo.URL, traceID, start, end)
+		tempoQuery = fmt.Sprintf("%s/api/traces/%s?start=%d&end=%d", dsInfo.url, traceID, start, end)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", tempoQuery, nil)

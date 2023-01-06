@@ -63,16 +63,14 @@ var aliasFormat = regexp.MustCompile(`\{\{\s*(.+?)\s*\}\}`)
 func ProvideService(cfg *setting.Cfg, httpClientProvider httpclient.Provider, features featuremgmt.FeatureToggles) *CloudWatchService {
 	logger.Debug("Initializing")
 
-	executor := newExecutor(datasource.NewInstanceManager(NewInstanceSettings(httpClientProvider)), cfg, awsds.NewSessionCache(), features)
-
+	executor := newExecutor(datasource.NewInstanceManager(NewInstanceSettings(httpClientProvider)),
+		clients.Config{AWSListMetricsPageLimit: cfg.AWSListMetricsPageLimit}, awsds.NewSessionCache(), features)
 	return &CloudWatchService{
-		Cfg:      cfg,
 		Executor: executor,
 	}
 }
 
 type CloudWatchService struct {
-	Cfg      *setting.Cfg
 	Executor *cloudWatchExecutor
 }
 
@@ -80,7 +78,7 @@ type SessionCache interface {
 	GetSession(c awsds.SessionConfig) (*session.Session, error)
 }
 
-func newExecutor(im instancemgmt.InstanceManager, cfg *setting.Cfg, sessions SessionCache, features featuremgmt.FeatureToggles) *cloudWatchExecutor {
+func newExecutor(im instancemgmt.InstanceManager, cfg clients.Config, sessions SessionCache, features featuremgmt.FeatureToggles) *cloudWatchExecutor {
 	e := &cloudWatchExecutor{
 		im:       im,
 		cfg:      cfg,
@@ -114,7 +112,7 @@ func NewInstanceSettings(httpClientProvider httpclient.Provider) datasource.Inst
 // cloudWatchExecutor executes CloudWatch requests.
 type cloudWatchExecutor struct {
 	im       instancemgmt.InstanceManager
-	cfg      *setting.Cfg
+	cfg      clients.Config
 	sessions SessionCache
 	features featuremgmt.FeatureToggles
 
@@ -247,7 +245,7 @@ func (e *cloudWatchExecutor) newSession(pluginCtx backend.PluginContext, region 
 
 	return e.sessions.GetSession(awsds.SessionConfig{
 		// https://github.com/grafana/grafana/issues/46365
-		// HTTPClient: dsInfo.HTTPClient,
+		// httpClient: dsInfo.httpClient,
 		Settings: awsds.AWSDatasourceSettings{
 			Profile:       instance.Settings.Profile,
 			Region:        region,
