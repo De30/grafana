@@ -13,7 +13,8 @@ import {
   RelativeTimeRange,
   ThresholdsConfig,
 } from '@grafana/data';
-import { RelativeTimeRangePicker, useStyles2, Tooltip, Icon, Stack } from '@grafana/ui';
+import { Stack } from '@grafana/experimental';
+import { RelativeTimeRangePicker, useStyles2, Tooltip, Icon, GraphTresholdsStyleMode } from '@grafana/ui';
 import { isExpressionQuery } from 'app/features/expressions/guards';
 import { QueryEditorRow } from 'app/features/query/components/QueryEditorRow';
 import { AlertQuery } from 'app/types/unified-alerting-dto';
@@ -38,7 +39,8 @@ interface Props {
   onRunQueries: () => void;
   index: number;
   thresholds: ThresholdsConfig;
-  onChangeThreshold: (thresholds: ThresholdsConfig, index: number) => void;
+  thresholdsType?: GraphTresholdsStyleMode;
+  onChangeThreshold?: (thresholds: ThresholdsConfig, index: number) => void;
   condition: string | null;
   onSetCondition: (refId: string) => void;
 }
@@ -57,6 +59,7 @@ export const QueryWrapper: FC<Props> = ({
   query,
   queries,
   thresholds,
+  thresholdsType,
   onChangeThreshold,
   condition,
   onSetCondition,
@@ -140,7 +143,8 @@ export const QueryWrapper: FC<Props> = ({
               changePanel={changePluginId}
               currentPanel={pluginId}
               thresholds={thresholds}
-              onThresholdsChange={(thresholds) => onChangeThreshold(thresholds, index)}
+              thresholdsType={thresholdsType}
+              onThresholdsChange={onChangeThreshold ? (thresholds) => onChangeThreshold(thresholds, index) : undefined}
             />
           ) : null
         }

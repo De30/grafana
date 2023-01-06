@@ -59,7 +59,7 @@ export class PublicDashboardDataSource extends DataSourceApi<DataQuery, DataSour
   }
 
   private static isMixedDatasource(datasource: DataSourceRef | string | DataSourceApi | null): boolean {
-    if (typeof datasource === 'string' || datasource === null) {
+    if (typeof datasource === 'string' || datasource == null) {
       return false;
     }
 
@@ -67,7 +67,7 @@ export class PublicDashboardDataSource extends DataSourceApi<DataQuery, DataSour
   }
 
   private static resolveInterval(datasource: DataSourceRef | string | DataSourceApi | null): string {
-    if (typeof datasource === 'string' || datasource === null) {
+    if (typeof datasource === 'string' || datasource == null) {
       return DEFAULT_INTERVAL;
     }
 
@@ -100,7 +100,7 @@ export class PublicDashboardDataSource extends DataSourceApi<DataQuery, DataSour
 
     // Its a datasource query
     else {
-      const body: any = { intervalMs, maxDataPoints };
+      const body = { intervalMs, maxDataPoints };
 
       return getBackendSrv()
         .fetch<BackendDataSourceResponse>({
@@ -130,12 +130,15 @@ export class PublicDashboardDataSource extends DataSourceApi<DataQuery, DataSour
       from: from.valueOf(),
       to: to.valueOf(),
     };
-    const annotations = await getBackendSrv().get(`/api/public/dashboards/${accessToken}/annotations`, params);
+
+    const annotations = accessToken
+      ? await getBackendSrv().get(`/api/public/dashboards/${accessToken}/annotations`, params)
+      : [];
 
     return { data: [toDataFrame(annotations)] };
   }
 
-  testDatasource(): Promise<any> {
+  testDatasource(): Promise<null> {
     return Promise.resolve(null);
   }
 }

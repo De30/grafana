@@ -2,7 +2,8 @@ import { css } from '@emotion/css';
 import React from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, Stack, ToolbarButton, useStyles2 } from '@grafana/ui';
+import { Stack } from '@grafana/experimental';
+import { Button, ToolbarButton, useStyles2 } from '@grafana/ui';
 
 import { SceneObjectBase } from '../core/SceneObjectBase';
 import { SceneObject, SceneLayoutChildState, SceneComponentProps, SceneLayout } from '../core/types';
@@ -12,25 +13,25 @@ interface NestedSceneState extends SceneLayoutChildState {
   isCollapsed?: boolean;
   canCollapse?: boolean;
   canRemove?: boolean;
-  layout: SceneLayout;
+  body: SceneLayout;
   actions?: SceneObject[];
 }
 
 export class NestedScene extends SceneObjectBase<NestedSceneState> {
-  static Component = NestedSceneRenderer;
+  public static Component = NestedSceneRenderer;
 
-  onToggle = () => {
+  public onToggle = () => {
     this.setState({
       isCollapsed: !this.state.isCollapsed,
-      size: {
-        ...this.state.size,
+      placement: {
+        ...this.state.placement,
         ySizing: this.state.isCollapsed ? 'fill' : 'content',
       },
     });
   };
 
   /** Removes itself from its parent's children array */
-  onRemove = () => {
+  public onRemove = () => {
     const parent = this.parent!;
     if ('children' in parent.state) {
       parent.setState({
@@ -41,7 +42,7 @@ export class NestedScene extends SceneObjectBase<NestedSceneState> {
 }
 
 export function NestedSceneRenderer({ model, isEditing }: SceneComponentProps<NestedScene>) {
-  const { title, isCollapsed, canCollapse, canRemove, layout, actions } = model.useState();
+  const { title, isCollapsed, canCollapse, canRemove, body, actions } = model.useState();
   const styles = useStyles2(getStyles);
 
   const toolbarActions = (actions ?? []).map((action) => <action.Component key={action.state.key} model={action} />);
@@ -80,7 +81,7 @@ export function NestedSceneRenderer({ model, isEditing }: SceneComponentProps<Ne
         </Stack>
         <div className={styles.actions}>{toolbarActions}</div>
       </div>
-      {!isCollapsed && <layout.Component model={layout} isEditing={isEditing} />}
+      {!isCollapsed && <body.Component model={body} isEditing={isEditing} />}
     </div>
   );
 }

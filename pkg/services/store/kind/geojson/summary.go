@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/store"
 )
 
-func GetObjectKindInfo() models.ObjectKindInfo {
-	return models.ObjectKindInfo{
+func GetEntityKindInfo() models.EntityKindInfo {
+	return models.EntityKindInfo{
 		ID:            models.StandardKindGeoJSON,
 		Name:          "GeoJSON",
 		Description:   "JSON formatted spatial data",
@@ -20,8 +20,8 @@ func GetObjectKindInfo() models.ObjectKindInfo {
 }
 
 // Very basic geojson validator
-func GetObjectSummaryBuilder() models.ObjectSummaryBuilder {
-	return func(ctx context.Context, uid string, body []byte) (*models.ObjectSummary, []byte, error) {
+func GetEntitySummaryBuilder() models.EntitySummaryBuilder {
+	return func(ctx context.Context, uid string, body []byte) (*models.EntitySummary, []byte, error) {
 		var geojson map[string]interface{}
 		err := json.Unmarshal(body, &geojson)
 		if err != nil {
@@ -38,9 +38,9 @@ func GetObjectSummaryBuilder() models.ObjectSummaryBuilder {
 			return nil, nil, err
 		}
 
-		summary := &models.ObjectSummary{
+		summary := &models.EntitySummary{
 			Kind: models.StandardKindGeoJSON,
-			Name: guessNameFromUID(uid),
+			Name: store.GuessNameFromUID(uid),
 			UID:  uid,
 			Fields: map[string]interface{}{
 				"type": ftype,
@@ -56,16 +56,4 @@ func GetObjectSummaryBuilder() models.ObjectSummaryBuilder {
 
 		return summary, body, nil
 	}
-}
-
-func guessNameFromUID(uid string) string {
-	sidx := strings.LastIndex(uid, "/") + 1
-	didx := strings.LastIndex(uid, ".")
-	if didx > sidx && didx != sidx {
-		return uid[sidx:didx]
-	}
-	if sidx > 0 {
-		return uid[sidx:]
-	}
-	return uid
 }

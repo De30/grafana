@@ -1,7 +1,6 @@
 ---
 aliases:
-  - /docs/grafana/latest/auth/jwt/
-  - /docs/grafana/latest/setup-grafana/configure-security/configure-authentication/jwt/
+  - ../../../auth/jwt/
 description: Grafana JWT Authentication
 title: Configure JWT Authentication
 weight: 500
@@ -78,6 +77,8 @@ can use URL login instead.
 
 `url_login` allows grafana to search for a JWT in the URL query parameter
 `auth_token` and use it as the authentication token.
+
+**Note**: You need to have enabled JWT before setting this setting see section Enabled JWT
 
 > **Warning**: this can lead to JWTs being exposed in logs and possible session hijacking if the server is not
 > using HTTP over TLS.

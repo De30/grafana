@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"golang.org/x/oauth2"
 
@@ -97,8 +96,7 @@ func (hs *HTTPServer) OAuthLogin(ctx *models.ReqContext) {
 
 	code := ctx.Query("code")
 	if code == "" {
-		opts := []oauth2.AuthCodeOption{oauth2.AccessTypeOnline}
-
+		var opts []oauth2.AuthCodeOption
 		if provider.UsePKCE {
 			ascii, pkce, err := genPKCECode()
 			if err != nil {
@@ -195,10 +193,15 @@ func (hs *HTTPServer) OAuthLogin(ctx *models.ReqContext) {
 	token.TokenType = "Bearer"
 
 	if hs.Cfg.Env != setting.Dev {
-		oauthLogger.Debug("OAuthLogin: got token", "expiry", fmt.Sprintf("%v", token.Expiry))
+		oauthLogger.Debug("OAuthLogin: got token",
+			"expiry", fmt.Sprintf("%v", token.Expiry),
+			"type", token.TokenType,
+			"has_refresh_token", token.RefreshToken != "",
+		)
 	} else {
 		oauthLogger.Debug("OAuthLogin: got token",
 			"expiry", fmt.Sprintf("%v", token.Expiry),
+			"type", token.TokenType,
 			"access_token", fmt.Sprintf("%v", token.AccessToken),
 			"refresh_token", fmt.Sprintf("%v", token.RefreshToken),
 		)
@@ -254,7 +257,7 @@ func (hs *HTTPServer) OAuthLogin(ctx *models.ReqContext) {
 	hs.HooksService.RunLoginHook(&loginInfo, ctx)
 	metrics.MApiLoginOAuth.Inc()
 
-	if redirectTo, err := url.QueryUnescape(ctx.GetCookie("redirect_to")); err == nil && len(redirectTo) > 0 {
+	if redirectTo := ctx.GetCookie("redirect_to"); len(redirectTo) > 0 {
 		if err := hs.ValidateRedirectTo(redirectTo); err == nil {
 			cookies.DeleteCookie(ctx.Resp, "redirect_to", hs.CookieOptionsFromCfg)
 			ctx.Redirect(redirectTo)

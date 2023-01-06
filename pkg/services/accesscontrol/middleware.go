@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/middleware/cookies"
-
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/models/usertoken"
+	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
@@ -41,7 +42,7 @@ func Middleware(ac AccessControl) func(web.Handler, Evaluator) web.Handler {
 				}
 			}
 
-			var revokedErr *models.TokenRevokedError
+			var revokedErr *usertoken.TokenRevokedError
 			if errors.As(c.LookupTokenErr, &revokedErr) {
 				unauthorized(c, revokedErr)
 				return
@@ -84,6 +85,7 @@ func deny(c *models.ReqContext, evaluator Evaluator, err error) {
 
 	if !c.IsApiRequest() {
 		// TODO(emil): I'd like to show a message after this redirect, not sure how that can be done?
+		writeRedirectCookie(c)
 		c.Redirect(setting.AppSubUrl + "/")
 		return
 	}
@@ -110,7 +112,7 @@ func unauthorized(c *models.ReqContext, err error) {
 			"message": "Unauthorized",
 		}
 
-		var revokedErr *models.TokenRevokedError
+		var revokedErr *usertoken.TokenRevokedError
 		if errors.As(err, &revokedErr) {
 			response["message"] = "Token revoked"
 			response["error"] = map[string]interface{}{
@@ -214,7 +216,7 @@ func UseOrgFromContextParams(c *models.ReqContext) (int64, error) {
 
 	// Special case of macaron handling invalid params
 	if orgID == 0 || err != nil {
-		return 0, models.ErrOrgNotFound
+		return 0, org.ErrOrgNotFound
 	}
 
 	return orgID, nil

@@ -6,6 +6,10 @@ import { CompletionDataProvider } from './CompletionDataProvider';
 import { getCompletions } from './completions';
 import { Label, Situation } from './situation';
 
+jest.mock('../../../querybuilder/operations', () => ({
+  explainOperator: () => 'Operator docs',
+}));
+
 const history = [
   {
     ts: 12345678,
@@ -25,7 +29,8 @@ const history = [
 
 const labelNames = ['place', 'source'];
 const labelValues = ['moon', 'luna', 'server\\1'];
-const extractedLabelKeys = ['extracted', 'label'];
+// Source is duplicated to test handling duplicated labels
+const extractedLabelKeys = ['extracted', 'place', 'source'];
 const otherLabels: Label[] = [
   {
     name: 'place',
@@ -35,104 +40,107 @@ const otherLabels: Label[] = [
 ];
 const afterSelectorCompletions = [
   {
-    documentation: 'Log line contains string',
+    documentation: 'Operator docs',
     insertText: '|= "$0"',
     isSnippet: true,
     label: '|= ""',
     type: 'LINE_FILTER',
   },
   {
-    documentation: 'Log line does not contain string',
+    documentation: 'Operator docs',
     insertText: '!= "$0"',
     isSnippet: true,
     label: '!= ""',
     type: 'LINE_FILTER',
   },
   {
-    documentation: 'Log line contains a match to the regular expression',
+    documentation: 'Operator docs',
     insertText: '|~ "$0"',
     isSnippet: true,
     label: '|~ ""',
     type: 'LINE_FILTER',
   },
   {
-    documentation: 'Log line does not contain a match to the regular expression',
+    documentation: 'Operator docs',
     insertText: '!~ "$0"',
     isSnippet: true,
     label: '!~ ""',
     type: 'LINE_FILTER',
   },
   {
-    documentation: 'Parse and extract labels from the log content.',
+    documentation: 'Operator docs',
     insertText: '',
     label: '// Placeholder for the detected parser',
     type: 'DETECTED_PARSER_PLACEHOLDER',
   },
   {
-    documentation: 'Parse and extract labels from the log content.',
+    documentation: 'Operator docs',
     insertText: '',
     label: '// Placeholder for logfmt or json',
     type: 'OPPOSITE_PARSER_PLACEHOLDER',
   },
   {
-    documentation: 'Parse and extract labels from the log content.',
+    documentation: 'Operator docs',
     insertText: '| pattern',
     label: 'pattern',
     type: 'PARSER',
   },
   {
-    documentation: 'Parse and extract labels from the log content.',
+    documentation: 'Operator docs',
     insertText: '| regexp',
     label: 'regexp',
     type: 'PARSER',
   },
   {
-    documentation: 'Parse and extract labels from the log content.',
+    documentation: 'Operator docs',
     insertText: '| unpack',
     label: 'unpack',
     type: 'PARSER',
   },
   {
     insertText: '| unwrap extracted',
-    label: 'unwrap extracted (detected)',
-    type: 'LINE_FILTER',
+    label: 'unwrap extracted',
+    type: 'PIPE_OPERATION',
   },
   {
-    insertText: '| unwrap label',
-    label: 'unwrap label (detected)',
-    type: 'LINE_FILTER',
+    insertText: '| unwrap place',
+    label: 'unwrap place',
+    type: 'PIPE_OPERATION',
+  },
+  {
+    insertText: '| unwrap source',
+    label: 'unwrap source',
+    type: 'PIPE_OPERATION',
   },
   {
     insertText: '| unwrap',
     label: 'unwrap',
     type: 'PIPE_OPERATION',
+    documentation: 'Operator docs',
   },
   {
     insertText: '| line_format "{{.$0}}"',
     isSnippet: true,
     label: 'line_format',
     type: 'PIPE_OPERATION',
+    documentation: 'Operator docs',
   },
   {
     insertText: '| label_format',
     isSnippet: true,
     label: 'label_format',
     type: 'PIPE_OPERATION',
+    documentation: 'Operator docs',
   },
 ];
 
-function buildAfterSelectorCompletions(
-  detectedParser: string,
-  detectedParserType: string,
-  otherParser: string,
-  afterPipe: boolean
-) {
+function buildAfterSelectorCompletions(detectedParser: string, otherParser: string, afterPipe: boolean) {
   const explanation = '(detected)';
   const expectedCompletions = afterSelectorCompletions.map((completion) => {
     if (completion.type === 'DETECTED_PARSER_PLACEHOLDER') {
       return {
         ...completion,
-        type: detectedParserType,
+        type: 'PARSER',
         label: `${detectedParser} ${explanation}`,
         insertText: `| ${detectedParser}`,
       };
@@ -169,7 +177,9 @@ describe('getCompletions', () => {
   beforeEach(() => {
     datasource = createLokiDatasource();
     languageProvider = new LokiLanguageProvider(datasource);
-    completionProvider = new CompletionDataProvider(languageProvider, history);
+    completionProvider = new CompletionDataProvider(languageProvider, {
+      current: history,
+    });
 
     jest.spyOn(completionProvider, 'getLabelNames').mockResolvedValue(labelNames);
     jest.spyOn(completionProvider, 'getLabelValues').mockResolvedValue(labelValues);
@@ -184,11 +194,11 @@ describe('getCompletions', () => {
     const situation = { type } as Situation;
     const completions = await getCompletions(situation, completionProvider);
 
-    expect(completions).toHaveLength(25);
+    expect(completions).toHaveLength(24);
   });
 
-  test('Returns completion options when the situation is IN_DURATION', async () => {
-    const situation: Situation = { type: 'IN_DURATION' };
+  test('Returns completion options when the situation is IN_RANGE', async () => {
+    const situation: Situation = { type: 'IN_RANGE' };
     const completions = await getCompletions(situation, completionProvider);
 
     expect(completions).toEqual([
@@ -204,10 +214,16 @@ describe('getCompletions', () => {
   });
 
   test('Returns completion options when the situation is IN_GROUPING', async () => {
-    const situation: Situation = { type: 'IN_GROUPING', otherLabels };
+    const situation: Situation = { type: 'IN_GROUPING', logQuery: '' };
     const completions = await getCompletions(situation, completionProvider);
 
     expect(completions).toEqual([
+      {
+        insertText: 'extracted',
+        label: 'extracted',
+        triggerOnInsert: false,
+        type: 'LABEL_NAME',
+      },
       {
         insertText: 'place',
         label: 'place',
@@ -217,18 +233,6 @@ describe('getCompletions', () => {
       {
         insertText: 'source',
         label: 'source',
-        triggerOnInsert: false,
-        type: 'LABEL_NAME',
-      },
-      {
-        insertText: 'extracted',
-        label: 'extracted (parsed)',
-        triggerOnInsert: false,
-        type: 'LABEL_NAME',
-      },
-      {
-        insertText: 'label',
-        label: 'label (parsed)',
         triggerOnInsert: false,
         type: 'LABEL_NAME',
       },
@@ -304,33 +308,33 @@ describe('getCompletions', () => {
   });
 
   test.each([true, false])(
-    'Returns completion options when the situation is AFTER_SELECTOR, JSON parser, and afterPipe %s',
+    'Returns completion options when the situation is AFTER_SELECTOR, detected JSON parser, and afterPipe %s',
     async (afterPipe: boolean) => {
       jest.spyOn(completionProvider, 'getParserAndLabelKeys').mockResolvedValue({
         extractedLabelKeys,
         hasJSON: true,
         hasLogfmt: false,
       });
-      const situation: Situation = { type: 'AFTER_SELECTOR', labels: [], afterPipe };
+      const situation: Situation = { type: 'AFTER_SELECTOR', logQuery: '', afterPipe };
       const completions = await getCompletions(situation, completionProvider);
 
-      const expected = buildAfterSelectorCompletions('json', 'PARSER', 'logfmt', afterPipe);
+      const expected = buildAfterSelectorCompletions('json', 'logfmt', afterPipe);
       expect(completions).toEqual(expected);
     }
   );
 
   test.each([true, false])(
-    'Returns completion options when the situation is AFTER_SELECTOR, Logfmt parser, and afterPipe %s',
+    'Returns completion options when the situation is AFTER_SELECTOR, detected Logfmt parser, and afterPipe %s',
     async (afterPipe: boolean) => {
       jest.spyOn(completionProvider, 'getParserAndLabelKeys').mockResolvedValue({
         extractedLabelKeys,
         hasJSON: false,
         hasLogfmt: true,
       });
-      const situation: Situation = { type: 'AFTER_SELECTOR', labels: [], afterPipe };
+      const situation: Situation = { type: 'AFTER_SELECTOR', logQuery: '', afterPipe };
       const completions = await getCompletions(situation, completionProvider);
 
-      const expected = buildAfterSelectorCompletions('logfmt', 'DURATION', 'json', afterPipe);
+      const expected = buildAfterSelectorCompletions('logfmt', 'json', afterPipe);
       expect(completions).toEqual(expected);
     }
   );
@@ -340,5 +344,16 @@ describe('getCompletions', () => {
     const completions = await getCompletions(situation, completionProvider);
 
     expect(completions).toHaveLength(22);
+  });
+
+  test('Returns completion options when the situation is AFTER_UNWRAP', async () => {
+    const situation: Situation = { type: 'AFTER_UNWRAP', logQuery: '' };
+    const completions = await getCompletions(situation, completionProvider);
+
+    const extractedCompletions = completions.filter((completion) => completion.type === 'LABEL_NAME');
+    const functionCompletions = completions.filter((completion) => completion.type === 'FUNCTION');
+
+    expect(extractedCompletions).toHaveLength(3);
+    expect(functionCompletions).toHaveLength(3);
   });
 });

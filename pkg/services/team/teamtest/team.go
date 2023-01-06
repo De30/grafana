@@ -8,6 +8,8 @@ import (
 
 type FakeService struct {
 	ExpectedTeam        models.Team
+	ExpectedIsMember    bool
+	ExpectedTeamDTO     *models.TeamDTO
 	ExpectedTeamsByUser []*models.TeamDTO
 	ExpectedMembers     []*models.TeamMemberDTO
 	ExpectedError       error
@@ -34,6 +36,7 @@ func (s *FakeService) SearchTeams(ctx context.Context, query *models.SearchTeams
 }
 
 func (s *FakeService) GetTeamById(ctx context.Context, query *models.GetTeamByIdQuery) error {
+	query.Result = s.ExpectedTeamDTO
 	return s.ExpectedError
 }
 
@@ -51,7 +54,7 @@ func (s *FakeService) UpdateTeamMember(ctx context.Context, cmd *models.UpdateTe
 }
 
 func (s *FakeService) IsTeamMember(orgId int64, teamId int64, userId int64) (bool, error) {
-	return false, s.ExpectedError
+	return s.ExpectedIsMember, s.ExpectedError
 }
 
 func (s *FakeService) RemoveTeamMember(ctx context.Context, cmd *models.RemoveTeamMemberCommand) error {

@@ -2,21 +2,24 @@ package querydata
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"regexp"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
+	"go.opentelemetry.io/otel/attribute"
+
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/tsdb/intervalv2"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/client"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/models"
+	"github.com/grafana/grafana/pkg/tsdb/prometheus/querydata/exemplar"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/utils"
 	"github.com/grafana/grafana/pkg/util/maputil"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 const legendFormatAuto = "__auto"
@@ -40,6 +43,7 @@ type QueryData struct {
 	URL                string
 	TimeInterval       string
 	enableWideSeries   bool
+	exemplarSampler    exemplar.Sampler
 }
 
 func New(
@@ -62,6 +66,13 @@ func New(
 
 	promClient := client.NewClient(httpClient, httpMethod, settings.URL)
 
+	// standard deviation sampler is the default for backwards compatibility
+	exemplarSampler := exemplar.NewStandardDeviationSampler()
+
+	if features.IsEnabled(featuremgmt.FlagDisablePrometheusExemplarSampling) {
+		exemplarSampler = exemplar.NewNoOpSampler()
+	}
+
 	return &QueryData{
 		intervalCalculator: intervalv2.NewCalculator(),
 		tracer:             tracer,
@@ -71,6 +82,7 @@ func New(
 		ID:                 settings.ID,
 		URL:                settings.URL,
 		enableWideSeries:   features.IsEnabled(featuremgmt.FlagPrometheusWideSeries),
+		exemplarSampler:    exemplarSampler,
 	}, nil
 }
 
@@ -90,7 +102,7 @@ func (s *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) 
 			return &result, err
 		}
 		if r == nil {
-			s.log.Debug("Received nilresponse from runQuery", "query", query.Expr)
+			s.log.FromContext(ctx).Debug("Received nilresponse from runQuery", "query", query.Expr)
 			continue
 		}
 		result.Responses[q.RefID] = *r
@@ -100,14 +112,24 @@ func (s *QueryData) Execute(ctx context.Context, req *backend.QueryDataRequest) 
 }
 
 func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.Query, headers map[string]string) (*backend.DataResponse, error) {
-	s.log.Debug("Sending query", "start", q.Start, "end", q.End, "step", q.Step, "query", q.Expr)
-
 	traceCtx, end := s.trace(ctx, q)
 	defer end()
+
+	logger := s.log.FromContext(traceCtx)
+	logger.Debug("Sending query", "start", q.Start, "end", q.End, "step", q.Step, "query", q.Expr)
 
 	response := &backend.DataResponse{
 		Frames: data.Frames{},
 		Error:  nil,
+	}
+
+	if q.InstantQuery {
+		res, err := s.instantQuery(traceCtx, client, q, headers)
+		if err != nil {
+			return nil, err
+		}
+		response.Error = res.Error
+		response.Frames = res.Frames
 	}
 
 	if q.RangeQuery {
@@ -115,13 +137,12 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 		if err != nil {
 			return nil, err
 		}
-		response.Frames = res.Frames
-	}
-
-	if q.InstantQuery {
-		res, err := s.instantQuery(traceCtx, client, q, headers)
-		if err != nil {
-			return nil, err
+		if res.Error != nil {
+			if response.Error == nil {
+				response.Error = res.Error
+			} else {
+				response.Error = fmt.Errorf("%v %w", response.Error, res.Error) // lovely
+			}
 		}
 		response.Frames = append(response.Frames, res.Frames...)
 	}
@@ -131,7 +152,7 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 		if err != nil {
 			// If exemplar query returns error, we want to only log it and
 			// continue with other results processing
-			s.log.Error("Exemplar query failed", "query", q.Expr, "err", err)
+			logger.Error("Exemplar query failed", "query", q.Expr, "err", err)
 		}
 		if res != nil {
 			response.Frames = append(response.Frames, res.Frames...)
@@ -142,7 +163,7 @@ func (s *QueryData) fetch(ctx context.Context, client *client.Client, q *models.
 }
 
 func (s *QueryData) rangeQuery(ctx context.Context, c *client.Client, q *models.Query, headers map[string]string) (*backend.DataResponse, error) {
-	res, err := c.QueryRange(ctx, q, sdkHeaderToHttpHeader(headers))
+	res, err := c.QueryRange(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +171,7 @@ func (s *QueryData) rangeQuery(ctx context.Context, c *client.Client, q *models.
 }
 
 func (s *QueryData) instantQuery(ctx context.Context, c *client.Client, q *models.Query, headers map[string]string) (*backend.DataResponse, error) {
-	res, err := c.QueryInstant(ctx, q, sdkHeaderToHttpHeader(headers))
+	res, err := c.QueryInstant(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +179,7 @@ func (s *QueryData) instantQuery(ctx context.Context, c *client.Client, q *model
 }
 
 func (s *QueryData) exemplarQuery(ctx context.Context, c *client.Client, q *models.Query, headers map[string]string) (*backend.DataResponse, error) {
-	res, err := c.QueryExemplars(ctx, q, sdkHeaderToHttpHeader(headers))
+	res, err := c.QueryExemplars(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -171,12 +192,4 @@ func (s *QueryData) trace(ctx context.Context, q *models.Query) (context.Context
 		{Key: "start_unixnano", Value: q.Start, Kv: attribute.Key("start_unixnano").Int64(q.Start.UnixNano())},
 		{Key: "stop_unixnano", Value: q.End, Kv: attribute.Key("stop_unixnano").Int64(q.End.UnixNano())},
 	})
-}
-
-func sdkHeaderToHttpHeader(headers map[string]string) http.Header {
-	httpHeader := make(http.Header)
-	for key, val := range headers {
-		httpHeader[key] = []string{val}
-	}
-	return httpHeader
 }

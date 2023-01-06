@@ -1,5 +1,7 @@
 import { DataQuery, DataSourceJsonData, QueryResultMeta, ScopedVars } from '@grafana/data';
 
+import { PromApplication } from '../../../types/unified-alerting-dto';
+
 import { QueryEditorMode } from './querybuilder/shared/types';
 
 export interface PromQuery extends DataQuery {
@@ -30,10 +32,9 @@ export interface PromOptions extends DataSourceJsonData {
   customQueryParameters?: string;
   disableMetricsLookup?: boolean;
   exemplarTraceIdDestinations?: ExemplarTraceIdDestination[];
-}
-
-export enum PromQueryType {
-  timeSeriesQuery = 'timeSeriesQuery',
+  prometheusType?: PromApplication;
+  prometheusVersion?: string;
+  enableSecureSocksProxy?: boolean;
 }
 
 export type ExemplarTraceIdDestination = {

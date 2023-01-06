@@ -3,9 +3,10 @@ import pluralize from 'pluralize';
 import React, { FC, useMemo, useState } from 'react';
 
 import { GrafanaTheme2, dateTime, dateTimeFormat } from '@grafana/data';
-import { Button, ConfirmModal, Modal, useStyles2, Badge, Icon, Stack } from '@grafana/ui';
+import { Stack } from '@grafana/experimental';
+import { Button, ConfirmModal, Modal, useStyles2, Badge, Icon } from '@grafana/ui';
 import { contextSrv } from 'app/core/services/context_srv';
-import { AlertManagerCortexConfig, Receiver } from 'app/plugins/datasource/alertmanager/types';
+import { AlertManagerCortexConfig } from 'app/plugins/datasource/alertmanager/types';
 import { useDispatch, AccessControlAction, ContactPointsState, NotifiersState, ReceiversState } from 'app/types';
 
 import { useGetContactPointsState } from '../../api/receiversApi';
@@ -23,6 +24,9 @@ import { ProvisioningBadge } from '../Provisioning';
 import { ActionIcon } from '../rules/ActionIcon';
 
 import { ReceiversSection } from './ReceiversSection';
+import { GrafanaAppBadge } from './grafanaAppReceivers/GrafanaAppBadge';
+import { useGetReceiversWithGrafanaAppTypes } from './grafanaAppReceivers/grafanaApp';
+import { GrafanaAppReceiverEnum, ReceiverWithTypes } from './grafanaAppReceivers/types';
 
 interface UpdateActionProps extends ActionProps {
   onClickDeleteReceiver: (receiverName: string) => void;
@@ -79,17 +83,12 @@ function ViewAction({ permissions, alertManagerName, receiverName }: ActionProps
 interface ReceiverErrorProps {
   errorCount: number;
   errorDetail?: string;
+  showErrorCount: boolean;
 }
 
-function ReceiverError({ errorCount, errorDetail }: ReceiverErrorProps) {
-  return (
-    <Badge
-      color="orange"
-      icon="exclamation-triangle"
-      text={`${errorCount} ${pluralize('error', errorCount)}`}
-      tooltip={errorDetail ?? 'Error'}
-    />
-  );
+function ReceiverError({ errorCount, errorDetail, showErrorCount }: ReceiverErrorProps) {
+  const text = showErrorCount ? `${errorCount} ${pluralize('error', errorCount)}` : 'Error';
+  return <Badge color="orange" icon="exclamation-triangle" text={text} tooltip={errorDetail ?? 'Error'} />;
 }
 interface NotifierHealthProps {
   errorsByNotifier: number;
@@ -101,7 +100,7 @@ function NotifierHealth({ errorsByNotifier, errorDetail, lastNotify }: NotifierH
   const noErrorsColor = isLastNotifyNullDate(lastNotify) ? 'orange' : 'green';
   const noErrorsText = isLastNotifyNullDate(lastNotify) ? 'No attempts' : 'OK';
   return errorsByNotifier > 0 ? (
-    <ReceiverError errorCount={errorsByNotifier} errorDetail={errorDetail} />
+    <ReceiverError errorCount={errorsByNotifier} errorDetail={errorDetail} showErrorCount={false} />
   ) : (
     <Badge color={noErrorsColor} text={noErrorsText} tooltip="" />
   );
@@ -116,22 +115,23 @@ function ReceiverHealth({ errorsByReceiver, someWithNoAttempt }: ReceiverHealthP
   const noErrorsColor = someWithNoAttempt ? 'orange' : 'green';
   const noErrorsText = someWithNoAttempt ? 'No attempts' : 'OK';
   return errorsByReceiver > 0 ? (
-    <ReceiverError errorCount={errorsByReceiver} />
+    <ReceiverError errorCount={errorsByReceiver} showErrorCount={true} />
   ) : (
     <Badge color={noErrorsColor} text={noErrorsText} tooltip="" />
   );
 }
+
 const useContactPointsState = (alertManagerName: string) => {
-  const contactPointsState = useGetContactPointsState(alertManagerName ?? '');
+  const contactPointsState = useGetContactPointsState(alertManagerName);
   const receivers: ReceiversState = contactPointsState?.receivers ?? {};
-  const errorStateAvailable = Object.keys(receivers).length > 0; // this logic can change depending on how we implement this in the BE
+  const errorStateAvailable = Object.keys(receivers).length > 0;
   return { contactPointsState, errorStateAvailable };
 };
-
 interface ReceiverItem {
   name: string;
   types: string[];
   provisioned?: boolean;
+  grafanaAppReceiverType?: GrafanaAppReceiverEnum;
 }
 
 interface NotifierStatus {
@@ -265,10 +265,10 @@ export const ReceiversTable: FC<Props> = ({ config, alertManagerName }) => {
     }
     setReceiverToDelete(undefined);
   };
-
-  const rows: RowItemTableProps[] = useMemo(
-    () =>
-      config.alertmanager_config.receivers?.map((receiver: Receiver) => ({
+  const receivers = useGetReceiversWithGrafanaAppTypes(config.alertmanager_config.receivers ?? []);
+  const rows: RowItemTableProps[] = useMemo(() => {
+    return (
+      receivers?.map((receiver: ReceiverWithTypes) => ({
         id: receiver.name,
         data: {
           name: receiver.name,
@@ -280,11 +280,13 @@ export const ReceiversTable: FC<Props> = ({ config, alertManagerName }) => {
               return type;
             }
           ),
+          grafanaAppReceiverType: receiver.grafanaAppReceiverType,
           provisioned: receiver.grafana_managed_receiver_configs?.some((receiver) => receiver.provenance),
         },
-      })) ?? [],
-    [config, grafanaNotifiers.result]
-  );
+      })) ?? []
+    );
+  }, [grafanaNotifiers.result, receivers]);
+
   const columns = useGetColumns(
     alertManagerName,
     errorStateAvailable,
@@ -300,7 +302,7 @@ export const ReceiversTable: FC<Props> = ({ config, alertManagerName }) => {
       title="Contact points"
       description="Define where the notifications will be sent to, for example email or Slack."
       showButton={!isVanillaAM && contextSrv.hasPermission(permissions.create)}
-      addButtonLabel="New contact point"
+      addButtonLabel={'New contact point'}
       addButtonTo={makeAMLink('/alerting/notifications/receivers/new', alertManagerName)}
     >
       <DynamicTable
@@ -374,16 +376,19 @@ function useGetColumns(
       id: 'name',
       label: 'Contact point name',
       renderCell: ({ data: { name, provisioned } }) => (
-        <>
-          {name} {provisioned && <ProvisioningBadge />}
-        </>
+        <Stack alignItems="center">
+          <div>{name}</div>
+          {provisioned && <ProvisioningBadge />}
+        </Stack>
       ),
       size: 1,
     },
     {
       id: 'type',
       label: 'Type',
-      renderCell: ({ data: { types } }) => <>{types.join(', ')}</>,
+      renderCell: ({ data: { types, grafanaAppReceiverType } }) => (
+        <>{grafanaAppReceiverType ? <GrafanaAppBadge grafanaAppType={grafanaAppReceiverType} /> : types.join(', ')}</>
+      ),
       size: 1,
     },
   ];
@@ -439,4 +444,14 @@ const getStyles = (theme: GrafanaTheme2) => ({
     color: ${theme.colors.warning.text};
   `,
   countMessage: css``,
+  onCallBadgeWrapper: css`
+    text-align: left;
+    height: 22px;
+    display: inline-flex;
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(245, 95, 62, 1);
+    color: rgba(245, 95, 62, 1);
+    font-weight: ${theme.typography.fontWeightRegular};
+  `,
 });

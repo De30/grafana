@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/grafana-azure-sdk-go/azsettings"
 
 	"github.com/grafana/grafana/pkg/infra/log"
+	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -29,6 +30,8 @@ type Cfg struct {
 	Azure *azsettings.AzureSettings
 
 	BuildVersion string // TODO Remove
+
+	LogDatasourceRequests bool
 }
 
 func ProvideConfig(settingProvider setting.Provider, grafanaCfg *setting.Cfg) *Cfg {
@@ -38,7 +41,6 @@ func ProvideConfig(settingProvider setting.Provider, grafanaCfg *setting.Cfg) *C
 func NewCfg(settingProvider setting.Provider, grafanaCfg *setting.Cfg) *Cfg {
 	logger := log.New("plugin.cfg")
 
-	azure := settingProvider.Section("azure")
 	aws := settingProvider.Section("aws")
 	plugins := settingProvider.Section("plugins")
 
@@ -62,11 +64,8 @@ func NewCfg(settingProvider setting.Provider, grafanaCfg *setting.Cfg) *Cfg {
 		PluginsAllowUnsigned:    allowedUnsigned,
 		AWSAllowedAuthProviders: allowedAuth,
 		AWSAssumeRoleEnabled:    aws.KeyValue("assume_role_enabled").MustBool(grafanaCfg.AWSAssumeRoleEnabled),
-		Azure: &azsettings.AzureSettings{
-			Cloud:                   azure.KeyValue("cloud").MustString(grafanaCfg.Azure.Cloud),
-			ManagedIdentityEnabled:  azure.KeyValue("managed_identity_enabled").MustBool(grafanaCfg.Azure.ManagedIdentityEnabled),
-			ManagedIdentityClientId: azure.KeyValue("managed_identity_client_id").MustString(grafanaCfg.Azure.ManagedIdentityClientId),
-		},
+		Azure:                   grafanaCfg.Azure,
+		LogDatasourceRequests:   grafanaCfg.IsFeatureToggleEnabled(featuremgmt.FlagDatasourceLogger),
 	}
 }
 

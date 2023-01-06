@@ -9,11 +9,12 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/actest"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/login/logintest"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/org/orgtest"
-	"github.com/grafana/grafana/pkg/services/quota/quotaimpl"
+	"github.com/grafana/grafana/pkg/services/quota/quotatest"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/services/user/usertest"
 	"github.com/stretchr/testify/assert"
@@ -26,9 +27,8 @@ func Test_syncOrgRoles_doesNotBreakWhenTryingToRemoveLastOrgAdmin(t *testing.T) 
 	authInfoMock := &logintest.AuthInfoServiceFake{}
 
 	login := Implementation{
-		QuotaService:    &quotaimpl.Service{},
+		QuotaService:    quotatest.New(false, nil),
 		AuthInfoService: authInfoMock,
-		SQLStore:        nil,
 		userService:     usertest.NewUserServiceFake(),
 		orgService:      orgtest.NewOrgServiceFake(),
 	}
@@ -51,11 +51,11 @@ func Test_syncOrgRoles_whenTryingToRemoveLastOrgLogsError(t *testing.T) {
 	orgService.ExpectedOrgListResponse = createResponseWithOneErrLastOrgAdminItem()
 
 	login := Implementation{
-		QuotaService:    &quotaimpl.Service{},
+		QuotaService:    quotatest.New(false, nil),
 		AuthInfoService: authInfoMock,
-		SQLStore:        nil,
 		userService:     usertest.NewUserServiceFake(),
 		orgService:      orgService,
+		accessControl:   &actest.FakeService{},
 	}
 
 	err := login.syncOrgRoles(context.Background(), &user, &externalUser)
@@ -66,7 +66,7 @@ func Test_syncOrgRoles_whenTryingToRemoveLastOrgLogsError(t *testing.T) {
 func Test_teamSync(t *testing.T) {
 	authInfoMock := &logintest.AuthInfoServiceFake{}
 	login := Implementation{
-		QuotaService:    &quotaimpl.Service{},
+		QuotaService:    quotatest.New(false, nil),
 		AuthInfoService: authInfoMock,
 	}
 

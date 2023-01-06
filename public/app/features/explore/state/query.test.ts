@@ -4,7 +4,6 @@ import { assertIsDefined } from 'test/helpers/asserts';
 
 import {
   ArrayVector,
-  DataFrame,
   DataQuery,
   DataQueryResponse,
   DataSourceApi,
@@ -12,7 +11,6 @@ import {
   DataSourceWithLogsVolumeSupport,
   LoadingState,
   MutableDataFrame,
-  PanelData,
   RawTimeRange,
 } from '@grafana/data';
 import { ExploreId, ExploreItemState, StoreState, ThunkDispatch } from 'app/types';
@@ -70,7 +68,7 @@ jest.mock('app/features/dashboard/services/TimeSrv', () => ({
 }));
 
 jest.mock('@grafana/runtime', () => ({
-  ...(jest.requireActual('@grafana/runtime') as unknown as object),
+  ...jest.requireActual('@grafana/runtime'),
   getTemplateSrv: () => ({
     updateTimeRange: jest.fn(),
   }),
@@ -124,7 +122,7 @@ describe('runQueries', () => {
 
     const state = getState().explore[ExploreId.left];
     expect(state.queryResponse.request?.requestId).toBe('explore_left');
-    const datasource = state.datasourceInstance as any as DataSourceWithLogsVolumeSupport<DataQuery>;
+    const datasource = state.datasourceInstance as unknown as DataSourceWithLogsVolumeSupport<DataQuery>;
     expect(datasource.getLogsVolumeDataProvider).toBeCalledWith(
       expect.objectContaining({
         requestId: 'explore_left_log_volume',
@@ -282,9 +280,9 @@ describe('reducer', () => {
           [ExploreId.left]: {
             ...defaultInitialState.explore[ExploreId.left],
             queryResponse: {
-              series: [{ name: 'test name' }] as DataFrame[],
+              series: [{ name: 'test name' }],
               state: LoadingState.Done,
-            } as PanelData,
+            },
             absoluteRange: { from: 1621348027000, to: 1621348050000 },
           },
         },
@@ -303,7 +301,7 @@ describe('reducer', () => {
         explore: {
           [ExploreId.left]: {
             ...defaultInitialState.explore[ExploreId.left],
-            queryResponse: { series: [{ name: 'test name' }] as DataFrame[], state: LoadingState.Loading } as PanelData,
+            queryResponse: { series: [{ name: 'test name' }], state: LoadingState.Loading },
             absoluteRange: { from: 1621348027000, to: 1621348050000 },
           },
         },
@@ -321,9 +319,9 @@ describe('reducer', () => {
           [ExploreId.left]: {
             ...defaultInitialState.explore[ExploreId.left],
             queryResponse: {
-              series: [{ name: 'test name' }] as DataFrame[],
+              series: [{ name: 'test name' }],
               state: LoadingState.Done,
-            } as PanelData,
+            },
             absoluteRange: { from: 1621348027000, to: 1621348050000 },
             cache: [
               {

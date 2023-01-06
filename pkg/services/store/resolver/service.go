@@ -7,7 +7,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/services/datasources"
 )
 
@@ -28,26 +27,26 @@ type ResolutionInfo struct {
 	Timestamp time.Time `json:"timestamp,omitempty"`
 }
 
-type ObjectReferenceResolver interface {
-	Resolve(ctx context.Context, ref *models.ObjectExternalReference) (ResolutionInfo, error)
+type EntityReferenceResolver interface {
+	Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error)
 }
 
-func ProvideObjectReferenceResolver(ds datasources.DataSourceService, pluginRegistry registry.Service) ObjectReferenceResolver {
+func ProvideEntityReferenceResolver(ds datasources.DataSourceService, pluginStore plugins.Store) EntityReferenceResolver {
 	return &standardReferenceResolver{
-		pluginRegistry: pluginRegistry,
+		pluginStore: pluginStore,
 		ds: dsCache{
-			ds:             ds,
-			pluginRegistry: pluginRegistry,
+			ds:          ds,
+			pluginStore: pluginStore,
 		},
 	}
 }
 
 type standardReferenceResolver struct {
-	pluginRegistry registry.Service
-	ds             dsCache
+	pluginStore plugins.Store
+	ds          dsCache
 }
 
-func (r *standardReferenceResolver) Resolve(ctx context.Context, ref *models.ObjectExternalReference) (ResolutionInfo, error) {
+func (r *standardReferenceResolver) Resolve(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
 	if ref == nil {
 		return ResolutionInfo{OK: false, Timestamp: getNow()}, fmt.Errorf("ref is nil")
 	}
@@ -74,7 +73,7 @@ func (r *standardReferenceResolver) Resolve(ctx context.Context, ref *models.Obj
 	}, nil
 }
 
-func (r *standardReferenceResolver) resolveDatasource(ctx context.Context, ref *models.ObjectExternalReference) (ResolutionInfo, error) {
+func (r *standardReferenceResolver) resolveDatasource(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
 	ds, err := r.ds.getDS(ctx, ref.UID)
 	if err != nil || ds == nil || ds.UID == "" {
 		return ResolutionInfo{
@@ -100,9 +99,9 @@ func (r *standardReferenceResolver) resolveDatasource(ctx context.Context, ref *
 	return res, nil
 }
 
-func (r *standardReferenceResolver) resolvePlugin(ctx context.Context, ref *models.ObjectExternalReference) (ResolutionInfo, error) {
-	p, ok := r.pluginRegistry.Plugin(ctx, ref.UID)
-	if !ok || p == nil {
+func (r *standardReferenceResolver) resolvePlugin(ctx context.Context, ref *models.EntityExternalReference) (ResolutionInfo, error) {
+	p, ok := r.pluginStore.Plugin(ctx, ref.UID)
+	if !ok {
 		return ResolutionInfo{
 			OK:        false,
 			Timestamp: getNow(),
