@@ -17,8 +17,51 @@ import (
 
 var newProviderFunc = sdkhttpclient.NewProvider
 
+func ProvideService(cfg *setting.Cfg, validator models.PluginRequestValidator, tracer tracing.Tracer,
+	features featuremgmt.FeatureToggles) *sdkhttpclient.Provider {
+	return New(Config{
+		BuildVersion:                     cfg.BuildVersion,
+		DataProxyTimeout:                 cfg.DataProxyTimeout,
+		DataProxyDialTimeout:             cfg.DataProxyDialTimeout,
+		DataProxyTLSHandshakeTimeout:     cfg.DataProxyTLSHandshakeTimeout,
+		DataProxyExpectContinueTimeout:   cfg.DataProxyExpectContinueTimeout,
+		DataProxyMaxConnsPerHost:         cfg.DataProxyMaxConnsPerHost,
+		DataProxyMaxIdleConns:            cfg.DataProxyMaxIdleConns,
+		DataProxyKeepAlive:               cfg.DataProxyKeepAlive,
+		DataProxyIdleConnTimeout:         cfg.DataProxyIdleConnTimeout,
+		ResponseLimit:                    cfg.ResponseLimit,
+		SigV4AuthEnabled:                 cfg.SigV4AuthEnabled,
+		SigV4VerboseLogging:              cfg.SigV4VerboseLogging,
+		PluginSettings:                   cfg.PluginSettings,
+		SecureSocksDSProxyFeatureEnabled: features.IsEnabled(featuremgmt.FlagSecureSocksDatasourceProxy),
+		SecureSocksDSProxy:               cfg.SecureSocksDSProxy,
+	}, validator, tracer)
+}
+
+type Config struct {
+	BuildVersion string
+
+	DataProxyTimeout               int
+	DataProxyDialTimeout           int
+	DataProxyTLSHandshakeTimeout   int
+	DataProxyExpectContinueTimeout int
+	DataProxyMaxConnsPerHost       int
+	DataProxyMaxIdleConns          int
+	DataProxyKeepAlive             int
+	DataProxyIdleConnTimeout       int
+	ResponseLimit                  int64
+
+	SigV4AuthEnabled    bool
+	SigV4VerboseLogging bool
+
+	PluginSettings setting.PluginSettings
+
+	SecureSocksDSProxyFeatureEnabled bool
+	SecureSocksDSProxy               setting.SecureSocksDSProxySettings
+}
+
 // New creates a new HTTP client provider with pre-configured middlewares.
-func New(cfg *setting.Cfg, validator models.PluginRequestValidator, tracer tracing.Tracer) *sdkhttpclient.Provider {
+func New(cfg Config, validator models.PluginRequestValidator, tracer tracing.Tracer) *sdkhttpclient.Provider {
 	logger := log.New("httpclient")
 	userAgent := fmt.Sprintf("Grafana/%s", cfg.BuildVersion)
 
@@ -55,7 +98,7 @@ func New(cfg *setting.Cfg, validator models.PluginRequestValidator, tracer traci
 				return
 			}
 
-			if cfg.IsFeatureToggleEnabled(featuremgmt.FlagSecureSocksDatasourceProxy) &&
+			if cfg.SecureSocksDSProxyFeatureEnabled &&
 				cfg.SecureSocksDSProxy.Enabled && secureSocksProxyEnabledOnDS(opts) {
 				err = newSecureSocksProxy(&cfg.SecureSocksDSProxy, transport)
 				if err != nil {
@@ -81,7 +124,7 @@ func newConntrackRoundTripper(name string, transport *http.Transport) *http.Tran
 // setDefaultTimeoutOptions overrides the default timeout options for the SDK.
 //
 // Note: Not optimal changing global state, but hard to not do in this case.
-func setDefaultTimeoutOptions(cfg *setting.Cfg) {
+func setDefaultTimeoutOptions(cfg Config) {
 	sdkhttpclient.DefaultTimeoutOptions = sdkhttpclient.TimeoutOptions{
 		Timeout:               time.Duration(cfg.DataProxyTimeout) * time.Second,
 		DialTimeout:           time.Duration(cfg.DataProxyDialTimeout) * time.Second,

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grafana/grafana-azure-sdk-go/azsettings"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
@@ -25,8 +26,7 @@ import (
 var plog = log.New("tsdb.prometheus")
 
 type Service struct {
-	im       instancemgmt.InstanceManager
-	features featuremgmt.FeatureToggles
+	im instancemgmt.InstanceManager
 }
 
 type instance struct {
@@ -37,16 +37,34 @@ type instance struct {
 
 func ProvideService(httpClientProvider httpclient.Provider, cfg *setting.Cfg, features featuremgmt.FeatureToggles, tracer tracing.Tracer) *Service {
 	plog.Debug("initializing")
+	return New(Config{
+		AzureAuthEnabled:               cfg.AzureAuthEnabled,
+		Azure:                          cfg.Azure,
+		WideSeriesFeatureEnabled:       features.IsEnabled(featuremgmt.FlagPrometheusWideSeries),
+		DisableExemplarSamplingFeature: features.IsEnabled(featuremgmt.FlagDisablePrometheusExemplarSampling),
+	}, httpClientProvider, tracer)
+}
+
+func New(cfg Config, httpClientProvider httpclient.Provider, tracer tracing.Tracer) *Service {
 	return &Service{
-		im:       datasource.NewInstanceManager(newInstanceSettings(httpClientProvider, cfg, features, tracer)),
-		features: features,
+		im: datasource.NewInstanceManager(newInstanceSettings(httpClientProvider, cfg, tracer)),
 	}
 }
 
-func newInstanceSettings(httpClientProvider httpclient.Provider, cfg *setting.Cfg, features featuremgmt.FeatureToggles, tracer tracing.Tracer) datasource.InstanceFactoryFunc {
+type Config struct {
+	AzureAuthEnabled               bool
+	Azure                          *azsettings.AzureSettings
+	WideSeriesFeatureEnabled       bool
+	DisableExemplarSamplingFeature bool
+}
+
+func newInstanceSettings(httpClientProvider httpclient.Provider, cfg Config, tracer tracing.Tracer) datasource.InstanceFactoryFunc {
 	return func(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
 		// Creates a http roundTripper.
-		opts, err := client.CreateTransportOptions(settings, cfg, plog)
+		opts, err := client.CreateTransportOptions(settings, client.TransportCfg{
+			AzureAuthEnabled: cfg.AzureAuthEnabled,
+			Azure:            cfg.Azure,
+		}, plog)
 		if err != nil {
 			return nil, fmt.Errorf("error creating transport options: %v", err)
 		}
@@ -56,7 +74,10 @@ func newInstanceSettings(httpClientProvider httpclient.Provider, cfg *setting.Cf
 		}
 
 		// New version using custom client and better response parsing
-		qd, err := querydata.New(httpClient, features, tracer, settings, plog)
+		qd, err := querydata.New(httpClient, querydata.QueryCfg{
+			WideSeriesEnabled:       cfg.WideSeriesFeatureEnabled,
+			DisableExemplarSampling: cfg.DisableExemplarSamplingFeature,
+		}, tracer, settings, plog)
 		if err != nil {
 			return nil, err
 		}

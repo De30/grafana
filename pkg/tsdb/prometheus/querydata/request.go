@@ -13,7 +13,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/tracing"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/tsdb/intervalv2"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/client"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/models"
@@ -46,9 +45,14 @@ type QueryData struct {
 	exemplarSampler    exemplar.Sampler
 }
 
+type QueryCfg struct {
+	WideSeriesEnabled       bool
+	DisableExemplarSampling bool
+}
+
 func New(
 	httpClient *http.Client,
-	features featuremgmt.FeatureToggles,
+	qCfg QueryCfg,
 	tracer tracing.Tracer,
 	settings backend.DataSourceInstanceSettings,
 	plog log.Logger,
@@ -69,7 +73,7 @@ func New(
 	// standard deviation sampler is the default for backwards compatibility
 	exemplarSampler := exemplar.NewStandardDeviationSampler()
 
-	if features.IsEnabled(featuremgmt.FlagDisablePrometheusExemplarSampling) {
+	if qCfg.DisableExemplarSampling {
 		exemplarSampler = exemplar.NewNoOpSampler()
 	}
 
@@ -81,7 +85,7 @@ func New(
 		TimeInterval:       timeInterval,
 		ID:                 settings.ID,
 		URL:                settings.URL,
-		enableWideSeries:   features.IsEnabled(featuremgmt.FlagPrometheusWideSeries),
+		enableWideSeries:   qCfg.WideSeriesEnabled,
 		exemplarSampler:    exemplarSampler,
 	}, nil
 }

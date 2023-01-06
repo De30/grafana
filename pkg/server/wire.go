@@ -198,7 +198,7 @@ var wireBasicSet = wire.NewSet(
 	mysql.ProvideService,
 	mssql.ProvideService,
 	store.ProvideEntityEventsService,
-	httpclientprovider.New,
+	httpclientprovider.ProvideService,
 	wire.Bind(new(httpclient.Provider), new(*sdkhttpclient.Provider)),
 	serverlock.ProvideService,
 	annotationsimpl.ProvideCleanupService,

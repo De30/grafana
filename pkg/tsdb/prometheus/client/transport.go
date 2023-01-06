@@ -4,19 +4,24 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/grafana/grafana-azure-sdk-go/azsettings"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/azureauth"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/middleware"
 	"github.com/grafana/grafana/pkg/tsdb/prometheus/utils"
 	"github.com/grafana/grafana/pkg/util/maputil"
 )
 
+type TransportCfg struct {
+	AzureAuthEnabled bool
+	Azure            *azsettings.AzureSettings
+}
+
 // CreateTransportOptions creates options for the http client. Probably should be shared and should not live in the
 // buffered package.
-func CreateTransportOptions(settings backend.DataSourceInstanceSettings, cfg *setting.Cfg, logger log.Logger) (*sdkhttpclient.Options, error) {
+func CreateTransportOptions(settings backend.DataSourceInstanceSettings, cfg TransportCfg, logger log.Logger) (*sdkhttpclient.Options, error) {
 	opts, err := settings.HTTPClientOptions()
 	if err != nil {
 		return nil, err
