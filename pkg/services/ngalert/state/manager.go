@@ -173,7 +173,7 @@ func (st *Manager) resetStateByRuleUID(ctx context.Context, rule *ngModels.Alert
 	}
 
 	if reason == ngModels.StateReasonPaused {
-		transitions := make([]StateTransition, 0, len(states)*2)
+		transitions := make([]StateTransition, 0, len(states))
 		for _, s := range states {
 			oldState := s.State
 			oldReason := s.StateReason
@@ -186,15 +186,6 @@ func (st *Manager) resetStateByRuleUID(ctx context.Context, rule *ngModels.Alert
 			s.Values = map[string]float64{}
 			transitions = append(transitions, StateTransition{
 				State:               s,
-				PreviousState:       oldState,
-				PreviousStateReason: oldReason,
-			})
-			oldState = s.State
-			oldReason = s.StateReason
-			ls := *s
-			ls.StateReason = ""
-			transitions = append(transitions, StateTransition{
-				State:               &ls,
 				PreviousState:       oldState,
 				PreviousStateReason: oldReason,
 			})
