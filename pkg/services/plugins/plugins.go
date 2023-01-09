@@ -92,37 +92,3 @@ func (p PluginDTO) File(name string) (fs.File, error) {
 	}
 	return f, nil
 }
-
-type Class string
-
-const (
-	Core     Class = "core"
-	Bundled  Class = "bundled"
-	External Class = "external"
-)
-
-var PluginTypes = []Type{
-	DataSource,
-	Panel,
-	App,
-	Renderer,
-	SecretsManager,
-}
-
-type Type string
-
-const (
-	DataSource     Type = "datasource"
-	Panel          Type = "panel"
-	App            Type = "app"
-	Renderer       Type = "renderer"
-	SecretsManager Type = "secretsmanager"
-)
-
-func (pt Type) IsValid() bool {
-	switch pt {
-	case DataSource, Panel, App, Renderer, SecretsManager:
-		return true
-	}
-	return false
-}

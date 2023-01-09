@@ -69,7 +69,7 @@ func (hs *HTTPServer) AdminMigrateSecretsToPlugin(c *models.ReqContext) response
 // To migrate from the plugin, it must be installed only
 // as it is possible the user disabled it and then wants to migrate
 func (hs *HTTPServer) AdminMigrateSecretsFromPlugin(c *models.ReqContext) response.Response {
-	if hs.secretsPluginManager.SecretsManager(c.Req.Context()) == nil {
+	if _, exists := hs.secretsPluginManager.SecretsManager(c.Req.Context()); exists {
 		hs.log.Warn("Received secrets plugin migration request while plugin is not installed")
 		return response.Respond(http.StatusBadRequest, "Secrets plugin is not installed")
 	}
@@ -82,7 +82,7 @@ func (hs *HTTPServer) AdminMigrateSecretsFromPlugin(c *models.ReqContext) respon
 }
 
 func (hs *HTTPServer) AdminDeleteAllSecretsManagerPluginSecrets(c *models.ReqContext) response.Response {
-	if hs.secretsPluginManager.SecretsManager(c.Req.Context()) == nil {
+	if _, exists := hs.secretsPluginManager.SecretsManager(c.Req.Context()); exists {
 		hs.log.Warn("Received secrets plugin deletion request while plugin is not installed")
 		return response.Respond(http.StatusBadRequest, "Secrets plugin is not installed")
 	}

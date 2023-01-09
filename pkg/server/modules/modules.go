@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/plugins/manager"
-	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
@@ -40,7 +39,7 @@ type Modules struct {
 	backgroundServiceRegistry registry.BackgroundServiceRegistry
 	db                        db.DB
 	entityReferenceResolver   resolver.EntityReferenceResolver
-	pluginStore               *store.Service
+	pluginStore               *plugins.StoreService
 	pluginClient              *plugins.Decorator
 	pluginInstaller           *manager.PluginInstaller
 
@@ -58,7 +57,7 @@ func ProvideService(
 	roleRegistry accesscontrol.RoleRegistry,
 	db db.DB,
 	entityReferenceResolver resolver.EntityReferenceResolver,
-	store *store.Service, client *plugins.Decorator, installer *manager.PluginInstaller,
+	store *plugins.StoreService, client *plugins.Decorator, installer *manager.PluginInstaller,
 ) *Modules {
 	m := &Modules{
 		cfg: cfg,

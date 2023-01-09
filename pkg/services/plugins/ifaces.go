@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
+
+	"github.com/grafana/grafana/pkg/plugins"
 )
 
 // Store is the publicly accessible storage for plugins.
@@ -11,7 +13,7 @@ type Store interface {
 	// Plugin finds a plugin by its ID.
 	Plugin(ctx context.Context, pluginID string) (PluginDTO, bool)
 	// Plugins returns plugins by their requested type.
-	Plugins(ctx context.Context, pluginTypes ...Type) []PluginDTO
+	Plugins(ctx context.Context, pluginTypes ...plugins.Type) []PluginDTO
 }
 
 type Installer interface {
@@ -19,6 +21,16 @@ type Installer interface {
 	Add(ctx context.Context, pluginID, version string, opts CompatOpts) error
 	// Remove removes an existing plugin.
 	Remove(ctx context.Context, pluginID string) error
+}
+
+type RendererPluginManager interface {
+	// Renderer returns a renderer plugin.
+	Renderer(ctx context.Context) (plugins.Plugin, bool)
+}
+
+type SecretsPluginManager interface {
+	// SecretsManager returns a secretsmanager plugin
+	SecretsManager(ctx context.Context) (plugins.Plugin, bool)
 }
 
 type PluginSource struct {
@@ -59,7 +71,7 @@ func (fn ClientMiddlewareFunc) CreateClientMiddleware(next Client) Client {
 }
 
 type StaticRouteResolver interface {
-	Routes() []*StaticRoute
+	Routes() []StaticRoute
 }
 
 type PluginErrorResolver interface {

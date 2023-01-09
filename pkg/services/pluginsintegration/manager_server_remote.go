@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	pluginManagerLib "github.com/grafana/grafana/pkg/plugins/manager"
-	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/services/grpcserver"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/plugins"
@@ -21,13 +20,13 @@ var _ PluginManagerServer = (*PluginManagerRemoteServer)(nil)
 
 type PluginManagerRemoteServer struct {
 	*services.BasicService
-	store     *store.Service
+	store     *plugins.StoreService
 	client    *plugins.Decorator
 	installer *pluginManagerLib.PluginInstaller
 	log       log.Logger
 }
 
-func ProvidePluginManagerServer(grpcServerProvider grpcserver.Provider, store *store.Service,
+func ProvidePluginManagerServer(grpcServerProvider grpcserver.Provider, store *plugins.StoreService,
 	client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller) *PluginManagerRemoteServer {
 	pm := NewPluginManagerServer(store, client, installer)
 	grpcSrv := grpcServerProvider.GetServer()
@@ -43,7 +42,7 @@ func ProvidePluginManagerServer(grpcServerProvider grpcserver.Provider, store *s
 	return pm
 }
 
-func NewPluginManagerServer(store *store.Service, client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller,
+func NewPluginManagerServer(store *plugins.StoreService, client *plugins.Decorator, installer *pluginManagerLib.PluginInstaller,
 ) *PluginManagerRemoteServer {
 	return &PluginManagerRemoteServer{
 		store:     store,
@@ -72,39 +71,13 @@ func (s *PluginManagerRemoteServer) stop(err error) error {
 }
 
 func (s *PluginManagerRemoteServer) Plugin(ctx context.Context, pluginID string) (plugins.PluginDTO, bool) {
-	libDTO, exists := s.store.Plugin(ctx, pluginID)
-	if !exists {
-		return plugins.PluginDTO{}, false
-	}
-
-	return toGrafanaDTO(libDTO), true
+	return s.store.Plugin(ctx, pluginID)
 }
 
-func toGrafanaDTO(gDTO pluginLib.PluginDTO) plugins.PluginDTO {
-	dto := plugins.PluginDTO{
-		JSONData:        gDTO.JSONData,
-		Class:           gDTO.Class,
-		IncludedInAppID: gDTO.IncludedInAppID,
-		DefaultNavURL:   gDTO.DefaultNavURL,
-		Pinned:          gDTO.Pinned,
-		Signature:       gDTO.Signature,
-		SignatureType:   gDTO.SignatureType,
-		SignatureOrg:    gDTO.SignatureOrg,
-		SignatureError:  gDTO.SignatureError,
-		Module:          gDTO.Module,
-		BaseURL:         gDTO.BaseURL,
-		//StreamHandler:   nil,
-	}
-
-	return dto
-}
-
-func (s *PluginManagerRemoteServer) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
-	libTypes := toLibTypes(types)
-
+func (s *PluginManagerRemoteServer) Plugins(ctx context.Context, types ...pluginLib.Type) []plugins.PluginDTO {
 	var res []plugins.PluginDTO
-	for _, p := range s.store.Plugins(ctx, libTypes...) {
-		res = append(res, toGrafanaDTO(p))
+	for _, p := range s.store.Plugins(ctx, types...) {
+		res = append(res, p)
 	}
 
 	return res
@@ -134,15 +107,15 @@ func (s *PluginManagerRemoteServer) GetPlugin(ctx context.Context, req *GetPlugi
 }
 
 func (s *PluginManagerRemoteServer) GetPlugins(ctx context.Context, req *GetPluginsRequest) (*GetPluginsResponse, error) {
-	var types []plugins.Type
+	var types []pluginLib.Type
 	for _, t := range req.Types {
-		if plugins.Type(t).IsValid() {
-			types = append(types, plugins.Type(t))
+		if pluginLib.Type(t).IsValid() {
+			types = append(types, pluginLib.Type(t))
 		}
 	}
 
 	var ps []*PluginData
-	for _, p := range s.store.Plugins(ctx, toLibTypes(types)...) {
+	for _, p := range s.store.Plugins(ctx, types...) {
 		ps = append(ps, toProto(p))
 	}
 
@@ -243,7 +216,7 @@ func (fn callResourceResponseSenderFunc) Send(resp *backend.CallResourceResponse
 	return fn(resp)
 }
 
-func toProto(p pluginLib.PluginDTO) *PluginData {
+func toProto(p plugins.PluginDTO) *PluginData {
 	var links []*PluginData_JsonData_Info_Link
 	for _, l := range p.Info.Links {
 		links = append(links, &PluginData_JsonData_Info_Link{
@@ -435,12 +408,4 @@ func protoRole(r org.RoleType) PluginData_JsonData_Role {
 		return PluginData_JsonData_EDITOR
 	}
 	return PluginData_JsonData_VIEWER
-}
-
-func toLibTypes(types []plugins.Type) []pluginLib.Type {
-	var libTypes []pluginLib.Type
-	for _, t := range types {
-		libTypes = append(libTypes, pluginLib.Type(t))
-	}
-	return libTypes
 }

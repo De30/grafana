@@ -69,7 +69,7 @@ func (s *PluginManagerRemoteClient) Plugin(ctx context.Context, id string) (plug
 	return fromProto(p.Plugin), true
 }
 
-func (s *PluginManagerRemoteClient) Plugins(ctx context.Context, pluginTypes ...plugins.Type) []plugins.PluginDTO {
+func (s *PluginManagerRemoteClient) Plugins(ctx context.Context, pluginTypes ...pluginLib.Type) []plugins.PluginDTO {
 	var types []string
 	for _, t := range pluginTypes {
 		types = append(types, string(t))

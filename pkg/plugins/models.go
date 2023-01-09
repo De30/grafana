@@ -147,11 +147,6 @@ type Screenshots struct {
 	Path string `json:"path"`
 }
 
-type StaticRoute struct {
-	PluginID  string
-	Directory string
-}
-
 type SignatureStatus string
 
 func (ss SignatureStatus) IsValid() bool {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/kvstore"
-	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	secretskvs "github.com/grafana/grafana/pkg/services/secrets/kvstore"
 	"github.com/grafana/grafana/pkg/setting"
@@ -98,10 +98,13 @@ func (s *MigrateFromPluginService) Migrate(ctx context.Context) error {
 	logger.Debug("Shutting down secrets plugin now that migration is complete")
 	// if `use_plugin` wasn't set, stop the plugin after migration
 	if !s.cfg.SectionWithEnvOverrides("secrets").Key("use_plugin").MustBool(false) {
-		err := s.manager.SecretsManager(ctx).Stop(ctx)
-		if err != nil {
-			// Log a warning but don't throw an error
-			logger.Error("Error stopping secrets plugin after migration", "error", err.Error())
+		p, exists := s.manager.SecretsManager(ctx)
+		if exists {
+			err := p.Stop(ctx)
+			if err != nil {
+				// Log a warning but don't throw an error
+				logger.Error("Error stopping secrets plugin after migration", "error", err.Error())
+			}
 		}
 	}
 	return nil

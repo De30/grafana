@@ -13,10 +13,11 @@ import (
 	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
 	secretsmng "github.com/grafana/grafana/pkg/services/secrets/manager"
 	"github.com/grafana/grafana/pkg/setting"
@@ -36,8 +37,8 @@ func NewFakePluginSecretsKVStore(t *testing.T, features featuremgmt.FeatureToggl
 	store := kvstore.ProvideService(sqlStore)
 	namespacedKVStore := GetNamespacedKVStore(store)
 	manager := NewFakeSecretsPluginManager(t, false)
-	plugin := manager.SecretsManager(context.Background()).SecretsManager
-	return NewPluginSecretsKVStore(plugin, secretsService, namespacedKVStore, features, fallback, log.New("test.logger"))
+	plugin, _ := manager.SecretsManager(context.Background())
+	return NewPluginSecretsKVStore(plugin.SecretsManager, secretsService, namespacedKVStore, features, fallback, log.New("test.logger"))
 }
 
 // In memory kv store used for testing
@@ -214,14 +215,14 @@ var _ secretsmanagerplugin.SecretsManagerPlugin = &fakeGRPCSecretsPlugin{}
 // Fake plugin manager
 type fakePluginManager struct {
 	shouldFailOnStart bool
-	plugin            *plugins.Plugin
+	plugin            *pluginLib.Plugin
 }
 
-func (mg *fakePluginManager) SecretsManager(_ context.Context) *plugins.Plugin {
+func (mg *fakePluginManager) SecretsManager(_ context.Context) (pluginLib.Plugin, bool) {
 	if mg.plugin != nil {
-		return mg.plugin
+		return *mg.plugin, true
 	}
-	p := &plugins.Plugin{
+	p := &pluginLib.Plugin{
 		SecretsManager: &fakeGRPCSecretsPlugin{
 			kv: make(map[Key]string),
 		},
@@ -230,7 +231,7 @@ func (mg *fakePluginManager) SecretsManager(_ context.Context) *plugins.Plugin {
 		shouldFailOnStart: mg.shouldFailOnStart,
 	})
 	mg.plugin = p
-	return p
+	return *p, true
 }
 
 func NewFakeSecretsPluginManager(t *testing.T, shouldFailOnStart bool) plugins.SecretsPluginManager {

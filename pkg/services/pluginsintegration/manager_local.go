@@ -7,7 +7,6 @@ import (
 
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/manager"
-	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/services/plugins"
 )
 
@@ -16,12 +15,12 @@ var _ plugins.Client = (*PluginManagerLocalService)(nil)
 var _ plugins.Installer = (*PluginManagerLocalService)(nil)
 
 type PluginManagerLocalService struct {
-	store     *store.Service
+	store     *plugins.StoreService
 	client    *plugins.Decorator
 	installer *manager.PluginInstaller
 }
 
-func newPluginManagerLocalService(store *store.Service, client *plugins.Decorator,
+func newPluginManagerLocalService(store *plugins.StoreService, client *plugins.Decorator,
 	installer *manager.PluginInstaller) *PluginManagerLocalService {
 	return &PluginManagerLocalService{
 		store:     store,
@@ -71,20 +70,13 @@ func (s *PluginManagerLocalService) Remove(ctx context.Context, pluginID string)
 }
 
 func (s *PluginManagerLocalService) Plugin(ctx context.Context, pluginID string) (plugins.PluginDTO, bool) {
-	p, exists := s.store.Plugin(ctx, pluginID)
-	if !exists {
-		return plugins.PluginDTO{}, false
-	}
-
-	return toGrafanaDTO(p), true
+	return s.store.Plugin(ctx, pluginID)
 }
 
-func (s *PluginManagerLocalService) Plugins(ctx context.Context, types ...plugins.Type) []plugins.PluginDTO {
-	libTypes := toLibTypes(types)
-
+func (s *PluginManagerLocalService) Plugins(ctx context.Context, types ...pluginLib.Type) []plugins.PluginDTO {
 	var res []plugins.PluginDTO
-	for _, p := range s.store.Plugins(ctx, libTypes...) {
-		res = append(res, toGrafanaDTO(p))
+	for _, p := range s.store.Plugins(ctx, types...) {
+		res = append(res, p)
 	}
 
 	return res

@@ -144,8 +144,9 @@ func TestInitializer_envVars(t *testing.T) {
 		}
 
 		licensing := &fakes.FakeLicensingService{
-			TokenRaw:    "token",
-			LicensePath: "/path/to/ent/license",
+			TokenRaw:     "token",
+			LicensePath:  "/path/to/ent/license",
+			TokenEdition: "test",
 		}
 
 		i := &Initializer{

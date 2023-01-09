@@ -14,6 +14,7 @@ import (
 	"github.com/grafana/grafana/pkg/infra/usagestats"
 	"github.com/grafana/grafana/pkg/login/social"
 	"github.com/grafana/grafana/pkg/models"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -367,13 +368,13 @@ func (s *Service) updateTotalStats(ctx context.Context) bool {
 }
 
 func (s *Service) appCount(ctx context.Context) int {
-	return len(s.pluginStore.Plugins(ctx, plugins.App))
+	return len(s.pluginStore.Plugins(ctx, pluginLib.App))
 }
 
 func (s *Service) panelCount(ctx context.Context) int {
-	return len(s.pluginStore.Plugins(ctx, plugins.Panel))
+	return len(s.pluginStore.Plugins(ctx, pluginLib.Panel))
 }
 
 func (s *Service) dataSourceCount(ctx context.Context) int {
-	return len(s.pluginStore.Plugins(ctx, plugins.DataSource))
+	return len(s.pluginStore.Plugins(ctx, pluginLib.DataSource))
 }

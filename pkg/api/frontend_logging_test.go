@@ -77,7 +77,7 @@ func logSentryEventScenario(t *testing.T, desc string, event frontendlogging.Fro
 
 		// fake plugin route so we will try to find a source map there
 		pm := fakePluginStaticRouteResolver{
-			routes: []*plugins.StaticRoute{
+			routes: []plugins.StaticRoute{
 				{
 					Directory: "/usr/local/telepathic-panel",
 					PluginID:  "telepathic",
@@ -150,7 +150,7 @@ func logGrafanaJavascriptAgentEventScenario(t *testing.T, desc string, event fro
 
 		// fake plugin route so we will try to find a source map there
 		pm := fakePluginStaticRouteResolver{
-			routes: []*plugins.StaticRoute{
+			routes: []plugins.StaticRoute{
 				{
 					Directory: "/usr/local/telepathic-panel",
 					PluginID:  "telepathic",

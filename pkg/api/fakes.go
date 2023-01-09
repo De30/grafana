@@ -5,7 +5,6 @@ import (
 
 	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/plugins"
-	"github.com/grafana/grafana/pkg/services/rendering"
 )
 
 type fakePluginInstaller struct {
@@ -35,18 +34,18 @@ func (pm *fakePluginInstaller) Remove(_ context.Context, pluginID string) error 
 }
 
 type fakeRendererManager struct {
-	rendering.RendererPluginManager
+	plugins.RendererPluginManager
 }
 
-func (ps *fakeRendererManager) Renderer(_ context.Context) *pluginLib.Plugin {
-	return nil
+func (ps *fakeRendererManager) Renderer(_ context.Context) (pluginLib.Plugin, bool) {
+	return pluginLib.Plugin{}, false
 }
 
 type fakePluginStaticRouteResolver struct {
-	routes []*plugins.StaticRoute
+	routes []plugins.StaticRoute
 }
 
-func (psrr *fakePluginStaticRouteResolver) Routes() []*plugins.StaticRoute {
+func (psrr *fakePluginStaticRouteResolver) Routes() []plugins.StaticRoute {
 	return psrr.routes
 }
 
@@ -64,15 +63,15 @@ func (pr FakePluginStore) Plugin(_ context.Context, pluginID string) (plugins.Pl
 	return plugins.PluginDTO{}, false
 }
 
-func (pr FakePluginStore) Plugins(_ context.Context, pluginTypes ...plugins.Type) []plugins.PluginDTO {
+func (pr FakePluginStore) Plugins(_ context.Context, pluginTypes ...pluginLib.Type) []plugins.PluginDTO {
 	var result []plugins.PluginDTO
 	if len(pluginTypes) == 0 {
-		pluginTypes = plugins.PluginTypes
+		pluginTypes = pluginLib.PluginTypes
 	}
 
 	for _, v := range pr.PluginList {
 		for _, t := range pluginTypes {
-			if v.Type == pluginLib.Type(t) {
+			if v.Type == t {
 				result = append(result, v)
 			}
 		}

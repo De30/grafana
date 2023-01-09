@@ -318,9 +318,8 @@ func (pr *FakeBackendProcessProvider) BackendFactory(_ context.Context, p *plugi
 }
 
 type FakeLicensingService struct {
-	TokenRaw     string
-	LicensePath  string
-	TokenEdition string
+	TokenRaw    string
+	LicensePath string
 }
 
 func NewFakeLicensingService() *FakeLicensingService {
@@ -328,7 +327,7 @@ func NewFakeLicensingService() *FakeLicensingService {
 }
 
 func (s *FakeLicensingService) Edition() string {
-	return s.TokenEdition
+	return ""
 }
 
 func (s *FakeLicensingService) Path() string {
@@ -349,4 +348,16 @@ func NewFakeRoleRegistry() *FakeRoleRegistry {
 
 func (f *FakeRoleRegistry) DeclarePluginRoles(_ context.Context, _ string, _ string, _ []plugins.RoleRegistration) error {
 	return f.ExpectedErr
+}
+
+type DecommissionedPlugin struct {
+	backendplugin.Plugin
+}
+
+func (p *DecommissionedPlugin) Decommission() error {
+	return nil
+}
+
+func (p *DecommissionedPlugin) IsDecommissioned() bool {
+	return true
 }

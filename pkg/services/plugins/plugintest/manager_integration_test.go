@@ -26,7 +26,6 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/manager/loader"
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/plugins/manager/signature"
-	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/licensing"
@@ -67,23 +66,18 @@ func TestIntegrationPluginManager(t *testing.T) {
 	// We use the raw config here as it forms the basis for the setting.Provider implementation
 	// The plugin manager also relies directly on the setting.Cfg struct to provide Grafana specific
 	// properties such as the loading paths
-	raw, err := ini.Load([]byte(`
-		app_mode = production
-
-		[plugin.test-app]
-		path=../../../plugins/manager/testdata/test-app
-
-		[plugin.test-panel]
-		not=included
-		`),
-	)
+	raw, err := ini.Load([]byte(`app_mode = production`))
 	require.NoError(t, err)
 
 	cfg := &setting.Cfg{
-		Raw:                    raw,
-		StaticRootPath:         staticRootPath,
-		BundledPluginsPath:     bundledPluginsPath,
-		Azure:                  &azsettings.AzureSettings{},
+		Raw:                raw,
+		StaticRootPath:     staticRootPath,
+		BundledPluginsPath: bundledPluginsPath,
+		Azure:              &azsettings.AzureSettings{},
+		PluginSettings: map[string]map[string]string{
+			"test-app":   {"path": "../../../plugins/manager/testdata/test-app"},
+			"test-panel": {"not": "included"},
+		},
 		IsFeatureToggleEnabled: func(_ string) bool { return false },
 	}
 
@@ -118,18 +112,15 @@ func TestIntegrationPluginManager(t *testing.T) {
 	lic := plicensing.ProvideLicensing(cfg, &licensing.OSSLicensingService{Cfg: cfg})
 	l := loader.ProvideService(pCfg, lic, signature.NewUnsignedAuthorizer(pCfg),
 		reg, provider.ProvideService(coreRegistry), fakes.NewFakeRoleRegistry())
-	ps, err := store.ProvideService(cfg, pCfg, reg, l)
-	require.NoError(t, err)
-	rr := plugins.ProvideRouteResolver(ps)
-	require.NoError(t, err)
+	ps := plugins.ProvideStore(cfg, reg, l)
 
 	ctx := context.Background()
 	err = ps.Run(ctx)
 	require.NoError(t, err)
 
-	verifyCorePluginCatalogue(t, ctx, ps)
+	verifyPluginCatalogue(t, ctx, ps)
 	verifyBundledPlugins(t, ctx, ps, reg)
-	verifyPluginStaticRoutes(t, ctx, rr, reg)
+	verifyPluginStaticRoutes(t, ctx, ps, reg)
 	verifyBackendProcesses(t, reg.Plugins(ctx))
 	verifyPluginQuery(t, ctx, client.ProvideService(reg, pCfg, &fakeJWTAuth{}))
 }
@@ -159,7 +150,7 @@ func verifyPluginQuery(t *testing.T, ctx context.Context, c plugins.Client) {
 	require.JSONEq(t, `{"results":{"A":{"frames":[{"schema":{"refId":"A","fields":[{"name":"time","type":"time","typeInfo":{"frame":"time.Time"}},{"name":"A-series","type":"number","typeInfo":{"frame":"int64","nullable":true}}]},"data":{"values":[[1661420570000,1661420630000,1661420690000,1661420750000,1661420810000,1661420870000],[1,20,90,30,5,0]]}}],"status":200}}}`, string(payload))
 }
 
-func verifyCorePluginCatalogue(t *testing.T, ctx context.Context, ps *store.Service) {
+func verifyPluginCatalogue(t *testing.T, ctx context.Context, ps *plugins.StoreService) {
 	t.Helper()
 
 	expPanels := map[string]struct{}{
@@ -257,7 +248,7 @@ func verifyCorePluginCatalogue(t *testing.T, ctx context.Context, ps *store.Serv
 	require.Equal(t, len(expPanels)+len(expDataSources)+len(expApps), len(ps.Plugins(ctx)))
 }
 
-func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, reg registry.Service) {
+func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *plugins.StoreService, reg registry.Service) {
 	t.Helper()
 
 	dsPlugins := make(map[string]struct{})
@@ -273,7 +264,7 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 	intInputPlugin, exists := reg.Plugin(ctx, "input")
 	require.True(t, exists)
 
-	pluginRoutes := make(map[string]*pluginLib.StaticRoute)
+	pluginRoutes := make(map[string]plugins.StaticRoute)
 	for _, r := range ps.Routes() {
 		pluginRoutes[r.PluginID] = r
 	}
@@ -285,7 +276,7 @@ func verifyBundledPlugins(t *testing.T, ctx context.Context, ps *store.Service, 
 }
 
 func verifyPluginStaticRoutes(t *testing.T, ctx context.Context, rr plugins.StaticRouteResolver, reg registry.Service) {
-	routes := make(map[string]*plugins.StaticRoute)
+	routes := make(map[string]plugins.StaticRoute)
 	for _, route := range rr.Routes() {
 		routes[route.PluginID] = route
 	}

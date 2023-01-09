@@ -13,8 +13,8 @@ import (
 
 type dummyPluginManager struct{}
 
-func (d *dummyPluginManager) Renderer(_ context.Context) *plugins.Plugin {
-	return nil
+func (d *dummyPluginManager) Renderer(_ context.Context) (plugins.Plugin, bool) {
+	return plugins.Plugin{}, false
 }
 
 var dummyRendererUrl = "http://dummyurl.com"

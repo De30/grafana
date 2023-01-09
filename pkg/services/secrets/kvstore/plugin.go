@@ -8,10 +8,11 @@ import (
 
 	"github.com/grafana/grafana/pkg/infra/kvstore"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	smp "github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
 	"github.com/grafana/grafana/pkg/services/datasources"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -260,26 +261,32 @@ func EvaluateRemoteSecretsPlugin(ctx context.Context, mg plugins.SecretsPluginMa
 	if !usePlugin {
 		return errPluginDisabledByConfig
 	}
-	pluginInstalled := mg.SecretsManager(ctx) != nil
-	if !pluginInstalled {
+	_, exists := mg.SecretsManager(ctx)
+	if !exists {
 		return errPluginNotInstalled
 	}
 	return nil
 }
 
 func HasPluginStarted(ctx context.Context, mg plugins.SecretsPluginManager) bool {
-	return mg.SecretsManager(ctx) != nil && mg.SecretsManager(ctx).SecretsManager != nil
+	_, exists := mg.SecretsManager(ctx)
+	return exists
 }
 
 func StartAndReturnPlugin(mg plugins.SecretsPluginManager, ctx context.Context) (smp.SecretsManagerPlugin, error) {
 	var err error
+	var p pluginLib.Plugin
 	startupOnce.Do(func() {
-		err = mg.SecretsManager(ctx).Start(ctx)
+		var exists bool
+		p, exists = mg.SecretsManager(ctx)
+		if exists {
+			err = p.Start(ctx)
+		}
 	})
 	if err != nil {
 		return nil, err
 	}
-	return mg.SecretsManager(ctx).SecretsManager, nil
+	return p.SecretsManager, nil
 }
 
 func ResetPlugin() {

@@ -20,15 +20,15 @@ func (pr FakePluginStore) Plugin(_ context.Context, pluginID string) (PluginDTO,
 	return PluginDTO{}, false
 }
 
-func (pr FakePluginStore) Plugins(_ context.Context, pluginTypes ...Type) []PluginDTO {
+func (pr FakePluginStore) Plugins(_ context.Context, pluginTypes ...pluginLib.Type) []PluginDTO {
 	var result []PluginDTO
 	if len(pluginTypes) == 0 {
-		pluginTypes = PluginTypes
+		pluginTypes = pluginLib.PluginTypes
 	}
 
 	for _, v := range pr.PluginList {
 		for _, t := range pluginTypes {
-			if v.Type == pluginLib.Type(t) {
+			if v.Type == t {
 				result = append(result, v)
 			}
 		}

@@ -18,7 +18,8 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/infra/remotecache"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/plugins"
+	pluginLib "github.com/grafana/grafana/pkg/plugins"
+	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 )
@@ -33,7 +34,7 @@ const ServiceName = "RenderingService"
 
 type RenderingService struct {
 	log               log.Logger
-	pluginInfo        *plugins.Plugin
+	pluginInfo        pluginLib.Plugin
 	renderAction      renderFunc
 	renderCSVAction   renderCSVFunc
 	sanitizeSVGAction sanitizeFunc
@@ -47,10 +48,10 @@ type RenderingService struct {
 	perRequestRenderKeyProvider renderKeyProvider
 	Cfg                         *setting.Cfg
 	RemoteCacheService          *remotecache.RemoteCache
-	RendererPluginManager       RendererPluginManager
+	RendererPluginManager       plugins.RendererPluginManager
 }
 
-func ProvideService(cfg *setting.Cfg, remoteCache *remotecache.RemoteCache, rm RendererPluginManager) (*RenderingService, error) {
+func ProvideService(cfg *setting.Cfg, remoteCache *remotecache.RemoteCache, rm plugins.RendererPluginManager) (*RenderingService, error) {
 	// ensure ImagesDir exists
 	err := os.MkdirAll(cfg.ImagesDir, 0700)
 	if err != nil {
@@ -156,9 +157,9 @@ func (rs *RenderingService) Run(ctx context.Context) error {
 		}
 	}
 
-	if rs.pluginAvailable(ctx) {
+	if rp, exists := rs.rendererPlugin(ctx); exists {
 		rs.log = rs.log.New("renderer", "plugin")
-		rs.pluginInfo = rs.RendererPluginManager.Renderer(ctx)
+		rs.pluginInfo = rp
 
 		if err := rs.startPlugin(ctx); err != nil {
 			return err
@@ -191,8 +192,8 @@ func (rs *RenderingService) Run(ctx context.Context) error {
 	return nil
 }
 
-func (rs *RenderingService) pluginAvailable(ctx context.Context) bool {
-	return rs.RendererPluginManager.Renderer(ctx) != nil
+func (rs *RenderingService) rendererPlugin(ctx context.Context) (pluginLib.Plugin, bool) {
+	return rs.RendererPluginManager.Renderer(ctx)
 }
 
 func (rs *RenderingService) remoteAvailable() bool {
@@ -200,7 +201,8 @@ func (rs *RenderingService) remoteAvailable() bool {
 }
 
 func (rs *RenderingService) IsAvailable(ctx context.Context) bool {
-	return rs.remoteAvailable() || rs.pluginAvailable(ctx)
+	_, pluginAvailable := rs.rendererPlugin(ctx)
+	return rs.remoteAvailable() || pluginAvailable
 }
 
 func (rs *RenderingService) Version() string {

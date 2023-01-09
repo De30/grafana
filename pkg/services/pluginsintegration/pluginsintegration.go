@@ -3,7 +3,6 @@ package pluginsintegration
 import (
 	"github.com/google/wire"
 
-	pluginLib "github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
 	"github.com/grafana/grafana/pkg/plugins/backendplugin/provider"
 	"github.com/grafana/grafana/pkg/plugins/config"
@@ -15,28 +14,24 @@ import (
 	"github.com/grafana/grafana/pkg/plugins/manager/registry"
 	"github.com/grafana/grafana/pkg/plugins/manager/repo"
 	"github.com/grafana/grafana/pkg/plugins/manager/signature"
-	"github.com/grafana/grafana/pkg/plugins/manager/store"
 	"github.com/grafana/grafana/pkg/services/auth/jwt"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/plugins"
 	"github.com/grafana/grafana/pkg/services/plugins/licensing"
 	"github.com/grafana/grafana/pkg/services/plugins/plugincontext"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/clientmiddleware"
-	"github.com/grafana/grafana/pkg/services/rendering"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
 // WireSet provides a wire.ProviderSet of plugin providers.
 var WireSet = wire.NewSet(
 	config.ProvideConfig,
-	store.ProvideService,
-	wire.Bind(new(rendering.RendererPluginManager), new(*store.Service)),
-	wire.Bind(new(pluginLib.SecretsPluginManager), new(*store.Service)),
+	plugins.ProvideStore,
+	wire.Bind(new(plugins.RendererPluginManager), new(*plugins.StoreService)),
+	wire.Bind(new(plugins.SecretsPluginManager), new(*plugins.StoreService)),
+	wire.Bind(new(plugins.StaticRouteResolver), new(*plugins.StoreService)),
 
 	ProvidePlugins,
-
-	plugins.ProvideRouteResolver,
-	wire.Bind(new(plugins.StaticRouteResolver), new(*plugins.RouteResolver)), // TODO
 
 	plugins.ProvideErrorResolver,
 	wire.Bind(new(plugins.PluginErrorResolver), new(*plugins.ErrorResolver)), // TODO

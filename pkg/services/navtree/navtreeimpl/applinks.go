@@ -37,7 +37,7 @@ func (s *ServiceImpl) addAppLinks(treeRoot *navtree.NavTreeRoot, c *models.ReqCo
 		return false
 	}
 
-	for _, plugin := range s.pluginStore.Plugins(c.Req.Context(), plugins.App) {
+	for _, plugin := range s.pluginStore.Plugins(c.Req.Context(), pluginLib.App) {
 		if !isPluginEnabled(plugin) {
 			continue
 		}
