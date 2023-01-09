@@ -120,6 +120,7 @@ const (
 	StateReasonMissingSeries = "MissingSeries"
 	StateReasonError         = "Error"
 	StateReasonPaused        = "Paused"
+	StateReasonDeleted       = "Deleted"
 )
 
 var (
