@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api/avatar"
 	"github.com/grafana/grafana/pkg/api/routing"
 	"github.com/grafana/grafana/pkg/bus"
+	"github.com/grafana/grafana/pkg/cmd/grafana-cli/runner"
 	"github.com/grafana/grafana/pkg/cuectx"
 	"github.com/grafana/grafana/pkg/expr"
 	"github.com/grafana/grafana/pkg/infra/db"
@@ -170,7 +171,6 @@ var wireBasicSet = wire.NewSet(
 	alerting.ProvideAlertStore,
 	alerting.ProvideAlertEngine,
 	wire.Bind(new(alerting.UsageStatsQuerier), new(*alerting.AlertEngine)),
-	setting.NewCfgFromArgs,
 	New,
 	api.ProvideHTTPServer,
 	query.ProvideService,
@@ -363,6 +363,21 @@ var wireBasicSet = wire.NewSet(
 
 var wireSet = wire.NewSet(
 	wireBasicSet,
+	setting.NewCfgFromArgs,
+	sqlstore.ProvideService,
+	ngmetrics.ProvideService,
+	wire.Bind(new(notifications.Service), new(*notifications.NotificationService)),
+	wire.Bind(new(notifications.WebhookSender), new(*notifications.NotificationService)),
+	wire.Bind(new(notifications.EmailSender), new(*notifications.NotificationService)),
+	wire.Bind(new(db.DB), new(*sqlstore.SQLStore)),
+	prefimpl.ProvideService,
+	oauthtoken.ProvideService,
+	wire.Bind(new(oauthtoken.OAuthTokenService), new(*oauthtoken.Service)),
+)
+
+var wireCLISet = wire.NewSet(
+	wireBasicSet,
+	runner.New,
 	sqlstore.ProvideService,
 	ngmetrics.ProvideService,
 	wire.Bind(new(notifications.Service), new(*notifications.NotificationService)),
@@ -376,6 +391,7 @@ var wireSet = wire.NewSet(
 
 var wireTestSet = wire.NewSet(
 	wireBasicSet,
+	setting.NewCfgFromArgs,
 	ProvideTestEnv,
 	sqlstore.ProvideServiceForTests,
 	ngmetrics.ProvideServiceForTest,
@@ -400,4 +416,9 @@ func Initialize(cla setting.CommandLineArgs, opts Options, apiOpts api.ServerOpt
 func InitializeForTest(cla setting.CommandLineArgs, opts Options, apiOpts api.ServerOptions) (*TestEnv, error) {
 	wire.Build(wireExtsTestSet)
 	return &TestEnv{Server: &Server{}, SQLStore: &sqlstore.SQLStore{}}, nil
+}
+
+func InitializeForCLI(cfg *setting.Cfg) (runner.Runner, error) {
+	wire.Build(wireExtsCLISet)
+	return runner.Runner{}, nil
 }
