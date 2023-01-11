@@ -161,7 +161,7 @@ func removePrivateLabels(labels data.Labels) data.Labels {
 
 func shouldAnnotate(transition state.StateTransition) bool {
 	// Do not log not transitioned states normal states if it was marked as stale
-	if !transition.HasChanged() || transition.StateReason == ngmodels.StateReasonMissingSeries && transition.PreviousState == eval.Normal && transition.State.State == eval.Normal {
+	if !transition.Changed() || transition.StateReason == ngmodels.StateReasonMissingSeries && transition.PreviousState == eval.Normal && transition.State.State == eval.Normal {
 		return false
 	}
 	return true
