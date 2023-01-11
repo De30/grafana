@@ -554,8 +554,30 @@
    "type": "object"
   },
   "DataTopic": {
+   "description": "nolint:revive",
    "title": "DataTopic is used to identify which topic the frame should be assigned to.",
    "type": "string"
+  },
+  "DiscordConfig": {
+   "properties": {
+    "http_config": {
+     "$ref": "#/definitions/HTTPClientConfig"
+    },
+    "message": {
+     "type": "string"
+    },
+    "send_resolved": {
+     "type": "boolean"
+    },
+    "title": {
+     "type": "string"
+    },
+    "webhook_url": {
+     "$ref": "#/definitions/SecretURL"
+    }
+   },
+   "title": "DiscordConfig configures notifications via Discord.",
+   "type": "object"
   },
   "DiscoveryBase": {
    "properties": {
@@ -1004,6 +1026,12 @@
   },
   "GettableApiReceiver": {
    "properties": {
+    "discord_configs": {
+     "items": {
+      "$ref": "#/definitions/DiscordConfig"
+     },
+     "type": "array"
+    },
     "email_configs": {
      "items": {
       "$ref": "#/definitions/EmailConfig"
@@ -1059,6 +1087,12 @@
     "victorops_configs": {
      "items": {
       "$ref": "#/definitions/VictorOpsConfig"
+     },
+     "type": "array"
+    },
+    "webex_configs": {
+     "items": {
+      "$ref": "#/definitions/WebexConfig"
      },
      "type": "array"
     },
@@ -1127,7 +1161,7 @@
      "type": "object"
     },
     "settings": {
-     "$ref": "#/definitions/Json"
+     "$ref": "#/definitions/RawMessage"
     },
     "type": {
      "type": "string"
@@ -1359,7 +1393,13 @@
     "victorops_api_key": {
      "$ref": "#/definitions/Secret"
     },
+    "victorops_api_key_file": {
+     "type": "string"
+    },
     "victorops_api_url": {
+     "$ref": "#/definitions/URL"
+    },
+    "webex_api_url": {
      "$ref": "#/definitions/URL"
     },
     "wechat_api_corp_id": {
@@ -1400,6 +1440,9 @@
     "oauth2": {
      "$ref": "#/definitions/OAuth2"
     },
+    "proxy_connect_header": {
+     "$ref": "#/definitions/Header"
+    },
     "proxy_url": {
      "$ref": "#/definitions/URL"
     },
@@ -1408,6 +1451,15 @@
     }
    },
    "title": "HTTPClientConfig configures an HTTP client.",
+   "type": "object"
+  },
+  "Header": {
+   "additionalProperties": {
+    "items": {
+     "$ref": "#/definitions/Secret"
+    },
+    "type": "array"
+   },
    "type": "object"
   },
   "HostPort": {
@@ -1874,13 +1926,22 @@
     "routing_key": {
      "$ref": "#/definitions/Secret"
     },
+    "routing_key_file": {
+     "type": "string"
+    },
     "send_resolved": {
      "type": "boolean"
     },
     "service_key": {
      "$ref": "#/definitions/Secret"
     },
+    "service_key_file": {
+     "type": "string"
+    },
     "severity": {
+     "type": "string"
+    },
+    "source": {
      "type": "string"
     },
     "url": {
@@ -1972,6 +2033,12 @@
   },
   "PostableApiReceiver": {
    "properties": {
+    "discord_configs": {
+     "items": {
+      "$ref": "#/definitions/DiscordConfig"
+     },
+     "type": "array"
+    },
     "email_configs": {
      "items": {
       "$ref": "#/definitions/EmailConfig"
@@ -2027,6 +2094,12 @@
     "victorops_configs": {
      "items": {
       "$ref": "#/definitions/VictorOpsConfig"
+     },
+     "type": "array"
+    },
+    "webex_configs": {
+     "items": {
+      "$ref": "#/definitions/WebexConfig"
      },
      "type": "array"
     },
@@ -2092,7 +2165,7 @@
      "type": "object"
     },
     "settings": {
-     "$ref": "#/definitions/Json"
+     "$ref": "#/definitions/RawMessage"
     },
     "type": {
      "type": "string"
@@ -2471,8 +2544,17 @@
    "title": "QueryStat is used for storing arbitrary statistics metadata related to a query and its result, e.g. total request time, data processing time.",
    "type": "object"
   },
+  "RawMessage": {
+   "type": "object"
+  },
   "Receiver": {
    "properties": {
+    "discord_configs": {
+     "items": {
+      "$ref": "#/definitions/DiscordConfig"
+     },
+     "type": "array"
+    },
     "email_configs": {
      "items": {
       "$ref": "#/definitions/EmailConfig"
@@ -2522,6 +2604,12 @@
     "victorops_configs": {
      "items": {
       "$ref": "#/definitions/VictorOpsConfig"
+     },
+     "type": "array"
+    },
+    "webex_configs": {
+     "items": {
+      "$ref": "#/definitions/WebexConfig"
      },
      "type": "array"
     },
@@ -3026,6 +3114,9 @@
      "description": "The client key file for the targets.",
      "type": "string"
     },
+    "max_version": {
+     "$ref": "#/definitions/TLSVersion"
+    },
     "min_version": {
      "$ref": "#/definitions/TLSVersion"
     },
@@ -3269,6 +3360,9 @@
     "Host": {
      "type": "string"
     },
+    "OmitHost": {
+     "type": "boolean"
+    },
     "Opaque": {
      "type": "string"
     },
@@ -3330,7 +3424,7 @@
      "$ref": "#/definitions/Secret"
     },
     "api_key_file": {
-     "$ref": "#/definitions/Secret"
+     "type": "string"
     },
     "api_url": {
      "$ref": "#/definitions/URL"
@@ -3369,6 +3463,27 @@
   "VisType": {
    "title": "VisType is used to indicate how the data should be visualized in explore.",
    "type": "string"
+  },
+  "WebexConfig": {
+   "properties": {
+    "api_url": {
+     "$ref": "#/definitions/URL"
+    },
+    "http_config": {
+     "$ref": "#/definitions/HTTPClientConfig"
+    },
+    "message": {
+     "type": "string"
+    },
+    "room_id": {
+     "type": "string"
+    },
+    "send_resolved": {
+     "type": "boolean"
+    }
+   },
+   "title": "WebexConfig configures notifications via Webex.",
+   "type": "object"
   },
   "WebhookConfig": {
    "properties": {
@@ -3574,6 +3689,7 @@
    "type": "object"
   },
   "gettableAlert": {
+   "description": "GettableAlert gettable alert",
    "properties": {
     "annotations": {
      "$ref": "#/definitions/labelSet"
@@ -3635,6 +3751,7 @@
    "type": "array"
   },
   "gettableSilence": {
+   "description": "GettableSilence gettable silence",
    "properties": {
     "comment": {
      "description": "comment",
@@ -3683,6 +3800,7 @@
    "type": "object"
   },
   "gettableSilences": {
+   "description": "GettableSilences gettable silences",
    "items": {
     "$ref": "#/definitions/gettableSilence"
    },
@@ -3832,6 +3950,7 @@
    "type": "array"
   },
   "postableSilence": {
+   "description": "PostableSilence postable silence",
    "properties": {
     "comment": {
      "description": "comment",
@@ -3869,7 +3988,6 @@
    "type": "object"
   },
   "receiver": {
-   "description": "Receiver receiver",
    "properties": {
     "active": {
      "description": "active",
