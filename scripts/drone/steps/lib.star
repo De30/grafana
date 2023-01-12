@@ -14,7 +14,7 @@ curl_image = 'byrnedo/alpine-curl:0.1.8'
 windows_image = 'mcr.microsoft.com/windows:1809'
 wix_image = 'grafana/ci-wix:0.1.1'
 go_image = 'golang:1.19.4'
-cypress_image = 'cypress/included:12.1.0'
+cypress_image = 'cypress/included:12.3.0'
 
 trigger_oss = {
     'repo': [
