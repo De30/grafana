@@ -460,17 +460,6 @@ func evaluateExecutionResult(execResults ExecutionResults, ts time.Time) Results
 		return evalResults
 	}
 
-	if len(execResults.NoData) > 0 {
-		noData := datasourceUIDsToRefIDs(execResults.NoData)
-		for datasourceUID, refIDs := range noData {
-			appendNoData(data.Labels{
-				"datasource_uid": datasourceUID,
-				"ref_id":         strings.Join(refIDs, ","),
-			})
-		}
-		return evalResults
-	}
-
 	if len(execResults.Condition) == 0 {
 		appendNoData(nil)
 		return evalResults
@@ -527,6 +516,16 @@ func evaluateExecutionResult(execResults ExecutionResults, ts time.Time) Results
 		switch {
 		case val == nil:
 			r.State = NoData
+			if len(execResults.NoData) > 0 {
+				noData := datasourceUIDsToRefIDs(execResults.NoData)
+				for datasourceUID, refIDs := range noData {
+					appendNoData(data.Labels{
+						"datasource_uid": datasourceUID,
+						"ref_id":         strings.Join(refIDs, ","),
+					})
+				}
+				continue
+			}
 		case *val == 0:
 			r.State = Normal
 		default:
