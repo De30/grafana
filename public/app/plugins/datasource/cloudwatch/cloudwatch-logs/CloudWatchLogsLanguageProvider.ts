@@ -4,7 +4,9 @@ import { lastValueFrom } from 'rxjs';
 import { AbsoluteTimeRange, HistoryItem, LanguageProvider } from '@grafana/data';
 import { CompletionItemGroup, SearchFunctionType, Token, TypeaheadInput, TypeaheadOutput } from '@grafana/ui';
 
-import { CloudWatchDatasource } from './datasource';
+import { CloudWatchDatasource } from '../datasource';
+import { CloudWatchQuery, LogGroup, TSDBResponse } from '../types';
+
 import syntax, {
   AGGREGATION_FUNCTIONS_STATS,
   BOOLEAN_FUNCTIONS,
@@ -15,7 +17,6 @@ import syntax, {
   QUERY_COMMANDS,
   STRING_FUNCTIONS,
 } from './syntax';
-import { CloudWatchQuery, LogGroup, TSDBResponse } from './types';
 
 export type CloudWatchHistoryItem = HistoryItem<CloudWatchQuery>;
 
@@ -26,7 +27,7 @@ type TypeaheadContext = {
   region: string;
 };
 
-export class CloudWatchLanguageProvider extends LanguageProvider {
+export class CloudWatchLogsLanguageProvider extends LanguageProvider {
   started = false;
   declare initialRange: AbsoluteTimeRange;
   datasource: CloudWatchDatasource;
