@@ -19,6 +19,7 @@ import {
   DataSourceWithQueryImportSupport,
   dateMath,
   DateTime,
+  dateTimeParse,
   FieldCache,
   FieldType,
   getDefaultTimeRange,
@@ -49,7 +50,12 @@ import LanguageProvider from './LanguageProvider';
 import { LiveStreams, LokiLiveTarget } from './LiveStreams';
 import { transformBackendResult } from './backendResultTransformer';
 import { LokiAnnotationsQueryEditor } from './components/AnnotationsQueryEditor';
-import { escapeLabelValueInExactSelector, escapeLabelValueInSelector, isRegexSelector } from './languageUtils';
+import {
+  escapeLabelValueInExactSelector,
+  escapeLabelValueInSelector,
+  isRegexSelector,
+  roundSecToMin,
+} from './languageUtils';
 import { labelNamesRegex, labelValuesRegex } from './migrations/variableQueryMigrations';
 import {
   addLabelFormatToQuery,
@@ -171,7 +177,50 @@ export class LokiDatasource
     });
   }
 
+  manageRequestTimeRange(request: DataQueryRequest<LokiQuery>): DataQueryRequest<LokiQuery> {
+    function roundSecToLastMin(seconds: number, minutes = 1): number {
+      return roundSecToMin(seconds) - (roundSecToMin(seconds) % minutes);
+    }
+
+    // Returns number of minutes rounded up to the nearest nth minute
+    function roundSecToNextMin(seconds: number, minutes = 1): number {
+      return Math.ceil(seconds / 60) - (Math.ceil(seconds / 60) % minutes);
+    }
+
+    function getPrometheusTime(date: string | DateTime, roundUp: boolean) {
+      if (typeof date === 'string') {
+        date = dateMath.parse(date, roundUp)!;
+      }
+
+      return Math.ceil(date.valueOf() / 1000);
+    }
+
+    console.log(request.range.from, request.range.to);
+
+    const range = request.range;
+    const CACHE_TIME_MINUTES = 5;
+
+    const startTime = getPrometheusTime(range.from, false);
+    const startTimeQuantizedSeconds = roundSecToLastMin(startTime, CACHE_TIME_MINUTES) * 60;
+
+    // And round up to the nearest nth minute for the end time
+    const endTime = getPrometheusTime(range.to, true);
+    const endTimeQuantizedSeconds = roundSecToNextMin(endTime, CACHE_TIME_MINUTES) * 60;
+
+    if (startTimeQuantizedSeconds === endTimeQuantizedSeconds) {
+      throw new Error('Start and end cannot be the same value');
+    }
+
+    request.range.from = dateTimeParse(startTimeQuantizedSeconds * 1000);
+    request.range.to = dateTimeParse(endTimeQuantizedSeconds * 1000);
+
+    console.log(request.range.from, request.range.to);
+
+    return request;
+  }
+
   query(request: DataQueryRequest<LokiQuery>): Observable<DataQueryResponse> {
+    this.manageRequestTimeRange(request);
     const queries = request.targets
       .map(getNormalizedLokiQuery) // "fix" the `.queryType` prop
       .map((q) => ({ ...q, maxLines: q.maxLines || this.maxLines })); // set maxLines if not set

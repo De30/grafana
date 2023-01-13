@@ -1,10 +1,10 @@
 import { TimeRange } from '@grafana/data';
 
-function roundMsToMin(milliseconds: number): number {
+export function roundMsToMin(milliseconds: number): number {
   return roundSecToMin(milliseconds / 1000);
 }
 
-function roundSecToMin(seconds: number): number {
+export function roundSecToMin(seconds: number): number {
   return Math.floor(seconds / 60);
 }
 
