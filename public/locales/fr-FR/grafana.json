@@ -7,17 +7,17 @@
   },
   "command-palette": {
     "action": {
-      "change-theme": "",
+      "change-theme": "Modifier le thème...",
       "dark-theme": "Sombre",
       "light-theme": "Clair",
-      "search": ""
+      "search": "Chercher"
     },
     "section": {
       "actions": "Actions",
       "dashboard-search-results": "Tableaux de bord",
-      "pages": "",
+      "pages": "Pages",
       "preferences": "Préférences",
-      "recent-dashboards": ""
+      "recent-dashboards": "Tableaux de bord récemment consultés"
     }
   },
   "common": {
@@ -254,7 +254,7 @@
       "title": "Suivi"
     },
     "new": {
-      "title": ""
+      "title": "Nouveau"
     },
     "new-dashboard": {
       "title": "Nouveau tableau de bord"
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "Télécharger les packs d’assistance",
-      "title": ""
+      "title": "Packs d’assistance"
     },
     "teams": {
       "subtitle": "Groupes d'utilisateurs ayant des besoins communs en matière de tableau de bord et d'autorisations",
@@ -352,20 +352,20 @@
     "header-menu": {
       "copy": "Copier",
       "create-library-panel": "Créer un panneau de bibliothèque",
-      "duplicate": "",
-      "edit": "",
+      "duplicate": "Dupliquer",
+      "edit": "Modifier",
       "explore": "Explorer",
-      "get-help": "",
+      "get-help": "Obtenir de l'aide",
       "hide-legend": "Masquer la légende",
       "inspect": "Inspecter",
       "inspect-data": "Données",
       "inspect-json": "Panneau JSON",
       "more": "Plus...",
       "query": "Requête",
-      "remove": "",
+      "remove": "Supprimer",
       "share": "Partager",
       "show-legend": "Afficher la légende",
-      "unlink-library-panel": "",
+      "unlink-library-panel": "Dissocier le panneau de bibliothèque",
       "view": "Afficher"
     }
   },
@@ -389,9 +389,9 @@
   "search": {
     "dashboard-actions": {
       "import": "Importer",
-      "new": "",
-      "new-dashboard": "",
-      "new-folder": ""
+      "new": "Nouveau",
+      "new-dashboard": "Nouveau tableau de bord",
+      "new-folder": "Nouveau dossier"
     }
   },
   "share-modal": {
@@ -553,7 +553,7 @@
       "name-label": "Nom",
       "username-label": "Nom d’utilisateur"
     },
-    "title": ""
+    "title": "Profil"
   },
   "user-session": {
     "browser-column": "Navigateur et système d'exploitation",
