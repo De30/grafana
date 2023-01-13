@@ -8,15 +8,15 @@
   "command-palette": {
     "action": {
       "change-theme": "",
-      "dark-theme": "",
-      "light-theme": "",
+      "dark-theme": "Dunkel",
+      "light-theme": "Hell",
       "search": ""
     },
     "section": {
-      "actions": "",
-      "dashboard-search-results": "",
+      "actions": "Aktionen",
+      "dashboard-search-results": "Dashboards",
       "pages": "",
-      "preferences": "",
+      "preferences": "Einstellungen",
       "recent-dashboards": ""
     }
   },
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "Support Bundles herunterladen",
-      "title": "Support Bundles"
+      "title": ""
     },
     "teams": {
       "subtitle": "Gruppen von Benutzern mit gemeinsamen Dashboards und Benachrichtigungen",
@@ -350,18 +350,18 @@
   },
   "panel": {
     "header-menu": {
-      "copy": "",
-      "create-library-panel": "",
+      "copy": "Kopieren",
+      "create-library-panel": "Bibliotheks-Panel erstellen",
       "duplicate": "",
       "edit": "",
-      "explore": "",
+      "explore": "Entdecken",
       "get-help": "",
       "hide-legend": "Legende ausblenden",
       "inspect": "Überprüfen",
       "inspect-data": "Daten",
       "inspect-json": "Panel-JSON",
       "more": "Mehr …",
-      "query": "",
+      "query": "Abfrage",
       "remove": "",
       "share": "Teilen",
       "show-legend": "Legende anzeigen",
@@ -388,7 +388,7 @@
   },
   "search": {
     "dashboard-actions": {
-      "import": "",
+      "import": "Importieren",
       "new": "",
       "new-dashboard": "",
       "new-folder": ""
@@ -553,7 +553,7 @@
       "name-label": "Name",
       "username-label": "Benutzername"
     },
-    "title": "Profil"
+    "title": ""
   },
   "user-session": {
     "browser-column": "Browser & Betriebssystem",
