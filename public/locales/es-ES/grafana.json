@@ -7,17 +7,17 @@
   },
   "command-palette": {
     "action": {
-      "change-theme": "",
+      "change-theme": "Cambiar tema...",
       "dark-theme": "Oscuro",
       "light-theme": "Claro",
-      "search": ""
+      "search": "Buscar"
     },
     "section": {
       "actions": "Acciones",
       "dashboard-search-results": "Paneles de control",
-      "pages": "",
+      "pages": "Páginas",
       "preferences": "Preferencias",
-      "recent-dashboards": ""
+      "recent-dashboards": "Paneles de control vistos recientemente"
     }
   },
   "common": {
@@ -254,7 +254,7 @@
       "title": "Seguimiento"
     },
     "new": {
-      "title": ""
+      "title": "Nuevo"
     },
     "new-dashboard": {
       "title": "Nuevo panel de control"
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "Descargar paquetes de apoyo",
-      "title": ""
+      "title": "Paquetes de apoyo"
     },
     "teams": {
       "subtitle": "Grupos de usuarios que tienen necesidades comunes de permisos y de panel de control",
@@ -352,20 +352,20 @@
     "header-menu": {
       "copy": "Copiar",
       "create-library-panel": "Crear panel de librería",
-      "duplicate": "",
-      "edit": "",
+      "duplicate": "Duplicar",
+      "edit": "Editar",
       "explore": "Explorar",
-      "get-help": "",
+      "get-help": "Obtener ayuda",
       "hide-legend": "Ocultar leyenda",
       "inspect": "Inspeccionar",
       "inspect-data": "Datos",
       "inspect-json": "JSON de panel",
       "more": "Más...",
       "query": "Consulta",
-      "remove": "",
+      "remove": "Eliminar",
       "share": "Compartir",
       "show-legend": "Mostrar leyenda",
-      "unlink-library-panel": "",
+      "unlink-library-panel": "Desvincular panel de librería",
       "view": "Vista"
     }
   },
@@ -389,9 +389,9 @@
   "search": {
     "dashboard-actions": {
       "import": "Importar",
-      "new": "",
-      "new-dashboard": "",
-      "new-folder": ""
+      "new": "Nuevo",
+      "new-dashboard": "Nuevo panel de control",
+      "new-folder": "Nueva carpeta"
     }
   },
   "share-modal": {
@@ -553,7 +553,7 @@
       "name-label": "Nombre",
       "username-label": "Nombre de usuario"
     },
-    "title": ""
+    "title": "Perfil"
   },
   "user-session": {
     "browser-column": "Navegador y sistema operativo",
