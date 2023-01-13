@@ -129,7 +129,7 @@ export class CloudWatchLanguageProvider extends LanguageProvider {
   private fetchFields = async (logGroups: LogGroup[], region: string): Promise<string[]> => {
     const results = await Promise.all(
       logGroups.map((logGroup) =>
-        this.datasource.api
+        this.datasource.resources
           .getLogGroupFields({ logGroupName: logGroup.name, arn: logGroup.arn, region })
           .then((fields) => fields.filter((f) => f).map((f) => f.value.name ?? ''))
       )
