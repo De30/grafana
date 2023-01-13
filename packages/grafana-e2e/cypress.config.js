@@ -3,6 +3,8 @@ const path = require('path');
 
 const benchmarkPlugin = require('./cypress/plugins/benchmark/index');
 const compareScreenshots = require('./cypress/plugins/compareScreenshots');
+// I'm not sure if we need this anymore or not. If nothing breaks, this can be removed.
+// const extendConfig = require('./cypress/plugins/extendConfig');
 const readProvisions = require('./cypress/plugins/readProvisions');
 
 module.exports = {
