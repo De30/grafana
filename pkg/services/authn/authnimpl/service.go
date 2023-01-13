@@ -80,7 +80,7 @@ func ProvideService(
 	}
 
 	if s.cfg.AuthProxyEnabled {
-		s.clients[authn.ClientProxy] = clients.ProvideProxy()
+		s.clients[authn.ClientProxy] = clients.ProvideProxy(cfg)
 	}
 
 	if s.cfg.JWTAuthEnabled {
