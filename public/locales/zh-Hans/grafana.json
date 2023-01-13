@@ -7,17 +7,17 @@
   },
   "command-palette": {
     "action": {
-      "change-theme": "",
+      "change-theme": "更改主题...",
       "dark-theme": "深色",
       "light-theme": "浅色",
-      "search": ""
+      "search": "搜索"
     },
     "section": {
       "actions": "操作",
       "dashboard-search-results": "仪表板",
-      "pages": "",
+      "pages": "页面",
       "preferences": "首选项",
-      "recent-dashboards": ""
+      "recent-dashboards": "最近查看的仪表板"
     }
   },
   "common": {
@@ -254,7 +254,7 @@
       "title": "正在监控"
     },
     "new": {
-      "title": ""
+      "title": "新建"
     },
     "new-dashboard": {
       "title": "新建仪表板"
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "下载支持包",
-      "title": ""
+      "title": "支持包"
     },
     "teams": {
       "subtitle": "具有共同仪表板和权限需求的用户组",
@@ -352,20 +352,20 @@
     "header-menu": {
       "copy": "复制",
       "create-library-panel": "创建库面板",
-      "duplicate": "",
-      "edit": "",
+      "duplicate": "复制",
+      "edit": "编辑",
       "explore": "探索",
-      "get-help": "",
+      "get-help": "获得帮助",
       "hide-legend": "隐藏图例",
       "inspect": "检查",
       "inspect-data": "数据",
       "inspect-json": "面板 JSON",
       "more": "更多...",
       "query": "查询",
-      "remove": "",
+      "remove": "删除",
       "share": "分享",
       "show-legend": "显示图例",
-      "unlink-library-panel": "",
+      "unlink-library-panel": "取消链接库面板",
       "view": "查看"
     }
   },
@@ -389,9 +389,9 @@
   "search": {
     "dashboard-actions": {
       "import": "导入",
-      "new": "",
-      "new-dashboard": "",
-      "new-folder": ""
+      "new": "新建",
+      "new-dashboard": "新建仪表板",
+      "new-folder": "新建文件夹"
     }
   },
   "share-modal": {
@@ -553,7 +553,7 @@
       "name-label": "姓名",
       "username-label": "用户名"
     },
-    "title": ""
+    "title": "个人资料"
   },
   "user-session": {
     "browser-column": "浏览器和操作系统",
