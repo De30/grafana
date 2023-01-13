@@ -72,6 +72,10 @@ type PasswordClient interface {
 	AuthenticatePassword(ctx context.Context, r *Request, username, password string) (*Identity, error)
 }
 
+type ProxyClient interface {
+	AuthenticateProxy(ctx context.Context, r *Request, username string) (*Identity, error)
+}
+
 type Request struct {
 	// OrgID will be populated by authn.Service
 	OrgID int64
