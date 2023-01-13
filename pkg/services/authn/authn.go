@@ -24,6 +24,7 @@ const (
 	ClientJWT       = "auth.client.jwt"
 	ClientRender    = "auth.client.render"
 	ClientSession   = "auth.client.session"
+	ClientProxy     = "auth.client.proxy"
 )
 
 const (
