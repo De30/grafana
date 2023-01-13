@@ -8,15 +8,15 @@
   "command-palette": {
     "action": {
       "change-theme": "",
-      "dark-theme": "",
-      "light-theme": "",
+      "dark-theme": "Oscuro",
+      "light-theme": "Claro",
       "search": ""
     },
     "section": {
-      "actions": "",
-      "dashboard-search-results": "",
+      "actions": "Acciones",
+      "dashboard-search-results": "Paneles de control",
       "pages": "",
-      "preferences": "",
+      "preferences": "Preferencias",
       "recent-dashboards": ""
     }
   },
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "Descargar paquetes de apoyo",
-      "title": "Paquetes de apoyo"
+      "title": ""
     },
     "teams": {
       "subtitle": "Grupos de usuarios que tienen necesidades comunes de permisos y de panel de control",
@@ -350,18 +350,18 @@
   },
   "panel": {
     "header-menu": {
-      "copy": "",
-      "create-library-panel": "",
+      "copy": "Copiar",
+      "create-library-panel": "Crear panel de librería",
       "duplicate": "",
       "edit": "",
-      "explore": "",
+      "explore": "Explorar",
       "get-help": "",
       "hide-legend": "Ocultar leyenda",
       "inspect": "Inspeccionar",
       "inspect-data": "Datos",
       "inspect-json": "JSON de panel",
       "more": "Más...",
-      "query": "",
+      "query": "Consulta",
       "remove": "",
       "share": "Compartir",
       "show-legend": "Mostrar leyenda",
@@ -388,7 +388,7 @@
   },
   "search": {
     "dashboard-actions": {
-      "import": "",
+      "import": "Importar",
       "new": "",
       "new-dashboard": "",
       "new-folder": ""
@@ -553,7 +553,7 @@
       "name-label": "Nombre",
       "username-label": "Nombre de usuario"
     },
-    "title": "Perfil"
+    "title": ""
   },
   "user-session": {
     "browser-column": "Navegador y sistema operativo",
