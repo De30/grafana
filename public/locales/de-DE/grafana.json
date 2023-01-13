@@ -7,17 +7,17 @@
   },
   "command-palette": {
     "action": {
-      "change-theme": "",
+      "change-theme": "Theme ändern...",
       "dark-theme": "Dunkel",
       "light-theme": "Hell",
-      "search": ""
+      "search": "Suche"
     },
     "section": {
       "actions": "Aktionen",
       "dashboard-search-results": "Dashboards",
-      "pages": "",
+      "pages": "Seiten",
       "preferences": "Einstellungen",
-      "recent-dashboards": ""
+      "recent-dashboards": "Kürzlich angesehene Dashboards"
     }
   },
   "common": {
@@ -254,7 +254,7 @@
       "title": "Überwachung"
     },
     "new": {
-      "title": ""
+      "title": "Neu"
     },
     "new-dashboard": {
       "title": "Neues Dashboard"
@@ -322,7 +322,7 @@
     },
     "support-bundles": {
       "subtitle": "Support Bundles herunterladen",
-      "title": ""
+      "title": "Supportpakete"
     },
     "teams": {
       "subtitle": "Gruppen von Benutzern mit gemeinsamen Dashboards und Benachrichtigungen",
@@ -352,20 +352,20 @@
     "header-menu": {
       "copy": "Kopieren",
       "create-library-panel": "Bibliotheks-Panel erstellen",
-      "duplicate": "",
-      "edit": "",
+      "duplicate": "Duplikat",
+      "edit": "Bearbeiten",
       "explore": "Entdecken",
-      "get-help": "",
+      "get-help": "Hilfe bekommen",
       "hide-legend": "Legende ausblenden",
       "inspect": "Überprüfen",
       "inspect-data": "Daten",
       "inspect-json": "Panel-JSON",
       "more": "Mehr …",
       "query": "Abfrage",
-      "remove": "",
+      "remove": "Entfernen",
       "share": "Teilen",
       "show-legend": "Legende anzeigen",
-      "unlink-library-panel": "",
+      "unlink-library-panel": "Verknüpfung mit dem Bibliotheksfeld aufheben",
       "view": "Anzeigen"
     }
   },
@@ -389,9 +389,9 @@
   "search": {
     "dashboard-actions": {
       "import": "Importieren",
-      "new": "",
-      "new-dashboard": "",
-      "new-folder": ""
+      "new": "Neu",
+      "new-dashboard": "Neues Dashboard",
+      "new-folder": "Neuer Ordner"
     }
   },
   "share-modal": {
@@ -553,7 +553,7 @@
       "name-label": "Name",
       "username-label": "Benutzername"
     },
-    "title": ""
+    "title": "Profil"
   },
   "user-session": {
     "browser-column": "Browser & Betriebssystem",
