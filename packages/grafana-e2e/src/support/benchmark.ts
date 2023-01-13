@@ -42,9 +42,6 @@ export const benchmark = ({
     });
 
     afterEach(() => e2e.flows.revertAllChanges());
-    after(() => {
-      e2e().clearCookies();
-    });
 
     Array(repeat)
       .fill(0)
