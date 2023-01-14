@@ -351,11 +351,11 @@
   "panel": {
     "header-menu": {
       "copy": "Copier",
-      "create-library-panel": "Créer un panneau de bibliothèque",
+      "create-library-panel": "Créer un panneau Bibliothèque",
       "duplicate": "Dupliquer",
       "edit": "Modifier",
       "explore": "Explorer",
-      "get-help": "Obtenir de l'aide",
+      "get-help": "Obtenir de l’aide",
       "hide-legend": "Masquer la légende",
       "inspect": "Inspecter",
       "inspect-data": "Données",
@@ -365,7 +365,7 @@
       "remove": "Supprimer",
       "share": "Partager",
       "show-legend": "Afficher la légende",
-      "unlink-library-panel": "Dissocier le panneau de bibliothèque",
+      "unlink-library-panel": "Dissocier le panneau Bibliothèque",
       "view": "Afficher"
     }
   },
