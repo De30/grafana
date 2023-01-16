@@ -3,9 +3,10 @@ const path = require('path');
 
 const benchmarkPlugin = require('./cypress/plugins/benchmark/index');
 const compareScreenshots = require('./cypress/plugins/compareScreenshots');
-// I'm not sure if we need this anymore or not. If nothing breaks, this can be removed.
-// const extendConfig = require('./cypress/plugins/extendConfig');
+// Used by plugin developers.
+const extendConfig = require('./cypress/plugins/extendConfig');
 const readProvisions = require('./cypress/plugins/readProvisions');
+const typescriptPreprocessor = require('./cypress/plugins/typescriptPreprocessor');
 
 module.exports = {
   projectId: 'zb7k1c',
@@ -15,6 +16,7 @@ module.exports = {
 
   e2e: {
     setupNodeEvents(on, config) {
+      on('file:preprocessor', typescriptPreprocessor);
       on('task', {
         log({ message, optional }) {
           optional ? console.log(message, optional) : console.log(message);
@@ -74,6 +76,9 @@ module.exports = {
         // IMPORTANT: return the updated browser launch options
         return launchOptions;
       });
+
+      const customConfig = extendConfig(config);
+      return customConfig;
     },
   },
 };
