@@ -218,7 +218,7 @@ require (
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20220428173112-74888fd59c2b // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
-	github.com/segmentio/encoding v0.3.5
+	github.com/segmentio/encoding v0.3.6
 	github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
@@ -274,8 +274,8 @@ require (
 
 require (
 	github.com/dave/dst v0.27.2
+	github.com/parca-dev/parca v0.15.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
-	github.com/parca-dev/parca v0.12.1
 	k8s.io/apimachinery v0.25.3
 )
 
