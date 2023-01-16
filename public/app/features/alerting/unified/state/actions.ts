@@ -258,7 +258,8 @@ export function fetchRulerRulesIfNotFetchedYet(rulesSourceName: string): ThunkRe
   return (dispatch, getStore) => {
     const { rulerRules } = getStore().unifiedAlerting;
     const resp = rulerRules[rulesSourceName];
-    if (!resp?.result && !(resp && isRulerNotSupportedResponse(resp)) && !resp?.loading) {
+    const respHasResults = resp?.result ? Object.keys(resp.result).length > 0 : false;
+    if (!respHasResults && !(resp && isRulerNotSupportedResponse(resp)) && !resp?.loading) {
       dispatch(fetchRulerRulesAction({ rulesSourceName }));
     }
   };
