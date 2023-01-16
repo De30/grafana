@@ -166,6 +166,7 @@ const getSearchStyles = (theme: GrafanaTheme2) => ({
     paddingTop: 0,
   }),
 
+  // Last item gets extra padding so it's not clipped by the rounded corners on the container
   lastItem: css({
     paddingBottom: theme.spacing(1),
   }),
