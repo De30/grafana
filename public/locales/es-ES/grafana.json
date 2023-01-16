@@ -12,12 +12,15 @@
       "light-theme": "Claro",
       "search": "Buscar"
     },
+    "search-box": {
+      "placeholder": "Buscar Grafana"
+    },
     "section": {
       "actions": "Acciones",
       "dashboard-search-results": "Paneles de control",
       "pages": "Páginas",
       "preferences": "Preferencias",
-      "recent-dashboards": "Paneles de control vistos recientemente"
+      "recent-dashboards": ""
     }
   },
   "common": {
