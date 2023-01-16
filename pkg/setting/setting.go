@@ -88,6 +88,7 @@ var (
 	CookieSameSiteMode     http.SameSite
 
 	// Snapshots
+	SnapshotEnabled       bool
 	ExternalSnapshotUrl   string
 	ExternalSnapshotName  string
 	ExternalEnabled       bool
@@ -1659,6 +1660,9 @@ func IsLegacyAlertingEnabled() bool {
 
 func readSnapshotsSettings(cfg *Cfg, iniFile *ini.File) error {
 	snapshots := iniFile.Section("snapshots")
+
+	// TODO LND Check if we want to disable external snapshot if this is false
+	SnapshotEnabled = snapshots.Key("enabled").MustBool(true)
 
 	ExternalSnapshotUrl = valueAsString(snapshots, "external_snapshot_url", "")
 	ExternalSnapshotName = valueAsString(snapshots, "external_snapshot_name", "")
