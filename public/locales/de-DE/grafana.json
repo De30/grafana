@@ -226,7 +226,7 @@
     "help/documentation": "Dokumentation",
     "help/keyboard-shortcuts": "Tastaturbefehle",
     "help/support": "Support",
-    "help/support-bundle": "Support Bundles",
+    "help/support-bundle": "Support-Bundles",
     "home": {
       "title": "Home"
     },
@@ -321,8 +321,8 @@
       "title": "Speicher"
     },
     "support-bundles": {
-      "subtitle": "Support Bundles herunterladen",
-      "title": "Supportpakete"
+      "subtitle": "Support-Bundles herunterladen",
+      "title": "Support-Bundles"
     },
     "teams": {
       "subtitle": "Gruppen von Benutzern mit gemeinsamen Dashboards und Benachrichtigungen",
@@ -351,11 +351,11 @@
   "panel": {
     "header-menu": {
       "copy": "Kopieren",
-      "create-library-panel": "Bibliotheks-Panel erstellen",
+      "create-library-panel": "Bibliotheksleiste erstellen",
       "duplicate": "Duplikat",
       "edit": "Bearbeiten",
       "explore": "Entdecken",
-      "get-help": "Hilfe bekommen",
+      "get-help": "Hilfe",
       "hide-legend": "Legende ausblenden",
       "inspect": "Überprüfen",
       "inspect-data": "Daten",
@@ -365,7 +365,7 @@
       "remove": "Entfernen",
       "share": "Teilen",
       "show-legend": "Legende anzeigen",
-      "unlink-library-panel": "Verknüpfung mit dem Bibliotheksfeld aufheben",
+      "unlink-library-panel": "Verknüpfung mit der Bibliotheksleiste aufheben",
       "view": "Anzeigen"
     }
   },
