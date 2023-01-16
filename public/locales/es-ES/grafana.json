@@ -55,7 +55,7 @@
       "panel-transforms": "Transformaciones de panel",
       "series-to-columns": "Series unidas por el tiempo",
       "transformation": "Series unidas por el tiempo",
-      "transformations-description": "Los datos de la tabla se muestran con transformaciones definidas en la pestaña Transformar del panel.",
+      "transformations-description": "Los datos de la tabla se muestran con las transformaciones definidas en la pestaña Transformaciones del panel.",
       "transformations-label": "Aplicar transformaciones de panel"
     },
     "inspect-json": {
@@ -113,14 +113,14 @@
       "create": "Crear panel de librería",
       "error": "Ya existe un panel de librería con este nombre",
       "folder": "Guardar en carpeta",
-      "folder-description": "Los permisos del panel de librería se derivan de los permisos de la carpeta",
-      "name": "Nombre del panel de librería"
+      "folder-description": "Los permisos del panel de biblioteca se derivan de los permisos de la carpeta",
+      "name": "Nombre del panel de biblioteca"
     }
   },
   "library-panels": {
     "save": {
-      "error": "Error al guardar el panel de la librería: «{{errorMsg}}»",
-      "success": "Panel de librería guardado"
+      "error": "Error al guardar el panel de la biblioteca: «{{errorMsg}}»",
+      "success": "Panel de biblioteca guardado"
     }
   },
   "nav": {
@@ -455,7 +455,7 @@
     "tab-title": {
       "embed": "Incrustar",
       "export": "Exportar",
-      "library-panel": "Panel de librería",
+      "library-panel": "Panel de biblioteca",
       "link": "Enlace",
       "snapshot": "Instantánea"
     },
