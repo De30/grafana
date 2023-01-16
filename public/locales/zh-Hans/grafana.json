@@ -12,12 +12,15 @@
       "light-theme": "浅色",
       "search": "搜索"
     },
+    "search-box": {
+      "placeholder": "搜索 Grafana"
+    },
     "section": {
       "actions": "操作",
       "dashboard-search-results": "仪表板",
       "pages": "页面",
       "preferences": "首选项",
-      "recent-dashboards": "最近查看的仪表板"
+      "recent-dashboards": ""
     }
   },
   "common": {
