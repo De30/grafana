@@ -67,7 +67,7 @@ require (
 	github.com/grafana/thema v0.0.0-20221222001256-d3a8fa941a6b
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/go-hclog v1.2.0
-	github.com/hashicorp/go-plugin v1.4.3
+	github.com/hashicorp/go-plugin v1.4.8
 	github.com/hashicorp/go-version v1.3.0
 	github.com/influxdata/influxdb-client-go/v2 v2.6.0
 	github.com/influxdata/line-protocol v0.0.0-20210311194329-9aa0e372d097
@@ -274,8 +274,8 @@ require (
 
 require (
 	github.com/dave/dst v0.27.2
+	github.com/parca-dev/parca v0.15.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
-	github.com/parca-dev/parca v0.12.1
 	k8s.io/apimachinery v0.25.3
 )
 
