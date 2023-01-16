@@ -29,7 +29,7 @@
     "cypress",
     "dist",
     "cli.js",
-    "cypress.json",
+    "cypress.config.js",
     "./README.md",
     "./CHANGELOG.md",
     "LICENSE_APACHE2"
