@@ -12,12 +12,15 @@
       "light-theme": "Hell",
       "search": "Suche"
     },
+    "search-box": {
+      "placeholder": "Grafana durchsuchen"
+    },
     "section": {
       "actions": "Aktionen",
       "dashboard-search-results": "Dashboards",
       "pages": "Seiten",
       "preferences": "Einstellungen",
-      "recent-dashboards": "Kürzlich angesehene Dashboards"
+      "recent-dashboards": ""
     }
   },
   "common": {
