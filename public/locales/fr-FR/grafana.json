@@ -12,12 +12,15 @@
       "light-theme": "Clair",
       "search": "Chercher"
     },
+    "search-box": {
+      "placeholder": "Rechercher dans Grafana"
+    },
     "section": {
       "actions": "Actions",
       "dashboard-search-results": "Tableaux de bord",
       "pages": "Pages",
       "preferences": "Préférences",
-      "recent-dashboards": "Tableaux de bord récemment consultés"
+      "recent-dashboards": ""
     }
   },
   "common": {
